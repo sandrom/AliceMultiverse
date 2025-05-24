@@ -1,0 +1,52 @@
+# Redis configuration for single-node development
+# Optimized for local Kubernetes on Mac
+
+# Single master, no replicas
+architecture: standalone
+
+# No authentication for local dev
+auth:
+  enabled: false
+
+# Single instance configuration
+master:
+  # No replicas for local dev
+  replicaCount: 1
+  
+  # Small resource limits for local dev
+  resources:
+    limits:
+      memory: 256Mi
+      cpu: 250m
+    requests:
+      memory: 128Mi
+      cpu: 100m
+  
+  # Small persistent volume
+  persistence:
+    enabled: true
+    size: 1Gi
+    # Use default storage class
+    # storageClass: standard
+  
+  # Disable AOF for better performance on local
+  configuration: |
+    # Disable AOF
+    appendonly no
+    # Reduce memory overhead
+    maxmemory-policy allkeys-lru
+    # Faster saves
+    save ""
+
+# Disable sentinel (not needed for standalone)
+sentinel:
+  enabled: false
+
+# Disable metrics to save resources
+metrics:
+  enabled: false
+
+# Service configuration
+service:
+  type: ClusterIP
+  port: 6379

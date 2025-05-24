@@ -1,0 +1,125 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env
+.venv/
+venv/
+ENV/
+env/
+*.egg-info/
+dist/
+build/
+*.egg
+.eggs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# User data and local files
+.alicemultiverse/
+*.db
+inbox/*
+!inbox/README.md
+!inbox/.gitkeep
+organized/*
+!organized/README.md
+!organized/.gitkeep
+training/*
+!training/README.md
+!training/.gitkeep
+
+# Testing
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+junit/
+.tox/
+.nox/
+test_output/
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Project specific
+inbox/
+organized/
+.metadata/
+.alicemultiverse/
+.alicemultiverse_cache/
+api_keys.json
+settings.local.yaml
+*.local.yaml
+*.local.yml
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+alicemultiverse.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*.old
+.cache/
+
+# Documentation build
+docs/_build/
+docs/.doctrees/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# pytype static type analyzer
+.pytype/
+
+# Cython debug symbols
+cython_debug/
+
+# Package build artifacts
+packages/*/build/
+packages/*/dist/
+packages/*/*.egg-info/
+
+# Test artifacts
+test.db
+**/test_cache.db
+.test_cache/
+
+# training data is local only
+training/
+
+# should not be in repo anymore but still useful for short term reference
+only-for-reference/

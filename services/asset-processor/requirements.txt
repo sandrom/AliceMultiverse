@@ -1,0 +1,35 @@
+# Asset Processor Service Requirements
+
+# Web framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database
+sqlalchemy==2.0.23
+asyncpg==0.29.0
+alembic==1.12.1
+
+# Redis for events
+redis==5.0.1
+
+# Image processing
+pillow==10.1.0
+python-magic==0.4.27
+
+# Video processing
+ffmpeg-python==0.2.0
+
+# Utilities
+httpx==0.25.2
+python-multipart==0.0.6
+aiofiles==23.2.1
+
+# Monitoring
+prometheus-client==0.19.0
+
+# Development
+pytest==7.4.3
+pytest-asyncio==0.21.1
+requests==2.31.0  # For healthcheck

@@ -1,0 +1,44 @@
+# AliceMultiverse Monorepo Configuration
+# This file configures the monorepo structure for future microservices architecture.
+# Currently, AliceMultiverse runs as a single application, but the codebase is
+# structured to support splitting into microservices when needed.
+
+[monorepo]
+name = "alicemultiverse"
+type = "python"
+structure = "packages-and-services"
+
+[packages]
+# Shared packages used across services
+alice-events = { path = "packages/alice-events", version = "0.1.0" }
+alice-models = { path = "packages/alice-models", version = "0.1.0" }
+alice-config = { path = "packages/alice-config", version = "0.1.0" }
+alice-utils = { path = "packages/alice-utils", version = "0.1.0" }
+
+[services]
+# Microservices
+alice-interface = { path = "services/alice-interface", port = 8000 }
+asset-processor = { path = "services/asset-processor", port = 8001 }
+quality-analyzer = { path = "services/quality-analyzer", port = 8002 }
+metadata-extractor = { path = "services/metadata-extractor", port = 8003 }
+
+[development]
+# Development settings
+python_version = "3.9"
+virtual_env = ".venv"
+install_mode = "editable"  # pip install -e
+
+[testing]
+# Test configuration
+test_paths = [
+    "tests",
+    "packages/*/tests",
+    "services/*/tests"
+]
+coverage_threshold = 80
+
+[deployment]
+# Deployment configuration
+container_registry = "ghcr.io/alicemultiverse"
+kubernetes_namespace = "alice-prod"
+docker_build_args = ["--platform", "linux/amd64,linux/arm64"]

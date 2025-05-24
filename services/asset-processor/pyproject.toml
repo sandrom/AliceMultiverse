@@ -1,0 +1,22 @@
+[project]
+name = "asset-processor"
+version = "0.1.0"
+description = "Media processing and organization service"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "alice-events",
+    "alice-models",
+    "alice-config",
+    "alice-utils",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+]
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["asset_processor"]
+package-dir = {"" = "src"}

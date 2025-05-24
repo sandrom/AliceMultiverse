@@ -1,0 +1,29 @@
+# Documentation dependencies for AliceMultiverse
+# Install with: pip install -r requirements-docs.txt
+
+# MkDocs and theme
+mkdocs>=1.5.0
+mkdocs-material>=9.0.0
+
+# MkDocs plugins
+mkdocstrings>=0.24.0
+mkdocstrings-python>=1.8.0
+
+# Markdown extensions
+pymdown-extensions>=10.0
+markdown-include>=0.8.0
+
+# For versioning
+mike>=2.0.0
+
+# For search
+mkdocs-minify-plugin>=0.7.0
+
+# For diagrams
+mkdocs-mermaid2-plugin>=1.1.0
+
+# For better tables
+mkdocs-table-reader-plugin>=2.0.0
+
+# For PDF generation (optional)
+# mkdocs-pdf-export-plugin>=0.5.0

@@ -1,0 +1,22 @@
+[project]
+name = "quality-analyzer"
+version = "0.1.0"
+description = "Quality assessment pipeline service"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "alice-events @ file://../../packages/alice-events",
+    "alice-models @ file://../../packages/alice-models",
+    "alice-config @ file://../../packages/alice-config",
+    "alice-utils @ file://../../packages/alice-utils",
+    "fastapi>=0.100.0",
+    "uvicorn>=0.23.0",
+]
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["quality_analyzer"]
+package-dir = {"" = "src"}

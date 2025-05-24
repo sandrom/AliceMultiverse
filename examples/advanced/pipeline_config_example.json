@@ -1,0 +1,69 @@
+{
+  "output_dir": "./quality_output",
+  "cache_dir": "~/.alicemultiverse_cache/quality_pipeline",
+  "dry_run": false,
+  "stages": {
+    "brisque": {
+      "enabled": true,
+      "threshold": 70,
+      "batch_size": 50,
+      "concurrent_requests": 10,
+      "config": {}
+    },
+    "sightengine": {
+      "enabled": true,
+      "threshold": 65,
+      "max_cost": 1.0,
+      "batch_size": 10,
+      "concurrent_requests": 5,
+      "retry_attempts": 3,
+      "retry_delay": 1.0,
+      "timeout": 30.0,
+      "config": {
+        "api_user": "YOUR_SIGHTENGINE_USER",
+        "api_secret": "YOUR_SIGHTENGINE_SECRET",
+        "models": ["quality", "properties", "faces", "celebrities"]
+      }
+    },
+    "claude": {
+      "enabled": true,
+      "threshold": 75,
+      "max_cost": 5.0,
+      "batch_size": 5,
+      "concurrent_requests": 3,
+      "retry_attempts": 2,
+      "retry_delay": 2.0,
+      "timeout": 60.0,
+      "config": {
+        "api_key": "YOUR_ANTHROPIC_API_KEY",
+        "model": "claude-3-opus-20240229",
+        "max_tokens": 1000,
+        "prompt": "Analyze this image for professional quality assessment. Consider:\n\n1. **Technical Quality** (40% weight):\n   - Sharpness and focus accuracy\n   - Noise levels and grain\n   - Dynamic range and exposure\n   - Color accuracy and white balance\n   - Compression artifacts or banding\n\n2. **Composition** (30% weight):\n   - Rule of thirds application\n   - Leading lines and visual flow\n   - Balance and symmetry\n   - Depth and dimension\n   - Framing and cropping\n\n3. **Aesthetic Appeal** (20% weight):\n   - Visual impact and mood\n   - Creative vision\n   - Emotional resonance\n   - Uniqueness and originality\n\n4. **Subject Quality** (10% weight):\n   - Subject clarity and definition\n   - Expression and timing (if applicable)\n   - Background separation\n   - Overall coherence\n\nProvide a JSON response with:\n{\n  \"overall_score\": 0-100,\n  \"technical_score\": 0-100,\n  \"composition_score\": 0-100,\n  \"aesthetic_score\": 0-100,\n  \"subject_score\": 0-100,\n  \"strengths\": [\"list of strengths\"],\n  \"weaknesses\": [\"list of weaknesses\"],\n  \"recommendations\": [\"improvement suggestions\"],\n  \"professional_grade\": true/false\n}"
+      }
+    },
+    "gpt4v": {
+      "enabled": false,
+      "threshold": 75,
+      "max_cost": 3.0,
+      "batch_size": 5,
+      "concurrent_requests": 3,
+      "config": {
+        "api_key": "YOUR_OPENAI_API_KEY",
+        "model": "gpt-4-vision-preview",
+        "max_tokens": 800
+      }
+    }
+  },
+  "pipeline_settings": {
+    "stop_on_failure": true,
+    "save_intermediate_results": true,
+    "cost_limit": 100.0,
+    "quality_thresholds": {
+      "excellent": 90,
+      "good": 75,
+      "average": 60,
+      "below_average": 40,
+      "poor": 20
+    }
+  }
+}

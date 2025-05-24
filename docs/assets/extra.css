@@ -1,0 +1,145 @@
+/* AliceMultiverse Documentation Custom Styles */
+
+/* Grid layout for feature cards */
+.grid.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1rem;
+    margin: 2rem 0;
+}
+
+.grid.cards > * {
+    border: 1px solid var(--md-default-fg-color--lightest);
+    border-radius: 8px;
+    padding: 1.5rem;
+    transition: box-shadow 0.3s ease;
+}
+
+.grid.cards > *:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Mermaid diagram styling */
+.mermaid {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+/* Code block enhancements */
+.highlight {
+    margin: 1rem 0;
+}
+
+/* Admonition customization */
+.admonition {
+    margin: 1.5rem 0;
+}
+
+/* Table styling */
+table {
+    margin: 1.5rem 0;
+}
+
+/* Better spacing for lists */
+ul, ol {
+    margin: 1rem 0;
+}
+
+li {
+    margin: 0.5rem 0;
+}
+
+/* Emoji styling */
+h1 .twemoji,
+h2 .twemoji,
+h3 .twemoji {
+    height: 1em;
+    vertical-align: middle;
+}
+
+/* Center align for hero sections */
+div[align="center"] {
+    text-align: center;
+    margin: 2rem 0;
+}
+
+/* Button-like links */
+.md-button {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    margin: 0.5rem;
+    border-radius: 4px;
+    background-color: var(--md-primary-fg-color);
+    color: var(--md-primary-bg-color);
+    text-decoration: none;
+    transition: opacity 0.3s ease;
+}
+
+.md-button:hover {
+    opacity: 0.8;
+}
+
+/* Pipeline stage visualization */
+.pipeline-stage {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    margin: 0.25rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.pipeline-stage.free {
+    background-color: #4caf50;
+    color: white;
+}
+
+.pipeline-stage.cheap {
+    background-color: #ff9800;
+    color: white;
+}
+
+.pipeline-stage.premium {
+    background-color: #2196f3;
+    color: white;
+}
+
+/* Feature comparison table */
+.comparison-table {
+    width: 100%;
+    margin: 2rem 0;
+}
+
+.comparison-table th {
+    background-color: var(--md-primary-fg-color);
+    color: var(--md-primary-bg-color);
+}
+
+.comparison-table td:first-child {
+    font-weight: 500;
+}
+
+/* Documentation navigation improvements */
+.md-nav__item--nested > .md-nav__link {
+    font-weight: 500;
+}
+
+/* Syntax highlighting improvements */
+.highlight .k { /* Keywords */
+    font-weight: 600;
+}
+
+.highlight .s { /* Strings */
+    color: #0a7e8c;
+}
+
+/* Responsive improvements */
+@media screen and (max-width: 768px) {
+    .grid.cards {
+        grid-template-columns: 1fr;
+    }
+    
+    div[align="center"] {
+        padding: 0 1rem;
+    }
+}

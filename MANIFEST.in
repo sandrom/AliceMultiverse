@@ -1,0 +1,10 @@
+include README.md
+include LICENSE
+include requirements.txt
+include settings.yaml
+include CLAUDE.md
+include API_KEYS.md
+include CONFIGURATION.md
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+recursive-exclude * .DS_Store

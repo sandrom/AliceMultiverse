@@ -1,0 +1,127 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Get Next Version
+        id: semver
+        uses: ietf-tools/semver-action@v1
+        with:
+          token: ${{ github.token }}
+          branch: main
+          skipInvalidTags: true
+          
+      - name: Create Release Notes
+        id: release_notes
+        if: steps.semver.outputs.next != ''
+        run: |
+          echo "## What's Changed" > release_notes.md
+          echo "" >> release_notes.md
+          git log --pretty=format:"* %s (%h)" ${{ steps.semver.outputs.current }}..HEAD >> release_notes.md
+          echo "" >> release_notes.md
+          echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.semver.outputs.current }}...${{ steps.semver.outputs.next }}" >> release_notes.md
+
+      - name: Update Version File
+        if: steps.semver.outputs.next != ''
+        run: |
+          # Update version in alicemultiverse/version.py
+          echo '__version__ = "${{ steps.semver.outputs.nextStrict }}"' > alicemultiverse/version.py
+          
+          # Update version in pyproject.toml
+          sed -i "s/version = \".*\"/version = \"${{ steps.semver.outputs.nextStrict }}\"/" pyproject.toml
+
+      - name: Update CHANGELOG
+        if: steps.semver.outputs.next != ''
+        run: |
+          # Get current date
+          DATE=$(date +%Y-%m-%d)
+          
+          # Create temporary file with new release section
+          echo "## [${{ steps.semver.outputs.nextStrict }}] - $DATE" > new_section.md
+          echo "" >> new_section.md
+          
+          # Extract commit types and messages
+          git log --pretty=format:"%s" ${{ steps.semver.outputs.current }}..HEAD | while read -r commit; do
+            if [[ $commit == feat:* ]] || [[ $commit == feat\(*\):* ]]; then
+              echo "### Added" >> new_section.md
+              break
+            fi
+          done
+          
+          git log --pretty=format:"%s" ${{ steps.semver.outputs.current }}..HEAD | grep -E "^feat(\(.*\))?:" | sed 's/^feat(\(.*\))://' | sed 's/^feat://' | while read -r msg; do
+            echo "- $msg" >> new_section.md
+          done
+          
+          # Check for fixes
+          if git log --pretty=format:"%s" ${{ steps.semver.outputs.current }}..HEAD | grep -qE "^fix(\(.*\))?:"; then
+            echo "" >> new_section.md
+            echo "### Fixed" >> new_section.md
+            git log --pretty=format:"%s" ${{ steps.semver.outputs.current }}..HEAD | grep -E "^fix(\(.*\))?:" | sed 's/^fix(\(.*\))://' | sed 's/^fix://' | while read -r msg; do
+              echo "- $msg" >> new_section.md
+            done
+          fi
+          
+          # Check for breaking changes
+          if git log --pretty=format:"%B" ${{ steps.semver.outputs.current }}..HEAD | grep -q "BREAKING CHANGE:"; then
+            echo "" >> new_section.md
+            echo "### BREAKING CHANGES" >> new_section.md
+            git log --pretty=format:"%B" ${{ steps.semver.outputs.current }}..HEAD | grep -A1 "BREAKING CHANGE:" | grep -v "BREAKING CHANGE:" | grep -v "^--$" | while read -r msg; do
+              [ -n "$msg" ] && echo "- $msg" >> new_section.md
+            done
+          fi
+          
+          echo "" >> new_section.md
+          
+          # Insert new section after [Unreleased] section
+          awk '/## \[Unreleased\]/ {print; getline; print; print ""; system("cat new_section.md"); next} 1' CHANGELOG.md > CHANGELOG.tmp
+          mv CHANGELOG.tmp CHANGELOG.md
+          
+          # Update links section
+          echo "[Unreleased]: https://github.com/${{ github.repository }}/compare/v${{ steps.semver.outputs.nextStrict }}...HEAD" >> CHANGELOG.md
+          echo "[${{ steps.semver.outputs.nextStrict }}]: https://github.com/${{ github.repository }}/compare/v${{ steps.semver.outputs.current }}...v${{ steps.semver.outputs.nextStrict }}" >> CHANGELOG.md
+          
+          rm new_section.md
+
+      - name: Commit Version Updates
+        if: steps.semver.outputs.next != ''
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add alicemultiverse/version.py pyproject.toml CHANGELOG.md
+          git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.semver.outputs.next }} [skip ci]"
+          git push
+
+      - name: Create Release
+        if: steps.semver.outputs.next != ''
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ steps.semver.outputs.next }}
+          release_name: Release ${{ steps.semver.outputs.next }}
+          body_path: release_notes.md
+          draft: false
+          prerelease: false
+
+      - name: Report Version
+        run: |
+          echo "Current version: ${{ steps.semver.outputs.current || 'none' }}"
+          echo "Next version: ${{ steps.semver.outputs.next || 'no bump needed' }}"
+          echo "Bump type: ${{ steps.semver.outputs.bump || 'none' }}"

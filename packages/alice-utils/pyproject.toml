@@ -1,0 +1,17 @@
+[project]
+name = "alice-utils"
+version = "0.1.0"
+description = "Common utilities for AliceMultiverse"
+readme = "README.md"
+requires-python = ">=3.9"
+dependencies = [
+    "pillow>=10.0.0",
+    "numpy>=1.24.0",
+]
+
+[build-system]
+requires = ["setuptools>=45", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+packages = ["alice_utils"]

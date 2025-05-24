@@ -1,0 +1,17 @@
+apiVersion: v2
+name: alice-service
+description: A Helm chart for AliceMultiverse microservices
+type: application
+version: 0.1.0
+appVersion: "1.0"
+
+keywords:
+  - alice
+  - microservice
+  - cloudnativepg
+
+maintainers:
+  - name: AliceMultiverse Team
+
+dependencies:
+  # We'll manage PostgreSQL through CloudNativePG CRDs

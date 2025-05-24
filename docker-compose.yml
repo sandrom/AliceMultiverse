@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  alice-interface:
+    build:
+      context: .
+      dockerfile: services/alice-interface/Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=alice-interface
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/alice-interface:/app
+      - ./packages:/packages
+
+  asset-processor:
+    build:
+      context: .
+      dockerfile: services/asset-processor/Dockerfile
+    ports:
+      - "8001:8001"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=asset-processor
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/asset-processor:/app
+      - ./packages:/packages
+      - ./inbox:/inbox
+      - ./organized:/organized
+
+  quality-analyzer:
+    build:
+      context: .
+      dockerfile: services/quality-analyzer/Dockerfile
+    ports:
+      - "8002:8002"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=quality-analyzer
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/quality-analyzer:/app
+      - ./packages:/packages
+
+  metadata-extractor:
+    build:
+      context: .
+      dockerfile: services/metadata-extractor/Dockerfile
+    ports:
+      - "8003:8003"
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - SERVICE_NAME=metadata-extractor
+    depends_on:
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/metadata-extractor:/app
+      - ./packages:/packages
+
+volumes:
+  redis-data:

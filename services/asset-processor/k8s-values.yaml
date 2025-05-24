@@ -1,0 +1,115 @@
+# Asset Processor Service - Kubernetes Values
+# Use with: helm install asset-processor charts/alice-service -f services/asset-processor/k8s-values.yaml
+
+# Image configuration
+image:
+  repository: alice-assets
+  tag: v4
+  pullPolicy: IfNotPresent  # For local development
+
+# Service configuration
+service:
+  port: 80
+  targetPort: 8001
+
+containerPort: 8001
+
+# Database configuration
+database:
+  enabled: true
+  name: assets
+  # Single instance for local dev
+  instances: 1
+  # Smaller size for local dev
+  size: 2Gi
+  parameters:
+    max_connections: "200"
+    shared_buffers: "512MB"
+    # Asset processor specific PostgreSQL settings
+    work_mem: "4MB"
+    maintenance_work_mem: "64MB"
+
+# Environment variables
+env:
+  - name: SERVICE_NAME
+    value: "asset-processor"
+  - name: LOG_LEVEL
+    value: "INFO"
+  - name: PYTHONUNBUFFERED
+    value: "1"
+  # Service URLs
+  - name: QUALITY_SERVICE_URL
+    value: "http://quality-analyzer.alice-quality.svc.cluster.local"
+  - name: METADATA_SERVICE_URL
+    value: "http://metadata-extractor.alice-metadata.svc.cluster.local"
+
+# Additional config via ConfigMap
+config:
+  settings.yaml: |
+    service:
+      name: asset-processor
+      version: 1.0.0
+    
+    # Asset processing settings
+    processing:
+      supported_formats:
+        images: [".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"]
+        videos: [".mp4", ".mov", ".avi"]
+      max_file_size: 104857600  # 100MB
+      
+    # AI source detection patterns
+    ai_sources:
+      midjourney:
+        patterns: ["midjourney", "mj_", "MJ_"]
+      dalle:
+        patterns: ["dalle", "DALL-E", "openai"]
+      stable_diffusion:
+        patterns: ["sd_", "stable_diffusion", "stablediffusion"]
+      
+    # Organization rules
+    organization:
+      date_format: "%Y-%m-%d"
+      project_detection:
+        enabled: true
+        min_files: 3
+
+# Resource configuration for asset processing
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 200m
+    memory: 256Mi
+
+# Health check paths
+livenessProbe:
+  httpGet:
+    path: /health
+    port: 8001
+
+readinessProbe:
+  httpGet:
+    path: /ready
+    port: 8001
+
+# Network policies
+networkPolicy:
+  enabled: true
+  # Additional egress rules for external services
+  egress:
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: alice-quality
+    - to:
+      - namespaceSelector:
+          matchLabels:
+            name: alice-metadata
+
+# Monitoring
+monitoring:
+  enabled: true
+  serviceMonitor:
+    enabled: true
+    path: /metrics

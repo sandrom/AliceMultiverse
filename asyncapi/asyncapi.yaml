@@ -1,0 +1,730 @@
+asyncapi: '3.0.0'
+info:
+  title: AliceMultiverse Event API
+  version: '1.0.0'
+  description: |
+    Event-driven API for AliceMultiverse creative workflow system.
+    
+    This API defines the events that flow through the system, enabling
+    loose coupling between services and supporting the creative chaos
+    that artists thrive in.
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+defaultContentType: application/json
+
+servers:
+  development:
+    host: localhost:6379
+    protocol: redis
+    description: Local Redis for development
+  production:
+    host: kafka-cluster:9092
+    protocol: kafka
+    description: Production Kafka cluster
+
+channels:
+  assetEvents:
+    address: 'alice.assets.{eventType}'
+    messages:
+      assetDiscovered:
+        $ref: '#/components/messages/AssetDiscovered'
+      assetProcessed:
+        $ref: '#/components/messages/AssetProcessed'
+      assetOrganized:
+        $ref: '#/components/messages/AssetOrganized'
+      qualityAssessed:
+        $ref: '#/components/messages/QualityAssessed'
+      metadataUpdated:
+        $ref: '#/components/messages/MetadataUpdated'
+    parameters:
+      eventType:
+        enum:
+          - discovered
+          - processed
+          - organized
+          - quality-assessed
+          - metadata-updated
+
+  workflowEvents:
+    address: 'alice.workflows.{eventType}'
+    messages:
+      workflowStarted:
+        $ref: '#/components/messages/WorkflowStarted'
+      workflowStepCompleted:
+        $ref: '#/components/messages/WorkflowStepCompleted'
+      workflowCompleted:
+        $ref: '#/components/messages/WorkflowCompleted'
+      workflowFailed:
+        $ref: '#/components/messages/WorkflowFailed'
+    parameters:
+      eventType:
+        enum:
+          - started
+          - step-completed
+          - completed
+          - failed
+
+  creativeEvents:
+    address: 'alice.creative.{eventType}'
+    messages:
+      projectCreated:
+        $ref: '#/components/messages/ProjectCreated'
+      styleChosen:
+        $ref: '#/components/messages/StyleChosen'
+      contextUpdated:
+        $ref: '#/components/messages/ContextUpdated'
+      characterDefined:
+        $ref: '#/components/messages/CharacterDefined'
+      conceptApproved:
+        $ref: '#/components/messages/ConceptApproved'
+    parameters:
+      eventType:
+        enum:
+          - project-created
+          - style-chosen
+          - context-updated
+          - character-defined
+          - concept-approved
+
+operations:
+  publishAssetDiscovered:
+    action: send
+    channel:
+      $ref: '#/channels/assetEvents'
+    summary: Publish when new asset is discovered
+    
+  subscribeToAssetEvents:
+    action: receive
+    channel:
+      $ref: '#/channels/assetEvents'
+    summary: Subscribe to asset lifecycle events
+
+components:
+  messages:
+    AssetDiscovered:
+      name: AssetDiscovered
+      title: Asset Discovered Event
+      summary: A new asset has been discovered in the system
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/AssetDiscoveredPayload'
+        
+    AssetProcessed:
+      name: AssetProcessed
+      title: Asset Processed Event
+      summary: Asset has been analyzed and metadata extracted
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/AssetProcessedPayload'
+        
+    AssetOrganized:
+      name: AssetOrganized
+      title: Asset Organized Event
+      summary: Asset has been organized to its destination
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/AssetOrganizedPayload'
+        
+    QualityAssessed:
+      name: QualityAssessed
+      title: Quality Assessed Event
+      summary: Quality assessment completed for an asset
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/QualityAssessedPayload'
+        
+    MetadataUpdated:
+      name: MetadataUpdated
+      title: Metadata Updated Event
+      summary: Asset metadata has been updated
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/MetadataUpdatedPayload'
+        
+    WorkflowStarted:
+      name: WorkflowStarted
+      title: Workflow Started Event
+      summary: A creative workflow has begun execution
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/WorkflowStartedPayload'
+        
+    WorkflowStepCompleted:
+      name: WorkflowStepCompleted
+      title: Workflow Step Completed Event
+      summary: A step within a workflow has completed
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/WorkflowStepCompletedPayload'
+        
+    WorkflowCompleted:
+      name: WorkflowCompleted
+      title: Workflow Completed Event
+      summary: A workflow has completed successfully
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/WorkflowCompletedPayload'
+        
+    WorkflowFailed:
+      name: WorkflowFailed
+      title: Workflow Failed Event
+      summary: A workflow has failed to complete
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/WorkflowFailedPayload'
+        
+    ProjectCreated:
+      name: ProjectCreated
+      title: Project Created Event
+      summary: A new creative project has been created
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ProjectCreatedPayload'
+        
+    StyleChosen:
+      name: StyleChosen
+      title: Style Chosen Event
+      summary: A style decision has been made
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/StyleChosenPayload'
+        
+    ContextUpdated:
+      name: ContextUpdated
+      title: Context Updated Event
+      summary: Project creative context has been updated
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ContextUpdatedPayload'
+        
+    CharacterDefined:
+      name: CharacterDefined
+      title: Character Defined Event
+      summary: A character has been defined or updated
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/CharacterDefinedPayload'
+        
+    ConceptApproved:
+      name: ConceptApproved
+      title: Concept Approved Event
+      summary: A creative concept has been approved
+      contentType: application/json
+      payload:
+        $ref: '#/components/schemas/ConceptApprovedPayload'
+
+  schemas:
+    EventBase:
+      type: object
+      required:
+        - event_id
+        - timestamp
+        - source
+        - version
+        - event_type
+      properties:
+        event_id:
+          type: string
+          format: uuid
+          description: Unique identifier for this event instance
+        timestamp:
+          type: string
+          format: date-time
+          description: When the event occurred
+        source:
+          type: string
+          description: Service or component that generated the event
+        version:
+          type: string
+          description: Event schema version
+        event_type:
+          type: string
+          description: Type identifier for the event
+          
+    AssetDiscoveredPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - file_path
+            - content_hash
+            - file_size
+            - media_type
+            - project_name
+          properties:
+            file_path:
+              type: string
+            content_hash:
+              type: string
+            file_size:
+              type: integer
+            media_type:
+              type: string
+              enum: ['image', 'video']
+            project_name:
+              type: string
+            source_type:
+              type: string
+              nullable: true
+            inbox_path:
+              type: string
+            discovery_source:
+              type: string
+              enum: ['file_scan', 'watch_mode', 'manual']
+              
+    AssetProcessedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - content_hash
+            - file_path
+          properties:
+            content_hash:
+              type: string
+            file_path:
+              type: string
+            metadata:
+              type: object
+            extracted_metadata:
+              type: object
+            generation_params:
+              type: object
+            processing_duration_ms:
+              type: integer
+            processor_version:
+              type: string
+              
+    AssetOrganizedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - content_hash
+            - source_path
+            - destination_path
+            - project_name
+            - source_type
+            - date_folder
+          properties:
+            content_hash:
+              type: string
+            source_path:
+              type: string
+            destination_path:
+              type: string
+            project_name:
+              type: string
+            source_type:
+              type: string
+            date_folder:
+              type: string
+              pattern: '^\d{4}-\d{2}-\d{2}$'
+            quality_folder:
+              type: string
+              nullable: true
+            operation:
+              type: string
+              enum: ['copy', 'move']
+            sequence_number:
+              type: integer
+              nullable: true
+              
+    QualityAssessedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - content_hash
+            - file_path
+            - star_rating
+            - combined_score
+          properties:
+            content_hash:
+              type: string
+            file_path:
+              type: string
+            brisque_score:
+              type: number
+              nullable: true
+            sightengine_score:
+              type: number
+              nullable: true
+            claude_assessment:
+              type: object
+              nullable: true
+            star_rating:
+              type: integer
+              minimum: 1
+              maximum: 5
+            combined_score:
+              type: number
+              minimum: 0
+              maximum: 1
+            quality_issues:
+              type: array
+              items:
+                type: string
+            pipeline_mode:
+              type: string
+            assessment_duration_ms:
+              type: integer
+            stages_completed:
+              type: array
+              items:
+                type: string
+                
+    MetadataUpdatedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - content_hash
+            - metadata_type
+            - updated_fields
+          properties:
+            content_hash:
+              type: string
+            file_path:
+              type: string
+              nullable: true
+            metadata_type:
+              type: string
+              enum: ['embedded', 'cached', 'database']
+            updated_fields:
+              type: array
+              items:
+                type: string
+            metadata:
+              type: object
+            update_reason:
+              type: string
+            previous_version:
+              type: string
+              nullable: true
+              
+    WorkflowStartedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - workflow_id
+            - workflow_type
+            - workflow_name
+          properties:
+            workflow_id:
+              type: string
+            workflow_type:
+              type: string
+            workflow_name:
+              type: string
+            project_id:
+              type: string
+              nullable: true
+            initiated_by:
+              type: string
+            input_parameters:
+              type: object
+            provider:
+              type: string
+              nullable: true
+            estimated_duration_ms:
+              type: integer
+              nullable: true
+            estimated_cost:
+              type: number
+              nullable: true
+              
+    WorkflowStepCompletedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - workflow_id
+            - step_id
+            - step_name
+            - step_number
+            - total_steps
+            - status
+          properties:
+            workflow_id:
+              type: string
+            step_id:
+              type: string
+            step_name:
+              type: string
+            step_number:
+              type: integer
+            total_steps:
+              type: integer
+            status:
+              type: string
+              enum: ['completed', 'skipped', 'failed']
+            output_data:
+              type: object
+            duration_ms:
+              type: integer
+            resource_usage:
+              type: object
+              
+    WorkflowCompletedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - workflow_id
+            - workflow_type
+            - total_duration_ms
+            - steps_completed
+          properties:
+            workflow_id:
+              type: string
+            workflow_type:
+              type: string
+            total_duration_ms:
+              type: integer
+            steps_completed:
+              type: integer
+            output_assets:
+              type: array
+              items:
+                type: string
+            output_metadata:
+              type: object
+            total_cost:
+              type: number
+              nullable: true
+            provider_used:
+              type: string
+              nullable: true
+            resource_usage:
+              type: object
+              
+    WorkflowFailedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - workflow_id
+            - workflow_type
+            - error_type
+            - error_message
+          properties:
+            workflow_id:
+              type: string
+            workflow_type:
+              type: string
+            failed_at_step:
+              type: string
+              nullable: true
+            error_type:
+              type: string
+            error_message:
+              type: string
+            error_details:
+              type: object
+            is_retryable:
+              type: boolean
+            retry_count:
+              type: integer
+            max_retries:
+              type: integer
+            duration_before_failure_ms:
+              type: integer
+            partial_outputs:
+              type: array
+              items:
+                type: string
+                
+    ProjectCreatedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - project_id
+            - project_name
+          properties:
+            project_id:
+              type: string
+            project_name:
+              type: string
+            description:
+              type: string
+              nullable: true
+            project_type:
+              type: string
+              nullable: true
+            initial_context:
+              type: object
+            style_preferences:
+              type: object
+            created_by:
+              type: string
+            parent_project_id:
+              type: string
+              nullable: true
+              
+    StyleChosenPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - project_id
+            - style_name
+            - style_category
+          properties:
+            project_id:
+              type: string
+            asset_id:
+              type: string
+              nullable: true
+            style_name:
+              type: string
+            style_category:
+              type: string
+            style_parameters:
+              type: object
+            reference_assets:
+              type: array
+              items:
+                type: string
+            style_prompt:
+              type: string
+              nullable: true
+            chosen_by:
+              type: string
+            reason:
+              type: string
+              nullable: true
+            alternatives_considered:
+              type: array
+              items:
+                type: object
+                
+    ContextUpdatedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - project_id
+            - context_type
+            - update_type
+            - context_key
+          properties:
+            project_id:
+              type: string
+            context_type:
+              type: string
+            update_type:
+              type: string
+              enum: ['addition', 'modification', 'removal']
+            context_key:
+              type: string
+            previous_value:
+              type: object
+              nullable: true
+            new_value:
+              type: object
+            updated_by:
+              type: string
+            update_reason:
+              type: string
+              nullable: true
+            related_assets:
+              type: array
+              items:
+                type: string
+            natural_language_description:
+              type: string
+              nullable: true
+            impacts:
+              type: array
+              items:
+                type: string
+                
+    CharacterDefinedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - project_id
+            - character_id
+            - character_name
+            - character_type
+          properties:
+            project_id:
+              type: string
+            character_id:
+              type: string
+            character_name:
+              type: string
+            character_type:
+              type: string
+            visual_description:
+              type: object
+            personality_traits:
+              type: array
+              items:
+                type: string
+            backstory:
+              type: string
+              nullable: true
+            reference_assets:
+              type: array
+              items:
+                type: string
+            style_guidelines:
+              type: object
+            version:
+              type: integer
+            previous_version_id:
+              type: string
+              nullable: true
+            changes_from_previous:
+              type: array
+              items:
+                type: string
+                
+    ConceptApprovedPayload:
+      allOf:
+        - $ref: '#/components/schemas/EventBase'
+        - type: object
+          required:
+            - project_id
+            - concept_id
+            - concept_type
+            - concept_name
+            - description
+            - approved_by
+          properties:
+            project_id:
+              type: string
+            concept_id:
+              type: string
+            concept_type:
+              type: string
+            concept_name:
+              type: string
+            description:
+              type: string
+            approved_by:
+              type: string
+            approval_notes:
+              type: string
+              nullable: true
+            concept_assets:
+              type: array
+              items:
+                type: string
+            reference_materials:
+              type: array
+              items:
+                type: string
+            production_notes:
+              type: object
+            dependencies:
+              type: array
+              items:
+                type: string
