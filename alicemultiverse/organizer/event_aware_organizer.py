@@ -32,21 +32,20 @@ class EventAwareMediaOrganizer(MediaOrganizer):
         
         # Track event loop for async operations
         try:
-            self.loop = asyncio.get_event_loop()
+            self.loop = asyncio.get_running_loop()
         except RuntimeError:
-            self.loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(self.loop)
+            self.loop = None
     
     def _publish_event_sync(self, event):
         """Publish event synchronously by running async code."""
         # If we're already in an event loop, schedule it
         try:
-            asyncio.get_running_loop()
+            loop = asyncio.get_running_loop()
             # We're in an async context, create a task
             asyncio.create_task(publish_event(event))
         except RuntimeError:
             # No running loop, run it directly
-            self.loop.run_until_complete(publish_event(event))
+            asyncio.run(publish_event(event))
     
     def _process_file(self, media_path: Path) -> OrganizeResult:
         """Process file with event publishing."""
