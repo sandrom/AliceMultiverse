@@ -1,7 +1,5 @@
 """Constants used throughout AliceMultiverse."""
 
-from pathlib import Path
-
 # Version information
 VERSION = "2.0.0"
 CACHE_VERSION = "3.0"
@@ -34,7 +32,7 @@ COSTS = {
     "brisque": 0.0,
     "sightengine": 0.001,
     "claude": 0.002,  # Haiku model default
-    "gpt4v": 0.01
+    "gpt4v": 0.01,
 }
 
 # Date format for output folders
@@ -45,18 +43,31 @@ SEQUENCE_DIGITS = 5
 SEQUENCE_FORMAT = "{:05d}"
 
 # File extensions - AI-generated content focus
-IMAGE_EXTENSIONS = {'.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif'}
-VIDEO_EXTENSIONS = {'.mp4', '.mov'}
+IMAGE_EXTENSIONS = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"}
+VIDEO_EXTENSIONS = {".mp4", ".mov"}
 
 # AI generator signatures
 AI_IMAGE_GENERATORS = [
-    'stablediffusion', 'midjourney', 'dalle', 'comfyui', 
-    'flux', 'leonardo', 'firefly'
+    "stablediffusion",
+    "midjourney",
+    "dalle",
+    "comfyui",
+    "flux",
+    "leonardo",
+    "firefly",
 ]
 
 AI_VIDEO_GENERATORS = [
-    'runway', 'kling', 'pika', 'stable-video', 'animatediff',
-    'deforum', 'modelscope', 'zeroscope', 'haiper', 'genmo'
+    "runway",
+    "kling",
+    "pika",
+    "stable-video",
+    "animatediff",
+    "deforum",
+    "modelscope",
+    "zeroscope",
+    "haiper",
+    "genmo",
 ]
 
 # Logging format

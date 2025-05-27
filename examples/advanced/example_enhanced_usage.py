@@ -1,18 +1,15 @@
 """Example of using AliceMultiverse with enhanced metadata."""
 
-from pathlib import Path
-from alicemultiverse.metadata.models import SearchQuery
-
 
 def main():
     """Demonstrate enhanced metadata usage."""
     print("AliceMultiverse Enhanced Metadata Example\n")
     print("=" * 50)
-    
+
     print("\n1. ORGANIZE WITH ENHANCED METADATA:")
     print("   alice --enhanced-metadata")
     print("   This extracts rich metadata including prompts, style tags, and relationships")
-    
+
     print("\n2. COMMAND LINE USAGE:")
     print("   # Basic organization with metadata")
     print("   alice --enhanced-metadata")
@@ -22,7 +19,7 @@ def main():
     print("")
     print("   # With pipeline processing")
     print("   alice --enhanced-metadata --pipeline brisque-sightengine")
-    
+
     print("\n3. PROGRAMMATIC USAGE (for AI integration):")
     print("   ```python")
     print("   from alicemultiverse.organizer.enhanced_organizer import EnhancedMediaOrganizer")
@@ -46,7 +43,7 @@ def main():
     print("   # Tag assets")
     print("   organizer.tag_asset(asset_id, ['hero-shot', 'approved'], 'custom_tags')")
     print("   ```")
-    
+
     print("\n4. AI ASSISTANT WORKFLOW:")
     print("   User: 'Find neon cyberpunk portraits from last week'")
     print("   ")
@@ -58,7 +55,7 @@ def main():
     print("       subject_tags=['portrait']")
     print("   )")
     print("   ```")
-    
+
     print("\n5. METADATA STRUCTURE:")
     print("   Each asset has:")
     print("   - Unique ID (content hash)")
@@ -68,14 +65,14 @@ def main():
     print("   - Quality metrics (BRISQUE, stars, AI defects)")
     print("   - Creative role (hero, b-roll, reference, etc.)")
     print("   - Project context")
-    
+
     print("\n6. BENEFITS:")
     print("   - AI can find assets by creative concepts, not file paths")
     print("   - Automatic relationship detection (variations, similar assets)")
     print("   - Rich semantic search capabilities")
     print("   - Preserves all generation parameters for reuse")
     print("   - Enables long-term project continuity")
-    
+
     print("\n" + "=" * 50)
     print("This is the foundation for Alice to become the intelligent")
     print("orchestration layer between AI assistants and creative tools!")

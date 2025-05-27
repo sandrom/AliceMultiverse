@@ -15,7 +15,7 @@ jobs:
         with:
           script: |
             const branch = context.ref.replace('refs/heads/', '');
-            
+
             // Check if this push is associated with a PR
             const prs = await github.rest.pulls.list({
               owner: context.repo.owner,
@@ -23,17 +23,17 @@ jobs:
               head: `${context.repo.owner}:${branch}`,
               state: 'open'
             });
-            
+
             if (prs.data.length === 0) {
               core.setFailed(`
                 ❌ Direct pushes to branches are not allowed!
-                
+
                 Please create a Pull Request for branch: ${branch}
-                
+
                 Steps:
                 1. Create a PR: gh pr create --title "Your PR title" --body "Description"
                 2. Or via GitHub UI: https://github.com/${context.repo.owner}/${context.repo.repo}/pull/new/${branch}
-                
+
                 All changes must go through PR review process.
               `);
             } else {

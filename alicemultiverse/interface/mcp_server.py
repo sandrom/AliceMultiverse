@@ -7,13 +7,13 @@ It does NOT expose direct file access or underlying APIs - only Alice's function
 """
 
 import asyncio
-import json
 import logging
-from typing import Dict, Any, List, Optional
+from typing import Any
 
 try:
     from mcp import Server, Tool
     from mcp.server import stdio
+
     MCP_AVAILABLE = True
 except ImportError:
     MCP_AVAILABLE = False
@@ -21,10 +21,7 @@ except ImportError:
     logger.warning("MCP package not installed. Install with: pip install mcp")
 
 from .interface import AliceInterface
-from .interface.models import (
-    SearchRequest, OrganizeRequest, TagRequest
-)
-from .metadata.models import AssetRole
+from .interface.models import OrganizeRequest, SearchRequest, TagRequest
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -41,26 +38,28 @@ else:
         def tool(self):
             def decorator(func):
                 return func
+
             return decorator
+
     server = DummyServer()
 
 
 @server.tool()
 async def search_assets(
-    description: Optional[str] = None,
-    style_tags: Optional[List[str]] = None,
-    mood_tags: Optional[List[str]] = None,
-    subject_tags: Optional[List[str]] = None,
-    time_reference: Optional[str] = None,
-    min_quality_stars: Optional[int] = None,
-    source_types: Optional[List[str]] = None,
-    roles: Optional[List[str]] = None,
-    limit: Optional[int] = 20,
-    sort_by: Optional[str] = "relevance"
-) -> Dict[str, Any]:
+    description: str | None = None,
+    style_tags: list[str] | None = None,
+    mood_tags: list[str] | None = None,
+    subject_tags: list[str] | None = None,
+    time_reference: str | None = None,
+    min_quality_stars: int | None = None,
+    source_types: list[str] | None = None,
+    roles: list[str] | None = None,
+    limit: int | None = 20,
+    sort_by: str | None = "relevance",
+) -> dict[str, Any]:
     """
     Search for creative assets using natural language and tags.
-    
+
     Examples:
     - description: "dark moody portraits with neon lighting"
     - style_tags: ["cyberpunk", "minimalist", "abstract"]
@@ -69,7 +68,7 @@ async def search_assets(
     - time_reference: "last week", "yesterday", "March 2024"
     - min_quality_stars: 4 (only return 4-5 star assets)
     - roles: ["hero", "b_roll", "reference"]
-    
+
     Returns asset information without file paths.
     """
     try:
@@ -83,38 +82,34 @@ async def search_assets(
             source_types=source_types,
             roles=roles,
             limit=limit,
-            sort_by=sort_by
+            sort_by=sort_by,
         )
-        
+
         response = alice.search_assets(request)
         return response
     except Exception as e:
         logger.error(f"Search failed: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": "Search failed"
-        }
+        return {"success": False, "error": str(e), "message": "Search failed"}
 
 
 @server.tool()
 async def organize_media(
-    source_path: Optional[str] = None,
+    source_path: str | None = None,
     quality_assessment: bool = True,
     enhanced_metadata: bool = True,
     pipeline: str = "standard",
-    watch_mode: bool = False
-) -> Dict[str, Any]:
+    watch_mode: bool = False,
+) -> dict[str, Any]:
     """
     Organize and analyze media files with quality assessment.
-    
+
     Parameters:
     - source_path: Source directory (defaults to configured inbox)
     - quality_assessment: Enable BRISQUE quality scoring
     - enhanced_metadata: Extract rich metadata for AI navigation
     - pipeline: Quality pipeline ("basic", "standard", "premium")
     - watch_mode: Continuously monitor for new files
-    
+
     Returns organization statistics and processed asset information.
     """
     try:
@@ -123,32 +118,28 @@ async def organize_media(
             quality_assessment=quality_assessment,
             enhanced_metadata=enhanced_metadata,
             pipeline=pipeline,
-            watch_mode=watch_mode
+            watch_mode=watch_mode,
         )
-        
+
         response = alice.organize_media(request)
         return response
     except Exception as e:
         logger.error(f"Organization failed: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": "Organization failed"
-        }
+        return {"success": False, "error": str(e), "message": "Organization failed"}
 
 
 @server.tool()
 async def tag_assets(
-    asset_ids: List[str],
-    style_tags: Optional[List[str]] = None,
-    mood_tags: Optional[List[str]] = None,
-    subject_tags: Optional[List[str]] = None,
-    custom_tags: Optional[List[str]] = None,
-    role: Optional[str] = None
-) -> Dict[str, Any]:
+    asset_ids: list[str],
+    style_tags: list[str] | None = None,
+    mood_tags: list[str] | None = None,
+    subject_tags: list[str] | None = None,
+    custom_tags: list[str] | None = None,
+    role: str | None = None,
+) -> dict[str, Any]:
     """
     Add semantic tags to assets for better organization and discovery.
-    
+
     Parameters:
     - asset_ids: List of asset IDs to tag
     - style_tags: Visual style descriptors
@@ -156,7 +147,7 @@ async def tag_assets(
     - subject_tags: Subject matter descriptors
     - custom_tags: Custom project-specific tags
     - role: Asset role ("hero", "b_roll", "reference", "alternate")
-    
+
     Tags help with future discovery and workflow automation.
     """
     try:
@@ -166,34 +157,28 @@ async def tag_assets(
             mood_tags=mood_tags,
             subject_tags=subject_tags,
             custom_tags=custom_tags,
-            role=role
+            role=role,
         )
-        
+
         response = alice.tag_assets(request)
         return response
     except Exception as e:
         logger.error(f"Tagging failed: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": "Tagging failed"
-        }
+        return {"success": False, "error": str(e), "message": "Tagging failed"}
 
 
 @server.tool()
 async def find_similar_assets(
-    asset_id: str,
-    threshold: float = 0.8,
-    limit: int = 10
-) -> Dict[str, Any]:
+    asset_id: str, threshold: float = 0.8, limit: int = 10
+) -> dict[str, Any]:
     """
     Find assets similar to a reference asset.
-    
+
     Parameters:
     - asset_id: Reference asset ID
     - threshold: Similarity threshold (0.0-1.0, higher = more similar)
     - limit: Maximum number of results
-    
+
     Finds visually or conceptually similar assets based on metadata and tags.
     """
     try:
@@ -201,23 +186,17 @@ async def find_similar_assets(
         return response
     except Exception as e:
         logger.error(f"Similar search failed: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": "Similar search failed"
-        }
+        return {"success": False, "error": str(e), "message": "Similar search failed"}
 
 
 @server.tool()
-async def get_asset_info(
-    asset_id: str
-) -> Dict[str, Any]:
+async def get_asset_info(asset_id: str) -> dict[str, Any]:
     """
     Get detailed information about a specific asset.
-    
+
     Parameters:
     - asset_id: The unique asset identifier
-    
+
     Returns comprehensive metadata including prompt, tags, quality, and relationships.
     """
     try:
@@ -225,25 +204,18 @@ async def get_asset_info(
         return response
     except Exception as e:
         logger.error(f"Get asset info failed: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": "Failed to get asset info"
-        }
+        return {"success": False, "error": str(e), "message": "Failed to get asset info"}
 
 
 @server.tool()
-async def assess_quality(
-    asset_ids: List[str],
-    pipeline: str = "standard"
-) -> Dict[str, Any]:
+async def assess_quality(asset_ids: list[str], pipeline: str = "standard") -> dict[str, Any]:
     """
     Run quality assessment on specific assets.
-    
+
     Parameters:
     - asset_ids: List of asset IDs to assess
     - pipeline: Assessment pipeline ("basic", "standard", "premium")
-    
+
     Returns quality scores and identified issues for each asset.
     """
     try:
@@ -251,18 +223,14 @@ async def assess_quality(
         return response
     except Exception as e:
         logger.error(f"Quality assessment failed: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": "Quality assessment failed"
-        }
+        return {"success": False, "error": str(e), "message": "Quality assessment failed"}
 
 
 @server.tool()
-async def get_organization_stats() -> Dict[str, Any]:
+async def get_organization_stats() -> dict[str, Any]:
     """
     Get statistics about the organized media collection.
-    
+
     Returns counts by date, source, quality, and project.
     """
     try:
@@ -270,11 +238,7 @@ async def get_organization_stats() -> Dict[str, Any]:
         return response
     except Exception as e:
         logger.error(f"Get stats failed: {e}")
-        return {
-            "success": False,
-            "error": str(e),
-            "message": "Failed to get statistics"
-        }
+        return {"success": False, "error": str(e), "message": "Failed to get statistics"}
 
 
 def main():
@@ -283,7 +247,7 @@ def main():
         logger.error("MCP package is not installed.")
         logger.error("To use the MCP server, install it with: pip install mcp")
         return
-    
+
     logger.info("Starting AliceMultiverse MCP Server...")
     logger.info("Available tools:")
     logger.info("  - search_assets: Find assets using creative concepts")
@@ -293,7 +257,7 @@ def main():
     logger.info("  - get_asset_info: Get asset details")
     logger.info("  - assess_quality: Run quality assessment")
     logger.info("  - get_organization_stats: Get collection statistics")
-    
+
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))
 

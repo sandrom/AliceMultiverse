@@ -2,4 +2,4 @@
 
 from .manager import APIKeyManager
 
-__all__ = ['APIKeyManager']
+__all__ = ["APIKeyManager"]

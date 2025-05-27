@@ -5,26 +5,26 @@
 paths:
   # Default input directory for media files
   inbox: inbox
-  
+
   # Default output directory for organized files
   organized: organized
 
 processing:
   # Copy files instead of moving them
   copy_mode: true
-  
+
   # Force re-analysis of all files (ignores cache)
   force_reindex: false
-  
+
   # Enable quality assessment by default
   quality: false
-  
+
   # Watch mode - continuously monitor for new files
   watch: false
-  
+
   # Check interval for watch mode (seconds)
   watch_interval: 5
-  
+
   # Dry run mode - preview without making changes
   dry_run: false
 
@@ -47,38 +47,38 @@ quality:
     1_star:
       min: 80
       max: 100
-  
+
   # Maximum image dimension for BRISQUE processing (to avoid memory issues)
   max_dimension: 2048
 
 pipeline:
   # Default pipeline mode (basic, standard, premium, custom)
   mode: null
-  
+
   # Custom pipeline stages (when mode is custom)
   stages: []
-  
+
   # Cost limits for each stage (USD)
   cost_limits:
     sightengine: 10.0
     claude: 50.0
     gpt4v: 30.0
-  
+
   # Batch sizes for API calls
   batch_sizes:
     sightengine: 128
     claude: 10
     gpt4v: 10
-  
+
   # Progressive filtering thresholds
   thresholds:
     # Minimum BRISQUE stars to proceed to SightEngine
     brisque_min_stars: 3
-    
+
     # SightEngine minimums to proceed to Claude/GPT4V
     sightengine_min_quality: 0.8
     sightengine_min_ai_prob: 0.7
-  
+
   # Scoring weights for combining quality scores
   # Weights must sum to 1.0 for each pipeline mode
   scoring_weights:
@@ -86,13 +86,13 @@ pipeline:
     standard:
       brisque: 0.6      # 60% weight on BRISQUE score
       sightengine: 0.4  # 40% weight on SightEngine score
-    
+
     # Premium pipeline (BRISQUE + SightEngine + Claude)
     premium:
       brisque: 0.4      # 40% weight on BRISQUE score
       sightengine: 0.3  # 30% weight on SightEngine score
       claude: 0.3       # 30% weight on Claude defect analysis
-  
+
   # Star rating thresholds based on combined scores
   # Combined scores range from 0.0 to 1.0 (higher is better)
   star_thresholds:
@@ -104,10 +104,10 @@ pipeline:
 output:
   # Date format for organized folders
   date_format: "%Y-%m-%d"
-  
+
   # Number of digits for sequential numbering
   sequence_digits: 5
-  
+
   # File naming pattern: {project}-{number}.{ext}
   naming_pattern: "{project}-{number:0{digits}d}{ext}"
 
@@ -115,7 +115,7 @@ output:
 metadata:
   # Cache version (increment to force cache rebuild)
   cache_version: "3.0.0"
-  
+
   # Metadata folder name
   folder_name: ".metadata"
 
@@ -127,7 +127,7 @@ file_types:
     - .jpg
     - .jpeg
     - .png
-  
+
   # Video extensions to process
   video_extensions:
     - .mp4
@@ -143,7 +143,7 @@ ai_generators:
     - flux
     - leonardo
     - firefly
-  
+
   video:
     - runway
     - kling
@@ -160,6 +160,6 @@ ai_generators:
 logging:
   # Log level (DEBUG, INFO, WARNING, ERROR)
   level: INFO
-  
+
   # Show progress bars
   show_progress: true

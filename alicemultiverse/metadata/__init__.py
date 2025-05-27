@@ -1,23 +1,23 @@
 """Metadata management for AliceMultiverse."""
 
 from .models import (
-    AssetRole,
+    COLOR_VOCABULARY,
+    MOOD_VOCABULARY,
+    STYLE_VOCABULARY,
     AssetMetadata,
+    AssetRelationship,
+    AssetRole,
     ProjectContext,
     SearchQuery,
-    AssetRelationship,
-    STYLE_VOCABULARY,
-    MOOD_VOCABULARY,
-    COLOR_VOCABULARY,
 )
 
 __all__ = [
+    "COLOR_VOCABULARY",
+    "MOOD_VOCABULARY",
+    "STYLE_VOCABULARY",
+    "AssetMetadata",
+    "AssetRelationship",
     "AssetRole",
-    "AssetMetadata", 
     "ProjectContext",
     "SearchQuery",
-    "AssetRelationship",
-    "STYLE_VOCABULARY",
-    "MOOD_VOCABULARY",
-    "COLOR_VOCABULARY",
 ]

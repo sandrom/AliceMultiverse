@@ -2,9 +2,8 @@
 
 import json
 from datetime import datetime, timedelta
-from pathlib import Path
 
-from alicemultiverse.metadata.models import AssetMetadata, SearchQuery, AssetRole
+from alicemultiverse.metadata.models import AssetMetadata, AssetRole, SearchQuery
 from alicemultiverse.metadata.search import AssetSearchEngine
 
 
@@ -51,7 +50,7 @@ def create_sample_metadata():
             timecode=None,
             beat_aligned=None,
             scene_number=1,
-            lyrics_line=None
+            lyrics_line=None,
         ),
         "asset_002": AssetMetadata(
             asset_id="asset_002",
@@ -93,7 +92,7 @@ def create_sample_metadata():
             timecode=None,
             beat_aligned=None,
             scene_number=1,
-            lyrics_line=None
+            lyrics_line=None,
         ),
         "asset_003": AssetMetadata(
             asset_id="asset_003",
@@ -135,8 +134,8 @@ def create_sample_metadata():
             timecode="00:00:10",
             beat_aligned=True,
             scene_number=1,
-            lyrics_line="In the neon-lit streets"
-        )
+            lyrics_line="In the neon-lit streets",
+        ),
     }
 
 
@@ -145,58 +144,49 @@ def test_search_functionality():
     # Create sample data
     metadata_store = create_sample_metadata()
     search_engine = AssetSearchEngine(metadata_store)
-    
+
     print("=== Testing Asset Search System ===\n")
-    
+
     # Test 1: Search by timeframe (last month)
     print("1. Search for assets from last month:")
     query = SearchQuery(
-        timeframe_start=datetime.now() - timedelta(days=35),
-        timeframe_end=datetime.now(),
-        limit=10
+        timeframe_start=datetime.now() - timedelta(days=35), timeframe_end=datetime.now(), limit=10
     )
     results = search_engine.search_assets(query)
     print(f"   Found {len(results)} assets")
     for asset in results:
         print(f"   - {asset['file_name']} (created {asset['created_at'].strftime('%Y-%m-%d')})")
-    
+
     # Test 2: Search by style and mood
     print("\n2. Search for cyberpunk assets with dark mood:")
-    query = SearchQuery(
-        style_tags=["cyberpunk"],
-        mood_tags=["dark"],
-        limit=10
-    )
+    query = SearchQuery(style_tags=["cyberpunk"], mood_tags=["dark"], limit=10)
     results = search_engine.search_assets(query)
     print(f"   Found {len(results)} assets")
     for asset in results:
         print(f"   - {asset['file_name']}: {asset['prompt']}")
-    
+
     # Test 3: Find variations
     print("\n3. Find variations of asset_001:")
-    query = SearchQuery(
-        variations_of="asset_001",
-        limit=10
-    )
+    query = SearchQuery(variations_of="asset_001", limit=10)
     results = search_engine.search_assets(query)
     print(f"   Found {len(results)} variations")
     for asset in results:
         print(f"   - {asset['file_name']}: {asset['description']}")
-    
+
     # Test 4: Find similar assets
     print("\n4. Find assets similar to asset_001:")
     similar = search_engine.find_similar_assets("asset_001", similarity_threshold=0.5)
     print(f"   Found {len(similar)} similar assets")
     for asset in similar:
         print(f"   - {asset['file_name']} (source: {asset['source_type']})")
-    
+
     # Test 5: Natural language search
     print("\n5. Search by description 'neon portrait':")
     results = search_engine.search_by_description("neon portrait", limit=5)
     print(f"   Found {len(results)} matching assets")
     for asset in results:
         print(f"   - {asset['file_name']}: {asset['prompt']}")
-    
+
     # Test 6: Complex query - AI perspective
     print("\n6. AI searching for 'cyberpunk portraits from last week with high quality':")
     query = SearchQuery(
@@ -206,22 +196,24 @@ def test_search_functionality():
         min_stars=4,
         exclude_defects=True,
         approved_only=False,  # AI can see unapproved too
-        sort_by="quality"
+        sort_by="quality",
     )
     results = search_engine.search_assets(query)
     print(f"   Found {len(results)} assets matching criteria")
     for asset in results:
-        print(f"   - {asset['file_name']} ({asset['quality_stars']} stars, "
-              f"{'approved' if asset['approved'] else 'pending'})")
-    
+        print(
+            f"   - {asset['file_name']} ({asset['quality_stars']} stars, "
+            f"{'approved' if asset['approved'] else 'pending'})"
+        )
+
     # Test 7: Finding assets for a specific scene
     print("\n7. Find all assets for scene 1:")
     # This would be done by filtering in a real implementation
     scene_assets = []
     for asset_id, metadata in metadata_store.items():
-        if metadata.get('scene_number') == 1:
+        if metadata.get("scene_number") == 1:
             scene_assets.append(metadata)
-    
+
     print(f"   Found {len(scene_assets)} assets for scene 1")
     for asset in scene_assets:
         print(f"   - {asset['file_name']} (role: {asset['role'].value})")
@@ -231,35 +223,35 @@ def demonstrate_ai_workflow():
     """Demonstrate how AI would use these functions."""
     metadata_store = create_sample_metadata()
     search_engine = AssetSearchEngine(metadata_store)
-    
+
     print("\n\n=== AI Workflow Example ===")
     print("User: 'Generate a cyberpunk portrait with the neon style from last month'\n")
-    
+
     print("AI Step 1: Translate 'last month' to timeframe")
     print("   search_assets(timeframe_start='2024-09-20', style_tags=['cyberpunk', 'neon'])")
-    
+
     query = SearchQuery(
         timeframe_start=datetime.now() - timedelta(days=35),
         style_tags=["cyberpunk", "neon"],
-        subject_tags=["portrait"]
+        subject_tags=["portrait"],
     )
     results = search_engine.search_assets(query)
-    
+
     print(f"\nAI Step 2: Found {len(results)} matching reference assets")
     if results:
         reference = results[0]
         print(f"   Selected: {reference['file_name']} as style reference")
         print(f"   Style tags: {reference['style_tags']}")
         print(f"   Generation params: {json.dumps(reference['generation_params'], indent=2)}")
-        
+
         print("\nAI Step 3: Extract style parameters and generate new image")
-        print(f"   generate_image(")
-        print(f"       prompt='cyberpunk portrait in neon style',")
+        print("   generate_image(")
+        print("       prompt='cyberpunk portrait in neon style',")
         print(f"       style_reference='{reference['asset_id']}',")
         print(f"       model='{reference['model']}',")
         print(f"       parameters={reference['generation_params']}")
-        print(f"   )")
-        
+        print("   )")
+
         print("\nAI Step 4: Tag and organize the new asset")
         print("   tag_asset(new_asset_id, tags=['cyberpunk', 'neon', 'portrait'])")
         print("   set_asset_role(new_asset_id, role='wip')")

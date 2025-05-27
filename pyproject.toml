@@ -108,11 +108,28 @@ ignore = [
     "B008",   # Do not perform function calls in argument defaults
     "ARG002", # Unused method argument
     "SIM108", # Use ternary operator (sometimes less readable)
+    "G004",   # Logging f-strings are readable and safe in our use case
+    "TID252", # Relative imports are valid within our package structure
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/*" = ["S101", "ARG", "PLR2004"]
-"scripts/*" = ["INP001"]
+"tests/*" = [
+    "S101",    # assert is expected in tests
+    "ARG",     # unused arguments in test fixtures
+    "PLR2004", # magic values in tests are fine
+    "F841",    # unused variables in test setup
+    "S110",    # try-except-pass is sometimes needed in tests
+    "S603",    # subprocess without shell=True is fine in tests
+    "S607",    # partial paths are fine in tests
+]
+"scripts/*" = [
+    "INP001",  # implicit namespace packages are fine for scripts
+    "T201",    # print() is expected in CLI scripts
+]
+"alembic/*" = [
+    "INP001",  # implicit namespace packages
+    "F401",    # unused imports in migration files
+]
 
 [tool.ruff.format]
 quote-style = "double"

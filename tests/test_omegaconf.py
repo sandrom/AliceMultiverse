@@ -3,6 +3,7 @@
 
 import sys
 from pathlib import Path
+
 from omegaconf import OmegaConf
 
 # Test loading settings.yaml
@@ -13,7 +14,9 @@ if settings_path.exists():
     print(f"  - Inbox path: {config.paths.inbox}")
     print(f"  - Organized path: {config.paths.organized}")
     print(f"  - Quality thresholds loaded: {len(config.quality.thresholds)} star levels")
-    print(f"  - 5-star threshold: {config.quality.thresholds['5_star']['min']}-{config.quality.thresholds['5_star']['max']}")
+    print(
+        f"  - 5-star threshold: {config.quality.thresholds['5_star']['min']}-{config.quality.thresholds['5_star']['max']}"
+    )
 else:
     print("✗ settings.yaml not found")
     sys.exit(1)

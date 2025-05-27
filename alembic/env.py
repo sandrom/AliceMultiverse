@@ -1,13 +1,12 @@
-from logging.config import fileConfig
 import os
 import sys
+from logging.config import fileConfig
 from pathlib import Path
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from sqlalchemy import engine_from_config
-from sqlalchemy import pool
+from sqlalchemy import engine_from_config, pool
 
 from alembic import context
 from alicemultiverse.database.models import Base
@@ -44,7 +43,7 @@ def run_migrations_offline() -> None:
 
     """
     # Allow database URL override from environment
-    url = os.environ.get('ALEMBIC_DATABASE_URL') or config.get_main_option("sqlalchemy.url")
+    url = os.environ.get("ALEMBIC_DATABASE_URL") or config.get_main_option("sqlalchemy.url")
     context.configure(
         url=url,
         target_metadata=target_metadata,
@@ -65,9 +64,9 @@ def run_migrations_online() -> None:
     """
     # Allow database URL override from environment
     configuration = config.get_section(config.config_ini_section, {})
-    if 'ALEMBIC_DATABASE_URL' in os.environ:
-        configuration['sqlalchemy.url'] = os.environ['ALEMBIC_DATABASE_URL']
-    
+    if "ALEMBIC_DATABASE_URL" in os.environ:
+        configuration["sqlalchemy.url"] = os.environ["ALEMBIC_DATABASE_URL"]
+
     connectable = engine_from_config(
         configuration,
         prefix="sqlalchemy.",
@@ -75,9 +74,7 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(
-            connection=connection, target_metadata=target_metadata
-        )
+        context.configure(connection=connection, target_metadata=target_metadata)
 
         with context.begin_transaction():
             context.run_migrations()

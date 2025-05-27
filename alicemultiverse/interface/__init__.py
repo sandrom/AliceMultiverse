@@ -1,31 +1,34 @@
 """Alice Interface - The primary interface for AI assistants."""
 
+from .alice_api import AliceAPI, AliceMCP, ask_alice, ask_alice_sync
 from .alice_interface import AliceInterface
 from .alice_orchestrator import AliceOrchestrator, CreativeResponse
-from .alice_api import AliceAPI, ask_alice, ask_alice_sync, AliceMCP
 from .creative_models import (
-    CreativeContext, CreativeAsset, CreativeWorkflow,
-    CreativeRole, CreativeMood, WorkflowPhase
+    CreativeAsset,
+    CreativeContext,
+    CreativeMood,
+    CreativeRole,
+    CreativeWorkflow,
+    WorkflowPhase,
 )
 from .models import (
     AliceResponse,
-    SearchRequest,
     GenerateRequest,
+    GroupRequest,
     OrganizeRequest,
+    SearchRequest,
     TagRequest,
-    GroupRequest
 )
 
 __all__ = [
     # Legacy interface
     "AliceInterface",
     "AliceResponse",
-    "SearchRequest", 
+    "SearchRequest",
     "GenerateRequest",
     "OrganizeRequest",
     "TagRequest",
     "GroupRequest",
-    
     # New orchestrator
     "AliceOrchestrator",
     "CreativeResponse",
@@ -33,12 +36,11 @@ __all__ = [
     "ask_alice",
     "ask_alice_sync",
     "AliceMCP",
-    
     # Creative models
     "CreativeContext",
     "CreativeAsset",
     "CreativeWorkflow",
     "CreativeRole",
     "CreativeMood",
-    "WorkflowPhase"
+    "WorkflowPhase",
 ]

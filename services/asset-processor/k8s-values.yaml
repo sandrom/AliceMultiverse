@@ -49,14 +49,14 @@ config:
     service:
       name: asset-processor
       version: 1.0.0
-    
+
     # Asset processing settings
     processing:
       supported_formats:
         images: [".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"]
         videos: [".mp4", ".mov", ".avi"]
       max_file_size: 104857600  # 100MB
-      
+
     # AI source detection patterns
     ai_sources:
       midjourney:
@@ -65,7 +65,7 @@ config:
         patterns: ["dalle", "DALL-E", "openai"]
       stable_diffusion:
         patterns: ["sd_", "stable_diffusion", "stablediffusion"]
-      
+
     # Organization rules
     organization:
       date_format: "%Y-%m-%d"

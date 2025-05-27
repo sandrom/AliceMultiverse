@@ -15,7 +15,7 @@ jobs:
   # =============================================================================
   # PYTHON CODE QUALITY
   # =============================================================================
-  
+
   python-quality:
     name: Python Code Quality
     runs-on: ubuntu-latest
@@ -59,7 +59,7 @@ jobs:
   # =============================================================================
   # DOCKER & CONTAINER SECURITY
   # =============================================================================
-  
+
   docker-quality:
     name: Docker & Container Quality
     runs-on: ubuntu-latest
@@ -93,7 +93,7 @@ jobs:
   # =============================================================================
   # KUBERNETES & HELM
   # =============================================================================
-  
+
   kubernetes-quality:
     name: Kubernetes & Helm Quality
     runs-on: ubuntu-latest
@@ -126,7 +126,7 @@ jobs:
           wget https://github.com/controlplaneio/kubesec/releases/download/v2.13.0/kubesec_linux_amd64.tar.gz
           tar -xzf kubesec_linux_amd64.tar.gz
           chmod +x kubesec
-          
+
           # Scan Kubernetes files
           for file in $(find k8s -name "*.yaml" -o -name "*.yml"); do
             echo "### Scanning $file" >> $GITHUB_STEP_SUMMARY
@@ -136,7 +136,7 @@ jobs:
   # =============================================================================
   # SHELL SCRIPTS
   # =============================================================================
-  
+
   shell-quality:
     name: Shell Script Quality
     runs-on: ubuntu-latest
@@ -170,7 +170,7 @@ jobs:
   # =============================================================================
   # YAML/JSON VALIDATION
   # =============================================================================
-  
+
   config-quality:
     name: Config File Quality
     runs-on: ubuntu-latest
@@ -204,7 +204,7 @@ jobs:
   # =============================================================================
   # MARKDOWN QUALITY
   # =============================================================================
-  
+
   markdown-quality:
     name: Markdown Quality
     runs-on: ubuntu-latest
@@ -226,7 +226,7 @@ jobs:
   # =============================================================================
   # AGGREGATE RESULTS
   # =============================================================================
-  
+
   quality-summary:
     name: Quality Summary
     runs-on: ubuntu-latest
@@ -237,44 +237,44 @@ jobs:
         run: |
           echo "## 📊 Code Quality Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          
+
           # Check job statuses
           if [[ "${{ needs.python-quality.result }}" == "success" ]]; then
             echo "✅ Python quality checks passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Python quality checks failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [[ "${{ needs.docker-quality.result }}" == "success" ]]; then
             echo "✅ Docker quality checks passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Docker quality checks failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [[ "${{ needs.kubernetes-quality.result }}" == "success" ]]; then
             echo "✅ Kubernetes/Helm quality checks passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Kubernetes/Helm quality checks failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [[ "${{ needs.shell-quality.result }}" == "success" ]]; then
             echo "✅ Shell script quality checks passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Shell script quality checks failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [[ "${{ needs.config-quality.result }}" == "success" ]]; then
             echo "✅ Config file quality checks passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Config file quality checks failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           if [[ "${{ needs.markdown-quality.result }}" == "success" ]]; then
             echo "✅ Markdown quality checks passed" >> $GITHUB_STEP_SUMMARY
           else
             echo "❌ Markdown quality checks failed" >> $GITHUB_STEP_SUMMARY
           fi
-          
+
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### 💡 Tips" >> $GITHUB_STEP_SUMMARY
           echo "- Run \`pre-commit run --all-files\` locally to fix most issues" >> $GITHUB_STEP_SUMMARY

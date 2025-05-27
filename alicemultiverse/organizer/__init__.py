@@ -1,7 +1,7 @@
 """Media organization module."""
 
-from .organizer_runner import run_organizer
-from .media_organizer import MediaOrganizer
 from .event_aware_organizer import EventAwareMediaOrganizer
+from .media_organizer import MediaOrganizer
+from .organizer_runner import run_organizer
 
-__all__ = ['run_organizer', 'MediaOrganizer', 'EventAwareMediaOrganizer']
+__all__ = ["EventAwareMediaOrganizer", "MediaOrganizer", "run_organizer"]

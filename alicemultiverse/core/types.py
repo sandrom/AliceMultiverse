@@ -1,13 +1,12 @@
 """Type definitions for AliceMultiverse."""
 
-from typing import TypedDict, Optional, Dict, List, Any, Literal, Union
-from pathlib import Path
-from datetime import datetime
 from enum import Enum
+from typing import Literal, TypedDict
 
 
 class MediaType(Enum):
     """Type of media file."""
+
     IMAGE = "image"
     VIDEO = "video"
     GIF = "gif"
@@ -16,6 +15,7 @@ class MediaType(Enum):
 
 class QualityRating(Enum):
     """Quality rating levels."""
+
     FIVE_STAR = 5
     FOUR_STAR = 4
     THREE_STAR = 3
@@ -26,18 +26,20 @@ class QualityRating(Enum):
 
 class AnalysisResult(TypedDict):
     """Result of media file analysis."""
+
     source_type: str
     date_taken: str
     project_folder: str
     media_type: MediaType
-    file_number: Optional[int]
-    quality_stars: Optional[int]
-    brisque_score: Optional[float]
-    pipeline_result: Optional[str]
+    file_number: int | None
+    quality_stars: int | None
+    brisque_score: float | None
+    pipeline_result: str | None
 
 
 class CacheMetadata(TypedDict):
     """Metadata stored in cache."""
+
     version: str
     file_hash: str
     content_hash: str
@@ -52,35 +54,37 @@ class CacheMetadata(TypedDict):
 
 class OrganizeResult(TypedDict):
     """Result of organizing a single media file."""
+
     source: str
     project_folder: str
     status: Literal["success", "duplicate", "error", "dry_run", "pending", "moved_existing"]
-    destination: Optional[str]
-    date: Optional[str]
-    source_type: Optional[str]
-    media_type: Optional[MediaType]
-    file_number: Optional[int]
-    quality_stars: Optional[int]
-    brisque_score: Optional[float]
-    pipeline_result: Optional[str]
-    error: Optional[str]
+    destination: str | None
+    date: str | None
+    source_type: str | None
+    media_type: MediaType | None
+    file_number: int | None
+    quality_stars: int | None
+    brisque_score: float | None
+    pipeline_result: str | None
+    error: str | None
 
 
 class Statistics(TypedDict):
     """Organization statistics."""
+
     total: int
     organized: int
     already_organized: int
     duplicates: int
     errors: int
     moved_existing: int
-    by_date: Dict[str, int]
-    by_source: Dict[str, int]
-    by_project: Dict[str, int]
-    by_quality: Dict[int, int]
+    by_date: dict[str, int]
+    by_source: dict[str, int]
+    by_project: dict[str, int]
+    by_quality: dict[int, int]
     quality_assessed: int
     quality_skipped: int
     images_found: int
     videos_found: int
-    pipeline_results: Dict[str, int]
-    pipeline_costs: Dict[str, float]
+    pipeline_results: dict[str, int]
+    pipeline_costs: dict[str, float]

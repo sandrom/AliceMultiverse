@@ -5,6 +5,7 @@ from enum import Enum, IntEnum
 
 class MediaType(str, Enum):
     """Types of media files."""
+
     IMAGE = "image"
     VIDEO = "video"
     AUDIO = "audio"
@@ -14,6 +15,7 @@ class MediaType(str, Enum):
 
 class QualityRating(IntEnum):
     """Star rating for quality assessment."""
+
     ONE_STAR = 1
     TWO_STAR = 2
     THREE_STAR = 3
@@ -23,6 +25,7 @@ class QualityRating(IntEnum):
 
 class WorkflowState(str, Enum):
     """States of a workflow execution."""
+
     PENDING = "pending"
     RUNNING = "running"
     COMPLETED = "completed"
@@ -32,6 +35,7 @@ class WorkflowState(str, Enum):
 
 class ProcessingStatus(str, Enum):
     """Status of asset processing."""
+
     UNPROCESSED = "unprocessed"
     QUEUED = "queued"
     PROCESSING = "processing"
@@ -42,6 +46,7 @@ class ProcessingStatus(str, Enum):
 
 class SourceType(str, Enum):
     """AI generation sources."""
+
     STABLE_DIFFUSION = "stable-diffusion"
     MIDJOURNEY = "midjourney"
     DALLE = "dalle"

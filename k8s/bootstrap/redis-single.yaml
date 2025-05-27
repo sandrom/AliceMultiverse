@@ -12,7 +12,7 @@ auth:
 master:
   # No replicas for local dev
   replicaCount: 1
-  
+
   # Small resource limits for local dev
   resources:
     limits:
@@ -21,14 +21,14 @@ master:
     requests:
       memory: 128Mi
       cpu: 100m
-  
+
   # Small persistent volume
   persistence:
     enabled: true
     size: 1Gi
     # Use default storage class
     # storageClass: standard
-  
+
   # Disable AOF for better performance on local
   configuration: |
     # Disable AOF

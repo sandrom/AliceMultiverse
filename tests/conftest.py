@@ -3,13 +3,14 @@
 import os
 import shutil
 import tempfile
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator, Dict, Any
+from typing import Any
+from unittest.mock import Mock
+
 import pytest
-from unittest.mock import Mock, MagicMock
 from omegaconf import OmegaConf
 
-from alicemultiverse.core.config import load_config
 from alicemultiverse.core.types import MediaType, QualityRating
 
 
@@ -24,20 +25,17 @@ def temp_dir() -> Generator[Path, None, None]:
 
 
 @pytest.fixture
-def sample_config(temp_dir: Path) -> Dict[str, Any]:
+def sample_config(temp_dir: Path) -> dict[str, Any]:
     """Create a sample configuration dictionary."""
     return {
-        "paths": {
-            "inbox": str(temp_dir / "inbox"),
-            "organized": str(temp_dir / "organized")
-        },
+        "paths": {"inbox": str(temp_dir / "inbox"), "organized": str(temp_dir / "organized")},
         "processing": {
             "copy_mode": True,
             "quality": False,
             "watch": False,
             "watch_interval": 5,
             "force_reindex": False,
-            "dry_run": False
+            "dry_run": False,
         },
         "quality": {
             "thresholds": {
@@ -45,20 +43,17 @@ def sample_config(temp_dir: Path) -> Dict[str, Any]:
                 "4_star": {"min": 25, "max": 45},
                 "3_star": {"min": 45, "max": 65},
                 "2_star": {"min": 65, "max": 80},
-                "1_star": {"min": 80, "max": 100}
+                "1_star": {"min": 80, "max": 100},
             }
         },
         "ai_generators": {
             "image": ["stablediffusion", "midjourney", "dalle", "comfyui", "flux"],
-            "video": ["runway", "kling", "pika", "stable-video", "animatediff"]
+            "video": ["runway", "kling", "pika", "stable-video", "animatediff"],
         },
-        "metadata": {
-            "cache_version": "3.0.0",
-            "folder_name": ".metadata"
-        },
+        "metadata": {"cache_version": "3.0.0", "folder_name": ".metadata"},
         "file_types": {
             "image_extensions": [".jpg", ".jpeg", ".png"],
-            "video_extensions": [".mp4", ".mov"]
+            "video_extensions": [".mp4", ".mov"],
         },
         "pipeline": {
             "mode": None,
@@ -66,67 +61,52 @@ def sample_config(temp_dir: Path) -> Dict[str, Any]:
             "configurations": {
                 "basic": {"stages": ["brisque"]},
                 "standard": {"stages": ["brisque", "sightengine"]},
-                "premium": {"stages": ["brisque", "sightengine", "claude"]}
+                "premium": {"stages": ["brisque", "sightengine", "claude"]},
             },
             "thresholds": {
                 "brisque_min_stars": 3,
                 "sightengine_min_stars": 4,
-                "sightengine_min_quality": 0.7
+                "sightengine_min_quality": 0.7,
             },
             "scoring_weights": {
-                "standard": {
-                    "brisque": 0.6,
-                    "sightengine": 0.4
-                },
-                "premium": {
-                    "brisque": 0.4,
-                    "sightengine": 0.3,
-                    "claude": 0.3
-                }
+                "standard": {"brisque": 0.6, "sightengine": 0.4},
+                "premium": {"brisque": 0.4, "sightengine": 0.3, "claude": 0.3},
             },
-            "star_thresholds": {
-                "5_star": 0.80,
-                "4_star": 0.65
-            },
-            "cost_limits": {
-                "sightengine": 5.0,
-                "claude": 10.0,
-                "total": 20.0
-            }
-        }
+            "star_thresholds": {"5_star": 0.80, "4_star": 0.65},
+            "cost_limits": {"sightengine": 5.0, "claude": 10.0, "total": 20.0},
+        },
     }
 
 
 @pytest.fixture
-def omega_config(sample_config: Dict[str, Any]) -> OmegaConf:
+def omega_config(sample_config: dict[str, Any]) -> OmegaConf:
     """Create an OmegaConf configuration object."""
     return OmegaConf.create(sample_config)
 
 
 @pytest.fixture
-def sample_media_files(temp_dir: Path) -> Dict[str, Path]:
+def sample_media_files(temp_dir: Path) -> dict[str, Path]:
     """Create sample media files for testing."""
     inbox = temp_dir / "inbox"
     inbox.mkdir(exist_ok=True)
-    
+
     # Create test project structure
     project_dir = inbox / "test-project"
     project_dir.mkdir(exist_ok=True)
-    
+
     files = {}
-    
+
     # Create test images
     for i in range(3):
         img_path = project_dir / f"test_image_{i}.png"
         img_path.write_bytes(b"fake png data")
         files[f"image_{i}"] = img_path
-    
+
     # Create test video
     video_path = project_dir / "test_video.mp4"
     video_path.write_bytes(b"fake mp4 data")
     files["video"] = video_path
-    
-    
+
     return files
 
 
@@ -162,20 +142,20 @@ def reset_environment():
     """Reset environment variables before each test."""
     # Store original environment
     original_env = os.environ.copy()
-    
+
     # Remove any test-related env vars
     test_env_vars = [
-        'SIGHTENGINE_API_USER',
-        'SIGHTENGINE_API_SECRET', 
-        'ANTHROPIC_API_KEY',
-        'OPENAI_API_KEY'
+        "SIGHTENGINE_API_USER",
+        "SIGHTENGINE_API_SECRET",
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
     ]
-    
+
     for var in test_env_vars:
         os.environ.pop(var, None)
-    
+
     yield
-    
+
     # Restore original environment
     os.environ.clear()
     os.environ.update(original_env)
@@ -185,28 +165,27 @@ def reset_environment():
 def cli_runner():
     """Create a CLI runner for testing command-line interface."""
     from click.testing import CliRunner
+
     return CliRunner()
 
 
 # Parametrized fixtures for different test scenarios
-@pytest.fixture(params=[
-    MediaType.IMAGE,
-    MediaType.VIDEO,
-    MediaType.UNKNOWN
-])
+@pytest.fixture(params=[MediaType.IMAGE, MediaType.VIDEO, MediaType.UNKNOWN])
 def media_type(request):
     """Parametrized fixture for media types."""
     return request.param
 
 
-@pytest.fixture(params=[
-    QualityRating.FIVE_STAR,
-    QualityRating.FOUR_STAR,
-    QualityRating.THREE_STAR,
-    QualityRating.TWO_STAR,
-    QualityRating.ONE_STAR,
-    QualityRating.UNRATED
-])
+@pytest.fixture(
+    params=[
+        QualityRating.FIVE_STAR,
+        QualityRating.FOUR_STAR,
+        QualityRating.THREE_STAR,
+        QualityRating.TWO_STAR,
+        QualityRating.ONE_STAR,
+        QualityRating.UNRATED,
+    ]
+)
 def quality_rating(request):
     """Parametrized fixture for quality ratings."""
     return request.param

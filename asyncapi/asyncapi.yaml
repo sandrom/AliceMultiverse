@@ -4,7 +4,7 @@ info:
   version: '1.0.0'
   description: |
     Event-driven API for AliceMultiverse creative workflow system.
-    
+
     This API defines the events that flow through the system, enabling
     loose coupling between services and supporting the creative chaos
     that artists thrive in.
@@ -94,7 +94,7 @@ operations:
     channel:
       $ref: '#/channels/assetEvents'
     summary: Publish when new asset is discovered
-    
+
   subscribeToAssetEvents:
     action: receive
     channel:
@@ -110,7 +110,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/AssetDiscoveredPayload'
-        
+
     AssetProcessed:
       name: AssetProcessed
       title: Asset Processed Event
@@ -118,7 +118,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/AssetProcessedPayload'
-        
+
     AssetOrganized:
       name: AssetOrganized
       title: Asset Organized Event
@@ -126,7 +126,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/AssetOrganizedPayload'
-        
+
     QualityAssessed:
       name: QualityAssessed
       title: Quality Assessed Event
@@ -134,7 +134,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/QualityAssessedPayload'
-        
+
     MetadataUpdated:
       name: MetadataUpdated
       title: Metadata Updated Event
@@ -142,7 +142,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/MetadataUpdatedPayload'
-        
+
     WorkflowStarted:
       name: WorkflowStarted
       title: Workflow Started Event
@@ -150,7 +150,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/WorkflowStartedPayload'
-        
+
     WorkflowStepCompleted:
       name: WorkflowStepCompleted
       title: Workflow Step Completed Event
@@ -158,7 +158,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/WorkflowStepCompletedPayload'
-        
+
     WorkflowCompleted:
       name: WorkflowCompleted
       title: Workflow Completed Event
@@ -166,7 +166,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/WorkflowCompletedPayload'
-        
+
     WorkflowFailed:
       name: WorkflowFailed
       title: Workflow Failed Event
@@ -174,7 +174,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/WorkflowFailedPayload'
-        
+
     ProjectCreated:
       name: ProjectCreated
       title: Project Created Event
@@ -182,7 +182,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/ProjectCreatedPayload'
-        
+
     StyleChosen:
       name: StyleChosen
       title: Style Chosen Event
@@ -190,7 +190,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/StyleChosenPayload'
-        
+
     ContextUpdated:
       name: ContextUpdated
       title: Context Updated Event
@@ -198,7 +198,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/ContextUpdatedPayload'
-        
+
     CharacterDefined:
       name: CharacterDefined
       title: Character Defined Event
@@ -206,7 +206,7 @@ components:
       contentType: application/json
       payload:
         $ref: '#/components/schemas/CharacterDefinedPayload'
-        
+
     ConceptApproved:
       name: ConceptApproved
       title: Concept Approved Event
@@ -242,7 +242,7 @@ components:
         event_type:
           type: string
           description: Type identifier for the event
-          
+
     AssetDiscoveredPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -273,7 +273,7 @@ components:
             discovery_source:
               type: string
               enum: ['file_scan', 'watch_mode', 'manual']
-              
+
     AssetProcessedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -296,7 +296,7 @@ components:
               type: integer
             processor_version:
               type: string
-              
+
     AssetOrganizedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -331,7 +331,7 @@ components:
             sequence_number:
               type: integer
               nullable: true
-              
+
     QualityAssessedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -375,7 +375,7 @@ components:
               type: array
               items:
                 type: string
-                
+
     MetadataUpdatedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -404,7 +404,7 @@ components:
             previous_version:
               type: string
               nullable: true
-              
+
     WorkflowStartedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -436,7 +436,7 @@ components:
             estimated_cost:
               type: number
               nullable: true
-              
+
     WorkflowStepCompletedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -468,7 +468,7 @@ components:
               type: integer
             resource_usage:
               type: object
-              
+
     WorkflowCompletedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -501,7 +501,7 @@ components:
               nullable: true
             resource_usage:
               type: object
-              
+
     WorkflowFailedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -537,7 +537,7 @@ components:
               type: array
               items:
                 type: string
-                
+
     ProjectCreatedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -565,7 +565,7 @@ components:
             parent_project_id:
               type: string
               nullable: true
-              
+
     StyleChosenPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -602,7 +602,7 @@ components:
               type: array
               items:
                 type: object
-                
+
     ContextUpdatedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -643,7 +643,7 @@ components:
               type: array
               items:
                 type: string
-                
+
     CharacterDefinedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
@@ -686,7 +686,7 @@ components:
               type: array
               items:
                 type: string
-                
+
     ConceptApprovedPayload:
       allOf:
         - $ref: '#/components/schemas/EventBase'
