@@ -65,8 +65,8 @@ class APIKeyManager:
             value = keyring.get_password(self.SERVICE_NAME, key_name)
             if value:
                 return value
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Unable to access keychain for {key_name}: {e}")
 
         # 3. Config file
         if self.CONFIG_FILE.exists():
@@ -75,8 +75,8 @@ class APIKeyManager:
                     config = json.load(f)
                     if key_name in config:
                         return config[key_name]
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Unable to read config file for {key_name}: {e}")
 
         # 4. Interactive prompt (if provided)
         if prompt:
@@ -139,8 +139,8 @@ class APIKeyManager:
         try:
             keyring.delete_password(self.SERVICE_NAME, key_name)
             logger.info(f"Deleted {key_name} from macOS Keychain")
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Key {key_name} not found in keychain or unable to delete: {e}")
 
         # Config file
         if self.CONFIG_FILE.exists():
@@ -152,8 +152,8 @@ class APIKeyManager:
                     with open(self.CONFIG_FILE, "w") as f:
                         json.dump(config, f, indent=2)
                     logger.info(f"Deleted {key_name} from config file")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Unable to delete {key_name} from config file: {e}")
 
     def list_api_keys(self) -> list[str]:
         """List all stored API keys (without showing values)."""
@@ -183,15 +183,15 @@ class APIKeyManager:
                     config = json.load(f)
                     for key in config:
                         keys.add(f"{key} (config file)")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Unable to read config file: {e}")
 
         # Check keychain (check all known keys)
         for key_name in self.API_KEYS.keys():
             try:
                 if keyring.get_password(self.SERVICE_NAME, key_name):
                     keys.add(f"{key_name} (keychain)")
-            except Exception:
-                pass
+            except Exception as e:
+                logger.debug(f"Unable to check keychain for {key_name}: {e}")
 
         return sorted(keys)

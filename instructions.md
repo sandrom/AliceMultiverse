@@ -1,0 +1,8 @@
+- break down your work into smaller steps that can lead to a working commit each time
+- take into account the big picture we set out as goals in the docs/ folder
+- make sure to test everything, both by doing automated tests and testing it in the local setup before committing.
+- exceptions should always be handled and not just except: pass
+- make sure every change is reflected in the docs/
+- clean up any temporary files you create
+- use ADR for architecture changes
+- we do not have users yet, we can still do breaking changes at any time. this also means we can keep the documentation focused on the present and future, but can clean up the past (except for ADR which are about why we did certain things!)

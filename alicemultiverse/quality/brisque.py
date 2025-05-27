@@ -43,8 +43,8 @@ try:
 
             skimage.transform.rescale = patched_rescale
             logger.debug("Applied scikit-image compatibility patch")
-    except Exception:
-        pass
+    except Exception as e:
+        logger.debug(f"Unable to apply scikit-image compatibility patch: {e}")
 
 except ImportError:
     try:

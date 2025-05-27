@@ -108,6 +108,7 @@ class PersistentEventBus(EventBus):
             try:
                 await self._persistence_task
             except asyncio.CancelledError:
+                # Expected when cancelling the task
                 pass
             self._persistence_task = None
 

@@ -27,4 +27,5 @@ except ImportError:
         from .base_persistence import *
         from .persistence import *
     except ImportError:
+        # Persistence modules are optional - they require Redis
         pass

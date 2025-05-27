@@ -368,8 +368,8 @@ class MediaOrganizer:
                     for generator in generators:
                         if generator in value_str:
                             return generator
-        except Exception:
-            pass
+        except Exception as e:
+            logger.debug(f"Unable to extract metadata from {media_path}: {e}")
 
         return "ai-generated"  # Generic fallback
 
