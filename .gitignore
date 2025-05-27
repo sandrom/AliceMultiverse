@@ -72,6 +72,50 @@ settings.local.yaml
 *.local.yaml
 *.local.yml
 
+# Sensitive files and security
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.cert
+*.crt
+*.p12
+*.pfx
+.secrets
+.secrets.*
+!.secrets.baseline
+credentials.json
+credentials.yaml
+secrets.json
+secrets.yaml
+*_secret.*
+*_private.*
+private/
+secure/
+
+# API Keys and tokens
+*api[_-]key*
+!API_KEYS.md
+*token.json
+*token.yaml
+.auth/
+auth.json
+auth.yaml
+
+# Personal data
+personal/
+private/
+confidential/
+*.personal.*
+*.private.*
+user_data/
+
+# Local configuration
+local_config/
+config.local.*
+*.local.config.*
+
 # Database
 *.db
 *.sqlite

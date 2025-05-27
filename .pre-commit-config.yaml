@@ -1,32 +1,60 @@
+# See https://pre-commit.com for more information
+# See https://pre-commit.com/hooks.html for more hooks
 repos:
+  # Security - Detect secrets
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.4.0
+    hooks:
+      - id: detect-secrets
+        args: ['--baseline', '.secrets.baseline']
+        exclude: package.lock.json
+
+  # Security - Gitleaks
+  - repo: https://github.com/gitleaks/gitleaks
+    rev: v8.18.0
+    hooks:
+      - id: gitleaks
+
+  # Security - Bandit
+  - repo: https://github.com/PyCQA/bandit
+    rev: '1.7.5'
+    hooks:
+      - id: bandit
+        args: ['-ll', '--skip', 'B101,B601']
+        files: .py$
+
+  # Check for private keys
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
-      - id: trailing-whitespace
-      - id: end-of-file-fixer
-      - id: check-yaml
+      - id: detect-private-key
       - id: check-added-large-files
+        args: ['--maxkb=1000']
+      - id: check-case-conflict
+      - id: check-merge-conflict
+      - id: check-symlinks
+      - id: destroyed-symlinks
+      - id: end-of-file-fixer
+      - id: mixed-line-ending
+      - id: trailing-whitespace
 
+  # Python specific
   - repo: https://github.com/psf/black
     rev: 23.12.1
     hooks:
       - id: black
-        language_version: python3
+        language_version: python3.12
 
-  - repo: https://github.com/pycqa/isort
-    rev: 5.13.2
+  # Check for hardcoded passwords
+  - repo: local
     hooks:
-      - id: isort
-        args: ["--profile", "black"]
+      - id: check-sensitive-patterns
+        name: Check for sensitive patterns
+        entry: python scripts/security/check_sensitive_patterns.py
+        language: python
+        pass_filenames: true
+        files: \.(py|yaml|yml|json|md|txt|sh|bash)$
 
-  - repo: https://github.com/pycqa/flake8
-    rev: 7.0.0
-    hooks:
-      - id: flake8
-        args: ["--max-line-length=100", "--extend-ignore=E203,W503"]
-
-  - repo: https://github.com/commitizen-tools/commitizen
-    rev: v3.13.0
-    hooks:
-      - id: commitizen
-        stages: [commit-msg]
+# Configuration for detect-secrets
+# Run: detect-secrets scan --baseline .secrets.baseline
+# to create initial baseline
