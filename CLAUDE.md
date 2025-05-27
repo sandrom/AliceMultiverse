@@ -2,13 +2,15 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+**IMPORTANT**: Always follow the guidelines in `instructions.md` for development practices.
+
 ## Project Overview
 
-AliceMultiverse is an AI media organization and quality assessment system. It automatically detects which AI tool generated each image/video, assesses quality using multiple methods, and organizes files into a clean folder structure.
+AliceMultiverse is evolving from a media management system into a comprehensive creative workflow hub. Currently, it excels at detecting, organizing, and assessing AI-generated content. The system is being architected to become an intelligent orchestrator between AI assistants (Claude, ChatGPT) and creative tools/APIs.
 
-**Primary Purpose**: Organize and assess quality of AI-generated media files
-**Key Features**: AI source detection, multi-stage quality assessment, smart organization
-**Architecture**: Event-driven foundation that enables future expansion
+**Current Focus**: Media organization with event-driven foundation
+**Future Vision**: Complete creative workflow orchestration (see ROADMAP.md)
+**Architecture**: Event-driven, preparing for microservices
 
 ## Key Commands
 

@@ -2,6 +2,8 @@
 
 AliceMultiverse follows a monorepo architecture to manage shared code and services efficiently.
 
+> **Note**: For the architectural decision behind this structure, see [ADR-003: Monorepo for Service Evolution](adr/ADR-003-monorepo-structure.md)
+
 ## Directory Structure
 
 ```

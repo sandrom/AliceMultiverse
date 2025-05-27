@@ -99,7 +99,7 @@ The system is designed to:
 
 ### Development
 - **[Developer Guide](developer/development.md)** - Contributing
-- **[Event Development](developer/event-system.md)** - Working with events
+- **[Event Development](developer/event-system-v2.md)** - Working with events
 - **[API Reference](developer/api-reference.md)** - Module documentation
 
 ## Why AliceMultiverse?
