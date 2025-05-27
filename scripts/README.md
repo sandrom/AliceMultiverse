@@ -1,43 +1,67 @@
 # Scripts Directory
 
-This directory contains command-line scripts for AliceMultiverse.
+Utility scripts for development, maintenance, and monitoring of AliceMultiverse.
 
 ## Main Scripts
 
-All main functionality has been moved to the modular `alicemultiverse` package. The scripts here are thin wrappers for backward compatibility:
+- **alice.py** - Direct CLI entry point for development
+- **event_monitor.py** - Real-time event monitoring with metrics
+- **setup_api_keys.sh** - Interactive API key setup wizard
 
-- **alice.py** - Main entry point (runs `alicemultiverse.cli`)
-- **organizer.py** - Legacy wrapper (forwards to `alice` command)
-- **quality_pipeline.py** - Legacy wrapper (forwards to `alice` command)
-- **quality_organizer_integration.py** - Legacy wrapper (forwards to `alice` command)
-- **api_key_manager.py** - Legacy wrapper (forwards to `alice keys` command)
+## Subdirectories
 
-## Utility Scripts
+### database/
+Database management scripts:
+- **init_db.py** - Initialize the AliceMultiverse database with proper schema
 
-These are one-time maintenance scripts:
-
-- **cleanup_empty_metadata.py** - Remove empty .metadata folders after migration
-- **cleanup_root.py** - Organize project root directory
+### maintenance/
+One-time maintenance and cleanup scripts:
+- **cleanup_project.sh** - Remove temporary files and build artifacts
+- **cleanup_empty_metadata.py** - Remove empty .metadata folders
+- **cleanup_root.py** - Organize files in the project root
 - **migrate_metadata.py** - Migrate from old to new metadata format
-- **remove_duplicates.py** - Find and remove duplicate files
-- **remove_old_metadata.py** - Clean up old metadata files
-- **setup_api_keys.sh** - Shell script for API key setup
+- **remove_duplicates.py** - Find and remove duplicate media files
+- **remove_old_metadata.py** - Clean up outdated metadata files
 
-## Usage
+## Usage Examples
 
-Instead of running scripts directly, use the `alice` command:
-
+### Event Monitoring
 ```bash
-# Instead of: python scripts/organizer.py inbox
-alice -i inbox
+# Monitor all events in real-time
+python scripts/event_monitor.py
 
-# Instead of: python scripts/api_key_manager.py setup
-alice keys setup
+# Verbose mode with full event data
+python scripts/event_monitor.py --verbose
 
-# Instead of: python scripts/quality_pipeline.py --pipeline premium
-alice --pipeline premium
+# Collect metrics
+python scripts/event_monitor.py --metrics
+```
+
+### Database Setup
+```bash
+# Initialize the database
+python scripts/database/init_db.py
+```
+
+### Project Cleanup
+```bash
+# Remove temporary files
+./scripts/maintenance/cleanup_project.sh
+
+# Clean empty metadata folders
+python scripts/maintenance/cleanup_empty_metadata.py
 ```
 
 ## Note
 
-The old script implementations (3,700+ lines) have been archived to `archive/old_scripts/`. The modular implementation in `alicemultiverse/` provides the same functionality with better maintainability.
+For main functionality, use the `alice` command directly:
+```bash
+# Organize media
+alice -i ~/Downloads -o ~/Pictures/AI
+
+# Manage API keys
+alice keys setup
+
+# Start AI interface
+alice interface
+```
