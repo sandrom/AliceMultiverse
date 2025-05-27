@@ -6,10 +6,18 @@ Provides copy/move operations with automatic directory creation and hash-based
 file comparison for deduplication.
 """
 
+import asyncio
 import hashlib
 import logging
 import shutil
 from pathlib import Path
+from typing import Optional
+
+try:
+    import aiohttp
+    AIOHTTP_AVAILABLE = True
+except ImportError:
+    AIOHTTP_AVAILABLE = False
 
 from ..core.constants import HASH_CHUNK_SIZE
 from ..core.exceptions import FileOperationError
@@ -192,3 +200,47 @@ def find_duplicate(source_path: Path, dest_dir: Path, file_handler: FileHandler)
                 return existing_file
 
     return None
+
+
+async def download_file(url: str, destination: Path, session: Optional['aiohttp.ClientSession'] = None) -> None:
+    """Download a file from URL to destination.
+    
+    Args:
+        url: URL to download from
+        destination: Path to save file
+        session: Optional aiohttp session to reuse
+        
+    Raises:
+        FileOperationError: If download fails or aiohttp not available
+    """
+    if not AIOHTTP_AVAILABLE:
+        raise FileOperationError("aiohttp is required for downloading files. Install with: pip install aiohttp")
+    
+    if session is None:
+        async with aiohttp.ClientSession() as session:
+            await _download_with_session(url, destination, session)
+    else:
+        await _download_with_session(url, destination, session)
+
+
+async def _download_with_session(url: str, destination: Path, session: 'aiohttp.ClientSession') -> None:
+    """Download file using provided session."""
+    try:
+        async with session.get(url) as response:
+            response.raise_for_status()
+            
+            # Ensure directory exists
+            destination.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Download in chunks
+            with open(destination, 'wb') as f:
+                async for chunk in response.content.iter_chunked(8192):
+                    f.write(chunk)
+                    
+        logger.info(f"Downloaded {url} to {destination}")
+        
+    except Exception as e:
+        logger.error(f"Failed to download {url}: {e}")
+        if destination.exists():
+            destination.unlink()  # Clean up partial download
+        raise FileOperationError(f"Download failed: {e}")
