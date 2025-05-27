@@ -45,14 +45,14 @@ This checklist verifies that all important concepts from the reference documents
 ## ❌ Not Yet Migrated (Critical Gaps)
 
 ### 1. Architecture Decision Records (ADRs)
-Need to create `docs/architecture/adr/` with:
-- ADR-001: Event-Driven Foundation
-- ADR-002: Redis for Event Bus
-- ADR-003: Monorepo for Gradual Extraction
-- ADR-004: Alice as Sole Orchestrator
-- ADR-005: AI as Primary Interface
-- ADR-006: AsyncAPI for Event Documentation
-- ADR-007: Dapr + AsyncAPI Separation
+Created in `docs/architecture/adr/`:
+- ✅ ADR-001: Event-Driven Architecture (2024-01-15)
+- ✅ ADR-002: Redis Streams for Event Persistence (2024-01-16)
+- ✅ ADR-003: Monorepo for Service Evolution (2024-01-20)
+- ✅ ADR-004: Alice as Sole Orchestrator (2024-01-26)
+- ✅ ADR-005: Code Quality and Security Tooling (2025-01-27)
+- [ ] ADR-006: AI as Primary Interface (future)
+- [ ] ADR-007: AsyncAPI for Event Documentation (future)
 
 ### 2. Creative Chaos Philosophy
 The powerful vision of supporting creative minds needs its own document:

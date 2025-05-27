@@ -10,9 +10,9 @@ An Architecture Decision Record captures an important architectural decision mad
 
 | ADR | Title | Status | Date |
 |-----|-------|--------|------|
-| [ADR-001](ADR-001-event-driven-architecture.md) | Event-Driven Architecture | _Missing_ | - |
-| [ADR-002](ADR-002-content-addressed-storage.md) | Content-Addressed Storage | _Missing_ | - |
-| [ADR-003](ADR-003-monorepo-structure.md) | Monorepo Structure | _Missing_ | - |
+| [ADR-001](ADR-001-event-driven-architecture.md) | Event-Driven Architecture | Accepted | 2024-01-15 |
+| [ADR-002](ADR-002-redis-event-persistence.md) | Redis Streams for Event Persistence | Accepted | 2024-01-16 |
+| [ADR-003](ADR-003-monorepo-structure.md) | Monorepo for Service Evolution | Accepted | 2024-01-20 |
 | [ADR-004](ADR-004-alice-sole-orchestrator.md) | Alice as Sole Orchestrator | Accepted | 2024-01-26 |
 | [ADR-005](ADR-005-code-quality-security-tooling.md) | Code Quality and Security Tooling | Accepted | 2025-01-27 |
 
