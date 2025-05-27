@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "alicemultiverse"
 dynamic = ["version"]
-description = "AI Media Organizer - Automatically organize AI-generated images by source, date, and quality"
+description = "AI Assistant Interface & Creative Workflow Hub - Connect AI assistants with local tools and creative workflows"
 readme = "README.md"
 requires-python = ">=3.12"
 license = {text = "MIT"}

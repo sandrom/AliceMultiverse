@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 def create_parser() -> argparse.ArgumentParser:
     """Create and configure argument parser."""
     parser = argparse.ArgumentParser(
-        description="AliceMultiverse - AI Media Organizer\nIntelligent organization for AI-generated images and videos",
+        description="AliceMultiverse - AI Assistant Interface & Creative Workflow Hub\nConnect AI assistants with local tools and creative workflows",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:

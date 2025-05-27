@@ -1,8 +1,9 @@
 """
-AliceMultiverse - AI Media Organization System
+AliceMultiverse - AI Assistant Interface & Creative Workflow Hub
 
-A comprehensive media organization system for AI-generated content with 
-intelligent quality assessment and automated sorting.
+An extensible interface connecting AI assistants (Claude, ChatGPT) with local 
+development environments and creative tools. Provides media organization, 
+workflow automation, and project management capabilities.
 """
 
 __version__ = "2.0.0"
