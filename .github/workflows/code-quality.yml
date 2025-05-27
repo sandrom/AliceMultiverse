@@ -1,0 +1,282 @@
+name: Code Quality
+
+on:
+  pull_request:
+    branches: [ main, develop ]
+  push:
+    branches: [ main ]
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  # =============================================================================
+  # PYTHON CODE QUALITY
+  # =============================================================================
+  
+  python-quality:
+    name: Python Code Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff black mypy pylint
+
+      - name: Ruff Linting
+        run: |
+          echo "## Ruff Linting Results" >> $GITHUB_STEP_SUMMARY
+          ruff check . --format=github --output-format=concise >> $GITHUB_STEP_SUMMARY || true
+          ruff check . --exit-zero
+
+      - name: Black Formatting Check
+        run: |
+          echo "## Black Formatting" >> $GITHUB_STEP_SUMMARY
+          black --check --diff . >> $GITHUB_STEP_SUMMARY || echo "❌ Formatting issues found" >> $GITHUB_STEP_SUMMARY
+
+      - name: Type Checking with mypy
+        run: |
+          pip install types-all
+          echo "## MyPy Type Checking" >> $GITHUB_STEP_SUMMARY
+          mypy alicemultiverse --ignore-missing-imports --no-error-summary >> $GITHUB_STEP_SUMMARY || true
+
+      - name: Basic Pylint Check
+        run: |
+          echo "## Pylint Check (Errors Only)" >> $GITHUB_STEP_SUMMARY
+          pylint alicemultiverse --errors-only --output-format=parseable >> $GITHUB_STEP_SUMMARY || true
+
+  # =============================================================================
+  # DOCKER & CONTAINER SECURITY
+  # =============================================================================
+  
+  docker-quality:
+    name: Docker & Container Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Hadolint - Dockerfile Linting
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          recursive: true
+          ignore: DL3008,DL3009
+          failure-threshold: warning
+
+      - name: Container Scan with Trivy
+        uses: aquasecurity/trivy-action@master
+        with:
+          scan-type: 'fs'
+          scan-ref: '.'
+          scanners: 'vuln,secret,config'
+          severity: 'CRITICAL,HIGH,MEDIUM'
+          format: 'sarif'
+          output: 'trivy-results.sarif'
+
+      - name: Upload Trivy results to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+
+  # =============================================================================
+  # KUBERNETES & HELM
+  # =============================================================================
+  
+  kubernetes-quality:
+    name: Kubernetes & Helm Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Helm
+        uses: azure/setup-helm@v3
+        with:
+          version: 'latest'
+
+      - name: Validate Kubernetes YAML
+        uses: instrumenta/kubeval-action@master
+        with:
+          files: './k8s'
+
+      - name: Helm Lint
+        run: |
+          echo "## Helm Chart Validation" >> $GITHUB_STEP_SUMMARY
+          for chart in $(find . -name Chart.yaml -exec dirname {} \;); do
+            echo "### Linting $chart" >> $GITHUB_STEP_SUMMARY
+            helm lint $chart >> $GITHUB_STEP_SUMMARY 2>&1 || echo "❌ Issues found in $chart" >> $GITHUB_STEP_SUMMARY
+          done
+
+      - name: Kubesec Security Scan
+        run: |
+          echo "## Kubernetes Security Scan" >> $GITHUB_STEP_SUMMARY
+          # Install kubesec
+          wget https://github.com/controlplaneio/kubesec/releases/download/v2.13.0/kubesec_linux_amd64.tar.gz
+          tar -xzf kubesec_linux_amd64.tar.gz
+          chmod +x kubesec
+          
+          # Scan Kubernetes files
+          for file in $(find k8s -name "*.yaml" -o -name "*.yml"); do
+            echo "### Scanning $file" >> $GITHUB_STEP_SUMMARY
+            ./kubesec scan $file >> $GITHUB_STEP_SUMMARY || true
+          done
+
+  # =============================================================================
+  # SHELL SCRIPTS
+  # =============================================================================
+  
+  shell-quality:
+    name: Shell Script Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          severity: warning
+          check_together: 'yes'
+          scandir: '.'
+
+      - name: Shell Script Security
+        run: |
+          echo "## Shell Script Security Check" >> $GITHUB_STEP_SUMMARY
+          # Check for common security issues in shell scripts
+          for script in $(find . -name "*.sh" -o -name "*.bash"); do
+            echo "### Checking $script" >> $GITHUB_STEP_SUMMARY
+            # Check for curl | sh patterns
+            if grep -E "curl.*\|.*sh|wget.*\|.*sh" "$script"; then
+              echo "⚠️  Warning: Piping to shell detected in $script" >> $GITHUB_STEP_SUMMARY
+            fi
+            # Check for hardcoded credentials
+            if grep -E "password=|passwd=|token=|key=" "$script"; then
+              echo "⚠️  Warning: Potential hardcoded credentials in $script" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+  # =============================================================================
+  # YAML/JSON VALIDATION
+  # =============================================================================
+  
+  config-quality:
+    name: Config File Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: YAML Lint
+        uses: ibiqlik/action-yamllint@v3
+        with:
+          config_data: |
+            extends: default
+            rules:
+              line-length:
+                max: 120
+              truthy:
+                check-keys: false
+
+      - name: JSON Validation
+        run: |
+          echo "## JSON Validation" >> $GITHUB_STEP_SUMMARY
+          for file in $(find . -name "*.json" -not -path "./.git/*"); do
+            if python -m json.tool "$file" > /dev/null 2>&1; then
+              echo "✅ $file is valid JSON" >> $GITHUB_STEP_SUMMARY
+            else
+              echo "❌ $file has JSON errors" >> $GITHUB_STEP_SUMMARY
+              python -m json.tool "$file" 2>&1 >> $GITHUB_STEP_SUMMARY || true
+            fi
+          done
+
+  # =============================================================================
+  # MARKDOWN QUALITY
+  # =============================================================================
+  
+  markdown-quality:
+    name: Markdown Quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Markdown Lint
+        uses: DavidAnson/markdownlint-cli2-action@v15
+        with:
+          config: |
+            {
+              "default": true,
+              "MD013": false,
+              "MD033": false,
+              "MD041": false
+            }
+
+  # =============================================================================
+  # AGGREGATE RESULTS
+  # =============================================================================
+  
+  quality-summary:
+    name: Quality Summary
+    runs-on: ubuntu-latest
+    needs: [python-quality, docker-quality, kubernetes-quality, shell-quality, config-quality, markdown-quality]
+    if: always()
+    steps:
+      - name: Quality Check Summary
+        run: |
+          echo "## 📊 Code Quality Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Check job statuses
+          if [[ "${{ needs.python-quality.result }}" == "success" ]]; then
+            echo "✅ Python quality checks passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Python quality checks failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.docker-quality.result }}" == "success" ]]; then
+            echo "✅ Docker quality checks passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Docker quality checks failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.kubernetes-quality.result }}" == "success" ]]; then
+            echo "✅ Kubernetes/Helm quality checks passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Kubernetes/Helm quality checks failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.shell-quality.result }}" == "success" ]]; then
+            echo "✅ Shell script quality checks passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Shell script quality checks failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.config-quality.result }}" == "success" ]]; then
+            echo "✅ Config file quality checks passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Config file quality checks failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          if [[ "${{ needs.markdown-quality.result }}" == "success" ]]; then
+            echo "✅ Markdown quality checks passed" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "❌ Markdown quality checks failed" >> $GITHUB_STEP_SUMMARY
+          fi
+          
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 💡 Tips" >> $GITHUB_STEP_SUMMARY
+          echo "- Run \`pre-commit run --all-files\` locally to fix most issues" >> $GITHUB_STEP_SUMMARY
+          echo "- Use \`ruff check . --fix\` to auto-fix Python issues" >> $GITHUB_STEP_SUMMARY
+          echo "- Use \`black .\` to auto-format Python code" >> $GITHUB_STEP_SUMMARY

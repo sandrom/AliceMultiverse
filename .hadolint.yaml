@@ -1,0 +1,21 @@
+---
+ignored:
+  - DL3008  # Pin versions in apt get install
+  - DL3009  # Delete the apt-get lists after installing
+  - DL3015  # Avoid additional packages by specifying --no-install-recommends
+
+trustedRegistries:
+  - docker.io
+  - gcr.io
+  - ghcr.io
+  - quay.io
+
+override:
+  error:
+    - DL3001  # Don't use sudo
+    - DL3002  # Don't switch to root USER
+  warning:
+    - DL3007  # Use specific version tags
+    - DL3018  # Pin versions in apk add
+  info:
+    - DL3032  # Set SHELL option -o pipefail before RUN with pipe

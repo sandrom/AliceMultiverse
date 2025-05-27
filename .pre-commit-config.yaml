@@ -1,7 +1,38 @@
 # See https://pre-commit.com for more information
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
-  # Security - Detect secrets
+  # =============================================================================
+  # PYTHON CODE QUALITY
+  # =============================================================================
+  
+  # Ruff - Fast Python linter and formatter (replaces flake8, isort, and more)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.1.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+
+  # Black - Python code formatter
+  - repo: https://github.com/psf/black
+    rev: 23.12.1
+    hooks:
+      - id: black
+        language_version: python3.12
+
+  # Type checking with mypy
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.8.0
+    hooks:
+      - id: mypy
+        additional_dependencies: [types-all]
+        args: [--ignore-missing-imports]
+
+  # =============================================================================
+  # SECURITY SCANNING
+  # =============================================================================
+  
+  # Detect secrets
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
     hooks:
@@ -9,13 +40,13 @@ repos:
         args: ['--baseline', '.secrets.baseline']
         exclude: package.lock.json
 
-  # Security - Gitleaks
+  # Gitleaks
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.18.0
     hooks:
       - id: gitleaks
 
-  # Security - Bandit
+  # Bandit - Python security
   - repo: https://github.com/PyCQA/bandit
     rev: '1.7.5'
     hooks:
@@ -23,7 +54,90 @@ repos:
         args: ['-ll', '--skip', 'B101,B601']
         files: .py$
 
-  # Check for private keys
+  # Safety - Check Python dependencies
+  - repo: https://github.com/Lucas-C/pre-commit-hooks-safety
+    rev: v1.3.3
+    hooks:
+      - id: python-safety-dependencies-check
+        files: requirements.*\.txt$
+
+  # =============================================================================
+  # DOCKER & CONTAINER SCANNING
+  # =============================================================================
+  
+  # Hadolint - Dockerfile linter
+  - repo: https://github.com/hadolint/hadolint
+    rev: v2.12.0
+    hooks:
+      - id: hadolint-docker
+        args: ['--ignore', 'DL3008', '--ignore', 'DL3009']  # Ignore apt version pinning
+
+  # Docker Compose validation
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.27.3
+    hooks:
+      - id: check-docker-compose
+
+  # =============================================================================
+  # KUBERNETES & HELM
+  # =============================================================================
+  
+  # Kubernetes YAML validation
+  - repo: https://github.com/python-jsonschema/check-jsonschema
+    rev: 0.27.3
+    hooks:
+      - id: check-kubernetes
+        files: k8s/.*\.(yaml|yml)$
+        exclude: (helm|templates)/
+
+  # Helm template validation
+  - repo: local
+    hooks:
+      - id: helm-lint
+        name: Helm Chart Linting
+        entry: bash -c 'find . -name Chart.yaml -exec dirname {} \; | xargs -I {} helm lint {}'
+        language: system
+        files: (Chart\.yaml|values\.yaml|templates/.*\.yaml)$
+        pass_filenames: false
+
+  # =============================================================================
+  # SHELL SCRIPTS
+  # =============================================================================
+  
+  # Shellcheck - Shell script linter
+  - repo: https://github.com/shellcheck-py/shellcheck-py
+    rev: v0.9.0.6
+    hooks:
+      - id: shellcheck
+        args: ['--severity=warning']
+
+  # =============================================================================
+  # YAML/JSON/TOML
+  # =============================================================================
+  
+  # YAML validation and formatting
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: check-yaml
+        args: ['--unsafe']  # Allow custom tags
+      - id: check-json
+      - id: check-toml
+      - id: pretty-format-json
+        args: ['--autofix', '--no-sort-keys']
+
+  # YAML formatting
+  - repo: https://github.com/adrienverge/yamllint
+    rev: v1.33.0
+    hooks:
+      - id: yamllint
+        args: ['-d', '{extends: relaxed, rules: {line-length: {max: 120}}}']
+
+  # =============================================================================
+  # GENERAL CODE QUALITY
+  # =============================================================================
+  
+  # General pre-commit hooks
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.5.0
     hooks:
@@ -37,15 +151,21 @@ repos:
       - id: end-of-file-fixer
       - id: mixed-line-ending
       - id: trailing-whitespace
+      - id: check-executables-have-shebangs
+      - id: check-shebang-scripts-are-executable
 
-  # Python specific
-  - repo: https://github.com/psf/black
-    rev: 23.12.1
+  # Markdown linting
+  - repo: https://github.com/igorshubovych/markdownlint-cli
+    rev: v0.38.0
     hooks:
-      - id: black
-        language_version: python3.12
+      - id: markdownlint
+        args: ['--fix', '--disable', 'MD013', 'MD033']  # Disable line length and HTML
 
-  # Check for hardcoded passwords
+  # =============================================================================
+  # CUSTOM PROJECT CHECKS
+  # =============================================================================
+  
+  # Check for hardcoded sensitive patterns
   - repo: local
     hooks:
       - id: check-sensitive-patterns
@@ -58,3 +178,8 @@ repos:
 # Configuration for detect-secrets
 # Run: detect-secrets scan --baseline .secrets.baseline
 # to create initial baseline
+
+# To skip hooks temporarily:
+# SKIP=mypy,hadolint-docker git commit -m "message"
+# or
+# git commit -m "message" --no-verify

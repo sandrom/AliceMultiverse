@@ -48,83 +48,160 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
     "pytest-asyncio>=0.21.0",
-    "pytest-timeout>=2.1.0",
     "pytest-mock>=3.10.0",
     "black>=23.0.0",
-    "flake8>=6.0.0",
+    "ruff>=0.1.0",
     "mypy>=1.0.0",
-    "isort>=5.12.0",
-    "types-requests",
-    "types-aiofiles",
-    "types-pyyaml",
-]
-docs = [
-    "mkdocs>=1.5.0",
-    "mkdocs-material>=9.4.0",
-    "mkdocstrings[python]>=0.24.0",
+    "pre-commit>=3.0.0",
 ]
 
 [project.scripts]
 alice = "alicemultiverse.interface.main_cli:main"
 
 [project.urls]
-Homepage = "https://github.com/alicemultiverse/alicemultiverse"
-Documentation = "https://alicemultiverse.readthedocs.io"
-"Bug Reports" = "https://github.com/alicemultiverse/alicemultiverse/issues"
-"Source Code" = "https://github.com/alicemultiverse/alicemultiverse"
-
-[tool.setuptools]
-packages = {find = {where = ["."], include = ["alicemultiverse*"]}}
-include-package-data = true
-
-[tool.setuptools.package-data]
-alicemultiverse = ["py.typed", "*.yaml", "*.yml"]
+"Homepage" = "https://github.com/yourusername/AliceMultiverse"
+"Bug Tracker" = "https://github.com/yourusername/AliceMultiverse/issues"
 
 [tool.setuptools.dynamic]
 version = {attr = "alicemultiverse.version.__version__"}
 
-[tool.black]
-line-length = 88
-target-version = ['py38', 'py39', 'py310', 'py311', 'py312']
-include = '\.pyi?$'
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["alicemultiverse*"]
+exclude = ["tests*", "docs*", "examples*"]
 
-[tool.isort]
-profile = "black"
-line_length = 88
-multi_line_output = 3
-include_trailing_comma = true
+[tool.setuptools.package-data]
+alicemultiverse = ["py.typed"]
+
+# =============================================================================
+# RUFF CONFIGURATION
+# =============================================================================
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+indent-width = 4
+
+[tool.ruff.lint]
+select = [
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "I",      # isort
+    "B",      # flake8-bugbear
+    "C4",     # flake8-comprehensions
+    "UP",     # pyupgrade
+    "ARG",    # flake8-unused-arguments
+    "SIM",    # flake8-simplify
+    "TID",    # flake8-tidy-imports
+    "RUF",    # ruff-specific rules
+    "S",      # flake8-bandit (security)
+    "N",      # pep8-naming
+    "PT",     # flake8-pytest-style
+    "ASYNC",  # flake8-async
+    "LOG",    # flake8-logging
+    "G",      # flake8-logging-format
+]
+ignore = [
+    "S101",   # Use of assert (common in tests)
+    "S311",   # Use of random (we know what we're doing)
+    "B008",   # Do not perform function calls in argument defaults
+    "ARG002", # Unused method argument
+    "SIM108", # Use ternary operator (sometimes less readable)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101", "ARG", "PLR2004"]
+"scripts/*" = ["INP001"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# =============================================================================
+# BLACK CONFIGURATION
+# =============================================================================
+
+[tool.black]
+line-length = 100
+target-version = ['py312']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+# =============================================================================
+# MYPY CONFIGURATION
+# =============================================================================
 
 [tool.mypy]
-python_version = "3.8"
+python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
+disallow_incomplete_defs = false
+check_untyped_defs = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[[tool.mypy.overrides]]
+module = [
+    "cv2.*",
+    "PIL.*",
+    "omegaconf.*",
+    "image_quality.*",
+    "anthropic.*",
+    "keyring.*",
+]
 ignore_missing_imports = true
-files = ["alicemultiverse"]
-exclude = ["tests", "scripts", "examples"]
+
+# =============================================================================
+# PYTEST CONFIGURATION
+# =============================================================================
 
 [tool.pytest.ini_options]
 minversion = "7.0"
-addopts = "-ra -q --strict-markers"
-testpaths = ["tests"]
-python_files = "test_*.py"
-python_classes = "Test*"
-python_functions = "test_*"
-markers = [
-    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
-    "integration: marks tests that require external services",
+addopts = [
+    "-ra",
+    "--strict-markers",
+    "--cov=alicemultiverse",
+    "--cov-branch",
+    "--cov-report=term-missing:skip-covered",
+    "--cov-report=html",
+    "--cov-report=xml",
 ]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+
+# =============================================================================
+# COVERAGE CONFIGURATION
+# =============================================================================
 
 [tool.coverage.run]
+branch = true
 source = ["alicemultiverse"]
 omit = [
     "*/tests/*",
-    "*/test_*",
-    "*/__pycache__/*",
-    "*/venv/*",
-    "*/env/*",
-    "*/scripts/*",
-    "*/examples/*",
+    "*/test_*.py",
+    "*/__main__.py",
 ]
 
 [tool.coverage.report]
@@ -133,25 +210,7 @@ exclude_lines = [
     "def __repr__",
     "if self.debug:",
     "if __name__ == .__main__.:",
+    "raise AssertionError",
     "raise NotImplementedError",
-    "pass",
-    "except ImportError:",
-]
-
-[tool.ruff]
-line-length = 88
-target-version = "py38"
-select = [
-    "E",   # pycodestyle errors
-    "W",   # pycodestyle warnings
-    "F",   # pyflakes
-    "I",   # isort
-    "B",   # flake8-bugbear
-    "C4",  # flake8-comprehensions
-    "UP",  # pyupgrade
-]
-ignore = [
-    "E501",  # line too long (handled by black)
-    "B008",  # do not perform function calls in argument defaults
-    "W191",  # indentation contains tabs
+    "if TYPE_CHECKING:",
 ]

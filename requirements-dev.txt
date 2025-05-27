@@ -12,6 +12,17 @@ pre-commit>=3.0.0
 bandit>=1.7.0
 coverage[toml]>=7.0.0
 
+# Code quality tools
+ruff>=0.1.0
+pylint>=3.0.0
+yamllint>=1.33.0
+
 # Security scanning
 detect-secrets>=1.4.0
 safety>=2.3.0
+semgrep>=1.45.0
+
+# Type stubs
+types-requests>=2.31.0
+types-PyYAML>=6.0.0
+types-all>=1.0.0

@@ -156,12 +156,62 @@ All PRs undergo automated security scanning:
 
 PRs with security issues will be automatically blocked until resolved.
 
-## Code Style
+## Code Quality Standards
 
-- Follow PEP 8
-- Use type hints where appropriate
-- Add docstrings to all public functions and classes
-- Keep functions focused and small
+### Python Code
+- **Formatter**: Black (line length: 100)
+- **Linter**: Ruff (covers flake8, isort, and more)
+- **Type Checker**: MyPy
+- **Security**: Bandit
+- **Style Guide**: PEP 8 with some modifications (see pyproject.toml)
+
+### Other Languages
+- **Shell Scripts**: ShellCheck
+- **Dockerfiles**: Hadolint
+- **YAML**: yamllint
+- **Kubernetes**: kubeval
+- **Helm Charts**: helm lint
+
+### Running Quality Checks
+
+We provide a Makefile for convenience:
+
+```bash
+# Run all quality checks
+make quality
+
+# Run specific checks
+make lint          # All linters
+make format        # Auto-format code
+make security      # Security scans
+make test          # Run tests
+
+# Quick check before committing
+make check         # Format, lint, and test
+```
+
+Or use pre-commit (recommended):
+```bash
+pre-commit run --all-files
+```
+
+### IDE Setup
+
+For VS Code, add to `.vscode/settings.json`:
+```json
+{
+  "python.linting.enabled": true,
+  "python.linting.ruffEnabled": true,
+  "python.formatting.provider": "black",
+  "python.formatting.blackArgs": ["--line-length", "100"],
+  "[python]": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": true
+    }
+  }
+}
+```
 
 ## Testing
 
