@@ -88,6 +88,9 @@ Configuration overrides:
     interface_parser.add_argument(
         "--demo", action="store_true", help="Run demonstration of AI interaction"
     )
+    interface_parser.add_argument(
+        "--structured", action="store_true", help="Use structured interface (recommended)"
+    )
 
     # MCP server subcommand
     mcp_parser = subparsers.add_parser("mcp-server", help="Start MCP server for AI integration")
@@ -316,7 +319,10 @@ def main(argv: list[str] | None = None) -> int:
 
     # Handle interface subcommand
     if args.command == "interface":
-        from .cli_handler import run_interface_command
+        if hasattr(args, "structured") and args.structured:
+            from .cli_handler_structured import run_interface_command
+        else:
+            from .cli_handler import run_interface_command
 
         return run_interface_command(args)
 

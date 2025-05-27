@@ -43,7 +43,7 @@ class MediaOrganizer:
         self.output_dir = Path(config.paths.organized)
 
         # Initialize components
-        self.file_handler = FileHandler(dry_run=config.processing.get("dry_run", False))
+        self.file_handler = FileHandler(dry_run=getattr(config.processing, "dry_run", False))
         self.metadata_cache = MetadataCache(
             self.source_dir, force_reindex=config.processing.force_reindex
         )
@@ -63,7 +63,8 @@ class MediaOrganizer:
         self.pipeline_enabled = bool(self.pipeline_stages)
 
         # Cost tracking for pipeline
-        self.pipeline_cost_limit = getattr(config.get("pipeline", {}), "cost_limit", None)
+        pipeline_config = getattr(config, "pipeline", {})
+        self.pipeline_cost_limit = getattr(pipeline_config, "cost_limit", None)
         self.pipeline_cost_total = 0.0
 
         # Watch mode settings

@@ -3,6 +3,7 @@
 from .alice_api import AliceAPI, AliceMCP, ask_alice, ask_alice_sync
 from .alice_interface import AliceInterface
 from .alice_orchestrator import AliceOrchestrator, CreativeResponse
+from .alice_structured import AliceStructuredInterface
 from .creative_models import (
     CreativeAsset,
     CreativeContext,
@@ -19,9 +20,27 @@ from .models import (
     SearchRequest,
     TagRequest,
 )
+from .structured_models import (
+    AssetRole,
+    DateRange,
+    DimensionFilter,
+    GenerationRequest as StructuredGenerationRequest,
+    GroupingRequest,
+    MediaType,
+    OrganizeRequest as StructuredOrganizeRequest,
+    ProjectRequest,
+    RangeFilter,
+    SearchFilters,
+    SearchRequest as StructuredSearchRequest,
+    SearchResponse,
+    SortField,
+    SortOrder,
+    TagUpdateRequest,
+    WorkflowRequest,
+)
 
 __all__ = [
-    # Legacy interface
+    # Legacy interface (deprecated)
     "AliceInterface",
     "AliceResponse",
     "SearchRequest",
@@ -29,6 +48,24 @@ __all__ = [
     "OrganizeRequest",
     "TagRequest",
     "GroupRequest",
+    # Structured interface (recommended)
+    "AliceStructuredInterface",
+    "AssetRole",
+    "DateRange",
+    "DimensionFilter",
+    "GroupingRequest",
+    "MediaType",
+    "ProjectRequest",
+    "RangeFilter",
+    "SearchFilters",
+    "SearchResponse",
+    "SortField",
+    "SortOrder",
+    "StructuredGenerationRequest",
+    "StructuredOrganizeRequest",
+    "StructuredSearchRequest",
+    "TagUpdateRequest",
+    "WorkflowRequest",
     # New orchestrator
     "AliceOrchestrator",
     "CreativeResponse",

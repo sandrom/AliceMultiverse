@@ -32,17 +32,18 @@ class EnhancedMediaOrganizer(MediaOrganizer):
         self.metadata_cache = EnhancedMetadataCache(
             source_root=Path(config.paths.inbox),
             project_id=project_id,
-            force_reindex=config.get("force_reindex", False),
+            force_reindex=getattr(config.processing, "force_reindex", False),
         )
 
         # Initialize persistent metadata manager if configured
         self.persistent_metadata = None
-        self.embed_metadata = config.get("embed_metadata", True)  # Default to embedding
+        self.embed_metadata = getattr(config, "embed_metadata", True)  # Default to embedding
         if self.embed_metadata:
             cache_dir = Path(
-                config.paths.get("cache_dir", Path.home() / ".alicemultiverse" / "cache")
+                getattr(config.paths, "cache_dir", Path.home() / ".alicemultiverse" / "cache")
             )
-            quality_thresholds = config.get("quality", {}).get("thresholds", {})
+            quality_config = getattr(config, "quality", {})
+            quality_thresholds = getattr(quality_config, "thresholds", {})
             self.persistent_metadata = PersistentMetadataManager(cache_dir, quality_thresholds)
             logger.info("Persistent metadata embedding enabled")
 
@@ -53,7 +54,7 @@ class EnhancedMediaOrganizer(MediaOrganizer):
     def _get_project_id(self, config) -> str:
         """Extract or generate project ID from config."""
         # Could be enhanced to detect from folder structure or config
-        return config.get("project_id", "default_project")
+        return getattr(config, "project_id", "default_project")
 
     def _update_search_engine(self):
         """Update search engine with current metadata."""
