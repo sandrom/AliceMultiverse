@@ -14,6 +14,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Event monitoring tools for real-time observation
 - Comprehensive roadmap and vision documentation
 - WebP and HEIC/HEIF format support with metadata embedding
+- fal.ai provider integration with FLUX Pro and Kling models
+- Support for video generation (Kling v1 and v2, including elements and lipsync)
+- Comprehensive test suite for providers
+- Detailed documentation for fal.ai provider usage
 
 ### Changed
 - Updated all documentation to reflect evolution toward creative workflow hub

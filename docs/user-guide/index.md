@@ -26,6 +26,10 @@ Welcome to the AliceMultiverse User Guide! This comprehensive guide covers all f
     
     Setting up and managing API credentials
 
+- **[fal.ai Provider](fal-provider.md)**
+    
+    Generate images and videos with FLUX and Kling
+
 </div>
 
 ## What You'll Learn

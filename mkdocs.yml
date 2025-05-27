@@ -73,6 +73,7 @@ nav:
     - Watch Mode: user-guide/watch-mode.md
     - Pipeline System: user-guide/pipeline-system.md
     - API Keys: user-guide/api-keys.md
+    - fal.ai Provider: user-guide/fal-provider.md
   - Architecture:
     - Overview: architecture/index.md
     - System Design: architecture/system-design.md

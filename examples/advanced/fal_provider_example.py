@@ -10,8 +10,6 @@ This example demonstrates:
 """
 
 import asyncio
-from pathlib import Path
-
 from alicemultiverse.providers import registry, GenerationRequest, GenerationType
 from alicemultiverse.events import EventBus
 
@@ -49,8 +47,10 @@ async def generate_with_flux_schnell():
         prompt="A serene Japanese garden with cherry blossoms, koi pond, and traditional bridge, photorealistic, golden hour lighting",
         generation_type=GenerationType.IMAGE,
         model="flux-schnell",  # Fast model (~2s)
-        width=1024,
-        height=768
+        parameters={
+            "width": 1024,
+            "height": 768
+        }
     )
     
     result = await provider.generate(request)
@@ -73,10 +73,12 @@ async def generate_with_flux_dev():
         prompt="A cyberpunk street scene with neon signs, rain-slicked streets, and futuristic vehicles, highly detailed, cinematic lighting",
         generation_type=GenerationType.IMAGE,
         model="flux-dev",  # Quality model (~10s)
-        width=1024,
-        height=1024,
-        num_inference_steps=50,  # More steps for better quality
-        guidance_scale=3.5
+        parameters={
+            "width": 1024,
+            "height": 1024,
+            "num_inference_steps": 50,  # More steps for better quality
+            "guidance_scale": 3.5
+        }
     )
     
     result = await provider.generate(request)
@@ -99,15 +101,99 @@ async def generate_with_flux_realism():
         prompt="Professional headshot of a business executive in a modern office, natural lighting, shallow depth of field",
         generation_type=GenerationType.IMAGE,
         model="flux-realism",  # Photorealistic model
-        width=768,
-        height=1024,
-        num_images=2  # Generate 2 variations
+        parameters={
+            "width": 768,
+            "height": 1024,
+            "num_images": 2  # Generate 2 variations
+        }
     )
     
     result = await provider.generate(request)
     
     if result.success:
         print(f"Image saved to: {result.file_path}")
+    else:
+        print(f"Generation failed: {result.error}")
+    
+    return result
+
+
+async def generate_with_flux_pro():
+    """Generate an image with FLUX Pro (highest quality model)."""
+    print("\n=== FLUX Pro (Premium Quality) ===")
+    
+    provider = registry.get_provider("fal")
+    
+    request = GenerationRequest(
+        prompt="Award-winning photograph of a majestic eagle soaring through a dramatic sunset sky, professional wildlife photography, National Geographic style",
+        generation_type=GenerationType.IMAGE,
+        model="flux-pro",  # Premium model
+        parameters={
+            "width": 1024,
+            "height": 1024,
+            "num_inference_steps": 50,
+            "guidance_scale": 3.5
+        }
+    )
+    
+    result = await provider.generate(request)
+    
+    if result.success:
+        print(f"Image saved to: {result.file_path}")
+    else:
+        print(f"Generation failed: {result.error}")
+    
+    return result
+
+
+async def generate_with_kling_text():
+    """Generate a video with Kling text-to-video."""
+    print("\n=== Kling v2 Text-to-Video ===")
+    
+    provider = registry.get_provider("fal")
+    
+    request = GenerationRequest(
+        prompt="A graceful dancer performing ballet in a moonlit forest, ethereal atmosphere with fireflies floating around",
+        generation_type=GenerationType.VIDEO,
+        model="kling-v2-text",  # Latest Kling text-to-video
+        parameters={
+            "duration": "5",
+            "aspect_ratio": "16:9",
+            "cfg_scale": 0.5
+        }
+    )
+    
+    result = await provider.generate(request)
+    
+    if result.success:
+        print(f"Video saved to: {result.file_path}")
+    else:
+        print(f"Generation failed: {result.error}")
+    
+    return result
+
+
+async def generate_with_kling_elements():
+    """Generate a video with Kling elements (special effects)."""
+    print("\n=== Kling Elements (Special Effects) ===")
+    
+    provider = registry.get_provider("fal")
+    
+    request = GenerationRequest(
+        prompt="Create a magical transformation effect with sparkling particles",
+        generation_type=GenerationType.VIDEO,
+        model="kling-elements",
+        parameters={
+            "effect": "heart_gesture",  # Special effect type
+            "duration": "5",
+            "aspect_ratio": "16:9"
+        }
+    )
+    
+    result = await provider.generate(request)
+    
+    if result.success:
+        print(f"Video saved to: {result.file_path}")
     else:
         print(f"Generation failed: {result.error}")
     
@@ -160,6 +246,21 @@ async def main():
     
     # Photorealistic generation (comment out to save costs)
     # result = await generate_with_flux_realism()
+    # if result.success:
+    #     results.append(result)
+    
+    # Premium FLUX Pro generation (comment out to save costs)
+    # result = await generate_with_flux_pro()
+    # if result.success:
+    #     results.append(result)
+    
+    # Kling video generation (comment out to save costs)
+    # result = await generate_with_kling_text()
+    # if result.success:
+    #     results.append(result)
+    
+    # Kling elements (special effects) generation (comment out to save costs)
+    # result = await generate_with_kling_elements()
     # if result.success:
     #     results.append(result)
     

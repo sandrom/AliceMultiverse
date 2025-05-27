@@ -20,8 +20,8 @@ except ImportError:
     logger = logging.getLogger(__name__)
     logger.warning("MCP package not installed. Install with: pip install mcp")
 
-from .interface import AliceInterface
-from .interface.models import OrganizeRequest, SearchRequest, TagRequest
+from .alice_interface import AliceInterface
+from .models import OrganizeRequest, SearchRequest, TagRequest
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

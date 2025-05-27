@@ -53,6 +53,16 @@ class FalProvider(GenerationProvider):
         "animatediff": "fal-ai/animatediff-v2v",
         "svd": "fal-ai/stable-video-diffusion",
         
+        # Kling video models
+        "kling-v1-text": "fal-ai/kling-video/v1/pro/text-to-video",
+        "kling-v1-image": "fal-ai/kling-video/v1/pro/image-to-video",
+        "kling-v2-text": "fal-ai/kling-video/v2/master/text-to-video",
+        "kling-v2-image": "fal-ai/kling-video/v2/master/image-to-video",
+        
+        # Kling specialized models
+        "kling-elements": "fal-ai/kling-video/v1.6/pro/elements",
+        "kling-lipsync": "fal-ai/kling-video/lipsync/audio-to-video",
+        
         # Utility models
         "face-swap": "fal-ai/face-swap",
         "ccsr": "fal-ai/ccsr",  # upscaling
@@ -72,6 +82,12 @@ class FalProvider(GenerationProvider):
         "kolors": 0.01,
         "animatediff": 0.10,
         "svd": 0.10,
+        "kling-v1-text": 0.15,
+        "kling-v1-image": 0.15,
+        "kling-v2-text": 0.20,
+        "kling-v2-image": 0.20,
+        "kling-elements": 0.15,
+        "kling-lipsync": 0.20,
         "face-swap": 0.02,
         "ccsr": 0.02,
         "clarity-upscaler": 0.02,
@@ -245,6 +261,15 @@ class FalProvider(GenerationProvider):
             params.setdefault("guidance_scale", 2.0)
             params.setdefault("num_images", 1)
             
+        elif model.startswith("kling"):
+            # Kling video generation parameters
+            params.setdefault("duration", "5")  # 5 seconds
+            params.setdefault("aspect_ratio", "16:9")
+            params.setdefault("cfg_scale", 0.5)
+            # Remove any image-specific parameters
+            params.pop("num_images", None)
+            params.pop("image_size", None)
+            
         # Handle image-to-image
         if request.reference_assets and len(request.reference_assets) > 0:
             # This would need to be converted to a URL or base64
@@ -305,7 +330,7 @@ class FalProvider(GenerationProvider):
             status_url = f"{self.BASE_URL}/queue/requests/{request_id}/status"
         
         max_attempts = 60  # 5 minutes with 5 second intervals
-        for attempt in range(max_attempts):
+        for _ in range(max_attempts):
             async with session.get(status_url) as response:
                 if response.status != 200:
                     raise GenerationError(f"Failed to check status: {response.status}")
@@ -330,35 +355,42 @@ class FalProvider(GenerationProvider):
         result_data: Dict[str, Any]
     ) -> Path:
         """Download generated content from result."""
-        # Extract image URL(s)
-        images = result_data.get("images", [])
-        if not images:
-            # Try alternative response formats
-            image_url = result_data.get("image", {}).get("url")
-            if image_url:
-                images = [{"url": image_url}]
-            else:
-                raise GenerationError("No images in fal.ai response")
-        
-        # Get first image URL
-        image_url = images[0].get("url")
-        if not image_url:
-            raise GenerationError("No image URL in fal.ai response")
+        # Check if this is a video result (e.g., from Kling)
+        video_url = result_data.get("video", {}).get("url")
+        if video_url:
+            media_url = video_url
+            default_ext = ".mp4"
+        else:
+            # Extract image URL(s)
+            images = result_data.get("images", [])
+            if not images:
+                # Try alternative response formats
+                image_url = result_data.get("image", {}).get("url")
+                if image_url:
+                    images = [{"url": image_url}]
+                else:
+                    raise GenerationError("No images or video in fal.ai response")
+            
+            # Get first image URL
+            media_url = images[0].get("url")
+            if not media_url:
+                raise GenerationError("No image URL in fal.ai response")
+            default_ext = ".png"
         
         # Determine output path
         if request.output_path:
             output_path = request.output_path
         else:
             # Generate filename from URL
-            url_path = urlparse(image_url).path
-            filename = Path(url_path).name or f"fal_{datetime.now().timestamp()}.png"
+            url_path = urlparse(media_url).path
+            filename = Path(url_path).name or f"fal_{datetime.now().timestamp()}{default_ext}"
             output_path = Path.cwd() / "generated" / filename
         
         # Ensure directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
         # Download file
-        await download_file(image_url, output_path)
+        await download_file(media_url, output_path)
         
         return output_path
 
@@ -368,6 +400,7 @@ class FalProvider(GenerationProvider):
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
+        _ = (exc_type, exc_val, exc_tb)  # Unused but required by protocol
         if self._session:
             await self._session.close()
             self._session = None
