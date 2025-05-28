@@ -46,7 +46,8 @@ async def mock_redis():
 @pytest.fixture
 async def persistence(mock_redis):
     """Create EventPersistence instance with mocked Redis."""
-    with patch("alicemultiverse.events.persistence.redis.from_url", return_value=mock_redis):
+    async_from_url = AsyncMock(return_value=mock_redis)
+    with patch("alicemultiverse.events.persistence.redis.from_url", async_from_url):
         ep = EventPersistence()
         await ep.connect()
         yield ep
@@ -199,7 +200,8 @@ class TestEventPersistence:
 
     async def test_context_manager(self, mock_redis):
         """Test using persistence as a context manager."""
-        with patch("alicemultiverse.events.persistence.redis.from_url", return_value=mock_redis):
+        async_from_url = AsyncMock(return_value=mock_redis)
+        with patch("alicemultiverse.events.persistence.redis.from_url", async_from_url):
             async with EventPersistence() as ep:
                 # Should connect
                 assert ep._redis is not None
@@ -219,7 +221,8 @@ class TestEventPersistence:
 
     async def test_get_persistence_singleton(self, mock_redis):
         """Test get_persistence returns singleton."""
-        with patch("alicemultiverse.events.persistence.redis.from_url", return_value=mock_redis):
+        async_from_url = AsyncMock(return_value=mock_redis)
+        with patch("alicemultiverse.events.persistence.redis.from_url", async_from_url):
             # Reset global
             import alicemultiverse.events.persistence
 
