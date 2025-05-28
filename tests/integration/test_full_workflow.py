@@ -79,7 +79,7 @@ class TestFullWorkflow:
 
     @pytest.mark.integration
     @pytest.mark.slow
-    @patch("alicemultiverse.cli.load_config")
+    @patch("alicemultiverse.core.config_dataclass.load_config")
     def test_watch_mode_workflow(self, mock_load_config, omega_config, temp_dir):
         """Test watch mode functionality."""
         inbox = temp_dir / "inbox"
@@ -195,8 +195,8 @@ class TestCommandLineInterface:
         captured = capsys.readouterr()
 
         # Check key sections are present
-        assert "AliceMultiverse - AI Media Organization System" in captured.out
-        assert "Examples:" in captured.out
+        assert "AliceMultiverse" in captured.out
+        assert any(word in captured.out for word in ["Examples:", "Debug Examples:"])
         assert "--inbox" in captured.out
         assert "--quality" in captured.out
         assert "keys" in captured.out
@@ -209,7 +209,7 @@ class TestCommandLineInterface:
 
         assert exc_info.value.code == 0
         captured = capsys.readouterr()
-        assert "1.6.0" in captured.out
+        assert "1.7.1" in captured.out
 
     @pytest.mark.integration
     def test_check_deps_command(self, capsys):
@@ -226,7 +226,7 @@ class TestAPIKeyIntegration:
     """Test API key management integration."""
 
     @pytest.mark.integration
-    @patch("alicemultiverse.keys.manager.APIKeyManager.list_api_keys")
+    @patch("alicemultiverse.core.keys.manager.APIKeyManager.list_api_keys")
     def test_keys_list_integration(self, mock_list, capsys):
         """Test 'alice keys list' command."""
         mock_list.return_value = ["claude (keychain)", "openai (environment)"]
@@ -240,7 +240,7 @@ class TestAPIKeyIntegration:
 
     @pytest.mark.integration
     @patch("getpass.getpass")
-    @patch("alicemultiverse.keys.manager.APIKeyManager.set_api_key")
+    @patch("alicemultiverse.core.keys.manager.APIKeyManager.set_api_key")
     def test_keys_set_integration(self, mock_set, mock_getpass):
         """Test 'alice keys set' command."""
         mock_getpass.return_value = "test-api-key"

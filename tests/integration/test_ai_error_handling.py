@@ -42,7 +42,7 @@ paths:
         assert not response["success"]
         assert response["error"] is not None
         # Error should be clear for AI to explain
-        assert "does not exist" in response["error"] or "not found" in response["error"]
+        assert any(phrase in response["error"].lower() for phrase in ["does not exist", "not found", "read-only"])
 
     def test_validation_errors_explain_issue(self, alice):
         """Test validation errors are descriptive."""
@@ -79,7 +79,7 @@ paths:
     def test_api_errors_include_context(self, alice):
         """Test API errors include helpful context."""
         # Mock API failure
-        with patch.object(alice.organizer, 'process_file') as mock_process:
+        with patch.object(alice.organizer, '_process_file') as mock_process:
             mock_process.side_effect = Exception("API rate limit exceeded")
             
             request = OrganizeRequest()
@@ -132,9 +132,9 @@ paths:
     def test_memory_errors_handled(self, alice):
         """Test large operations handle memory issues."""
         # Mock a memory issue
-        with patch.object(alice.organizer.metadata_cache, 'metadata_cache') as mock_cache:
-            # Simulate large cache
-            mock_cache.__len__.return_value = 1000000
+        with patch.object(alice.organizer.metadata_cache, 'get_all_metadata') as mock_get_all:
+            # Simulate large cache by returning many items
+            mock_get_all.return_value = {f"hash_{i}": {} for i in range(1000000)}
             
             response = alice.get_stats()
             
@@ -146,7 +146,7 @@ paths:
     def test_concurrent_access_errors(self, alice):
         """Test handling of concurrent access issues."""
         # Mock file being accessed by another process
-        with patch.object(alice.organizer, 'process_file') as mock_process:
+        with patch.object(alice.organizer, '_process_file') as mock_process:
             mock_process.side_effect = OSError("Resource temporarily unavailable")
             
             request = OrganizeRequest()

@@ -50,22 +50,30 @@ class TestAliceOrchestrator:
         # Yesterday
         yesterday = orchestrator._parse_temporal_reference("yesterday")
         assert yesterday is not None
-        assert (now - yesterday).days == 1
+        # Check it's approximately 1 day ago (within a few seconds)
+        diff = now - yesterday
+        assert 0.99 < diff.total_seconds() / 86400 < 1.01
 
         # Last week
         last_week = orchestrator._parse_temporal_reference("last week")
         assert last_week is not None
-        assert 6 <= (now - last_week).days <= 8
+        # Check it's approximately 7 days ago
+        diff = now - last_week
+        assert 6.99 < diff.total_seconds() / 86400 < 7.01
 
         # Last month
         last_month = orchestrator._parse_temporal_reference("last month")
         assert last_month is not None
-        assert 29 <= (now - last_month).days <= 31
+        # Check it's approximately 30 days ago
+        diff = now - last_month  
+        assert 29.99 < diff.total_seconds() / 86400 < 30.01
 
         # X days ago
         three_days = orchestrator._parse_temporal_reference("3 days ago")
         assert three_days is not None
-        assert (now - three_days).days == 3
+        # Check it's approximately 3 days ago
+        diff = now - three_days
+        assert 2.99 < diff.total_seconds() / 86400 < 3.01
 
         # Month names
         october = orchestrator._parse_temporal_reference("in October")

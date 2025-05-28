@@ -4,7 +4,7 @@ from pathlib import Path
 
 import pytest
 
-from alicemultiverse.core.config import _get_default_config, load_config
+from alicemultiverse.core.config import get_default_config, load_config
 
 
 class TestConfig:
@@ -12,7 +12,7 @@ class TestConfig:
 
     def test_default_config(self):
         """Test default configuration structure."""
-        config = _get_default_config()
+        config = get_default_config()
 
         assert config["paths"]["inbox"] == "inbox"
         assert config["paths"]["organized"] == "organized"

@@ -429,7 +429,6 @@ class AliceOrchestrator:
 
             # Publish workflow started event
             workflow_event = WorkflowStartedEvent(
-                source="AliceOrchestrator",
                 workflow_id=f"create_{datetime.now(UTC).timestamp()}",
                 workflow_type="image_generation",
                 workflow_name="AI-requested creation",
@@ -630,7 +629,6 @@ class AliceOrchestrator:
                 # Update project context
                 await publish_event(
                     ContextUpdatedEvent(
-                        source="AliceOrchestrator",
                         project_id=self.project_id,
                         context_type="creative",
                         update_type="modification",
