@@ -4,10 +4,9 @@ import pytest
 from pathlib import Path
 
 from alicemultiverse.providers import (
-    BaseProvider,
+    Provider,
     BudgetExceededError,
     CostEstimate,
-    GenerationProvider,
     GenerationRequest,
     GenerationResult,
     GenerationType,
@@ -26,10 +25,10 @@ class TestProviderInterface:
         assert GenerationType.VIDEO == "video"
         assert ProviderStatus.AVAILABLE == "available"
         
-    def test_base_provider_abstract(self):
-        """Test that BaseProvider is abstract."""
+    def test_provider_abstract(self):
+        """Test that Provider is abstract."""
         with pytest.raises(TypeError, match="Can't instantiate abstract class"):
-            BaseProvider()
+            Provider()
     
     def test_generation_request_fields(self):
         """Test GenerationRequest has all expected fields."""
@@ -81,7 +80,7 @@ class TestProviderInterface:
         assert caps.supports_batch is False
 
 
-class MockProvider(BaseProvider):
+class MockProvider(Provider):
     """Mock provider for testing."""
     
     @property
@@ -96,7 +95,7 @@ class MockProvider(BaseProvider):
             pricing={"mock-model": 0.01}
         )
     
-    async def generate(self, request: GenerationRequest) -> GenerationResult:
+    async def _generate(self, request: GenerationRequest) -> GenerationResult:
         """Mock generation."""
         return GenerationResult(
             success=True,
@@ -171,16 +170,3 @@ class TestBaseProviderFeatures:
         """Test default model selection."""
         provider = MockProvider()
         assert provider.get_default_model(GenerationType.IMAGE) == "mock-model"
-
-
-class TestBackwardCompatibility:
-    """Test backward compatibility with old interface."""
-    
-    def test_old_provider_class_available(self):
-        """Test GenerationProvider is still available."""
-        assert GenerationProvider is not None
-        
-    def test_old_provider_abstract(self):
-        """Test old provider is still abstract."""
-        with pytest.raises(TypeError):
-            GenerationProvider()

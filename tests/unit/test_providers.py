@@ -9,7 +9,7 @@ import pytest
 
 from alicemultiverse.providers import (
     FalProvider,
-    GenerationProvider,
+    Provider,
     GenerationRequest,
     GenerationResult,
     GenerationType,
@@ -21,7 +21,7 @@ from alicemultiverse.providers import (
 )
 
 
-class MockProvider(GenerationProvider):
+class MockProvider(Provider):
     """Mock provider for testing."""
     
     @property
@@ -36,10 +36,10 @@ class MockProvider(GenerationProvider):
             max_resolution={"width": 1024, "height": 1024},
             formats=["png", "jpg"],
             features=["test"],
-            pricing={"image": 0.01, "text": 0.001}
+            pricing={"mock-fast": 0.01, "mock-quality": 0.02}
         )
     
-    async def generate(self, request: GenerationRequest) -> GenerationResult:
+    async def _generate(self, request: GenerationRequest) -> GenerationResult:
         """Mock generation."""
         return GenerationResult(
             success=True,
@@ -55,7 +55,7 @@ class MockProvider(GenerationProvider):
         return ProviderStatus.AVAILABLE
 
 
-class TestGenerationProvider:
+class TestProvider:
     """Test base provider functionality."""
     
     @pytest.mark.asyncio
@@ -132,25 +132,26 @@ class TestGenerationProvider:
             prompt="test",
             generation_type=GenerationType.IMAGE
         )
-        cost = await provider.estimate_cost(request)
-        assert cost == 0.01
+        estimate = await provider.estimate_cost(request)
+        assert estimate.estimated_cost == 0.01
         
-        # High resolution image (4x base resolution)
+        # High resolution image (1024x1024 is base resolution in new provider)
         request = GenerationRequest(
             prompt="test",
             generation_type=GenerationType.IMAGE,
             parameters={"width": 1024, "height": 1024}
         )
-        cost = await provider.estimate_cost(request)
-        assert cost == 0.04  # 4x base price
+        estimate = await provider.estimate_cost(request)
+        assert estimate.estimated_cost == 0.01  # Base price (1024x1024 is default)
         
-        # Text generation
+        # Different model with different price
         request = GenerationRequest(
             prompt="test",
-            generation_type=GenerationType.TEXT
+            generation_type=GenerationType.IMAGE,
+            model="mock-quality"
         )
-        cost = await provider.estimate_cost(request)
-        assert cost == 0.001
+        estimate = await provider.estimate_cost(request)
+        assert estimate.estimated_cost == 0.02  # Quality model costs more
     
     def test_event_publishing_removed(self):
         """Event publishing is now handled by the event mixin, not base provider."""

@@ -1,25 +1,24 @@
 """Provider interfaces for AI generation services."""
 
-# Re-export from base for backward compatibility
-from .base import (
-    GenerationProvider,
+# Import from types module
+from .types import (
     GenerationRequest,
     GenerationResult,
     GenerationType,
     ProviderCapabilities,
-    ProviderError,
     ProviderStatus,
+    CostEstimate,
+)
+
+# Import from provider module
+from .provider import (
+    Provider,
+    ProviderError,
     RateLimitError,
     AuthenticationError,
     GenerationError,
-)
-
-# New base provider and types
-from .base_provider import (
-    BaseProvider,
     BudgetExceededError,
 )
-from .types import CostEstimate
 
 # Implementations
 from .anthropic_provider import AnthropicProvider
@@ -33,15 +32,13 @@ from .registry import (
 )
 
 __all__ = [
-    # Base classes and types (backward compatibility)
-    "GenerationProvider",
+    # Base classes and types
+    "Provider",
     "GenerationRequest",
     "GenerationResult",
     "GenerationType",
     "ProviderCapabilities",
     "ProviderStatus",
-    # New base provider
-    "BaseProvider",
     # Errors
     "ProviderError",
     "RateLimitError",
