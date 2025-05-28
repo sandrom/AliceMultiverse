@@ -362,6 +362,15 @@ class TestFalProvider:
 class TestProviderRegistry:
     """Test provider registry."""
     
+    @pytest.fixture(autouse=True)
+    def reset_global_registry(self):
+        """Reset global registry before each test."""
+        import alicemultiverse.providers.registry
+        alicemultiverse.providers.registry._registry = None
+        yield
+        # Clean up after test
+        alicemultiverse.providers.registry._registry = None
+    
     def test_register_and_get_provider(self):
         """Test registering and getting providers."""
         registry = ProviderRegistry()
