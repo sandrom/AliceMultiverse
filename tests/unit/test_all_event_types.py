@@ -2,21 +2,21 @@
 
 from datetime import datetime
 
-from alicemultiverse.events.asset_events_v2 import (
+from alicemultiverse.events.asset_events import (
     AssetDiscoveredEvent,
     AssetOrganizedEvent,
     AssetProcessedEvent,
     MetadataUpdatedEvent,
     QualityAssessedEvent,
 )
-from alicemultiverse.events.creative_events_v2 import (
+from alicemultiverse.events.creative_events import (
     CharacterDefinedEvent,
     ConceptApprovedEvent,
     ContextUpdatedEvent,
     ProjectCreatedEvent,
     StyleChosenEvent,
 )
-from alicemultiverse.events.workflow_events_v2 import (
+from alicemultiverse.events.workflow_events import (
     WorkflowCompletedEvent,
     WorkflowFailedEvent,
     WorkflowStartedEvent,

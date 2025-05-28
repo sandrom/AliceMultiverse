@@ -7,12 +7,12 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 ## Current Work
 
 ### 🚨 CRITICAL: Fix Broken Tests
-Working application takes priority over new features. Multiple unit tests are failing due to import errors and outdated references.
+Working application takes priority over new features. Import errors are fixed, but some tests still fail.
 
-- [ ] Fix import errors in pipeline tests (alicemultiverse.keys → alicemultiverse.core.keys)
-- [ ] Update event tests to use current event module structure (remove v2 references)
-- [ ] Fix alice_orchestrator test imports (CreativeIntent missing)
-- [ ] Ensure all unit tests pass before continuing with features
+- [x] Fix import errors in pipeline tests (alicemultiverse.keys → alicemultiverse.core.keys)
+- [x] Update event tests to use current event module structure (remove v2 references)
+- [x] Fix alice_orchestrator test imports (CreativeIntent missing)
+- [ ] Fix remaining test failures (20 failed, 13 errors - mostly async mocks and logic issues)
 
 ## Next Up (Priority Order)
 

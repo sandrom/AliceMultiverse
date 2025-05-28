@@ -6,7 +6,7 @@ import pytest
 
 from alicemultiverse.events import (
     AssetDiscoveredEvent,
-    Event,
+    BaseEvent,
     EventBus,
     EventSubscriber,
     ProjectCreatedEvent,
@@ -19,7 +19,7 @@ from alicemultiverse.events.middleware import EventFilter, EventLogger, EventMet
 
 
 class TestEvent:
-    """Test base Event class."""
+    """Test base BaseEvent class."""
 
     def test_event_creation(self):
         """Test creating a basic event."""
@@ -65,13 +65,13 @@ class TestEventSubscriber:
 
     class TestSubscriber(EventSubscriber):
         def __init__(self):
-            self.received_events: list[Event] = []
+            self.received_events: list[BaseEvent] = []
 
         @property
         def event_types(self):
             return ["asset.discovered", "asset.processed"]
 
-        async def handle_event(self, event: Event):
+        async def handle_event(self, event: BaseEvent):
             self.received_events.append(event)
 
     @pytest.mark.asyncio
@@ -195,7 +195,7 @@ class TestEventBus:
             def event_types(self):
                 return ["*"]
 
-            async def handle_event(self, event: Event):
+            async def handle_event(self, event: BaseEvent):
                 self.events.append(event)
 
         subscriber = WildcardSubscriber()
@@ -295,7 +295,7 @@ class TestEventMiddleware:
             def event_types(self):
                 return ["*"]
 
-            async def handle_event(self, event: Event):
+            async def handle_event(self, event: BaseEvent):
                 self.events.append(event)
 
         tracker = Tracker()

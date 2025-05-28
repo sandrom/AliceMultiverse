@@ -21,3 +21,4 @@
 - i like science and scientific method. this means i also like research and we can take current research into account too when deciding of course.
 - I mostly use the newest versions of everything (where possible and it doesnt break) so consider this in your answers.
 - when planning we are doing this agile, close to kanban. we have a backlog ordered on importance. we take the most important task next and reevaluate importance of our backlog continually based on findings while implementing and planning. the next up queue should be ordered continually and reevaluated against the backlog at least once a day but can be more often if we have bigger findings or changes. please take that into account.
+- a working service/application has always priority over features. this means fixing issues and tests has priority over anything new we develop. the current functionality should be kept working and if we break that we can not move on but need to fix what is broken first. 

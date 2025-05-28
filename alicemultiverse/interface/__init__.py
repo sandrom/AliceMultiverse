@@ -2,7 +2,7 @@
 
 from .alice_api import AliceAPI, AliceMCP, ask_alice, ask_alice_sync
 from .alice_interface import AliceInterface
-from .alice_orchestrator import AliceOrchestrator, CreativeResponse
+from .alice_orchestrator import AliceOrchestrator, CreativeIntent, CreativeResponse
 from .alice_structured import AliceStructuredInterface
 from .creative_models import (
     CreativeAsset,
@@ -68,6 +68,7 @@ __all__ = [
     "WorkflowRequest",
     # New orchestrator
     "AliceOrchestrator",
+    "CreativeIntent",
     "CreativeResponse",
     "AliceAPI",
     "ask_alice",

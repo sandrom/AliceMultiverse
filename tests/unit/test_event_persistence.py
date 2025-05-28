@@ -7,9 +7,9 @@ import pytest
 # Skip tests if redis not installed
 redis = pytest.importorskip("redis")
 
-from alicemultiverse.events.asset_events_v2 import AssetDiscoveredEvent
+from alicemultiverse.events.asset_events import AssetDiscoveredEvent
 from alicemultiverse.events.persistence import EventPersistence, get_persistence
-from alicemultiverse.events.workflow_events_v2 import WorkflowStartedEvent
+from alicemultiverse.events.workflow_events import WorkflowStartedEvent
 
 
 @pytest.fixture

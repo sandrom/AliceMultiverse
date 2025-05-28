@@ -12,7 +12,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .base import Event
+from .base import BaseEvent
 
 logger = logging.getLogger(__name__)
 
@@ -23,7 +23,7 @@ class EventLogger:
     def __init__(self, log_level: int = logging.DEBUG):
         self.log_level = log_level
 
-    def __call__(self, event: Event) -> None:
+    def __call__(self, event: BaseEvent) -> None:
         """Log the event."""
         logger.log(
             self.log_level,
@@ -46,7 +46,7 @@ class EventMetrics:
         self.event_timings: dict[str, list] = {}
         self.start_time = time.time()
 
-    def __call__(self, event: Event) -> None:
+    def __call__(self, event: BaseEvent) -> None:
         """Record metrics for the event."""
         # Count events by type
         self.event_counts[event.event_type] = self.event_counts.get(event.event_type, 0) + 1
@@ -93,7 +93,7 @@ class EventPersistence:
         self.session_dir = self.storage_dir / session_id
         self.session_dir.mkdir(exist_ok=True)
 
-    def __call__(self, event: Event) -> None:
+    def __call__(self, event: BaseEvent) -> None:
         """Persist the event to disk."""
         try:
             # Group events by type
@@ -118,14 +118,14 @@ class EventFilter:
         self,
         include_types: list | None = None,
         exclude_types: list | None = None,
-        predicate: Callable[[Event], bool] | None = None,
+        predicate: Callable[[BaseEvent], bool] | None = None,
     ):
         self.include_types = set(include_types) if include_types else None
         self.exclude_types = set(exclude_types) if exclude_types else None
         self.predicate = predicate
         self._filtered_count = 0
 
-    def __call__(self, event: Event) -> None:
+    def __call__(self, event: BaseEvent) -> None:
         """Check if event should be filtered."""
         # Check include list
         if self.include_types and event.event_type not in self.include_types:
@@ -156,7 +156,7 @@ class EventDebugger:
         self.event_history: list = []
         self.max_history = 100
 
-    def __call__(self, event: Event) -> None:
+    def __call__(self, event: BaseEvent) -> None:
         """Debug the event."""
         # Add to history
         self.event_history.append(
