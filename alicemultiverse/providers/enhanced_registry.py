@@ -355,7 +355,6 @@ class CostTrackingProvider(BaseProvider):
         
         # Delegate attributes
         self.api_key = provider.api_key
-        self.event_bus = provider.event_bus
     
     @property
     def name(self) -> str:

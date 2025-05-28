@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 
 from ..core.file_operations import download_file
-from .base_provider import BaseProvider, GenerationError, RateLimitError, AuthenticationError
+from .provider import Provider, GenerationError, RateLimitError, AuthenticationError
 from .types import (
     GenerationRequest,
     GenerationResult,
@@ -23,7 +23,7 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 
-class OpenAIProvider(BaseProvider):
+class OpenAIProvider(Provider):
     """Provider for OpenAI API integration (DALL-E, GPT-4 Vision)."""
     
     BASE_URL = "https://api.openai.com/v1"
@@ -152,8 +152,8 @@ class OpenAIProvider(BaseProvider):
         self._last_check = datetime.now()
         return self._status
 
-    async def generate(self, request: GenerationRequest) -> GenerationResult:
-        """Generate content using OpenAI.
+    async def _generate(self, request: GenerationRequest) -> GenerationResult:
+        """Perform the actual generation using OpenAI.
         
         Args:
             request: Generation request
@@ -161,52 +161,18 @@ class OpenAIProvider(BaseProvider):
         Returns:
             Generation result
         """
-        start_time = datetime.now()
+        # Determine model
+        model = request.model or self.get_default_model(request.generation_type)
         
-        try:
-            # Validate request
-            await self.validate_request(request)
-            
-            # Publish start event
-            self._publish_started(request)
-            
-            # Determine model
-            model = request.model or self.get_default_model(request.generation_type)
-            
-            # Generate based on type
-            if request.generation_type == GenerationType.IMAGE:
-                result = await self._generate_image(request, model)
-            elif request.generation_type == GenerationType.TEXT:
-                result = await self._analyze_image(request, model)
-            else:
-                raise GenerationError(f"Unsupported generation type: {request.generation_type}")
-            
-            # Add timing
-            result.generation_time = (datetime.now() - start_time).total_seconds()
-            
-            # Track costs
-            self._total_cost += result.cost or 0
-            self._generation_count += 1
-            
-            # Publish success
-            self._publish_success(request, result)
-            
-            return result
-            
-        except Exception as e:
-            error_msg = str(e)
-            logger.error(f"OpenAI generation failed: {error_msg}")
-            
-            # Publish failure
-            self._publish_failure(request, error_msg)
-            
-            # Return error result
-            return GenerationResult(
-                success=False,
-                error=error_msg,
-                provider=self.name,
-                model=request.model
-            )
+        # Generate based on type
+        if request.generation_type == GenerationType.IMAGE:
+            result = await self._generate_image(request, model)
+        elif request.generation_type == GenerationType.TEXT:
+            result = await self._analyze_image(request, model)
+        else:
+            raise GenerationError(f"Unsupported generation type: {request.generation_type}")
+        
+        return result
 
     async def _generate_image(self, request: GenerationRequest, model: str) -> GenerationResult:
         """Generate image using DALL-E."""

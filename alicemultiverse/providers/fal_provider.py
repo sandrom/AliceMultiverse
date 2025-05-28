@@ -11,22 +11,24 @@ from urllib.parse import urlparse
 import aiohttp
 
 from ..core.file_operations import download_file
-from .base import (
+from .provider import (
+    Provider,
     AuthenticationError,
     GenerationError,
-    GenerationProvider,
+    RateLimitError,
+)
+from .types import (
     GenerationRequest,
     GenerationResult,
     GenerationType,
     ProviderCapabilities,
     ProviderStatus,
-    RateLimitError,
 )
 
 logger = logging.getLogger(__name__)
 
 
-class FalProvider(GenerationProvider):
+class FalProvider(Provider):
     """Provider for fal.ai API integration."""
 
     BASE_URL = "https://fal.run"
@@ -169,8 +171,8 @@ class FalProvider(GenerationProvider):
         self._last_check = datetime.now()
         return self._status
 
-    async def generate(self, request: GenerationRequest) -> GenerationResult:
-        """Generate content using fal.ai.
+    async def _generate(self, request: GenerationRequest) -> GenerationResult:
+        """Perform the actual generation using fal.ai.
         
         Args:
             request: Generation request
@@ -178,65 +180,37 @@ class FalProvider(GenerationProvider):
         Returns:
             Generation result
         """
-        start_time = datetime.now()
+        # Determine model
+        model = request.model or "flux-schnell"  # Default to fast model
+        if model not in self.MODELS:
+            raise ValueError(f"Unknown model: {model}")
         
-        try:
-            # Validate request
-            await self.validate_request(request)
+        # Build API parameters
+        api_params = self._build_api_params(request, model)
             
-            # Determine model
-            model = request.model or "flux-schnell"  # Default to fast model
-            if model not in self.MODELS:
-                raise ValueError(f"Unknown model: {model}")
-            
-            # Build API parameters
-            api_params = self._build_api_params(request, model)
-            
-            # Make API request
-            result_data = await self._call_api(model, api_params)
-            
-            # Download generated content
-            file_path = await self._download_result(request, result_data)
-            
-            # Calculate cost and time
-            generation_time = (datetime.now() - start_time).total_seconds()
-            cost = self.PRICING.get(model, 0.0)
-            
-            # Build result
-            result = GenerationResult(
-                success=True,
-                file_path=file_path,
-                generation_time=generation_time,
-                cost=cost,
-                provider=self.name,
-                model=model,
-                metadata={
-                    "prompt": request.prompt,
-                    "model": model,
-                    "parameters": api_params,
-                    "fal_request_id": result_data.get("request_id"),
-                }
-            )
-            
-            # Publish success event
-            self._publish_success(request, result)
-            
-            return result
-            
-        except Exception as e:
-            error_msg = str(e)
-            logger.error(f"fal.ai generation failed: {error_msg}")
-            
-            # Publish failure event
-            self._publish_failure(request, error_msg)
-            
-            # Return error result
-            return GenerationResult(
-                success=False,
-                error=error_msg,
-                provider=self.name,
-                model=request.model
-            )
+        # Make API request
+        result_data = await self._call_api(model, api_params)
+        
+        # Download generated content
+        file_path = await self._download_result(request, result_data)
+        
+        # Calculate cost
+        cost = self.PRICING.get(model, 0.0)
+        
+        # Build result
+        return GenerationResult(
+            success=True,
+            file_path=file_path,
+            cost=cost,
+            provider=self.name,
+            model=model,
+            metadata={
+                "prompt": request.prompt,
+                "model": model,
+                "parameters": api_params,
+                "fal_request_id": result_data.get("request_id"),
+            }
+        )
 
     def _build_api_params(self, request: GenerationRequest, model: str) -> Dict[str, Any]:
         """Build API parameters for fal.ai request."""

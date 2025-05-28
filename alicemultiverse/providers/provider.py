@@ -286,12 +286,14 @@ class Provider(ABC):
         """Publish generation started event."""
         publish_event(
             "generation.started",
-            source=f"provider:{self.name}",
-            generation_type=request.generation_type.value,
-            provider=self.name,
-            model=request.model or "default",
-            prompt=request.prompt,
-            parameters=request.parameters or {},
+            {
+                "source": f"provider:{self.name}",
+                "generation_type": request.generation_type.value,
+                "provider": self.name,
+                "model": request.model or "default",
+                "prompt": request.prompt,
+                "parameters": request.parameters or {},
+            }
         )
     
     def _publish_success(self, request: GenerationRequest, result: GenerationResult):
@@ -299,29 +301,33 @@ class Provider(ABC):
         if result.file_path:
             publish_event(
                 "asset.generated",
-                source=f"provider:{self.name}",
-                asset_id=result.asset_id or "",
-                file_path=str(result.file_path),
-                generation_type=request.generation_type.value,
-                provider=self.name,
-                model=result.model or request.model or "default",
-                prompt=request.prompt,
-                parameters=request.parameters or {},
-                cost=result.cost,
-                generation_time=result.generation_time,
+                {
+                    "source": f"provider:{self.name}",
+                    "asset_id": result.asset_id or "",
+                    "file_path": str(result.file_path),
+                    "generation_type": request.generation_type.value,
+                    "provider": self.name,
+                    "model": result.model or request.model or "default",
+                    "prompt": request.prompt,
+                    "parameters": request.parameters or {},
+                    "cost": result.cost,
+                    "generation_time": result.generation_time,
+                }
             )
 
     def _publish_failure(self, request: GenerationRequest, error: str):
         """Publish failure event."""
         publish_event(
             "generation.failed",
-            source=f"provider:{self.name}",
-            generation_type=request.generation_type.value,
-            provider=self.name,
-            model=request.model or "default",
-            prompt=request.prompt,
-            error=error,
-            parameters=request.parameters or {},
+            {
+                "source": f"provider:{self.name}",
+                "generation_type": request.generation_type.value,
+                "provider": self.name,
+                "model": request.model or "default",
+                "prompt": request.prompt,
+                "error": error,
+                "parameters": request.parameters or {},
+            }
         )
 
     # Context manager support

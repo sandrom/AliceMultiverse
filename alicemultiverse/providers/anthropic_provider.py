@@ -11,7 +11,7 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 
 from ..core.file_operations import save_text_file
-from .base_provider import BaseProvider, GenerationError, RateLimitError, AuthenticationError
+from .provider import Provider, GenerationError, RateLimitError, AuthenticationError
 from .types import (
     GenerationRequest,
     GenerationResult,
@@ -23,7 +23,7 @@ from .types import (
 logger = logging.getLogger(__name__)
 
 
-class AnthropicProvider(BaseProvider):
+class AnthropicProvider(Provider):
     """Provider for Anthropic API integration (Claude vision and analysis)."""
     
     BASE_URL = "https://api.anthropic.com/v1"
@@ -148,8 +148,8 @@ class AnthropicProvider(BaseProvider):
         self._last_check = datetime.now()
         return self._status
 
-    async def generate(self, request: GenerationRequest) -> GenerationResult:
-        """Generate content using Anthropic Claude.
+    async def _generate(self, request: GenerationRequest) -> GenerationResult:
+        """Perform the actual generation using Anthropic Claude.
         
         Args:
             request: Generation request
@@ -157,51 +157,20 @@ class AnthropicProvider(BaseProvider):
         Returns:
             Generation result
         """
-        start_time = datetime.now()
+        # Determine model
+        model = request.model or self.get_default_model(request.generation_type)
         
-        try:
-            # Validate request
-            await self.validate_request(request)
-            
-            # Publish start event
-            self._publish_started(request)
-            
-            # Determine model
-            model = request.model or self.get_default_model(request.generation_type)
-            
-            # Only TEXT generation is supported
-            if request.generation_type != GenerationType.TEXT:
-                raise GenerationError(f"Anthropic only supports TEXT generation, not {request.generation_type}")
-            
-            # Analyze image or generate text
-            if request.reference_assets and len(request.reference_assets) > 0:
-                result = await self._analyze_image(request, model)
-            else:
-                result = await self._generate_text(request, model)
-            
-            # Calculate generation time
-            generation_time = (datetime.now() - start_time).total_seconds()
-            result.generation_time = generation_time
-            
-            # Publish success event
-            self._publish_success(request, result)
-            
-            return result
-            
-        except Exception as e:
-            error_msg = str(e)
-            logger.error(f"Anthropic generation failed: {error_msg}")
-            
-            # Publish failure
-            self._publish_failure(request, error_msg)
-            
-            # Return error result
-            return GenerationResult(
-                success=False,
-                error=error_msg,
-                provider=self.name,
-                model=request.model
-            )
+        # Only TEXT generation is supported
+        if request.generation_type != GenerationType.TEXT:
+            raise GenerationError(f"Anthropic only supports TEXT generation, not {request.generation_type}")
+        
+        # Analyze image or generate text
+        if request.reference_assets and len(request.reference_assets) > 0:
+            result = await self._analyze_image(request, model)
+        else:
+            result = await self._generate_text(request, model)
+        
+        return result
 
     async def _analyze_image(self, request: GenerationRequest, model: str) -> GenerationResult:
         """Analyze image using Claude vision."""
