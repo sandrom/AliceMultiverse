@@ -5,7 +5,7 @@ enabling AI assistants to work in natural, creative terms.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import UTC,  datetime
 from enum import Enum
 from typing import Any
 
@@ -199,7 +199,7 @@ class StyleEvolution:
                 "version": self.current_version,
                 "elements": elements,
                 "success": success,
-                "timestamp": datetime.utcnow(),
+                "timestamp": datetime.now(UTC),
             }
         )
 
@@ -254,7 +254,7 @@ class CreativeMemoryEntry:
 
     def age_days(self) -> int:
         """Get age of memory in days."""
-        return (datetime.utcnow() - self.timestamp).days
+        return (datetime.now(UTC) - self.timestamp).days
 
 
 @dataclass
@@ -267,7 +267,7 @@ class CreativePattern:
     # Statistics
     occurrence_count: int = 1
     success_rate: float = 1.0
-    last_seen: datetime = field(default_factory=datetime.utcnow)
+    last_seen: datetime = field(default_factory=lambda: datetime.now(UTC))
 
     # Context
     common_contexts: list[str] = field(default_factory=list)
@@ -275,7 +275,7 @@ class CreativePattern:
     def record_occurrence(self, success: bool, context: str | None = None):
         """Record a pattern occurrence."""
         self.occurrence_count += 1
-        self.last_seen = datetime.utcnow()
+        self.last_seen = datetime.now(UTC)
 
         # Update success rate
         if not success:

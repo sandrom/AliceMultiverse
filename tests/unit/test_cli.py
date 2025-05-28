@@ -143,7 +143,7 @@ class TestCLIMain:
         mock_run_keys.assert_called_once()
 
     @pytest.mark.unit
-    @patch("alicemultiverse.cli.check_dependencies")
+    @patch("alicemultiverse.interface.main_cli.check_dependencies")
     def test_main_check_deps(self, mock_check_deps):
         """Test --check-deps flag."""
         mock_check_deps.return_value = True
@@ -154,8 +154,8 @@ class TestCLIMain:
         mock_check_deps.assert_called_once()
 
     @pytest.mark.unit
-    @patch("alicemultiverse.cli.load_config")
-    @patch("alicemultiverse.organizer.run_organizer")
+    @patch("alicemultiverse.interface.main_cli.load_config")
+    @patch("alicemultiverse.interface.main_cli.run_organizer")
     def test_main_dry_run(self, mock_run_organizer, mock_load_config, omega_config, temp_dir):
         """Test dry run mode."""
         # Setup mocks
@@ -183,7 +183,7 @@ class TestCLIMain:
         assert result == 1
 
     @pytest.mark.unit
-    @patch("alicemultiverse.cli.load_config")
+    @patch("alicemultiverse.interface.main_cli.load_config")
     def test_main_keyboard_interrupt(self, mock_load_config, omega_config, temp_dir):
         """Test handling of keyboard interrupt."""
         inbox = temp_dir / "inbox"
@@ -192,13 +192,13 @@ class TestCLIMain:
         # Setup proper config
         mock_load_config.return_value = omega_config
 
-        with patch("alicemultiverse.organizer.run_organizer", side_effect=KeyboardInterrupt):
+        with patch("alicemultiverse.interface.main_cli.run_organizer", side_effect=KeyboardInterrupt):
             result = main(["--inbox", str(inbox)])
 
         assert result == 130  # Standard exit code for Ctrl+C
 
     @pytest.mark.unit
-    @patch("alicemultiverse.organizer.run_organizer")
+    @patch("alicemultiverse.interface.main_cli.run_organizer")
     def test_main_pipeline_args(self, mock_run_organizer, omega_config, temp_dir):
         """Test pipeline-related arguments are passed correctly."""
         mock_run_organizer.return_value = True
@@ -206,7 +206,7 @@ class TestCLIMain:
         inbox = temp_dir / "inbox"
         inbox.mkdir()
 
-        with patch("alicemultiverse.cli.load_config", return_value=omega_config):
+        with patch("alicemultiverse.interface.main_cli.load_config", return_value=omega_config):
             result = main(
                 [
                     "--inbox",

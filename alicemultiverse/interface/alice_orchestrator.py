@@ -6,7 +6,7 @@ language into technical operations while maintaining context across sessions.
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, timedelta
+from datetime import UTC,  datetime, timedelta
 from enum import Enum
 from typing import Any
 
@@ -114,7 +114,7 @@ class AliceOrchestrator:
 
     def _update_memory(self, intent: CreativeIntent, data: dict[str, Any]):
         """Update Alice's memory based on interactions."""
-        self.memory.last_interaction = datetime.utcnow()
+        self.memory.last_interaction = datetime.now(UTC)
 
         # Track patterns
         pattern_key = f"{intent.value}:{data.get('style', 'default')}"
@@ -147,7 +147,7 @@ class AliceOrchestrator:
         - "that cyberpunk thing from October"
         """
         text_lower = text.lower()
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
 
         # Relative times
         if "yesterday" in text_lower:
@@ -430,7 +430,7 @@ class AliceOrchestrator:
             # Publish workflow started event
             workflow_event = WorkflowStartedEvent(
                 source="AliceOrchestrator",
-                workflow_id=f"create_{datetime.utcnow().timestamp()}",
+                workflow_id=f"create_{datetime.now(UTC).timestamp()}",
                 workflow_type="image_generation",
                 workflow_name="AI-requested creation",
                 initiated_by="ai_assistant",

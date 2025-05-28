@@ -8,7 +8,7 @@ import json
 import logging
 import time
 from collections.abc import Callable
-from datetime import datetime
+from datetime import UTC,  datetime
 from pathlib import Path
 from typing import Any
 
@@ -89,7 +89,7 @@ class EventPersistence:
         self.storage_dir.mkdir(parents=True, exist_ok=True)
 
         # Create subdirectory for current session
-        session_id = datetime.utcnow().strftime("%Y%m%d_%H%M%S")
+        session_id = datetime.now(UTC).strftime("%Y%m%d_%H%M%S")
         self.session_dir = self.storage_dir / session_id
         self.session_dir.mkdir(exist_ok=True)
 

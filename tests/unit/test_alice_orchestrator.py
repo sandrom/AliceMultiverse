@@ -1,6 +1,6 @@
 """Tests for Alice orchestrator."""
 
-from datetime import datetime
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -45,7 +45,7 @@ class TestAliceOrchestrator:
 
     def test_parse_temporal_reference(self, orchestrator):
         """Test parsing temporal references."""
-        now = datetime.utcnow()
+        now = datetime.now(UTC)
 
         # Yesterday
         yesterday = orchestrator._parse_temporal_reference("yesterday")
