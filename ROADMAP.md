@@ -16,27 +16,20 @@ Must complete before adding more providers. This architectural foundation preven
 
 ## Next Up (Priority Order)
 
-### 1. Event System Enhancement
-- [ ] Add version field to events + migration utils → **Commit**: "Add event schema versioning"
-- [ ] Write ADR-006 for versioning strategy
-- [ ] Add optional Redis persistence → **Commit**: "Add optional Redis persistence"
-- [ ] Update ADR-002 with implementation
-
-### 2. Project Management Layer
-- [ ] Add version field to events + migration utils → **Commit**: "Add event schema versioning"
-- [ ] Write ADR-006 for versioning strategy
-- [ ] Add optional Redis persistence → **Commit**: "Add optional Redis persistence"
-- [ ] Update ADR-002 with implementation
-
-### 3. Workflow Engine
+### 1. Project Management Layer
 - [ ] Create project models + migrations → **Commit**: "Add project management models"
 - [ ] Implement project service + budget tracking → **Commit**: "Add project service"
 - [ ] Integrate into Alice interface → **Commit**: "Integrate projects into Alice"
 
-### 4. Remaining Test Fixes
+### 2. Workflow Engine
 - [ ] Design workflow definition format
 - [ ] Implement workflow executor
 - [ ] Add progress tracking and resumption
+
+### 3. Remaining Test Fixes
+- [ ] Fix remaining 32 failing tests
+- [ ] Update deprecated datetime usage
+- [ ] Ensure all tests pass in CI
 
 ## Backlog (Unprioritized)
 
@@ -61,6 +54,21 @@ Must complete before adding more providers. This architectural foundation preven
 - Real-time collaboration
 
 ## Recently Completed ✅
+
+### Event System Enhancement (Jan 2025)
+- Created EventStore abstraction for flexible persistence backends
+- Added SQLite backend for simpler deployments (no Redis required)
+- Implemented event schema versioning with migration support
+- Added consumer groups and dead letter queue
+- Integrated persistence into EnhancedEventBus
+- Created comprehensive migration guide
+
+### Provider Abstraction (Jan 2025)
+- Extracted base provider interface with budget management
+- Created provider registry with cost tracking
+- Added OpenAI provider (DALL-E 3, GPT-4 Vision)
+- Added Anthropic provider (Claude 3 models with vision)
+- Implemented comprehensive test coverage
 
 ### Test Suite Restoration (Jan 2025)
 - Fixed import errors throughout test suite
