@@ -1,8 +1,8 @@
-# AliceMultiverse - AI Assistant Interface & Creative Workflow Hub
+# AliceMultiverse - AI Native Creative Workflow Hub
 
 <div align="center">
 
-**A powerful interface for AI assistants (Claude, ChatGPT) with integrated creative workflow tools**
+**Connect AI assistants with your creative workflows through natural conversation**
 
 [![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -11,79 +11,78 @@
 
 ## 🎯 What is AliceMultiverse?
 
-AliceMultiverse is an extensible interface that connects AI assistants like Claude and ChatGPT with your local development environment and creative tools. It provides AI assistants with powerful capabilities including file operations, media management, code execution, and workflow automation.
+AliceMultiverse is transitioning from a command-line tool to an AI-native service. It enables AI assistants like Claude and ChatGPT to help you organize media, manage creative projects, and automate workflows through natural conversation.
 
-### Core Capabilities:
-- **🤖 AI Assistant Interface** - Direct integration with Claude Desktop and other AI assistants via MCP
-- **📁 Smart Media Organization** - Automatically organize AI-generated images by source, date, and quality
-- **🎨 Creative Workflows** - Manage projects, assets, and creative processes
-- **🔧 Development Tools** - File operations, code execution, and project management
-- **🔄 Event-Driven Architecture** - Extensible system for building custom workflows
+> **🚀 New**: Direct integration with Claude Desktop via MCP (Model Context Protocol)
 
-## 🚀 Quick Start
+## 🤖 AI-First Usage (Recommended)
 
-### 1. Install
+### Claude Desktop Integration
+
+1. **Install AliceMultiverse**:
+   ```bash
+   pip install -e .
+   ```
+
+2. **Configure Claude Desktop** (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+   ```json
+   {
+     "mcpServers": {
+       "alice": {
+         "command": "alice",
+         "args": ["mcp-server"]
+       }
+     }
+   }
+   ```
+
+3. **Start chatting with Claude**:
+   ```
+   You: "Hi Claude, I need help organizing my AI-generated images"
+   Claude: "I'll help you organize your AI-generated images using Alice..."
+   
+   You: "Check the quality of images in my Downloads folder"
+   Claude: "I'll assess the quality of images in your Downloads folder..."
+   ```
+
+### What Can You Ask?
+
+- "Organize my AI-generated images by quality and source"
+- "Find all my cyberpunk-style portraits from last week"
+- "Show me statistics about my creative projects"
+- "Tag these images as references for my new project"
+- "Find similar images to this one"
+
+## 🔧 Debug CLI (Developers Only)
+
+⚠️ **Direct CLI usage is deprecated.** The CLI is maintained only for debugging purposes.
+
 ```bash
-pip install -e .
+# Debugging examples
+alice --debug --dry-run              # Debug organization logic
+alice --debug --check-deps           # Check dependencies
+alice keys setup                     # Still available for API key setup
+alice mcp-server                     # Start MCP server
 ```
 
-### 2. Use as AI Assistant Tool (Claude Desktop)
-Add to your Claude Desktop configuration:
-```json
-{
-  "mcpServers": {
-    "alice": {
-      "command": "alice",
-      "args": ["mcp-server"]
-    }
-  }
-}
-```
-
-### 3. Use Standalone Features
-```bash
-# Start interactive AI interface
-alice interface
-
-# Organize AI-generated media
-alice --quality
-
-# Monitor events in real-time
-python scripts/event_monitor.py
-```
+For normal usage, please use Alice through AI assistants as shown above.
 
 ## ✨ Key Features
 
-### For AI Assistants
-- **File System Access** - Read, write, and manage files
-- **Media Processing** - Organize and analyze images/videos
-- **Project Management** - Create and manage creative projects
-- **Workflow Automation** - Execute complex multi-step processes
+### Media Organization
+- **🤖 AI Detection**: Recognizes content from 15+ AI tools (Midjourney, DALL-E, Stable Diffusion, etc.)
+- **⭐ Quality Assessment**: Multi-stage pipeline with BRISQUE, SightEngine, and Claude
+- **📁 Smart Organization**: Automatically sorts by date, project, source, and quality
+- **🏷️ Semantic Tagging**: Tag assets by style, mood, subject for easy discovery
 
-### For Users
-- **🤖 AI Detection** - Recognizes content from 15+ AI tools (Midjourney, DALL-E, Stable Diffusion, etc.)
-- **⭐ Quality Assessment** - Multi-stage pipeline with BRISQUE, SightEngine, and Claude
-- **📊 Event Monitoring** - Real-time visibility into all operations
-- **🔄 Watch Mode** - Continuous monitoring for new content
+### Creative Workflows
+- **📊 Project Management**: Track assets across multiple projects
+- **🔍 Smart Search**: Find assets using natural descriptions
+- **🔄 Event Monitoring**: Real-time visibility into all operations
+- **🎨 Style Analysis**: Understand and categorize your creative outputs
 
 ## 📋 Configuration
 
-### Basic Usage
-```bash
-# Use with default settings
-alice
-
-# Specify custom directories
-alice --inbox ~/Downloads/AI --organized ~/Pictures/AI-Sorted
-
-# Enable quality assessment
-alice --quality
-
-# Start AI interface
-alice interface
-```
-
-### Advanced Configuration
 Create `settings.yaml` for persistent settings:
 ```yaml
 paths:
@@ -98,72 +97,87 @@ pipeline:
   default_mode: standard  # basic, standard, premium
 ```
 
-## 🎨 Media Organization Example
-
-AliceMultiverse can organize your AI-generated content:
-
-### Before:
-```
-Downloads/
-├── 00123.png                    # What AI made this?
-├── _9f7d8a6b-4c2e-11ee.png     # Midjourney? 
-├── ComfyUI_00456_.png           # Another tool...
-└── dalle-3-image.jpg            # Mixed together
-```
-
-### After:
-```
-organized/
-├── 2024-03-15/
-│   ├── project-cyberpunk/
-│   │   ├── midjourney/
-│   │   │   ├── 5-star/         # Best quality
-│   │   │   ├── 4-star/         # Good quality
-│   │   │   └── 3-star/         # Average
-│   │   └── dalle/
-│   │       └── 5-star/
-│   └── project-nature/
-│       └── stablediffusion/
-```
-
-## 🔧 Architecture
-
-AliceMultiverse uses an event-driven architecture that makes it easy to extend:
-
-- **Event System** - All operations publish events for monitoring and integration
-- **Modular Pipeline** - Compose different processing stages
-- **MCP Integration** - Direct integration with AI assistants
-- **Caching Layer** - Intelligent caching for performance
-
-## 🛠️ Development
-
-### Running Tests
-```bash
-pytest tests/
-```
-
-### Monitoring Events
-```bash
-python scripts/event_monitor.py --verbose
-```
-
 ### API Keys
-For advanced features, set up API keys:
+
+For advanced features, configure API keys:
 ```bash
 alice keys setup
 ```
 
+This will guide you through setting up:
+- **SightEngine**: Technical quality assessment
+- **Claude (Anthropic)**: AI-powered defect detection
+
+## 🏗️ Architecture
+
+AliceMultiverse uses an event-driven architecture designed for AI orchestration:
+
+- **Structured APIs**: AI translates natural language to precise operations
+- **Event System**: Monitor long-running operations in real-time
+- **Service Boundaries**: Clean separation for reliable AI control
+- **Persistent State**: Maintains context between conversations
+
 ## 📚 Documentation
 
-- [Getting Started](docs/getting-started/quickstart.md)
-- [AI Integration](docs/integrations/claude-desktop.md)
-- [Architecture](docs/architecture/index.md)
+- [Quick Start Guide](QUICKSTART.md)
+- [AI Integration Guide](docs/integrations/claude-desktop.md)
+- [Architecture Overview](docs/architecture/)
 - [API Reference](docs/api/reference/)
+
+## 🎓 Examples
+
+### AI Assistant Conversation
+```
+You: "I just generated 50 new images with Midjourney, can you help organize them?"
+
+Claude: "I'll help organize your Midjourney images. Let me check your Downloads folder 
+and organize them by quality. I'll use the premium pipeline to ensure accurate 
+quality assessment..."
+
+[Alice organizes images into dated folders with quality ratings]
+
+Claude: "I've organized 50 images from your Downloads folder:
+- 12 images rated 5-star (excellent quality)
+- 23 images rated 4-star (good quality)  
+- 15 images rated 3-star (average quality)
+
+They're now in Pictures/AI-Organized/2024-03-15/midjourney/
+Would you like me to show you the best ones?"
+```
+
+### Debugging
+```bash
+# For developers only
+alice --debug --dry-run --verbose
+```
+
+## 🔮 Roadmap
+
+AliceMultiverse is evolving into a comprehensive creative workflow orchestrator:
+
+1. **Current**: Media organization with quality assessment
+2. **Phase 1**: Full AI-native interface (in progress)
+3. **Phase 2**: Multi-agent creative workflows
+4. **Phase 3**: Integration with creative tools (ComfyUI, Photoshop, etc.)
+
+See [ROADMAP.md](ROADMAP.md) for detailed plans.
 
 ## 🤝 Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for development guidelines.
+We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ## 📄 License
 
 MIT License - see [LICENSE](LICENSE) for details.
+
+---
+
+<div align="center">
+
+**Empowering AI assistants to manage your creative workflows**
+
+[Documentation](https://github.com/Alysonhower/AliceMultiverse/docs) • 
+[Issues](https://github.com/Alysonhower/AliceMultiverse/issues) • 
+[Discussions](https://github.com/Alysonhower/AliceMultiverse/discussions)
+
+</div>

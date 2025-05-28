@@ -6,15 +6,38 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AliceMultiverse is evolving from a media management system into a comprehensive creative workflow hub. Currently, it excels at detecting, organizing, and assessing AI-generated content. The system is being architected to become an intelligent orchestrator between AI assistants (Claude, ChatGPT) and creative tools/APIs.
+AliceMultiverse is an AI-native service that operates exclusively through AI assistants. The CLI has been deprecated and is maintained only for debugging purposes. The system excels at detecting, organizing, and assessing AI-generated content, serving as an intelligent orchestrator between AI assistants (Claude, ChatGPT) and creative tools/APIs.
 
-**Current Focus**: Media organization with event-driven foundation
+**Current Status**: AI-native service (CLI deprecated for normal use)
+**Current Focus**: Media organization through AI assistant conversations
 **Future Vision**: Complete creative workflow orchestration (see ROADMAP.md)
-**Architecture**: Event-driven, preparing for microservices
+**Architecture**: Event-driven, designed for AI orchestration
 
-## Key Commands
+## Usage During Transition Phase
 
-### Running the Main Scripts
+### AI Assistant Interface (Recommended)
+
+Alice is designed to be used through AI assistants:
+
+```bash
+# Start MCP server for Claude Desktop
+alice mcp-server
+
+# Configure in Claude Desktop settings instead:
+# Add to ~/Library/Application Support/Claude/claude_desktop_config.json:
+{
+  "mcpServers": {
+    "alice": {
+      "command": "alice",
+      "args": ["mcp-server"]
+    }
+  }
+}
+```
+
+### Debug CLI (Developers Only)
+
+**⚠️ Note**: Direct CLI usage is deprecated. Use --debug flag for development.
 
 ```bash
 # Organize AI-generated media (uses default folders from settings.yaml)
@@ -227,14 +250,16 @@ organized/2024-03-15/project/stablediffusion/
 
 ## Important Notes
 
+- **AI-Native Service**: Migration complete - use through AI assistants only
 - API keys are managed securely - use `alice keys setup` for configuration
 - The metadata cache in alice significantly improves performance for large collections
 - Video metadata extraction requires ffprobe (installed with ffmpeg)
 - **Event-driven architecture** - All new features should publish/subscribe to events
 - **Keep documentation updated** - README.md, ROADMAP.md, and architecture docs
-- **Follow the vision** - See todo/02 for full architectural specification
+- **Follow the vision** - AI-native service architecture (see docs/architecture/ai-native-vision.md)
 - **Structured APIs only** - Alice uses structured search, not natural language (see docs/architecture/alice-interface-design.md)
 - **Tags are semantic** - Use media_type for technical classification, tags for all semantic concepts
+- **AI-First Documentation**: New docs should show AI conversations, not just CLI commands
 
 ## API Key Setup
 

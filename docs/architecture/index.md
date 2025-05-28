@@ -1,6 +1,8 @@
 # Architecture Overview
 
-AliceMultiverse is designed as a modular, extensible system for organizing AI-generated media. This document provides a comprehensive overview of the system architecture, design decisions, and technical implementation details.
+AliceMultiverse is evolving from a CLI tool into an AI-native service that operates through AI assistants like Claude and ChatGPT. This document provides a comprehensive overview of the system architecture, design decisions, and technical implementation details.
+
+> **Important**: See [AI-Native Vision](ai-native-vision.md) for the fundamental architectural direction and [ADR-006](adr/ADR-006-ai-native-service-architecture.md) for the decision rationale.
 
 ## High-Level Architecture
 

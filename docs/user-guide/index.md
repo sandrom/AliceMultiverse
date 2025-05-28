@@ -1,14 +1,36 @@
 # User Guide
 
-Welcome to the AliceMultiverse User Guide! This comprehensive guide covers all features and workflows for organizing your AI-generated media.
+Welcome to AliceMultiverse! This guide covers both AI-assisted and traditional CLI usage.
 
-## Guide Overview
+## 🚀 Getting Started
+
+<div class="grid cards" markdown>
+
+- **[AI Conversations](ai-conversations.md)** 🤖
+    
+    Learn to use Alice through natural conversation with AI assistants
+
+- **[Claude Integration](claude-integration.md)** 
+    
+    Set up direct integration with Claude Desktop
+
+- **[CLI Usage](cli-usage.md)** 💻
+    
+    Traditional command-line interface reference
+
+- **[Quick Start](../../QUICKSTART.md)**
+    
+    Get up and running in 2 minutes
+
+</div>
+
+## 📚 Core Features
 
 <div class="grid cards" markdown>
 
 - **[Basic Usage](basic-usage.md)**
     
-    Learn the fundamental commands and workflows
+    Fundamental concepts and workflows
 
 - **[Quality Assessment](quality-assessment.md)**
     
@@ -32,197 +54,162 @@ Welcome to the AliceMultiverse User Guide! This comprehensive guide covers all f
 
 </div>
 
-## What You'll Learn
+## 🎯 Usage Modes
 
-### 🎯 Core Concepts
+### AI-First (Recommended)
 
-1. **File Organization** - How AliceMultiverse structures your media
-2. **AI Detection** - How sources are identified
-3. **Quality Metrics** - Understanding scores and ratings
-4. **Caching System** - How performance optimization works
+Alice is designed to work through natural conversation:
 
-### 🛠️ Practical Skills
+```
+You: "Hey Claude, I need help organizing my AI images"
+Claude: "I'll help you organize your AI-generated images. Let me scan your Downloads folder..."
 
-1. **Running Organizations** - Basic and advanced commands
-2. **Configuring Quality** - Adjusting thresholds
-3. **Setting Up Pipelines** - Cost-effective processing
-4. **Managing API Keys** - Secure credential storage
-
-### 📊 Advanced Features
-
-1. **Custom Pipelines** - Building your own stages
-2. **Batch Processing** - Handling large collections
-3. **Performance Tuning** - Optimizing for speed
-4. **Integration Options** - Using as a Python library
-
-## Typical Workflows
-
-### 1. First-Time User
-
-```mermaid
-graph LR
-    A[Install] --> B[Configure]
-    B --> C[Basic Organize]
-    C --> D[Add Quality]
-    D --> E[Try Pipeline]
+You: "Find my best cyberpunk portraits"
+Claude: "Searching for high-quality cyberpunk portraits..."
 ```
 
-1. Start with [Basic Usage](basic-usage.md)
-2. Try quality assessment
-3. Set up API keys if needed
-4. Explore advanced features
+**Benefits:**
+- Natural language interaction
+- Context-aware assistance
+- Guided workflows
+- No commands to memorize
 
-### 2. Regular Organization
+### Traditional CLI
 
-```mermaid
-graph LR
-    A[New Media] --> B[Watch Mode]
-    B --> C[Auto Organize]
-    C --> D[Quality Sort]
-    D --> A
+For direct control and automation:
+
+```bash
+alice --quality --pipeline premium
+alice --watch --inbox ~/Downloads
 ```
 
-1. Keep watch mode running
-2. Drop files into inbox
-3. Review organized output
-4. Adjust settings as needed
+**Benefits:**
+- Precise control
+- Scriptable automation
+- Debugging capabilities
+- Batch processing
 
-### 3. Large Collection Processing
+## 🔄 Typical Workflows
 
-```mermaid
-graph LR
-    A[Collection] --> B[Dry Run]
-    B --> C[Adjust Config]
-    C --> D[Process]
-    D --> E[Verify]
-```
+### For AI Users
 
-1. Preview with dry run
-2. Tune quality thresholds
-3. Run with appropriate pipeline
-4. Verify results
+1. **Daily Organization**
+   ```
+   "Claude, organize today's new AI images"
+   ```
 
-## Key Concepts
+2. **Quality Curation**
+   ```
+   "Show me only 5-star images from this week"
+   ```
+
+3. **Project Management**
+   ```
+   "Create a portfolio collection from my best work"
+   ```
+
+### For CLI Users
+
+1. **Basic Organization**
+   ```bash
+   alice
+   ```
+
+2. **Quality Pipeline**
+   ```bash
+   alice --quality --pipeline standard
+   ```
+
+3. **Continuous Monitoring**
+   ```bash
+   alice --watch --quality
+   ```
+
+## 📊 Key Concepts
 
 ### Organization Structure
-
 ```
 organized/
-└── 2024-03-15/          # Date
-    └── project-name/    # Your project
+└── 2024-01-28/          # Date
+    └── project-name/    # Project
         └── midjourney/  # AI source
-            └── 5-star/  # Quality rating
+            ├── 5-star/  # Quality rating
+            ├── 4-star/
+            └── 3-star/
 ```
 
 ### Quality Ratings
 
-| Stars | BRISQUE Score | Description |
-|-------|--------------|-------------|
-| ⭐⭐⭐⭐⭐ | 0-25 | Exceptional quality |
-| ⭐⭐⭐⭐ | 25-45 | Great quality |
-| ⭐⭐⭐ | 45-65 | Good quality |
-| ⭐⭐ | 65-80 | Fair quality |
-| ⭐ | 80-100 | Poor quality |
+| Stars | BRISQUE | Description |
+|-------|---------|-------------|
+| ⭐⭐⭐⭐⭐ | 0-25 | Exceptional |
+| ⭐⭐⭐⭐ | 25-45 | Great |
+| ⭐⭐⭐ | 45-65 | Good |
+| ⭐⭐ | 65-80 | Fair |
+| ⭐ | 80-100 | Poor |
 
-### Pipeline Stages
+### Pipeline Options
 
-<div class="pipeline-stages">
-<span class="pipeline-stage free">BRISQUE (Free)</span>
-→
-<span class="pipeline-stage cheap">SightEngine (~$0.001)</span>
-→
-<span class="pipeline-stage premium">Claude (~$0.02)</span>
-</div>
+| Pipeline | Cost | Components |
+|----------|------|------------|
+| Basic | Free | BRISQUE only |
+| Standard | ~$0.001 | + SightEngine |
+| Premium | ~$0.003 | + Claude AI |
 
-## Quick Reference
+## 🎓 Learning Path
 
-### Essential Commands
+### New to Alice?
 
-```bash
-# Basic organization (uses defaults from settings.yaml)
-alice
+1. Start with [AI Conversations](ai-conversations.md) for natural interaction
+2. Or jump to [CLI Usage](cli-usage.md) for traditional commands
+3. Explore [Quality Assessment](quality-assessment.md) to understand ratings
+4. Set up [API Keys](api-keys.md) for advanced features
 
-# With quality assessment
-alice --quality
+### Ready for More?
 
-# Watch mode
-alice --watch
+- [Pipeline System](pipeline-system.md) - Advanced quality processing
+- [Watch Mode](watch-mode.md) - Automated monitoring
+- [fal.ai Provider](fal-provider.md) - Generate new content
 
-# Pipeline processing (4 options)
-alice --pipeline brisque                     # BRISQUE only (free)
-alice --pipeline brisque-sightengine         # BRISQUE + SightEngine (~$0.001/image)
-alice --pipeline brisque-claude              # BRISQUE + Claude (~$0.02/image)
-alice --pipeline brisque-sightengine-claude  # All three (~$0.021/image)
+## 💡 Best Practices
 
-# Dry run preview
-alice --dry-run
+### For AI Usage
+- Be descriptive in your requests
+- Ask for clarification when needed
+- Let the AI guide complex workflows
+- Review AI actions before confirming
+
+### For CLI Usage
+- Start with dry runs (`--dry-run`)
+- Use configuration files for consistency
+- Monitor costs with pipeline limits
+- Keep backups when using `--move`
+
+## 🆘 Getting Help
+
+### In AI Conversation
+```
+"Claude, how do I organize by quality?"
+"Can you explain what star ratings mean?"
+"Help me set up API keys"
 ```
 
-### Common Options
-
-| Option | Short | Description |
-|--------|-------|-------------|
-| `--quality` | `-q` | Enable quality assessment |
-| `--watch` | `-w` | Watch mode |
-| `--move` | `-m` | Move instead of copy |
-| `--dry-run` | `-n` | Preview only |
-| `--force-reindex` | `-f` | Bypass cache |
-
-## Getting Help
-
-### In Documentation
-
-- Use the search function (top of page)
-- Check the table of contents (left sidebar)
-- Browse related topics (bottom of page)
-
-### In Application
-
+### In CLI
 ```bash
-# General help
 alice --help
-
-# Command-specific help
-alice organize --help
-alice keys setup --help
+alice keys --help
+alice interface --help
 ```
 
 ### Community
-
-- GitHub Issues for bugs
-- Discussions for questions
-- Pull requests for contributions
-
-## Best Practices
-
-### 1. Start Simple
-Begin with basic organization before adding quality assessment or pipelines.
-
-### 2. Use Dry Runs
-Always preview large operations with `--dry-run` first.
-
-### 3. Monitor Costs
-Check pipeline costs before processing large collections.
-
-### 4. Regular Backups
-Keep backups of your original files, especially when using `--move`.
-
-### 5. Cache Wisely
-Let the cache work for you - avoid `--force-reindex` unless necessary.
-
-## Next Steps
-
-Ready to start? Here's your learning path:
-
-1. **[Basic Usage](basic-usage.md)** - Master the fundamentals
-2. **[Quality Assessment](quality-assessment.md)** - Understand quality metrics
-3. **[API Keys](api-keys.md)** - Set up external services
-4. **[Pipeline System](pipeline-system.md)** - Advanced processing
+- [GitHub Issues](https://github.com/yourusername/AliceMultiverse/issues)
+- [Discussions](https://github.com/yourusername/AliceMultiverse/discussions)
+- [Contributing Guide](../../CONTRIBUTING.md)
 
 ---
 
 <div align="center">
 
-**Need help?** Check our [FAQ](faq.md) or [open an issue](https://github.com/yourusername/AliceMultiverse/issues)
+**Choose your path:** [AI Conversations](ai-conversations.md) 🤖 or [CLI Usage](cli-usage.md) 💻
 
 </div>

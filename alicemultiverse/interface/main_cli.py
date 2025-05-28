@@ -18,19 +18,16 @@ logger = logging.getLogger(__name__)
 def create_parser() -> argparse.ArgumentParser:
     """Create and configure argument parser."""
     parser = argparse.ArgumentParser(
-        description="AliceMultiverse - AI Assistant Interface & Creative Workflow Hub\nConnect AI assistants with local tools and creative workflows",
+        description="AliceMultiverse Debug CLI - For Development and Debugging Only\n\n⚠️  DEPRECATION WARNING: Direct CLI usage is deprecated!\nAlice is now an AI-native service designed to be used through AI assistants.\n\nFor normal usage, configure Alice with Claude Desktop or another AI assistant.\nSee: https://github.com/yourusername/AliceMultiverse/docs/integrations/claude-desktop.md\n\nThis CLI is maintained only for debugging and development purposes.",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
-Examples:
-  %(prog)s                           # Use defaults from settings.yaml
-  %(prog)s --inbox ~/Downloads       # Specify input directory
-  %(prog)s -i ~/Downloads -o ~/AI    # Specify both directories
-  %(prog)s --quality                 # Enable quality assessment
-  %(prog)s -w --quality              # Watch mode with quality
+Debug Examples:
+  %(prog)s --check-deps              # Check system dependencies
+  %(prog)s --dry-run --verbose       # Debug organization logic
   %(prog)s keys setup                # Configure API keys
+  %(prog)s mcp-server                # Start MCP server
   
-Configuration overrides:
-  %(prog)s --paths.inbox=~/Downloads --quality.thresholds.3_star.max=70
+For normal usage, use Alice through an AI assistant instead.
         """,
     )
 
@@ -206,8 +203,10 @@ Configuration overrides:
 
     parser.add_argument("--log-file", help="Path to log file")
 
-    # Utility options
+    # Debug/Development options
+    parser.add_argument("--debug", action="store_true", help="Enable debug mode (acknowledges CLI deprecation)")
     parser.add_argument("--check-deps", action="store_true", help="Check dependencies and exit")
+    parser.add_argument("--force-cli", action="store_true", help="Force CLI usage without deprecation warning")
 
     return parser
 
@@ -338,6 +337,33 @@ def main(argv: list[str] | None = None) -> int:
     log_file = Path(args.log_file) if hasattr(args, "log_file") and args.log_file else None
     quiet = hasattr(args, "quiet") and args.quiet
     setup_logging(level=log_level, log_file=log_file, quiet=quiet)
+    
+    # Show deprecation warning for direct CLI usage (except for allowed commands)
+    allowed_commands = ["mcp-server", "keys", "interface"]
+    force_cli = hasattr(args, "force_cli") and args.force_cli
+    debug_mode = hasattr(args, "debug") and args.debug
+    check_deps = hasattr(args, "check_deps") and args.check_deps
+    
+    # Skip warning for allowed commands or debug flags
+    if (args.command not in allowed_commands and 
+        not force_cli and 
+        not debug_mode and 
+        not check_deps and
+        args.command is not None):
+        
+        print("\n" + "="*70)
+        print("⚠️  ALICE IS NOW AN AI-NATIVE SERVICE")
+        print("="*70)
+        print("\nDirect CLI usage is deprecated. Alice should be used through AI assistants.")
+        print("\nFor normal usage:")
+        print("1. Install: pip install -e .")
+        print("2. Configure Claude Desktop to use Alice")
+        print("3. Chat naturally: 'Claude, organize my AI images'")
+        print("\nSee documentation: https://github.com/yourusername/AliceMultiverse")
+        print("\nTo proceed with debugging, use --debug flag")
+        print("Example: alice --debug --dry-run --verbose")
+        print("="*70 + "\n")
+        return 1
 
     # Check dependencies if requested
     if hasattr(args, "check_deps") and args.check_deps:
