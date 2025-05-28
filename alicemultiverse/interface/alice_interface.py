@@ -217,8 +217,18 @@ class AliceInterface:
                 query_params["limit"] = request.get("limit", 20)
 
                 # Try database search first
+                # Build structured tags for database search
+                structured_tags = {}
+                if request.get("style_tags"):
+                    structured_tags["style"] = request.get("style_tags", [])
+                if request.get("mood_tags"):
+                    structured_tags["mood"] = request.get("mood_tags", [])
+                if request.get("subject_tags"):
+                    structured_tags["subject"] = request.get("subject_tags", [])
+                
                 db_results = self._search_database(
-                    tags=request.get("style_tags", []) + request.get("mood_tags", []) + request.get("subject_tags", []),
+                    tags=structured_tags if structured_tags else None,
+                    tag_mode=request.get("tag_mode", "any"),
                     source_types=request.get("source_types"),
                     min_quality=request.get("min_quality_stars"),
                     roles=request.get("roles"),
@@ -341,7 +351,9 @@ class AliceInterface:
         """Add tags to assets.
 
         Args:
-            request: Tagging request
+            request: Tagging request with either:
+                - tags: list[str] for legacy single-type tags
+                - tags: dict[str, list[str]] for structured tags like {"style": ["cyberpunk"], "mood": ["dark"]}
 
         Returns:
             Response indicating success
@@ -351,12 +363,36 @@ class AliceInterface:
                 raise self.initialization_error
             self._ensure_organizer()
 
-            tag_type = request.get("tag_type", "custom_tags")
             success_count = 0
-
-            for asset_id in request["asset_ids"]:
-                if self.organizer.tag_asset(asset_id, request["tags"], tag_type):
-                    success_count += 1
+            tags = request["tags"]
+            
+            # If we have the asset repository, use it for structured tags
+            if self.asset_repo and isinstance(tags, dict):
+                # New structured format
+                for asset_id in request["asset_ids"]:
+                    asset_success = True
+                    for tag_type, tag_values in tags.items():
+                        for tag_value in tag_values:
+                            if not self.asset_repo.add_tag(
+                                content_hash=asset_id,
+                                tag_type=tag_type,
+                                tag_value=tag_value,
+                                source="ai"
+                            ):
+                                asset_success = False
+                                break
+                        if not asset_success:
+                            break
+                    if asset_success:
+                        success_count += 1
+            else:
+                # Legacy format or no database
+                tag_type = request.get("tag_type", "custom")
+                tag_list = tags if isinstance(tags, list) else []
+                
+                for asset_id in request["asset_ids"]:
+                    if self.organizer.tag_asset(asset_id, tag_list, tag_type):
+                        success_count += 1
 
             return AliceResponse(
                 success=success_count > 0,
@@ -688,7 +724,8 @@ class AliceInterface:
     
     def _search_database(
         self,
-        tags: list[str] | None = None,
+        tags: list[str] | dict[str, list[str]] | None = None,
+        tag_mode: str = "any",
         source_types: list[str] | None = None,
         min_quality: int | None = None,
         roles: list[str] | None = None,
@@ -697,7 +734,8 @@ class AliceInterface:
         """Search for assets in the database.
         
         Args:
-            tags: Combined list of all tags to search for
+            tags: Either a list of tags (legacy) or dict mapping tag types to values
+            tag_mode: "any" (OR) or "all" (AND) for tag matching
             source_types: Filter by AI source types
             min_quality: Minimum quality rating
             roles: Filter by asset roles
@@ -710,6 +748,7 @@ class AliceInterface:
             # Search database
             assets = self.asset_repo.search(
                 tags=tags,
+                tag_mode=tag_mode,
                 source_type=source_types[0] if source_types else None,
                 min_rating=min_quality,
                 role=roles[0] if roles else None,

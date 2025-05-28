@@ -393,7 +393,19 @@ class CostTrackingProvider(BaseProvider):
         return await self._provider.check_status()
     
     async def estimate_cost(self, request: GenerationRequest) -> CostEstimate:
-        return await self._provider.estimate_cost(request)
+        result = await self._provider.estimate_cost(request)
+        
+        # Handle providers that return float (old base.py)
+        if isinstance(result, float):
+            return CostEstimate(
+                provider=self.name,
+                model=request.model or self.get_default_model(request.generation_type),
+                estimated_cost=result,
+                confidence=0.9,
+                breakdown={"base": result}
+            )
+        
+        return result
     
     async def validate_request(self, request: GenerationRequest):
         return await self._provider.validate_request(request)

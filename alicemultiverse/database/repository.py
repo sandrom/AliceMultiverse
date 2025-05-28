@@ -117,22 +117,28 @@ class AssetRepository:
         self,
         project_id: str | None = None,
         media_type: str | None = None,
-        tags: list[str] | None = None,
+        tags: list[str] | dict[str, list[str]] | None = None,
         role: str | None = None,
         source_type: str | None = None,
         min_rating: int | None = None,
         limit: int = 100,
+        tag_mode: str = "any",  # "any" (OR) or "all" (AND)
     ) -> list[Asset]:
         """Search for assets with various filters.
 
         Args:
             project_id: Filter by project
             media_type: Filter by media type (image, video)
-            tags: Filter by tags (any match)
+            tags: Filter by tags - can be:
+                - list[str]: Legacy format, searches tag values only
+                - dict[str, list[str]]: Key-value format like {"style": ["cyberpunk"], "mood": ["dark"]}
             role: Filter by role (hero, b_roll, etc.)
             source_type: Filter by source (fal.ai, comfyui, etc.)
             min_rating: Minimum rating
             limit: Maximum results to return
+            tag_mode: How to combine tag filters:
+                - "any": Match assets with ANY of the specified tags (OR)
+                - "all": Match assets with ALL specified tag types (AND)
 
         Returns:
             List of matching assets
@@ -156,8 +162,40 @@ class AssetRepository:
                 query = query.filter(Asset.rating >= min_rating)
 
             if tags:
-                # Find assets with any of the specified tags
-                query = query.join(Tag).filter(Tag.tag_value.in_(tags))
+                if isinstance(tags, dict):
+                    # New format: {"style": ["cyberpunk", "noir"], "mood": ["dark"]}
+                    from sqlalchemy import and_, or_, exists
+                    
+                    if tag_mode == "all":
+                        # Must have at least one tag from EACH specified type
+                        for tag_type, tag_values in tags.items():
+                            if tag_values:  # Skip empty lists
+                                subq = exists().where(
+                                    and_(
+                                        Tag.asset_id == Asset.content_hash,
+                                        Tag.tag_type == tag_type,
+                                        Tag.tag_value.in_(tag_values)
+                                    )
+                                )
+                                query = query.filter(subq)
+                    else:  # "any" mode
+                        # Match assets with ANY of the specified tags
+                        query = query.join(Tag)
+                        conditions = []
+                        for tag_type, tag_values in tags.items():
+                            if tag_values:
+                                type_condition = and_(
+                                    Tag.tag_type == tag_type,
+                                    Tag.tag_value.in_(tag_values)
+                                )
+                                conditions.append(type_condition)
+                        
+                        if conditions:
+                            query = query.filter(or_(*conditions))
+                else:
+                    # Legacy format: ["cyberpunk", "dark"]
+                    # Find assets with any of the specified tag values
+                    query = query.join(Tag).filter(Tag.tag_value.in_(tags))
 
             return query.order_by(desc(Asset.first_seen)).limit(limit).all()
 

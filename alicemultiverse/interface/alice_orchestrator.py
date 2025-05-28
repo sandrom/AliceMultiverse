@@ -332,6 +332,16 @@ class AliceOrchestrator:
         """Determine the creative intent from natural language."""
         request_lower = request.lower()
 
+        # Memory patterns - check first for questions about past actions
+        memory_keywords = ["remember", "recall", "what did", "what have", "history", "past"]
+        # Check for questions about past searches/creations
+        if any(keyword in request_lower for keyword in memory_keywords):
+            return CreativeIntent.REMEMBER
+        # Also check for specific patterns like "what have I searched"
+        if ("what" in request_lower and "have" in request_lower and 
+            any(word in request_lower for word in ["searched", "created", "made", "looked"])):
+            return CreativeIntent.REMEMBER
+
         # Search patterns
         search_keywords = ["find", "search", "look for", "where is", "show me", "get"]
         if any(keyword in request_lower for keyword in search_keywords):
@@ -346,11 +356,6 @@ class AliceOrchestrator:
         organize_keywords = ["organize", "sort", "arrange", "clean up", "structure"]
         if any(keyword in request_lower for keyword in organize_keywords):
             return CreativeIntent.ORGANIZE
-
-        # Memory patterns
-        memory_keywords = ["remember", "recall", "what did we", "history"]
-        if any(keyword in request_lower for keyword in memory_keywords):
-            return CreativeIntent.REMEMBER
 
         # Exploration patterns
         explore_keywords = ["explore", "variations", "similar", "related"]
@@ -568,11 +573,14 @@ class AliceOrchestrator:
 
     def _extract_prompt(self, request: str) -> str:
         """Extract the actual prompt from a creation request."""
-        # Remove creation keywords
+        # Remove creation keywords (case insensitive)
         create_words = ["create", "generate", "make", "produce", "design"]
         prompt = request
         for word in create_words:
-            prompt = prompt.replace(word, "").replace(word.capitalize(), "")
+            # Replace all case variations
+            prompt = prompt.replace(word, "")
+            prompt = prompt.replace(word.capitalize(), "")
+            prompt = prompt.replace(word.upper(), "")
         return prompt.strip()
 
     def _enhance_prompt_with_style(self, prompt: str, styles: dict[str, Any]) -> str:

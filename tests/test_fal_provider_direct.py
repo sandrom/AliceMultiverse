@@ -7,16 +7,18 @@ This tests the provider without going through MCP.
 import asyncio
 import os
 from pathlib import Path
+import pytest
 
-from alicemultiverse.providers import get_provider, GenerationRequest, GenerationType
+from alicemultiverse.providers import get_provider_async, GenerationRequest, GenerationType
 
 
+@pytest.mark.asyncio
 async def test_provider_setup():
     """Test that fal.ai provider is properly set up."""
     print("=== Testing fal.ai Provider Setup ===\n")
     
     # Get provider
-    provider = get_provider("fal")
+    provider = await get_provider_async("fal")
     print(f"✅ Provider initialized: {provider.name}")
     
     # Check capabilities
@@ -36,6 +38,7 @@ async def test_provider_setup():
             print(f"  ❌ {model}: NOT FOUND")
 
 
+@pytest.mark.asyncio
 async def test_generation_request():
     """Test creating generation requests for new models."""
     print("\n=== Testing Generation Request Creation ===\n")
@@ -66,6 +69,7 @@ async def test_generation_request():
     print(f"✅ Created Kling v2 request: {kling_request.model}")
 
 
+@pytest.mark.asyncio
 async def test_api_key_availability():
     """Check if API key is available."""
     print("\n=== Testing API Key Availability ===\n")
@@ -88,11 +92,12 @@ async def test_api_key_availability():
         print("Run 'alice keys setup' to configure API keys.")
 
 
+@pytest.mark.asyncio
 async def test_dry_run_generation():
     """Test generation request validation without making API calls."""
     print("\n=== Testing Request Validation (Dry Run) ===\n")
     
-    provider = get_provider("fal")
+    provider = await get_provider_async("fal")
     
     # Test valid request
     valid_request = GenerationRequest(
@@ -102,14 +107,13 @@ async def test_dry_run_generation():
     )
     
     try:
-        # Just test parameter building
-        params = provider._build_api_params(valid_request, "flux-schnell")
-        print(f"✅ Valid request parameters built successfully")
-        print(f"   Prompt: {params['prompt']}")
-        print(f"   Steps: {params.get('num_inference_steps', 'default')}")
-        print(f"   Guidance: {params.get('guidance_scale', 'default')}")
+        # Test cost estimation instead of internal parameter building
+        estimate = await provider.estimate_cost(valid_request)
+        print(f"✅ Valid request cost estimate: ${estimate.estimated_cost:.4f}")
+        print(f"   Model: {valid_request.model}")
+        print(f"   Type: {valid_request.generation_type.value}")
     except Exception as e:
-        print(f"❌ Failed to build parameters: {e}")
+        print(f"❌ Failed to estimate cost: {e}")
     
     # Test invalid model
     invalid_request = GenerationRequest(
@@ -126,21 +130,4 @@ async def test_dry_run_generation():
         print(f"\n❌ Invalid model should have been rejected")
 
 
-async def main():
-    """Run all tests."""
-    print("=== fal.ai Provider Direct Test ===\n")
-    
-    await test_provider_setup()
-    await test_generation_request()
-    await test_api_key_availability()
-    await test_dry_run_generation()
-    
-    print("\n✅ All tests completed!")
-    print("\nNext steps:")
-    print("1. Configure API key with: alice keys setup")
-    print("2. Run example with: python examples/advanced/fal_provider_example.py")
-    print("3. Deploy to Kubernetes when ready")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+# This file is now a pytest test file and should be run with pytest

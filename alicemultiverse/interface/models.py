@@ -23,6 +23,7 @@ class SearchRequest(TypedDict):
     style_tags: list[str] | None
     mood_tags: list[str] | None
     subject_tags: list[str] | None
+    tag_mode: Literal["any", "all"] | None  # "any" for OR, "all" for AND
 
     # Filters
     source_types: list[str] | None  # ["midjourney", "flux"]
@@ -64,10 +65,13 @@ class TagRequest(TypedDict):
     """Request to tag assets."""
 
     asset_ids: list[str]
+    # Legacy format - individual tag lists
     style_tags: list[str] | None
     mood_tags: list[str] | None
     subject_tags: list[str] | None
     custom_tags: list[str] | None
+    # New structured format - key:value pairs
+    tags: list[str] | dict[str, list[str]] | None  # Either ["tag1", "tag2"] or {"style": ["cyberpunk"], "mood": ["dark"]}
     role: str | None  # Asset role like "hero", "b_roll", etc.
 
 

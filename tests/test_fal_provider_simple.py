@@ -6,16 +6,18 @@ This test does not make any API calls.
 
 import asyncio
 import os
+import pytest
 
-from alicemultiverse.providers import get_provider
+from alicemultiverse.providers import get_provider_async
 
 
+@pytest.mark.asyncio
 async def test_provider_setup():
     """Test that the fal.ai provider is properly configured."""
     print("=== Testing fal.ai Provider Setup ===\n")
     
     # Get the provider (without API key first)
-    provider = get_provider("fal")
+    provider = await get_provider_async("fal")
     print(f"✓ Provider initialized: {provider.name}")
     
     # Check capabilities
@@ -65,11 +67,4 @@ async def test_provider_setup():
         print(f"  Could not check status: {e}")
 
 
-async def main():
-    """Run the simple test."""
-    await test_provider_setup()
-    print("\n✓ All basic checks completed!")
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
+# This file is now a pytest test file and should be run with pytest
