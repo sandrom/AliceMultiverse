@@ -35,13 +35,23 @@ class Project(Base):
     created_at = Column(DateTime, server_default=func.now())
     updated_at = Column(DateTime, onupdate=func.now())
 
+    # Budget tracking
+    budget_total = Column(Float, nullable=True)  # Total budget allocated
+    budget_spent = Column(Float, default=0.0)  # Amount spent so far
+    budget_currency = Column(String(3), default="USD")  # Currency code
+
+    # Status tracking
+    status = Column(String(20), default="active")  # active, paused, completed, archived
+    
     # JSON fields for flexible data
     creative_context = Column(JSON, default={})  # Style preferences, characters, etc.
     settings = Column(JSON, default={})  # Project-specific settings
     extra_metadata = Column(JSON, default={})  # Additional metadata
+    cost_breakdown = Column(JSON, default={})  # Detailed breakdown by provider/model
 
     # Relationships
     assets = relationship("Asset", back_populates="project")
+    generations = relationship("Generation", back_populates="project")
 
     __table_args__ = (
         Index("idx_projects_created", "created_at"),
@@ -189,4 +199,45 @@ class Tag(Base):
         Index("idx_tags_type_value", "tag_type", "tag_value"),
         Index("idx_tags_value", "tag_value"),
         UniqueConstraint("asset_id", "tag_type", "tag_value", name="uq_asset_tag"),
+    )
+
+
+class Generation(Base):
+    """Track AI generation requests and costs."""
+
+    __tablename__ = "generations"
+
+    id = Column(String(36), primary_key=True, default=lambda: str(uuid.uuid4()))
+    project_id = Column(String(36), ForeignKey("projects.id"), nullable=False)
+    
+    # Provider info
+    provider = Column(String(50), nullable=False)  # 'fal', 'openai', 'anthropic'
+    model = Column(String(100), nullable=False)  # 'flux-pro', 'dall-e-3', etc.
+    
+    # Request details
+    request_type = Column(String(20))  # 'image', 'video', 'vision', 'text'
+    prompt = Column(String)
+    parameters = Column(JSON, default={})  # Model-specific parameters
+    
+    # Cost tracking
+    cost = Column(Float, default=0.0)
+    currency = Column(String(3), default="USD")
+    tokens_used = Column(Integer, nullable=True)  # For text models
+    
+    # Results
+    status = Column(String(20), default="pending")  # pending, success, failed
+    result_assets = Column(JSON, default=[])  # List of content hashes
+    error_message = Column(String, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, server_default=func.now())
+    completed_at = Column(DateTime, nullable=True)
+    
+    # Relationships
+    project = relationship("Project", back_populates="generations")
+    
+    __table_args__ = (
+        Index("idx_generations_project", "project_id"),
+        Index("idx_generations_created", "created_at"),
+        Index("idx_generations_provider", "provider"),
     )
