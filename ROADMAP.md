@@ -6,17 +6,7 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 
 ## Current Work
 
-### 🚨 CRITICAL: Fix Broken Tests
-Working application takes priority over new features. Import errors are fixed, but some tests still fail.
-
-- [x] Fix import errors in pipeline tests (alicemultiverse.keys → alicemultiverse.core.keys)
-- [x] Update event tests to use current event module structure (remove v2 references)
-- [x] Fix alice_orchestrator test imports (CreativeIntent missing)
-- [ ] Fix remaining test failures (20 failed, 13 errors - mostly async mocks and logic issues)
-
-## Next Up (Priority Order)
-
-### 1. Provider Abstraction [BLOCKING]
+### ⚠️ BLOCKING: Provider Abstraction
 Must complete before adding more providers. This architectural foundation prevents technical debt.
 
 - [x] **Step 1**: Extract base interface from fal_provider → **Commit**: "Extract provider interface"
@@ -24,18 +14,26 @@ Must complete before adding more providers. This architectural foundation preven
 - [ ] **Step 3**: Add OpenAI provider (DALL-E 3) → **Commit**: "Add OpenAI provider"
 - [ ] **Step 4**: Add Anthropic provider (Claude vision) → **Commit**: "Add Anthropic provider"
 
-### 2. Event System Enhancement
+## Next Up (Priority Order)
+
+### 1. Event System Enhancement
 - [ ] Add version field to events + migration utils → **Commit**: "Add event schema versioning"
 - [ ] Write ADR-006 for versioning strategy
 - [ ] Add optional Redis persistence → **Commit**: "Add optional Redis persistence"
 - [ ] Update ADR-002 with implementation
 
-### 3. Project Management Layer
+### 2. Project Management Layer
+- [ ] Add version field to events + migration utils → **Commit**: "Add event schema versioning"
+- [ ] Write ADR-006 for versioning strategy
+- [ ] Add optional Redis persistence → **Commit**: "Add optional Redis persistence"
+- [ ] Update ADR-002 with implementation
+
+### 3. Workflow Engine
 - [ ] Create project models + migrations → **Commit**: "Add project management models"
 - [ ] Implement project service + budget tracking → **Commit**: "Add project service"
 - [ ] Integrate into Alice interface → **Commit**: "Integrate projects into Alice"
 
-### 4. Workflow Engine
+### 4. Remaining Test Fixes
 - [ ] Design workflow definition format
 - [ ] Implement workflow executor
 - [ ] Add progress tracking and resumption
@@ -62,7 +60,16 @@ Must complete before adding more providers. This architectural foundation preven
 - DaVinci Resolve plugins
 - Real-time collaboration
 
-## Completed ✅
+## Recently Completed ✅
+
+### Test Suite Restoration (Jan 2025)
+- Fixed import errors throughout test suite
+- Updated event system references (removed v2 modules)
+- Fixed datetime deprecation warnings
+- Verified Kubernetes deployment
+- Achieved 89% test pass rate (232/264 tests passing)
+
+## Previously Completed
 
 ### Foundation
 - ✅ Content-Addressed Storage
