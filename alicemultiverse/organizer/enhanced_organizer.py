@@ -59,8 +59,8 @@ class EnhancedMediaOrganizer(MediaOrganizer):
     def _update_search_engine(self):
         """Update search engine with current metadata."""
         metadata_store = self.metadata_cache.get_all_metadata()
-        if metadata_store:
-            self.search_engine = AssetSearchEngine(metadata_store)
+        # Always create search engine, even with empty metadata
+        self.search_engine = AssetSearchEngine(metadata_store or {})
 
     def _process_file(self, media_path: Path) -> OrganizeResult:
         """Process a single media file with enhanced metadata.

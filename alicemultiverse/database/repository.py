@@ -2,6 +2,7 @@
 
 import logging
 from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy import desc
@@ -14,6 +15,79 @@ logger = logging.getLogger(__name__)
 
 class AssetRepository:
     """Repository for asset-related database operations."""
+    
+    def create_or_update_asset(
+        self,
+        content_hash: str,
+        file_path: str,
+        media_type: str,
+        metadata: dict[str, Any],
+        project_id: str | None = None,
+    ) -> Asset:
+        """Create or update an asset.
+        
+        Args:
+            content_hash: Content hash of the asset
+            file_path: Current file path
+            media_type: Type of media (image, video)
+            metadata: Full metadata from analysis
+            project_id: Optional project ID
+            
+        Returns:
+            Created or updated asset
+        """
+        with get_session() as session:
+            # Check if asset exists
+            asset = session.query(Asset).filter_by(content_hash=content_hash).first()
+            
+            if asset:
+                # Update existing asset
+                asset.file_path = file_path
+                asset.last_seen = datetime.now()
+                if metadata:
+                    asset.embedded_metadata = metadata
+                    asset.file_size = metadata.get("file_size", asset.file_size)
+                    # Update dimensions
+                    dimensions = metadata.get("dimensions")
+                    if dimensions:
+                        if isinstance(dimensions, dict):
+                            asset.width = dimensions.get("width", asset.width)
+                            asset.height = dimensions.get("height", asset.height)
+                        elif isinstance(dimensions, (list, tuple)) and len(dimensions) >= 2:
+                            asset.width, asset.height = dimensions[0], dimensions[1]
+                    asset.source_type = metadata.get("ai_source", asset.source_type)
+                    asset.rating = metadata.get("quality_star", asset.rating)
+            else:
+                # Create new asset
+                # Extract dimensions if available
+                dimensions = metadata.get("dimensions")
+                width = height = None
+                if dimensions:
+                    if isinstance(dimensions, dict):
+                        width = dimensions.get("width")
+                        height = dimensions.get("height")
+                    elif isinstance(dimensions, (list, tuple)) and len(dimensions) >= 2:
+                        width, height = dimensions[0], dimensions[1]
+                
+                asset = Asset(
+                    content_hash=content_hash,
+                    file_path=file_path,
+                    media_type=media_type,
+                    file_size=metadata.get("file_size", 0),
+                    width=width,
+                    height=height,
+                    source_type=metadata.get("ai_source", "unknown"),
+                    project_id=project_id or metadata.get("project"),
+                    rating=metadata.get("quality_star"),
+                    generation_params=metadata.get("generation_params", {}),
+                    embedded_metadata=metadata,
+                    analysis_results=metadata.get("analysis_results", {}),
+                )
+                session.add(asset)
+            
+            session.commit()
+            session.refresh(asset)
+            return asset
 
     def get_by_hash(self, content_hash: str) -> Asset | None:
         """Get asset by content hash.
@@ -85,7 +159,7 @@ class AssetRepository:
                 # Find assets with any of the specified tags
                 query = query.join(Tag).filter(Tag.tag_value.in_(tags))
 
-            return query.order_by(desc(Asset.created_at)).limit(limit).all()
+            return query.order_by(desc(Asset.first_seen)).limit(limit).all()
 
     def add_tag(
         self,
@@ -269,7 +343,7 @@ class AssetRepository:
             if analysis_results is not None:
                 asset.analysis_results = analysis_results
 
-            asset.updated_at = datetime.now()
+            asset.last_seen = datetime.now()
             session.commit()
             return True
 

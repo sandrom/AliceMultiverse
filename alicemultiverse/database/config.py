@@ -2,6 +2,7 @@
 
 import os
 from collections.abc import Generator
+from contextlib import contextmanager
 from pathlib import Path
 
 from sqlalchemy import create_engine
@@ -28,6 +29,7 @@ def get_engine():
     return engine
 
 
+@contextmanager
 def get_session() -> Generator[Session, None, None]:
     """Get a database session."""
     session = SessionLocal()

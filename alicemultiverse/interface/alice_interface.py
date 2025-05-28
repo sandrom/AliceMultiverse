@@ -5,7 +5,10 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
+from ..core.ai_errors import AIFriendlyError
 from ..core.config import load_config
+from ..database.config import init_db
+from ..database.repository import AssetRepository, ProjectRepository
 from ..metadata.models import AssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
 from .models import (
@@ -47,12 +50,28 @@ class AliceInterface:
         self.config = load_config(config_path)
         self.config.enhanced_metadata = True  # Always use enhanced metadata
         self.organizer = None
-        self._ensure_organizer()
+        self.initialization_error = None
+        
+        try:
+            self._ensure_organizer()
+        except Exception as e:
+            # Store error for later - allow interface to be created
+            self.initialization_error = e
+            logger.warning(f"Failed to initialize organizer: {e}")
+        
+        # Initialize database
+        init_db()
+        self.asset_repo = AssetRepository()
+        self.project_repo = ProjectRepository()
+        logger.info("Database initialized")
 
     def _ensure_organizer(self):
         """Ensure organizer is initialized."""
         if not self.organizer:
             self.organizer = EnhancedMediaOrganizer(self.config)
+            # Ensure search engine is initialized
+            if not self.organizer.search_engine:
+                self.organizer._update_search_engine()
 
     def _parse_time_reference(self, time_ref: str) -> datetime | None:
         """Parse natural language time references.
@@ -153,6 +172,8 @@ class AliceInterface:
             Response with matching assets
         """
         try:
+            if self.initialization_error:
+                raise self.initialization_error
             self._ensure_organizer()
 
             # Build search query
@@ -195,8 +216,20 @@ class AliceInterface:
                 query_params["sort_by"] = request.get("sort_by", "relevance")
                 query_params["limit"] = request.get("limit", 20)
 
-                # Execute search
-                results = self.organizer.search_assets(**query_params)
+                # Try database search first
+                db_results = self._search_database(
+                    tags=request.get("style_tags", []) + request.get("mood_tags", []) + request.get("subject_tags", []),
+                    source_types=request.get("source_types"),
+                    min_quality=request.get("min_quality_stars"),
+                    roles=request.get("roles"),
+                    limit=request.get("limit", 20)
+                )
+                
+                # Fallback to organizer search if available
+                if not db_results and self.organizer.search_engine:
+                    results = self.organizer.search_assets(**query_params)
+                else:
+                    results = db_results
 
             # Simplify results for AI
             simplified_results = [self._simplify_asset_info(asset) for asset in results]
@@ -210,7 +243,13 @@ class AliceInterface:
 
         except Exception as e:
             logger.error(f"Search failed: {e}")
-            return AliceResponse(success=False, message="Search failed", data=None, error=str(e))
+            friendly = AIFriendlyError.make_friendly(e, {"operation": "search", "request": request})
+            return AliceResponse(
+                success=False, 
+                message=friendly["error"],
+                data={"suggestions": friendly["suggestions"]},
+                error=friendly["technical_details"]
+            )
 
     def generate_content(self, request: GenerateRequest) -> AliceResponse:
         """Generate new content based on prompt and references.
@@ -251,6 +290,10 @@ class AliceInterface:
             Response with organization results
         """
         try:
+            # Check for initialization error
+            if self.initialization_error:
+                raise self.initialization_error
+                
             # Update config based on request
             if request.get("source_path"):
                 self.config.paths.inbox = request["source_path"]
@@ -269,6 +312,10 @@ class AliceInterface:
 
             # Get summary
             summary = self.organizer.get_organization_summary()
+            
+            # Persist to database
+            if success:
+                self._persist_organized_assets()
 
             return AliceResponse(
                 success=success,
@@ -282,8 +329,12 @@ class AliceInterface:
 
         except Exception as e:
             logger.error(f"Organization failed: {e}")
+            friendly = AIFriendlyError.make_friendly(e, {"operation": "organize", "request": request})
             return AliceResponse(
-                success=False, message="Organization failed", data=None, error=str(e)
+                success=False,
+                message=friendly["error"],
+                data={"suggestions": friendly["suggestions"]},
+                error=friendly["technical_details"]
             )
 
     def tag_assets(self, request: TagRequest) -> AliceResponse:
@@ -296,6 +347,8 @@ class AliceInterface:
             Response indicating success
         """
         try:
+            if self.initialization_error:
+                raise self.initialization_error
             self._ensure_organizer()
 
             tag_type = request.get("tag_type", "custom_tags")
@@ -326,6 +379,8 @@ class AliceInterface:
             Response indicating success
         """
         try:
+            if self.initialization_error:
+                raise self.initialization_error
             self._ensure_organizer()
 
             success = self.organizer.group_assets(request["asset_ids"], request["group_name"])
@@ -351,6 +406,8 @@ class AliceInterface:
             Response with project context
         """
         try:
+            if self.initialization_error:
+                raise self.initialization_error
             self._ensure_organizer()
 
             context = self.organizer.get_project_context()
@@ -381,6 +438,8 @@ class AliceInterface:
             Response with similar assets
         """
         try:
+            if self.initialization_error:
+                raise self.initialization_error
             self._ensure_organizer()
 
             similar = self.organizer.find_similar(asset_id, threshold)
@@ -410,6 +469,8 @@ class AliceInterface:
             Response indicating success
         """
         try:
+            if self.initialization_error:
+                raise self.initialization_error
             self._ensure_organizer()
 
             role_enum = AssetRole(role)
@@ -438,6 +499,8 @@ class AliceInterface:
             Comprehensive metadata including prompt, tags, quality, and relationships
         """
         try:
+            if self.initialization_error:
+                raise self.initialization_error
             self._ensure_organizer()
 
             # Get asset metadata from cache
@@ -463,8 +526,12 @@ class AliceInterface:
 
         except Exception as e:
             logger.error(f"Get asset info failed: {e}")
+            friendly = AIFriendlyError.make_friendly(e, {"operation": "get_info", "asset_id": asset_id})
             return AliceResponse(
-                success=False, message="Failed to get asset info", data=None, error=str(e)
+                success=False,
+                message=friendly["error"],
+                data={"suggestions": friendly["suggestions"]},
+                error=friendly["technical_details"]
             )
 
     def assess_quality(self, asset_ids: list[str], pipeline: str = "standard") -> AliceResponse:
@@ -478,6 +545,8 @@ class AliceInterface:
             Quality scores and identified issues for each asset
         """
         try:
+            if self.initialization_error:
+                raise self.initialization_error
             self._ensure_organizer()
 
             results = []
@@ -519,6 +588,8 @@ class AliceInterface:
             Counts by date, source, quality, and project
         """
         try:
+            if self.initialization_error:
+                raise self.initialization_error
             self._ensure_organizer()
 
             # Get all cached metadata
@@ -573,3 +644,95 @@ class AliceInterface:
             return AliceResponse(
                 success=False, message="Failed to get statistics", data=None, error=str(e)
             )
+    
+    def _persist_organized_assets(self) -> None:
+        """Persist organized assets to database."""
+        try:
+            # Get all metadata from the cache
+            all_metadata = self.organizer.metadata_cache._unified.metadata_index
+            
+            for content_hash, metadata in all_metadata.items():
+                # Determine media type
+                media_type = metadata.get("media_type", "image")
+                file_path = metadata.get("file_path", "")
+                
+                # Create or update asset in database
+                asset = self.asset_repo.create_or_update_asset(
+                    content_hash=content_hash,
+                    file_path=file_path,
+                    media_type=media_type,
+                    metadata=metadata,
+                    project_id=metadata.get("project")
+                )
+                
+                # Add tags if present
+                if metadata.get("style_tags"):
+                    for tag in metadata["style_tags"]:
+                        self.asset_repo.add_tag(content_hash, "style", tag, source="auto")
+                        
+                if metadata.get("mood_tags"):
+                    for tag in metadata["mood_tags"]:
+                        self.asset_repo.add_tag(content_hash, "mood", tag, source="auto")
+                        
+                if metadata.get("subject_tags"):
+                    for tag in metadata["subject_tags"]:
+                        self.asset_repo.add_tag(content_hash, "subject", tag, source="auto")
+                        
+                logger.debug(f"Persisted asset to database: {content_hash}")
+                
+            logger.info(f"Persisted {len(all_metadata)} assets to database")
+            
+        except Exception as e:
+            logger.error(f"Failed to persist assets to database: {e}")
+            # Don't fail the operation if database persistence fails
+    
+    def _search_database(
+        self,
+        tags: list[str] | None = None,
+        source_types: list[str] | None = None,
+        min_quality: int | None = None,
+        roles: list[str] | None = None,
+        limit: int = 20
+    ) -> list[dict]:
+        """Search for assets in the database.
+        
+        Args:
+            tags: Combined list of all tags to search for
+            source_types: Filter by AI source types
+            min_quality: Minimum quality rating
+            roles: Filter by asset roles
+            limit: Maximum results
+            
+        Returns:
+            List of asset metadata dictionaries
+        """
+        try:
+            # Search database
+            assets = self.asset_repo.search(
+                tags=tags,
+                source_type=source_types[0] if source_types else None,
+                min_rating=min_quality,
+                role=roles[0] if roles else None,
+                limit=limit
+            )
+            
+            # Convert to metadata format
+            results = []
+            for asset in assets:
+                metadata = asset.embedded_metadata or {}
+                metadata.update({
+                    "file_hash": asset.content_hash,
+                    "filename": Path(asset.file_path).name if asset.file_path else "unknown",
+                    "file_path": asset.file_path,
+                    "ai_source": asset.source_type,
+                    "quality_star": asset.rating,
+                    "project": asset.project_id,
+                    "media_type": asset.media_type,
+                })
+                results.append(metadata)
+                
+            return results
+            
+        except Exception as e:
+            logger.error(f"Database search failed: {e}")
+            return []
