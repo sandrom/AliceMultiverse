@@ -20,17 +20,34 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 
 **Focus**: Provider integrations and project management
 
-- 🔲 **fal.ai Provider System**
-  - Direct integration with FLUX, Kling, and other models
-  - Cost optimization and failover handling
-  - Unified provider abstraction
+> **⚠️ CRITICAL**: Provider abstraction MUST be completed before adding more providers.
 
-- 🔲 **Project Management**
-  - Creative context preservation
-  - Project-based asset organization
-  - Long-term continuity support
+#### 2.1 Provider System (Weeks 1-2)
+- 🔲 **Provider Abstraction** [BLOCKING]
+  - [ ] Step 1: Extract base interface from fal_provider → **Commit**: "Extract provider interface"
+  - [ ] Step 2: Create provider registry with cost tracking → **Commit**: "Add provider registry"
+  - [ ] Step 3: Add OpenAI provider (DALL-E 3) → **Commit**: "Add OpenAI provider"
+  - [ ] Step 4: Add Anthropic provider (Claude vision) → **Commit**: "Add Anthropic provider"
+- ✅ **fal.ai Integration**
+  - FLUX and Kling models implemented ✅
+  - Needs refactoring to use abstraction 🔄
 
-- 🔲 **Workflow Engine**
+#### 2.2 Event System Enhancement (Week 3)
+- 🔲 **Schema Versioning**
+  - [ ] Step 1: Add version field to events + migration utils → **Commit**: "Add event schema versioning"
+  - [ ] Write ADR-006 for versioning strategy
+- 🔲 **Redis Persistence** (Optional)
+  - [ ] Step 2: Add optional Redis persistence → **Commit**: "Add optional Redis persistence"
+  - [ ] Update ADR-002 with implementation
+
+#### 2.3 Project Management (Weeks 4-5)
+- 🔲 **Project Models**
+  - [ ] Step 1: Create project models + migrations → **Commit**: "Add project management models"
+  - [ ] Step 2: Implement project service + budget tracking → **Commit**: "Add project service"
+  - [ ] Step 3: Integrate into Alice interface → **Commit**: "Integrate projects into Alice"
+
+#### 2.4 Workflow Engine (Future)
+- 🔲 **Pipeline Orchestration**
   - Reusable creative workflows
   - Multi-step generation pipelines
   - Progress tracking and resumption
@@ -101,9 +118,11 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 
 ## Current Priorities
 
-1. **Alice Orchestration Layer** - Building the intelligent interface for AI assistants
-2. **fal.ai Integration** - Priority provider for image/video generation
-3. **Event System Maturity** - Expanding event coverage and monitoring
+1. **Provider Abstraction** [BLOCKING] - Must complete before adding more providers
+2. **Event Schema Versioning** - Prevent future migration issues  
+3. **Project Management Layer** - Enable creative context preservation
+
+**Execution**: Check boxes above as you complete each step. Each step = one working commit.
 
 ## Design Principles
 
@@ -111,6 +130,25 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 - **Local-First**: User data sovereignty with optional cloud
 - **Progressive Enhancement**: Each phase delivers working software
 - **Event-Driven**: Loose coupling for organic evolution
+
+## Implementation Guide
+
+### Testing Each Step
+```bash
+# After each commit, verify:
+alice --help                    # Still works
+python -m pytest tests/unit/    # All tests pass
+python scripts/event_monitor.py # Events flow correctly
+
+# Provider testing:
+alice --pipeline custom --stages "openai,anthropic" --dry-run
+```
+
+### When Context Resets
+1. Check ROADMAP.md Phase 2 checkboxes
+2. Run `git status` for uncommitted work
+3. Check last CHANGELOG.md entry
+4. Continue from next unchecked step
 
 ## How to Contribute
 
