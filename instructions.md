@@ -20,3 +20,4 @@
 - make sure to use official documentation where possible - often other sources are outdated or even wrong (especially stackoverflow has a lot of wrong information too). other sources can still inform, but be very careful about those when evaluating.
 - i like science and scientific method. this means i also like research and we can take current research into account too when deciding of course.
 - I mostly use the newest versions of everything (where possible and it doesnt break) so consider this in your answers.
+- when planning we are doing this agile, close to kanban. we have a backlog ordered on importance. we take the most important task next and reevaluate importance of our backlog continually based on findings while implementing and planning. 

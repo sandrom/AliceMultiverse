@@ -4,125 +4,71 @@
 
 AliceMultiverse is evolving from a media organization tool into a comprehensive creative workflow hub that bridges AI assistants with creative tools and APIs. Our goal is to support creative professionals who work iteratively with AI over extended periods, maintaining context and continuity across sessions.
 
-## Development Phases
+## Current Work
 
-### Phase 1: Foundation ✅ (Current)
+### ⚠️ BLOCKING: Provider Abstraction
+Must complete before adding more providers. This architectural foundation prevents technical debt.
 
-**Status**: Completed foundations, actively implementing
+- [ ] **Step 1**: Extract base interface from fal_provider → **Commit**: "Extract provider interface"
+- [ ] **Step 2**: Create provider registry with cost tracking → **Commit**: "Add provider registry"
+- [ ] **Step 3**: Add OpenAI provider (DALL-E 3) → **Commit**: "Add OpenAI provider"
+- [ ] **Step 4**: Add Anthropic provider (Claude vision) → **Commit**: "Add Anthropic provider"
 
-- ✅ **Content-Addressed Storage** - Files tracked by content hash, not paths
-- ✅ **Unified Metadata System** - Single source of truth for all metadata
-- ✅ **Event-Driven Architecture** - Foundation for future microservices
-- ✅ **Database Layer** - SQLAlchemy models with migration support
-- ✅ **Alice Orchestration Interface** - Intelligent endpoint for AI assistants
+## Next Up (Priority Order)
 
-### Phase 2: Integration 🚧 (Q1-Q2 2025)
+### 1. Event System Enhancement
+- [ ] Add version field to events + migration utils → **Commit**: "Add event schema versioning"
+- [ ] Write ADR-006 for versioning strategy
+- [ ] Add optional Redis persistence → **Commit**: "Add optional Redis persistence"
+- [ ] Update ADR-002 with implementation
 
-**Focus**: Provider integrations and project management
+### 2. Project Management Layer
+- [ ] Create project models + migrations → **Commit**: "Add project management models"
+- [ ] Implement project service + budget tracking → **Commit**: "Add project service"
+- [ ] Integrate into Alice interface → **Commit**: "Integrate projects into Alice"
 
-> **⚠️ CRITICAL**: Provider abstraction MUST be completed before adding more providers.
+### 3. Workflow Engine
+- [ ] Design workflow definition format
+- [ ] Implement workflow executor
+- [ ] Add progress tracking and resumption
 
-#### 2.1 Provider System (Weeks 1-2)
-- 🔲 **Provider Abstraction** [BLOCKING]
-  - [ ] Step 1: Extract base interface from fal_provider → **Commit**: "Extract provider interface"
-  - [ ] Step 2: Create provider registry with cost tracking → **Commit**: "Add provider registry"
-  - [ ] Step 3: Add OpenAI provider (DALL-E 3) → **Commit**: "Add OpenAI provider"
-  - [ ] Step 4: Add Anthropic provider (Claude vision) → **Commit**: "Add Anthropic provider"
-- ✅ **fal.ai Integration**
-  - FLUX and Kling models implemented ✅
-  - Needs refactoring to use abstraction 🔄
+## Backlog (Unprioritized)
 
-#### 2.2 Event System Enhancement (Week 3)
-- 🔲 **Schema Versioning**
-  - [ ] Step 1: Add version field to events + migration utils → **Commit**: "Add event schema versioning"
-  - [ ] Write ADR-006 for versioning strategy
-- 🔲 **Redis Persistence** (Optional)
-  - [ ] Step 2: Add optional Redis persistence → **Commit**: "Add optional Redis persistence"
-  - [ ] Update ADR-002 with implementation
+### Music Video Production Features
+- Audio analysis (beat detection, mood, sections)
+- Timeline generation (frame-accurate sync)
+- Visual generation (beat-synchronized)
 
-#### 2.3 Project Management (Weeks 4-5)
-- 🔲 **Project Models**
-  - [ ] Step 1: Create project models + migrations → **Commit**: "Add project management models"
-  - [ ] Step 2: Implement project service + budget tracking → **Commit**: "Add project service"
-  - [ ] Step 3: Integrate into Alice interface → **Commit**: "Integrate projects into Alice"
+### Service Distribution
+- Extract services (asset processing, workflow, projects)
+- Dapr integration for infrastructure abstraction
+- Multi-user and team features
 
-#### 2.4 Workflow Engine (Future)
-- 🔲 **Pipeline Orchestration**
-  - Reusable creative workflows
-  - Multi-step generation pipelines
-  - Progress tracking and resumption
+### Performance & Scale
+- GPU resource pooling
+- Advanced caching strategies
+- Batch processing optimization
 
-- ✅ **Enhanced Alice Interface**
-  - Natural language asset search ✅
-  - Context-aware responses ✅
-  - Creative decision tracking ✅
-  - Creative memory system ✅
-  - Pattern recognition 🔄
+### Integrations
+- ComfyUI workflow support
+- DaVinci Resolve plugins
+- Real-time collaboration
 
-### Phase 3: Music Video Production 🎬 (Q2-Q3 2025)
+## Completed ✅
 
-**Focus**: Specialized features for music video creation
+### Foundation
+- ✅ Content-Addressed Storage
+- ✅ Unified Metadata System
+- ✅ Event-Driven Architecture
+- ✅ Database Layer with migrations
+- ✅ Alice Orchestration Interface
 
-- 🔲 **Audio Analysis**
-  - Beat detection and tempo mapping
-  - Mood analysis over time
-  - Section detection (verse/chorus)
-
-- 🔲 **Timeline Generation**
-  - Frame-accurate synchronization
-  - Multiple export formats (AAF, EDL, FCPXML)
-  - Beat grid alignment
-
-- 🔲 **Visual Generation**
-  - Beat-synchronized image creation
-  - Style consistency across scenes
-  - Batch generation management
-
-### Phase 4: Distribution 🌐 (Q3-Q4 2025)
-
-**Focus**: Scaling and team collaboration
-
-- 🔲 **Service Extraction**
-  - Asset processing service
-  - Workflow execution service
-  - Project management service
-
-- 🔲 **Dapr Integration**
-  - Infrastructure abstraction
-  - Pub/sub communication
-  - State management
-
-- 🔲 **Team Features**
-  - Multi-user projects
-  - Permission management
-  - Collaborative workflows
-
-### Phase 5: Scale & Polish 🚀 (2026)
-
-**Focus**: Production readiness and optimization
-
-- 🔲 **Performance Optimization**
-  - GPU resource pooling
-  - Intelligent caching layers
-  - Batch processing optimization
-
-- 🔲 **Advanced Integrations**
-  - ComfyUI workflows
-  - DaVinci Resolve plugins
-  - Real-time collaboration
-
-- 🔲 **Enterprise Features**
-  - Cloud deployment options
-  - Audit trails
-  - SLA guarantees
-
-## Current Priorities
-
-1. **Provider Abstraction** [BLOCKING] - Must complete before adding more providers
-2. **Event Schema Versioning** - Prevent future migration issues  
-3. **Project Management Layer** - Enable creative context preservation
-
-**Execution**: Check boxes above as you complete each step. Each step = one working commit.
+### Integrations
+- ✅ fal.ai provider (FLUX, Kling models)
+- ✅ Alice structured interface (Phase 1)
+- ✅ Natural language asset search
+- ✅ Context-aware responses
+- ✅ Creative decision tracking
 
 ## Design Principles
 
@@ -130,12 +76,13 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 - **Local-First**: User data sovereignty with optional cloud
 - **Progressive Enhancement**: Each phase delivers working software
 - **Event-Driven**: Loose coupling for organic evolution
+- **Continuous Learning**: Adapt priorities based on implementation insights
 
 ## Implementation Guide
 
-### Testing Each Step
+### After Each Step
 ```bash
-# After each commit, verify:
+# Verify working state:
 alice --help                    # Still works
 python -m pytest tests/unit/    # All tests pass
 python scripts/event_monitor.py # Events flow correctly
@@ -145,32 +92,32 @@ alice --pipeline custom --stages "openai,anthropic" --dry-run
 ```
 
 ### When Context Resets
-1. Check ROADMAP.md Phase 2 checkboxes
+1. Check "Current Work" section for active task
 2. Run `git status` for uncommitted work
 3. Check last CHANGELOG.md entry
 4. Continue from next unchecked step
 
+### Adding New Work
+1. Complete current work first
+2. Re-evaluate priorities based on learnings
+3. Move highest priority item from "Next Up" to "Current Work"
+4. Update based on new insights
+
+## Architecture Decisions
+
+- **Alice as Orchestrator**: Not an AI, but coordinates between AIs and tools
+- **Structured APIs Only**: No natural language processing in core
+- **Event-First**: All features must publish/subscribe to events
+- **Provider Abstraction**: All AI integrations through common interface
+
 ## How to Contribute
 
-1. **Check Current Phase** - Focus on active phase items
-2. **Review Events** - New features should publish/subscribe to events
-3. **Follow Architecture** - Maintain separation of concerns
-4. **Test Everything** - Comprehensive test coverage required
-
-## Metrics for Success
-
-- **Phase 1**: 100% of operations publish events
-- **Phase 2**: AI can resume projects after 3+ months
-- **Phase 3**: Frame-accurate beat synchronization
-- **Phase 4**: <100ms inter-service communication
-- **Phase 5**: 99.9% uptime for production deployments
-
-## Getting Involved
-
-- **Discord**: [Coming Soon]
-- **Issues**: [GitHub Issues](https://github.com/yourusername/AliceMultiverse/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/yourusername/AliceMultiverse/discussions)
+1. **Focus on Current Work** - Complete blocking tasks first
+2. **One Step = One Commit** - Each checkbox is a working state
+3. **Test Everything** - Unit tests + integration verification
+4. **Update Docs** - Keep documentation current with changes
+5. **Use ADRs** - Document significant architecture decisions
 
 ---
 
-**Note**: This roadmap is a living document. Priorities may shift based on user feedback and technical discoveries. The full technical specification is available in [todo/02 alice-multiverse-big-refactor-into-a-bigger-scope.md](todo/02%20alice-multiverse-big-refactor-into-a-bigger-scope.md).
+**Note**: This roadmap follows kanban principles. We work on the most important task, learn from implementation, and continuously re-evaluate priorities. No artificial timelines - we're optimizing for quality and learning.
