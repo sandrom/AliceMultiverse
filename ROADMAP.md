@@ -6,30 +6,49 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 
 ## Current Work
 
-### ⚠️ BLOCKING: Provider Abstraction
-Must complete before adding more providers. This architectural foundation prevents technical debt.
+### 🚨 CRITICAL: Architecture Simplification
+Deep review revealed over-engineering that violates our "pragmatic, direct, no bullshit" principle. Must simplify before new features.
 
-- [x] **Step 1**: Extract base interface from fal_provider → **Commit**: "Extract provider interface"
-- [x] **Step 2**: Create provider registry with cost tracking → **Commit**: "Add provider registry"
-- [x] **Step 3**: Add OpenAI provider (DALL-E 3) → **Commit**: "Add OpenAI provider"
-- [x] **Step 4**: Add Anthropic provider (Claude vision) → **Commit**: "Add Anthropic provider"
+**Event System Simplification (2,600 → 400 lines)**
+- [ ] **Step 1**: Create PostgreSQL-native event system → **Commit**: "Create PostgreSQL-native event system"
+- [ ] **Step 2**: Migrate event publishers → **Commit**: "Migrate event publishers to PostgreSQL events"
+- [ ] **Step 3**: Remove legacy implementations → **Commit**: "Remove legacy event store implementations"
+
+**Provider Abstraction Simplification (1,500 → 600 lines)**
+- [ ] **Step 4**: Create unified provider base → **Commit**: "Create unified provider base class"
+- [ ] **Step 5**: Migrate providers → **Commit**: "Migrate providers to unified base class"
+- [ ] **Step 6**: Create simple registry → **Commit**: "Create simplified provider registry"
+- [ ] **Step 7**: Remove old abstractions → **Commit**: "Remove legacy provider abstractions"
+
+**Critical Issues**
+- [ ] **Step 8**: Fix exception handling (33 files) → **Commit**: "Fix exception handling throughout codebase"
+- [ ] **Step 9**: Implement video hashing → **Commit**: "Implement video content hashing"
+- [ ] **Step 10**: Move hardcoded values → **Commit**: "Move hardcoded values to configuration"
+
+**Additional Improvements**
+- [ ] **Step 11**: Add input validation → **Commit**: "Add input validation for API endpoints"
+- [ ] **Step 12**: Clean up empty files → **Commit**: "Remove empty and unused files"
+- [ ] **Step 13**: Add type hints → **Commit**: "Add comprehensive type hints"
+- [ ] **Step 14**: Update documentation → **Commit**: "Update documentation to reflect AI-native architecture"
+
+[See detailed plan: docs/architecture/simplification-plan.md]
 
 ## Next Up (Priority Order)
 
-### 1. Project Management Layer ✅
-- [x] Create project models + migrations → **Commit**: "Add project management models"
-- [x] Implement project service + budget tracking → **Commit**: "Add project service"
-- [x] Integrate into Alice interface → **Commit**: "Integrate projects into Alice"
-
-### 2. Workflow Engine
+### 1. Workflow Engine
 - [ ] Design workflow definition format
 - [ ] Implement workflow executor
 - [ ] Add progress tracking and resumption
 
-### 3. Remaining Test Fixes
-- [ ] Fix remaining 32 failing tests
-- [ ] Update deprecated datetime usage
-- [ ] Ensure all tests pass in CI
+### 2. Enhanced Search & Discovery
+- [ ] Implement semantic search with embeddings
+- [ ] Add advanced filtering and facets
+- [ ] Create search API for AI assistants
+
+### 3. More Provider Integrations
+- [ ] Midjourney (via proxy API)
+- [ ] Stable Diffusion (local/cloud)
+- [ ] RunwayML for video generation
 
 ## Backlog (Unprioritized)
 

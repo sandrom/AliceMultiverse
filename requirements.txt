@@ -27,10 +27,8 @@ defusedxml>=0.7.1    # Safe XML parsing for XMP
 # Database
 sqlalchemy>=2.0.0
 alembic>=1.13.0
+psycopg2-binary>=2.9.0  # PostgreSQL adapter
+asyncpg>=0.30.0         # Async PostgreSQL support
 
 # Optional format support (install if needed)
 pillow-heif>=0.16.0  # HEIC/HEIF support (recommended for iPhone images)
-
-# Event system
-redis>=5.0.0         # Redis client for event persistence
-asyncio-redis>=0.16.0  # Async Redis support
