@@ -6,7 +6,17 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 
 ## Current Work
 
-### ⚠️ BLOCKING: Provider Abstraction
+### 🚨 CRITICAL: Fix Broken Tests
+Working application takes priority over new features. Multiple unit tests are failing due to import errors and outdated references.
+
+- [ ] Fix import errors in pipeline tests (alicemultiverse.keys → alicemultiverse.core.keys)
+- [ ] Update event tests to use current event module structure (remove v2 references)
+- [ ] Fix alice_orchestrator test imports (CreativeIntent missing)
+- [ ] Ensure all unit tests pass before continuing with features
+
+## Next Up (Priority Order)
+
+### 1. Provider Abstraction [BLOCKING]
 Must complete before adding more providers. This architectural foundation prevents technical debt.
 
 - [x] **Step 1**: Extract base interface from fal_provider → **Commit**: "Extract provider interface"
@@ -14,20 +24,18 @@ Must complete before adding more providers. This architectural foundation preven
 - [ ] **Step 3**: Add OpenAI provider (DALL-E 3) → **Commit**: "Add OpenAI provider"
 - [ ] **Step 4**: Add Anthropic provider (Claude vision) → **Commit**: "Add Anthropic provider"
 
-## Next Up (Priority Order)
-
-### 1. Event System Enhancement
+### 2. Event System Enhancement
 - [ ] Add version field to events + migration utils → **Commit**: "Add event schema versioning"
 - [ ] Write ADR-006 for versioning strategy
 - [ ] Add optional Redis persistence → **Commit**: "Add optional Redis persistence"
 - [ ] Update ADR-002 with implementation
 
-### 2. Project Management Layer
+### 3. Project Management Layer
 - [ ] Create project models + migrations → **Commit**: "Add project management models"
 - [ ] Implement project service + budget tracking → **Commit**: "Add project service"
 - [ ] Integrate into Alice interface → **Commit**: "Integrate projects into Alice"
 
-### 3. Workflow Engine
+### 4. Workflow Engine
 - [ ] Design workflow definition format
 - [ ] Implement workflow executor
 - [ ] Add progress tracking and resumption
