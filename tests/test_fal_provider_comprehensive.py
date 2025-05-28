@@ -233,7 +233,8 @@ async def main():
             from alicemultiverse.core.keys import KeyManager
             key_manager = KeyManager()
             api_key = key_manager.get_api_key("FAL_KEY")
-        except:
+        except Exception as e:
+            print(f"Failed to get API key from keychain: {e}")
             pass
     
     if not api_key:

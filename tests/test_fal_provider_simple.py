@@ -50,7 +50,8 @@ async def test_provider_setup():
             api_key = key_manager.get_api_key("FAL_KEY")
             if api_key:
                 print("\n✓ API key found in keychain")
-        except:
+        except Exception as e:
+            print(f"  Failed to get API key from keychain: {e}")
             pass
     else:
         print("\n✓ API key found in environment")

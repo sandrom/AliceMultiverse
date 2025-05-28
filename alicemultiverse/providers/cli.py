@@ -152,7 +152,8 @@ def list_providers(registry, show_disabled: bool = False) -> int:
             try:
                 temp_provider = registry._enhanced_registry._provider_classes[provider]()
                 types = ", ".join(t.value for t in temp_provider.capabilities.generation_types)
-            except:
+            except Exception as e:
+                console.print(f"[yellow]Warning: Failed to get capabilities for {provider}: {e}[/yellow]")
                 types = "Unknown"
             
             table.add_row(
@@ -176,7 +177,8 @@ def list_providers(registry, show_disabled: bool = False) -> int:
                     models += "..."
                 
                 table.add_row(provider, types, models)
-            except:
+            except Exception as e:
+                console.print(f"[yellow]Warning: Failed to load provider {provider}: {e}[/yellow]")
                 table.add_row(provider, "Error", "Unable to load")
     
     console.print(table)
