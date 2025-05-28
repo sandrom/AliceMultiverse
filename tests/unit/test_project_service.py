@@ -1,41 +1,16 @@
 """Tests for project service."""
 
 import pytest
+from unittest.mock import patch, MagicMock
 
 from alicemultiverse.database.models import Generation, Project
-from alicemultiverse.events.base import EventBus, EventSubscriber
-from alicemultiverse.events.creative_events import ContextUpdatedEvent, ProjectCreatedEvent
-from alicemultiverse.events.workflow_events import WorkflowCompletedEvent, WorkflowFailedEvent
 from alicemultiverse.projects import ProjectService
 
 
-class TestEventSubscriber(EventSubscriber):
-    """Test event subscriber that collects events."""
-    
-    def __init__(self, event_types: list[str]):
-        self._event_types = event_types
-        self.events = []
-    
-    async def handle_event(self, event) -> None:
-        """Collect events for testing."""
-        self.events.append(event)
-    
-    @property
-    def event_types(self) -> list[str]:
-        """Return event types to subscribe to."""
-        return self._event_types
-
-
 @pytest.fixture
-def event_bus():
-    """Create event bus for testing."""
-    return EventBus()
-
-
-@pytest.fixture
-def project_service(db_session, event_bus):
+def project_service(db_session):
     """Create project service instance."""
-    return ProjectService(db_session, event_bus)
+    return ProjectService(db_session)
 
 
 class TestProjectService:
@@ -59,18 +34,17 @@ class TestProjectService:
         assert project.status == "active"
         assert project.creative_context == {"style": "cyberpunk", "mood": "dark"}
     
-    def test_create_project_publishes_event(self, project_service, event_bus):
+    @patch('alicemultiverse.projects.service.publish_event')
+    def test_create_project_publishes_event(self, mock_publish, project_service):
         """Test that creating a project publishes an event."""
-        subscriber = TestEventSubscriber(["project.created"])
-        event_bus.subscribe(subscriber)
-        
         project = project_service.create_project(name="Event Test")
         
-        assert len(subscriber.events) == 1
-        event = subscriber.events[0]
-        assert isinstance(event, ProjectCreatedEvent)
-        assert event.project_id == project.id
-        assert event.project_name == "Event Test"
+        mock_publish.assert_called_once()
+        # publish_event(event_type, data) - so args are (event_type, data_dict)
+        args, kwargs = mock_publish.call_args
+        assert args[0] == "project.created"
+        assert args[1]['project_id'] == project.id
+        assert args[1]['project_name'] == "Event Test"
     
     def test_get_project(self, project_service):
         """Test getting a project by ID."""
@@ -106,15 +80,16 @@ class TestProjectService:
         assert len(completed_projects) == 1
         assert completed_projects[0].id == project2.id
     
-    def test_update_project_context(self, project_service, event_bus):
+    @patch('alicemultiverse.projects.service.publish_event')
+    def test_update_project_context(self, mock_publish, project_service):
         """Test updating project creative context."""
-        subscriber = TestEventSubscriber(["context.updated"])
-        event_bus.subscribe(subscriber)
-        
         project = project_service.create_project(
             name="Context Test",
             creative_context={"style": "anime"}
         )
+        
+        # Reset mock after project creation
+        mock_publish.reset_mock()
         
         updated = project_service.update_project_context(
             project.id,
@@ -129,10 +104,10 @@ class TestProjectService:
         }
         
         # Check event was published
-        assert len(subscriber.events) == 1
-        event = subscriber.events[0]
-        assert isinstance(event, ContextUpdatedEvent)
-        assert event.project_id == project.id
+        mock_publish.assert_called_once()
+        args, kwargs = mock_publish.call_args
+        assert args[0] == "context.updated"
+        assert args[1]['project_id'] == project.id
     
     def test_track_generation(self, project_service):
         """Test tracking AI generation and budget updates."""
@@ -177,15 +152,16 @@ class TestProjectService:
         assert "openai:dall-e-3" in updated_project.cost_breakdown
         assert updated_project.cost_breakdown["openai:dall-e-3"]["total_cost"] >= 0.04
     
-    def test_budget_exceeded(self, project_service, event_bus):
+    @patch('alicemultiverse.projects.service.publish_event')
+    def test_budget_exceeded(self, mock_publish, project_service):
         """Test that exceeding budget pauses project and publishes event."""
-        subscriber = TestEventSubscriber(["workflow.failed"])
-        event_bus.subscribe(subscriber)
-        
         project = project_service.create_project(
             name="Budget Test",
             budget_total=0.10
         )
+        
+        # Reset mock after project creation
+        mock_publish.reset_mock()
         
         # Track generations that exceed budget
         project_service.track_generation(
@@ -209,12 +185,12 @@ class TestProjectService:
         assert updated_project.budget_spent == 0.16
         
         # Check event was published
-        assert len(subscriber.events) == 1
-        event = subscriber.events[0]
-        assert isinstance(event, WorkflowFailedEvent)
-        assert "Budget exceeded" in event.error_message
-        assert event.error_details["budget_total"] == 0.10
-        assert event.error_details["budget_spent"] == 0.16
+        mock_publish.assert_called_once()
+        args, kwargs = mock_publish.call_args
+        assert args[0] == "workflow.failed"
+        assert "Budget exceeded" in args[1]['error_message']
+        assert args[1]['error_details']['budget_total'] == 0.10
+        assert args[1]['error_details']['budget_spent'] == 0.16
     
     def test_get_project_stats(self, project_service):
         """Test getting project statistics."""
@@ -266,12 +242,13 @@ class TestProjectService:
         assert stats["providers"]["openai"]["total_cost"] == 0.04
         assert "dall-e-3" in stats["providers"]["openai"]["models"]
     
-    def test_update_project_status(self, project_service, event_bus):
+    @patch('alicemultiverse.projects.service.publish_event')
+    def test_update_project_status(self, mock_publish, project_service):
         """Test updating project status."""
-        subscriber = TestEventSubscriber(["workflow.completed"])
-        event_bus.subscribe(subscriber)
-        
         project = project_service.create_project(name="Status Test")
+        
+        # Reset mock after project creation
+        mock_publish.reset_mock()
         
         # Update to completed
         updated = project_service.update_project_status(project.id, "completed")
@@ -280,9 +257,9 @@ class TestProjectService:
         assert updated.status == "completed"
         
         # Check event
-        assert len(subscriber.events) == 1
-        event = subscriber.events[0]
-        assert isinstance(event, WorkflowCompletedEvent)
-        assert event.workflow_id == f"project-{project.id}"
-        assert event.output_metadata["old_status"] == "active"
-        assert event.output_metadata["new_status"] == "completed"
+        mock_publish.assert_called_once()
+        args, kwargs = mock_publish.call_args
+        assert args[0] == "workflow.completed"
+        assert args[1]['workflow_id'] == f"project-{project.id}"
+        assert args[1]['output_metadata']['old_status'] == "active"
+        assert args[1]['output_metadata']['new_status'] == "completed"

@@ -1,49 +1,31 @@
 """Project service for managing projects and budget tracking."""
 
-import asyncio
 import uuid
 from datetime import datetime, timezone
-from typing import Any
+from typing import Any, Optional
 
 from sqlalchemy.orm import Session
 
 from alicemultiverse.database.models import Generation, Project
-from alicemultiverse.events.base import BaseEvent, EventBus, create_event
-from alicemultiverse.events.creative_events import ContextUpdatedEvent, ProjectCreatedEvent
-from alicemultiverse.events.workflow_events import WorkflowCompletedEvent, WorkflowFailedEvent
+from alicemultiverse.events.postgres_events import publish_event
 
 
 class ProjectService:
     """Service for managing projects and tracking budgets."""
     
-    def __init__(self, db_session: Session, event_bus: EventBus | None = None):
+    def __init__(self, db_session: Session, event_bus: Optional[Any] = None):
         """Initialize project service.
         
         Args:
             db_session: Database session
-            event_bus: Optional event bus for publishing events
+            event_bus: Deprecated, kept for compatibility
         """
         self.db = db_session
-        self.event_bus = event_bus
+        # event_bus parameter kept for backward compatibility but not used
     
-    def _publish_event(self, event: BaseEvent) -> None:
-        """Publish event handling async in sync context."""
-        if not self.event_bus:
-            return
-        
-        try:
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # If loop is already running, schedule as task
-                asyncio.create_task(self.event_bus.publish(event))
-            else:
-                loop.run_until_complete(self.event_bus.publish(event))
-        except RuntimeError:
-            # No event loop, create one
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            loop.run_until_complete(self.event_bus.publish(event))
-            loop.close()
+    def _publish_event(self, event_type: str, **data) -> None:
+        """Publish event using PostgreSQL events."""
+        publish_event(event_type, data)
     
     def create_project(
         self, 
@@ -83,15 +65,14 @@ class ProjectService:
         self.db.refresh(project)
         
         # Publish event
-        event = create_event(
-            ProjectCreatedEvent,
+        self._publish_event(
+            "project.created",
             source="project_service",
             project_id=project.id,
             project_name=project.name,
             description=project.description,
             initial_context=project.creative_context
         )
-        self._publish_event(event)
         
         return project
     
@@ -149,8 +130,8 @@ class ProjectService:
         self.db.refresh(project)
         
         # Publish event
-        event = create_event(
-            ContextUpdatedEvent,
+        self._publish_event(
+            "context.updated",
             source="project_service",
             project_id=project.id,
             context_type="creative",
@@ -158,7 +139,6 @@ class ProjectService:
             context_key="creative_context",
             new_value=project.creative_context
         )
-        self._publish_event(event)
         
         return project
     
@@ -243,8 +223,8 @@ class ProjectService:
             project.status = "paused"
             
             # Publish budget exceeded event
-            event = create_event(
-                WorkflowFailedEvent,
+            self._publish_event(
+                "workflow.failed",
                 source="project_service",
                 workflow_id=f"project-{project.id}",
                 workflow_type="budget_management",
@@ -256,7 +236,6 @@ class ProjectService:
                     "overage": project.budget_spent - project.budget_total
                 }
             )
-            self._publish_event(event)
         
         self.db.commit()
         self.db.refresh(generation)
@@ -346,8 +325,8 @@ class ProjectService:
         
         # Publish event
         if status == "completed":
-            event = create_event(
-                WorkflowCompletedEvent,
+            self._publish_event(
+                "workflow.completed",
                 source="project_service",
                 workflow_id=f"project-{project.id}",
                 workflow_type="project_lifecycle",
@@ -360,8 +339,8 @@ class ProjectService:
                 }
             )
         else:
-            event = create_event(
-                ContextUpdatedEvent,
+            self._publish_event(
+                "context.updated",
                 source="project_service",
                 project_id=project.id,
                 context_type="status",
@@ -370,6 +349,5 @@ class ProjectService:
                 new_value={"status": status},
                 previous_value={"status": old_status}
             )
-        self._publish_event(event)
         
         return project

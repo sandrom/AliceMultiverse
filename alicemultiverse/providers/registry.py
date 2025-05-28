@@ -6,9 +6,8 @@ for better cost tracking and provider management. The API remains compatible.
 
 import asyncio
 import logging
-from typing import Dict, List, Optional, Type
+from typing import Any, Dict, List, Optional, Type
 
-from ..events.base import EventBus
 from .base import GenerationProvider, GenerationType
 from .enhanced_registry import EnhancedProviderRegistry
 from .anthropic_provider import AnthropicProvider
@@ -33,21 +32,18 @@ class ProviderRegistry:
         "claude": AnthropicProvider,  # Alias
     }
 
-    def __init__(self, event_bus: Optional[EventBus] = None):
+    def __init__(self, event_bus: Optional[Any] = None):
         """Initialize provider registry.
         
         Args:
-            event_bus: Event bus for providers to use
+            event_bus: Deprecated parameter, kept for compatibility
         """
-        # Use enhanced registry internally
-        self._enhanced_registry = EnhancedProviderRegistry(event_bus)
+        # Use enhanced registry internally (event_bus param is deprecated)
+        self._enhanced_registry = EnhancedProviderRegistry()
         
         # Register existing providers
         for name, provider_class in self.PROVIDERS.items():
             self._enhanced_registry.register_provider(name, provider_class)
-        
-        # Legacy compatibility
-        self.event_bus = event_bus or EventBus()
         self._instances: Dict[str, GenerationProvider] = {}
         self._api_keys: Dict[str, str] = {}
 

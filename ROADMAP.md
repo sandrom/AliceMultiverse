@@ -10,7 +10,7 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 Deep review revealed over-engineering that violates our "pragmatic, direct, no bullshit" principle. Must simplify before new features.
 
 **Event System Simplification (2,600 → 400 lines)**
-- [ ] **Step 1**: Create PostgreSQL-native event system → **Commit**: "Create PostgreSQL-native event system"
+- [x] **Step 1**: Create PostgreSQL-native event system → **Commit**: "Create PostgreSQL-native event system"
 - [ ] **Step 2**: Migrate event publishers → **Commit**: "Migrate event publishers to PostgreSQL events"
 - [ ] **Step 3**: Remove legacy implementations → **Commit**: "Remove legacy event store implementations"
 

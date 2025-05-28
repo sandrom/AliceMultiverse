@@ -19,7 +19,6 @@ from alicemultiverse.providers import (
     ProviderStatus,
     get_provider,
 )
-from alicemultiverse.events.base import EventBus
 
 
 class MockProvider(GenerationProvider):
@@ -153,18 +152,10 @@ class TestGenerationProvider:
         cost = await provider.estimate_cost(request)
         assert cost == 0.001
     
-    def test_event_publishing(self):
+    @patch('alicemultiverse.events.postgres_events.publish_event')
+    def test_event_publishing(self, mock_publish):
         """Test event publishing on success and failure."""
-        # Create a simple sync event bus for testing
-        class SyncEventBus:
-            def __init__(self):
-                self.events = []
-            
-            async def publish(self, event):
-                self.events.append(event)
-        
-        event_bus = SyncEventBus()
-        provider = MockProvider(event_bus=event_bus)
+        provider = MockProvider()
         
         # Success event
         request = GenerationRequest(
@@ -180,18 +171,16 @@ class TestGenerationProvider:
         )
         
         provider._publish_success(request, result)
-        assert len(event_bus.events) == 1
-        event = event_bus.events[0]
-        assert event.event_type == "asset.generated"
-        assert event.provider == "mock"
+        mock_publish.assert_called_once()
+        assert mock_publish.call_args[0][0] == "asset.generated"
+        assert mock_publish.call_args[0][1]["provider"] == "mock"
         
         # Failure event
-        event_bus.events.clear()
+        mock_publish.reset_mock()
         provider._publish_failure(request, "Test error")
-        assert len(event_bus.events) == 1
-        event = event_bus.events[0]
-        assert event.event_type == "generation.failed"
-        assert event.error == "Test error"
+        mock_publish.assert_called_once()
+        assert mock_publish.call_args[0][0] == "generation.failed"
+        assert mock_publish.call_args[0][1]["error"] == "Test error"
 
 
 class TestFalProvider:

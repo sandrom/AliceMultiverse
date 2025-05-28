@@ -5,9 +5,9 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Dict, List, Optional, Set, Type
+from typing import Any, Dict, List, Optional, Set, Type
 
-from ..events.base import EventBus, create_event
+from ..events.postgres_events import publish_event
 from .base_provider import BaseProvider, BudgetExceededError
 from .types import CostEstimate, GenerationRequest, GenerationType
 
@@ -50,14 +50,13 @@ class CostTracker:
 class EnhancedProviderRegistry:
     """Enhanced registry with cost tracking and provider management."""
     
-    def __init__(self, event_bus: Optional[EventBus] = None, budget_limit: Optional[float] = None):
+    def __init__(self, event_bus: Optional[Any] = None, budget_limit: Optional[float] = None):
         """Initialize enhanced registry.
         
         Args:
-            event_bus: Event bus for providers to use
+            event_bus: Deprecated parameter, kept for compatibility
             budget_limit: Global budget limit across all providers
         """
-        self.event_bus = event_bus or EventBus()
         self.budget_limit = budget_limit
         
         # Provider management
@@ -167,7 +166,7 @@ class EnhancedProviderRegistry:
         
         # Create instance with cost tracking wrapper
         instance = CostTrackingProvider(
-            provider_class(api_key=api_key, event_bus=self.event_bus),
+            provider_class(api_key=api_key),
             self
         )
         self._instances[name_lower] = instance

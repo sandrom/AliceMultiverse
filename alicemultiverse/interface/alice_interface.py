@@ -9,7 +9,6 @@ from ..core.ai_errors import AIFriendlyError
 from ..core.config import load_config
 from ..database.config import init_db
 from ..database.repository import AssetRepository, ProjectRepository
-from ..events.base import get_event_bus
 from ..metadata.models import AssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
 from ..projects import ProjectService
@@ -66,9 +65,8 @@ class AliceInterface:
         self.asset_repo = AssetRepository()
         self.project_repo = ProjectRepository()
         
-        # Initialize project service with event bus
-        event_bus = get_event_bus()
-        self.project_service = ProjectService(db_session, event_bus)
+        # Initialize project service (event_bus parameter is deprecated)
+        self.project_service = ProjectService(db_session)
         logger.info("Database and services initialized")
 
     def _ensure_organizer(self):
