@@ -142,6 +142,27 @@ class AssetGeneratedEvent(BaseEvent):
 
 
 @dataclass
+class GenerationStartedEvent(BaseEvent):
+    """Fired when asset generation starts."""
+
+    # Required fields
+    generation_type: str
+    provider: str
+    model: str
+    prompt: str
+
+    # Optional fields
+    parameters: dict[str, Any] = field(default_factory=dict)
+    estimated_cost: float | None = None
+    project_id: str | None = None
+    workflow_id: str | None = None
+
+    @property
+    def event_type(self) -> str:
+        return "generation.started"
+
+
+@dataclass
 class GenerationFailedEvent(BaseEvent):
     """Fired when asset generation fails."""
 

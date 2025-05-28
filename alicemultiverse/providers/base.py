@@ -1,33 +1,40 @@
-"""Base provider interface for AI generation services."""
+"""Base provider interface for AI generation services.
 
-import logging
+DEPRECATED: This module is maintained for backward compatibility.
+New code should use base_provider.py and types.py instead.
+"""
+
 import asyncio
+import logging
 from abc import ABC, abstractmethod
-from dataclasses import dataclass
 from datetime import datetime
-from enum import Enum
-from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from ..events.base import EventBus
+from .types import (
+    GenerationRequest,
+    GenerationResult,
+    GenerationType,
+    ProviderCapabilities,
+    ProviderStatus,
+)
 
 logger = logging.getLogger(__name__)
 
 
-class GenerationType(str, Enum):
-    """Types of content that can be generated."""
-    IMAGE = "image"
-    VIDEO = "video"
-    AUDIO = "audio"
-    TEXT = "text"
-
-
-class ProviderStatus(str, Enum):
-    """Provider availability status."""
-    AVAILABLE = "available"
-    DEGRADED = "degraded"
-    UNAVAILABLE = "unavailable"
-    UNKNOWN = "unknown"
+# Re-export types for backward compatibility
+__all__ = [
+    "GenerationType",
+    "ProviderStatus", 
+    "ProviderError",
+    "RateLimitError",
+    "AuthenticationError",
+    "GenerationError",
+    "GenerationRequest",
+    "GenerationResult",
+    "ProviderCapabilities",
+    "GenerationProvider",
+]
 
 
 class ProviderError(Exception):
@@ -50,47 +57,11 @@ class GenerationError(ProviderError):
     pass
 
 
-@dataclass
-class GenerationRequest:
-    """Request to generate content."""
-    prompt: str
-    generation_type: GenerationType
-    model: Optional[str] = None
-    parameters: Optional[Dict[str, Any]] = None
-    reference_assets: Optional[List[str]] = None  # Asset IDs for style reference
-    output_format: Optional[str] = None  # png, jpg, mp4, etc.
-    output_path: Optional[Path] = None  # Where to save the result
-    metadata: Optional[Dict[str, Any]] = None  # Additional metadata to embed
-
-
-@dataclass
-class GenerationResult:
-    """Result of a generation operation."""
-    success: bool
-    asset_id: Optional[str] = None
-    file_path: Optional[Path] = None
-    generation_time: Optional[float] = None  # Seconds
-    cost: Optional[float] = None  # USD
-    metadata: Optional[Dict[str, Any]] = None
-    error: Optional[str] = None
-    provider: Optional[str] = None
-    model: Optional[str] = None
-
-
-@dataclass
-class ProviderCapabilities:
-    """What a provider can do."""
-    generation_types: List[GenerationType]
-    models: List[str]
-    max_resolution: Optional[Dict[str, int]] = None  # {"width": 1024, "height": 1024}
-    formats: Optional[List[str]] = None
-    features: Optional[List[str]] = None  # ["style_reference", "controlnet", etc.]
-    rate_limits: Optional[Dict[str, Any]] = None
-    pricing: Optional[Dict[str, float]] = None  # Cost per generation
-
-
 class GenerationProvider(ABC):
-    """Abstract base class for AI generation providers."""
+    """Abstract base class for AI generation providers.
+    
+    DEPRECATED: Use BaseProvider from base_provider.py instead.
+    """
 
     def __init__(self, api_key: Optional[str] = None, event_bus: Optional[EventBus] = None):
         """Initialize provider.

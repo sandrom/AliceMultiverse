@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- Enhanced provider interface with BaseProvider abstract class
+- Cost estimation with detailed breakdowns (CostEstimate type)
+- Budget validation and BudgetExceededError for cost control
+- Provider interface documentation for implementing new providers
+- GenerationStartedEvent for tracking generation lifecycle
 - Event-driven architecture foundation with AsyncAPI documentation
 - Content-addressed database system using SQLAlchemy
 - Asset discovery system for finding moved files
@@ -20,12 +25,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Detailed documentation for fal.ai provider usage
 
 ### Changed
+- Extracted provider types into separate types.py module
+- Enhanced ProviderCapabilities with streaming and batch support flags
+- Improved provider event publishing with ProviderEventMixin
 - Updated all documentation to reflect evolution toward creative workflow hub
 - Unified all cache implementations into single UnifiedCache class
 - Migrated from OmegaConf to dataclasses for configuration (with backward compatibility)
 - Reorganized module structure for better maintainability
 
 ### Architecture
+- Separated provider interface into base_provider.py (new) and base.py (deprecated)
 - Implemented event publishing for all major operations
 - Created event bus with middleware support
 - Added AsyncAPI 3.0 specifications for all events

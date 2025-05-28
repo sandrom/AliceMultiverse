@@ -7,7 +7,7 @@ from pathlib import Path
 from omegaconf import DictConfig
 
 from ..core.types import MediaType, OrganizeResult
-from ..keys import APIKeyManager
+from ..core.keys import APIKeyManager
 from ..organizer.media_organizer import MediaOrganizer
 from .stages import BRISQUEStage, ClaudeStage, PipelineStage, SightEngineStage
 
