@@ -9,8 +9,10 @@ from ..core.ai_errors import AIFriendlyError
 from ..core.config import load_config
 from ..database.config import init_db
 from ..database.repository import AssetRepository, ProjectRepository
+from ..events.base import get_event_bus
 from ..metadata.models import AssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
+from ..projects import ProjectService
 from .models import (
     AssetInfo,
     GenerateRequest,
@@ -60,10 +62,14 @@ class AliceInterface:
             logger.warning(f"Failed to initialize organizer: {e}")
         
         # Initialize database
-        init_db()
+        db_session = init_db()
         self.asset_repo = AssetRepository()
         self.project_repo = ProjectRepository()
-        logger.info("Database initialized")
+        
+        # Initialize project service with event bus
+        event_bus = get_event_bus()
+        self.project_service = ProjectService(db_session, event_bus)
+        logger.info("Database and services initialized")
 
     def _ensure_organizer(self):
         """Ensure organizer is initialized."""
@@ -775,3 +781,243 @@ class AliceInterface:
         except Exception as e:
             logger.error(f"Database search failed: {e}")
             return []
+    
+    # Project Management Methods
+    
+    def create_project(
+        self,
+        name: str,
+        description: str | None = None,
+        budget: float | None = None,
+        creative_context: dict[str, Any] | None = None
+    ) -> AliceResponse:
+        """Create a new project for organizing creative work.
+        
+        Args:
+            name: Project name
+            description: Optional project description
+            budget: Optional budget limit in USD
+            creative_context: Optional creative context (style preferences, characters, etc.)
+            
+        Returns:
+            Response with created project details
+        """
+        try:
+            project = self.project_service.create_project(
+                name=name,
+                description=description,
+                budget_total=budget,
+                creative_context=creative_context
+            )
+            
+            return AliceResponse(
+                success=True,
+                message=f"Created project '{name}'",
+                data={
+                    "project_id": project.id,
+                    "name": project.name,
+                    "budget": project.budget_total,
+                    "status": project.status
+                },
+                error=None
+            )
+            
+        except Exception as e:
+            logger.error(f"Project creation failed: {e}")
+            friendly = AIFriendlyError.make_friendly(e, {"operation": "create_project", "name": name})
+            return AliceResponse(
+                success=False,
+                message=friendly["error"],
+                data={"suggestions": friendly["suggestions"]},
+                error=friendly["technical_details"]
+            )
+    
+    def update_project_context(
+        self,
+        project_id: str,
+        creative_context: dict[str, Any]
+    ) -> AliceResponse:
+        """Update project creative context (style, characters, etc.).
+        
+        Args:
+            project_id: Project ID
+            creative_context: New context to merge with existing
+            
+        Returns:
+            Response with updated project details
+        """
+        try:
+            project = self.project_service.update_project_context(
+                project_id=project_id,
+                creative_context=creative_context
+            )
+            
+            if not project:
+                return AliceResponse(
+                    success=False,
+                    message=f"Project not found: {project_id}",
+                    data=None,
+                    error="Project not found"
+                )
+            
+            return AliceResponse(
+                success=True,
+                message="Updated project context",
+                data={
+                    "project_id": project.id,
+                    "creative_context": project.creative_context
+                },
+                error=None
+            )
+            
+        except Exception as e:
+            logger.error(f"Project update failed: {e}")
+            return AliceResponse(
+                success=False,
+                message="Failed to update project",
+                data=None,
+                error=str(e)
+            )
+    
+    def get_project_budget_status(self, project_id: str) -> AliceResponse:
+        """Get project budget status and cost breakdown.
+        
+        Args:
+            project_id: Project ID
+            
+        Returns:
+            Response with budget details and statistics
+        """
+        try:
+            stats = self.project_service.get_project_stats(project_id)
+            
+            if not stats:
+                return AliceResponse(
+                    success=False,
+                    message=f"Project not found: {project_id}",
+                    data=None,
+                    error="Project not found"
+                )
+            
+            return AliceResponse(
+                success=True,
+                message="Retrieved project budget status",
+                data=stats,
+                error=None
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to get project stats: {e}")
+            return AliceResponse(
+                success=False,
+                message="Failed to retrieve budget status",
+                data=None,
+                error=str(e)
+            )
+    
+    def list_projects(self, status: str | None = None) -> AliceResponse:
+        """List all projects, optionally filtered by status.
+        
+        Args:
+            status: Optional status filter (active, paused, completed, archived)
+            
+        Returns:
+            Response with list of projects
+        """
+        try:
+            projects = self.project_service.list_projects(status=status)
+            
+            project_list = []
+            for project in projects:
+                project_list.append({
+                    "project_id": project.id,
+                    "name": project.name,
+                    "description": project.description,
+                    "status": project.status,
+                    "budget_total": project.budget_total,
+                    "budget_spent": project.budget_spent,
+                    "created_at": project.created_at.isoformat() if project.created_at else None
+                })
+            
+            return AliceResponse(
+                success=True,
+                message=f"Found {len(projects)} projects",
+                data={"projects": project_list},
+                error=None
+            )
+            
+        except Exception as e:
+            logger.error(f"Failed to list projects: {e}")
+            return AliceResponse(
+                success=False,
+                message="Failed to list projects",
+                data=None,
+                error=str(e)
+            )
+    
+    def track_generation_cost(
+        self,
+        project_id: str,
+        provider: str,
+        model: str,
+        cost: float,
+        request_type: str = "image",
+        prompt: str | None = None,
+        result_assets: list[str] | None = None
+    ) -> AliceResponse:
+        """Track AI generation cost for a project.
+        
+        Args:
+            project_id: Project ID
+            provider: Provider name (fal, openai, anthropic)
+            model: Model name
+            cost: Cost in USD
+            request_type: Type of request (image, video, vision, text)
+            prompt: Optional prompt used
+            result_assets: Optional list of resulting asset content hashes
+            
+        Returns:
+            Response with generation tracking details
+        """
+        try:
+            generation = self.project_service.track_generation(
+                project_id=project_id,
+                provider=provider,
+                model=model,
+                cost=cost,
+                request_type=request_type,
+                prompt=prompt,
+                result_assets=result_assets
+            )
+            
+            # Get updated project stats
+            stats = self.project_service.get_project_stats(project_id)
+            
+            return AliceResponse(
+                success=True,
+                message="Tracked generation cost",
+                data={
+                    "generation_id": generation.id,
+                    "cost": generation.cost,
+                    "budget_remaining": stats["budget"]["remaining"] if stats else None,
+                    "project_status": stats["status"] if stats else None
+                },
+                error=None
+            )
+            
+        except ValueError as e:
+            # Project not found
+            return AliceResponse(
+                success=False,
+                message=str(e),
+                data=None,
+                error="Project not found"
+            )
+        except Exception as e:
+            logger.error(f"Failed to track generation: {e}")
+            return AliceResponse(
+                success=False,
+                message="Failed to track generation cost",
+                data=None,
+                error=str(e)
+            )
