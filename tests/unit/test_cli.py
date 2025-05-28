@@ -129,10 +129,10 @@ class TestCLIMain:
 
         assert exc_info.value.code == 0
         captured = capsys.readouterr()
-        assert "1.6.0" in captured.out
+        assert "1.7.1" in captured.out
 
     @pytest.mark.unit
-    @patch("alicemultiverse.keys.cli.run_keys_command")
+    @patch("alicemultiverse.core.keys.cli.run_keys_command")
     def test_main_keys_command(self, mock_run_keys):
         """Test keys subcommand routing."""
         mock_run_keys.return_value = 0
@@ -155,7 +155,7 @@ class TestCLIMain:
 
     @pytest.mark.unit
     @patch("alicemultiverse.interface.main_cli.load_config")
-    @patch("alicemultiverse.interface.main_cli.run_organizer")
+    @patch("alicemultiverse.organizer.run_organizer")
     def test_main_dry_run(self, mock_run_organizer, mock_load_config, omega_config, temp_dir):
         """Test dry run mode."""
         # Setup mocks
@@ -166,7 +166,7 @@ class TestCLIMain:
         inbox = temp_dir / "inbox"
         inbox.mkdir()
 
-        result = main(["--dry-run"])
+        result = main(["--debug", "--dry-run"])
 
         assert result == 0
         mock_run_organizer.assert_called_once()
@@ -192,13 +192,13 @@ class TestCLIMain:
         # Setup proper config
         mock_load_config.return_value = omega_config
 
-        with patch("alicemultiverse.interface.main_cli.run_organizer", side_effect=KeyboardInterrupt):
-            result = main(["--inbox", str(inbox)])
+        with patch("alicemultiverse.organizer.run_organizer", side_effect=KeyboardInterrupt):
+            result = main(["--debug", "--inbox", str(inbox)])
 
         assert result == 130  # Standard exit code for Ctrl+C
 
     @pytest.mark.unit
-    @patch("alicemultiverse.interface.main_cli.run_organizer")
+    @patch("alicemultiverse.organizer.run_organizer")
     def test_main_pipeline_args(self, mock_run_organizer, omega_config, temp_dir):
         """Test pipeline-related arguments are passed correctly."""
         mock_run_organizer.return_value = True
@@ -209,6 +209,7 @@ class TestCLIMain:
         with patch("alicemultiverse.interface.main_cli.load_config", return_value=omega_config):
             result = main(
                 [
+                    "--debug",
                     "--inbox",
                     str(inbox),
                     "--pipeline",
