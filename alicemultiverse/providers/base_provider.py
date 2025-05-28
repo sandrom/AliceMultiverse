@@ -3,9 +3,8 @@
 import logging
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 
-from ..events.base import EventBus
 from .event_mixin import ProviderEventMixin
 from .types import (
     CostEstimate,
@@ -47,15 +46,15 @@ class BudgetExceededError(ProviderError):
 class BaseProvider(ProviderEventMixin, ABC):
     """Abstract base class for AI generation providers."""
 
-    def __init__(self, api_key: Optional[str] = None, event_bus: Optional[EventBus] = None):
+    def __init__(self, api_key: Optional[str] = None, event_bus: Optional[Any] = None):
         """Initialize provider.
         
         Args:
             api_key: API key for authentication
-            event_bus: Event bus for publishing events
+            event_bus: Deprecated parameter, kept for compatibility
         """
         self.api_key = api_key
-        self.event_bus = event_bus or EventBus()
+        self.event_bus = None  # Deprecated
         self._status = ProviderStatus.UNKNOWN
         self._last_check: Optional[datetime] = None
         self._total_cost = 0.0  # Track total cost

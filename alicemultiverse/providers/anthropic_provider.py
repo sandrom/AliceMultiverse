@@ -11,7 +11,6 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 
 from ..core.file_operations import save_text_file
-from ..events.base import EventBus
 from .base_provider import BaseProvider, GenerationError, RateLimitError, AuthenticationError
 from .types import (
     GenerationRequest,
@@ -69,18 +68,18 @@ class AnthropicProvider(BaseProvider):
         "claude-3-5-sonnet-20241022": {"input": 3.0, "output": 15.0},
     }
     
-    def __init__(self, api_key: Optional[str] = None, event_bus: Optional[EventBus] = None):
+    def __init__(self, api_key: Optional[str] = None, event_bus: Optional[Any] = None):
         """Initialize Anthropic provider.
         
         Args:
             api_key: Anthropic API key (or set ANTHROPIC_API_KEY env var)
-            event_bus: Event bus for publishing events
+            event_bus: Deprecated parameter, kept for compatibility
         """
         api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
         if not api_key:
             raise ValueError("Anthropic API key is required")
             
-        super().__init__(api_key, event_bus)
+        super().__init__(api_key)
         self._session = None
         
     @property

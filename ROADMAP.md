@@ -11,7 +11,7 @@ Deep review revealed over-engineering that violates our "pragmatic, direct, no b
 
 **Event System Simplification (2,600 → 400 lines)**
 - [x] **Step 1**: Create PostgreSQL-native event system → **Commit**: "Create PostgreSQL-native event system"
-- [ ] **Step 2**: Migrate event publishers → **Commit**: "Migrate event publishers to PostgreSQL events"
+- [x] **Step 2**: Migrate event publishers → **Commit**: "Migrate event publishers to PostgreSQL events"
 - [ ] **Step 3**: Remove legacy implementations → **Commit**: "Remove legacy event store implementations"
 
 **Provider Abstraction Simplification (1,500 → 600 lines)**

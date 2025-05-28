@@ -16,7 +16,6 @@ from datetime import datetime
 
 from alicemultiverse.providers import get_provider, GenerationRequest, GenerationType
 from alicemultiverse.providers.registry import get_registry
-from alicemultiverse.events import EventBus
 
 
 class FalProviderTester:
@@ -29,28 +28,8 @@ class FalProviderTester:
         self.test_output_dir = Path("test_outputs") / f"fal_test_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
         self.test_output_dir.mkdir(parents=True, exist_ok=True)
         
-        # Initialize event monitoring
-        self.event_bus = EventBus()
-        self.setup_event_monitoring()
+        # Event monitoring removed - using direct result tracking
     
-    def setup_event_monitoring(self):
-        """Set up event monitoring for test results."""
-        def on_generation_started(event):
-            print(f"🎨 Started: {event.data['model']} - {event.data['prompt'][:50]}...")
-        
-        def on_generation_completed(event):
-            data = event.data
-            print(f"✅ Completed: {data['model']} in {data['generation_time']:.2f}s (${data['cost']:.4f})")
-            self.results.append(data)
-            self.total_cost += data['cost']
-        
-        def on_generation_failed(event):
-            print(f"❌ Failed: {event.data['model']} - {event.data['error']}")
-            self.errors.append(event.data)
-        
-        self.event_bus.subscribe("generation.started", on_generation_started)
-        self.event_bus.subscribe("generation.completed", on_generation_completed)
-        self.event_bus.subscribe("generation.failed", on_generation_failed)
     
     async def test_flux_models(self):
         """Test all FLUX image generation models."""

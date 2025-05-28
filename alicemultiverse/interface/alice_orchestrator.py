@@ -14,7 +14,7 @@ from ..assets.discovery import AssetDiscovery
 from ..core.logging import get_logger
 from ..database import get_session
 from ..database.repository import AssetRepository, ProjectRepository
-from ..events import ContextUpdatedEvent, WorkflowStartedEvent, publish_event
+from ..events import publish_event
 
 logger = get_logger(__name__)
 
@@ -433,7 +433,8 @@ class AliceOrchestrator:
                 prompt = self._enhance_prompt_with_style(prompt, self.memory.active_styles)
 
             # Publish workflow started event
-            workflow_event = WorkflowStartedEvent(
+            publish_event(
+                "workflow.started",
                 workflow_id=f"create_{datetime.now(UTC).timestamp()}",
                 workflow_type="image_generation",
                 workflow_name="AI-requested creation",
@@ -444,7 +445,6 @@ class AliceOrchestrator:
                     "original_request": request,
                 },
             )
-            await publish_event(workflow_event)
 
             # Update memory
             self._update_memory(
@@ -635,19 +635,18 @@ class AliceOrchestrator:
         if self.project_id and self.project_repo:
             try:
                 # Update project context
-                await publish_event(
-                    ContextUpdatedEvent(
-                        project_id=self.project_id,
-                        context_type="creative",
-                        update_type="modification",
-                        context_key="memory",
-                        new_value={
-                            "recent_searches": self.memory.recent_searches,
-                            "recent_creations": self.memory.recent_creations,
-                            "active_styles": self.memory.active_styles,
-                            "patterns": self.memory.creative_patterns,
-                        },
-                    )
+                publish_event(
+                    "context.updated",
+                    project_id=self.project_id,
+                    context_type="creative",
+                    update_type="modification",
+                    context_key="memory",
+                    new_value={
+                        "recent_searches": self.memory.recent_searches,
+                        "recent_creations": self.memory.recent_creations,
+                        "active_styles": self.memory.active_styles,
+                        "patterns": self.memory.creative_patterns,
+                    },
                 )
                 return True
             except Exception as e:

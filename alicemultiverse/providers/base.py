@@ -10,7 +10,6 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
-from ..events.base import EventBus
 from .types import (
     GenerationRequest,
     GenerationResult,
@@ -63,15 +62,15 @@ class GenerationProvider(ABC):
     DEPRECATED: Use BaseProvider from base_provider.py instead.
     """
 
-    def __init__(self, api_key: Optional[str] = None, event_bus: Optional[EventBus] = None):
+    def __init__(self, api_key: Optional[str] = None, event_bus: Optional[Any] = None):
         """Initialize provider.
         
         Args:
             api_key: API key for authentication
-            event_bus: Event bus for publishing events
+            event_bus: Deprecated parameter, kept for compatibility
         """
         self.api_key = api_key
-        self.event_bus = event_bus or EventBus()
+        self.event_bus = None  # Deprecated
         self._status = ProviderStatus.UNKNOWN
         self._last_check = None
 

@@ -14,7 +14,6 @@ from alicemultiverse.providers import (
     ProviderCapabilities,
     ProviderStatus,
 )
-from alicemultiverse.events.base import EventBus
 
 
 class TestProviderInterface:

@@ -179,18 +179,18 @@ class ProviderRegistry:
 _registry: Optional[ProviderRegistry] = None
 
 
-def get_registry(event_bus: Optional[EventBus] = None) -> ProviderRegistry:
+def get_registry(event_bus: Optional[Any] = None) -> ProviderRegistry:
     """Get global provider registry.
     
     Args:
-        event_bus: Event bus to use (only on first call)
+        event_bus: Deprecated parameter, kept for compatibility
         
     Returns:
         Provider registry
     """
     global _registry
     if _registry is None:
-        _registry = ProviderRegistry(event_bus)
+        _registry = ProviderRegistry()
     return _registry
 
 

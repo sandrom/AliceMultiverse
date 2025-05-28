@@ -152,35 +152,11 @@ class TestGenerationProvider:
         cost = await provider.estimate_cost(request)
         assert cost == 0.001
     
-    @patch('alicemultiverse.events.postgres_events.publish_event')
-    def test_event_publishing(self, mock_publish):
-        """Test event publishing on success and failure."""
-        provider = MockProvider()
-        
-        # Success event
-        request = GenerationRequest(
-            prompt="test",
-            generation_type=GenerationType.IMAGE
-        )
-        result = GenerationResult(
-            success=True,
-            file_path=Path("test.png"),
-            generation_time=1.0,
-            cost=0.01,
-            model="mock-fast"
-        )
-        
-        provider._publish_success(request, result)
-        mock_publish.assert_called_once()
-        assert mock_publish.call_args[0][0] == "asset.generated"
-        assert mock_publish.call_args[0][1]["provider"] == "mock"
-        
-        # Failure event
-        mock_publish.reset_mock()
-        provider._publish_failure(request, "Test error")
-        mock_publish.assert_called_once()
-        assert mock_publish.call_args[0][0] == "generation.failed"
-        assert mock_publish.call_args[0][1]["error"] == "Test error"
+    def test_event_publishing_removed(self):
+        """Event publishing is now handled by the event mixin, not base provider."""
+        # This test is removed as GenerationProvider (deprecated) doesn't have event mixin
+        # New providers using BaseProvider have event mixin built in
+        pass
 
 
 class TestFalProvider:

@@ -11,7 +11,6 @@ from urllib.parse import urlparse
 import aiohttp
 
 from ..core.file_operations import download_file
-from ..events.base import EventBus
 from .base import (
     AuthenticationError,
     GenerationError,
@@ -93,18 +92,18 @@ class FalProvider(GenerationProvider):
         "clarity-upscaler": 0.02,
     }
 
-    def __init__(self, api_key: Optional[str] = None, event_bus: Optional[EventBus] = None):
+    def __init__(self, api_key: Optional[str] = None, event_bus: Optional[Any] = None):
         """Initialize fal.ai provider.
         
         Args:
             api_key: fal.ai API key (or from FAL_KEY env var)
-            event_bus: Event bus for publishing events
+            event_bus: Deprecated parameter, kept for compatibility
         """
         api_key = api_key or os.getenv("FAL_KEY")
         if not api_key:
             logger.warning("No fal.ai API key provided. Some features may be limited.")
         
-        super().__init__(api_key, event_bus)
+        super().__init__(api_key)
         self._session: Optional[aiohttp.ClientSession] = None
 
     @property
