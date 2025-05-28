@@ -234,9 +234,13 @@ class TestFalProvider:
     def test_get_provider_from_registry(self):
         """Test getting provider from registry."""
         provider = get_provider("fal")
-        assert isinstance(provider, FalProvider)
-        assert provider.name == "fal.ai"
+        # Should get CostTrackingProvider wrapper
+        from alicemultiverse.providers.enhanced_registry import CostTrackingProvider
+        assert isinstance(provider, CostTrackingProvider)
+        assert isinstance(provider._provider, FalProvider)
+        assert provider._provider.name == "fal.ai"
         
         # Test alias
         provider2 = get_provider("fal.ai")
-        assert isinstance(provider2, FalProvider)
+        assert isinstance(provider2, CostTrackingProvider)
+        assert isinstance(provider2._provider, FalProvider)

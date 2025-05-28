@@ -1,6 +1,7 @@
 """Tests for provider system."""
 
 import asyncio
+import os
 from pathlib import Path
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -371,8 +372,12 @@ class TestProviderRegistry:
         
         # Get provider
         provider = registry.get_provider("fal")
-        assert isinstance(provider, FalProvider)
-        assert provider.api_key == "test-key"
+        # Should get CostTrackingProvider wrapper
+        from alicemultiverse.providers.enhanced_registry import CostTrackingProvider
+        assert isinstance(provider, CostTrackingProvider)
+        # The wrapped provider should be FalProvider
+        assert isinstance(provider._provider, FalProvider)
+        assert provider._provider.api_key == "test-key"
         
         # Get same instance
         provider2 = registry.get_provider("fal")
@@ -386,17 +391,19 @@ class TestProviderRegistry:
         """Test getting providers by generation type."""
         registry = ProviderRegistry()
         
-        # Image providers
-        image_providers = registry.get_providers_for_type(GenerationType.IMAGE)
-        assert "fal" in image_providers
-        
-        # Video providers
-        video_providers = registry.get_providers_for_type(GenerationType.VIDEO)
-        assert "fal" in video_providers
-        
-        # Audio providers (none currently)
-        audio_providers = registry.get_providers_for_type(GenerationType.AUDIO)
-        assert len(audio_providers) == 0
+        # Mock API keys to avoid initialization errors
+        with patch.dict(os.environ, {"OPENAI_API_KEY": "test-key", "ANTHROPIC_API_KEY": "test-key"}):
+            # Image providers
+            image_providers = registry.get_providers_for_type(GenerationType.IMAGE)
+            assert "fal" in image_providers
+            
+            # Video providers
+            video_providers = registry.get_providers_for_type(GenerationType.VIDEO)
+            assert "fal" in video_providers
+            
+            # Audio providers (none currently)
+            audio_providers = registry.get_providers_for_type(GenerationType.AUDIO)
+            assert len(audio_providers) == 0
     
     def test_list_providers(self):
         """Test listing all providers."""
@@ -417,9 +424,9 @@ class TestProviderRegistry:
         
         # Get provider through convenience function
         provider = get_provider("fal", api_key="test-key")
-        assert isinstance(provider, FalProvider)
-        assert provider.api_key == "test-key"
+        # Should get CostTrackingProvider wrapper
+        from alicemultiverse.providers.enhanced_registry import CostTrackingProvider
+        assert isinstance(provider, CostTrackingProvider)
+        assert isinstance(provider._provider, FalProvider)
+        assert provider._provider.api_key == "test-key"
 
-
-# Import os for environment variable mocking
-import os
