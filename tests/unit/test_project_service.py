@@ -1,10 +1,8 @@
 """Tests for project service."""
 
 import pytest
-from sqlalchemy import create_engine
-from sqlalchemy.orm import Session, sessionmaker
 
-from alicemultiverse.database.models import Base, Generation, Project
+from alicemultiverse.database.models import Generation, Project
 from alicemultiverse.events.base import EventBus, EventSubscriber
 from alicemultiverse.events.creative_events import ContextUpdatedEvent, ProjectCreatedEvent
 from alicemultiverse.events.workflow_events import WorkflowCompletedEvent, WorkflowFailedEvent
@@ -26,17 +24,6 @@ class TestEventSubscriber(EventSubscriber):
     def event_types(self) -> list[str]:
         """Return event types to subscribe to."""
         return self._event_types
-
-
-@pytest.fixture
-def db_session():
-    """Create an in-memory database session for testing."""
-    engine = create_engine("sqlite:///:memory:")
-    Base.metadata.create_all(engine)
-    SessionLocal = sessionmaker(bind=engine)
-    session = SessionLocal()
-    yield session
-    session.close()
 
 
 @pytest.fixture

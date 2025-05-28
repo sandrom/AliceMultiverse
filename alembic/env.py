@@ -1,3 +1,5 @@
+"""Alembic environment configuration for PostgreSQL migrations."""
+
 import os
 import sys
 from logging.config import fileConfig
@@ -9,6 +11,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from sqlalchemy import engine_from_config, pool
 
 from alembic import context
+from alicemultiverse.database.config import DATABASE_URL
 from alicemultiverse.database.models import Base
 
 # this is the Alembic Config object, which provides
@@ -24,11 +27,6 @@ if config.config_file_name is not None:
 # for 'autogenerate' support
 target_metadata = Base.metadata
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
-
 
 def run_migrations_offline() -> None:
     """Run migrations in 'offline' mode.
@@ -42,13 +40,14 @@ def run_migrations_offline() -> None:
     script output.
 
     """
-    # Allow database URL override from environment
-    url = os.environ.get("ALEMBIC_DATABASE_URL") or config.get_main_option("sqlalchemy.url")
+    # Use DATABASE_URL from our config
     context.configure(
-        url=url,
+        url=DATABASE_URL,
         target_metadata=target_metadata,
         literal_binds=True,
         dialect_opts={"paramstyle": "named"},
+        compare_type=True,  # Compare column types
+        compare_server_default=True,  # Compare defaults
     )
 
     with context.begin_transaction():
@@ -62,10 +61,9 @@ def run_migrations_online() -> None:
     and associate a connection with the context.
 
     """
-    # Allow database URL override from environment
+    # Create configuration with our DATABASE_URL
     configuration = config.get_section(config.config_ini_section, {})
-    if "ALEMBIC_DATABASE_URL" in os.environ:
-        configuration["sqlalchemy.url"] = os.environ["ALEMBIC_DATABASE_URL"]
+    configuration["sqlalchemy.url"] = DATABASE_URL
 
     connectable = engine_from_config(
         configuration,
@@ -74,7 +72,12 @@ def run_migrations_online() -> None:
     )
 
     with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
+        context.configure(
+            connection=connection,
+            target_metadata=target_metadata,
+            compare_type=True,  # Compare column types
+            compare_server_default=True,  # Compare defaults
+        )
 
         with context.begin_transaction():
             context.run_migrations()

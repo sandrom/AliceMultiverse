@@ -1,6 +1,22 @@
 version: '3.8'
 
 services:
+  postgres:
+    image: postgres:16-alpine
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: alice
+      POSTGRES_PASSWORD: alice
+      POSTGRES_DB: alicemultiverse
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U alice"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
   redis:
     image: redis:7-alpine
     ports:
@@ -21,8 +37,11 @@ services:
       - "8000:8000"
     environment:
       - REDIS_URL=redis://redis:6379
+      - DATABASE_URL=postgresql://alice:alice@postgres:5432/alicemultiverse
       - SERVICE_NAME=alice-interface
     depends_on:
+      postgres:
+        condition: service_healthy
       redis:
         condition: service_healthy
     volumes:
@@ -80,4 +99,5 @@ services:
       - ./packages:/packages
 
 volumes:
+  postgres-data:
   redis-data:

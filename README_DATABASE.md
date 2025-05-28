@@ -2,7 +2,30 @@
 
 ## Overview
 
-The database system implements a content-addressed asset storage model where files are tracked by their content hash rather than file path. This allows assets to be moved freely while maintaining all metadata and relationships.
+AliceMultiverse uses PostgreSQL exclusively for all database operations. The system implements a content-addressed asset storage model where files are tracked by their content hash rather than file path. This allows assets to be moved freely while maintaining all metadata and relationships.
+
+## PostgreSQL Setup
+
+### Local Development
+
+Use docker-compose to run PostgreSQL locally:
+
+```bash
+# Start PostgreSQL and other services
+docker-compose up -d postgres
+
+# Database will be available at:
+# postgresql://alice:alice@localhost:5432/alicemultiverse
+```
+
+### Kubernetes Production
+
+In Kubernetes, PostgreSQL is managed by CloudNativePG operator:
+
+```bash
+# Database connection is provided via environment variable:
+# DATABASE_URL=postgresql://alice:password@postgres-rw:5432/alicemultiverse
+```
 
 ## Key Concepts
 
@@ -16,12 +39,18 @@ The database system implements a content-addressed asset storage model where fil
 
 **Projects**
 - Container for related assets with creative context
+- Budget tracking with automatic enforcement
 - Stores style preferences, settings, and metadata
 
 **Assets**  
 - Primary entity tracked by content_hash
 - Stores file properties, generation parameters, analysis results
 - Links to current file_path (can be null if file moved)
+
+**Generations**
+- Tracks AI generation requests and costs
+- Links to projects for budget management
+- Records provider, model, prompt, and results
 
 **AssetPaths**
 - Historical record of where assets have been found
@@ -32,94 +61,97 @@ The database system implements a content-addressed asset storage model where fil
 - Supports workflow tracking and asset lineage
 
 **Tags**
-- Semantic tagging system for assets
+- Semantic tagging system with key:value pairs
+- Example: {"style": ["cyberpunk"], "mood": ["dark"]}
 - Supports user, AI, and auto-generated tags
 
-## Setup
+## Database Migrations
 
-### Initialize Database
+All schema changes are managed through Alembic:
+
 ```bash
-# Using Alembic migrations (recommended)
+# Run all migrations
 alembic upgrade head
 
-# Or direct initialization
-python scripts/init_db.py
+# Create a new migration
+alembic revision -m "Description of changes"
+
+# Check current version
+alembic current
+
+# View migration history
+alembic history
 ```
 
-### Configuration
+## Environment Variables
 
-Environment variables:
-- `ALICEMULTIVERSE_DATABASE_URL` - Database connection string (defaults to SQLite)
-- `ALICEMULTIVERSE_SQL_ECHO` - Enable SQL query logging
-
-Default SQLite location: `~/.alicemultiverse/alicemultiverse.db`
-
-### Database Migrations
-
-Create new migration:
 ```bash
-alembic revision --autogenerate -m "Description of changes"
+# Required - PostgreSQL connection string
+DATABASE_URL=postgresql://user:password@host:5432/dbname
+
+# Optional - Enable SQL logging
+ALICEMULTIVERSE_SQL_ECHO=true
 ```
 
-Apply migrations:
-```bash
-alembic upgrade head
-```
+## Connection Pool Settings
 
-## Usage Example
+The database connection is configured with:
+- `pool_size=10`: Number of persistent connections
+- `max_overflow=20`: Additional connections when needed
+- `pool_pre_ping=True`: Verify connections before use
+- `pool_recycle=3600`: Recycle connections after 1 hour
+
+## Python Usage
 
 ```python
-from alicemultiverse.database import get_session
+from alicemultiverse.database.config import get_session, init_db
 from alicemultiverse.database.repository import AssetRepository
-from alicemultiverse.assets.hashing import calculate_content_hash
 
-# Calculate content hash for a file
-content_hash = calculate_content_hash(Path("image.png"))
+# Initialize database connection
+db_session = init_db()
 
-# Store asset in database
-with get_session() as session:
-    repo = AssetRepository(session)
-    asset = repo.create_or_update_asset(
-        content_hash=content_hash,
-        file_path="image.png",
-        media_type="image",
-        source_type="fal.ai"
-    )
-    session.commit()
+# Use repository pattern
+repo = AssetRepository(db_session)
+assets = repo.search(tags={"style": ["cyberpunk"]})
 ```
 
-## Migration Path
+## Troubleshooting
 
-The system is designed to support future PostgreSQL migration:
-1. Update `ALICEMULTIVERSE_DATABASE_URL` environment variable
-2. Run migrations on new database
-3. Use same repository pattern - no code changes needed
+### Connection Issues
 
-## Integration with Unified Cache
+```bash
+# Test PostgreSQL connection
+psql $DATABASE_URL -c "SELECT 1"
 
-The database integrates seamlessly with the UnifiedCache system:
-- Content hashes are shared between cache and database
-- Metadata is stored in both systems for redundancy
-- Database enables advanced queries across all assets
-- Cache provides fast local access for active operations
-
-## Advanced Features
-
-### Asset Discovery
-```python
-from alicemultiverse.assets.discovery import AssetDiscovery
-
-discovery = AssetDiscovery(session)
-# Find all assets in a directory tree
-assets = discovery.discover_assets(Path("/path/to/media"))
+# Check if migrations are up to date
+alembic current
 ```
 
-### Relationship Tracking
-- Track parent/child relationships (e.g., variations)
-- Monitor workflow progression
-- Build asset lineage trees
+### Performance
 
-### Semantic Search
-- Tag-based queries
-- Metadata-based filtering
-- AI-generated content detection
+- Create indexes for frequently queried columns
+- Use EXPLAIN ANALYZE for slow queries
+- Monitor connection pool usage
+- Consider partitioning for large tables
+
+## Best Practices
+
+1. **Always use migrations** - Never modify schema directly
+2. **Use transactions** - Wrap related operations in transactions
+3. **Handle connections properly** - Always close sessions
+4. **Index foreign keys** - PostgreSQL doesn't do this automatically
+5. **Use JSONB for flexible data** - Better than JSON for querying
+
+## Backup and Recovery
+
+For production deployments:
+
+```bash
+# Backup
+pg_dump $DATABASE_URL > backup.sql
+
+# Restore
+psql $DATABASE_URL < backup.sql
+```
+
+In Kubernetes, use CloudNativePG's built-in backup features.

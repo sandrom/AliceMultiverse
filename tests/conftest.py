@@ -10,8 +10,12 @@ from unittest.mock import Mock
 
 import pytest
 from omegaconf import OmegaConf
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session, sessionmaker
+from sqlalchemy.pool import StaticPool
 
 from alicemultiverse.core.types import MediaType, QualityRating
+from alicemultiverse.database.models import Base
 
 
 @pytest.fixture
@@ -149,6 +153,8 @@ def reset_environment():
         "SIGHTENGINE_API_SECRET",
         "ANTHROPIC_API_KEY",
         "OPENAI_API_KEY",
+        "DATABASE_URL",
+        "ALICEMULTIVERSE_DATABASE_URL",
     ]
 
     for var in test_env_vars:
@@ -159,6 +165,33 @@ def reset_environment():
     # Restore original environment
     os.environ.clear()
     os.environ.update(original_env)
+
+
+# Database test fixtures
+# For tests only, we use SQLite in-memory for speed and isolation
+# Production always uses PostgreSQL
+
+@pytest.fixture(scope="function")
+def test_db_engine():
+    """Create a test database engine using SQLite in-memory."""
+    engine = create_engine(
+        "sqlite:///:memory:",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,  # Required for SQLite in-memory with multiple connections
+    )
+    Base.metadata.create_all(engine)
+    yield engine
+    Base.metadata.drop_all(engine)
+    engine.dispose()
+
+
+@pytest.fixture(scope="function")
+def db_session(test_db_engine):
+    """Create a test database session."""
+    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_db_engine)
+    session = SessionLocal()
+    yield session
+    session.close()
 
 
 @pytest.fixture

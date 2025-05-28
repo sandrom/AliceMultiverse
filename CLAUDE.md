@@ -272,18 +272,31 @@ This will store your API keys securely in macOS Keychain. For containerized envi
 - `SIGHTENGINE_API_USER` and `SIGHTENGINE_API_SECRET`
 - `ANTHROPIC_API_KEY`
 
-## Database Setup (Optional)
+## Database Setup
 
-The system includes an optional content-addressed asset database for advanced features:
+AliceMultiverse uses PostgreSQL for all database operations:
+
+### Local Development
 ```bash
+# Start PostgreSQL with docker-compose
+docker-compose up -d postgres
+
 # Run database migrations
 alembic upgrade head
 
-# Or use the init script
-python scripts/init_db.py
+# Database connection (set in environment)
+export DATABASE_URL="postgresql://alice:alice@localhost:5432/alicemultiverse"
 ```
 
-The database uses SQLite by default at `~/.alicemultiverse/alicemultiverse.db`. See README_DATABASE.md for details on the content-addressed storage system.
+### Production (Kubernetes)
+The database is managed by CloudNativePG operator and connection is provided via environment variable:
+```bash
+# Migrations are run automatically on deployment
+# Connection string is injected from Kubernetes secret
+DATABASE_URL=postgresql://alice:password@postgres-rw:5432/alicemultiverse
+```
+
+See README_DATABASE.md for details on the content-addressed storage system and PostgreSQL configuration.
 
 ## Event System
 

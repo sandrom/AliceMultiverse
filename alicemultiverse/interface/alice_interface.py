@@ -1021,3 +1021,75 @@ class AliceInterface:
                 data=None,
                 error=str(e)
             )
+    
+    def health_check(self) -> AliceResponse:
+        """Check system health including database connectivity.
+        
+        Returns:
+            Response with health status of all components
+        """
+        health = {
+            "status": "healthy",
+            "components": {}
+        }
+        
+        # Check database
+        try:
+            from alicemultiverse.database.config import get_pool_stats
+            
+            with self.project_service.db.begin():
+                self.project_service.db.execute("SELECT 1")
+            
+            # Get pool statistics
+            pool_stats = get_pool_stats()
+            
+            health["components"]["database"] = {
+                "status": "healthy",
+                "type": "postgresql",
+                "pool_stats": pool_stats.get("pool_status", {}),
+                "pool_health": pool_stats.get("health", {})
+            }
+        except Exception as e:
+            health["status"] = "unhealthy"
+            health["components"]["database"] = {
+                "status": "unhealthy",
+                "error": str(e)
+            }
+        
+        # Check Redis event bus
+        try:
+            # Simple check if event bus is available
+            if self.project_service.event_bus:
+                health["components"]["event_bus"] = {"status": "healthy"}
+            else:
+                health["components"]["event_bus"] = {"status": "not_configured"}
+        except Exception as e:
+            health["components"]["event_bus"] = {
+                "status": "unhealthy",
+                "error": str(e)
+            }
+        
+        # Check file system access
+        try:
+            from pathlib import Path
+            inbox = Path(self.config.paths.inbox)
+            organized = Path(self.config.paths.organized)
+            
+            health["components"]["filesystem"] = {
+                "status": "healthy",
+                "inbox_exists": inbox.exists(),
+                "organized_exists": organized.exists()
+            }
+        except Exception as e:
+            health["status"] = "unhealthy"
+            health["components"]["filesystem"] = {
+                "status": "unhealthy",
+                "error": str(e)
+            }
+        
+        return AliceResponse(
+            success=health["status"] == "healthy",
+            message=f"System is {health['status']}",
+            data=health,
+            error=None
+        )
