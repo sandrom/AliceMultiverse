@@ -12,7 +12,7 @@ Must complete before adding more providers. This architectural foundation preven
 - [x] **Step 1**: Extract base interface from fal_provider → **Commit**: "Extract provider interface"
 - [x] **Step 2**: Create provider registry with cost tracking → **Commit**: "Add provider registry"
 - [x] **Step 3**: Add OpenAI provider (DALL-E 3) → **Commit**: "Add OpenAI provider"
-- [ ] **Step 4**: Add Anthropic provider (Claude vision) → **Commit**: "Add Anthropic provider"
+- [x] **Step 4**: Add Anthropic provider (Claude vision) → **Commit**: "Add Anthropic provider"
 
 ## Next Up (Priority Order)
 
