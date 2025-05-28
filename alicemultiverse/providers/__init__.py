@@ -23,7 +23,13 @@ from .types import CostEstimate
 
 # Implementations
 from .fal_provider import FalProvider
-from .registry import ProviderRegistry, get_provider, get_cost_report, set_global_budget
+from .registry import (
+    ProviderRegistry, 
+    get_provider, 
+    get_provider_async,
+    get_cost_report, 
+    set_global_budget
+)
 
 __all__ = [
     # Base classes and types (backward compatibility)
@@ -47,6 +53,7 @@ __all__ = [
     "FalProvider",
     "ProviderRegistry",
     "get_provider",
+    "get_provider_async",
     "get_cost_report",
     "set_global_budget",
 ]

@@ -4,6 +4,7 @@ MIGRATION NOTE: This module now uses EnhancedProviderRegistry internally
 for better cost tracking and provider management. The API remains compatible.
 """
 
+import asyncio
 import logging
 from typing import Dict, List, Optional, Type
 
@@ -11,6 +12,7 @@ from ..events.base import EventBus
 from .base import GenerationProvider, GenerationType
 from .enhanced_registry import EnhancedProviderRegistry
 from .fal_provider import FalProvider
+from .openai_provider import OpenAIProvider
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +27,7 @@ class ProviderRegistry:
     PROVIDERS: Dict[str, Type[GenerationProvider]] = {
         "fal": FalProvider,
         "fal.ai": FalProvider,  # Alias
+        "openai": OpenAIProvider,
     }
 
     def __init__(self, event_bus: Optional[EventBus] = None):
@@ -66,16 +69,29 @@ class ProviderRegistry:
             
         Raises:
             ValueError: If provider not found
+            RuntimeError: If called from async context (use get_provider_async instead)
         """
+        # Check if we're in an async context
+        try:
+            asyncio.get_running_loop()
+            # We're in an async context - this is unsafe
+            raise RuntimeError(
+                "get_provider() cannot be called from async context. "
+                "Use 'await get_provider_async(name)' instead."
+            )
+        except RuntimeError:
+            # No running loop - safe to proceed
+            pass
+        
         # Use async method synchronously for compatibility
         import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
         try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-        
-        return loop.run_until_complete(self._enhanced_registry.get_provider(name))
+            return loop.run_until_complete(self._enhanced_registry.get_provider(name))
+        finally:
+            loop.close()
+            asyncio.set_event_loop(None)
 
     def get_providers_for_type(self, generation_type: GenerationType) -> List[str]:
         """Get providers that support a generation type.
@@ -132,6 +148,33 @@ class ProviderRegistry:
             provider_name: Provider to enable
         """
         self._enhanced_registry.enable_provider(provider_name)
+    
+    # Async methods for use in async contexts
+    
+    async def get_provider_async(self, name: str) -> GenerationProvider:
+        """Get a provider instance by name (async version).
+        
+        Args:
+            name: Provider name
+            
+        Returns:
+            Provider instance
+            
+        Raises:
+            ValueError: If provider not found
+        """
+        return await self._enhanced_registry.get_provider(name)
+    
+    async def select_provider_async(self, request) -> GenerationProvider:
+        """Select best provider for request (async version).
+        
+        Args:
+            request: Generation request
+            
+        Returns:
+            Selected provider
+        """
+        return await self._enhanced_registry.select_provider(request)
 
 
 # Global registry instance
@@ -191,3 +234,23 @@ def get_cost_report() -> Dict[str, any]:
     """
     registry = get_registry()
     return registry.get_stats()
+
+
+# Async convenience functions
+
+async def get_provider_async(name: str, api_key: Optional[str] = None) -> GenerationProvider:
+    """Async version of get_provider.
+    
+    Args:
+        name: Provider name
+        api_key: Optional API key to register
+        
+    Returns:
+        Provider instance
+    """
+    registry = get_registry()
+    
+    if api_key:
+        registry.register_api_key(name, api_key)
+    
+    return await registry.get_provider_async(name)
