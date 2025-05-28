@@ -3,12 +3,12 @@
 import logging
 from datetime import datetime, timedelta
 from pathlib import Path
+from typing import Any
 
 from ..core.config import load_config
 from ..metadata.models import AssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
 from .models import (
-    AliceResponse,
     AssetInfo,
     GenerateRequest,
     GroupRequest,
@@ -17,6 +17,16 @@ from .models import (
     SearchRequest,
     TagRequest,
 )
+
+# Since AliceResponse is a TypedDict, we need to create dicts not instances
+def AliceResponse(success: bool, message: str, data: Any = None, error: str = None) -> dict:
+    """Create an AliceResponse dict."""
+    return {
+        "success": success,
+        "message": message,
+        "data": data,
+        "error": error
+    }
 
 logger = logging.getLogger(__name__)
 
@@ -113,21 +123,21 @@ class AliceInterface:
         if asset.get("grouped_with"):
             relationships["grouped"] = asset["grouped_with"]
 
-        return AssetInfo(
-            id=asset["asset_id"],
-            filename=asset["file_name"],
-            prompt=asset.get("prompt"),
-            tags=all_tags,
-            quality_stars=asset.get("quality_stars"),
-            role=(
+        return {
+            "id": asset.get("asset_id", asset.get("file_hash", "unknown")),
+            "filename": asset.get("file_name", asset.get("filename", "unknown")),
+            "prompt": asset.get("prompt"),
+            "tags": all_tags,
+            "quality_stars": asset.get("quality_stars", asset.get("quality_star")),
+            "role": (
                 asset.get("role", AssetRole.WIP).value
                 if hasattr(asset.get("role"), "value")
                 else str(asset.get("role", "wip"))
             ),
-            created=asset.get("created_at", datetime.now()).isoformat(),
-            source=asset.get("source_type", "unknown"),
-            relationships=relationships,
-        )
+            "created": asset.get("created_at", asset.get("date_taken", datetime.now().isoformat())),
+            "source": asset.get("source_type", asset.get("ai_source", "unknown")),
+            "relationships": relationships,
+        }
 
     # === Core Functions for AI ===
 
@@ -150,10 +160,14 @@ class AliceInterface:
 
             # Handle natural language description
             if request.get("description"):
-                # Use description search first
-                results = self.organizer.search_engine.search_by_description(
-                    request["description"], limit=request.get("limit", 20)
-                )
+                # Use description search if search engine is available
+                if self.organizer.search_engine:
+                    results = self.organizer.search_engine.search_by_description(
+                        request["description"], limit=request.get("limit", 20)
+                    )
+                else:
+                    # Fallback to basic search
+                    results = []
             else:
                 # Build structured query
                 if request.get("time_reference"):
@@ -412,4 +426,150 @@ class AliceInterface:
             logger.error(f"Role setting failed: {e}")
             return AliceResponse(
                 success=False, message="Role setting failed", data=None, error=str(e)
+            )
+
+    def get_asset_info(self, asset_id: str) -> AliceResponse:
+        """Get detailed information about a specific asset.
+
+        Args:
+            asset_id: The unique asset identifier
+
+        Returns:
+            Comprehensive metadata including prompt, tags, quality, and relationships
+        """
+        try:
+            self._ensure_organizer()
+
+            # Get asset metadata from cache
+            # Try the metadata index first
+            metadata = self.organizer.metadata_cache._unified.metadata_index.get(asset_id)
+            if not metadata:
+                return AliceResponse(
+                    success=False,
+                    message=f"Asset not found: {asset_id}",
+                    data=None,
+                    error="Asset not found"
+                )
+
+            # Convert to simplified format
+            asset_info = self._simplify_asset_info(metadata)
+
+            return AliceResponse(
+                success=True,
+                message="Asset information retrieved",
+                data={"asset": asset_info},
+                error=None
+            )
+
+        except Exception as e:
+            logger.error(f"Get asset info failed: {e}")
+            return AliceResponse(
+                success=False, message="Failed to get asset info", data=None, error=str(e)
+            )
+
+    def assess_quality(self, asset_ids: list[str], pipeline: str = "standard") -> AliceResponse:
+        """Run quality assessment on specific assets.
+
+        Args:
+            asset_ids: List of asset IDs to assess
+            pipeline: Assessment pipeline ("basic", "standard", "premium")
+
+        Returns:
+            Quality scores and identified issues for each asset
+        """
+        try:
+            self._ensure_organizer()
+
+            results = []
+            for asset_id in asset_ids:
+                metadata = self.organizer.metadata_cache._unified.metadata_index.get(asset_id)
+                if metadata:
+                    # Extract quality info if available
+                    quality_info = {
+                        "asset_id": asset_id,
+                        "brisque_score": metadata.get("brisque_score"),
+                        "quality_star": metadata.get("quality_star"),
+                        "pipeline_scores": metadata.get("pipeline_scores", {}),
+                        "issues": metadata.get("quality_issues", [])
+                    }
+                    results.append(quality_info)
+                else:
+                    results.append({
+                        "asset_id": asset_id,
+                        "error": "Asset not found"
+                    })
+
+            return AliceResponse(
+                success=True,
+                message=f"Assessed {len(results)} assets with {pipeline} pipeline",
+                data={"quality_results": results, "pipeline": pipeline},
+                error=None
+            )
+
+        except Exception as e:
+            logger.error(f"Quality assessment failed: {e}")
+            return AliceResponse(
+                success=False, message="Quality assessment failed", data=None, error=str(e)
+            )
+
+    def get_stats(self) -> AliceResponse:
+        """Get statistics about the organized media collection.
+
+        Returns:
+            Counts by date, source, quality, and project
+        """
+        try:
+            self._ensure_organizer()
+
+            # Get all cached metadata
+            all_metadata = list(self.organizer.metadata_cache._unified.metadata_index.values())
+
+            # Calculate statistics
+            stats = {
+                "total_assets": len(all_metadata),
+                "by_source": {},
+                "by_quality": {"5-star": 0, "4-star": 0, "3-star": 0, "2-star": 0, "1-star": 0},
+                "by_project": {},
+                "by_date": {},
+                "media_types": {"image": 0, "video": 0},
+            }
+
+            for metadata in all_metadata:
+                # Count by source
+                source = metadata.get("ai_source", "unknown")
+                stats["by_source"][source] = stats["by_source"].get(source, 0) + 1
+
+                # Count by quality
+                quality = metadata.get("quality_star")
+                if quality:
+                    key = f"{quality}-star"
+                    if key in stats["by_quality"]:
+                        stats["by_quality"][key] += 1
+
+                # Count by project
+                project = metadata.get("project", "untitled")
+                stats["by_project"][project] = stats["by_project"].get(project, 0) + 1
+
+                # Count by date
+                date_taken = metadata.get("date_taken")
+                if date_taken:
+                    date_str = date_taken.split("T")[0]  # Get just the date part
+                    stats["by_date"][date_str] = stats["by_date"].get(date_str, 0) + 1
+
+                # Count by media type
+                media_type = metadata.get("media_type", "image")
+                if media_type in stats["media_types"]:
+                    stats["media_types"][media_type] += 1
+
+            return AliceResponse(
+                success=True,
+                message="Collection statistics retrieved",
+                data=stats,
+                error=None
+            )
+
+        except Exception as e:
+            logger.error(f"Get stats failed: {e}")
+            return AliceResponse(
+                success=False, message="Failed to get statistics", data=None, error=str(e)
             )
