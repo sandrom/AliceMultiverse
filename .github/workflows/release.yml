@@ -1,9 +1,10 @@
 name: Release
 
 on:
-  push:
-    branches:
-      - main
+  # do not automatically release for now.
+  # push:
+  #   branches:
+  #     - main
   workflow_dispatch:
 
 permissions:
