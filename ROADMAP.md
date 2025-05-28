@@ -103,6 +103,13 @@ alice --pipeline custom --stages "openai,anthropic" --dry-run
 3. Move highest priority item from "Next Up" to "Current Work"
 4. Update based on new insights
 
+### Priority Re-evaluation
+- **Daily**: Review "Next Up" queue against backlog
+- **After each commit**: Check if learnings change priorities
+- **On significant findings**: Immediately re-order based on new information
+- Items from backlog may jump to "Next Up" if they become critical
+- Document why priorities changed in commit messages
+
 ## Architecture Decisions
 
 - **Alice as Orchestrator**: Not an AI, but coordinates between AIs and tools
