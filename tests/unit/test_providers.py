@@ -346,12 +346,9 @@ class TestProviderRegistry:
         
         # Get provider
         provider = registry.get_provider("fal")
-        # Should get CostTrackingProvider wrapper
-        from alicemultiverse.providers.enhanced_registry import CostTrackingProvider
-        assert isinstance(provider, CostTrackingProvider)
-        # The wrapped provider should be FalProvider
-        assert isinstance(provider._provider, FalProvider)
-        assert provider._provider.api_key == "test-key"
+        # Should get FalProvider directly (no wrapper)
+        assert isinstance(provider, FalProvider)
+        assert provider.api_key == "test-key"
         
         # Get same instance
         provider2 = registry.get_provider("fal")
@@ -398,9 +395,7 @@ class TestProviderRegistry:
         
         # Get provider through convenience function
         provider = get_provider("fal", api_key="test-key")
-        # Should get CostTrackingProvider wrapper
-        from alicemultiverse.providers.enhanced_registry import CostTrackingProvider
-        assert isinstance(provider, CostTrackingProvider)
-        assert isinstance(provider._provider, FalProvider)
-        assert provider._provider.api_key == "test-key"
+        # Should get FalProvider directly (no wrapper)
+        assert isinstance(provider, FalProvider)
+        assert provider.api_key == "test-key"
 

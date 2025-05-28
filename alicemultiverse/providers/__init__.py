@@ -29,8 +29,7 @@ from .registry import (
     ProviderRegistry, 
     get_provider, 
     get_provider_async,
-    get_cost_report, 
-    set_global_budget
+    get_registry,
 )
 
 __all__ = [
@@ -58,6 +57,5 @@ __all__ = [
     "ProviderRegistry",
     "get_provider",
     "get_provider_async",
-    "get_cost_report",
-    "set_global_budget",
+    "get_registry",
 ]

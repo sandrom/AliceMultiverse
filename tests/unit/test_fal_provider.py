@@ -110,10 +110,9 @@ class TestFalProvider:
             generation_type=GenerationType.IMAGE
         )
         
-        result = await provider.generate(request)
-        assert not result.success
-        assert "not available" in result.error
-        assert "invalid-model" in result.error
+        # Should raise ValueError during validation
+        with pytest.raises(ValueError, match="Model 'invalid-model' not available"):
+            await provider.generate(request)
     
     @pytest.mark.asyncio
     async def test_download_result_image(self):
@@ -234,13 +233,10 @@ class TestFalProvider:
     def test_get_provider_from_registry(self):
         """Test getting provider from registry."""
         provider = get_provider("fal")
-        # Should get CostTrackingProvider wrapper
-        from alicemultiverse.providers.enhanced_registry import CostTrackingProvider
-        assert isinstance(provider, CostTrackingProvider)
-        assert isinstance(provider._provider, FalProvider)
-        assert provider._provider.name == "fal.ai"
+        # Should get FalProvider directly (no wrapper)
+        assert isinstance(provider, FalProvider)
+        assert provider.name == "fal.ai"
         
         # Test alias
         provider2 = get_provider("fal.ai")
-        assert isinstance(provider2, CostTrackingProvider)
-        assert isinstance(provider2._provider, FalProvider)
+        assert isinstance(provider2, FalProvider)
