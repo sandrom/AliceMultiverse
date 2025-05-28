@@ -244,3 +244,29 @@ async def _download_with_session(url: str, destination: Path, session: 'aiohttp.
         if destination.exists():
             destination.unlink()  # Clean up partial download
         raise FileOperationError(f"Download failed: {e}")
+
+
+async def save_text_file(path: Path, content: str, encoding: str = 'utf-8') -> None:
+    """Save text content to a file.
+    
+    Args:
+        path: Path to save file
+        content: Text content to save
+        encoding: Text encoding (default: utf-8)
+        
+    Raises:
+        FileOperationError: If save fails
+    """
+    try:
+        # Ensure directory exists
+        path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Write file
+        with open(path, 'w', encoding=encoding) as f:
+            f.write(content)
+            
+        logger.info(f"Saved text file to {path}")
+        
+    except Exception as e:
+        logger.error(f"Failed to save text file {path}: {e}")
+        raise FileOperationError(f"Save failed: {e}")

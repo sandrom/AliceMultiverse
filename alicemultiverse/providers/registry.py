@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Type
 from ..events.base import EventBus
 from .base import GenerationProvider, GenerationType
 from .enhanced_registry import EnhancedProviderRegistry
+from .anthropic_provider import AnthropicProvider
 from .fal_provider import FalProvider
 from .openai_provider import OpenAIProvider
 
@@ -28,6 +29,8 @@ class ProviderRegistry:
         "fal": FalProvider,
         "fal.ai": FalProvider,  # Alias
         "openai": OpenAIProvider,
+        "anthropic": AnthropicProvider,
+        "claude": AnthropicProvider,  # Alias
     }
 
     def __init__(self, event_bus: Optional[EventBus] = None):
@@ -84,7 +87,6 @@ class ProviderRegistry:
             pass
         
         # Use async method synchronously for compatibility
-        import asyncio
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         try:

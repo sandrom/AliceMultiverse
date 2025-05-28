@@ -22,7 +22,9 @@ from .base_provider import (
 from .types import CostEstimate
 
 # Implementations
+from .anthropic_provider import AnthropicProvider
 from .fal_provider import FalProvider
+from .openai_provider import OpenAIProvider
 from .registry import (
     ProviderRegistry, 
     get_provider, 
@@ -50,7 +52,9 @@ __all__ = [
     # Types
     "CostEstimate",
     # Implementations
+    "AnthropicProvider",
     "FalProvider",
+    "OpenAIProvider",
     "ProviderRegistry",
     "get_provider",
     "get_provider_async",
