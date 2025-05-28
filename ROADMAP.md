@@ -10,7 +10,7 @@ AliceMultiverse is evolving from a media organization tool into a comprehensive 
 Must complete before adding more providers. This architectural foundation prevents technical debt.
 
 - [x] **Step 1**: Extract base interface from fal_provider → **Commit**: "Extract provider interface"
-- [ ] **Step 2**: Create provider registry with cost tracking → **Commit**: "Add provider registry"
+- [x] **Step 2**: Create provider registry with cost tracking → **Commit**: "Add provider registry"
 - [ ] **Step 3**: Add OpenAI provider (DALL-E 3) → **Commit**: "Add OpenAI provider"
 - [ ] **Step 4**: Add Anthropic provider (Claude vision) → **Commit**: "Add Anthropic provider"
 

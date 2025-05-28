@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Budget validation and BudgetExceededError for cost control
 - Provider interface documentation for implementing new providers
 - GenerationStartedEvent for tracking generation lifecycle
+- Enhanced provider registry with comprehensive cost tracking
+- Global and per-request budget management
+- Provider selection based on cost and capabilities
+- CLI commands for provider management (list, cost, enable/disable, budget)
+- Cost reporting by provider, project, and daily aggregation
+- Provider health monitoring and automatic disabling
 - Event-driven architecture foundation with AsyncAPI documentation
 - Content-addressed database system using SQLAlchemy
 - Asset discovery system for finding moved files

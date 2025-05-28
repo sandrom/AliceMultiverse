@@ -1,19 +1,27 @@
-"""Provider registry for managing AI generation providers."""
+"""Provider registry for managing AI generation providers.
+
+MIGRATION NOTE: This module now uses EnhancedProviderRegistry internally
+for better cost tracking and provider management. The API remains compatible.
+"""
 
 import logging
 from typing import Dict, List, Optional, Type
 
 from ..events.base import EventBus
 from .base import GenerationProvider, GenerationType
+from .enhanced_registry import EnhancedProviderRegistry
 from .fal_provider import FalProvider
 
 logger = logging.getLogger(__name__)
 
 
 class ProviderRegistry:
-    """Registry for managing generation providers."""
+    """Registry for managing generation providers.
+    
+    This is now a compatibility wrapper around EnhancedProviderRegistry.
+    """
 
-    # Available provider classes
+    # Available provider classes (for backward compatibility)
     PROVIDERS: Dict[str, Type[GenerationProvider]] = {
         "fal": FalProvider,
         "fal.ai": FalProvider,  # Alias
@@ -25,6 +33,14 @@ class ProviderRegistry:
         Args:
             event_bus: Event bus for providers to use
         """
+        # Use enhanced registry internally
+        self._enhanced_registry = EnhancedProviderRegistry(event_bus)
+        
+        # Register existing providers
+        for name, provider_class in self.PROVIDERS.items():
+            self._enhanced_registry.register_provider(name, provider_class)
+        
+        # Legacy compatibility
         self.event_bus = event_bus or EventBus()
         self._instances: Dict[str, GenerationProvider] = {}
         self._api_keys: Dict[str, str] = {}
@@ -37,6 +53,7 @@ class ProviderRegistry:
             api_key: API key
         """
         self._api_keys[provider_name.lower()] = api_key
+        self._enhanced_registry.register_api_key(provider_name, api_key)
 
     def get_provider(self, name: str) -> GenerationProvider:
         """Get a provider instance by name.
@@ -50,31 +67,15 @@ class ProviderRegistry:
         Raises:
             ValueError: If provider not found
         """
-        name_lower = name.lower()
+        # Use async method synchronously for compatibility
+        import asyncio
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
         
-        # Return existing instance if available
-        if name_lower in self._instances:
-            return self._instances[name_lower]
-        
-        # Create new instance
-        if name_lower not in self.PROVIDERS:
-            available = ", ".join(self.PROVIDERS.keys())
-            raise ValueError(
-                f"Unknown provider '{name}'. Available providers: {available}"
-            )
-        
-        # Get provider class
-        provider_class = self.PROVIDERS[name_lower]
-        
-        # Get API key if registered
-        api_key = self._api_keys.get(name_lower)
-        
-        # Create instance
-        instance = provider_class(api_key=api_key, event_bus=self.event_bus)
-        self._instances[name_lower] = instance
-        
-        logger.info(f"Initialized {name} provider")
-        return instance
+        return loop.run_until_complete(self._enhanced_registry.get_provider(name))
 
     def get_providers_for_type(self, generation_type: GenerationType) -> List[str]:
         """Get providers that support a generation type.
@@ -85,15 +86,7 @@ class ProviderRegistry:
         Returns:
             List of provider names
         """
-        providers = []
-        
-        for name, provider_class in self.PROVIDERS.items():
-            # Create temporary instance to check capabilities
-            instance = provider_class()
-            if generation_type in instance.capabilities.generation_types:
-                providers.append(name)
-        
-        return providers
+        return self._enhanced_registry.get_providers_for_type(generation_type)
 
     def list_providers(self) -> List[str]:
         """List all available providers.
@@ -101,7 +94,44 @@ class ProviderRegistry:
         Returns:
             List of provider names
         """
-        return list(self.PROVIDERS.keys())
+        return self._enhanced_registry.list_providers()
+    
+    # New methods exposed from enhanced registry
+    
+    def get_stats(self, provider_name: Optional[str] = None) -> Dict[str, any]:
+        """Get statistics for providers.
+        
+        Args:
+            provider_name: Specific provider or None for all
+            
+        Returns:
+            Statistics dictionary
+        """
+        return self._enhanced_registry.get_stats(provider_name)
+    
+    def set_budget_limit(self, limit: float):
+        """Set global budget limit.
+        
+        Args:
+            limit: Budget limit in USD
+        """
+        self._enhanced_registry.budget_limit = limit
+    
+    def disable_provider(self, provider_name: str):
+        """Temporarily disable a provider.
+        
+        Args:
+            provider_name: Provider to disable
+        """
+        self._enhanced_registry.disable_provider(provider_name)
+    
+    def enable_provider(self, provider_name: str):
+        """Re-enable a disabled provider.
+        
+        Args:
+            provider_name: Provider to enable
+        """
+        self._enhanced_registry.enable_provider(provider_name)
 
 
 # Global registry instance
@@ -139,3 +169,25 @@ def get_provider(name: str, api_key: Optional[str] = None) -> GenerationProvider
         registry.register_api_key(name, api_key)
     
     return registry.get_provider(name)
+
+
+# New convenience functions
+
+def set_global_budget(limit: float):
+    """Set global budget limit across all providers.
+    
+    Args:
+        limit: Budget limit in USD
+    """
+    registry = get_registry()
+    registry.set_budget_limit(limit)
+
+
+def get_cost_report() -> Dict[str, any]:
+    """Get cost report across all providers.
+    
+    Returns:
+        Cost statistics
+    """
+    registry = get_registry()
+    return registry.get_stats()
