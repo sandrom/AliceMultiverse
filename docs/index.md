@@ -9,39 +9,39 @@
 
 AliceMultiverse is transforming from a media organization tool into a comprehensive creative workflow hub. It bridges AI assistants (Claude, ChatGPT) with creative tools and APIs, designed for professionals who work iteratively with AI over extended periods.
 
-### Current Capabilities (v1.x)
-- 🤖 **AI Source Detection** - Identifies 15+ AI generation tools
+### Current Capabilities (AI-Native Service)
+- 🤖 **Natural Conversations** - Use Alice through Claude or ChatGPT
+- 📁 **Smart Organization** - AI-powered media management
 - ⭐ **Quality Assessment** - Multi-stage filtering (BRISQUE, SightEngine, Claude)
-- 📁 **Smart Organization** - Content-addressed storage with metadata
-- 🔄 **Watch Mode** - Continuous monitoring for new content
-- 💾 **Unified Caching** - Intelligent metadata management
+- 🔍 **Semantic Search** - Find assets using natural descriptions
+- 🎨 **Project Context** - AI remembers your creative work
 
-### Evolution to v2.x
-- 🎨 **Alice Orchestration** - Intelligent endpoint for AI assistants
-- 🚀 **Provider Integration** - Direct access to fal.ai, ComfyUI, and more
-- 📊 **Project Management** - Creative context preservation
-- 🎬 **Music Video Production** - Beat sync and timeline generation
-- 🔌 **Event-Driven Architecture** - Microservices-ready foundation
+### Technical Foundation
+- 💾 **Content-Addressed Storage** - Efficient metadata management
+- 🔄 **Event System** - PostgreSQL-based event streaming
+- 🚀 **Provider Integration** - Extensible AI tool connections
+- 📊 **Structured APIs** - No fuzzy NLP in core system
+- 🔒 **Security First** - Input validation and rate limiting
 
 ## Quick Links
 
 <div class="grid cards" markdown>
 
-- :material-rocket-launch: **[Quick Start](getting-started/quickstart.md)**
+- :material-robot: **[AI-Native Quick Start](getting-started/quickstart-ai.md)**
     
-    Get up and running in 5 minutes
+    Start using Alice through Claude or ChatGPT
 
 - :material-book-open-variant: **[User Guide](user-guide/index.md)**
     
-    Comprehensive usage documentation
+    Learn Alice through AI conversations
 
 - :material-architecture: **[Architecture](architecture/index.md)**
     
-    Technical design and evolution
+    Simplified, pragmatic design
 
 - :material-calendar-clock: **[Event System](architecture/event-driven-architecture.md)**
     
-    Foundation for the future
+    PostgreSQL-native event streaming
 
 </div>
 
@@ -49,22 +49,28 @@ AliceMultiverse is transforming from a media organization tool into a comprehens
 
 ```mermaid
 graph TB
-    subgraph "Today - Media Organization"
-        A[📁 Inbox] --> B[🔍 Organizer]
-        B --> C[⭐ Quality]
-        C --> D[📂 Output]
+    subgraph "AI-Native Architecture"
+        A[🤖 AI Assistant] --> B[💬 Natural Language]
+        B --> C[🎨 Alice Structured API]
+        C --> D[📁 Media Organization]
+        C --> E[⭐ Quality Pipeline]
+        C --> F[🔍 Smart Search]
+        D --> G[📂 Organized Assets]
+        E --> G
+        F --> G
     end
     
-    subgraph "Tomorrow - Creative Hub"
-        E[🤖 AI Assistant] --> F[🎨 Alice]
-        F --> G[🚀 Providers]
-        F --> H[📊 Projects]
-        G --> I[🎬 Assets]
+    subgraph "Technical Foundation"
+        H[🗄️ PostgreSQL] --> I[📨 Events]
+        J[💾 Content Storage] --> K[🏷️ Metadata]
+        L[🔒 Validation] --> M[⚡ Rate Limiting]
     end
     
-    B -.->|Events| F
+    C -.->|Structured Queries| H
+    C -.->|Content Hash| J
+    C -.->|Security| L
     
-    style F fill:#ff9999,stroke:#333,stroke-width:4px
+    style C fill:#ff9999,stroke:#333,stroke-width:4px
 ```
 
 ## For Creative Professionals
@@ -82,25 +88,25 @@ The system is designed to:
 ## Documentation Structure
 
 ### Getting Started
-- **[Quick Start](getting-started/quickstart.md)** - 5-minute setup
-- **[Installation](getting-started/installation.md)** - Detailed setup
+- **[AI-Native Quick Start](getting-started/quickstart-ai.md)** - Start with Claude/ChatGPT
+- **[Installation](getting-started/installation.md)** - Setup guide
 - **[Configuration](getting-started/configuration.md)** - Customization
 
-### Current Features
-- **[Media Organization](user-guide/index.md)** - Core functionality
+### Using Alice
+- **[AI Conversations](user-guide/ai-conversations.md)** - Natural language examples
 - **[Quality Pipeline](user-guide/pipeline-examples.md)** - Assessment stages
 - **[API Keys](user-guide/api-keys.md)** - Service configuration
 
-### Architecture & Future
-- **[System Design](architecture/index.md)** - Current architecture
-- **[Event System](architecture/event-driven-architecture.md)** - Evolution foundation
-- **[Caching Strategy](architecture/caching-strategy.md)** - Performance optimization
-- **[Vision Document](../todo/02%20alice-multiverse-big-refactor-into-a-bigger-scope.md)** - Complete roadmap
+### Architecture
+- **[System Design](architecture/index.md)** - Simplified architecture
+- **[Event System](architecture/event-driven-architecture.md)** - PostgreSQL events
+- **[AI-Native Design](architecture/ai-native-vision.md)** - Design principles
+- **[Simplification](architecture/simplification-plan.md)** - How we reduced complexity
 
 ### Development
 - **[Developer Guide](developer/development.md)** - Contributing
-- **[Event Development](developer/event-system-v2.md)** - Working with events
-- **[API Reference](developer/api-reference.md)** - Module documentation
+- **[Structured API](developer/search-api-specification.md)** - API design
+- **[Security](architecture/adr/ADR-005-code-quality-security-tooling.md)** - Validation & rate limiting
 
 ## Why AliceMultiverse?
 
@@ -118,10 +124,10 @@ The system is designed to:
 
 ## Next Steps
 
-- 🚀 **New Users**: Start with the [Quick Start Guide](getting-started/quickstart.md)
-- 📸 **Current Users**: Explore [advanced features](user-guide/pipeline-examples.md)
-- 🔧 **Developers**: Check the [event system](architecture/event-driven-architecture.md)
-- 🔮 **Visionaries**: Read the [full vision](../todo/02%20alice-multiverse-big-refactor-into-a-bigger-scope.md)
+- 🤖 **New Users**: Start with the [AI-Native Quick Start](getting-started/quickstart-ai.md)
+- 💬 **Learn by Example**: See [AI Conversation Patterns](user-guide/ai-conversations.md)
+- 🔧 **Developers**: Understand the [Simplified Architecture](architecture/simplification-plan.md)
+- 📊 **Advanced Users**: Configure [Quality Pipelines](user-guide/pipeline-examples.md)
 
 ---
 

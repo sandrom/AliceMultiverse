@@ -1,47 +1,52 @@
 # Architecture Overview
 
-AliceMultiverse is evolving from a CLI tool into an AI-native service that operates through AI assistants like Claude and ChatGPT. This document provides a comprehensive overview of the system architecture, design decisions, and technical implementation details.
+AliceMultiverse is an AI-native service designed to operate exclusively through AI assistants like Claude and ChatGPT. The architecture has been simplified following pragmatic principles, removing unnecessary abstractions while maintaining robustness.
 
-> **Important**: See [AI-Native Vision](ai-native-vision.md) for the fundamental architectural direction and [ADR-006](adr/ADR-006-ai-native-service-architecture.md) for the decision rationale.
+> **Key Principles**: 
+> - **AI-Native**: Natural language in, structured API calls internally
+> - **Simplified**: 50% less code after removing over-engineering
+> - **Secure**: Input validation and rate limiting on all endpoints
+> - **Event-Driven**: PostgreSQL NOTIFY/LISTEN for real-time updates
 
 ## High-Level Architecture
 
 ```mermaid
 graph TB
-    subgraph "Input Layer"
-        IN[Inbox Directory]
-        WATCH[File System Watcher]
+    subgraph "AI Assistant Layer"
+        AI[Claude/ChatGPT] --> NLP[Natural Language]
+        NLP --> STRUCT[Structured Request]
     end
     
-    subgraph "Core Processing"
-        ORG[Media Organizer]
-        DETECT[AI Detector]
-        CACHE[(Metadata Cache)]
+    subgraph "Security Layer"
+        STRUCT --> VAL[Input Validation]
+        VAL --> RATE[Rate Limiter]
     end
     
-    subgraph "Quality Pipeline"
-        BRISQUE[BRISQUE Scorer]
-        SIGHT[SightEngine API]
-        CLAUDE[Claude Vision API]
+    subgraph "API Layer"
+        RATE --> API[Alice Structured Interface]
+        API --> SEARCH[Search API]
+        API --> ORG[Organization API]
+        API --> QUAL[Quality API]
     end
     
-    subgraph "Output Layer"
-        OUT[Organized Directory]
-        STATS[Statistics]
+    subgraph "Core Services"
+        ORG --> DETECT[AI Detection]
+        ORG --> PIPE[Pipeline Stages]
+        SEARCH --> META[(Metadata)]
+        QUAL --> BRISQUE[BRISQUE]
+        PIPE --> SIGHT[SightEngine]
+        PIPE --> CLAUDE[Claude Vision]
     end
     
-    IN --> ORG
-    WATCH --> ORG
-    ORG --> DETECT
-    ORG <--> CACHE
-    ORG --> BRISQUE
-    BRISQUE --> SIGHT
-    SIGHT --> CLAUDE
-    ORG --> OUT
-    ORG --> STATS
+    subgraph "Data Layer"
+        META --> PG[(PostgreSQL)]
+        PG --> EVENT[Event Stream]
+        META --> CACHE[Content Cache]
+    end
     
-    style ORG fill:#f9f,stroke:#333,stroke-width:4px
-    style CACHE fill:#bbf,stroke:#333,stroke-width:2px
+    style API fill:#f9f,stroke:#333,stroke-width:4px
+    style PG fill:#bbf,stroke:#333,stroke-width:2px
+    style VAL fill:#fbb,stroke:#333,stroke-width:2px
 ```
 
 ## Core Components

@@ -1,6 +1,8 @@
-# Quick Start Guide
+# Quick Start Guide (CLI - Deprecated)
 
-Get AliceMultiverse up and running in 5 minutes! This guide covers the essential steps to start organizing your AI-generated media.
+> **🚨 Important**: Direct CLI usage is deprecated. For the recommended approach, see the [AI-Native Quick Start Guide](quickstart-ai.md).
+
+This guide documents the legacy CLI interface, maintained only for debugging purposes.
 
 ## Prerequisites
 
