@@ -31,12 +31,12 @@ class AssetProcessorClient:
 
         self.session = None
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "AssetProcessorClient":
         """Enter async context."""
         self.session = aiohttp.ClientSession()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         """Exit async context."""
         if self.session:
             await self.session.close()

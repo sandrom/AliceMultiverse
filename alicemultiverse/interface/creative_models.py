@@ -157,11 +157,11 @@ class CreativeWorkflow:
     failure_count: int = 0
     cost_estimate: float | None = None
 
-    def add_step(self, step_type: str, parameters: dict[str, Any]):
+    def add_step(self, step_type: str, parameters: dict[str, Any]) -> None:
         """Add a step to the workflow."""
         self.steps.append({"type": step_type, "parameters": parameters, "status": "pending"})
 
-    def complete_step(self, success: bool = True):
+    def complete_step(self, success: bool = True) -> None:
         """Mark current step as complete."""
         if self.current_step < len(self.steps):
             self.steps[self.current_step]["status"] = "completed" if success else "failed"
@@ -192,7 +192,7 @@ class StyleEvolution:
     usage_count: int = 0
     success_rate: float = 0.0
 
-    def record_iteration(self, elements: dict[str, Any], success: bool):
+    def record_iteration(self, elements: dict[str, Any], success: bool) -> None:
         """Record a style iteration."""
         self.iterations.append(
             {
@@ -272,7 +272,7 @@ class CreativePattern:
     # Context
     common_contexts: list[str] = field(default_factory=list)
 
-    def record_occurrence(self, success: bool, context: str | None = None):
+    def record_occurrence(self, success: bool, context: str | None = None) -> None:
         """Record a pattern occurrence."""
         self.occurrence_count += 1
         self.last_seen = datetime.now(UTC)

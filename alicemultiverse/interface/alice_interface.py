@@ -69,7 +69,7 @@ class AliceInterface:
         self.project_service = ProjectService(db_session)
         logger.info("Database and services initialized")
 
-    def _ensure_organizer(self):
+    def _ensure_organizer(self) -> None:
         """Ensure organizer is initialized."""
         if not self.organizer:
             self.organizer = EnhancedMediaOrganizer(self.config)

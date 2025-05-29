@@ -55,7 +55,7 @@ class RequestTracker:
 class RateLimiter:
     """Rate limiter for API endpoints."""
     
-    def __init__(self, config: Optional[RateLimitConfig] = None):
+    def __init__(self, config: Optional[RateLimitConfig] = None) -> None:
         """Initialize rate limiter.
         
         Args:

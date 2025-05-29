@@ -64,7 +64,7 @@ class AliceStructuredInterface:
         # Initialize rate limiter
         self.rate_limiter = RateLimiter()
 
-    def _ensure_organizer(self):
+    def _ensure_organizer(self) -> None:
         """Ensure organizer is initialized."""
         if not self.organizer:
             self.organizer = EnhancedMediaOrganizer(self.config)

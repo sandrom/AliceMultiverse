@@ -1,12 +1,14 @@
 """CLI commands for API key management."""
 
+from typing import Any
+
 from ..logging import get_logger
 from .manager import APIKeyManager
 
 logger = get_logger(__name__)
 
 
-def run_keys_command(args) -> int:
+def run_keys_command(args: Any) -> int:
     """Run keys subcommand.
 
     Args:

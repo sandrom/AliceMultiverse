@@ -3,9 +3,9 @@
 import os
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Optional
+from typing import Any, Optional
 
-from sqlalchemy import create_engine
+from sqlalchemy import Engine, create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
 from alicemultiverse.core.config import settings
@@ -51,7 +51,7 @@ if os.environ.get("ENABLE_DB_MONITORING", "true").lower() == "true":
     )
 
 
-def get_engine():
+def get_engine() -> Engine:
     """Get the database engine."""
     return engine
 
@@ -96,7 +96,7 @@ def get_pool_monitor() -> Optional[DatabasePoolMonitor]:
     return _pool_monitor
 
 
-def get_pool_stats() -> dict:
+def get_pool_stats() -> dict[str, Any]:
     """Get current pool statistics."""
     if _pool_monitor:
         return _pool_monitor.get_stats()

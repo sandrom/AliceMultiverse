@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 class PipelineOrganizer(MediaOrganizer):
     """Extended organizer with pipeline-based quality assessment."""
 
-    def __init__(self, config: DictConfig):
+    def __init__(self, config: DictConfig) -> None:
         """Initialize pipeline organizer.
 
         Args:

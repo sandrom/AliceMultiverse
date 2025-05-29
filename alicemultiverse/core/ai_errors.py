@@ -1,7 +1,7 @@
 """AI-friendly error handling utilities."""
 
 import logging
-from typing import Optional, Dict, Any, List
+from typing import Any, Callable, Dict, List, Optional
 
 logger = logging.getLogger(__name__)
 
@@ -187,12 +187,12 @@ class AIFriendlyError:
             ]
 
 
-def wrap_error_response(func):
+def wrap_error_response(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator to automatically convert exceptions to AI-friendly responses.
     
     Use this on interface methods to ensure all errors are AI-friendly.
     """
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Dict[str, Any]:
         try:
             return func(*args, **kwargs)
         except Exception as e:

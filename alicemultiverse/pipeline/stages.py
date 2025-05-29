@@ -4,6 +4,7 @@ import logging
 import time
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any
 
 from ..core.types import MediaType
 from ..quality.brisque import BRISQUEAssessor
@@ -21,7 +22,7 @@ class PipelineStage(ABC):
         pass
 
     @abstractmethod
-    def process(self, image_path: Path, metadata: dict) -> dict:
+    def process(self, image_path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
         """Process an image through this stage.
 
         Args:
@@ -34,7 +35,7 @@ class PipelineStage(ABC):
         pass
 
     @abstractmethod
-    def should_process(self, metadata: dict) -> bool:
+    def should_process(self, metadata: dict[str, Any]) -> bool:
         """Check if this stage should process the image.
 
         Args:
@@ -54,7 +55,7 @@ class PipelineStage(ABC):
 class BRISQUEStage(PipelineStage):
     """BRISQUE quality assessment stage."""
 
-    def __init__(self, thresholds: dict[int, tuple[float, float]]):
+    def __init__(self, thresholds: dict[int, tuple[float, float]]) -> None:
         """Initialize BRISQUE stage.
 
         Args:
@@ -66,7 +67,7 @@ class BRISQUEStage(PipelineStage):
     def name(self) -> str:
         return "brisque"
 
-    def process(self, image_path: Path, metadata: dict) -> dict:
+    def process(self, image_path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
         """Process image through BRISQUE assessment."""
         if not self.assessor:
             logger.warning("BRISQUE not available, skipping assessment")
@@ -96,7 +97,7 @@ class BRISQUEStage(PipelineStage):
 
         return metadata
 
-    def should_process(self, metadata: dict) -> bool:
+    def should_process(self, metadata: dict[str, Any]) -> bool:
         """BRISQUE processes all images."""
         return metadata.get("media_type") == MediaType.IMAGE
 
@@ -134,7 +135,7 @@ class SightEngineStage(PipelineStage):
     def name(self) -> str:
         return "sightengine"
 
-    def process(self, image_path: Path, metadata: dict) -> dict:
+    def process(self, image_path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
         """Process image through SightEngine API to refine quality rating."""
         try:
             # Import here to avoid circular imports
@@ -202,7 +203,7 @@ class SightEngineStage(PipelineStage):
 
         return metadata
 
-    def should_process(self, metadata: dict) -> bool:
+    def should_process(self, metadata: dict[str, Any]) -> bool:
         """Process if image has sufficient BRISQUE stars."""
         if metadata.get("media_type") != MediaType.IMAGE:
             return False
@@ -244,7 +245,7 @@ class ClaudeStage(PipelineStage):
     def name(self) -> str:
         return "claude"
 
-    def process(self, image_path: Path, metadata: dict) -> dict:
+    def process(self, image_path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
         """Process image through Claude for defect detection and final quality refinement."""
         try:
             # Import here to avoid circular imports
@@ -336,7 +337,7 @@ class ClaudeStage(PipelineStage):
 
         return metadata
 
-    def should_process(self, metadata: dict) -> bool:
+    def should_process(self, metadata: dict[str, Any]) -> bool:
         """Process if image has sufficient quality stars."""
         if metadata.get("media_type") != MediaType.IMAGE:
             return False

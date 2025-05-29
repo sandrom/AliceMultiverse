@@ -75,7 +75,7 @@ class AliceOrchestrator:
     - Event orchestration
     """
 
-    def __init__(self, project_id: str | None = None):
+    def __init__(self, project_id: str | None = None) -> None:
         """Initialize Alice with optional project context.
 
         Args:
@@ -87,7 +87,7 @@ class AliceOrchestrator:
         self._init_session()
         self._load_context()
 
-    def _init_session(self):
+    def _init_session(self) -> None:
         """Initialize database session."""
         try:
             self.session = next(get_session())
@@ -100,7 +100,7 @@ class AliceOrchestrator:
             self.project_repo = None
             self.discovery = None
 
-    def _load_context(self):
+    def _load_context(self) -> None:
         """Load project context if available."""
         if self.project_id and self.project_repo:
             try:
@@ -112,7 +112,7 @@ class AliceOrchestrator:
             except Exception as e:
                 logger.error(f"Failed to load project context: {e}")
 
-    def _update_memory(self, intent: CreativeIntent, data: dict[str, Any]):
+    def _update_memory(self, intent: CreativeIntent, data: dict[str, Any]) -> None:
         """Update Alice's memory based on interactions."""
         self.memory.last_interaction = datetime.now(UTC)
 
@@ -653,7 +653,7 @@ class AliceOrchestrator:
                 logger.error(f"Failed to save context: {e}")
         return False
 
-    def __del__(self):
+    def __del__(self) -> None:
         """Cleanup on deletion."""
         if self.session:
             self.session.close()
