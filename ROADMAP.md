@@ -17,6 +17,7 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - [ ] Create search API for AI assistants
 
 ### 3. More Provider Integrations
+- [ ] Hedra (AI avatar videos) - Character-1 API for talking avatars
 - [ ] Midjourney (via proxy API)
 - [ ] Stable Diffusion (local/cloud)
 - [ ] RunwayML for video generation
