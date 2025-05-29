@@ -469,7 +469,7 @@ class TestGroupOperations:
         alice_interface.organizer.group_assets.return_value = True
         
         request = GroupingRequest(
-            asset_ids=["asset1", "asset2", "asset3"],
+            asset_ids=[TEST_HASH1, TEST_HASH2, "c" * 64],
             group_name="Campaign Photos",
             group_metadata={"campaign": "summer_2024"}
         )
@@ -481,7 +481,7 @@ class TestGroupOperations:
         assert response["data"]["asset_count"] == 3
         
         alice_interface.organizer.group_assets.assert_called_with(
-            ["asset1", "asset2", "asset3"],
+            [TEST_HASH1, TEST_HASH2, "c" * 64],
             "Campaign Photos"
         )
 

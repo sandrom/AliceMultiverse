@@ -93,7 +93,8 @@ class TestPostgresEventSystem:
         
         # Check NOTIFY was called with correct channel
         notify_call = mock_session.execute.call_args_list[1]
-        assert "alice_events_asset_processed" in str(notify_call)
+        assert "alice_events" in str(notify_call)
+        assert "asset.processed" in str(notify_call)
         
     @patch('alicemultiverse.events.postgres_events.get_session')
     def test_error_handling(self, mock_get_session):

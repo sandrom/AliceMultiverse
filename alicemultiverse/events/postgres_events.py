@@ -53,33 +53,38 @@ class PostgresEventSystem:
             "timestamp": datetime.now(timezone.utc).isoformat()
         }
         
-        # Store in database
-        with get_session() as session:
-            session.execute(
-                text("""
-                    INSERT INTO events (id, type, data, created_at)
-                    VALUES (:id, :type, :data, :created_at)
-                """),
-                {
-                    "id": event_id,
-                    "type": event_type,
-                    "data": json.dumps(event_data),
-                    "created_at": datetime.now(timezone.utc)
-                }
-            )
-            session.commit()
+        try:
+            # Store in database
+            with get_session() as session:
+                session.execute(
+                    text("""
+                        INSERT INTO events (id, type, data, created_at)
+                        VALUES (:id, :type, :data, :created_at)
+                    """),
+                    {
+                        "id": event_id,
+                        "type": event_type,
+                        "data": json.dumps(event_data),
+                        "created_at": datetime.now(timezone.utc)
+                    }
+                )
+                session.commit()
+                
+                # Notify listeners
+                session.execute(
+                    text("SELECT pg_notify(:channel, :payload)"),
+                    {
+                        "channel": settings.providers.events.channel_prefix,
+                        "payload": json.dumps({"id": event_id, "type": event_type})
+                    }
+                )
+                session.commit()
+                
+            logger.debug(f"Published event {event_type} with ID {event_id}")
+        except Exception as e:
+            logger.error(f"Failed to publish event {event_type}: {e}")
+            # Still return the event ID - it was generated before the error
             
-            # Notify listeners
-            session.execute(
-                text("SELECT pg_notify(:channel, :payload)"),
-                {
-                    "channel": settings.providers.events.channel_prefix,
-                    "payload": json.dumps({"id": event_id, "type": event_type})
-                }
-            )
-            session.commit()
-            
-        logger.debug(f"Published event {event_type} with ID {event_id}")
         return event_id
     
     async def publish_async(self, event_type: str, data: Dict[str, Any]) -> str:
