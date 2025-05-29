@@ -21,14 +21,14 @@ class TestCompleteProviderRegistry:
     def test_all_providers_available(self, registry):
         """Test that all providers are registered."""
         # Check provider classes are available
-        assert "fal" in registry.PROVIDERS
-        assert "openai" in registry.PROVIDERS
-        assert "anthropic" in registry.PROVIDERS
-        assert "claude" in registry.PROVIDERS  # Alias
+        assert "fal" in registry._provider_classes
+        assert "openai" in registry._provider_classes
+        assert "anthropic" in registry._provider_classes
+        assert "claude" in registry._provider_classes  # Alias
         
         # Check aliases work
-        assert registry.PROVIDERS["fal"] == registry.PROVIDERS["fal.ai"]
-        assert registry.PROVIDERS["anthropic"] == registry.PROVIDERS["claude"]
+        assert registry._provider_classes["fal"] == registry._provider_classes["fal.ai"]
+        assert registry._provider_classes["anthropic"] == registry._provider_classes["claude"]
     
     def test_get_fal_provider(self):
         """Test getting fal provider."""

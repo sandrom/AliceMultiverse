@@ -73,8 +73,9 @@ def init_db() -> Session:
     This function now just verifies connectivity and returns a session.
     """
     # Test connection
+    from sqlalchemy import text
     with engine.connect() as conn:
-        conn.execute("SELECT 1")
+        conn.execute(text("SELECT 1"))
     
     return SessionLocal()
 

@@ -91,9 +91,9 @@ class AliceOrchestrator:
         """Initialize database session."""
         try:
             self.session = next(get_session())
-            self.asset_repo = AssetRepository(self.session)
-            self.project_repo = ProjectRepository(self.session)
-            self.discovery = AssetDiscovery(self.session)
+            self.asset_repo = AssetRepository()
+            self.project_repo = ProjectRepository()
+            self.discovery = AssetDiscovery(search_paths=[])
         except Exception as e:
             logger.warning(f"Database not available: {e}. Running in limited mode.")
             self.asset_repo = None
@@ -433,17 +433,20 @@ class AliceOrchestrator:
                 prompt = self._enhance_prompt_with_style(prompt, self.memory.active_styles)
 
             # Publish workflow started event
+            workflow_id = f"create_{datetime.now(UTC).timestamp()}"
             publish_event(
                 "workflow.started",
-                workflow_id=f"create_{datetime.now(UTC).timestamp()}",
-                workflow_type="image_generation",
-                workflow_name="AI-requested creation",
-                initiated_by="ai_assistant",
-                input_parameters={
-                    "prompt": prompt,
-                    "styles": creative_elements["styles"],
-                    "original_request": request,
-                },
+                {
+                    "workflow_id": workflow_id,
+                    "workflow_type": "image_generation",
+                    "workflow_name": "AI-requested creation",
+                    "initiated_by": "ai_assistant",
+                    "input_parameters": {
+                        "prompt": prompt,
+                        "styles": creative_elements["styles"],
+                        "original_request": request,
+                    },
+                }
             )
 
             # Update memory
@@ -460,7 +463,7 @@ class AliceOrchestrator:
             return CreativeResponse(
                 success=True,
                 message="Creation workflow initiated",
-                context={"workflow_id": workflow_event.workflow_id, "prompt": prompt},
+                context={"workflow_id": workflow_id, "prompt": prompt},
                 suggestions=["Check back in a moment for results", "I'll notify you when complete"],
                 memory_updated=True,
                 events_published=["workflow.started"],
@@ -529,16 +532,18 @@ class AliceOrchestrator:
     async def _semantic_search(self, description: str) -> list[dict[str, Any]]:
         """Perform semantic search based on description."""
         # This would integrate with embedding-based search
-        # For now, do a simple text-based search
+        # For now, search by extracting keywords as tags
         if self.asset_repo:
-            assets = self.asset_repo.search_by_prompt(description, limit=20)
+            # Extract potential tags from description
+            keywords = [word.lower() for word in description.split() if len(word) > 3]
+            assets = self.asset_repo.search(tags=keywords, limit=20, tag_mode="any")
             return [self._asset_to_dict(asset) for asset in assets]
         return []
 
     async def _structured_search(self, params: dict[str, Any]) -> list[dict[str, Any]]:
         """Perform structured search with specific parameters."""
         if self.asset_repo:
-            assets = self.asset_repo.search_assets(**params)
+            assets = self.asset_repo.search(**params)
             return [self._asset_to_dict(asset) for asset in assets]
         return []
 
@@ -637,16 +642,18 @@ class AliceOrchestrator:
                 # Update project context
                 publish_event(
                     "context.updated",
-                    project_id=self.project_id,
-                    context_type="creative",
-                    update_type="modification",
-                    context_key="memory",
-                    new_value={
-                        "recent_searches": self.memory.recent_searches,
-                        "recent_creations": self.memory.recent_creations,
-                        "active_styles": self.memory.active_styles,
-                        "patterns": self.memory.creative_patterns,
-                    },
+                    {
+                        "project_id": self.project_id,
+                        "context_type": "creative",
+                        "update_type": "modification",
+                        "context_key": "memory",
+                        "new_value": {
+                            "recent_searches": self.memory.recent_searches,
+                            "recent_creations": self.memory.recent_creations,
+                            "active_styles": self.memory.active_styles,
+                            "patterns": self.memory.creative_patterns,
+                        },
+                    }
                 )
                 return True
             except Exception as e:

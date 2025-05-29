@@ -170,9 +170,8 @@ class TestOpenAIProvider:
                 generation_type=GenerationType.IMAGE
             )
             
-            result = await provider.generate(request)
-            assert not result.success
-            assert "rate limit" in result.error.lower()
+            with pytest.raises(RateLimitError):
+                await provider.generate(request)
     
     @pytest.mark.asyncio
     async def test_generate_auth_error(self, provider):
@@ -194,9 +193,8 @@ class TestOpenAIProvider:
                 generation_type=GenerationType.IMAGE
             )
             
-            result = await provider.generate(request)
-            assert not result.success
-            assert "api key" in result.error.lower()
+            with pytest.raises(AuthenticationError):
+                await provider.generate(request)
     
     @pytest.mark.asyncio
     async def test_analyze_image(self, provider):

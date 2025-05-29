@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 from alicemultiverse.providers import GenerationRequest, GenerationType, get_provider
-from alicemultiverse.providers.base import GenerationError, RateLimitError, AuthenticationError
+from alicemultiverse.providers import GenerationError, RateLimitError, AuthenticationError
 from alicemultiverse.providers.fal_provider import FalProvider
 
 

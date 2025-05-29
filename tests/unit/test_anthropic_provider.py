@@ -235,9 +235,8 @@ class TestAnthropicProvider:
                 generation_type=GenerationType.TEXT
             )
             
-            result = await provider.generate(request)
-            assert not result.success
-            assert "rate limit" in result.error.lower()
+            with pytest.raises(RateLimitError):
+                await provider.generate(request)
     
     @pytest.mark.asyncio
     async def test_generate_auth_error(self, provider):
@@ -259,9 +258,8 @@ class TestAnthropicProvider:
                 generation_type=GenerationType.TEXT
             )
             
-            result = await provider.generate(request)
-            assert not result.success
-            assert "api key" in result.error.lower()
+            with pytest.raises(AuthenticationError):
+                await provider.generate(request)
     
     @pytest.mark.asyncio
     async def test_generate_invalid_type(self, provider):
@@ -271,9 +269,9 @@ class TestAnthropicProvider:
             generation_type=GenerationType.IMAGE
         )
         
-        result = await provider.generate(request)
-        assert not result.success
-        assert "does not support GenerationType.IMAGE" in result.error
+        with pytest.raises(ValueError) as exc_info:
+            await provider.generate(request)
+        assert "does not support" in str(exc_info.value)
     
     @pytest.mark.asyncio
     async def test_analyze_without_images(self, provider):

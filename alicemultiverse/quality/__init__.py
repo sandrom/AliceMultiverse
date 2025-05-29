@@ -1,13 +1,13 @@
 """Quality assessment functionality for AliceMultiverse."""
 
-from .brisque import BRISQUEScorer
-from .claude import ClaudeQualityAssessor
+from .brisque import BRISQUEAssessor
+from .claude import check_image_defects as claude_check_image_defects
 from .scorer import QualityScorer
-from .sightengine import SightEngineQualityAssessor
+from .sightengine import check_image_quality as sightengine_check_image_quality
 
 __all__ = [
-    "BRISQUEScorer",
-    "ClaudeQualityAssessor", 
+    "BRISQUEAssessor",
+    "claude_check_image_defects", 
     "QualityScorer",
-    "SightEngineQualityAssessor",
+    "sightengine_check_image_quality",
 ]

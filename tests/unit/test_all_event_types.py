@@ -45,14 +45,15 @@ class TestPostgresEventSystem:
         
         event_system = PostgresEventSystem()
         
-        # Publish with metadata
-        event_data = {"test": "data"}
-        metadata = {"user_id": "alice", "session_id": "abc123"}
+        # Publish with metadata included in data
+        event_data = {
+            "test": "data",
+            "metadata": {"user_id": "alice", "session_id": "abc123"}
+        }
         
         event_id = event_system.publish(
             "workflow.started", 
-            event_data,
-            metadata=metadata
+            event_data
         )
         
         assert event_id is not None
