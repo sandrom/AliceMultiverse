@@ -6,38 +6,48 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 ## Critical Questions (Re-evaluate Monthly)
 
-1. **Are we solving real problems?** Current focus on organization is proven. Workflow engine might be premature.
-2. **Is the architecture still simple?** After simplification, yes. Keep monitoring for complexity creep.
-3. **What would users pay for?** Provider integrations (Midjourney, Hedra) > workflow engine.
-4. **What's broken right now?** 11% test failures, no retry logic, missing provider health checks.
+1. **Are we solving real problems?** Media organization ✓, Quality assessment ✓, Workflow engine ✗
+2. **Is the architecture still simple?** 4,100 lines removed ✓, PostgreSQL-only ✓, One provider base ✓
+3. **What would users pay for?** Midjourney integration > Hedra API > Workflow automation
+4. **What's broken RIGHT NOW?** 
+   - 32 failing tests (11% failure rate)
+   - No retry logic (providers fail ~5% of calls)
+   - Database pool exhaustion under load
+   - No way to know when providers are down
 
 ## Next Up (Priority Order)
 
-### 1. Provider Integrations (Direct Value)
+### 1. Fix What's Broken (Working Service First!)
+- [ ] Fix remaining test failures (89% → 100% pass rate)
+- [ ] Add retry logic for all API calls (providers fail randomly)
+- [ ] Implement provider health monitoring with circuit breakers
+- [ ] Fix database connection pool exhaustion issues
+
+### 2. Observability & Monitoring (Know What's Broken)
+- [ ] Add structured logging with correlation IDs
+- [ ] Implement Prometheus metrics for API calls
+- [ ] Create health check endpoints for each provider
+- [ ] Add performance profiling for slow queries
+
+### 3. Provider Integrations (Direct User Value)
 - [ ] Hedra (AI avatar videos) - Character-1 API for talking avatars
 - [ ] Midjourney (via proxy API) - Most requested by creatives
 - [ ] ElevenLabs (voice generation) - Complete audio pipeline
 - [ ] Suno (music generation) - For music video production
 
-### 2. Enhanced Search & Discovery (Core Functionality)
-- [ ] Fix existing search performance issues
-- [ ] Add media_type and tag-based filtering
-- [ ] Implement date range and quality filters
-- [ ] Create batch search API for AI assistants
-
-### 3. Workflow Engine (Future Vision)
-- [ ] Define minimal workflow format (JSON/YAML)
-- [ ] Implement sequential execution only (no DAG yet)
-- [ ] Add basic retry and error handling
-- [ ] Enable workflow persistence and resumption
+### 4. Search Performance (Measured Improvements)
+- [ ] Profile and fix N+1 queries in asset search
+- [ ] Add database indexes for common query patterns
+- [ ] Implement pagination for large result sets
+- [ ] Cache embeddings in Redis for semantic search
 
 ## Backlog (Re-evaluate Weekly)
 
-### Quality & Reliability (Should be higher priority?)
-- Fix remaining test failures (89% → 100%)
-- Add integration tests for all providers
-- Implement retry logic for API failures
-- Add provider health monitoring
+### Workflow Engine (Deferred - No Evidence of Need Yet)
+- Define workflow format (JSON/YAML)
+- Implement sequential execution
+- Add retry and error handling
+- Enable persistence and resumption
 
 ### Performance Improvements
 - Optimize database queries (N+1 issues)
@@ -51,11 +61,17 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - Replicate (multiple models)
 - Together AI (open models)
 
+### Multi-User Support (Consider for Next Up?)
+- User authentication and sessions
+- Team workspaces with shared projects
+- Role-based access control
+- Usage quotas per user/team
+
 ### Advanced Features
 - Music video production (beat sync, timeline)
-- Multi-user support (teams, permissions)
 - ComfyUI workflow integration
 - Real-time collaboration
+- Advanced workflow orchestration
 
 ### Technical Debt
 - Increase test coverage to 95%+
