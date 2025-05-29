@@ -41,3 +41,9 @@ class FileOperationError(AliceMultiverseError):
     """Raised when file operations fail."""
 
     pass
+
+
+class ValidationError(AliceMultiverseError):
+    """Raised when input validation fails."""
+
+    pass

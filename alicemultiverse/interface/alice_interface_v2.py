@@ -183,11 +183,12 @@ class AliceInterface:
             relationships=relationships,
         )
 
-    def search_assets(self, request: SearchRequest) -> AliceResponse:
+    def search_assets(self, request: SearchRequest, client_id: str = "default") -> AliceResponse:
         """Search for assets with legacy request format.
         
         Args:
             request: Legacy search request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response with matching assets
@@ -241,7 +242,7 @@ class AliceInterface:
             )
             
             # Execute structured search
-            response = self.structured.search_assets(structured_request)
+            response = self.structured.search_assets(structured_request, client_id)
             
             # Convert response format if successful
             if response["success"] and response["data"]:
@@ -269,11 +270,12 @@ class AliceInterface:
                 error=str(e)
             )
 
-    def organize_media(self, request: OrganizeRequest) -> AliceResponse:
+    def organize_media(self, request: OrganizeRequest, client_id: str = "default") -> AliceResponse:
         """Organize media with legacy request format.
         
         Args:
             request: Legacy organization request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response with organization results
@@ -288,7 +290,7 @@ class AliceInterface:
             )
             
             # Use structured interface
-            return self.structured.organize_media(structured_request)
+            return self.structured.organize_media(structured_request, client_id)
             
         except Exception as e:
             logger.error(f"Organization failed: {e}", exc_info=True)
@@ -299,11 +301,12 @@ class AliceInterface:
                 error=str(e)
             )
 
-    def tag_assets(self, request: TagRequest) -> AliceResponse:
+    def tag_assets(self, request: TagRequest, client_id: str = "default") -> AliceResponse:
         """Add tags to assets with legacy request format.
         
         Args:
             request: Legacy tagging request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response indicating success
@@ -335,7 +338,7 @@ class AliceInterface:
             )
             
             # Use structured interface
-            return self.structured.update_tags(structured_request)
+            return self.structured.update_tags(structured_request, client_id)
             
         except Exception as e:
             logger.error(f"Tagging failed: {e}", exc_info=True)
@@ -346,11 +349,12 @@ class AliceInterface:
                 error=str(e)
             )
 
-    def group_assets(self, request: GroupRequest) -> AliceResponse:
+    def group_assets(self, request: GroupRequest, client_id: str = "default") -> AliceResponse:
         """Group assets with legacy request format.
         
         Args:
             request: Legacy grouping request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response indicating success
@@ -363,7 +367,7 @@ class AliceInterface:
             )
             
             # Use structured interface
-            return self.structured.group_assets(structured_request)
+            return self.structured.group_assets(structured_request, client_id)
             
         except Exception as e:
             logger.error(f"Grouping failed: {e}", exc_info=True)
@@ -374,11 +378,12 @@ class AliceInterface:
                 error=str(e)
             )
 
-    def generate_content(self, request: GenerateRequest) -> AliceResponse:
+    def generate_content(self, request: GenerateRequest, client_id: str = "default") -> AliceResponse:
         """Generate content with legacy request format.
         
         Args:
             request: Legacy generation request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response with generation result
@@ -395,7 +400,7 @@ class AliceInterface:
             )
             
             # Use structured interface
-            return self.structured.generate_content(structured_request)
+            return self.structured.generate_content(structured_request, client_id)
             
         except Exception as e:
             logger.error(f"Generation failed: {e}", exc_info=True)
@@ -434,12 +439,13 @@ class AliceInterface:
             error="Use structured search with appropriate tag filters instead"
         )
 
-    def set_asset_role(self, asset_id: str, role: str) -> AliceResponse:
+    def set_asset_role(self, asset_id: str, role: str, client_id: str = "default") -> AliceResponse:
         """Set asset role with legacy string role.
         
         Args:
             asset_id: Asset identifier
             role: Role name as string
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response indicating success
@@ -449,7 +455,7 @@ class AliceInterface:
             role_enum = AssetRole(role)
             
             # Use structured interface
-            return self.structured.set_asset_role(asset_id, role_enum)
+            return self.structured.set_asset_role(asset_id, role_enum, client_id)
             
         except ValueError:
             return AliceResponse(

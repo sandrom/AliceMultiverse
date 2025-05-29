@@ -6,8 +6,10 @@ from datetime import datetime
 from pathlib import Path
 
 from ..core.config import load_config
+from ..core.exceptions import ValidationError
 from ..metadata.models import AssetRole as MetadataAssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
+from .rate_limiter import RateLimiter
 from .structured_models import (
     AliceResponse,
     Asset,
@@ -26,6 +28,16 @@ from .structured_models import (
     SortOrder,
     TagUpdateRequest,
     WorkflowRequest,
+)
+from .validation import (
+    validate_asset_role,
+    validate_generation_request,
+    validate_grouping_request,
+    validate_organize_request,
+    validate_project_request,
+    validate_search_request,
+    validate_tag_update_request,
+    validate_workflow_request,
 )
 
 logger = logging.getLogger(__name__)
@@ -48,6 +60,9 @@ class AliceStructuredInterface:
         self.config.enhanced_metadata = True  # Always use enhanced metadata
         self.organizer = None
         self._ensure_organizer()
+        
+        # Initialize rate limiter
+        self.rate_limiter = RateLimiter()
 
     def _ensure_organizer(self):
         """Ensure organizer is initialized."""
@@ -108,16 +123,23 @@ class AliceStructuredInterface:
             all_tags.extend(metadata.get(tag_type, []))
         return list(set(all_tags))  # Remove duplicates
 
-    def search_assets(self, request: SearchRequest) -> AliceResponse:
+    def search_assets(self, request: SearchRequest, client_id: str = "default") -> AliceResponse:
         """Search for assets using structured queries only.
         
         Args:
             request: Structured search request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response with search results
         """
         try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "search")
+            
+            # Validate request
+            request = validate_search_request(request)
+            
             self._ensure_organizer()
             start_time = datetime.now()
 
@@ -307,16 +329,23 @@ class AliceStructuredInterface:
             ]
         )
 
-    def organize_media(self, request: OrganizeRequest) -> AliceResponse:
+    def organize_media(self, request: OrganizeRequest, client_id: str = "default") -> AliceResponse:
         """Organize media files with structured parameters only.
         
         Args:
             request: Structured organization request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response with organization results
         """
         try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "organize")
+            
+            # Validate request
+            request = validate_organize_request(request)
+            
             # Update config based on request
             if request.get("source_path"):
                 self.config.paths.inbox = request["source_path"]
@@ -350,6 +379,14 @@ class AliceStructuredInterface:
                 error=None
             )
 
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
         except Exception as e:
             logger.error(f"Organization failed: {e}", exc_info=True)
             return AliceResponse(
@@ -359,16 +396,23 @@ class AliceStructuredInterface:
                 error=str(e)
             )
 
-    def update_tags(self, request: TagUpdateRequest) -> AliceResponse:
+    def update_tags(self, request: TagUpdateRequest, client_id: str = "default") -> AliceResponse:
         """Update asset tags with structured operations.
         
         Args:
             request: Tag update request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response indicating success
         """
         try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "update_tags")
+            
+            # Validate request
+            request = validate_tag_update_request(request)
+            
             self._ensure_organizer()
 
             success_count = 0
@@ -406,6 +450,14 @@ class AliceStructuredInterface:
                 error=None
             )
 
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
         except Exception as e:
             logger.error(f"Tag update failed: {e}", exc_info=True)
             return AliceResponse(
@@ -415,16 +467,23 @@ class AliceStructuredInterface:
                 error=str(e)
             )
 
-    def group_assets(self, request: GroupingRequest) -> AliceResponse:
+    def group_assets(self, request: GroupingRequest, client_id: str = "default") -> AliceResponse:
         """Group assets together with structured parameters.
         
         Args:
             request: Grouping request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response indicating success
         """
         try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "group_assets")
+            
+            # Validate request
+            request = validate_grouping_request(request)
+            
             self._ensure_organizer()
 
             success = self.organizer.group_assets(
@@ -448,6 +507,14 @@ class AliceStructuredInterface:
                 error=None
             )
 
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
         except Exception as e:
             logger.error(f"Grouping failed: {e}", exc_info=True)
             return AliceResponse(
@@ -457,67 +524,122 @@ class AliceStructuredInterface:
                 error=str(e)
             )
 
-    def manage_project(self, request: ProjectRequest) -> AliceResponse:
+    def manage_project(self, request: ProjectRequest, client_id: str = "default") -> AliceResponse:
         """Manage projects with structured operations.
         
         Args:
             request: Project management request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response with project operation result
         """
-        # Placeholder for future project management
-        return AliceResponse(
-            success=False,
-            message="Project management not yet implemented",
-            data=None,
-            error="This feature will be implemented with the project management system"
-        )
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "manage_project")
+            
+            # Validate request
+            request = validate_project_request(request)
+            
+            # Placeholder for future project management
+            return AliceResponse(
+                success=False,
+                message="Project management not yet implemented",
+                data=None,
+                error="This feature will be implemented with the project management system"
+            )
+            
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
 
-    def execute_workflow(self, request: WorkflowRequest) -> AliceResponse:
+    def execute_workflow(self, request: WorkflowRequest, client_id: str = "default") -> AliceResponse:
         """Execute workflows with structured parameters.
         
         Args:
             request: Workflow execution request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response with workflow result
         """
-        # Placeholder for future workflow engine
-        return AliceResponse(
-            success=False,
-            message="Workflow execution not yet implemented",
-            data=None,
-            error="This feature will be implemented with the workflow engine"
-        )
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "execute_workflow")
+            
+            # Validate request
+            request = validate_workflow_request(request)
+            
+            # Placeholder for future workflow engine
+            return AliceResponse(
+                success=False,
+                message="Workflow execution not yet implemented",
+                data=None,
+                error="This feature will be implemented with the workflow engine"
+            )
+            
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
 
-    def generate_content(self, request: GenerationRequest) -> AliceResponse:
+    def generate_content(self, request: GenerationRequest, client_id: str = "default") -> AliceResponse:
         """Generate content with structured parameters.
         
         Args:
             request: Generation request
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response with generation result
         """
-        # Placeholder for future generation capabilities
-        return AliceResponse(
-            success=False,
-            message="Content generation not yet implemented",
-            data=None,
-            error="This feature will be implemented when generation services are integrated"
-        )
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "generate_content")
+            
+            # Validate request
+            request = validate_generation_request(request)
+            
+            # Placeholder for future generation capabilities
+            return AliceResponse(
+                success=False,
+                message="Content generation not yet implemented",
+                data=None,
+                error="This feature will be implemented when generation services are integrated"
+            )
+            
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
 
-    def get_asset_by_id(self, asset_id: str) -> AliceResponse:
+    def get_asset_by_id(self, asset_id: str, client_id: str = "default") -> AliceResponse:
         """Get a specific asset by ID.
         
         Args:
             asset_id: Asset identifier
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response with asset information
         """
         try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "get_asset")
+            
             self._ensure_organizer()
 
             metadata = self.organizer.metadata_cache.get_metadata_by_id(asset_id)
@@ -547,17 +669,24 @@ class AliceStructuredInterface:
                 error=str(e)
             )
 
-    def set_asset_role(self, asset_id: str, role: AssetRole) -> AliceResponse:
+    def set_asset_role(self, asset_id: str, role: AssetRole, client_id: str = "default") -> AliceResponse:
         """Set asset role with structured enum.
         
         Args:
             asset_id: Asset identifier
             role: Asset role enum value
+            client_id: Client identifier for rate limiting
             
         Returns:
             Response indicating success
         """
         try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "set_asset_role")
+            
+            # Validate role
+            role = validate_asset_role(role)
+            
             self._ensure_organizer()
 
             # Convert to internal enum
@@ -574,6 +703,14 @@ class AliceStructuredInterface:
                 error=None
             )
 
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
         except Exception as e:
             logger.error(f"Role setting failed: {e}", exc_info=True)
             return AliceResponse(
