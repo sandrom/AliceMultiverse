@@ -70,10 +70,7 @@ def hash_image_content(file_path: Path) -> str:
 
 
 def hash_video_content(file_path: Path) -> str:
-    """Hash video content, excluding metadata.
-
-    For now, we'll use file hash as video parsing is complex.
-    In future, we could hash keyframes or use perceptual hashing.
+    """Hash video content using keyframe extraction.
 
     Args:
         file_path: Path to video file
@@ -81,14 +78,21 @@ def hash_video_content(file_path: Path) -> str:
     Returns:
         SHA-256 hash of video content
     """
-    # TODO: Implement proper video content hashing
-    # Options:
-    # 1. Extract keyframes and hash them
-    # 2. Hash video stream data only (using ffmpeg)
-    # 3. Use perceptual video hashing
-
-    # For now, use file hash
-    return hash_file_content(file_path)
+    try:
+        # Import here to avoid circular dependencies
+        from .video_hashing import hash_video_keyframes
+        
+        # Use keyframe hashing for content identification
+        return hash_video_keyframes(file_path, max_frames=10)
+        
+    except ImportError as e:
+        logger.error(f"Failed to import video hashing module: {e}")
+        # Fall back to file hashing
+        return hash_file_content(file_path)
+    except Exception as e:
+        logger.error(f"Error in video content hashing: {e}")
+        # Fall back to file hashing
+        return hash_file_content(file_path)
 
 
 def hash_file_content(file_path: Path) -> str:
