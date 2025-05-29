@@ -1,16 +1,14 @@
 [project]
 name = "asset-processor"
 version = "0.1.0"
-description = "Media processing and organization service"
+description = "Media processing and organization service (DEPRECATED - for reference only)"
 readme = "README.md"
-requires-python = ">=3.9"
+requires-python = ">=3.12"
 dependencies = [
-    "alice-events",
-    "alice-models",
-    "alice-config",
-    "alice-utils",
     "fastapi>=0.100.0",
     "uvicorn>=0.23.0",
+    "pillow>=10.0.0",
+    "numpy>=1.24.0",
 ]
 
 [build-system]
