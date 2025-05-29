@@ -156,6 +156,49 @@ ai_generators:
     - haiper
     - genmo
 
+# Provider settings
+providers:
+  anthropic:
+    # Available Claude models
+    models:
+      claude-3-opus-20240229:
+        max_tokens: 4096
+        vision: true
+        context_window: 200000
+      claude-3-sonnet-20240229:
+        max_tokens: 4096
+        vision: true
+        context_window: 200000
+      claude-3-haiku-20240307:
+        max_tokens: 4096
+        vision: true
+        context_window: 200000
+      claude-3-5-sonnet-20241022:
+        max_tokens: 8192
+        vision: true
+        context_window: 200000
+    
+    # Default model for quality assessment
+    default_model: claude-3-haiku-20240307
+    
+    # API settings
+    max_retries: 3
+    timeout: 30
+    
+  # Connection pool settings
+  database:
+    pool_size: 10
+    max_overflow: 20
+    pool_timeout: 30
+    pool_recycle: 3600
+    
+  # Event system settings
+  events:
+    # PostgreSQL NOTIFY/LISTEN settings
+    channel_prefix: alice_events
+    cleanup_interval: 3600  # Clean up old events every hour
+    retention_days: 7       # Keep events for 7 days
+
 # Logging settings
 logging:
   # Log level (DEBUG, INFO, WARNING, ERROR)

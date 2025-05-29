@@ -8,6 +8,7 @@ from typing import Optional
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
+from alicemultiverse.core.config import settings
 from alicemultiverse.core.monitoring import DatabasePoolMonitor, setup_pool_monitoring
 
 # PostgreSQL connection - required in production
@@ -31,10 +32,11 @@ if not DATABASE_URL.startswith("postgresql"):
 engine = create_engine(
     DATABASE_URL,
     echo=bool(os.environ.get("ALICEMULTIVERSE_SQL_ECHO", False)),
-    pool_size=10,
-    max_overflow=20,
+    pool_size=settings.providers.database.pool_size,
+    max_overflow=settings.providers.database.max_overflow,
     pool_pre_ping=True,  # Verify connections before use
-    pool_recycle=3600,   # Recycle connections after 1 hour
+    pool_recycle=settings.providers.database.pool_recycle,
+    pool_timeout=settings.providers.database.pool_timeout,
 )
 
 # Create session factory

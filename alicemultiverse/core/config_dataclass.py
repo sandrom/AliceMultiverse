@@ -132,6 +132,40 @@ class PipelineConfig:
 
 
 @dataclass
+class AnthropicConfig:
+    """Anthropic provider configuration."""
+    models: dict = field(default_factory=dict)
+    default_model: str = "claude-3-haiku-20240307"
+    max_retries: int = 3
+    timeout: int = 30
+
+
+@dataclass
+class DatabaseConfig:
+    """Database configuration."""
+    pool_size: int = 10
+    max_overflow: int = 20
+    pool_timeout: int = 30
+    pool_recycle: int = 3600
+
+
+@dataclass
+class EventsConfig:
+    """Events configuration."""
+    channel_prefix: str = "alice_events"
+    cleanup_interval: int = 3600
+    retention_days: int = 7
+
+
+@dataclass
+class ProvidersConfig:
+    """Provider configuration."""
+    anthropic: AnthropicConfig = field(default_factory=AnthropicConfig)
+    database: DatabaseConfig = field(default_factory=DatabaseConfig)
+    events: EventsConfig = field(default_factory=EventsConfig)
+
+
+@dataclass
 class Config:
     """Main configuration class."""
 
@@ -142,6 +176,7 @@ class Config:
     metadata: MetadataConfig = field(default_factory=MetadataConfig)
     file_types: FileTypesConfig = field(default_factory=FileTypesConfig)
     pipeline: PipelineConfig = field(default_factory=PipelineConfig)
+    providers: ProvidersConfig = field(default_factory=ProvidersConfig)
 
     def __post_init__(self):
         """Post-initialization processing."""
@@ -206,6 +241,19 @@ class Config:
 
         if "file_types" in data:
             config.file_types = FileTypesConfig(**data["file_types"])
+
+        if "providers" in data:
+            providers_data = data["providers"]
+            providers_config = ProvidersConfig()
+            
+            if "anthropic" in providers_data:
+                providers_config.anthropic = AnthropicConfig(**providers_data["anthropic"])
+            if "database" in providers_data:
+                providers_config.database = DatabaseConfig(**providers_data["database"])
+            if "events" in providers_data:
+                providers_config.events = EventsConfig(**providers_data["events"])
+                
+            config.providers = providers_config
 
         if "pipeline" in data:
             pipeline_data = data["pipeline"].copy()

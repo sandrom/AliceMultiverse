@@ -15,6 +15,7 @@ import asyncpg
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import Session
 
+from alicemultiverse.core.config import settings
 from alicemultiverse.database.config import DATABASE_URL, get_session
 
 logger = logging.getLogger(__name__)
@@ -72,7 +73,7 @@ class PostgresEventSystem:
             session.execute(
                 text("SELECT pg_notify(:channel, :payload)"),
                 {
-                    "channel": "events",
+                    "channel": settings.providers.events.channel_prefix,
                     "payload": json.dumps({"id": event_id, "type": event_type})
                 }
             )

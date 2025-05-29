@@ -6,6 +6,8 @@ from pathlib import Path
 
 import anthropic
 
+from ..core.config import settings
+
 logger = logging.getLogger(__name__)
 
 # Prompt for Claude to detect AI-generated image defects
@@ -30,19 +32,23 @@ Be specific but concise. Focus only on actual defects, not artistic choices."""
 
 
 def check_image_defects(
-    image_path: str, api_key: str, model: str = "claude-3-haiku-20240307"
+    image_path: str, api_key: str, model: str = None
 ) -> dict | None:
     """Check image for AI-generated defects using Claude.
 
     Args:
         image_path: Path to the image file
         api_key: Anthropic API key
-        model: Claude model to use (default: haiku for cost efficiency)
+        model: Claude model to use (default from settings)
 
     Returns:
         Analysis results dict or None if error
     """
     try:
+        # Use model from settings if not specified
+        if model is None:
+            model = settings.providers.anthropic.default_model
+            
         # Initialize Claude client
         client = anthropic.Anthropic(api_key=api_key)
 

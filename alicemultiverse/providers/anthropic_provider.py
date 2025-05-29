@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional
 import aiohttp
 
 from ..core.file_operations import save_text_file
+from ..core.config import settings
 from .provider import Provider, GenerationError, RateLimitError, AuthenticationError
 from .types import (
     GenerationRequest,
@@ -28,36 +29,14 @@ class AnthropicProvider(Provider):
     
     BASE_URL = "https://api.anthropic.com/v1"
     
-    # Model configurations
+    # Load model configurations from settings
     MODELS = {
-        "claude-3-opus-20240229": {
+        model_name: {
             "endpoint": "/messages",
             "type": GenerationType.TEXT,
-            "max_tokens": 4096,
-            "vision": True,
-            "context_window": 200000,
-        },
-        "claude-3-sonnet-20240229": {
-            "endpoint": "/messages",
-            "type": GenerationType.TEXT,
-            "max_tokens": 4096,
-            "vision": True,
-            "context_window": 200000,
-        },
-        "claude-3-haiku-20240307": {
-            "endpoint": "/messages", 
-            "type": GenerationType.TEXT,
-            "max_tokens": 4096,
-            "vision": True,
-            "context_window": 200000,
-        },
-        "claude-3-5-sonnet-20241022": {
-            "endpoint": "/messages",
-            "type": GenerationType.TEXT,
-            "max_tokens": 8192,
-            "vision": True,
-            "context_window": 200000,
-        },
+            **config
+        }
+        for model_name, config in settings.providers.anthropic.models.items()
     }
     
     # Pricing per 1M tokens (input/output)
@@ -334,7 +313,7 @@ class AnthropicProvider(Provider):
     def get_default_model(self, generation_type: GenerationType) -> str:
         """Get default model for generation type."""
         if generation_type == GenerationType.TEXT:
-            return "claude-3-haiku-20240307"  # Cheapest for basic tasks
+            return settings.providers.anthropic.default_model
         return None
 
     def get_models_for_type(self, generation_type: GenerationType) -> List[str]:
