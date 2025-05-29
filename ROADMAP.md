@@ -81,6 +81,11 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 ## Recently Completed ✅
 
+### Provider Model Updates (Jan 2025)
+- Added Kling 2.1 Pro and Master variants for video generation
+- Added FLUX Pro Kontext Max for extended context image generation
+- Updated pricing tiers to reflect quality differences
+
 ### Architecture Simplification (Jan 2025)
 - Reduced event system from 2,600 to 300 lines using PostgreSQL NOTIFY/LISTEN
 - Simplified provider abstractions from 4 layers to 1 unified base class

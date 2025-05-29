@@ -37,6 +37,7 @@ class FalProvider(Provider):
     MODELS = {
         # FLUX models
         "flux-pro": "fal-ai/flux-pro",
+        "flux-pro-kontext-max": "fal-ai/flux-pro/kontext-max",  # New FLUX Pro with extended context
         "flux-dev": "fal-ai/flux/dev",
         "flux-schnell": "fal-ai/flux/schnell",
         "flux-realism": "fal-ai/flux-realism",
@@ -59,6 +60,10 @@ class FalProvider(Provider):
         "kling-v1-image": "fal-ai/kling-video/v1/pro/image-to-video",
         "kling-v2-text": "fal-ai/kling-video/v2/master/text-to-video",
         "kling-v2-image": "fal-ai/kling-video/v2/master/image-to-video",
+        "kling-v2.1-pro-text": "fal-ai/kling-video/v2.1/pro/text-to-video",  # New Kling 2.1 Pro
+        "kling-v2.1-pro-image": "fal-ai/kling-video/v2.1/pro/image-to-video",  # New Kling 2.1 Pro
+        "kling-v2.1-master-text": "fal-ai/kling-video/v2.1/master/text-to-video",  # New Kling 2.1 Master
+        "kling-v2.1-master-image": "fal-ai/kling-video/v2.1/master/image-to-video",  # New Kling 2.1 Master
         
         # Kling specialized models
         "kling-elements": "fal-ai/kling-video/v1.6/pro/elements",
@@ -73,6 +78,7 @@ class FalProvider(Provider):
     # Pricing per generation (approximate)
     PRICING = {
         "flux-pro": 0.05,
+        "flux-pro-kontext-max": 0.08,  # Higher cost for extended context
         "flux-dev": 0.025,
         "flux-schnell": 0.003,
         "flux-realism": 0.025,
@@ -87,6 +93,10 @@ class FalProvider(Provider):
         "kling-v1-image": 0.15,
         "kling-v2-text": 0.20,
         "kling-v2-image": 0.20,
+        "kling-v2.1-pro-text": 0.25,  # Kling 2.1 Pro tier
+        "kling-v2.1-pro-image": 0.25,  # Kling 2.1 Pro tier
+        "kling-v2.1-master-text": 0.30,  # Kling 2.1 Master tier - highest quality
+        "kling-v2.1-master-image": 0.30,  # Kling 2.1 Master tier - highest quality
         "kling-elements": 0.15,
         "kling-lipsync": 0.20,
         "face-swap": 0.02,
