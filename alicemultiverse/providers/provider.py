@@ -2,9 +2,12 @@
 
 import logging
 import time
+import random
+import asyncio
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List, Optional, TypeVar, Callable
+from functools import wraps
 
 from ..events.postgres_events import publish_event
 from .types import (
@@ -15,8 +18,19 @@ from .types import (
     ProviderCapabilities,
     ProviderStatus,
 )
+from .health_monitor import health_monitor
+from .generation_tracker import get_generation_tracker
+from ..core.structured_logging import get_logger, trace_operation, CorrelationContext
+from ..core.metrics import (
+    api_requests_total,
+    api_request_duration_seconds,
+    api_request_cost_dollars,
+    update_provider_health_metrics
+)
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
+
+T = TypeVar('T')
 
 
 class ProviderError(Exception):
@@ -53,7 +67,15 @@ class Provider(ABC):
     - Cost tracking and estimation
     - Request validation
     - Error handling
+    - Retry logic with exponential backoff
     """
+    
+    # Default retry configuration
+    DEFAULT_MAX_RETRIES = 3
+    DEFAULT_INITIAL_DELAY = 1.0  # seconds
+    DEFAULT_MAX_DELAY = 30.0  # seconds
+    DEFAULT_BACKOFF_FACTOR = 2.0
+    DEFAULT_JITTER = 0.1  # 10% jitter
 
     def __init__(self, api_key: Optional[str] = None):
         """Initialize provider.
@@ -66,6 +88,13 @@ class Provider(ABC):
         self._last_check: Optional[datetime] = None
         self._total_cost = 0.0
         self._generation_count = 0
+        
+        # Retry configuration (can be overridden by subclasses)
+        self.max_retries = self.DEFAULT_MAX_RETRIES
+        self.initial_delay = self.DEFAULT_INITIAL_DELAY
+        self.max_delay = self.DEFAULT_MAX_DELAY
+        self.backoff_factor = self.DEFAULT_BACKOFF_FACTOR
+        self.jitter = self.DEFAULT_JITTER
 
     @property
     @abstractmethod
@@ -80,7 +109,7 @@ class Provider(ABC):
         pass
 
     async def generate(self, request: GenerationRequest) -> GenerationResult:
-        """Generate content based on request.
+        """Generate content based on request with retry logic and health monitoring.
         
         Args:
             request: Generation request
@@ -92,6 +121,16 @@ class Provider(ABC):
             ProviderError: If generation fails
             BudgetExceededError: If request would exceed budget
         """
+        # Check circuit breaker
+        if not health_monitor.can_execute(self.name):
+            error_msg = f"{self.name} is currently unavailable (circuit breaker open)"
+            logger.error(
+                error_msg,
+                provider=self.name,
+                circuit_breaker_state="open"
+            )
+            raise GenerationError(error_msg)
+        
         start_time = time.time()
         
         try:
@@ -101,13 +140,60 @@ class Provider(ABC):
             # Publish start event
             self._publish_started(request)
             
-            # Perform generation (implemented by subclasses)
-            result = await self._generate(request)
+            # Perform generation with retry logic
+            logger.info(
+                "Starting generation",
+                provider=self.name,
+                model=request.model or "default",
+                generation_type=request.generation_type.value,
+                budget_limit=request.budget_limit
+            )
+            result = await self._retry_async(self._generate, request)
             
             # Track metrics
             result.generation_time = time.time() - start_time
             self._total_cost += result.cost or 0.0
             self._generation_count += 1
+            
+            # Record success with health monitor
+            health_monitor.record_success(self.name, result.generation_time)
+            
+            # Track generation for reproducibility
+            if result.file_path:
+                tracker = get_generation_tracker()
+                asset_id = await tracker.track_generation(request, result, self.name)
+                if asset_id:
+                    result.asset_id = asset_id
+            
+            # Update metrics
+            api_requests_total.labels(
+                provider=self.name,
+                model=result.model or request.model or "default",
+                operation=request.generation_type.value,
+                status="success"
+            ).inc()
+            
+            api_request_duration_seconds.labels(
+                provider=self.name,
+                model=result.model or request.model or "default",
+                operation=request.generation_type.value
+            ).observe(result.generation_time)
+            
+            if result.cost:
+                api_request_cost_dollars.labels(
+                    provider=self.name,
+                    model=result.model or request.model or "default"
+                ).observe(result.cost)
+            
+            # Log success
+            logger.info(
+                "Generation completed",
+                provider=self.name,
+                model=result.model or request.model or "default",
+                generation_time=result.generation_time,
+                cost=result.cost,
+                success=True
+            )
             
             # Publish success event
             self._publish_success(request, result)
@@ -115,6 +201,28 @@ class Provider(ABC):
             return result
             
         except Exception as e:
+            # Record failure with health monitor
+            health_monitor.record_failure(self.name)
+            
+            # Update metrics
+            api_requests_total.labels(
+                provider=self.name,
+                model=request.model or "default",
+                operation=request.generation_type.value,
+                status="error"
+            ).inc()
+            
+            # Log failure
+            logger.error(
+                "Generation failed",
+                provider=self.name,
+                model=request.model or "default",
+                generation_type=request.generation_type.value,
+                error_type=type(e).__name__,
+                error_message=str(e),
+                exc_info=True
+            )
+            
             # Publish failure event
             self._publish_failure(request, str(e))
             raise
@@ -142,6 +250,35 @@ class Provider(ABC):
             Provider status
         """
         pass
+    
+    def get_health_status(self) -> ProviderStatus:
+        """Get provider health status from monitor.
+        
+        Returns:
+            Provider status based on circuit breaker state
+        """
+        return health_monitor.get_status(self.name)
+    
+    def get_health_metrics(self) -> Optional[Dict[str, Any]]:
+        """Get provider health metrics.
+        
+        Returns:
+            Health metrics if available
+        """
+        metrics = health_monitor.get_metrics(self.name)
+        if not metrics:
+            return None
+            
+        return {
+            "total_requests": metrics.total_requests,
+            "failed_requests": metrics.failed_requests,
+            "failure_rate": metrics.failure_rate,
+            "consecutive_failures": metrics.consecutive_failures,
+            "average_response_time": metrics.average_response_time,
+            "last_success": metrics.last_success_time.isoformat() if metrics.last_success_time else None,
+            "last_failure": metrics.last_failure_time.isoformat() if metrics.last_failure_time else None,
+            "is_healthy": metrics.is_healthy
+        }
 
     async def estimate_cost(self, request: GenerationRequest) -> CostEstimate:
         """Estimate cost for a generation request.
@@ -340,3 +477,132 @@ class Provider(ABC):
         """Async context manager exit."""
         # Subclasses should override to clean up resources
         pass
+    
+    # Retry logic methods
+    
+    def _calculate_delay(self, attempt: int) -> float:
+        """Calculate delay with exponential backoff and jitter."""
+        delay = min(
+            self.initial_delay * (self.backoff_factor ** attempt),
+            self.max_delay
+        )
+        # Add jitter to prevent thundering herd
+        jitter_amount = delay * self.jitter
+        delay += random.uniform(-jitter_amount, jitter_amount)
+        return max(0, delay)
+    
+    def _should_retry(self, exception: Exception) -> bool:
+        """Determine if an exception should trigger a retry.
+        
+        Override this method in subclasses to customize retry logic.
+        """
+        # Don't retry validation errors or budget exceeded
+        if isinstance(exception, (ValueError, BudgetExceededError, AuthenticationError)):
+            return False
+            
+        # Retry rate limit errors with longer delay
+        if isinstance(exception, RateLimitError):
+            return True
+            
+        # Default: retry on common transient errors
+        error_msg = str(exception).lower()
+        transient_errors = [
+            'timeout', 'timed out',
+            'connection', 'network',
+            'temporarily unavailable',
+            'service unavailable',
+            '502', '503', '504',  # Gateway errors
+            'rate limit', 'too many requests',
+            'internal server error', '500'
+        ]
+        return any(error in error_msg for error in transient_errors)
+    
+    async def _retry_async(self, func: Callable, *args, **kwargs) -> Any:
+        """Retry an async function with exponential backoff."""
+        last_exception = None
+        
+        for attempt in range(self.max_retries + 1):
+            try:
+                return await func(*args, **kwargs)
+            except Exception as e:
+                last_exception = e
+                
+                if attempt == self.max_retries:
+                    logger.error(
+                        "Max retries exceeded",
+                        provider=self.name,
+                        attempts=self.max_retries + 1,
+                        final_error=str(e),
+                        error_type=type(e).__name__
+                    )
+                    raise
+                
+                if not self._should_retry(e):
+                    logger.error(
+                        "Non-retryable error",
+                        provider=self.name,
+                        error_type=type(e).__name__,
+                        error_message=str(e)
+                    )
+                    raise
+                
+                # Special handling for rate limit errors
+                if isinstance(e, RateLimitError):
+                    # Use longer delay for rate limits
+                    delay = self._calculate_delay(attempt + 2)  # Extra backoff
+                else:
+                    delay = self._calculate_delay(attempt)
+                
+                logger.warning(
+                    "Retrying after failure",
+                    provider=self.name,
+                    attempt=attempt + 1,
+                    max_attempts=self.max_retries + 1,
+                    retry_delay=delay,
+                    error_type=type(e).__name__,
+                    error_message=str(e)
+                )
+                await asyncio.sleep(delay)
+        
+        # This should never be reached, but just in case
+        if last_exception:
+            raise last_exception
+        raise RuntimeError("Retry logic error")
+    
+    def retry_with_backoff(self, func: Callable[..., T]) -> Callable[..., T]:
+        """Decorator to retry a sync function with exponential backoff.
+        
+        For use with synchronous methods in providers.
+        """
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> T:
+            last_exception = None
+            
+            for attempt in range(self.max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    last_exception = e
+                    
+                    if attempt == self.max_retries:
+                        logger.error(
+                            f"{self.name}: Failed after {self.max_retries + 1} attempts: {e}"
+                        )
+                        raise
+                    
+                    if not self._should_retry(e):
+                        logger.error(f"{self.name}: Non-retryable error: {e}")
+                        raise
+                    
+                    delay = self._calculate_delay(attempt)
+                    logger.warning(
+                        f"{self.name}: Attempt {attempt + 1} failed: {e}. "
+                        f"Retrying in {delay:.1f} seconds..."
+                    )
+                    time.sleep(delay)
+            
+            if last_exception:
+                raise last_exception
+            raise RuntimeError("Retry logic error")
+        
+        return wrapper

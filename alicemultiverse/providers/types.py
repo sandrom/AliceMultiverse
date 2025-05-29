@@ -30,7 +30,8 @@ class GenerationRequest:
     generation_type: GenerationType
     model: Optional[str] = None
     parameters: Optional[Dict[str, Any]] = None
-    reference_assets: Optional[List[str]] = None  # Asset IDs for style reference
+    reference_assets: Optional[List[str]] = None  # Asset IDs or URLs for reference images
+    reference_weights: Optional[List[float]] = None  # Weights for multi-reference models
     output_format: Optional[str] = None  # png, jpg, mp4, etc.
     output_path: Optional[Path] = None  # Where to save the result
     metadata: Optional[Dict[str, Any]] = None  # Additional metadata to embed

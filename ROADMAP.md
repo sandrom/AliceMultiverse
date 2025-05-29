@@ -31,9 +31,7 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 ### 3. Provider Integrations (Direct User Value)
 - [ ] Hedra (AI avatar videos) - Character-1 API for talking avatars
-- [ ] Midjourney (via proxy API) - Most requested by creatives
-- [ ] ElevenLabs (voice generation) - Complete audio pipeline
-- [ ] Suno (music generation) - For music video production
+- [ ] mmaudio (multimodal audio generation) - https://mmaudio.net/ for video soundtracks
 
 ### 4. Search Performance (Measured Improvements)
 - [ ] Profile and fix N+1 queries in asset search
@@ -56,6 +54,8 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - Batch API calls where possible
 
 ### Additional Providers
+- Midjourney (via proxy API) - Most requested by creatives
+- Suno (music generation) - For music video production
 - Stable Diffusion (local/cloud)
 - RunwayML (video generation)
 - Replicate (multiple models)

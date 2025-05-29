@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional, Type
 
 from .provider import Provider, BudgetExceededError
 from .types import GenerationRequest, GenerationType
+from .health_monitor import health_monitor
 
 logger = logging.getLogger(__name__)
 
@@ -44,6 +45,9 @@ class ProviderRegistry:
         self.total_cost = 0.0
         self._provider_stats: Dict[str, ProviderStats] = {}
         
+        # Health monitoring task
+        self._health_monitoring_task: Optional[asyncio.Task] = None
+        
         # Register built-in providers
         self._register_builtin_providers()
     
@@ -54,6 +58,7 @@ class ProviderRegistry:
         from .anthropic_provider import AnthropicProvider
         from .openai_provider import OpenAIProvider
         from .bfl_provider import BFLProvider
+        from .kling_provider import KlingProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
@@ -63,6 +68,9 @@ class ProviderRegistry:
         self.register_provider("bfl", BFLProvider)
         self.register_provider("bfl.ai", BFLProvider)  # Alias
         self.register_provider("black-forest-labs", BFLProvider)  # Alias
+        self.register_provider("kling", KlingProvider)
+        self.register_provider("klingai", KlingProvider)  # Alias
+        self.register_provider("kling-official", KlingProvider)  # Alias
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
@@ -232,6 +240,11 @@ class ProviderRegistry:
         """
         if provider_name:
             stats = self._provider_stats.get(provider_name.lower(), ProviderStats())
+            
+            # Include health status in stats
+            health_status = health_monitor.get_status(provider_name)
+            health_metrics = health_monitor.get_metrics(provider_name)
+            
             return {
                 "provider": provider_name,
                 "total_cost": stats.total_cost,
@@ -239,7 +252,12 @@ class ProviderRegistry:
                 "success_rate": stats.successful_requests / stats.total_requests if stats.total_requests > 0 else 0,
                 "average_cost": stats.total_cost / stats.successful_requests if stats.successful_requests > 0 else 0,
                 "average_time": stats.average_generation_time,
-                "last_used": stats.last_used.isoformat() if stats.last_used else None
+                "last_used": stats.last_used.isoformat() if stats.last_used else None,
+                "health_status": health_status.value,
+                "health_metrics": {
+                    "consecutive_failures": health_metrics.consecutive_failures if health_metrics else 0,
+                    "is_healthy": health_metrics.is_healthy if health_metrics else True
+                }
             }
         else:
             return {
@@ -250,6 +268,40 @@ class ProviderRegistry:
                     name: self.get_stats(name) for name in self._provider_stats
                 }
             }
+    
+    async def start_health_monitoring(self):
+        """Start health monitoring for all providers."""
+        if self._health_monitoring_task and not self._health_monitoring_task.done():
+            logger.warning("Health monitoring already running")
+            return
+        
+        # Get all provider instances
+        providers = []
+        for name in self._provider_classes:
+            try:
+                provider = self.get_provider(name)
+                providers.append(provider)
+            except Exception as e:
+                logger.error(f"Failed to initialize {name} for health monitoring: {e}")
+        
+        # Start monitoring
+        await health_monitor.start_monitoring(providers)
+        logger.info(f"Started health monitoring for {len(providers)} providers")
+    
+    async def stop_health_monitoring(self):
+        """Stop health monitoring."""
+        await health_monitor.stop_monitoring()
+    
+    def get_health_statuses(self) -> Dict[str, str]:
+        """Get health status for all providers.
+        
+        Returns:
+            Dict of provider name to health status
+        """
+        return {
+            name: health_monitor.get_status(name).value
+            for name in self._provider_classes
+        }
 
 
 # Global registry instance

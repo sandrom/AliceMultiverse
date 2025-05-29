@@ -11,7 +11,7 @@ from enum import Enum
 from typing import Any
 
 from ..assets.discovery import AssetDiscovery
-from ..core.logging import get_logger
+from ..core.structured_logging import get_logger, trace_operation, CorrelationContext
 from ..database import get_session
 from ..database.repository import AssetRepository, ProjectRepository
 from ..events import publish_event
@@ -286,6 +286,7 @@ class AliceOrchestrator:
 
     # === Primary Creative Interface ===
 
+    @trace_operation("understand_request")
     async def understand(self, request: str) -> CreativeResponse:
         """Understand and execute any creative request.
 
@@ -368,6 +369,7 @@ class AliceOrchestrator:
 
         return CreativeIntent.SEARCH  # Default
 
+    @trace_operation("handle_search")
     async def _handle_search(
         self, request: str, temporal_ref: datetime | None, creative_elements: dict[str, Any]
     ) -> CreativeResponse:
@@ -420,6 +422,7 @@ class AliceOrchestrator:
                 suggestions=["Try being more specific", "Use style or mood keywords"],
             )
 
+    @trace_operation("handle_creation")
     async def _handle_creation(
         self, request: str, creative_elements: dict[str, Any]
     ) -> CreativeResponse:
@@ -529,6 +532,7 @@ class AliceOrchestrator:
             logger.error(f"Memory request failed: {e}")
             return CreativeResponse(success=False, message="I couldn't access the memory right now")
 
+    @trace_operation("semantic_search")
     async def _semantic_search(self, description: str) -> list[dict[str, Any]]:
         """Perform semantic search based on description."""
         # This would integrate with embedding-based search
@@ -540,6 +544,7 @@ class AliceOrchestrator:
             return [self._asset_to_dict(asset) for asset in assets]
         return []
 
+    @trace_operation("structured_search")
     async def _structured_search(self, params: dict[str, Any]) -> list[dict[str, Any]]:
         """Perform structured search with specific parameters."""
         if self.asset_repo:

@@ -37,11 +37,16 @@ class FalProvider(Provider):
     MODELS = {
         # FLUX models
         "flux-pro": "fal-ai/flux-pro",
-        "flux-kontext-pro": "fal-ai/flux-pro/kontext",  # FLUX Kontext Pro - local edits & transformations
-        "flux-kontext-max": "fal-ai/flux-pro/kontext/max",  # FLUX Kontext Max - premium consistency
+        "flux-pro-v1.1": "fal-ai/flux-pro/v1.1",
+        "flux-kontext-pro": "fal-ai/flux-pro/kontext",  # FLUX Kontext Pro - single reference image
+        "flux-kontext-pro-multi": "fal-ai/flux-pro/kontext/multi",  # FLUX Kontext Pro - multiple reference images
+        "flux-kontext-max": "fal-ai/flux-pro/kontext/max",  # FLUX Kontext Max - single reference
+        "flux-kontext-max-multi": "fal-ai/flux-pro/kontext/max/multi",  # FLUX Kontext Max - multiple references
         "flux-dev": "fal-ai/flux/dev",
+        "flux-dev-image-to-image": "fal-ai/flux/dev/image-to-image",
         "flux-schnell": "fal-ai/flux/schnell",
         "flux-realism": "fal-ai/flux-realism",
+        "flux-lora": "fal-ai/flux-lora",  # Custom LoRA support
         
         # Fast SDXL
         "fast-sdxl": "fal-ai/fast-sdxl",
@@ -70,6 +75,9 @@ class FalProvider(Provider):
         "kling-elements": "fal-ai/kling-video/v1.6/pro/elements",
         "kling-lipsync": "fal-ai/kling-video/lipsync/audio-to-video",
         
+        # Audio models
+        "mmaudio-v2": "fal-ai/mmaudio-v2",  # Multimodal audio generation for video
+        
         # Utility models
         "face-swap": "fal-ai/face-swap",
         "ccsr": "fal-ai/ccsr",  # upscaling
@@ -79,11 +87,16 @@ class FalProvider(Provider):
     # Pricing per generation (approximate)
     PRICING = {
         "flux-pro": 0.05,
-        "flux-kontext-pro": 0.06,  # FLUX Kontext Pro - iterative editing
-        "flux-kontext-max": 0.08,  # FLUX Kontext Max - maximum performance
+        "flux-pro-v1.1": 0.055,
+        "flux-kontext-pro": 0.06,  # Single reference
+        "flux-kontext-pro-multi": 0.07,  # Multiple references
+        "flux-kontext-max": 0.08,  # Single reference
+        "flux-kontext-max-multi": 0.09,  # Multiple references
         "flux-dev": 0.025,
+        "flux-dev-image-to-image": 0.025,
         "flux-schnell": 0.003,
         "flux-realism": 0.025,
+        "flux-lora": 0.03,
         "fast-sdxl": 0.003,
         "lightning-sdxl": 0.003,
         "stable-cascade": 0.01,
@@ -101,6 +114,7 @@ class FalProvider(Provider):
         "kling-v2.1-master-image": 0.30,  # Kling 2.1 Master tier - highest quality
         "kling-elements": 0.15,
         "kling-lipsync": 0.20,
+        "mmaudio-v2": 0.05,  # Multimodal audio generation
         "face-swap": 0.02,
         "ccsr": 0.02,
         "clarity-upscaler": 0.02,
@@ -129,7 +143,7 @@ class FalProvider(Provider):
     def capabilities(self) -> ProviderCapabilities:
         """Provider capabilities."""
         return ProviderCapabilities(
-            generation_types=[GenerationType.IMAGE, GenerationType.VIDEO],
+            generation_types=[GenerationType.IMAGE, GenerationType.VIDEO, GenerationType.AUDIO],
             models=list(self.MODELS.keys()),
             max_resolution={"width": 2048, "height": 2048},  # FLUX can go higher
             formats=["png", "jpg", "webp"],
@@ -141,7 +155,9 @@ class FalProvider(Provider):
                 "lora",
                 "face_swap",
                 "upscaling",
-                "video_generation"
+                "video_generation",
+                "audio_generation",
+                "video_to_audio"
             ],
             rate_limits={
                 "requests_per_minute": 60,
@@ -241,10 +257,30 @@ class FalProvider(Provider):
             params.setdefault("guidance_scale", 3.5)
             params.setdefault("num_images", 1)
             
-            # Add reference images if provided
+            # Handle reference images based on model type
             if request.reference_assets:
-                # For kontext models, the first reference is the image to edit
+                if "multi" in model:
+                    # Multi-reference models accept array of image URLs
+                    params["image_urls"] = request.reference_assets
+                    # Use provided weights or default to equal weights
+                    if request.reference_weights:
+                        params["image_weights"] = request.reference_weights
+                    else:
+                        params.setdefault("image_weights", [1.0] * len(request.reference_assets))
+                else:
+                    # Single reference models
+                    params["image_url"] = request.reference_assets[0]
+                    
+        elif model == "flux-dev-image-to-image":
+            # Image-to-image model
+            params.setdefault("num_inference_steps", 28)
+            params.setdefault("guidance_scale", 3.5)
+            params.setdefault("strength", 0.85)  # How much to change the image
+            
+            if request.reference_assets:
                 params["image_url"] = request.reference_assets[0]
+            else:
+                raise ValueError("flux-dev-image-to-image requires a reference image")
                 
         elif model.startswith("flux"):
             params.setdefault("num_inference_steps", 28 if "schnell" in model else 50)
@@ -265,6 +301,22 @@ class FalProvider(Provider):
             # Remove any image-specific parameters
             params.pop("num_images", None)
             params.pop("image_size", None)
+            
+        elif model == "mmaudio-v2":
+            # MMAudio v2 parameters for video-to-audio generation
+            params.setdefault("num_steps", 25)
+            params.setdefault("duration", 8)  # seconds
+            params.setdefault("cfg_strength", 4.5)
+            params.setdefault("seed", None)  # Random if not specified
+            params.setdefault("negative_prompt", "")
+            params.setdefault("mask_away_clip", False)
+            
+            # Require video URL for mmaudio
+            if "video_url" not in params and request.reference_assets:
+                # Use first reference asset as video URL
+                params["video_url"] = str(request.reference_assets[0])
+            elif "video_url" not in params:
+                raise ValueError("mmaudio-v2 requires a video_url parameter")
             
         # Handle image-to-image
         if request.reference_assets and len(request.reference_assets) > 0:
@@ -351,7 +403,7 @@ class FalProvider(Provider):
         result_data: Dict[str, Any]
     ) -> Path:
         """Download generated content from result."""
-        # Check if this is a video result (e.g., from Kling)
+        # Check if this is a video result (e.g., from Kling or mmaudio)
         video_url = result_data.get("video", {}).get("url")
         if video_url:
             media_url = video_url

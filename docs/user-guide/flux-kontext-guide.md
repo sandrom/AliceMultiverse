@@ -1,6 +1,6 @@
 # FLUX Kontext Guide
 
-FLUX Kontext is a groundbreaking multimodal flow model that enables iterative image editing with unprecedented consistency and control.
+FLUX Kontext is a groundbreaking multimodal flow model that enables iterative image editing with unprecedented consistency and control. Both single-reference and multi-reference variants are supported.
 
 ## Overview
 
@@ -10,19 +10,25 @@ FLUX Kontext models excel at:
 - **Style preservation** while transforming content
 - **Interactive editing** with minimal quality degradation
 - **Typography generation** with improved accuracy
+- **Multi-reference synthesis** combining elements from multiple images
 
 ## Available Models
 
 ### Via fal.ai Provider
 
 ```python
-# FLUX Kontext Pro - Fast iterative editing
-provider = "fal"
-model = "flux-kontext-pro"
+# Single reference models
+model = "flux-kontext-pro"      # Fast iterative editing with one reference
+model = "flux-kontext-max"      # Maximum performance with one reference
 
-# FLUX Kontext Max - Maximum performance
-provider = "fal"
-model = "flux-kontext-max"
+# Multi-reference models (NEW!)
+model = "flux-kontext-pro-multi" # Combine multiple reference images
+model = "flux-kontext-max-multi" # Premium multi-reference synthesis
+
+# Other FLUX variants
+model = "flux-pro-v1.1"         # Latest FLUX Pro version
+model = "flux-dev-image-to-image" # Standard image-to-image
+model = "flux-lora"             # Custom LoRA support
 ```
 
 ### Via BFL Provider (Direct API)
@@ -38,15 +44,15 @@ model = "flux-kontext-pro"  # or "flux-kontext-max"
 
 ## Usage Examples
 
-### Basic Image Editing
+### Single Reference Image Editing
 
 ```python
 from alicemultiverse.providers import get_provider, GenerationRequest, GenerationType
 
-# Get provider (fal or bfl)
+# Get provider
 provider = get_provider("fal", api_key="your-key")
 
-# Edit an existing image
+# Edit with one reference image
 request = GenerationRequest(
     prompt="Change the background to a sunset beach scene",
     generation_type=GenerationType.IMAGE,

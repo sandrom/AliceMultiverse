@@ -8,6 +8,7 @@ from typing import Any
 from sqlalchemy import desc
 
 from .config import get_session
+from .pool_manager import get_managed_session
 from .models import Asset, AssetRelationship, Project, Tag
 
 logger = logging.getLogger(__name__)
@@ -36,7 +37,7 @@ class AssetRepository:
         Returns:
             Created or updated asset
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             # Check if asset exists
             asset = session.query(Asset).filter_by(content_hash=content_hash).first()
             
@@ -98,7 +99,7 @@ class AssetRepository:
         Returns:
             Asset if found, None otherwise
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             return session.query(Asset).filter_by(content_hash=content_hash).first()
 
     def get_by_path(self, file_path: str) -> Asset | None:
@@ -110,7 +111,7 @@ class AssetRepository:
         Returns:
             Asset if found, None otherwise
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             return session.query(Asset).filter_by(file_path=file_path).first()
 
     def search(
@@ -143,7 +144,7 @@ class AssetRepository:
         Returns:
             List of matching assets
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             query = session.query(Asset)
 
             if project_id:
@@ -219,7 +220,7 @@ class AssetRepository:
         Returns:
             True if successful
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             asset = session.query(Asset).filter_by(content_hash=content_hash).first()
             if not asset:
                 logger.error(f"Asset not found: {content_hash}")
@@ -269,7 +270,7 @@ class AssetRepository:
         Returns:
             True if successful
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             # Verify both assets exist
             parent = session.query(Asset).filter_by(content_hash=parent_hash).first()
             child = session.query(Asset).filter_by(content_hash=child_hash).first()
@@ -317,7 +318,7 @@ class AssetRepository:
         Returns:
             List of related assets
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             related_assets = []
 
             if direction in ["parent", "both"]:
@@ -366,7 +367,7 @@ class AssetRepository:
         Returns:
             True if successful
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             asset = session.query(Asset).filter_by(content_hash=content_hash).first()
             if not asset:
                 logger.error(f"Asset not found: {content_hash}")
@@ -402,7 +403,7 @@ class ProjectRepository:
         Returns:
             Created project
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             project = Project(
                 name=name, description=description, creative_context=creative_context or {}
             )
@@ -420,7 +421,7 @@ class ProjectRepository:
         Returns:
             Project if found
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             return session.query(Project).filter_by(id=project_id).first()
 
     def list_all(self, limit: int = 100) -> list[Project]:
@@ -432,7 +433,7 @@ class ProjectRepository:
         Returns:
             List of projects
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             return session.query(Project).order_by(desc(Project.created_at)).limit(limit).all()
 
     def update_context(self, project_id: str, creative_context: dict) -> bool:
@@ -445,7 +446,7 @@ class ProjectRepository:
         Returns:
             True if successful
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             project = session.query(Project).filter_by(id=project_id).first()
             if not project:
                 logger.error(f"Project not found: {project_id}")
@@ -466,7 +467,7 @@ class ProjectRepository:
         Returns:
             True if successful
         """
-        with get_session() as session:
+        with get_managed_session() as session:
             asset = session.query(Asset).filter_by(content_hash=content_hash).first()
             if not asset:
                 logger.error(f"Asset not found: {content_hash}")

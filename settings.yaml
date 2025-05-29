@@ -187,10 +187,23 @@ providers:
     
   # Connection pool settings
   database:
-    pool_size: 10
-    max_overflow: 20
+    # Base pool size - number of persistent connections
+    pool_size: 20  # Increased from 10 for better concurrency
+    
+    # Maximum overflow - temporary connections when pool exhausted
+    max_overflow: 40  # Increased from 20 to handle spikes
+    
+    # Timeout waiting for connection from pool (seconds)
     pool_timeout: 30
-    pool_recycle: 3600
+    
+    # Recycle connections after this many seconds
+    pool_recycle: 1800  # Reduced from 3600 to prevent stale connections
+    
+    # Check connection health before use
+    pool_pre_ping: true
+    
+    # Log pool events for debugging (set to false in production)
+    pool_echo: false
     
   # Event system settings
   events:

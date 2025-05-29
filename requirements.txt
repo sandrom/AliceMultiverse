@@ -30,5 +30,11 @@ alembic>=1.13.0
 psycopg2-binary>=2.9.0  # PostgreSQL adapter
 asyncpg>=0.30.0         # Async PostgreSQL support
 
+# Logging and monitoring
+structlog>=24.0.0       # Structured logging
+prometheus-client>=0.19.0  # Metrics export
+uvicorn>=0.30.0         # ASGI server for metrics endpoint
+fastapi>=0.110.0        # Web framework for metrics
+
 # Optional format support (install if needed)
 pillow-heif>=0.16.0  # HEIC/HEIF support (recommended for iPhone images)

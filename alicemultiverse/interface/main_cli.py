@@ -10,6 +10,7 @@ from omegaconf import DictConfig
 from ..core.config import load_config
 from ..core.exceptions import AliceMultiverseError, ConfigurationError
 from ..core.logging import setup_logging
+from ..core.structured_logging import setup_structured_logging
 from ..version import __version__
 
 logger = logging.getLogger(__name__)
@@ -77,6 +78,29 @@ For normal usage, use Alice through an AI assistant instead.
 
     # Keys - setup
     keys_setup = keys_subparsers.add_parser("setup", help="Interactive setup wizard")
+    
+    # Recreate subcommand
+    recreate_parser = subparsers.add_parser("recreate", help="Recreate AI generations")
+    recreate_subparsers = recreate_parser.add_subparsers(
+        dest="recreate_command", help="Recreation commands"
+    )
+    
+    # Recreate - inspect
+    recreate_inspect = recreate_subparsers.add_parser("inspect", help="Inspect generation metadata")
+    recreate_inspect.add_argument("file_path", help="Path to media file")
+    
+    # Recreate - recreate
+    recreate_recreate = recreate_subparsers.add_parser("recreate", help="Recreate a generation")
+    recreate_recreate.add_argument("asset_id", help="Asset ID or file path")
+    recreate_recreate.add_argument("--provider", help="Override provider")
+    recreate_recreate.add_argument("--model", help="Override model")
+    recreate_recreate.add_argument("-o", "--output", help="Output path")
+    recreate_recreate.add_argument("-n", "--dry-run", action="store_true", help="Show what would be done")
+    
+    # Recreate - catalog
+    recreate_catalog = recreate_subparsers.add_parser("catalog", help="Catalog generations in directory")
+    recreate_catalog.add_argument("directory", help="Directory to catalog")
+    recreate_catalog.add_argument("-r", "--recursive", action="store_true", help="Search recursively")
 
     # Interface subcommand (for AI interaction demo)
     interface_parser = subparsers.add_parser(
@@ -93,6 +117,15 @@ For normal usage, use Alice through an AI assistant instead.
     mcp_parser = subparsers.add_parser("mcp-server", help="Start MCP server for AI integration")
     mcp_parser.add_argument(
         "--port", type=int, help="Port to run on (for TCP mode, not implemented yet)"
+    )
+    
+    # Metrics server subcommand
+    metrics_parser = subparsers.add_parser("metrics-server", help="Start Prometheus metrics server")
+    metrics_parser.add_argument(
+        "--host", default="0.0.0.0", help="Host to bind to (default: 0.0.0.0)"
+    )
+    metrics_parser.add_argument(
+        "--port", type=int, default=9090, help="Port to listen on (default: 9090)"
     )
 
     # Directory arguments
@@ -202,6 +235,20 @@ For normal usage, use Alice through an AI assistant instead.
     parser.add_argument("-q", "--quiet", action="store_true", help="Suppress non-error output")
 
     parser.add_argument("--log-file", help="Path to log file")
+    
+    parser.add_argument(
+        "--log-format",
+        choices=["json", "console"],
+        default="console",
+        help="Log output format (default: console)"
+    )
+    
+    parser.add_argument(
+        "--log-level",
+        choices=["DEBUG", "INFO", "WARNING", "ERROR"],
+        default="INFO",
+        help="Logging level (default: INFO)"
+    )
 
     # Debug/Development options
     parser.add_argument("--debug", action="store_true", help="Enable debug mode (acknowledges CLI deprecation)")
@@ -315,6 +362,33 @@ def main(argv: list[str] | None = None) -> int:
         from ..core.keys.cli import run_keys_command
 
         return run_keys_command(args)
+    
+    # Handle recreate subcommand
+    if args.command == "recreate":
+        from ..providers.recreate_cli import cli as recreate_cli
+        
+        # Build command line args for click
+        click_args = [args.recreate_command]
+        if args.recreate_command == "inspect":
+            click_args.append(args.file_path)
+        elif args.recreate_command == "recreate":
+            click_args.append(args.asset_id)
+            if hasattr(args, "provider") and args.provider:
+                click_args.extend(["--provider", args.provider])
+            if hasattr(args, "model") and args.model:
+                click_args.extend(["--model", args.model])
+            if hasattr(args, "output") and args.output:
+                click_args.extend(["--output", args.output])
+            if hasattr(args, "dry_run") and args.dry_run:
+                click_args.append("--dry-run")
+        elif args.recreate_command == "catalog":
+            click_args.append(args.directory)
+            if hasattr(args, "recursive") and args.recursive:
+                click_args.append("--recursive")
+        
+        # Run the click command
+        recreate_cli(click_args)
+        return 0
 
     # Handle interface subcommand
     if args.command == "interface":
@@ -331,15 +405,30 @@ def main(argv: list[str] | None = None) -> int:
 
         run_mcp_server()
         return 0
+    
+    # Handle metrics server subcommand
+    if args.command == "metrics-server":
+        from ..core.metrics_server import run_metrics_server
+        
+        run_metrics_server(host=args.host, port=args.port)
+        return 0
 
     # Setup logging for main command
-    log_level = "DEBUG" if hasattr(args, "verbose") and args.verbose else "INFO"
-    log_file = Path(args.log_file) if hasattr(args, "log_file") and args.log_file else None
-    quiet = hasattr(args, "quiet") and args.quiet
-    setup_logging(level=log_level, log_file=log_file, quiet=quiet)
+    log_level = args.log_level if hasattr(args, "log_level") else "INFO"
+    if hasattr(args, "verbose") and args.verbose:
+        log_level = "DEBUG"
+    elif hasattr(args, "quiet") and args.quiet:
+        log_level = "ERROR"
+    
+    # Use structured logging
+    setup_structured_logging(
+        log_level=log_level,
+        json_logs=(getattr(args, "log_format", "console") == "json"),
+        include_caller_info=(log_level == "DEBUG")
+    )
     
     # Show deprecation warning for direct CLI usage (except for allowed commands)
-    allowed_commands = ["mcp-server", "keys", "interface"]
+    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate"]
     force_cli = hasattr(args, "force_cli") and args.force_cli
     debug_mode = hasattr(args, "debug") and args.debug
     check_deps = hasattr(args, "check_deps") and args.check_deps

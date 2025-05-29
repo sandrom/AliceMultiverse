@@ -17,8 +17,10 @@ from sqlalchemy.orm import Session
 
 from alicemultiverse.core.config import settings
 from alicemultiverse.database.config import DATABASE_URL, get_session
+from alicemultiverse.core.structured_logging import get_logger
+from alicemultiverse.core.metrics import events_published_total, event_processing_duration_seconds
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class PostgresEventSystem:
@@ -46,6 +48,10 @@ class PostgresEventSystem:
             Event ID
         """
         event_id = str(uuid.uuid4())
+        
+        # Track metrics
+        events_published_total.labels(event_type=event_type).inc()
+        
         event_data = {
             "id": event_id,
             "type": event_type,
