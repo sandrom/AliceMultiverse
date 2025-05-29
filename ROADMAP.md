@@ -2,36 +2,7 @@
 
 ## Vision
 
-AliceMultiverse is evolving from a media organization tool into a comprehensive creative workflow hub that bridges AI assistants with creative tools and APIs. Our goal is to support creative professionals who work iteratively with AI over extended periods, maintaining context and continuity across sessions.
-
-## Current Work
-
-### 🚨 CRITICAL: Architecture Simplification
-Deep review revealed over-engineering that violates our "pragmatic, direct, no bullshit" principle. Must simplify before new features.
-
-**Event System Simplification (2,600 → 400 lines)** ✅
-- [x] **Step 1**: Create PostgreSQL-native event system → **Commit**: "Create PostgreSQL-native event system"
-- [x] **Step 2**: Migrate event publishers → **Commit**: "Migrate event publishers to PostgreSQL events"
-- [x] **Step 3**: Remove legacy implementations → **Commit**: "Remove legacy event store implementations"
-
-**Provider Abstraction Simplification (1,500 → 600 lines)** ✅
-- [x] **Step 4**: Create unified provider base → **Commit**: "Create unified provider base class"
-- [x] **Step 5**: Migrate providers → **Commit**: "Migrate providers to unified base class"
-- [x] **Step 6**: Create simple registry → **Commit**: "Create simplified provider registry"
-- [x] **Step 7**: Remove old abstractions → **Commit**: "Remove legacy provider abstractions"
-
-**Critical Issues** ✅
-- [x] **Step 8**: Fix exception handling (4 files fixed) → **Commit**: "Fix exception handling throughout codebase"
-- [x] **Step 9**: Implement video hashing → **Commit**: "Implement video content hashing"
-- [x] **Step 10**: Move hardcoded values → **Commit**: "Move hardcoded values to configuration"
-
-**Additional Improvements** ✅
-- [x] **Step 11**: Add input validation → **Commit**: "Add input validation for API endpoints"
-- [x] **Step 12**: Clean up empty files → **Commit**: "Remove empty and unused files"
-- [x] **Step 13**: Add type hints → **Commit**: "Add comprehensive type hints"
-- [x] **Step 14**: Update documentation → **Commit**: "Update documentation to reflect AI-native architecture"
-
-[See detailed plan: docs/architecture/simplification-plan.md]
+AliceMultiverse is an AI-native service that operates exclusively through AI assistants. It bridges creative professionals with AI generation tools and APIs, excelling at detecting, organizing, and assessing AI-generated content while maintaining context across extended creative sessions.
 
 ## Next Up (Priority Order)
 
@@ -73,6 +44,15 @@ Deep review revealed over-engineering that violates our "pragmatic, direct, no b
 - Real-time collaboration
 
 ## Recently Completed ✅
+
+### Architecture Simplification (Jan 2025)
+- Reduced event system from 2,600 to 300 lines using PostgreSQL NOTIFY/LISTEN
+- Simplified provider abstractions from 4 layers to 1 unified base class
+- Fixed all bare exception blocks per instructions.md
+- Implemented video content hashing with ffmpeg
+- Added comprehensive input validation and rate limiting
+- Updated all documentation to reflect AI-native architecture
+- Removed 79 empty/unused files and ~4,100 lines of over-engineered code
 
 ### Project Management Layer (Jan 2025)
 - Created database models with budget tracking fields

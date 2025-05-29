@@ -1,7 +1,7 @@
 # ADR-006: Simplification Over Abstraction
 
 ## Status
-Proposed
+Accepted (January 2025)
 
 ## Context
 A deep review of the AliceMultiverse codebase revealed significant over-engineering:
@@ -40,11 +40,13 @@ We will simplify the architecture by:
 - **Documentation updates**: All docs need revision
 - **Test updates**: Tests must be rewritten for new interfaces
 
-## Implementation Plan
-14 commits as detailed in docs/architecture/simplification-plan.md:
-- 3 commits for event system
-- 4 commits for provider system
+## Implementation
+Completed in 14 commits (January 2025):
+- 3 commits for event system (PostgreSQL NOTIFY/LISTEN)
+- 4 commits for provider system (unified base class)
 - 7 commits for critical issues and improvements
+
+Total code reduction: ~4,100 lines removed
 
 ## Alternatives Considered
 
@@ -54,5 +56,5 @@ We will simplify the architecture by:
 
 ## References
 - instructions.md: Core development principles
-- docs/architecture/simplification-plan.md: Detailed implementation plan
 - Original event persistence: 320 lines provided same functionality
+- ROADMAP.md: See "Architecture Simplification (Jan 2025)" in Recently Completed

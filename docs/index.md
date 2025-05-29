@@ -101,7 +101,7 @@ The system is designed to:
 - **[System Design](architecture/index.md)** - Simplified architecture
 - **[Event System](architecture/event-driven-architecture.md)** - PostgreSQL events
 - **[AI-Native Design](architecture/ai-native-vision.md)** - Design principles
-- **[Simplification](architecture/simplification-plan.md)** - How we reduced complexity
+- **[ADR-006](architecture/adr/ADR-006-simplification-over-abstraction.md)** - How we reduced complexity
 
 ### Development
 - **[Developer Guide](developer/development.md)** - Contributing
@@ -126,7 +126,7 @@ The system is designed to:
 
 - 🤖 **New Users**: Start with the [AI-Native Quick Start](getting-started/quickstart-ai.md)
 - 💬 **Learn by Example**: See [AI Conversation Patterns](user-guide/ai-conversations.md)
-- 🔧 **Developers**: Understand the [Simplified Architecture](architecture/simplification-plan.md)
+- 🔧 **Developers**: Read [ADR-006](architecture/adr/ADR-006-simplification-over-abstraction.md)
 - 📊 **Advanced Users**: Configure [Quality Pipelines](user-guide/pipeline-examples.md)
 
 ---

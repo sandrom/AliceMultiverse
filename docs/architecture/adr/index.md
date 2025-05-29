@@ -15,6 +15,7 @@ An Architecture Decision Record captures an important architectural decision mad
 | [ADR-003](ADR-003-monorepo-structure.md) | Monorepo for Service Evolution | Accepted | 2024-01-20 |
 | [ADR-004](ADR-004-alice-sole-orchestrator.md) | Alice as Sole Orchestrator | Accepted | 2024-01-26 |
 | [ADR-005](ADR-005-code-quality-security-tooling.md) | Code Quality and Security Tooling | Accepted | 2025-01-27 |
+| [ADR-006](ADR-006-simplification-over-abstraction.md) | Simplification Over Abstraction | Accepted | 2025-01-29 |
 
 ## ADR Template
 

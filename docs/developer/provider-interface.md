@@ -6,11 +6,10 @@ The provider system in AliceMultiverse enables integration with various AI gener
 
 ## Architecture
 
-### Base Classes
+### Core Components
 
-- **BaseProvider**: The abstract base class all providers must inherit from
-- **ProviderEventMixin**: Mixin for event publishing functionality
-- **ProviderRegistry**: Central registry for managing provider instances
+- **Provider**: The unified base class all providers must inherit from (includes event publishing and cost tracking)
+- **ProviderRegistry**: Simple registry for managing provider instances
 
 ### Key Types
 
@@ -29,10 +28,10 @@ from alicemultiverse.providers.types import (
 ### 1. Basic Structure
 
 ```python
-from alicemultiverse.providers import BaseProvider, ProviderCapabilities
+from alicemultiverse.providers import Provider, ProviderCapabilities
 from alicemultiverse.providers.types import GenerationType, GenerationRequest, GenerationResult
 
-class MyProvider(BaseProvider):
+class MyProvider(Provider):
     """Provider for MyService API."""
     
     @property
