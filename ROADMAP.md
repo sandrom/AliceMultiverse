@@ -83,7 +83,10 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 ### Provider Model Updates (Jan 2025)
 - Added Kling 2.1 Pro and Master variants for video generation
-- Added FLUX Pro Kontext Max for extended context image generation
+- Added complete FLUX Kontext family (Pro, Max) for iterative image editing
+- Added BFL provider for direct Black Forest Labs API access
+- Support for both fal.ai and bfl.ai endpoints for FLUX models
+- Added specialized FLUX models: Fill, Canny, Depth control
 - Updated pricing tiers to reflect quality differences
 
 ### Architecture Simplification (Jan 2025)

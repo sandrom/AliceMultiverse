@@ -37,7 +37,8 @@ class FalProvider(Provider):
     MODELS = {
         # FLUX models
         "flux-pro": "fal-ai/flux-pro",
-        "flux-pro-kontext-max": "fal-ai/flux-pro/kontext-max",  # New FLUX Pro with extended context
+        "flux-kontext-pro": "fal-ai/flux-pro/kontext",  # FLUX Kontext Pro - local edits & transformations
+        "flux-kontext-max": "fal-ai/flux-pro/kontext/max",  # FLUX Kontext Max - premium consistency
         "flux-dev": "fal-ai/flux/dev",
         "flux-schnell": "fal-ai/flux/schnell",
         "flux-realism": "fal-ai/flux-realism",
@@ -78,7 +79,8 @@ class FalProvider(Provider):
     # Pricing per generation (approximate)
     PRICING = {
         "flux-pro": 0.05,
-        "flux-pro-kontext-max": 0.08,  # Higher cost for extended context
+        "flux-kontext-pro": 0.06,  # FLUX Kontext Pro - iterative editing
+        "flux-kontext-max": 0.08,  # FLUX Kontext Max - maximum performance
         "flux-dev": 0.025,
         "flux-schnell": 0.003,
         "flux-realism": 0.025,
@@ -233,7 +235,18 @@ class FalProvider(Provider):
             params.update(request.parameters)
         
         # Model-specific defaults
-        if model.startswith("flux"):
+        if "kontext" in model:
+            # FLUX Kontext models support reference images for editing
+            params.setdefault("num_inference_steps", 28)
+            params.setdefault("guidance_scale", 3.5)
+            params.setdefault("num_images", 1)
+            
+            # Add reference images if provided
+            if request.reference_assets:
+                # For kontext models, the first reference is the image to edit
+                params["image_url"] = request.reference_assets[0]
+                
+        elif model.startswith("flux"):
             params.setdefault("num_inference_steps", 28 if "schnell" in model else 50)
             params.setdefault("guidance_scale", 3.5)
             params.setdefault("num_images", 1)

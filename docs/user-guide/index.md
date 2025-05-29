@@ -48,6 +48,10 @@ Welcome to AliceMultiverse! This guide covers both AI-assisted and traditional C
     
     Setting up and managing API credentials
 
+- **[FLUX Kontext Guide](flux-kontext-guide.md)** ✨
+    
+    Iterative image editing with FLUX Kontext models
+
 - **[fal.ai Provider](fal-provider.md)**
     
     Generate images and videos with FLUX and Kling

@@ -53,12 +53,16 @@ class ProviderRegistry:
         from .fal_provider import FalProvider
         from .anthropic_provider import AnthropicProvider
         from .openai_provider import OpenAIProvider
+        from .bfl_provider import BFLProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
         self.register_provider("anthropic", AnthropicProvider)
         self.register_provider("claude", AnthropicProvider)  # Alias
         self.register_provider("openai", OpenAIProvider)
+        self.register_provider("bfl", BFLProvider)
+        self.register_provider("bfl.ai", BFLProvider)  # Alias
+        self.register_provider("black-forest-labs", BFLProvider)  # Alias
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
