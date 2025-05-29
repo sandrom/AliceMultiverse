@@ -4,45 +4,64 @@
 
 AliceMultiverse is an AI-native service that operates exclusively through AI assistants. It bridges creative professionals with AI generation tools and APIs, excelling at detecting, organizing, and assessing AI-generated content while maintaining context across extended creative sessions.
 
+## Critical Questions (Re-evaluate Monthly)
+
+1. **Are we solving real problems?** Current focus on organization is proven. Workflow engine might be premature.
+2. **Is the architecture still simple?** After simplification, yes. Keep monitoring for complexity creep.
+3. **What would users pay for?** Provider integrations (Midjourney, Hedra) > workflow engine.
+4. **What's broken right now?** 11% test failures, no retry logic, missing provider health checks.
+
 ## Next Up (Priority Order)
 
-### 1. Workflow Engine
-- [ ] Design workflow definition format
-- [ ] Implement workflow executor
-- [ ] Add progress tracking and resumption
-
-### 2. Enhanced Search & Discovery
-- [ ] Implement semantic search with embeddings
-- [ ] Add advanced filtering and facets
-- [ ] Create search API for AI assistants
-
-### 3. More Provider Integrations
+### 1. Provider Integrations (Direct Value)
 - [ ] Hedra (AI avatar videos) - Character-1 API for talking avatars
-- [ ] Midjourney (via proxy API)
-- [ ] Stable Diffusion (local/cloud)
-- [ ] RunwayML for video generation
+- [ ] Midjourney (via proxy API) - Most requested by creatives
+- [ ] ElevenLabs (voice generation) - Complete audio pipeline
+- [ ] Suno (music generation) - For music video production
 
-## Backlog (Unprioritized)
+### 2. Enhanced Search & Discovery (Core Functionality)
+- [ ] Fix existing search performance issues
+- [ ] Add media_type and tag-based filtering
+- [ ] Implement date range and quality filters
+- [ ] Create batch search API for AI assistants
 
-### Music Video Production Features
-- Audio analysis (beat detection, mood, sections)
-- Timeline generation (frame-accurate sync)
-- Visual generation (beat-synchronized)
+### 3. Workflow Engine (Future Vision)
+- [ ] Define minimal workflow format (JSON/YAML)
+- [ ] Implement sequential execution only (no DAG yet)
+- [ ] Add basic retry and error handling
+- [ ] Enable workflow persistence and resumption
 
-### Service Distribution
-- Extract services (asset processing, workflow, projects)
-- Dapr integration for infrastructure abstraction
-- Multi-user and team features
+## Backlog (Re-evaluate Weekly)
 
-### Performance & Scale
-- GPU resource pooling
-- Advanced caching strategies
-- Batch processing optimization
+### Quality & Reliability (Should be higher priority?)
+- Fix remaining test failures (89% → 100%)
+- Add integration tests for all providers
+- Implement retry logic for API failures
+- Add provider health monitoring
 
-### Integrations
-- ComfyUI workflow support
-- DaVinci Resolve plugins
+### Performance Improvements
+- Optimize database queries (N+1 issues)
+- Implement connection pooling properly
+- Add Redis caching for embeddings
+- Batch API calls where possible
+
+### Additional Providers
+- Stable Diffusion (local/cloud)
+- RunwayML (video generation)
+- Replicate (multiple models)
+- Together AI (open models)
+
+### Advanced Features
+- Music video production (beat sync, timeline)
+- Multi-user support (teams, permissions)
+- ComfyUI workflow integration
 - Real-time collaboration
+
+### Technical Debt
+- Increase test coverage to 95%+
+- Add missing type hints
+- Document internal APIs
+- Performance profiling
 
 ## Recently Completed ✅
 
@@ -104,11 +123,11 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 ## Design Principles
 
-- **Creative Chaos**: Support how creative minds actually work
-- **Local-First**: User data sovereignty with optional cloud
+- **Working Service First**: Stability and reliability over new features
+- **Pragmatic & Direct**: Simple solutions, no over-engineering
+- **AI-Native**: Built for AI assistants, not human CLI users
 - **Progressive Enhancement**: Each phase delivers working software
-- **Event-Driven**: Loose coupling for organic evolution
-- **Continuous Learning**: Adapt priorities based on implementation insights
+- **Continuous Re-evaluation**: Adapt based on real usage and findings
 
 ## Implementation Guide
 
@@ -135,12 +154,13 @@ alice --pipeline custom --stages "openai,anthropic" --dry-run
 3. Move highest priority item from "Next Up" to "Current Work"
 4. Update based on new insights
 
-### Priority Re-evaluation
-- **Daily**: Review "Next Up" queue against backlog
-- **After each commit**: Check if learnings change priorities
-- **On significant findings**: Immediately re-order based on new information
-- Items from backlog may jump to "Next Up" if they become critical
-- Document why priorities changed in commit messages
+### Priority Re-evaluation (Per instructions.md)
+- **Weekly**: Full backlog review - what delivers most value NOW?
+- **After failures**: Quality/reliability issues jump to top priority
+- **After user feedback**: Real usage trumps planned features
+- **Test coverage < 90%**: Testing becomes priority
+- **Performance issues**: Fix before adding features
+- Document priority changes in commit messages
 
 ## Architecture Decisions
 
