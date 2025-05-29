@@ -5,6 +5,10 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+# Valid SHA256 hashes for testing
+TEST_HASH1 = "a" * 64  # 64 hex chars
+TEST_HASH2 = "b" * 64  # 64 hex chars
+
 from alicemultiverse.interface.alice_structured import AliceStructuredInterface
 from alicemultiverse.interface.structured_models import (
     AliceResponse,
@@ -54,8 +58,8 @@ class TestSearchAssets:
         """Test searching with media type filter."""
         # Setup mock data
         mock_results = [{
-            "asset_id": "test123",
-            "content_hash": "hash123",
+            "asset_id": TEST_HASH1,
+            "content_hash": "c" * 64,
             "file_path": "/test/image.jpg",
             "file_name": "image.jpg",
             "media_type": "image",
@@ -94,7 +98,7 @@ class TestSearchAssets:
         
         # Verify result structure
         result = response["data"]["results"][0]
-        assert result["content_hash"] == "hash123"
+        assert result["content_hash"] == "c" * 64
         assert result["media_type"] == MediaType.IMAGE
         assert len(result["tags"]) == 3  # cyberpunk, dark, portrait
     
@@ -161,7 +165,7 @@ class TestSearchAssets:
         # Mock data with various dimensions
         mock_results = [
             {
-                "content_hash": "hash1",
+                "content_hash": TEST_HASH1,
                 "file_path": "/test/image1.jpg",
                 "file_name": "image1.jpg",
                 "media_type": "image",
@@ -173,7 +177,7 @@ class TestSearchAssets:
                 "discovered_at": datetime.now(),
             },
             {
-                "content_hash": "hash2",
+                "content_hash": TEST_HASH2,
                 "file_path": "/test/image2.jpg", 
                 "file_name": "image2.jpg",
                 "media_type": "image",
@@ -201,13 +205,13 @@ class TestSearchAssets:
         
         # Should only return the first image (1920x1080)
         assert response["data"]["total_count"] == 1
-        assert response["data"]["results"][0]["content_hash"] == "hash1"
+        assert response["data"]["results"][0]["content_hash"] == TEST_HASH1
     
     def test_search_with_filename_pattern(self, alice_interface):
         """Test searching with filename regex pattern."""
         mock_results = [
             {
-                "content_hash": "hash1",
+                "content_hash": TEST_HASH1,
                 "file_path": "/test/cyberpunk_001.jpg",
                 "file_name": "cyberpunk_001.jpg",
                 "media_type": "image",
@@ -217,7 +221,7 @@ class TestSearchAssets:
                 "discovered_at": datetime.now(),
             },
             {
-                "content_hash": "hash2",
+                "content_hash": TEST_HASH2,
                 "file_path": "/test/fantasy_001.jpg",
                 "file_name": "fantasy_001.jpg", 
                 "media_type": "image",
@@ -245,7 +249,7 @@ class TestSearchAssets:
         """Test that search returns proper facets."""
         mock_results = [
             {
-                "content_hash": f"hash{i}",
+                "content_hash": "d" * 64,
                 "file_path": f"/test/image{i}.jpg",
                 "file_name": f"image{i}.jpg",
                 "media_type": "image",
@@ -338,13 +342,13 @@ class TestTagOperations:
         """Test adding tags to assets."""
         # Mock existing asset
         alice_interface.organizer.metadata_cache.get_metadata_by_id.return_value = {
-            "asset_id": "test123",
+            "asset_id": TEST_HASH1,
             "custom_tags": ["existing"]
         }
         alice_interface.organizer.metadata_cache.update_metadata.return_value = True
         
         request = TagUpdateRequest(
-            asset_ids=["test123"],
+            asset_ids=[TEST_HASH1],
             add_tags=["new1", "new2"]
         )
         
@@ -361,13 +365,13 @@ class TestTagOperations:
     def test_remove_tags(self, alice_interface):
         """Test removing tags from assets."""
         alice_interface.organizer.metadata_cache.get_metadata_by_id.return_value = {
-            "asset_id": "test123",
+            "asset_id": TEST_HASH1,
             "custom_tags": ["tag1", "tag2", "tag3"]
         }
         alice_interface.organizer.metadata_cache.update_metadata.return_value = True
         
         request = TagUpdateRequest(
-            asset_ids=["test123"],
+            asset_ids=[TEST_HASH1],
             remove_tags=["tag2"]
         )
         
@@ -380,13 +384,13 @@ class TestTagOperations:
     def test_set_tags(self, alice_interface):
         """Test replacing all tags."""
         alice_interface.organizer.metadata_cache.get_metadata_by_id.return_value = {
-            "asset_id": "test123",
+            "asset_id": TEST_HASH1,
             "custom_tags": ["old1", "old2"]
         }
         alice_interface.organizer.metadata_cache.update_metadata.return_value = True
         
         request = TagUpdateRequest(
-            asset_ids=["test123"],
+            asset_ids=[TEST_HASH1],
             set_tags=["new1", "new2", "new3"]
         )
         
@@ -403,8 +407,8 @@ class TestAssetOperations:
     def test_get_asset_by_id(self, alice_interface):
         """Test retrieving a single asset."""
         mock_metadata = {
-            "asset_id": "test123",
-            "content_hash": "hash123",
+            "asset_id": TEST_HASH1,
+            "content_hash": "c" * 64,
             "file_path": "/test/image.jpg",
             "file_name": "image.jpg",
             "media_type": "image",
@@ -424,10 +428,10 @@ class TestAssetOperations:
         }
         alice_interface.organizer.metadata_cache.get_metadata_by_id.return_value = mock_metadata
         
-        response = alice_interface.get_asset_by_id("test123")
+        response = alice_interface.get_asset_by_id(TEST_HASH1)
         
         assert response["success"] is True
-        assert response["data"]["content_hash"] == "hash123"
+        assert response["data"]["content_hash"] == "c" * 64
         assert response["data"]["media_type"] == MediaType.IMAGE
         assert "cyberpunk" in response["data"]["tags"]
         assert response["data"]["metadata"]["prompt"] == "cyberpunk city at night"
@@ -445,7 +449,7 @@ class TestAssetOperations:
         """Test setting asset role."""
         alice_interface.organizer.set_asset_role.return_value = True
         
-        response = alice_interface.set_asset_role("test123", AssetRole.HERO)
+        response = alice_interface.set_asset_role(TEST_HASH1, AssetRole.HERO)
         
         assert response["success"] is True
         assert response["data"]["role"] == "hero"
@@ -453,7 +457,7 @@ class TestAssetOperations:
         # Verify the organizer was called correctly
         alice_interface.organizer.set_asset_role.assert_called_once()
         call_args = alice_interface.organizer.set_asset_role.call_args[0]
-        assert call_args[0] == "test123"
+        assert call_args[0] == TEST_HASH1
         assert call_args[1].value == "hero"
 
 
