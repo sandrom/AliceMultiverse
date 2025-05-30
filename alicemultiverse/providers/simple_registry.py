@@ -62,6 +62,7 @@ class ProviderRegistry:
         from .hedra_provider import HedraProvider
         from .freepik_provider import FreepikProvider
         from .firefly_provider import FireflyProvider
+        from .google_ai_provider import GoogleAIProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
@@ -81,6 +82,11 @@ class ProviderRegistry:
         self.register_provider("firefly", FireflyProvider)
         self.register_provider("adobe", FireflyProvider)  # Alias
         self.register_provider("adobe-firefly", FireflyProvider)  # Alias
+        self.register_provider("google", GoogleAIProvider)
+        self.register_provider("google-ai", GoogleAIProvider)  # Alias
+        self.register_provider("gemini", GoogleAIProvider)  # Alias
+        self.register_provider("imagen", GoogleAIProvider)  # Alias
+        self.register_provider("veo", GoogleAIProvider)  # Alias
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
@@ -147,6 +153,11 @@ class ProviderRegistry:
                 "firefly": "ADOBE_CLIENT_ID",
                 "adobe": "ADOBE_CLIENT_ID",
                 "adobe-firefly": "ADOBE_CLIENT_ID",
+                "google": "GOOGLE_AI_API_KEY",
+                "google-ai": "GOOGLE_AI_API_KEY",
+                "gemini": "GEMINI_API_KEY",
+                "imagen": "GOOGLE_AI_API_KEY",
+                "veo": "GOOGLE_AI_API_KEY",
             }
             if name_lower in env_vars:
                 api_key = os.getenv(env_vars[name_lower])
