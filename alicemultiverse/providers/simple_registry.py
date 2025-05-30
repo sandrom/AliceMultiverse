@@ -63,6 +63,7 @@ class ProviderRegistry:
         from .freepik_provider import FreepikProvider
         from .firefly_provider import FireflyProvider
         from .google_ai_provider import GoogleAIProvider
+        from .ideogram_provider import IdeogramProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
@@ -87,6 +88,8 @@ class ProviderRegistry:
         self.register_provider("gemini", GoogleAIProvider)  # Alias
         self.register_provider("imagen", GoogleAIProvider)  # Alias
         self.register_provider("veo", GoogleAIProvider)  # Alias
+        self.register_provider("ideogram", IdeogramProvider)
+        self.register_provider("ideogram-ai", IdeogramProvider)  # Alias
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
@@ -158,6 +161,8 @@ class ProviderRegistry:
                 "gemini": "GEMINI_API_KEY",
                 "imagen": "GOOGLE_AI_API_KEY",
                 "veo": "GOOGLE_AI_API_KEY",
+                "ideogram": "IDEOGRAM_API_KEY",
+                "ideogram-ai": "IDEOGRAM_API_KEY",
             }
             if name_lower in env_vars:
                 api_key = os.getenv(env_vars[name_lower])
