@@ -6,10 +6,12 @@ from pathlib import Path
 from typing import Any
 
 from sqlalchemy import desc
+from sqlalchemy.orm import joinedload, selectinload
 
 from .config import get_session
 from .pool_manager import get_managed_session
 from .models import Asset, AssetRelationship, Project, Tag
+from .optimizations import OptimizedAssetRepository
 
 logger = logging.getLogger(__name__)
 
@@ -124,6 +126,8 @@ class AssetRepository:
         min_rating: int | None = None,
         limit: int = 100,
         tag_mode: str = "any",  # "any" (OR) or "all" (AND)
+        offset: int = 0,
+        eager_load: bool = True,
     ) -> list[Asset]:
         """Search for assets with various filters.
 
@@ -140,12 +144,24 @@ class AssetRepository:
             tag_mode: How to combine tag filters:
                 - "any": Match assets with ANY of the specified tags (OR)
                 - "all": Match assets with ALL specified tag types (AND)
+            offset: Pagination offset
+            eager_load: Whether to eager load relationships
 
         Returns:
             List of matching assets
         """
         with get_managed_session() as session:
             query = session.query(Asset)
+            
+            # Apply eager loading to prevent N+1 queries
+            if eager_load:
+                query = query.options(
+                    selectinload(Asset.tags),
+                    joinedload(Asset.project),
+                    selectinload(Asset.known_paths),
+                    selectinload(Asset.parent_relationships),
+                    selectinload(Asset.child_relationships)
+                )
 
             if project_id:
                 query = query.filter(Asset.project_id == project_id)
@@ -198,7 +214,90 @@ class AssetRepository:
                     # Find assets with any of the specified tag values
                     query = query.join(Tag).filter(Tag.tag_value.in_(tags))
 
-            return query.order_by(desc(Asset.first_seen)).limit(limit).all()
+            return query.order_by(desc(Asset.first_seen)).offset(offset).limit(limit).all()
+
+    def search_with_count(
+        self,
+        project_id: str | None = None,
+        media_type: str | None = None,
+        tags: list[str] | dict[str, list[str]] | None = None,
+        role: str | None = None,
+        source_type: str | None = None,
+        min_rating: int | None = None,
+        limit: int = 100,
+        tag_mode: str = "any",
+        offset: int = 0,
+    ) -> tuple[list[Asset], int]:
+        """Search for assets and return total count.
+
+        Same parameters as search() but returns (assets, total_count).
+        """
+        with get_managed_session() as session:
+            # Build base query without eager loading for count
+            query = session.query(Asset)
+
+            if project_id:
+                query = query.filter(Asset.project_id == project_id)
+
+            if media_type:
+                query = query.filter(Asset.media_type == media_type)
+
+            if role:
+                query = query.filter(Asset.role == role)
+
+            if source_type:
+                query = query.filter(Asset.source_type == source_type)
+
+            if min_rating:
+                query = query.filter(Asset.rating >= min_rating)
+
+            if tags:
+                if isinstance(tags, dict):
+                    from sqlalchemy import and_, or_, exists
+                    
+                    if tag_mode == "all":
+                        for tag_type, tag_values in tags.items():
+                            if tag_values:
+                                subq = exists().where(
+                                    and_(
+                                        Tag.asset_id == Asset.content_hash,
+                                        Tag.tag_type == tag_type,
+                                        Tag.tag_value.in_(tag_values)
+                                    )
+                                )
+                                query = query.filter(subq)
+                    else:
+                        query = query.join(Tag)
+                        conditions = []
+                        for tag_type, tag_values in tags.items():
+                            if tag_values:
+                                type_condition = and_(
+                                    Tag.tag_type == tag_type,
+                                    Tag.tag_value.in_(tag_values)
+                                )
+                                conditions.append(type_condition)
+                        
+                        if conditions:
+                            query = query.filter(or_(*conditions))
+                else:
+                    query = query.join(Tag).filter(Tag.tag_value.in_(tags))
+            
+            # Get total count before pagination
+            total_count = query.count()
+            
+            # Now apply eager loading for actual results
+            query = query.options(
+                selectinload(Asset.tags),
+                joinedload(Asset.project),
+                selectinload(Asset.known_paths),
+                selectinload(Asset.parent_relationships),
+                selectinload(Asset.child_relationships)
+            )
+            
+            # Apply pagination and get results
+            assets = query.order_by(desc(Asset.first_seen)).offset(offset).limit(limit).all()
+            
+            return assets, total_count
 
     def add_tag(
         self,

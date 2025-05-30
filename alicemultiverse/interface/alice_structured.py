@@ -10,6 +10,7 @@ from ..core.exceptions import ValidationError
 from ..metadata.models import AssetRole as MetadataAssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
 from .rate_limiter import RateLimiter
+from .search_handler import OptimizedSearchHandler
 from .structured_models import (
     AliceResponse,
     Asset,
@@ -63,6 +64,9 @@ class AliceStructuredInterface:
         
         # Initialize rate limiter
         self.rate_limiter = RateLimiter()
+        
+        # Initialize optimized search handler
+        self.search_handler = OptimizedSearchHandler()
 
     def _ensure_organizer(self) -> None:
         """Ensure organizer is initialized."""
@@ -140,139 +144,12 @@ class AliceStructuredInterface:
             # Validate request
             request = validate_search_request(request)
             
-            self._ensure_organizer()
-            start_time = datetime.now()
-
-            filters = request.get("filters", {})
-
-            # Build internal query parameters
-            query_params = {}
-
-            # Apply media type filter
-            if filters.get("media_type"):
-                query_params["media_types"] = [filters["media_type"]]
-
-            # Apply date range filter
-            if filters.get("date_range"):
-                date_range = filters["date_range"]
-                if date_range.get("start"):
-                    query_params["timeframe_start"] = self._parse_iso_date(date_range["start"])
-                if date_range.get("end"):
-                    query_params["timeframe_end"] = self._parse_iso_date(date_range["end"])
-
-            # Apply quality rating filter
-            if filters.get("quality_rating"):
-                quality_range = filters["quality_rating"]
-                if quality_range.get("min"):
-                    query_params["min_stars"] = quality_range["min"]
-                if quality_range.get("max"):
-                    query_params["max_stars"] = quality_range["max"]
-
-            # Apply source filter
-            if filters.get("ai_source"):
-                query_params["source_types"] = filters["ai_source"]
-
-            # Apply tag filters
-            if filters.get("tags"):
-                query_params["all_tags"] = filters["tags"]  # AND operation
-            if filters.get("any_tags"):
-                query_params["any_tags"] = filters["any_tags"]  # OR operation
-            if filters.get("exclude_tags"):
-                query_params["exclude_tags"] = filters["exclude_tags"]  # NOT operation
-
-            # Apply sorting
-            sort_by = request.get("sort_by", SortField.CREATED_DATE)
-            order = request.get("order", SortOrder.DESC)
-            query_params["sort_by"] = sort_by
-            query_params["ascending"] = (order == SortOrder.ASC)
-
-            # Apply pagination
-            query_params["limit"] = min(request.get("limit", 50), 1000)
-            query_params["offset"] = request.get("offset", 0)
-
-            # Execute search
-            results = self.organizer.search_assets(**query_params)
-
-            # Apply additional filters that aren't supported by the current search
-            filtered_results = []
-            for asset in results:
-                # File format filter
-                if filters.get("file_formats"):
-                    file_ext = Path(asset.get("file_path", "")).suffix[1:].lower()
-                    if file_ext not in filters["file_formats"]:
-                        continue
-
-                # File size filter
-                if filters.get("file_size"):
-                    if not self._apply_range_filter(
-                        asset.get("file_size", 0),
-                        filters["file_size"]
-                    ):
-                        continue
-
-                # Dimension filters
-                if filters.get("dimensions"):
-                    dims = filters["dimensions"]
-                    if dims.get("width") and not self._apply_range_filter(
-                        asset.get("width", 0), dims["width"]
-                    ):
-                        continue
-                    if dims.get("height") and not self._apply_range_filter(
-                        asset.get("height", 0), dims["height"]
-                    ):
-                        continue
-                    if dims.get("aspect_ratio"):
-                        width = asset.get("width", 1)
-                        height = asset.get("height", 1)
-                        aspect_ratio = width / height if height > 0 else 0
-                        if not self._apply_range_filter(aspect_ratio, dims["aspect_ratio"]):
-                            continue
-
-                # Filename pattern filter
-                if filters.get("filename_pattern"):
-                    if not self._matches_pattern(
-                        asset.get("file_name", ""),
-                        filters["filename_pattern"]
-                    ):
-                        continue
-
-                # Prompt keywords filter
-                if filters.get("prompt_keywords"):
-                    prompt = asset.get("prompt", "").lower()
-                    if not all(keyword.lower() in prompt for keyword in filters["prompt_keywords"]):
-                        continue
-
-                # Has metadata filter
-                if filters.get("has_metadata"):
-                    if not all(key in asset for key in filters["has_metadata"]):
-                        continue
-
-                # Content hash filter
-                if filters.get("content_hash"):
-                    if asset.get("content_hash") != filters["content_hash"]:
-                        continue
-
-                filtered_results.append(asset)
-
-            # Convert to API format
-            api_results = [self._convert_to_asset(asset) for asset in filtered_results]
-
-            # Calculate facets if requested (simplified version)
-            facets = self._calculate_facets(filtered_results)
-
-            # Calculate query time
-            query_time_ms = int((datetime.now() - start_time).total_seconds() * 1000)
-
-            response_data = SearchResponse(
-                total_count=len(api_results),
-                results=api_results,
-                facets=facets,
-                query_time_ms=query_time_ms
-            )
-
+            # Use optimized search handler
+            response_data = self.search_handler.search_assets(request)
+            
             return AliceResponse(
                 success=True,
-                message=f"Found {len(api_results)} assets",
+                message=f"Found {response_data['total_count']} assets",
                 data=response_data,
                 error=None
             )
