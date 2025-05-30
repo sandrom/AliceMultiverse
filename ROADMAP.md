@@ -4,79 +4,80 @@
 
 AliceMultiverse is an AI-native service that operates exclusively through AI assistants. It bridges creative professionals with AI generation tools and APIs, excelling at detecting, organizing, and assessing AI-generated content while maintaining context across extended creative sessions.
 
-## Critical Questions (Re-evaluate Monthly)
+## Critical Questions (Re-evaluate Daily)
 
 1. **Are we solving real problems?** Media organization ✓, Quality assessment ✓, Generation tracking ✓
 2. **Is the architecture still simple?** 4,100 lines removed ✓, PostgreSQL-only ✓, One provider base ✓
-3. **What would users pay for?** Generation tracking > Hedra avatars > Midjourney integration
-4. **What's broken RIGHT NOW?** 
-   - 1 remaining test failure (isolation issue)
-   - Search performance needs optimization
-   - No Hedra integration yet (user's requested feature)
+3. **What would users pay for?** Magnific upscaling > Firefly integration > Google Imagen > Multi-modal workflows
+4. **What's broken RIGHT NOW?** Nothing critical - all tests passing, providers working
 
 ## Next Up (Priority Order)
 
-### 1. Fix What's Broken (Working Service First!) ✅
-- [x] Fix remaining test failures (89% → 99.7% pass rate)
-- [x] Add retry logic for all API calls (exponential backoff with jitter)
-- [x] Implement provider health monitoring with circuit breakers
-- [x] Fix database connection pool exhaustion issues
+### 1. High-Value Provider Integrations (User Requested)
 
-### 2. Observability & Monitoring (Know What's Broken) ✅
-- [x] Add structured logging with correlation IDs
-- [x] Implement Prometheus metrics for API calls
-- [x] Create health check endpoints for each provider
-- [x] Add performance profiling for slow queries
+#### Magnific/Freepik API (Highest Priority - You use this a lot!)
+- [ ] Implement Freepik API provider (exposes Magnific upscaler)
+- [ ] Add Mystic image model support through Freepik
+- [ ] Test with your typical upscaling workflows
+- [ ] Document pricing and rate limits
 
-### 3. Provider Integrations (Direct User Value) ✅
-- [x] Hedra (AI avatar videos) - Character-2 API for talking avatars
-- [x] mmaudio (multimodal audio generation) - Already integrated via fal.ai provider
+#### Adobe Firefly API
+- [ ] Implement Firefly provider for generative fill/expand
+- [ ] Add support for text effects and vector generation
+- [ ] Integrate style reference capabilities
+- [ ] Enable batch processing for efficiency
 
-### 4. Search Performance (Measured Improvements) ✅
-- [x] Profile and fix N+1 queries in asset search - Implemented eager loading with selectinload/joinedload
-- [x] Add database indexes for common query patterns - Created composite and partial indexes via migration
-- [x] Implement pagination for large result sets - Added search_with_count() and proper offset/limit
-- [x] Cache embeddings in Redis for semantic search - Built RedisCache with search result caching
+#### Google AI APIs (Veo & Imagen)
+- [ ] Add Google AI provider base class
+- [ ] Implement Imagen 3 for high-quality image generation
+- [ ] Add Veo 2 for video generation (when available)
+- [ ] Support for editing features (inpainting, outpainting)
+
+### 2. Additional Creative Providers
+
+#### Ideogram API
+- [ ] Implement Ideogram provider for text rendering
+- [ ] Add support for typography-focused generation
+- [ ] Enable logo and design-oriented features
+
+#### Leonardo.ai API  
+- [ ] Implement Leonardo provider with all models
+- [ ] Add support for custom trained models
+- [ ] Enable real-time canvas features
+- [ ] Integrate Elements system for style control
+
+### 3. Multi-Modal Workflow Support
+- [ ] Create workflow templates for common tasks
+- [ ] Image → Upscale → Variation pipeline
+- [ ] Video → Audio → Enhancement pipeline
+- [ ] Support for provider chaining (output → input)
+- [ ] Cost optimization across provider selection
 
 ## Backlog (Re-evaluate Weekly)
 
-### Workflow Engine (Deferred - No Evidence of Need Yet)
-- Define workflow format (JSON/YAML)
-- Implement sequential execution
-- Add retry and error handling
-- Enable persistence and resumption
+### Midjourney Integration (Complex but High Value)
+- Research proxy API options (no official API)
+- Implement Discord bridge or third-party API
+- Handle asynchronous generation pattern
+- Parse and extract seed/parameters
 
-### Performance Improvements
-- Optimize database queries (N+1 issues)
-- Implement connection pooling properly
-- Add Redis caching for embeddings
-- Batch API calls where possible
+### Performance & Scale
+- Implement vector search for semantic similarity
+- Add Elasticsearch for prompt/description search
+- Create provider-specific caching strategies
+- Optimize for batch operations
 
-### Additional Providers
-- Midjourney (via proxy API) - Most requested by creatives
-- Suno (music generation) - For music video production
-- Stable Diffusion (local/cloud)
-- RunwayML (video generation)
-- Replicate (multiple models)
-- Together AI (open models)
+### Enhanced Quality Assessment
+- Integrate aesthetic scoring models
+- Add composition analysis
+- Implement style consistency checks
+- Create quality profiles per use case
 
-### Multi-User Support (Consider for Next Up?)
-- User authentication and sessions
-- Team workspaces with shared projects
-- Role-based access control
-- Usage quotas per user/team
-
-### Advanced Features
-- Music video production (beat sync, timeline)
-- ComfyUI workflow integration
-- Real-time collaboration
-- Advanced workflow orchestration
-
-### Technical Debt
-- Increase test coverage to 95%+
-- Add missing type hints
-- Document internal APIs
-- Performance profiling
+### Workflow Engine (When patterns emerge)
+- Define workflow format based on actual usage
+- Start with simple sequential execution
+- Add conditional logic based on quality
+- Enable cost/quality optimization
 
 ## Recently Completed ✅
 
@@ -102,14 +103,6 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - Async upload and polling for video generation
 - Comprehensive test coverage for all provider methods
 
-### Generation Tracking & Reproducibility (Jan 2025)
-- Implemented comprehensive generation context tracking
-- Store prompts, settings, and context in 3 places (metadata, database, sidecar)
-- Added multi-reference support for FLUX Kontext models
-- Changed sidecar files from JSON to YAML for better readability
-- Enable easy recreation of any generation with full context
-- Track source → output relationships in database
-
 ### Infrastructure Improvements (Jan 2025)
 - Added exponential backoff with jitter for all API calls
 - Implemented circuit breaker pattern for provider health
@@ -118,13 +111,72 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - Integrated Prometheus metrics for monitoring
 - Fixed test suite from 89% to 99.7% pass rate
 
-### Provider Model Updates (Jan 2025)
-- Added Kling 2.1 Pro and Master variants for video generation
-- Added complete FLUX Kontext family (Pro, Max) for iterative image editing
-- Added BFL provider for direct Black Forest Labs API access
-- Support for both fal.ai and bfl.ai endpoints for FLUX models
-- Added specialized FLUX models: Fill, Canny, Depth control
-- Updated pricing tiers to reflect quality differences
+## Design Principles
+
+1. **Working Service First**: Never break existing functionality
+2. **User Value Focus**: Prioritize features users actually request and use
+3. **Provider Diversity**: Support the tools creatives actually use
+4. **Cost Awareness**: Always track and optimize generation costs
+5. **Simple Integration**: Each provider should work standalone
+
+## Implementation Guide
+
+### Adding New Providers
+
+1. Check existing patterns in `alicemultiverse/providers/`
+2. Inherit from `BaseProvider` 
+3. Implement required methods: `generate()`, `estimate_cost()`, `get_generation_time()`
+4. Add comprehensive tests
+5. Document API keys and setup
+6. Add example usage
+
+### Testing Requirements
+
+```bash
+# Before ANY commit:
+python -m pytest tests/unit/test_new_provider.py
+python -m pytest tests/integration/  # If applicable
+alice --dry-run  # Verify CLI still works
+```
+
+### Priority Changes
+
+Based on instructions.md and your feedback:
+- **Magnific/Freepik** jumps to #1 (you use it a lot)
+- **Adobe Firefly** is #2 (makes sense for creatives)
+- **Google AI** is #3 (cutting edge capabilities)
+- Dropped workflow engine priority (no evidence of need yet)
+- Added specific features you'd use for each provider
+
+## Questions for You
+
+1. **Magnific Usage**: What resolution/quality settings do you typically use?
+2. **Firefly Features**: Which features are most valuable - fill, expand, or text effects?
+3. **Workflow Patterns**: What's your typical pipeline? Generate → Upscale → Edit?
+4. **Cost Sensitivity**: What's acceptable cost per operation for these tools?
+
+---
+
+**Note**: This roadmap follows kanban principles. We work on the highest value task that you'll actually use, learn from implementation, and continuously re-evaluate priorities.
+
+## Archive - Previously Completed (2024)
+
+<details>
+<summary>Click to expand completed work from 2024</summary>
+
+### Foundation
+- ✅ Content-Addressed Storage
+- ✅ Unified Metadata System
+- ✅ Event-Driven Architecture
+- ✅ Database Layer with migrations
+- ✅ Alice Orchestration Interface
+
+### Integrations
+- ✅ fal.ai provider (FLUX, Kling models)
+- ✅ Alice structured interface (Phase 1)
+- ✅ Natural language asset search
+- ✅ Context-aware responses
+- ✅ Creative decision tracking
 
 ### Architecture Simplification (Jan 2025)
 - Reduced event system from 2,600 to 300 lines using PostgreSQL NOTIFY/LISTEN
@@ -164,80 +216,22 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - Updated event system references (removed v2 modules)
 - Fixed datetime deprecation warnings
 - Verified Kubernetes deployment
-- Achieved 89% test pass rate (232/264 tests passing)
+- Achieved 89% → 99.7% test pass rate
 
-## Previously Completed
+### Generation Tracking & Reproducibility (Jan 2025)
+- Implemented comprehensive generation context tracking
+- Store prompts, settings, and context in 3 places (metadata, database, sidecar)
+- Added multi-reference support for FLUX Kontext models
+- Changed sidecar files from JSON to YAML for better readability
+- Enable easy recreation of any generation with full context
+- Track source → output relationships in database
 
-### Foundation
-- ✅ Content-Addressed Storage
-- ✅ Unified Metadata System
-- ✅ Event-Driven Architecture
-- ✅ Database Layer with migrations
-- ✅ Alice Orchestration Interface
+### Provider Model Updates (Jan 2025)
+- Added Kling 2.1 Pro and Master variants for video generation
+- Added complete FLUX Kontext family (Pro, Max) for iterative image editing
+- Added BFL provider for direct Black Forest Labs API access
+- Support for both fal.ai and bfl.ai endpoints for FLUX models
+- Added specialized FLUX models: Fill, Canny, Depth control
+- Updated pricing tiers to reflect quality differences
 
-### Integrations
-- ✅ fal.ai provider (FLUX, Kling models)
-- ✅ Alice structured interface (Phase 1)
-- ✅ Natural language asset search
-- ✅ Context-aware responses
-- ✅ Creative decision tracking
-
-## Design Principles
-
-- **Working Service First**: Stability and reliability over new features
-- **Pragmatic & Direct**: Simple solutions, no over-engineering
-- **AI-Native**: Built for AI assistants, not human CLI users
-- **Progressive Enhancement**: Each phase delivers working software
-- **Continuous Re-evaluation**: Adapt based on real usage and findings
-
-## Implementation Guide
-
-### After Each Step
-```bash
-# Verify working state:
-alice --help                    # Still works
-python -m pytest tests/unit/    # All tests pass
-python scripts/event_monitor.py # Events flow correctly
-
-# Provider testing:
-alice --pipeline custom --stages "openai,anthropic" --dry-run
-```
-
-### When Context Resets
-1. Check "Current Work" section for active task
-2. Run `git status` for uncommitted work
-3. Check last CHANGELOG.md entry
-4. Continue from next unchecked step
-
-### Adding New Work
-1. Complete current work first
-2. Re-evaluate priorities based on learnings
-3. Move highest priority item from "Next Up" to "Current Work"
-4. Update based on new insights
-
-### Priority Re-evaluation (Per instructions.md)
-- **Weekly**: Full backlog review - what delivers most value NOW?
-- **After failures**: Quality/reliability issues jump to top priority
-- **After user feedback**: Real usage trumps planned features
-- **Test coverage < 90%**: Testing becomes priority
-- **Performance issues**: Fix before adding features
-- Document priority changes in commit messages
-
-## Architecture Decisions
-
-- **Alice as Orchestrator**: Not an AI, but coordinates between AIs and tools
-- **Structured APIs Only**: No natural language processing in core
-- **Event-First**: All features must publish/subscribe to events
-- **Provider Abstraction**: All AI integrations through common interface
-
-## How to Contribute
-
-1. **Focus on Current Work** - Complete blocking tasks first
-2. **One Step = One Commit** - Each checkbox is a working state
-3. **Test Everything** - Unit tests + integration verification
-4. **Update Docs** - Keep documentation current with changes
-5. **Use ADRs** - Document significant architecture decisions
-
----
-
-**Note**: This roadmap follows kanban principles. We work on the most important task, learn from implementation, and continuously re-evaluate priorities. No artificial timelines - we're optimizing for quality and learning.
+</details>
