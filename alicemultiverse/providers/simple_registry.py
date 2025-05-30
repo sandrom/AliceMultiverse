@@ -60,6 +60,7 @@ class ProviderRegistry:
         from .bfl_provider import BFLProvider
         from .kling_provider import KlingProvider
         from .hedra_provider import HedraProvider
+        from .freepik_provider import FreepikProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
@@ -74,6 +75,8 @@ class ProviderRegistry:
         self.register_provider("kling-official", KlingProvider)  # Alias
         self.register_provider("hedra", HedraProvider)
         self.register_provider("hedra-character", HedraProvider)  # Alias
+        self.register_provider("freepik", FreepikProvider)
+        self.register_provider("magnific", FreepikProvider)  # Alias for Magnific users
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
@@ -135,6 +138,8 @@ class ProviderRegistry:
                 "openai": "OPENAI_API_KEY",
                 "hedra": "HEDRA_API_KEY",
                 "hedra-character": "HEDRA_API_KEY",
+                "freepik": "FREEPIK_API_KEY",
+                "magnific": "FREEPIK_API_KEY",
             }
             if name_lower in env_vars:
                 api_key = os.getenv(env_vars[name_lower])

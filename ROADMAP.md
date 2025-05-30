@@ -15,11 +15,11 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 ### 1. High-Value Provider Integrations (User Requested)
 
-#### Magnific/Freepik API (Highest Priority - You use this a lot!)
-- [ ] Implement Freepik API provider (exposes Magnific upscaler)
-- [ ] Add Mystic image model support through Freepik
-- [ ] Test with your typical upscaling workflows
-- [ ] Document pricing and rate limits
+#### Magnific/Freepik API (Highest Priority - You use this a lot!) ✅
+- [x] Implement Freepik API provider (exposes Magnific upscaler)
+- [x] Add Mystic image model support through Freepik
+- [x] Test with your typical upscaling workflows
+- [x] Document pricing and rate limits
 
 #### Adobe Firefly API
 - [ ] Implement Firefly provider for generative fill/expand
