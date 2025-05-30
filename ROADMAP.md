@@ -13,26 +13,19 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 ## Next Up (Priority Order)
 
-### 1. Leonardo.ai API ✅
-- [x] Implement Leonardo provider with all models
-- [x] Add support for custom trained models
-- [x] Enable real-time canvas features
-- [x] Integrate Elements system for style control
+### 1. Midjourney Integration
+- [ ] Research proxy API options (no official API)
+- [ ] Implement Discord bridge or third-party API
+- [ ] Handle asynchronous generation pattern
+- [ ] Parse and extract seed/parameters
 
-### 2. Multi-Modal Workflow Support
-- [ ] Create workflow templates for common tasks
-- [ ] Image → Upscale → Variation pipeline
-- [ ] Video → Audio → Enhancement pipeline
-- [ ] Support for provider chaining (output → input)
-- [ ] Cost optimization across provider selection
+### 2. Enhanced Quality Assessment
+- [ ] Integrate aesthetic scoring models
+- [ ] Add composition analysis
+- [ ] Implement style consistency checks
+- [ ] Create quality profiles per use case
 
 ## Backlog (Re-evaluate Weekly)
-
-### Midjourney Integration (Complex but High Value)
-- Research proxy API options (no official API)
-- Implement Discord bridge or third-party API
-- Handle asynchronous generation pattern
-- Parse and extract seed/parameters
 
 ### Performance & Scale
 - Implement vector search for semantic similarity
@@ -40,13 +33,9 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - Create provider-specific caching strategies
 - Optimize for batch operations
 
-### Enhanced Quality Assessment
-- Integrate aesthetic scoring models
-- Add composition analysis
-- Implement style consistency checks
-- Create quality profiles per use case
+## Completed ✅
 
-## Completed Providers ✅
+### Providers
 - **Magnific/Freepik**: Upscaling with Magnific, Mystic image generation
 - **Adobe Firefly**: Generative fill/expand, style reference, all v3 features
 - **Google AI**: Imagen 3 ($0.03/image), Veo 2 video (8-second clips)
@@ -54,6 +43,12 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - **Leonardo.ai**: Phoenix, Flux, PhotoReal, Alchemy, Elements system
 - **Hedra**: Character-2 talking avatars from image + audio
 - **fal.ai**: FLUX family, Kling video, mmaudio, specialized models
+
+### Features
+- **Multi-Modal Workflows**: Chain operations across providers with cost optimization
+- **Search Performance**: 10-20x speedup with eager loading and Redis caching
+- **Event System**: PostgreSQL-based with workflow events
+- **Provider Infrastructure**: Unified base class with health monitoring
 
 ## Design Principles
 
