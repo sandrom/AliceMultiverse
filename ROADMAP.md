@@ -8,18 +8,25 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 1. **Are we solving real problems?** Media organization ✓, Quality assessment ✓, Generation tracking ✓
 2. **Is the architecture still simple?** 4,100 lines removed ✓, PostgreSQL-only ✓, One provider base ✓
-3. **What would users pay for?** Multi-modal workflows > Leonardo.ai canvas > Enhanced quality assessment
+3. **What would users pay for?** Sound effects for videos > Multi-modal workflows > Enhanced quality assessment
 4. **What's broken RIGHT NOW?** Nothing critical - all tests passing, providers working
 
 ## Next Up (Priority Order)
 
-### 1. Midjourney Integration
+### 1. ElevenLabs Sound Effects (New Request!)
+- [ ] Implement ElevenLabs provider for AI sound effects
+- [ ] Support text-to-sound generation
+- [ ] Add duration and format parameters
+- [ ] Enable sound effects in video workflows
+- [ ] Create audio-focused workflow templates
+
+### 2. Midjourney Integration
 - [ ] Research proxy API options (no official API)
 - [ ] Implement Discord bridge or third-party API
 - [ ] Handle asynchronous generation pattern
 - [ ] Parse and extract seed/parameters
 
-### 2. Enhanced Quality Assessment
+### 3. Enhanced Quality Assessment
 - [ ] Integrate aesthetic scoring models
 - [ ] Add composition analysis
 - [ ] Implement style consistency checks
