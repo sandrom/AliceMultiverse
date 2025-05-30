@@ -61,6 +61,7 @@ class ProviderRegistry:
         from .kling_provider import KlingProvider
         from .hedra_provider import HedraProvider
         from .freepik_provider import FreepikProvider
+        from .firefly_provider import FireflyProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
@@ -77,6 +78,9 @@ class ProviderRegistry:
         self.register_provider("hedra-character", HedraProvider)  # Alias
         self.register_provider("freepik", FreepikProvider)
         self.register_provider("magnific", FreepikProvider)  # Alias for Magnific users
+        self.register_provider("firefly", FireflyProvider)
+        self.register_provider("adobe", FireflyProvider)  # Alias
+        self.register_provider("adobe-firefly", FireflyProvider)  # Alias
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
@@ -140,6 +144,9 @@ class ProviderRegistry:
                 "hedra-character": "HEDRA_API_KEY",
                 "freepik": "FREEPIK_API_KEY",
                 "magnific": "FREEPIK_API_KEY",
+                "firefly": "ADOBE_CLIENT_ID",
+                "adobe": "ADOBE_CLIENT_ID",
+                "adobe-firefly": "ADOBE_CLIENT_ID",
             }
             if name_lower in env_vars:
                 api_key = os.getenv(env_vars[name_lower])

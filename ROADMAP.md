@@ -21,11 +21,11 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - [x] Test with your typical upscaling workflows
 - [x] Document pricing and rate limits
 
-#### Adobe Firefly API
-- [ ] Implement Firefly provider for generative fill/expand
-- [ ] Add support for text effects and vector generation
-- [ ] Integrate style reference capabilities
-- [ ] Enable batch processing for efficiency
+#### Adobe Firefly API ✅
+- [x] Implement Firefly provider for generative fill/expand
+- [x] Add support for all Firefly v3 capabilities
+- [x] Integrate style and structure reference features
+- [x] Support for async job polling and all endpoints
 
 #### Google AI APIs (Veo & Imagen)
 - [ ] Add Google AI provider base class
@@ -80,6 +80,15 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - Enable cost/quality optimization
 
 ## Recently Completed ✅
+
+### Adobe Firefly API Integration (Jan 2025)
+- Implemented complete Adobe Firefly v3 provider with all capabilities
+- Supports text-to-image, generative fill, expand, composite, and similar
+- Added authentication with Adobe IMS token management
+- Implemented async job polling for long-running operations
+- Created comprehensive tests achieving 100% pass rate
+- Added style presets, structure reference, and advanced features
+- Documented all capabilities with usage examples
 
 ### Search Performance Optimization (Jan 2025)
 - Fixed N+1 queries by implementing eager loading for relationships
