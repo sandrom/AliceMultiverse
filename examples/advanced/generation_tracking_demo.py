@@ -2,6 +2,7 @@
 
 import asyncio
 import json
+import yaml
 from pathlib import Path
 from alicemultiverse.providers import get_provider, GenerationRequest, GenerationType
 from alicemultiverse.providers.generation_tracker import get_generation_tracker
@@ -59,13 +60,26 @@ async def demonstrate_generation_tracking():
             print(f"    - Seed: {params['parameters'].get('seed', 'N/A')}")
         
         # Check sidecar file
-        sidecar_path = result.file_path.with_suffix('.png.json')
+        sidecar_path = result.file_path.with_suffix('.png.yaml')
         if sidecar_path.exists():
-            print("\n  Sidecar JSON file:")
+            print("\n  Sidecar YAML file:")
             with open(sidecar_path) as f:
-                sidecar = json.load(f)
-            print(f"    - Full context preserved")
+                sidecar = yaml.safe_load(f)
+            print(f"    - Full context preserved in human-readable format")
             print(f"    - Keys: {', '.join(sidecar.keys())}")
+            
+            # Show a snippet of the YAML
+            print("\n  YAML snippet:")
+            print("    ```yaml")
+            yaml_snippet = yaml.dump(
+                {k: sidecar[k] for k in ['prompt', 'model', 'provider', 'cost'] if k in sidecar},
+                default_flow_style=False,
+                indent=2
+            )
+            for line in yaml_snippet.split('\n')[:5]:
+                print(f"    {line}")
+            print("    ...")
+            print("    ```")
         
         # 3. Demonstrate recreation
         print("\n3. Recreating from stored context...")
@@ -184,7 +198,7 @@ async def demonstrate_generation_tracking():
     print("Demo complete! Check the output folder for generated files.")
     print("\nKey features demonstrated:")
     print("- All prompts and settings embedded in files")
-    print("- Sidecar JSON files for easy access")
+    print("- Sidecar YAML files for human-readable access")
     print("- Database tracking with relationships")
     print("- Complete recreation capability")
     print("- Multi-reference relationship tracking")

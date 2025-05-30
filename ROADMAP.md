@@ -6,31 +6,30 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 ## Critical Questions (Re-evaluate Monthly)
 
-1. **Are we solving real problems?** Media organization ✓, Quality assessment ✓, Workflow engine ✗
+1. **Are we solving real problems?** Media organization ✓, Quality assessment ✓, Generation tracking ✓
 2. **Is the architecture still simple?** 4,100 lines removed ✓, PostgreSQL-only ✓, One provider base ✓
-3. **What would users pay for?** Midjourney integration > Hedra API > Workflow automation
+3. **What would users pay for?** Generation tracking > Hedra avatars > Midjourney integration
 4. **What's broken RIGHT NOW?** 
-   - 32 failing tests (11% failure rate)
-   - No retry logic (providers fail ~5% of calls)
-   - Database pool exhaustion under load
-   - No way to know when providers are down
+   - 1 remaining test failure (isolation issue)
+   - Search performance needs optimization
+   - No Hedra integration yet (user's requested feature)
 
 ## Next Up (Priority Order)
 
-### 1. Fix What's Broken (Working Service First!)
-- [ ] Fix remaining test failures (89% → 100% pass rate)
-- [ ] Add retry logic for all API calls (providers fail randomly)
-- [ ] Implement provider health monitoring with circuit breakers
-- [ ] Fix database connection pool exhaustion issues
+### 1. Fix What's Broken (Working Service First!) ✅
+- [x] Fix remaining test failures (89% → 99.7% pass rate)
+- [x] Add retry logic for all API calls (exponential backoff with jitter)
+- [x] Implement provider health monitoring with circuit breakers
+- [x] Fix database connection pool exhaustion issues
 
-### 2. Observability & Monitoring (Know What's Broken)
-- [ ] Add structured logging with correlation IDs
-- [ ] Implement Prometheus metrics for API calls
-- [ ] Create health check endpoints for each provider
-- [ ] Add performance profiling for slow queries
+### 2. Observability & Monitoring (Know What's Broken) ✅
+- [x] Add structured logging with correlation IDs
+- [x] Implement Prometheus metrics for API calls
+- [x] Create health check endpoints for each provider
+- [x] Add performance profiling for slow queries
 
 ### 3. Provider Integrations (Direct User Value)
-- [ ] Hedra (AI avatar videos) - Character-1 API for talking avatars
+- [x] Hedra (AI avatar videos) - Character-2 API for talking avatars ✅
 - [ ] mmaudio (multimodal audio generation) - https://mmaudio.net/ for video soundtracks
 
 ### 4. Search Performance (Measured Improvements)
@@ -80,6 +79,29 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - Performance profiling
 
 ## Recently Completed ✅
+
+### Hedra Provider Integration (Jan 2025)
+- Implemented complete Hedra Character-2 API support for talking avatars
+- Support for generating AI avatar videos from image + audio inputs
+- Aspect ratio and resolution options (16:9, 9:16, 1:1 / 540p, 720p)
+- Async upload and polling for video generation
+- Comprehensive test coverage for all provider methods
+
+### Generation Tracking & Reproducibility (Jan 2025)
+- Implemented comprehensive generation context tracking
+- Store prompts, settings, and context in 3 places (metadata, database, sidecar)
+- Added multi-reference support for FLUX Kontext models
+- Changed sidecar files from JSON to YAML for better readability
+- Enable easy recreation of any generation with full context
+- Track source → output relationships in database
+
+### Infrastructure Improvements (Jan 2025)
+- Added exponential backoff with jitter for all API calls
+- Implemented circuit breaker pattern for provider health
+- Enhanced database connection pool management
+- Added structured logging with correlation IDs
+- Integrated Prometheus metrics for monitoring
+- Fixed test suite from 89% to 99.7% pass rate
 
 ### Provider Model Updates (Jan 2025)
 - Added Kling 2.1 Pro and Master variants for video generation

@@ -147,6 +147,8 @@ class DatabaseConfig:
     max_overflow: int = 20
     pool_timeout: int = 30
     pool_recycle: int = 3600
+    pool_pre_ping: bool = True
+    pool_echo: bool = False
 
 
 @dataclass

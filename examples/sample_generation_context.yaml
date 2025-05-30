@@ -1,0 +1,66 @@
+# Sample generation context YAML file
+# This shows what gets saved alongside each generated image/video
+
+alice_version: '1.0'
+metadata_version: '1.0'
+
+# Core generation information
+prompt: A cyberpunk city with neon lights reflecting in rain-soaked streets, flying cars in the distance
+model: flux-kontext-max-multi
+provider: fal.ai
+generation_type: image
+timestamp: '2025-01-29T15:45:23.456789'
+
+# Full parameters used
+parameters:
+  guidance_scale: 3.5
+  image_size:
+    height: 1024
+    width: 1792
+  num_images: 1
+  num_inference_steps: 50
+  seed: 2024
+  style: cyberpunk
+  lighting: neon_rain
+  
+# Reference images (for multi-reference or image-to-image)
+reference_assets:
+  - https://example.com/cyberpunk_architecture.jpg
+  - https://example.com/neon_signs.jpg
+  - https://example.com/rain_effects.jpg
+
+reference_weights: [1.5, 2.0, 0.5]
+
+# Source images with their own context (for video from images)
+source_images:
+  - asset_id: abc123def456789
+    model: flux-pro
+    prompt: Futuristic cityscape base architecture
+    role: primary
+  - asset_id: def456ghi789012
+    model: flux-schnell
+    prompt: Neon sign references and color palette
+    role: style_reference
+
+# Cost and performance metrics
+cost: 0.09
+generation_time: 23.45
+
+# Project association
+project_id: cyberpunk-scenes-2025
+
+# Provider-specific metadata
+provider_metadata:
+  fal_request_id: req_abc123xyz
+  queue_time: 2.1
+  inference_time: 21.35
+
+# Output details
+output_format: png
+
+# This YAML format makes it easy to:
+# 1. Read and understand what was generated
+# 2. Manually edit and re-run with modifications
+# 3. Track relationships between assets
+# 4. Build workflows and pipelines
+# 5. Share reproducible generations with others

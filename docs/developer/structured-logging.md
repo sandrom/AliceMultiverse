@@ -183,6 +183,33 @@ from alicemultiverse.database.config import engine
 setup_sqlalchemy_logging(engine)
 ```
 
+## Generation Context Storage
+
+When using the generation tracker, context is stored in multiple formats:
+
+### YAML Sidecar Files
+Human-readable generation context stored alongside each file:
+
+```yaml
+# dragon_image.png.yaml
+alice_version: '1.0'
+cost: 0.003
+generation_time: 2.34
+generation_type: image
+model: flux-schnell
+parameters:
+  guidance_scale: 0
+  image_size:
+    height: 1024
+    width: 1024
+  num_images: 1
+  num_inference_steps: 4
+  seed: 42
+prompt: A majestic dragon perched on a crystal mountain at sunset
+provider: fal.ai
+timestamp: '2025-01-29T10:30:45.123456'
+```
+
 ## Best Practices
 
 ### 1. Use Structured Data

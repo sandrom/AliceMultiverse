@@ -2,6 +2,8 @@
 
 import asyncio
 import click
+import json
+import yaml
 from pathlib import Path
 from rich.console import Console
 from rich.table import Table
@@ -50,14 +52,24 @@ def inspect(file_path):
     else:
         console.print("[yellow]No embedded metadata found[/yellow]")
     
-    # Check for sidecar JSON
-    sidecar_path = path.with_suffix(path.suffix + '.json')
-    if sidecar_path.exists():
-        console.print(f"\n[green]✓ Sidecar file found:[/green] {sidecar_path.name}")
-        
-        import json
-        with open(sidecar_path) as f:
+    # Check for sidecar files (YAML or JSON)
+    yaml_sidecar = path.with_suffix(path.suffix + '.yaml')
+    json_sidecar = path.with_suffix(path.suffix + '.json')
+    
+    sidecar_data = None
+    sidecar_path = None
+    
+    if yaml_sidecar.exists():
+        sidecar_path = yaml_sidecar
+        with open(yaml_sidecar) as f:
+            sidecar_data = yaml.safe_load(f)
+    elif json_sidecar.exists():
+        sidecar_path = json_sidecar
+        with open(json_sidecar) as f:
             sidecar_data = json.load(f)
+    
+    if sidecar_data:
+        console.print(f"\n[green]✓ Sidecar file found:[/green] {sidecar_path.name}")
         
         # Show key generation info
         panel = Panel(
@@ -181,7 +193,8 @@ def catalog(directory, recursive):
     for file_path in sorted(files):
         # Check for generation context
         metadata = embedder.extract_metadata(file_path)
-        sidecar = file_path.with_suffix(file_path.suffix + '.json')
+        yaml_sidecar = file_path.with_suffix(file_path.suffix + '.yaml')
+        json_sidecar = file_path.with_suffix(file_path.suffix + '.json')
         
         model = "Unknown"
         provider = "Unknown"
@@ -189,21 +202,28 @@ def catalog(directory, recursive):
         
         if metadata and 'generation_params' in metadata:
             try:
-                import json
                 params = json.loads(metadata['generation_params'])
                 model = params.get('model', 'Unknown')
                 provider = params.get('provider', 'Unknown')
                 has_context = "Embedded"
             except:
                 pass
-        elif sidecar.exists():
+        elif yaml_sidecar.exists():
             try:
-                import json
-                with open(sidecar) as f:
+                with open(yaml_sidecar) as f:
+                    data = yaml.safe_load(f)
+                model = data.get('model', 'Unknown')
+                provider = data.get('provider', 'Unknown')
+                has_context = "YAML"
+            except:
+                pass
+        elif json_sidecar.exists():
+            try:
+                with open(json_sidecar) as f:
                     data = json.load(f)
                 model = data.get('model', 'Unknown')
                 provider = data.get('provider', 'Unknown')
-                has_context = "Sidecar"
+                has_context = "JSON"
             except:
                 pass
         
@@ -220,7 +240,12 @@ def catalog(directory, recursive):
     console.print(table)
     
     # Summary
-    with_context = sum(1 for f in files if f.with_suffix(f.suffix + '.json').exists() or embedder.extract_metadata(f))
+    with_context = sum(
+        1 for f in files 
+        if f.with_suffix(f.suffix + '.yaml').exists() 
+        or f.with_suffix(f.suffix + '.json').exists() 
+        or embedder.extract_metadata(f)
+    )
     console.print(f"\n[bold]Summary:[/bold]")
     console.print(f"Total files: {len(files)}")
     console.print(f"With context: {with_context} ({with_context/len(files)*100:.1f}%)")

@@ -4,6 +4,7 @@ numpy>=1.24.0
 opencv-python>=4.8.0
 tqdm>=4.66.0
 omegaconf>=2.3.0      # Configuration management (YAML + CLI)
+pyyaml>=6.0.0         # YAML file handling
 
 # API and async support
 aiohttp>=3.9.0

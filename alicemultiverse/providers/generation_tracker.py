@@ -1,6 +1,6 @@
 """Track and store generation context for reproducibility."""
 
-import json
+import yaml
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -62,7 +62,7 @@ class GenerationTracker:
                 generation_context
             )
             
-            # 3. Create sidecar JSON file for easy access
+            # 3. Create sidecar YAML file for easy access
             await self._create_sidecar_file(result.file_path, generation_context)
             
             logger.info(
@@ -159,7 +159,7 @@ class GenerationTracker:
                 "negative_prompt": context.get("parameters", {}).get("negative_prompt", ""),
                 "model": context["model"],
                 "provider": context["provider"],
-                "generation_params": json.dumps(context),  # Full context as JSON
+                "generation_params": yaml.dump(context),  # Full context as YAML
                 "timestamp": context["timestamp"]
             }
             
@@ -241,14 +241,21 @@ class GenerationTracker:
             )
     
     async def _create_sidecar_file(self, file_path: Path, context: Dict[str, Any]):
-        """Create a sidecar JSON file with full context."""
+        """Create a sidecar YAML file with full context."""
         try:
-            # Create .json file alongside the media file
-            sidecar_path = file_path.with_suffix(file_path.suffix + '.json')
+            # Create .yaml file alongside the media file
+            sidecar_path = file_path.with_suffix(file_path.suffix + '.yaml')
             
-            # Write formatted JSON
+            # Write formatted YAML with nice formatting
             with open(sidecar_path, 'w') as f:
-                json.dump(context, f, indent=2, sort_keys=True)
+                yaml.dump(
+                    context, 
+                    f, 
+                    default_flow_style=False,  # Use block style, not inline
+                    sort_keys=True,
+                    width=120,  # Wider lines before wrapping
+                    indent=2    # 2-space indentation
+                )
             
             logger.debug("Sidecar file created", path=str(sidecar_path))
             
