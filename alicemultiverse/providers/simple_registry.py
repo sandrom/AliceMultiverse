@@ -64,6 +64,7 @@ class ProviderRegistry:
         from .firefly_provider import FireflyProvider
         from .google_ai_provider import GoogleAIProvider
         from .ideogram_provider import IdeogramProvider
+        from .leonardo_provider import LeonardoProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
@@ -90,6 +91,9 @@ class ProviderRegistry:
         self.register_provider("veo", GoogleAIProvider)  # Alias
         self.register_provider("ideogram", IdeogramProvider)
         self.register_provider("ideogram-ai", IdeogramProvider)  # Alias
+        self.register_provider("leonardo", LeonardoProvider)
+        self.register_provider("leonardo-ai", LeonardoProvider)  # Alias
+        self.register_provider("leonardo.ai", LeonardoProvider)  # Alias
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
@@ -163,6 +167,9 @@ class ProviderRegistry:
                 "veo": "GOOGLE_AI_API_KEY",
                 "ideogram": "IDEOGRAM_API_KEY",
                 "ideogram-ai": "IDEOGRAM_API_KEY",
+                "leonardo": "LEONARDO_API_KEY",
+                "leonardo-ai": "LEONARDO_API_KEY",
+                "leonardo.ai": "LEONARDO_API_KEY",
             }
             if name_lower in env_vars:
                 api_key = os.getenv(env_vars[name_lower])

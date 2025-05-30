@@ -13,11 +13,11 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 
 ## Next Up (Priority Order)
 
-### 1. Leonardo.ai API  
-- [ ] Implement Leonardo provider with all models
-- [ ] Add support for custom trained models
-- [ ] Enable real-time canvas features
-- [ ] Integrate Elements system for style control
+### 1. Leonardo.ai API ✅
+- [x] Implement Leonardo provider with all models
+- [x] Add support for custom trained models
+- [x] Enable real-time canvas features
+- [x] Integrate Elements system for style control
 
 ### 2. Multi-Modal Workflow Support
 - [ ] Create workflow templates for common tasks
@@ -51,6 +51,7 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - **Adobe Firefly**: Generative fill/expand, style reference, all v3 features
 - **Google AI**: Imagen 3 ($0.03/image), Veo 2 video (8-second clips)
 - **Ideogram**: Superior text rendering, V2/V2-Turbo/V3 models
+- **Leonardo.ai**: Phoenix, Flux, PhotoReal, Alchemy, Elements system
 - **Hedra**: Character-2 talking avatars from image + audio
 - **fal.ai**: FLUX family, Kling video, mmaudio, specialized models
 
