@@ -161,6 +161,33 @@ For normal usage, use Alice through an AI assistant instead.
     
     # Comparison - reset
     comparison_reset = comparison_subparsers.add_parser("reset", help="Reset all comparison data")
+    
+    # Index subcommand for search index management
+    index_parser = subparsers.add_parser("index", help="Manage search index")
+    index_subparsers = index_parser.add_subparsers(
+        dest="index_command", help="Index management commands"
+    )
+    
+    # Index - rebuild
+    index_rebuild = index_subparsers.add_parser("rebuild", help="Rebuild search index from files")
+    index_rebuild.add_argument(
+        "paths", nargs="+", help="Paths to scan for media files"
+    )
+    index_rebuild.add_argument(
+        "--no-progress", action="store_true", help="Disable progress bar"
+    )
+    
+    # Index - update
+    index_update = index_subparsers.add_parser("update", help="Update index with new/modified files")
+    index_update.add_argument(
+        "path", help="Path to scan for updates"
+    )
+    
+    # Index - verify
+    index_verify = index_subparsers.add_parser("verify", help="Verify index integrity")
+    
+    # Index - stats
+    index_stats = index_subparsers.add_parser("stats", help="Show index statistics")
 
     # Directory arguments
     parser.add_argument(
@@ -477,6 +504,55 @@ def main(argv: list[str] | None = None) -> int:
             
             comparison_cli(click_args)
             return 0
+    
+    # Handle index subcommand
+    if args.command == "index":
+        from ..storage.index_builder import SearchIndexBuilder
+        from ..core.config import load_config
+        
+        # Load config to get DB path
+        config = load_config()
+        db_path = None
+        if hasattr(config, 'storage') and hasattr(config.storage, 'search_db'):
+            db_path = config.storage.search_db
+        
+        builder = SearchIndexBuilder(db_path)
+        
+        if args.index_command == "rebuild":
+            print(f"Rebuilding search index from {len(args.paths)} paths...")
+            count = builder.rebuild_from_paths(
+                args.paths, 
+                show_progress=not args.no_progress
+            )
+            print(f"\nSuccessfully indexed {count} assets")
+            return 0
+            
+        elif args.index_command == "update":
+            print(f"Updating search index from {args.path}...")
+            count = builder.update_from_path(args.path)
+            print(f"Updated {count} assets in index")
+            return 0
+            
+        elif args.index_command == "verify":
+            print("Verifying search index...")
+            results = builder.verify_index()
+            print(f"\nIndex verification results:")
+            print(f"  Total indexed: {results['total_indexed']}")
+            print(f"  Valid files: {results['valid_files']}")
+            print(f"  Missing files: {results['missing_files']}")
+            if results['missing_files'] > 0 and results['missing_file_paths']:
+                print(f"\nFirst few missing files:")
+                for path in results['missing_file_paths'][:10]:
+                    print(f"  - {path}")
+            return 0
+            
+        elif args.index_command == "stats":
+            print("Search index statistics:")
+            stats = builder.search_db.get_statistics()
+            print(f"  Total assets: {stats.get('total_assets', 0)}")
+            print(f"  Unique tags: {stats.get('unique_tags', 0)}")
+            print(f"  Storage size: {stats.get('storage_size_mb', 0):.1f} MB")
+            return 0
 
     # Setup logging for main command
     log_level = args.log_level if hasattr(args, "log_level") else "INFO"
@@ -493,7 +569,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     
     # Show deprecation warning for direct CLI usage (except for allowed commands)
-    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate"]
+    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison"]
     force_cli = hasattr(args, "force_cli") and args.force_cli
     debug_mode = hasattr(args, "debug") and args.debug
     check_deps = hasattr(args, "check_deps") and args.check_deps

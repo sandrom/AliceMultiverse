@@ -9,6 +9,27 @@ paths:
   # Default output directory for organized files
   organized: organized
 
+# Storage configuration
+storage:
+  # Where to store DuckDB search index
+  search_db: "data/search.duckdb"
+  
+  # Paths where projects can be stored
+  # Can include local paths or cloud URLs (s3://, gcs://)
+  project_paths:
+    - "projects"       # Local projects directory
+    # - "s3://my-bucket/projects"  # Example S3 path
+    # - "gcs://my-bucket/projects" # Example GCS path
+  
+  # Where to find existing assets for reuse
+  asset_paths:
+    - "organized"      # Default organized output
+    - "inbox"          # Also check inbox
+    # - "/Volumes/External/AI-Assets"  # Example external drive
+  
+  # Where rejected/soft-deleted assets go
+  sorted_out_path: "sorted-out"
+
 processing:
   # Copy files instead of moving them
   copy_mode: true
@@ -122,6 +143,21 @@ providers:
   anthropic:
     # Available Claude models
     models:
+      # Claude 4 models (latest)
+      claude-opus-4-20250115:
+        max_tokens: 8192
+        vision: true
+        context_window: 300000
+      claude-sonnet-4-20250115:
+        max_tokens: 8192
+        vision: true
+        context_window: 200000
+      # Claude 3.5 models (still good)
+      claude-3-5-sonnet-20241022:
+        max_tokens: 8192
+        vision: true
+        context_window: 200000
+      # Claude 3 models (legacy but cheaper)
       claude-3-opus-20240229:
         max_tokens: 4096
         vision: true
@@ -134,13 +170,9 @@ providers:
         max_tokens: 4096
         vision: true
         context_window: 200000
-      claude-3-5-sonnet-20241022:
-        max_tokens: 8192
-        vision: true
-        context_window: 200000
     
     # Default model for image understanding
-    default_model: claude-3-5-sonnet-20241022
+    default_model: claude-opus-4-20250115
     
     # API settings
     max_retries: 3
@@ -173,67 +205,9 @@ providers:
     cleanup_interval: 3600  # Clean up old events every hour
     retention_days: 7       # Keep events for 7 days
 
-# Storage configuration
-storage:
-  # Define multiple storage locations
-  locations:
-    # Primary organized storage
-    primary:
-      type: local
-      path: organized  # Relative to current directory
-      purpose: organized  # Where organized files go
-      
-    # Inbox for new files
-    inbox:
-      type: local
-      path: inbox
-      scan: true  # Monitor for new files
-      purpose: inbox
-      
-    # Example: External drive
-    # external:
-    #   type: local
-    #   path: /Volumes/External/AI
-    #   scan: true
-    #   purpose: archive
-    
-    # Example: Cloud storage
-    # cloud:
-    #   type: s3
-    #   bucket: my-ai-media
-    #   prefix: images/
-    #   region: us-east-1
-    #   purpose: backup
-    
-  # Rules for automatic filing
-  rules:
-    # - match: "*.mp4"
-    #   location: cloud  # Videos go to cloud
-    # - match: "project:client-*"
-    #   location: external  # Client work to external
-    - default: primary
-    
-  # Search index configuration
-  search:
-    # Search backend (sqlite, meilisearch, elasticsearch)
-    backend: sqlite
-    
-    # SQLite settings
-    sqlite:
-      path: .alicemultiverse/search.db
-      
-    # Future: Meilisearch settings
-    # meilisearch:
-    #   url: http://localhost:7700
-    #   api_key: null
-    
-  # Location registry
-  registry:
-    # Track file locations by hash
-    enable_tracking: true
-    
-    # Scan interval for changes (seconds)
-    scan_interval: 300
+# Additional storage configuration (future expansion)
+# This section is reserved for advanced storage features like
+# multi-location storage, cloud integration, and registry tracking
 
 # Logging settings
 logging:

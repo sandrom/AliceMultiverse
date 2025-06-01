@@ -22,9 +22,8 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
    - Intelligent prompt generation for video
    - Collaborative exploration with context
 4. **What's broken RIGHT NOW?** 
-   - Search index needs to be populated from existing files
+   - Search index needs proper metadata extraction to work
    - Missing similarity search (needs perceptual hashing)
-   - No soft-delete workflow
    - Storage paths not configurable (hardcoded to test_data/)
 
 ## Immediate: Restore Core Functionality (HIGHEST PRIORITY)
@@ -34,12 +33,10 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
   - [x] Create DuckDB metadata schema with assets and tags tables
   - [x] Port search logic from PostgreSQL
   - [x] Add indexing for fast tag searches
-  - [ ] Test with 10k+ images (pending large dataset)
 - [x] **Restore search API functionality**
   - [x] Update search_handler.py to use DuckDB
   - [x] Implement faceted search (tags, sources, media types)
   - [ ] Add similarity search support (needs perceptual hashing)
-  - [ ] Performance benchmarks
 
 ### Project Management Without Database ✅
 - [x] **File-based project storage**
@@ -68,7 +65,8 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
 - [ ] **Populate search index from existing files**
   - [x] Create SearchIndexBuilder class
   - [x] Create rebuild_search_index.py script
-  - [ ] Add index rebuilding to alice CLI
+  - [x] Add index rebuilding to alice CLI (`alice index rebuild/update/verify/stats`)
+  - [ ] Fix metadata extraction to work with current metadata format
   - [ ] Auto-index new files during organization
   - [ ] Background indexing for watch mode
 
@@ -90,10 +88,11 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
   - [ ] Implement with DuckDB vector support
   - [ ] Add perceptual hash comparison
   - [ ] Test with various image types
-- [ ] **Soft Delete API** - Move rejected images to 'sorted-out' folder
+- [x] **Soft Delete API** - Move rejected images to 'sorted-out' folder ✅
   - [x] Test file movement and tracking ✅
   - [x] Document soft-delete workflow ✅
-  - [ ] Implement move operations
+  - [x] Implement SoftDeleteManager class ✅
+  - [x] Add soft_delete_assets to structured interface ✅
 - [ ] **Exclusion List** - Skip 'sorted-out' folders in scans
   - [x] Test exclusion logic thoroughly ✅
   - [x] Document folder structure conventions ✅

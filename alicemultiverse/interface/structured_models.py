@@ -48,129 +48,122 @@ class DimensionFilter(TypedDict, total=False):
     """Image/video dimension filters."""
     width: RangeFilter | None
     height: RangeFilter | None
-    aspect_ratio: RangeFilter | None
-
-
-class DateRange(TypedDict, total=False):
-    """Date range filter."""
-    start: str | None  # ISO 8601 date
-    end: str | None    # ISO 8601 date
 
 
 class SearchFilters(TypedDict, total=False):
-    """Structured search filters matching the API specification."""
-
-    # Technical filters
+    """All available search filters."""
     media_type: MediaType | None
-    file_formats: list[str] | None
+    tags: list[str] | None
+    any_tags: list[str] | None
+    not_tags: list[str] | None
+    quality_rating: RangeFilter | None
+    ai_source: str | list[str] | None
+    created_date: RangeFilter | None
+    modified_date: RangeFilter | None
     file_size: RangeFilter | None
     dimensions: DimensionFilter | None
-    quality_rating: RangeFilter | None
-
-    # Semantic filters (current: simple tags)
-    tags: list[str] | None          # AND operation
-    any_tags: list[str] | None      # OR operation
-    exclude_tags: list[str] | None  # NOT operation
-
-    # Future: tag:value pairs
-    tag_values: dict[str, str | list[str]] | None
-    tag_ranges: dict[str, RangeFilter] | None
-    tag_patterns: dict[str, str] | None
-
-    # Metadata filters
-    ai_source: list[str] | None
+    file_formats: list[str] | None
     project: str | None
-    content_hash: str | None
-    has_metadata: list[str] | None
-
-    # Temporal filters
-    date_range: DateRange | None
-
-    # Text search (structured)
-    filename_pattern: str | None  # Regex pattern
-    prompt_keywords: list[str] | None  # Keywords in prompt
-
-
-class SearchRequest(TypedDict):
-    """Structured search request following API specification."""
-    filters: SearchFilters
-    sort_by: SortField | None
-    order: SortOrder | None
-    limit: int | None  # Default: 50, Max: 1000
-    offset: int | None  # Default: 0
-
-
-class AssetMetadata(TypedDict, total=False):
-    """Asset metadata structure."""
-    dimensions: dict[str, int] | None
-    prompt: str | None
-    generation_params: dict[str, Any] | None
-    # Allow arbitrary metadata
-    # Note: In actual implementation, this would be more flexible
-
-
-class Asset(TypedDict):
-    """Asset information in search results."""
-    content_hash: str
-    file_path: str
-    media_type: MediaType
-    file_size: int
-
-    # Metadata
-    tags: list[str]
-    ai_source: str | None
-    quality_rating: float | None
-
-    # Timestamps
-    created_at: str
-    modified_at: str
-    discovered_at: str
-
-    # Additional metadata
-    metadata: AssetMetadata
+    group: str | None
+    filename_pattern: str | None
+    prompt_keywords: list[str] | None
 
 
 class SearchFacet(TypedDict):
-    """Individual facet with count."""
+    """Facet count for search results."""
     value: str
     count: int
 
 
 class SearchFacets(TypedDict, total=False):
-    """Faceted search results for discovery."""
+    """Aggregated facets from search results."""
     tags: list[SearchFacet]
     ai_sources: list[SearchFacet]
     quality_ratings: list[SearchFacet]
     media_types: list[SearchFacet]
+    projects: list[SearchFacet]
+    groups: list[SearchFacet]
+
+
+class Asset(TypedDict):
+    """Asset information."""
+    content_hash: str
+    file_path: str
+    media_type: MediaType
+    file_size: int
+    tags: list[str]
+    ai_source: str | None
+    quality_rating: int | None
+    created_at: str
+    modified_at: str
+    discovered_at: str
+    metadata: dict[str, Any]
+
+
+class SearchRequest(TypedDict, total=False):
+    """Search request parameters."""
+    filters: SearchFilters | None
+    sort_by: SortField | None
+    order: SortOrder | None
+    limit: int | None
+    offset: int | None
 
 
 class SearchResponse(TypedDict):
-    """Structured search response."""
+    """Search response with results and facets."""
     total_count: int
     results: list[Asset]
     facets: SearchFacets | None
     query_time_ms: int
 
 
-class AliceResponse(TypedDict):
-    """Standard response wrapper from Alice."""
-    success: bool
-    message: str
-    data: Any
-    error: str | None
-
-
-# Additional structured requests for other operations
-
 class OrganizeRequest(TypedDict, total=False):
     """Request to organize media files."""
     source_path: str | None
     destination_path: str | None
-    organization_rules: dict[str, Any] | None
     quality_assessment: bool | None
     pipeline: str | None
     watch_mode: bool | None
     move_files: bool | None
+    custom_rules: dict[str, Any] | None
+
+
+class AssetInfo(TypedDict):
+    """Basic asset information for responses."""
+    content_hash: str
+    file_path: str
+    media_type: MediaType
+    tags: list[str]
+
+
+class AliceResponse(TypedDict):
+    """Standard response format for all Alice operations."""
+    success: bool
+    message: str
+    data: Any | None
+    error: str | None
+
+
+class BatchImagePresentationRequest(TypedDict):
+    """Request to present multiple images for review."""
+    asset_ids: list[str]
+    session_id: str | None
+    grid_size: str | None
+
+
+class ImageSelectionFeedback(TypedDict):
+    """Feedback on image selection."""
+    asset_id: str
+    selected: bool
+    reason: str | None
+    tags: list[str] | None
+
+
+class BatchSelectionFeedback(TypedDict):
+    """Batch feedback on multiple selections."""
+    session_id: str
+    selections: list[ImageSelectionFeedback]
+    context: str | None
 
 
 class TagUpdateRequest(TypedDict):
@@ -178,11 +171,11 @@ class TagUpdateRequest(TypedDict):
     asset_ids: list[str]
     add_tags: list[str] | None
     remove_tags: list[str] | None
-    set_tags: list[str] | None  # Replace all tags
+    set_tags: list[str] | None
 
 
 class GroupingRequest(TypedDict):
-    """Request to group assets."""
+    """Request to group assets together."""
     asset_ids: list[str]
     group_name: str
     group_metadata: dict[str, Any] | None
@@ -190,18 +183,18 @@ class GroupingRequest(TypedDict):
 
 class ProjectRequest(TypedDict, total=False):
     """Request for project operations."""
-    project_name: str
-    filters: SearchFilters | None
-    action: Literal["create", "update", "delete"] | None
+    operation: Literal["create", "update", "list", "get", "delete"]
+    project_id: str | None
+    name: str | None
     metadata: dict[str, Any] | None
 
 
 class WorkflowRequest(TypedDict):
     """Request to execute a workflow."""
-    workflow_name: str
-    filters: SearchFilters
+    workflow_id: str
+    input_assets: list[str]
     parameters: dict[str, Any] | None
-    dry_run: bool | None
+    output_settings: dict[str, Any] | None
 
 
 class GenerationRequest(TypedDict, total=False):
@@ -213,3 +206,10 @@ class GenerationRequest(TypedDict, total=False):
     output_settings: dict[str, Any] | None
     project: str | None
     tags: list[str] | None
+
+
+class SoftDeleteRequest(TypedDict):
+    """Request to soft delete assets."""
+    asset_ids: list[str]
+    category: Literal["broken", "duplicate", "maybe-later", "rejected", "archive"]
+    reason: str | None

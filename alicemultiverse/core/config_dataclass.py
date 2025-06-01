@@ -83,6 +83,16 @@ class MetadataConfig:
 
 
 @dataclass
+class StorageConfig:
+    """Storage configuration."""
+    
+    search_db: str = "data/search.duckdb"
+    project_paths: list[str] = field(default_factory=lambda: ["projects"])
+    asset_paths: list[str] = field(default_factory=lambda: ["organized", "inbox"])
+    sorted_out_path: str = "sorted-out"
+
+
+@dataclass
 class FileTypesConfig:
     """File types configuration."""
 
@@ -136,7 +146,7 @@ class PipelineConfig:
 class AnthropicConfig:
     """Anthropic provider configuration."""
     models: dict = field(default_factory=dict)
-    default_model: str = "claude-3-haiku-20240307"
+    default_model: str = "claude-opus-4-20250115"
     max_retries: int = 3
     timeout: int = 30
 
@@ -180,6 +190,7 @@ class Config:
     file_types: FileTypesConfig = field(default_factory=FileTypesConfig)
     pipeline: PipelineConfig = field(default_factory=PipelineConfig)
     providers: ProvidersConfig = field(default_factory=ProvidersConfig)
+    storage: StorageConfig = field(default_factory=StorageConfig)
 
     def __post_init__(self):
         """Post-initialization processing."""
@@ -229,6 +240,10 @@ class Config:
         # Update processing
         if "processing" in data:
             config.processing = ProcessingConfig(**data["processing"])
+        
+        # Update storage
+        if "storage" in data:
+            config.storage = StorageConfig(**data["storage"])
 
         # Update quality
         if "quality" in data:

@@ -497,47 +497,6 @@ class DuckDBSearch:
             "media_types": type_facets
         }
     
-    def rebuild_from_files(self, paths: List[Path]) -> int:
-        """Rebuild search index from file metadata.
-        
-        Args:
-            paths: List of paths to scan for files
-            
-        Returns:
-            Number of files indexed
-        """
-        from ..metadata.extractor import MetadataExtractor
-        
-        logger.info(f"Rebuilding search index from {len(paths)} paths")
-        
-        extractor = MetadataExtractor()
-        indexed_count = 0
-        
-        for path in paths:
-            if not path.exists():
-                logger.warning(f"Path does not exist: {path}")
-                continue
-            
-            # Find all media files
-            if path.is_file():
-                files = [path]
-            else:
-                files = []
-                for pattern in ["*.png", "*.jpg", "*.jpeg", "*.webp", "*.mp4", "*.mov"]:
-                    files.extend(path.rglob(pattern))
-            
-            # Extract and index metadata
-            for file_path in files:
-                try:
-                    metadata = extractor.extract(file_path)
-                    if metadata and metadata.get("content_hash"):
-                        self.index_asset(metadata)
-                        indexed_count += 1
-                except Exception as e:
-                    logger.error(f"Failed to index {file_path}: {e}")
-        
-        logger.info(f"Indexed {indexed_count} files")
-        return indexed_count
     
     def _parse_timestamp(self, value: Any) -> Optional[datetime]:
         """Parse various timestamp formats.
@@ -697,17 +656,13 @@ class DuckDBSearch:
             )
         """).fetchone()[0]
         
+        # Database size (if using file-based storage)
+        if self.db_path and self.db_path.exists():
+            stats["storage_size_mb"] = self.db_path.stat().st_size / (1024 * 1024)
+        else:
+            stats["storage_size_mb"] = 0.0
+        
         return stats
-    
-    def clear_index(self):
-        """Clear all data from the search index."""
-        logger.warning("Clearing search index...")
-        
-        # Delete all data from tables
-        self.conn.execute("DELETE FROM tags")
-        self.conn.execute("DELETE FROM assets")
-        
-        logger.info("Search index cleared")
     
     def close(self):
         """Close the database connection."""

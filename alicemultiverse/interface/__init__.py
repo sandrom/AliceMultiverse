@@ -22,7 +22,6 @@ from .models import (
 )
 from .structured_models import (
     AssetRole,
-    DateRange,
     DimensionFilter,
     GenerationRequest as StructuredGenerationRequest,
     GroupingRequest,
@@ -51,7 +50,6 @@ __all__ = [
     # Structured interface (recommended)
     "AliceStructuredInterface",
     "AssetRole",
-    "DateRange",
     "DimensionFilter",
     "GroupingRequest",
     "MediaType",

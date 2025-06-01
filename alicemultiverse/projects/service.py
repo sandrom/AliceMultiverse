@@ -9,6 +9,7 @@ from typing import Any, Optional
 # from alicemultiverse.database.models import Generation, Project
 
 from alicemultiverse.events import publish_event_sync
+from alicemultiverse.core.config import load_config
 from .file_service import FileProjectService
 
 
@@ -18,16 +19,27 @@ class ProjectService:
     Uses file-based storage when database is not available.
     """
     
-    def __init__(self, db_session: Optional[Any] = None, event_bus: Optional[Any] = None):
+    def __init__(self, db_session: Optional[Any] = None, event_bus: Optional[Any] = None, config=None):
         """Initialize project service.
         
         Args:
             db_session: Database session (no longer used)
             event_bus: Deprecated, kept for compatibility
+            config: Optional configuration object
         """
         self.db = None  # PostgreSQL removed
+        
+        # Load config if not provided
+        if not config:
+            config = load_config()
+        
+        # Get storage paths from config
+        storage_paths = None
+        if hasattr(config, 'storage') and hasattr(config.storage, 'project_paths'):
+            storage_paths = list(config.storage.project_paths)
+        
         # Always use file-based service
-        self._file_service = FileProjectService()
+        self._file_service = FileProjectService(storage_paths)
     
     def _publish_event(self, event_type: str, **data) -> None:
         """Publish event using Redis Streams."""

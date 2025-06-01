@@ -1,5 +1,6 @@
 """Media organizer implementation."""
 
+import hashlib
 import re
 import signal
 import time
@@ -16,6 +17,7 @@ from ..core.constants import OUTPUT_DATE_FORMAT, SEQUENCE_FORMAT
 from ..core.file_operations import FileHandler
 from ..core.logging import get_logger
 from ..core.types import AnalysisResult, MediaType, OrganizeResult, Statistics
+from ..storage.duckdb_search import DuckDBSearch
 from .organization_helpers import (
     extract_project_folder,
     get_quality_folder_name,
@@ -85,6 +87,15 @@ class MediaOrganizer:
 
         # File extensions
         self.image_extensions = set(config.file_types.image_extensions)
+        
+        # Initialize search index if available
+        self.search_db = None
+        if hasattr(config, 'storage') and hasattr(config.storage, 'search_db'):
+            try:
+                self.search_db = DuckDBSearch(config.storage.search_db)
+                logger.info(f"Search index enabled: {config.storage.search_db}")
+            except Exception as e:
+                logger.warning(f"Failed to initialize search index: {e}")
         self.video_extensions = set(config.file_types.video_extensions)
 
     def organize(self) -> bool:
@@ -298,6 +309,9 @@ class MediaOrganizer:
         # Assign unique file number for this project/source combination
         file_number = self._get_next_file_number(project_folder, source_type)
 
+        # Calculate content hash
+        content_hash = self.metadata_cache.get_content_hash(media_path)
+        
         # Build metadata dict for pipeline stages
         metadata = {
             "source_type": source_type,
@@ -305,6 +319,7 @@ class MediaOrganizer:
             "project_folder": project_folder,
             "media_type": media_type,
             "file_number": file_number,
+            "content_hash": content_hash,
         }
 
         # Image analysis happens in pipeline stages if configured
@@ -704,6 +719,9 @@ class MediaOrganizer:
             # Use cached analysis but update project folder
             analysis = cached_metadata["analysis"]
             analysis["project_folder"] = project_folder
+            # Include content hash from cache
+            if "content_hash" in cached_metadata:
+                analysis["content_hash"] = cached_metadata["content_hash"]
 
             # If no file number in cache, assign one now
             if "file_number" not in analysis or analysis["file_number"] is None:
@@ -839,6 +857,9 @@ class MediaOrganizer:
             self.file_handler.copy_file(media_path, dest_path)
         else:
             self.file_handler.move_file(media_path, dest_path)
+        
+        # Update search index with new file location
+        self._update_search_index(dest_path, analysis)
 
         return OrganizeResult(
             source=str(media_path),
@@ -854,3 +875,46 @@ class MediaOrganizer:
             pipeline_result=analysis.get("pipeline_result"),
             error=None,
         )
+
+    
+    def _update_search_index(self, file_path: Path, analysis: dict) -> None:
+        """Update search index with newly organized file.
+        
+        Args:
+            file_path: Path to the organized file
+            analysis: Analysis results containing metadata
+        """
+        if not self.search_db or self.config.processing.dry_run:
+            return
+            
+        try:
+            # Build metadata for indexing
+            metadata = {
+                "content_hash": analysis.get("content_hash"),
+                "file_path": str(file_path),
+                "file_size": file_path.stat().st_size,
+                "media_type": analysis.get("media_type", "image"),
+                "ai_source": analysis.get("source_type"),
+                "quality_rating": analysis.get("quality_stars"),
+                "quality_score": analysis.get("final_combined_score"),
+                "prompt": analysis.get("prompt"),
+                "project": analysis.get("project_folder"),
+                "created_at": datetime.now(),
+                "modified_at": datetime.fromtimestamp(file_path.stat().st_mtime),
+                "discovered_at": datetime.now(),
+            }
+            
+            # Extract prompt from filename if not in analysis
+            if not metadata["prompt"] and "_" in file_path.name:
+                parts = file_path.name.split("_")
+                if len(parts) > 2:
+                    potential_prompt = "_".join(parts[1:-1])
+                    if len(potential_prompt) > 10:
+                        metadata["prompt"] = potential_prompt.replace("_", " ")
+            
+            # Index the asset
+            self.search_db.index_asset(metadata)
+            logger.debug(f"Indexed asset in search: {file_path.name}")
+            
+        except Exception as e:
+            logger.warning(f"Failed to update search index for {file_path}: {e}")

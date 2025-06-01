@@ -109,12 +109,16 @@ class MetadataExtractor:
         
         return parsed
     
-    def _parse_xmp_data(self, xmp_bytes: bytes) -> Dict[str, Any]:
+    def _parse_xmp_data(self, xmp_data) -> Dict[str, Any]:
         """Parse XMP metadata containing Alice-specific data."""
         parsed = {}
         
         try:
-            xmp_str = xmp_bytes.decode('utf-8')
+            # Handle both bytes and string input
+            if isinstance(xmp_data, bytes):
+                xmp_str = xmp_data.decode('utf-8')
+            else:
+                xmp_str = xmp_data
             
             # Extract Alice namespace data
             # This is a simplified parser - in production we'd use python-xmp-toolkit

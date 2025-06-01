@@ -64,7 +64,8 @@ class AliceInterface:
         # PostgreSQL removed - no database initialization
         self.asset_repo = None
         self.project_repo = None
-        self.project_service = None
+        # Initialize project service with config
+        self.project_service = ProjectService(config=self.config)
         logger.info("Running without database - PostgreSQL removed")
 
     def _ensure_organizer(self) -> None:

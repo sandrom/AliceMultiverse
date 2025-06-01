@@ -25,6 +25,7 @@ from .structured_models import (
     SearchFacets,
     SearchRequest,
     SearchResponse,
+    SoftDeleteRequest,
     SortField,
     SortOrder,
     TagUpdateRequest,
@@ -37,6 +38,7 @@ from .validation import (
     validate_organize_request,
     validate_project_request,
     validate_search_request,
+    validate_soft_delete_request,
     validate_tag_update_request,
     validate_workflow_request,
 )
@@ -295,30 +297,56 @@ class AliceStructuredInterface:
             success_count = 0
 
             for asset_id in request["asset_ids"]:
+                # Asset ID should be content_hash for now
+                content_hash = asset_id
+                
                 # Get current asset metadata
-                metadata = self.organizer.metadata_cache.get_metadata_by_id(asset_id)
-                if not metadata:
+                search_request = SearchRequest(
+                    filters={"content_hash": content_hash},
+                    limit=1
+                )
+                search_response = self.search_handler.search(search_request)
+                
+                if not search_response.assets:
                     continue
+                    
+                asset = search_response.assets[0]
+                current_tags = set(asset.tags)
 
                 # Apply tag operations
                 if request.get("set_tags") is not None:
                     # Replace all tags
-                    metadata["custom_tags"] = request["set_tags"]
+                    new_tags = request["set_tags"]
                 else:
                     # Add/remove operations
-                    current_tags = set(metadata.get("custom_tags", []))
+                    new_tags = current_tags.copy()
 
                     if request.get("add_tags"):
-                        current_tags.update(request["add_tags"])
+                        new_tags.update(request["add_tags"])
 
                     if request.get("remove_tags"):
-                        current_tags.difference_update(request["remove_tags"])
+                        new_tags.difference_update(request["remove_tags"])
 
-                    metadata["custom_tags"] = list(current_tags)
+                    new_tags = list(new_tags)
 
-                # Save updated metadata
-                if self.organizer.metadata_cache.update_metadata(asset_id, metadata):
-                    success_count += 1
+                # Re-index asset with updated tags
+                # Create metadata dict for re-indexing
+                metadata = {
+                    "content_hash": asset.content_hash,
+                    "file_path": asset.file_path,
+                    "file_size": asset.file_size,
+                    "media_type": asset.media_type.value,
+                    "ai_source": asset.ai_source,
+                    "tags": new_tags,
+                    "quality_rating": asset.quality_rating,
+                    "created_at": asset.created_at,
+                    "modified_at": asset.modified_at,
+                    "discovered_at": asset.discovered_at,
+                }
+                
+                # Re-index in search DB (will update existing entry)
+                self.search_handler.search_db.index_asset(metadata)
+                success_count += 1
 
             return AliceResponse(
                 success=success_count > 0,
@@ -503,6 +531,123 @@ class AliceStructuredInterface:
                 error=str(e)
             )
 
+    def soft_delete_assets(self, request: SoftDeleteRequest, client_id: str = "default") -> AliceResponse:
+        """Soft delete assets by moving them to sorted-out folder.
+        
+        Args:
+            request: Soft delete request with asset IDs and category
+            client_id: Client identifier for rate limiting
+            
+        Returns:
+            Response with deletion results
+        """
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "soft_delete")
+            
+            # Validate request
+            request = validate_soft_delete_request(request)
+            
+            # Import soft delete manager
+            from ..organizer.soft_delete import SoftDeleteManager
+            
+            # Get sorted-out path from config or use default
+            sorted_out_path = "sorted-out"
+            if hasattr(self.config, 'storage') and hasattr(self.config.storage, 'sorted_out_path'):
+                sorted_out_path = self.config.storage.sorted_out_path
+            
+            soft_delete_manager = SoftDeleteManager(sorted_out_path)
+            
+            self._ensure_organizer()
+            
+            success_count = 0
+            failed_count = 0
+            moved_files = []
+            failed_files = []
+            
+            for asset_id in request["asset_ids"]:
+                # Asset ID should be content_hash for now
+                # TODO: Add proper asset ID support in search index
+                content_hash = asset_id
+                
+                # Search for asset by content hash
+                # Access search_db through the search handler
+                search_request = SearchRequest(
+                    filters={"content_hash": content_hash},
+                    limit=1
+                )
+                search_response = self.search_handler.search(search_request)
+                search_results = search_response.assets
+                if not search_results:
+                    failed_files.append(asset_id)
+                    failed_count += 1
+                    continue
+                
+                asset = search_results[0]
+                file_path = Path(asset.file_path)
+                
+                # Check if file exists
+                if not file_path.exists():
+                    failed_files.append(asset_id)
+                    failed_count += 1
+                    continue
+                
+                # Convert Asset object to dict for soft delete
+                asset_data = {
+                    "content_hash": asset.content_hash,
+                    "file_path": asset.file_path,
+                    "media_type": asset.media_type.value,
+                    "ai_source": asset.ai_source,
+                    "tags": asset.tags,
+                    "quality_rating": asset.quality_rating,
+                }
+                
+                # Soft delete the file
+                new_path = soft_delete_manager.soft_delete(
+                    file_path=file_path,
+                    category=request["category"],
+                    reason=request.get("reason"),
+                    metadata=asset_data
+                )
+                
+                if new_path:
+                    moved_files.append(str(new_path))
+                    success_count += 1
+                    # TODO: Remove from search index or mark as deleted
+                else:
+                    failed_files.append(asset_id)
+                    failed_count += 1
+            
+            return AliceResponse(
+                success=success_count > 0,
+                message=f"Soft deleted {success_count}/{len(request['asset_ids'])} assets",
+                data={
+                    "moved_count": success_count,
+                    "failed_count": failed_count,
+                    "moved_files": moved_files,
+                    "failed_assets": failed_files,
+                    "category": request["category"]
+                },
+                error=None
+            )
+            
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
+        except Exception as e:
+            logger.error(f"Soft delete failed: {e}", exc_info=True)
+            return AliceResponse(
+                success=False,
+                message="Soft delete failed",
+                data=None,
+                error=str(e)
+            )
+
     def get_asset_by_id(self, asset_id: str, client_id: str = "default") -> AliceResponse:
         """Get a specific asset by ID.
         
@@ -517,10 +662,18 @@ class AliceStructuredInterface:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "get_asset")
             
-            self._ensure_organizer()
-
-            metadata = self.organizer.metadata_cache.get_metadata_by_id(asset_id)
-            if not metadata:
+            # Asset ID should be content_hash for now
+            # TODO: Add proper asset ID support in search index
+            content_hash = asset_id
+            
+            # Search for asset by content hash
+            search_request = SearchRequest(
+                filters={"content_hash": content_hash},
+                limit=1
+            )
+            search_response = self.search_handler.search(search_request)
+            
+            if not search_response.assets:
                 return AliceResponse(
                     success=False,
                     message="Asset not found",
@@ -528,7 +681,7 @@ class AliceStructuredInterface:
                     error=f"No asset found with ID: {asset_id}"
                 )
 
-            asset = self._convert_to_asset(metadata)
+            asset = search_response.assets[0]
 
             return AliceResponse(
                 success=True,
@@ -564,11 +717,10 @@ class AliceStructuredInterface:
             # Validate role
             role = validate_asset_role(role)
             
-            self._ensure_organizer()
-
-            # Convert to internal enum
-            metadata_role = MetadataAssetRole(role.value)
-            success = self.organizer.set_asset_role(asset_id, metadata_role)
+            # TODO: Implement asset role setting in search index
+            # For now, asset roles are not supported in the new architecture
+            success = False
+            logger.warning("Asset role setting not yet implemented in search-based architecture")
 
             return AliceResponse(
                 success=success,

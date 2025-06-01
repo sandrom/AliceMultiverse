@@ -14,6 +14,7 @@ from .structured_models import (
     OrganizeRequest,
     ProjectRequest,
     SearchRequest,
+    SoftDeleteRequest,
     SortField,
     SortOrder,
     TagUpdateRequest,
@@ -580,3 +581,40 @@ def validate_asset_role(role: Union[str, AssetRole]) -> AssetRole:
     except ValueError:
         valid_roles = [r.value for r in AssetRole]
         raise ValidationError(f"Invalid role '{role}'. Valid roles: {valid_roles}")
+
+
+def validate_soft_delete_request(request: SoftDeleteRequest) -> SoftDeleteRequest:
+    """Validate soft delete request parameters.
+    
+    Args:
+        request: Soft delete request to validate
+        
+    Returns:
+        Validated soft delete request
+        
+    Raises:
+        ValidationError: If request contains invalid data
+    """
+    validated = request.copy()
+    
+    # Validate asset IDs
+    validated["asset_ids"] = validate_asset_ids(request["asset_ids"])
+    
+    # Validate category
+    valid_categories = ["broken", "duplicate", "maybe-later", "rejected", "archive"]
+    if request["category"] not in valid_categories:
+        raise ValidationError(f"Invalid category '{request['category']}'. Valid categories: {valid_categories}")
+    
+    # Validate reason if provided
+    if "reason" in request and request["reason"] is not None:
+        if not isinstance(request["reason"], str):
+            raise ValidationError("reason must be a string")
+        if len(request["reason"]) > 500:
+            raise ValidationError("reason exceeds maximum length of 500 characters")
+        # Check for malicious content
+        for pattern in SQL_INJECTION_PATTERNS:
+            if pattern.search(request["reason"]):
+                raise ValidationError("reason contains potentially malicious content")
+        validated["reason"] = request["reason"].strip()
+    
+    return validated
