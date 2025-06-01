@@ -41,6 +41,8 @@ alice mcp-server
 
 **✓ Fixed**: alice CLI no longer requires PYTHONPATH to be set.
 
+**Note**: If you encounter import issues with the installed `alice` command, use `./alice` from the project root or `python -m alicemultiverse`.
+
 ```bash
 # Organize AI-generated media (uses default folders from settings.yaml)
 alice
