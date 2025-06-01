@@ -29,16 +29,16 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
 
 ## Immediate: Restore Core Functionality (HIGHEST PRIORITY)
 
-### DuckDB Search Implementation
-- [ ] **Implement DuckDB search backend**
-  - [ ] Create DuckDB metadata schema
-  - [ ] Port search logic from PostgreSQL
-  - [ ] Add indexing for fast tag searches
-  - [ ] Test with 10k+ images
-- [ ] **Restore search API functionality**
-  - [ ] Update search_handler.py to use DuckDB
-  - [ ] Implement faceted search
-  - [ ] Add similarity search support
+### DuckDB Search Implementation ✅
+- [x] **Implement DuckDB search backend**
+  - [x] Create DuckDB metadata schema with assets and tags tables
+  - [x] Port search logic from PostgreSQL
+  - [x] Add indexing for fast tag searches
+  - [ ] Test with 10k+ images (pending large dataset)
+- [x] **Restore search API functionality**
+  - [x] Update search_handler.py to use DuckDB
+  - [x] Implement faceted search (tags, sources, media types)
+  - [ ] Add similarity search support (needs perceptual hashing)
   - [ ] Performance benchmarks
 
 ### Project Management Without Database

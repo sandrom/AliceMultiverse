@@ -5,9 +5,7 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-# PostgreSQL removed - using DuckDB for search
-# from ..database.repository import AssetRepository
-# from ..database.models import Asset as DBAsset
+from ..storage.duckdb_search import DuckDBSearch
 from ..database.cache import RedisCache
 from .structured_models import (
     Asset,
@@ -24,10 +22,20 @@ logger = logging.getLogger(__name__)
 class OptimizedSearchHandler:
     """Handles search operations with database optimization."""
     
-    def __init__(self):
-        """Initialize search handler."""
-        # PostgreSQL removed - would use DuckDB for search
-        # self.repo = AssetRepository()
+    def __init__(self, db_path: str = None):
+        """Initialize search handler.
+        
+        Args:
+            db_path: Path to DuckDB database file. If None, uses default location.
+        """
+        # Initialize DuckDB search
+        if not db_path:
+            # Use default path in user's data directory
+            data_dir = Path.home() / ".alice" / "data"
+            data_dir.mkdir(parents=True, exist_ok=True)
+            db_path = data_dir / "search.duckdb"
+        
+        self.search_db = DuckDBSearch(db_path)
         
         # Initialize Redis cache
         self.cache = RedisCache(
@@ -38,8 +46,7 @@ class OptimizedSearchHandler:
             ttl=300  # 5 minutes for search results
         )
         
-        # TODO: Initialize DuckDB connection for search
-        logger.warning("Search functionality needs to be reimplemented with DuckDB")
+        logger.info(f"Search handler initialized with DuckDB at {db_path}")
     
     def search_assets(self, request: SearchRequest) -> SearchResponse:
         """Execute optimized search query.
@@ -61,9 +68,8 @@ class OptimizedSearchHandler:
             # Convert cached database models back to API format
             api_results = []
             for asset_data in cached_result.get("results", []):
-                # Reconstruct minimal DBAsset for conversion
-                db_asset = type('DBAsset', (), asset_data)()
-                api_results.append(self._convert_db_to_api_asset(db_asset))
+                # asset_data is already a dictionary from DuckDB
+                api_results.append(self._convert_db_to_api_asset(asset_data))
             
             return SearchResponse(
                 total_count=cached_result.get("total_count", 0),
@@ -82,7 +88,9 @@ class OptimizedSearchHandler:
         
         # Map filters to database parameters
         if filters.get("media_type"):
-            db_params["media_type"] = filters["media_type"].value
+            # Handle both enum and string values
+            media_type = filters["media_type"]
+            db_params["media_type"] = media_type.value if hasattr(media_type, 'value') else media_type
         
         if filters.get("quality_rating"):
             quality_range = filters["quality_rating"]
@@ -93,10 +101,10 @@ class OptimizedSearchHandler:
             # Handle both single and multiple sources
             sources = filters["ai_source"]
             if isinstance(sources, str):
-                db_params["source_type"] = sources
-            elif isinstance(sources, list) and len(sources) == 1:
-                db_params["source_type"] = sources[0]
-            # Note: Current repository doesn't support multiple sources in one query
+                db_params["ai_source"] = sources
+            elif isinstance(sources, list):
+                db_params["ai_source"] = sources
+            # DuckDB supports multiple sources in one query
         
         # Handle tag filters
         if filters.get("tags") or filters.get("any_tags"):
@@ -113,11 +121,19 @@ class OptimizedSearchHandler:
                 db_params["tags"] = {"custom": all_tags}
                 db_params["tag_mode"] = "any" if filters.get("any_tags") else "all"
         
-        # TODO: Execute search with DuckDB
-        # For now, return empty results until DuckDB integration is complete
-        logger.warning("Search not yet implemented with DuckDB")
-        assets = []
-        total_count = 0
+        # Execute search with DuckDB
+        try:
+            assets, total_count = self.search_db.search(
+                filters=filters,
+                sort_by=request.get("sort_by", "created_at"),
+                order=request.get("order", "desc"),
+                limit=db_params["limit"],
+                offset=db_params["offset"]
+            )
+        except Exception as e:
+            logger.error(f"Search failed: {e}")
+            assets = []
+            total_count = 0
         
         # Convert database models to API models
         api_results = []
@@ -157,37 +173,40 @@ class OptimizedSearchHandler:
         """Convert database asset to API asset model.
         
         Args:
-            db_asset: Database asset model
+            db_asset: Database asset dictionary from DuckDB
             
         Returns:
             API asset model
         """
-        # Collect all tags
-        tags = []
-        for tag in db_asset.tags:
-            tags.append(tag.tag_value)
+        # DuckDB returns a dictionary, not an object
+        tags = db_asset.get("tags", [])
         
         # Extract metadata
-        metadata = db_asset.embedded_metadata or {}
-        generation_params = db_asset.generation_params or {}
+        metadata = db_asset.get("metadata", {})
+        generation_params = db_asset.get("generation_params", {})
+        
+        # Get dimensions
+        dimensions = db_asset.get("dimensions")
+        if not dimensions and db_asset.get("width") and db_asset.get("height"):
+            dimensions = {
+                "width": db_asset["width"],
+                "height": db_asset["height"]
+            }
         
         return Asset(
-            content_hash=db_asset.content_hash,
-            file_path=db_asset.file_path or "",
-            media_type=MediaType(db_asset.media_type or "unknown"),
-            file_size=db_asset.file_size or 0,
+            content_hash=db_asset["content_hash"],
+            file_path=db_asset.get("file_path", ""),
+            media_type=MediaType(db_asset.get("media_type", "unknown")),
+            file_size=db_asset.get("file_size", 0),
             tags=tags,
-            ai_source=db_asset.source_type,
-            quality_rating=db_asset.rating,
-            created_at=db_asset.first_seen.isoformat() if db_asset.first_seen else datetime.now().isoformat(),
-            modified_at=db_asset.last_seen.isoformat() if db_asset.last_seen else datetime.now().isoformat(),
-            discovered_at=db_asset.first_seen.isoformat() if db_asset.first_seen else datetime.now().isoformat(),
+            ai_source=db_asset.get("ai_source"),
+            quality_rating=db_asset.get("quality_rating"),
+            created_at=db_asset.get("created_at", datetime.now().isoformat()),
+            modified_at=db_asset.get("modified_at", datetime.now().isoformat()),
+            discovered_at=db_asset.get("discovered_at", datetime.now().isoformat()),
             metadata={
-                "dimensions": {
-                    "width": db_asset.width,
-                    "height": db_asset.height,
-                } if db_asset.width and db_asset.height else None,
-                "prompt": metadata.get("prompt") or generation_params.get("prompt"),
+                "dimensions": dimensions,
+                "prompt": db_asset.get("prompt") or metadata.get("prompt") or generation_params.get("prompt"),
                 "generation_params": generation_params,
             }
         )
@@ -258,52 +277,72 @@ class OptimizedSearchHandler:
         """Calculate facets from database results.
         
         Args:
-            assets: Database asset models
+            assets: Database asset dictionaries from DuckDB
             
         Returns:
             Search facets
         """
-        tag_counts = {}
-        source_counts = {}
-        quality_counts = {}
-        type_counts = {}
-        
-        for asset in assets:
-            # Count tags
-            for tag in asset.tags:
-                key = f"{tag.tag_type}:{tag.tag_value}"
-                tag_counts[key] = tag_counts.get(key, 0) + 1
+        # For better performance, get facets directly from DuckDB
+        try:
+            return self.search_db.get_facets(filters=None)
+        except Exception as e:
+            logger.warning(f"Failed to get facets from DuckDB: {e}")
             
-            # Count sources
-            if asset.source_type:
-                source_counts[asset.source_type] = source_counts.get(asset.source_type, 0) + 1
+            # Fallback to calculating from results
+            tag_counts = {}
+            source_counts = {}
+            quality_counts = {}
+            type_counts = {}
             
-            # Count quality ratings
-            if asset.rating:
-                quality_counts[str(asset.rating)] = quality_counts.get(str(asset.rating), 0) + 1
+            for asset in assets:
+                # Count tags
+                for tag in asset.get("tags", []):
+                    tag_counts[tag] = tag_counts.get(tag, 0) + 1
+                
+                # Count sources
+                ai_source = asset.get("ai_source")
+                if ai_source:
+                    source_counts[ai_source] = source_counts.get(ai_source, 0) + 1
+                
+                # Count quality ratings
+                rating = asset.get("quality_rating")
+                if rating is not None:
+                    # Convert to star rating
+                    if rating >= 80:
+                        star_rating = "5"
+                    elif rating >= 60:
+                        star_rating = "4"
+                    elif rating >= 40:
+                        star_rating = "3"
+                    elif rating >= 20:
+                        star_rating = "2"
+                    else:
+                        star_rating = "1"
+                    quality_counts[star_rating] = quality_counts.get(star_rating, 0) + 1
+                
+                # Count media types
+                media_type = asset.get("media_type")
+                if media_type:
+                    type_counts[media_type] = type_counts.get(media_type, 0) + 1
             
-            # Count media types
-            if asset.media_type:
-                type_counts[asset.media_type] = type_counts.get(asset.media_type, 0) + 1
-        
-        return SearchFacets(
-            tags=[
-                SearchFacet(value=tag, count=count)
-                for tag, count in sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)[:20]
-            ],
-            ai_sources=[
-                SearchFacet(value=source, count=count)
-                for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True)
-            ],
-            quality_ratings=[
-                SearchFacet(value=rating, count=count)
-                for rating, count in sorted(quality_counts.items())
-            ],
-            media_types=[
-                SearchFacet(value=media_type, count=count)
-                for media_type, count in sorted(type_counts.items(), key=lambda x: x[1], reverse=True)
-            ]
-        )
+            return SearchFacets(
+                tags=[
+                    SearchFacet(value=tag, count=count)
+                    for tag, count in sorted(tag_counts.items(), key=lambda x: x[1], reverse=True)[:20]
+                ],
+                ai_sources=[
+                    SearchFacet(value=source, count=count)
+                    for source, count in sorted(source_counts.items(), key=lambda x: x[1], reverse=True)
+                ],
+                quality_ratings=[
+                    SearchFacet(value=rating, count=count)
+                    for rating, count in sorted(quality_counts.items())
+                ],
+                media_types=[
+                    SearchFacet(value=media_type, count=count)
+                    for media_type, count in sorted(type_counts.items(), key=lambda x: x[1], reverse=True)
+                ]
+            )
     
     def _build_cache_key(self, request: SearchRequest) -> dict:
         """Build cache key from search request.
@@ -327,23 +366,52 @@ class OptimizedSearchHandler:
         """Serialize database asset for caching.
         
         Args:
-            asset: Database asset
+            asset: Database asset dictionary from DuckDB
             
         Returns:
             Serializable dictionary
         """
-        return {
-            "content_hash": asset.content_hash,
-            "file_path": asset.file_path,
-            "media_type": asset.media_type,
-            "file_size": asset.file_size,
-            "width": asset.width,
-            "height": asset.height,
-            "source_type": asset.source_type,
-            "rating": asset.rating,
-            "first_seen": asset.first_seen.isoformat() if asset.first_seen else None,
-            "last_seen": asset.last_seen.isoformat() if asset.last_seen else None,
-            "tags": [{"tag_type": t.tag_type, "tag_value": t.tag_value} for t in asset.tags],
-            "embedded_metadata": asset.embedded_metadata,
-            "generation_params": asset.generation_params
-        }
+        # DuckDB already returns a dictionary, just ensure timestamps are serializable
+        serialized = asset.copy()
+        
+        # Convert datetime objects to ISO format strings for JSON serialization
+        for field in ["created_at", "modified_at", "discovered_at", "first_seen", "last_seen"]:
+            if field in serialized and hasattr(serialized[field], "isoformat"):
+                serialized[field] = serialized[field].isoformat()
+        
+        return serialized
+    
+    def rebuild_index(self, paths: list[Path]) -> int:
+        """Rebuild the search index from files.
+        
+        Args:
+            paths: List of paths to scan for media files
+            
+        Returns:
+            Number of files indexed
+        """
+        # Clear Redis cache since we're rebuilding
+        self.cache.clear_namespace("search")
+        
+        # Rebuild DuckDB index
+        return self.search_db.rebuild_from_files(paths)
+    
+    def index_asset(self, metadata: dict) -> None:
+        """Index a single asset.
+        
+        Args:
+            metadata: Asset metadata to index
+        """
+        # Clear relevant cache entries
+        self.cache.clear_namespace("search")
+        
+        # Index in DuckDB
+        self.search_db.index_asset(metadata)
+    
+    def get_statistics(self) -> dict:
+        """Get search index statistics.
+        
+        Returns:
+            Dictionary with statistics
+        """
+        return self.search_db.get_statistics()
