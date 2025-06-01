@@ -1,5 +1,9 @@
 """Request and response models for Alice interface."""
 
+from dataclasses import dataclass
+from datetime import datetime
+from enum import Enum
+
 from typing import Any, Literal, TypedDict
 
 
@@ -103,3 +107,93 @@ class AssetInfo(TypedDict):
     created: str  # ISO format
     source: str
     relationships: dict[str, list[str]]  # type -> [asset_ids]
+
+
+# New models for image presentation and browsing
+
+@dataclass
+class PresentableImage:
+    """Image data optimized for chat display"""
+    hash: str
+    path: str
+    thumbnail_url: str  # Base64 or file:// URL
+    display_url: str    # Full resolution for detail view
+    
+    # Key metadata for display
+    tags: list[str]
+    source: str  # midjourney, dalle, etc.
+    created_date: datetime
+    
+    # Understanding data
+    description: str  # AI-generated description
+    mood: list[str]
+    style: list[str]
+    colors: list[str]
+    
+    # Selection history
+    previously_selected: bool = False
+    selection_reason: str | None = None
+    
+    # Technical info
+    dimensions: tuple[int, int] = (0, 0)
+    file_size: int = 0
+    
+    def to_display_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for chat display"""
+        return {
+            "id": self.hash,
+            "thumbnail": self.thumbnail_url,
+            "display_url": self.display_url,
+            "caption": self.description,
+            "tags": self.tags,
+            "source": self.source,
+            "mood": self.mood,
+            "style": self.style,
+            "colors": self.colors,
+            "selectable": True,
+            "previously_selected": self.previously_selected,
+            "selection_reason": self.selection_reason,
+            "created": self.created_date.isoformat() if self.created_date else None
+        }
+
+
+@dataclass
+class ImageSearchResult:
+    """Results formatted for AI chat display"""
+    images: list[PresentableImage]
+    total_count: int
+    has_more: bool
+    query_interpretation: str  # How we understood the query
+    suggestions: list[str]  # Suggested refinements
+    
+    def to_chat_response(self) -> dict[str, Any]:
+        """Format for chat UI display"""
+        return {
+            "images": [img.to_display_dict() for img in self.images],
+            "total": self.total_count,
+            "has_more": self.has_more,
+            "query_interpretation": self.query_interpretation,
+            "instructions": "Click images to select. Tell me what you like/dislike.",
+            "suggestions": self.suggestions
+        }
+
+
+@dataclass
+class SelectionFeedback:
+    """User feedback on image selection"""
+    image_hash: str
+    selected: bool
+    reason: str | None = None
+    session_id: str | None = None
+    timestamp: datetime | None = None
+    
+    def __post_init__(self):
+        if self.timestamp is None:
+            self.timestamp = datetime.now()
+
+
+class SoftDeleteCategory(str, Enum):
+    """Categories for soft-deleted images"""
+    REJECTED = "rejected"
+    BROKEN = "broken"
+    MAYBE_LATER = "maybe-later"

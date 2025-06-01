@@ -22,6 +22,9 @@ except ImportError:
 
 from .interface import AliceInterface
 from .interface.models import OrganizeRequest, SearchRequest, TagRequest
+from .interface.image_presentation import ImagePresentationAPI
+from .interface.image_presentation_mcp import register_image_presentation_tools
+from .storage.duckdb_cache import DuckDBSearchCache
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -29,6 +32,10 @@ logger = logging.getLogger(__name__)
 
 # Initialize server and alice interface
 alice = AliceInterface()
+
+# Initialize image presentation API
+storage = DuckDBSearchCache()
+image_api = ImagePresentationAPI(storage=storage)
 
 if MCP_AVAILABLE:
     server = Server("alice-multiverse")
@@ -42,6 +49,10 @@ else:
             return decorator
 
     server = DummyServer()
+
+# Register image presentation tools (works with both real and dummy server)
+if MCP_AVAILABLE:
+    register_image_presentation_tools(server, image_api)
 
 
 @server.tool()
@@ -260,6 +271,10 @@ def main():
     logger.info("  - get_asset_info: Get asset details")
     logger.info("  - assess_quality: Run quality assessment")
     logger.info("  - get_organization_stats: Get collection statistics")
+    logger.info("  - search_images: Browse images for collaborative selection")
+    logger.info("  - track_selection: Record image selection decisions")
+    logger.info("  - soft_delete_image: Move unwanted images to sorted folder")
+    logger.info("  - get_selection_summary: Get summary of selected images")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))

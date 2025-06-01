@@ -37,40 +37,26 @@ Following instructions.md: "a working service/application has always priority ov
 - [x] **Commit or revert** 21 uncommitted files - New features committed, critical fixes committed
 - [x] **Fix test suite** - Core imports work, service foundation stable
 
-### IMMEDIATE: Enable Creative Workflows (HIGHEST PRIORITY)
-- [ ] **Image Presentation API** - Return images to AI for display in chat
-  - [ ] Write comprehensive tests for image retrieval
-  - [ ] Document API endpoints and response formats
-  - [ ] Clean up old display code if any
-- [ ] **Selection Tracking** - Record which images user selected and why
-  - [ ] Test selection persistence and retrieval
-  - [ ] Document feedback data structure
-  - [ ] Remove deprecated tracking code
-- [ ] **Similarity Search** - "Find more like these selected ones"
-  - [ ] Implement with full test coverage
-  - [ ] Document similarity algorithms used
-  - [ ] Clean up old search implementations
-- [ ] **Soft Delete API** - Move rejected images to 'sorted-out' folder
-  - [ ] Test file movement and tracking
-  - [ ] Document soft-delete workflow
-  - [ ] Clean up hard-delete code
-- [ ] **Exclusion List** - Skip 'sorted-out' folders in scans
-  - [ ] Test exclusion logic thoroughly
-  - [ ] Document folder structure conventions
-  - [ ] Remove old filtering code
-- [ ] **Prompt Generation** - Create engaging Kling prompts from selected images
-  - [ ] Test prompt quality and variety
-  - [ ] Document prompt templates and strategies
-  - [ ] Clean up old prompt generation attempts
-
-### Remaining Issues (Next Session - HIGH PRIORITY)
+### IMMEDIATE: Fix Critical Issues (HIGHEST PRIORITY)
+- [ ] **Fix Image Presentation API test failures** - 9 tests need fixing (soft delete paths, mock expectations)
 - [ ] **Fix recursion bug** - Metadata loading causes infinite recursion in organizer
-- [ ] **Fix PYTHONPATH requirement** - alice CLI requires PYTHONPATH to be set (workaround: alice-wrapper.sh)  
-- [x] **Fix Midjourney test failures** - Async mock issues and API compatibility ✅ FIXED
-- [x] **Test naming conflicts** - Resolve test_config.py collection errors ✅ FIXED
-- [x] **Verify end-to-end functionality** - Test that alice CLI works without crashes ✅ VERIFIED
+- [ ] **Fix PYTHONPATH requirement** - alice CLI requires PYTHONPATH to be set (workaround: alice-wrapper.sh)
+- [ ] **Fix deprecation warnings** - MetadataCache, SQLAlchemy, AsyncIO warnings
+  - [ ] Update all imports to use new modules
+  - [ ] Test deprecated code paths still work
+  - [ ] Document migration path for users
+- [ ] **Complete test coverage** for new modules
+  - [ ] comparison/ module - test Elo system and web UI
+  - [ ] understanding/ module - test all providers
+  - [ ] storage/ module - test location registry
+  - [ ] Document test requirements for each module
+- [ ] **Add integration tests** for new understanding system
+  - [ ] Test multi-provider analysis
+  - [ ] Test metadata embedding
+  - [ ] Test tag search functionality
+  - [ ] Document test scenarios
 
-### Critical (Next Session - HIGH PRIORITY)
+### Additional Issues
 - [x] **Write ADRs** for major architectural changes ✅ DONE
   - ADR-007: Quality → Understanding System
   - ADR-008: DuckDB for Metadata Search
@@ -110,6 +96,40 @@ Following instructions.md: "a working service/application has always priority ov
 
 ## Next Up: Creative Workflow Support
 
+- [x] **Image Presentation API** - Return images to AI for display in chat ✅
+  - [x] Write comprehensive tests for image retrieval ✅
+  - [x] Document API endpoints and response formats ✅
+  - [x] Implement core functionality ✅
+  - [x] Run tests - 9/18 passing, 9 need fixes ✅
+  - [x] Integrate with MCP server ✅
+- [ ] **Selection Tracking** - Record which images user selected and why
+  - [x] Test selection persistence and retrieval ✅
+  - [x] Document feedback data structure ✅
+  - [ ] Remove deprecated tracking code
+- [ ] **Similarity Search** - "Find more like these selected ones"
+  - [ ] Implement with full test coverage
+  - [ ] Document similarity algorithms used
+  - [ ] Clean up old search implementations
+- [ ] **Soft Delete API** - Move rejected images to 'sorted-out' folder
+  - [x] Test file movement and tracking ✅
+  - [x] Document soft-delete workflow ✅
+  - [ ] Clean up hard-delete code
+- [ ] **Exclusion List** - Skip 'sorted-out' folders in scans
+  - [x] Test exclusion logic thoroughly ✅
+  - [x] Document folder structure conventions ✅
+  - [ ] Remove old filtering code
+- [ ] **Prompt Generation** - Create engaging Kling prompts from selected images
+  - [ ] Test prompt quality and variety
+  - [ ] Document prompt templates and strategies
+  - [ ] Clean up old prompt generation attempts
+- [ ] **Flux Kontext Integration** - Enable image editing/combination workflows
+  - [ ] Implement Flux Kontext provider for image editing
+  - [ ] Create keyframe generation workflow
+  - [ ] Test multi-image combination capabilities
+  - [ ] Document editing strategies for video sequences
+  - [ ] Build templates for common transitions (zoom, pan, object addition)
+  - [ ] Integrate with selection tracking for workflow continuity
+  
 ### Implementation Plan for Image Discovery Workflow
 
 **User Story**: "I have thousands of images and need to find a small set for video creation"
@@ -129,10 +149,24 @@ Following instructions.md: "a working service/application has always priority ov
    - Mark maybe-later → moves to 'sorted-out/archive/'
    - These folders excluded from future searches
 
-4. **Video Preparation**
-   - Selected images → generate Kling prompts
-   - Suggest transitions and narrative flow
-   - Export selection with prompts
+4. **Video Preparation with Flux Kontext**
+   - **Keyframe Creation**: Use Flux Kontext to edit/reframe selected images
+     - Describe changes to existing images (zoom, pan, add objects)
+     - Combine multiple images into cohesive keyframes
+     - Create variations for smooth transitions
+   - **Multi-frame Workflows**:
+     - Generate initial frames from any source (Midjourney, DALL-E, etc.)
+     - Use Flux Kontext to create intermediate keyframes
+     - Export keyframe sequence for Kling video generation
+   - **Advanced Editing**:
+     - Add/remove objects between frames
+     - Adjust composition for video flow
+     - Maintain style consistency across edits
+   - **Kling Frames Integration**:
+     - Generate prompts optimized for Kling Frames
+     - Support optional start/end keyframes
+     - Suggest motion types based on keyframe differences
+     - Export complete storyboard with frame sequences
 
 ### Technical Requirements
 
@@ -170,6 +204,8 @@ Following instructions.md: "a working service/application has always priority ov
        "destination": "sorted-out/broken/"
    })
    ```
+
+
 
 ## Backlog (Re-evaluate Weekly)
 
