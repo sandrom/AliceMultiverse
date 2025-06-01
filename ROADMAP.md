@@ -34,8 +34,8 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - [x] Update metadata embedder for new structure
 - [x] Implement Redis Streams for event system (16 tests passing)
 - [x] Create migration guide and examples for Redis Streams
-- [ ] Update all event publishers throughout codebase to use Redis Streams
-- [ ] Remove PostgreSQL dependencies from pyproject.toml
+- [x] Update all event publishers throughout codebase to use Redis Streams
+- [x] Remove PostgreSQL dependencies from pyproject.toml and requirements.txt
 - [x] Native array/JSON support for complex queries (implemented)
 - [x] Direct Parquet export for archival data (implemented)
 
