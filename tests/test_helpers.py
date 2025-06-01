@@ -1,39 +1,26 @@
-"""Test helper functions for quality assessment tests."""
-
-from alicemultiverse.quality.brisque import is_available as brisque_available
+"""Test helper functions for understanding system tests."""
 
 
-def get_expected_quality_scores():
-    """Get expected quality scores based on whether BRISQUE is available.
+def get_expected_understanding_scores():
+    """Get expected understanding scores for test images.
 
     Returns:
-        dict: Mapping of image types to (score, stars) tuples
+        dict: Mapping of image types to expected analysis results
     """
-    if brisque_available():
-        # Real BRISQUE scores
-        return {
-            "high_quality": (20.0, 5),
-            "medium_quality": (35.0, 4),
-            "low_quality": (60.0, 3),
-            "default": (90.0, 1),
-        }
-    else:
-        # Compression-based fallback scores
-        # Simple test images will have very low bits per pixel
-        return {
-            "high_quality": (90.0, 1),  # All simple images get same score
-            "medium_quality": (90.0, 1),  # from compression fallback
-            "low_quality": (90.0, 1),
-            "default": (90.0, 1),
-        }
+    return {
+        "high_quality": {"aesthetic_score": 0.8, "technical_score": 0.9},
+        "medium_quality": {"aesthetic_score": 0.6, "technical_score": 0.7},
+        "low_quality": {"aesthetic_score": 0.4, "technical_score": 0.5},
+        "default": {"aesthetic_score": 0.5, "technical_score": 0.5},
+    }
 
 
-def adjust_quality_expectations(test_func):
-    """Decorator to adjust quality test expectations based on BRISQUE availability."""
+def adjust_understanding_expectations(test_func):
+    """Decorator to adjust understanding test expectations."""
 
     def wrapper(*args, **kwargs):
         # Inject expected scores into test
-        kwargs["expected_scores"] = get_expected_quality_scores()
+        kwargs["expected_scores"] = get_expected_understanding_scores()
         return test_func(*args, **kwargs)
 
     return wrapper

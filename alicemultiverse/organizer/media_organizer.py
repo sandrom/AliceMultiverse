@@ -23,6 +23,16 @@ from .organization_helpers import (
 
 logger = get_logger(__name__)
 
+# Import pipeline function - doing it here to avoid circular imports
+def _get_create_pipeline_stages():
+    """Get create_pipeline_stages function dynamically to avoid circular import."""
+    try:
+        from ..pipeline.pipeline_organizer import create_pipeline_stages
+        return create_pipeline_stages
+    except ImportError:
+        logger.warning("Pipeline functionality not available")
+        return lambda config: None
+
 
 class MediaOrganizer:
     """Main class for organizing AI-generated media files."""
@@ -48,6 +58,7 @@ class MediaOrganizer:
         self.quality_enabled = False
 
         # Initialize pipeline stages if configured
+        create_pipeline_stages = _get_create_pipeline_stages()
         self.pipeline_stages = create_pipeline_stages(config)
         self.pipeline_enabled = bool(self.pipeline_stages)
 

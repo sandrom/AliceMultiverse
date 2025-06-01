@@ -366,14 +366,13 @@ def check_dependencies() -> bool:
         print("  Install with: brew install ffmpeg (macOS) or apt install ffmpeg (Linux)")
         deps_ok = False
 
-    # Check for BRISQUE
-    from ..quality.brisque import is_available
-
-    if is_available():
-        print("✓ BRISQUE available (quality assessment)")
-    else:
-        print("ℹ BRISQUE not available - quality assessment disabled")
-        print("  Install with: pip install image-quality")
+    # Check for understanding system
+    try:
+        from ..understanding import analyzer
+        print("✓ Understanding system available (advanced analysis)")
+    except ImportError:
+        print("ℹ Understanding system not available - advanced analysis disabled")
+        print("  Understanding system provides AI-powered asset analysis")
 
     return deps_ok
 

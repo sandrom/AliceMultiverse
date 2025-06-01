@@ -61,20 +61,18 @@ paths:
 
     def test_missing_dependencies_clear_message(self, alice):
         """Test missing dependencies provide installation instructions."""
-        with patch('alicemultiverse.quality.brisque.is_available', return_value=False):
-            # Try to use quality assessment without BRISQUE
-            request = OrganizeRequest(
-                quality_assessment=True,
-                pipeline="basic"
-            )
-            
-            response = alice.organize_media(request)
-            
-            # Should still work but maybe skip quality
-            assert isinstance(response["success"], bool)
-            if response["message"]:
-                # Message should explain the limitation
-                assert "quality" in response["message"].lower() or response["success"]
+        # Try to use understanding system with missing dependencies
+        request = OrganizeRequest(
+            understanding_enabled=True
+        )
+        
+        response = alice.organize_media(request)
+        
+        # Should still work but maybe skip understanding
+        assert isinstance(response["success"], bool)
+        if response["message"]:
+            # Message should explain the limitation
+            assert "understanding" in response["message"].lower() or response["success"]
 
     def test_api_errors_include_context(self, alice):
         """Test API errors include helpful context."""

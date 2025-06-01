@@ -25,29 +25,15 @@ class TestFullWorkflow:
         assert all(f.exists() for f in sample_media_files.values())
 
     @pytest.mark.integration
-    @patch("alicemultiverse.organizer.media_organizer.brisque_available")
-    @patch("alicemultiverse.organizer.media_organizer.BRISQUEAssessor")
-    def test_quality_assessment_workflow(
-        self, mock_brisque_class, mock_is_available, temp_dir, sample_media_files
-    ):
-        """Test organization with quality assessment."""
-        # Mock BRISQUE availability
-        mock_is_available.return_value = True
-
-        # Create mock BRISQUE assessor instance
-        mock_assessor = MagicMock()
-        mock_assessor.assess_quality.return_value = (30.0, 4)  # 4-star quality
-        mock_brisque_class.return_value = mock_assessor
-
+    def test_understanding_workflow(self, temp_dir, sample_media_files):
+        """Test organization with understanding system."""
         inbox = temp_dir / "inbox"
         organized = temp_dir / "organized"
 
-        # Run with quality assessment
-        result = main(["--inbox", str(inbox), "--output", str(organized), "--quality", "--dry-run"])
+        # Run with understanding enabled (if available)
+        result = main(["--inbox", str(inbox), "--output", str(organized), "--understanding", "--dry-run"])
 
         assert result == 0
-        # BRISQUE should be called for image files
-        assert mock_assessor.assess_quality.call_count >= 3  # We have 3 test images
 
     @pytest.mark.integration
     def test_metadata_caching_workflow(self, temp_dir, sample_media_files):
@@ -104,23 +90,20 @@ class TestFullWorkflow:
         inbox = temp_dir / "inbox"
         organized = temp_dir / "organized"
 
-        # Mock the quality assessment
-        with patch("alicemultiverse.quality.brisque.calculate_brisque_score") as mock_brisque:
-            mock_brisque.return_value = 20.0  # 5-star quality
+        # Test basic pipeline without mocking 
+        result = main(
+            [
+                "--inbox",
+                str(inbox),
+                "--output",
+                str(organized),
+                "--pipeline",
+                "basic",
+                "--dry-run",
+            ]
+        )
 
-            result = main(
-                [
-                    "--inbox",
-                    str(inbox),
-                    "--output",
-                    str(organized),
-                    "--pipeline",
-                    "basic",
-                    "--dry-run",
-                ]
-            )
-
-            assert result == 0
+        assert result == 0
 
     @pytest.mark.integration
     def test_cli_override_workflow(self, temp_dir):
@@ -138,7 +121,7 @@ class TestFullWorkflow:
                 str(organized),
                 "--paths.inbox=" + str(inbox),  # Override via OmegaConf syntax
                 "--processing.copy_mode=false",
-                "--quality.thresholds.3_star.max=70",
+                "--understanding.enabled=true",
                 "--dry-run",
             ]
         )
@@ -219,7 +202,7 @@ class TestCommandLineInterface:
         captured = capsys.readouterr()
         # Should show status of dependencies
         assert "ffprobe" in captured.out
-        assert "BRISQUE" in captured.out
+        assert "Understanding system" in captured.out
 
 
 class TestAPIKeyIntegration:

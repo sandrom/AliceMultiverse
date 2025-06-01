@@ -3,6 +3,7 @@
 import logging
 import time
 from pathlib import Path
+from typing import List, Optional
 
 from omegaconf import DictConfig
 
@@ -13,6 +14,23 @@ from .stages import PipelineStage
 # Import understanding stages dynamically to avoid circular imports
 
 logger = logging.getLogger(__name__)
+
+
+def create_pipeline_stages(config: DictConfig) -> Optional[List[PipelineStage]]:
+    """Create pipeline stages based on configuration.
+    
+    Args:
+        config: Configuration object
+        
+    Returns:
+        List of pipeline stages or None if no pipeline configured
+    """
+    pipeline_config = getattr(config, 'pipeline', None)
+    if not pipeline_config or not getattr(pipeline_config, 'mode', None):
+        return None
+    
+    organizer = PipelineOrganizer(config)
+    return organizer.pipeline_stages
 
 
 class PipelineOrganizer(MediaOrganizer):
