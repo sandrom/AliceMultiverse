@@ -25,7 +25,7 @@ from .models import (
     QualityAssessResponse,
 )
 from .organizer import AssetOrganizer
-from .quality import QualityPipeline
+# Quality assessment has been moved to understanding system
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -50,7 +50,7 @@ app.add_middleware(
 # Initialize components
 config = get_config()
 analyzer = AssetAnalyzer()
-quality_pipeline = QualityPipeline()
+# quality_pipeline = QualityPipeline()  # Moved to understanding system
 organizer = AssetOrganizer()
 
 
@@ -120,9 +120,10 @@ async def assess_quality(request: QualityAssessRequest):
         if not file_path.exists():
             raise HTTPException(status_code=404, detail="File not found")
 
-        # Run quality assessment
-        result = await quality_pipeline.assess(
-            file_path, content_hash=request.content_hash, pipeline_mode=request.pipeline_mode
+        # Quality assessment moved to understanding system
+        raise HTTPException(
+            status_code=501,
+            detail="Quality assessment has been moved to the understanding system"
         )
 
         # Publish event
@@ -181,7 +182,8 @@ async def process_batch(file_paths: list[str]):
             # Assess quality if image
             quality = None
             if analysis.media_type == "image":
-                quality = await quality_pipeline.assess(Path(file_path), analysis.content_hash)
+                # quality = await quality_pipeline.assess(Path(file_path), analysis.content_hash)
+                quality = None  # Quality assessment moved to understanding system
 
             # Plan organization
             organization = await organizer.plan_organization(
