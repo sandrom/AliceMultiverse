@@ -24,12 +24,15 @@ python-dotenv>=1.0.0  # For .env file support
 # Metadata embedding
 piexif>=1.1.3        # JPEG EXIF manipulation
 defusedxml>=0.7.1    # Safe XML parsing for XMP
+mutagen>=1.47.0      # Audio/video metadata (ID3, MP4)
 
 # Database
 sqlalchemy>=2.0.0
 alembic>=1.13.0
-psycopg2-binary>=2.9.0  # PostgreSQL adapter
-asyncpg>=0.30.0         # Async PostgreSQL support
+psycopg2-binary>=2.9.0  # PostgreSQL adapter (being phased out)
+asyncpg>=0.30.0         # Async PostgreSQL support (being phased out)
+duckdb>=0.10.0          # DuckDB for OLAP/search cache
+redis>=5.0.0            # Redis for caching and streams
 
 # Logging and monitoring
 structlog>=24.0.0       # Structured logging
