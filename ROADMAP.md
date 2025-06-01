@@ -43,10 +43,26 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
 
 ### Project Management Without Database
 - [ ] **File-based project storage**
-  - [ ] Design project.yaml format
+  - [ ] Design project.yaml format for metadata and context
   - [ ] Implement file-based ProjectService
-  - [ ] Store in .alice/projects/ directory
-  - [ ] Add project migration tool
+  - [ ] Support project folder structure:
+    ```
+    project-name/
+    ├── project.yaml         # Metadata, budget, context
+    ├── .alice/              # Alice-specific data
+    │   ├── selections.json  # Asset selections with reasons
+    │   └── sessions/        # Conversation history
+    ├── created/             # Assets created for this project
+    │   └── 2024-01-15/      # Organized by date/source
+    ├── selected/            # Assets copied from global library
+    ├── rounds/              # Selection rounds for curation
+    │   ├── round-1/
+    │   └── final/
+    └── exports/             # Final deliverables
+    ```
+  - [ ] Global registry in ~/.alice/projects/registry.yaml
+  - [ ] Asset copying/linking from global library
+  - [ ] Selection tracking with provenance
 
 ## Next Up: Creative Workflow Support
 
@@ -103,6 +119,24 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
    - Add/remove objects between frames
    - Generate variations for transitions
    - Export storyboard for Kling
+
+### Project-Based Asset Management
+
+**Philosophy**: Assets created within a project stay in the project by default. Move to global library only when reuse is identified.
+
+**Workflow**:
+1. **Create in Project** - New generations go to `project/created/`
+2. **Select from Library** - Copy existing assets to `project/selected/`
+3. **Curate in Rounds** - Mix created & selected in `project/rounds/`
+4. **Export Final** - Deliverables in `project/exports/`
+5. **Promote to Global** - Move gems to global library when reuse identified
+
+**Benefits**:
+- Projects are self-contained archives
+- Clear context for project-specific generations  
+- Easy to share complete projects
+- Flexible organization per project needs
+- No pollution of global library with one-off assets
 
 ## Backlog (Re-evaluate Weekly)
 
