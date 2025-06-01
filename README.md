@@ -105,8 +105,10 @@ alice keys setup
 ```
 
 This will guide you through setting up:
-- **SightEngine**: Technical quality assessment
-- **Claude (Anthropic)**: AI-powered defect detection
+- **Anthropic Claude**: Advanced image understanding and tagging
+- **OpenAI GPT-4**: Vision analysis and prompt generation
+- **Google AI**: Free tier image analysis
+- **DeepSeek**: Cost-effective batch processing
 
 ## 🏗️ Architecture
 
@@ -130,19 +132,20 @@ AliceMultiverse uses an event-driven architecture designed for AI orchestration:
 ```
 You: "I just generated 50 new images with Midjourney, can you help organize them?"
 
-Claude: "I'll help organize your Midjourney images. Let me check your Downloads folder 
-and organize them by quality. I'll use the premium pipeline to ensure accurate 
-quality assessment..."
+Claude: "I'll help organize your Midjourney images. Let me analyze your Downloads folder 
+and organize them by content and style. I'll use AI understanding to tag and 
+categorize them..."
 
-[Alice organizes images into dated folders with quality ratings]
+[Alice analyzes and organizes images with semantic tags]
 
 Claude: "I've organized 50 images from your Downloads folder:
-- 12 images rated 5-star (excellent quality)
-- 23 images rated 4-star (good quality)  
-- 15 images rated 3-star (average quality)
+- 18 portraits (realistic, stylized, fantasy)
+- 22 landscapes (sci-fi, nature, abstract)  
+- 10 conceptual art pieces
 
 They're now in Pictures/AI-Organized/2024-03-15/midjourney/
-Would you like me to show you the best ones?"
+Each image has been tagged with style, mood, and subject. 
+Would you like me to show you specific types?"
 ```
 
 ### Debugging
@@ -155,7 +158,7 @@ alice --debug --dry-run --verbose
 
 AliceMultiverse is evolving into a comprehensive creative workflow orchestrator:
 
-1. **Current**: Media organization with quality assessment
+1. **Current**: Media organization with AI understanding
 2. **Phase 1**: Full AI-native interface (in progress)
 3. **Phase 2**: Multi-agent creative workflows
 4. **Phase 3**: Integration with creative tools (ComfyUI, Photoshop, etc.)

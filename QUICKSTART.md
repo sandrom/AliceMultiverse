@@ -36,10 +36,10 @@ You: "I have a bunch of Midjourney images in my Downloads folder"
 Claude: "I'll organize your Midjourney images from Downloads. Let me check what's there and sort them by date and project..."
 ```
 
-**Quality Assessment**:
+**Content Understanding**:
 ```
-You: "Can you find my best quality AI portraits?"
-Claude: "I'll search for your highest quality portrait images and show you the 5-star rated ones..."
+You: "Can you find my most detailed AI portraits?"
+Claude: "I'll search for portrait images with rich details and artistic styles..."
 ```
 
 **Project Management**:
@@ -72,7 +72,7 @@ See [Debug CLI Reference](docs/user-guide/cli-usage.md) if you're a developer.
 AliceMultiverse automatically:
 1. **Detects** AI-generated content (15+ tools supported)
 2. **Organizes** by date, project, and source
-3. **Assesses** quality (optional)
+3. **Analyzes** content with AI understanding
 4. **Maintains** metadata for instant search
 
 ### Supported Content
@@ -86,7 +86,7 @@ organized/
 ├── 2024-03-15/              # Date
 │   └── project-name/        # Project
 │       └── midjourney/      # AI tool
-│           ├── 5-star/      # Quality rating
+│           ├── portraits/   # Content category
 │           │   └── image1.png
 │           └── 4-star/
 │               └── image2.jpg
@@ -120,7 +120,7 @@ organized/
 ## ❓ Common Questions
 
 **Q: Do I need API keys?**  
-A: Only for advanced quality features (SightEngine, Claude analysis). Basic organization is free.
+A: Only for AI understanding features (Claude, GPT-4, etc.). Basic organization is free.
 
 **Q: Can I still use the CLI?**  
 A: Only for debugging with --debug flag. Normal usage is through AI assistants.

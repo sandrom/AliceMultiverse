@@ -48,7 +48,7 @@ hot_storage = StorageLocation(
     rules=[
         StorageRule(
             max_age_days=7,
-            min_quality_stars=4,
+            include_tags=["hero", "featured"],
             include_types=["image/jpeg", "image/png"]
         )
     ],
@@ -61,7 +61,7 @@ registry.register_location(hot_storage)
 # Determine best location for a file
 metadata = {
     "age_days": 2,
-    "quality_stars": 5,
+    "tags": ["hero", "production", "portrait"],
     "file_type": "image/jpeg",
     "file_size": 1024000,
     "tags": ["hero", "production"]
@@ -84,7 +84,7 @@ registry.track_file(
 Rules determine which files should be stored in each location:
 
 - **Age rules**: `max_age_days`, `min_age_days`
-- **Quality rules**: `min_quality_stars`, `max_quality_stars`
+- **Tag rules**: `include_tags`, `exclude_tags`
 - **Type rules**: `include_types`, `exclude_types` (MIME types)
 - **Size rules**: `max_size_bytes`, `min_size_bytes`
 - **Tag rules**: `require_tags`, `exclude_tags`
@@ -142,7 +142,7 @@ The storage registry integrates with the existing file-first architecture:
 
 1. Files maintain embedded metadata
 2. Registry tracks locations by content hash
-3. Supports the existing quality assessment pipeline
+3. Supports the existing understanding and tagging system
 4. Works with the asset organization system
 
 ## Future Enhancements
