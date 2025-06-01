@@ -127,6 +127,40 @@ For normal usage, use Alice through an AI assistant instead.
     metrics_parser.add_argument(
         "--port", type=int, default=9090, help="Port to listen on (default: 9090)"
     )
+    
+    # Comparison subcommand with subcommands
+    comparison_parser = subparsers.add_parser("comparison", help="Model comparison system")
+    comparison_subparsers = comparison_parser.add_subparsers(
+        dest="comparison_command", help="Comparison commands"
+    )
+    
+    # Comparison - server
+    comparison_server = comparison_subparsers.add_parser("server", help="Start web interface")
+    comparison_server.add_argument(
+        "--host", default="0.0.0.0", help="Host to bind to (default: 0.0.0.0)"
+    )
+    comparison_server.add_argument(
+        "--port", type=int, default=8000, help="Port to listen on (default: 8000)"
+    )
+    comparison_server.add_argument(
+        "--populate-test-data", action="store_true", help="Populate with test data (development only)"
+    )
+    
+    # Comparison - populate
+    comparison_populate = comparison_subparsers.add_parser("populate", help="Populate with images")
+    comparison_populate.add_argument("directory", help="Directory to scan")
+    comparison_populate.add_argument("-r", "--recursive", action="store_true", help="Search recursively")
+    comparison_populate.add_argument("-l", "--limit", type=int, help="Maximum number to add")
+    
+    # Comparison - populate-default
+    comparison_populate_default = comparison_subparsers.add_parser("populate-default", help="Populate from default dirs")
+    comparison_populate_default.add_argument("-l", "--limit", type=int, help="Maximum number to add")
+    
+    # Comparison - stats
+    comparison_stats = comparison_subparsers.add_parser("stats", help="Show model rankings")
+    
+    # Comparison - reset
+    comparison_reset = comparison_subparsers.add_parser("reset", help="Reset all comparison data")
 
     # Directory arguments
     parser.add_argument(
@@ -412,6 +446,38 @@ def main(argv: list[str] | None = None) -> int:
         
         run_metrics_server(host=args.host, port=args.port)
         return 0
+    
+    # Handle comparison subcommand
+    if args.command == "comparison":
+        if args.comparison_command == "server":
+            import os
+            from ..comparison.web_server import run_server
+            
+            if args.populate_test_data:
+                os.environ["ALICE_ENV"] = "development"
+            
+            run_server(host=args.host, port=args.port)
+            return 0
+        else:
+            # Handle other comparison commands
+            from ..comparison.cli import cli as comparison_cli
+            
+            # Build command line args for click
+            click_args = [args.comparison_command]
+            
+            if args.comparison_command == "populate":
+                click_args.append(args.directory)
+                if args.recursive:
+                    click_args.append("--recursive")
+                if args.limit:
+                    click_args.extend(["--limit", str(args.limit)])
+            elif args.comparison_command == "populate-default":
+                if hasattr(args, "limit") and args.limit:
+                    click_args.extend(["--limit", str(args.limit)])
+            # stats and reset don't need additional args
+            
+            comparison_cli(click_args)
+            return 0
 
     # Setup logging for main command
     log_level = args.log_level if hasattr(args, "log_level") else "INFO"

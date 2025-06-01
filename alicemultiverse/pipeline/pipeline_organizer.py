@@ -10,7 +10,7 @@ from ..core.types import MediaType, OrganizeResult
 from ..core.keys import APIKeyManager
 from ..organizer.media_organizer import MediaOrganizer
 from .stages import PipelineStage
-from ..understanding.pipeline_stages import ImageUnderstandingStage, MultiProviderUnderstandingStage
+# Import understanding stages dynamically to avoid circular imports
 
 logger = logging.getLogger(__name__)
 
@@ -78,6 +78,9 @@ class PipelineOrganizer(MediaOrganizer):
         """
         # Image understanding stages
         if stage_name.startswith("understanding_"):
+            # Dynamic import to avoid circular imports
+            from ..understanding.pipeline_stages import ImageUnderstandingStage, MultiProviderUnderstandingStage
+            
             # Extract provider from stage name
             provider = stage_name.replace("understanding_", "")
             

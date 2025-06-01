@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alice Model Comparison</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header class="header">
+        <h1>Alice Model Comparison</h1>
+        <button class="stats-button" onclick="showStats()">View Rankings</button>
+    </header>
+
+    <main class="comparison-container">
+        <div class="image-panel">
+            <div class="label">A</div>
+            <div class="image-wrapper" id="image-a">
+                <div class="loading">Loading...</div>
+            </div>
+        </div>
+
+        <div class="image-panel">
+            <div class="label">B</div>
+            <div class="image-wrapper" id="image-b">
+                <div class="loading">Loading...</div>
+            </div>
+        </div>
+    </main>
+
+    <div class="controls">
+        <div class="control-group">
+            <button class="control-button" onclick="selectWinner('a')" id="btn-a">
+                <span>A is better</span>
+                <kbd>A</kbd>
+            </button>
+            <button class="control-button" onclick="selectWinner('tie')" id="btn-tie">
+                <span>Tie</span>
+                <kbd>=</kbd>
+            </button>
+            <button class="control-button" onclick="selectWinner('b')" id="btn-b">
+                <span>B is better</span>
+                <kbd>B</kbd>
+            </button>
+        </div>
+
+        <div class="strength-selector" id="strength-selector" style="display: none;">
+            <label>Strength:</label>
+            <div class="strength-buttons">
+                <button class="strength-button" onclick="selectStrength('slight')">Slight</button>
+                <button class="strength-button active" onclick="selectStrength('clear')">Clear</button>
+                <button class="strength-button" onclick="selectStrength('strong')">Strong</button>
+                <button class="strength-button" onclick="selectStrength('decisive')">Decisive</button>
+            </div>
+        </div>
+
+        <button class="control-button" onclick="submitVote()" id="submit-btn" style="display: none;">
+            Submit <kbd>Enter</kbd>
+        </button>
+    </div>
+
+    <div class="instructions">
+        <p><kbd>A</kbd> or <kbd>←</kbd> Select A</p>
+        <p><kbd>B</kbd> or <kbd>→</kbd> Select B</p>
+        <p><kbd>=</kbd> or <kbd>Space</kbd> Tie</p>
+        <p><kbd>1-4</kbd> Set strength</p>
+        <p><kbd>Enter</kbd> Submit</p>
+    </div>
+
+    <!-- Stats Modal -->
+    <div class="modal" id="stats-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Model Rankings</h2>
+                <button class="close-button" onclick="hideStats()">×</button>
+            </div>
+            <table class="stats-table" id="stats-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>Model</th>
+                        <th>Rating</th>
+                        <th>Comparisons</th>
+                        <th>Win Rate</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="/static/comparison.js"></script>
+</body>
+</html>

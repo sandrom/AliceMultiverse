@@ -66,6 +66,7 @@ class ProviderRegistry:
         from .ideogram_provider import IdeogramProvider
         from .leonardo_provider import LeonardoProvider
         from .elevenlabs_provider import ElevenLabsProvider
+        from .midjourney_provider import MidjourneyProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
@@ -98,6 +99,8 @@ class ProviderRegistry:
         self.register_provider("elevenlabs", ElevenLabsProvider)
         self.register_provider("eleven-labs", ElevenLabsProvider)  # Alias
         self.register_provider("11labs", ElevenLabsProvider)  # Alias
+        self.register_provider("midjourney", MidjourneyProvider)
+        self.register_provider("mj", MidjourneyProvider)  # Alias
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
@@ -177,6 +180,8 @@ class ProviderRegistry:
                 "elevenlabs": "ELEVENLABS_API_KEY",
                 "eleven-labs": "ELEVENLABS_API_KEY",
                 "11labs": "ELEVENLABS_API_KEY",
+                "midjourney": "USEAPI_API_KEY",  # Default to UseAPI
+                "mj": "USEAPI_API_KEY",
             }
             if name_lower in env_vars:
                 api_key = os.getenv(env_vars[name_lower])

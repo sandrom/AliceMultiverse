@@ -11,66 +11,44 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 3. **What would users pay for?** Sound effects > Semantic search > Cross-platform sync > AI insights
 4. **What's broken RIGHT NOW?** Quality assessment removed - need docs update
 
-## Next Up (Priority Order)
+## CRITICAL: Code Cleanup Required 🚨
 
-### 1. ElevenLabs Sound Effects ✅
-- [x] Implement ElevenLabs provider for AI sound effects
-- [x] Support text-to-sound generation
-- [x] Add duration and format parameters
-- [x] Enable sound effects in video workflows
-- [x] Create audio-focused workflow templates
+**Status:** All feature development BLOCKED until these are resolved.
+Following instructions.md: "a working service/application has always priority over features"
 
-### 2. Midjourney Integration
-- [ ] Research proxy API options (no official API)
-- [ ] Implement Discord bridge or third-party API
-- [ ] Handle asynchronous generation pattern
-- [ ] Parse and extract seed/parameters
+### Immediate (This Session - BLOCKING)
+- [ ] **Fix broken imports** - Remove alicemultiverse.quality references from 9 test files
+- [ ] **Implement missing create_pipeline_stages()** function or remove the call
+- [ ] **Commit or revert** 21 uncommitted files (decide repository state)
+- [ ] **Fix test suite** - Currently 5+ test files cannot be imported
 
-### 3. DuckDB + Redis Streams Migration ✅
-- [x] Replace PostgreSQL with DuckDB for all metadata/search (OLAP)
-- [x] Implement DuckDB search cache with content-addressed storage
-- [x] Write comprehensive tests for DuckDB (13 tests passing)
-- [x] Create file scanner to rebuild cache from embedded metadata
-- [x] Update metadata embedder for new structure
-- [x] Implement Redis Streams for event system (16 tests passing)
-- [x] Create migration guide and examples for Redis Streams
-- [x] Update all event publishers throughout codebase to use Redis Streams
-- [x] Remove PostgreSQL dependencies from pyproject.toml and requirements.txt
-- [x] Native array/JSON support for complex queries (implemented)
-- [x] Direct Parquet export for archival data (implemented)
+### Critical (Next Session - HIGH PRIORITY)
+- [ ] **Write ADRs** for major architectural changes (quality→understanding, DuckDB, file-first)
+- [ ] **Update documentation** - CLAUDE.md still references removed quality features
+- [ ] **Fix deprecation warnings** - MetadataCache, SQLAlchemy, AsyncIO warnings
+- [ ] **Add integration tests** for new understanding system
 
-### 4. Multi-Location Storage System
-- [ ] Implement storage location registry in DuckDB
-- [ ] Support local, S3/GCS, network drives
-- [ ] Content-addressed file tracking
-- [ ] Automatic file discovery across locations
-- [ ] Storage rules engine (what goes where)
+### Important (This Week - MEDIUM PRIORITY)
+- [ ] **Complete test coverage** for new modules (comparison/, understanding/, storage/)
+- [ ] **Clean up temporary files** - Remove research docs, fix services/asset-processor
+- [ ] **Align documentation** with actual implementation
+- [ ] **Performance testing** of DuckDB integration
 
-### 5. Model Comparison & Rating System
-- [ ] Web interface for blind A/B comparison
-- [ ] Simple keyboard controls: A/←, B/→, =/Space
-- [ ] Optional strength rating (1-3) after picking winner
-- [ ] Elo rating system to track model performance
-- [ ] Store individual model outputs separately
-- [ ] Auto-select models based on Elo ratings
-- [ ] AI-initiated but human-rated workflow
+## Next Up (After Cleanup Complete)
 
-### 6. Advanced Image Understanding
-- [ ] Expand tag categories for better search
-- [ ] Add custom instruction support per project
-- [ ] Implement batch analysis for existing files
-- [ ] Cost optimization with provider selection
+### 1. Semantic Search & Discovery
 - [ ] Semantic similarity search with DuckDB VSS extension
 - [ ] Model selection based on performance data
+- [ ] Vector embeddings for image similarity
+- [ ] Cross-modal search (text-to-image, image-to-text)
 
 ## Backlog (Re-evaluate Weekly)
 
 ### Search & Discovery
-- DuckDB columnar storage for fast analytical queries
-- DuckDB VSS extension for vector similarity search
 - Direct S3/GCS querying with DuckDB
-- Rebuild search index from file metadata
 - Cloud metadata integration (GCS/S3)
+- Real-time search suggestions
+- Faceted search interface
 
 ### Storage & Sync
 - Multi-device synchronization
@@ -89,6 +67,7 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - **Hedra**: Character-2 talking avatars from image + audio
 - **fal.ai**: FLUX family, Kling video, mmaudio, specialized models
 - **ElevenLabs**: AI sound effects generation with duration control, multiple formats
+- **Midjourney**: All models (v4-v6.1, niji) via proxy APIs (UseAPI/GoAPI), parameter parsing
 
 ### Features
 - **Multi-Modal Workflows**: Chain operations across providers with cost optimization
@@ -96,8 +75,14 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - **Flexible Storage**: Content-addressed tracking across multiple locations
 - **Rich Tagging**: Semantic tags embedded in file metadata for portability
 - **Search Performance**: 10-20x speedup with eager loading and Redis caching
-- **Event System**: PostgreSQL-based with workflow events (migrating to Redis Streams)
+- **Event System**: Redis Streams-based with consumer groups and retry logic
 - **Provider Infrastructure**: Unified base class with health monitoring
+- **DuckDB Search Cache**: OLAP-optimized metadata search with content addressing
+- **ElevenLabs Sound Effects**: AI-generated sound effects with duration control
+- **Midjourney Integration**: Full support via proxy APIs with parameter parsing
+- **Multi-Location Storage**: Registry for tracking files across local/S3/GCS/network with rules engine
+- **Model Comparison System**: Web-based blind A/B testing with Elo ratings and keyboard shortcuts
+- **Advanced Image Understanding**: Hierarchical tagging, custom instructions, batch analysis, cost optimization
 
 ## Database Architecture Evolution
 
