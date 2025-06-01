@@ -39,11 +39,29 @@ Following instructions.md: "a working service/application has always priority ov
 
 ### IMMEDIATE: Enable Creative Workflows (HIGHEST PRIORITY)
 - [ ] **Image Presentation API** - Return images to AI for display in chat
+  - [ ] Write comprehensive tests for image retrieval
+  - [ ] Document API endpoints and response formats
+  - [ ] Clean up old display code if any
 - [ ] **Selection Tracking** - Record which images user selected and why
+  - [ ] Test selection persistence and retrieval
+  - [ ] Document feedback data structure
+  - [ ] Remove deprecated tracking code
 - [ ] **Similarity Search** - "Find more like these selected ones"
+  - [ ] Implement with full test coverage
+  - [ ] Document similarity algorithms used
+  - [ ] Clean up old search implementations
 - [ ] **Soft Delete API** - Move rejected images to 'sorted-out' folder
+  - [ ] Test file movement and tracking
+  - [ ] Document soft-delete workflow
+  - [ ] Clean up hard-delete code
 - [ ] **Exclusion List** - Skip 'sorted-out' folders in scans
+  - [ ] Test exclusion logic thoroughly
+  - [ ] Document folder structure conventions
+  - [ ] Remove old filtering code
 - [ ] **Prompt Generation** - Create engaging Kling prompts from selected images
+  - [ ] Test prompt quality and variety
+  - [ ] Document prompt templates and strategies
+  - [ ] Clean up old prompt generation attempts
 
 ### Remaining Issues (Next Session - HIGH PRIORITY)
 - [ ] **Fix recursion bug** - Metadata loading causes infinite recursion in organizer
@@ -59,15 +77,36 @@ Following instructions.md: "a working service/application has always priority ov
   - ADR-009: File-First Metadata Architecture
 - [x] **Update documentation** - CLAUDE.md still references removed quality features ✅ UPDATED
 - [ ] **Fix deprecation warnings** - MetadataCache, SQLAlchemy, AsyncIO warnings
+  - [ ] Update all imports to use new modules
+  - [ ] Test deprecated code paths still work
+  - [ ] Document migration path for users
 - [ ] **Add integration tests** for new understanding system
+  - [ ] Test multi-provider analysis
+  - [ ] Test metadata embedding
+  - [ ] Test tag search functionality
+  - [ ] Document test scenarios
 
 ### Important (This Week - MEDIUM PRIORITY)
-- [ ] **Image Presentation UI** - Show images in AI chat for selection
-- [ ] **Feedback Loop** - Capture user preferences and reasons
-- [ ] **Similarity Search** - Find images based on selected examples
-- [ ] **Soft Delete Implementation** - Move unwanted images to excluded folders
-- [ ] **Complete test coverage** for new modules (comparison/, understanding/, storage/)
+- [ ] **Complete test coverage** for new modules
+  - [ ] comparison/ module - test Elo system and web UI
+  - [ ] understanding/ module - test all providers
+  - [ ] storage/ module - test location registry
+  - [ ] Document test requirements for each module
+- [ ] **Clean up temporary files and old code**
+  - [ ] Remove research docs that are outdated
+  - [ ] Fix services/asset-processor structure
+  - [ ] Delete deprecated quality assessment code
+  - [ ] Archive old experiments properly
+- [ ] **Align all documentation**
+  - [ ] Update README.md with current features
+  - [ ] Sync docs/ with implementation
+  - [ ] Add examples for new workflows
+  - [ ] Remove references to deprecated features
 - [ ] **Performance testing** of DuckDB integration
+  - [ ] Benchmark search operations
+  - [ ] Test with large datasets (10k+ images)
+  - [ ] Document performance characteristics
+  - [ ] Compare with old PostgreSQL performance
 
 ## Next Up: Creative Workflow Support
 
@@ -231,26 +270,83 @@ storage:
 4. **Provider Diversity**: Support the tools creatives actually use
 5. **Cost Awareness**: Always track and optimize generation costs
 6. **Simple Integration**: Each provider should work standalone
+7. **Documentation First**: Every feature must be documented before release
+8. **Test Coverage**: No feature without comprehensive tests
+9. **Clean as You Go**: Remove old code when adding new
+10. **User Workflows**: Design for complete creative workflows, not just features
 
 ## Implementation Guide
+
+### Development Workflow for New Features
+
+1. **Plan**
+   - Write ADR if architectural change
+   - Update roadmap with feature details
+   - Design API with documentation first
+
+2. **Implement**
+   - Write tests FIRST (TDD approach)
+   - Implement feature to pass tests
+   - Clean up any old/deprecated code
+   - Add comprehensive error handling
+
+3. **Document**
+   - Update relevant .md files
+   - Add docstrings to all functions
+   - Create usage examples
+   - Update CHANGELOG.md
+
+4. **Test**
+   - Unit tests for all new code
+   - Integration tests for workflows
+   - Manual testing of user scenarios
+   - Performance benchmarks if relevant
+
+5. **Clean**
+   - Remove commented-out code
+   - Delete temporary test files
+   - Archive old implementations
+   - Update .gitignore if needed
 
 ### Adding New Providers
 
 1. Check existing patterns in `alicemultiverse/providers/`
 2. Inherit from `BaseProvider` 
 3. Implement required methods: `generate()`, `estimate_cost()`, `get_generation_time()`
-4. Add comprehensive tests
+4. Add comprehensive tests (aim for 90%+ coverage)
 5. Document API keys and setup
 6. Add example usage
+7. Clean up any similar old providers
 
 ### Testing Requirements
 
 ```bash
 # Before ANY commit:
-python -m pytest tests/unit/test_new_provider.py
-python -m pytest tests/integration/  # If applicable
+python -m pytest tests/unit/test_new_feature.py -v  # Unit tests
+python -m pytest tests/integration/ -v              # Integration tests
+python -m pytest --cov=alicemultiverse --cov-report=html  # Coverage
 alice --dry-run  # Verify CLI still works
+
+# Check for regressions:
+python -m pytest tests/ -x  # Stop on first failure
 ```
+
+### Documentation Standards
+
+1. **Code Documentation**
+   - Every public function needs a docstring
+   - Complex logic needs inline comments
+   - Type hints for all parameters
+
+2. **User Documentation**
+   - Update README.md for new features
+   - Add to relevant docs/ sections
+   - Include practical examples
+
+3. **Developer Documentation**
+   - Document architectural decisions
+   - Explain non-obvious design choices
+   - Add migration guides for breaking changes
 
 ### Recent Changes
 
