@@ -39,6 +39,8 @@ alice mcp-server
 
 **⚠️ Note**: Direct CLI usage is deprecated. Use --debug flag for development.
 
+**✓ Fixed**: alice CLI no longer requires PYTHONPATH to be set.
+
 ```bash
 # Organize AI-generated media (uses default folders from settings.yaml)
 alice

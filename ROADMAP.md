@@ -38,9 +38,9 @@ Following instructions.md: "a working service/application has always priority ov
 - [x] **Fix test suite** - Core imports work, service foundation stable
 
 ### IMMEDIATE: Fix Critical Issues (HIGHEST PRIORITY)
-- [ ] **Fix Image Presentation API test failures** - 9 tests need fixing (soft delete paths, mock expectations)
-- [ ] **Fix recursion bug** - Metadata loading causes infinite recursion in organizer
-- [ ] **Fix PYTHONPATH requirement** - alice CLI requires PYTHONPATH to be set (workaround: alice-wrapper.sh)
+- [x] **Fix Image Presentation API test failures** - All 18 tests now passing
+- [x] **Fix recursion bug** - Fixed circular dependency in pipeline_organizer.py
+- [x] **Fix PYTHONPATH requirement** - Created cli_entry.py wrapper for proper imports
 - [ ] **Fix deprecation warnings** - MetadataCache, SQLAlchemy, AsyncIO warnings
   - [ ] Update all imports to use new modules
   - [ ] Test deprecated code paths still work

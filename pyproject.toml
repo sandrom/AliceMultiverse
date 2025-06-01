@@ -58,7 +58,7 @@ dev = [
 ]
 
 [project.scripts]
-alice = "alicemultiverse.interface.main_cli:main"
+alice = "alicemultiverse.cli_entry:main"
 
 [project.urls]
 "Homepage" = "https://github.com/yourusername/AliceMultiverse"
