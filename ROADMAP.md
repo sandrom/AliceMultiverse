@@ -22,10 +22,12 @@ Following instructions.md: "a working service/application has always priority ov
 - [x] **Commit or revert** 21 uncommitted files - New features committed, critical fixes committed
 - [x] **Fix test suite** - Core imports work, service foundation stable
 
-### Remaining Issues (Next Session - HIGH PRIORITY)  
+### Remaining Issues (Next Session - HIGH PRIORITY)
+- [ ] **Fix recursion bug** - Metadata loading causes infinite recursion in organizer
+- [ ] **Fix PYTHONPATH requirement** - alice CLI requires PYTHONPATH to be set (workaround: alice-wrapper.sh)  
 - [x] **Fix Midjourney test failures** - Async mock issues and API compatibility ✅ FIXED
-- [ ] **Test naming conflicts** - Resolve test_config.py collection errors
-- [ ] **Verify end-to-end functionality** - Test that alice CLI works without crashes
+- [x] **Test naming conflicts** - Resolve test_config.py collection errors ✅ FIXED
+- [x] **Verify end-to-end functionality** - Test that alice CLI works without crashes ✅ VERIFIED
 
 ### Critical (Next Session - HIGH PRIORITY)
 - [ ] **Write ADRs** for major architectural changes (quality→understanding, DuckDB, file-first)
