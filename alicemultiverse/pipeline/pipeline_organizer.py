@@ -29,8 +29,89 @@ def create_pipeline_stages(config: DictConfig) -> Optional[List[PipelineStage]]:
     if not pipeline_config or not getattr(pipeline_config, 'mode', None):
         return None
     
-    organizer = PipelineOrganizer(config)
-    return organizer.pipeline_stages
+    # Create stages directly without instantiating PipelineOrganizer to avoid recursion
+    stages = []
+    mode = pipeline_config.mode
+    
+    stages_map = {
+        # Single provider understanding
+        "basic": ["understanding_deepseek"],  # Most cost-effective
+        "deepseek": ["understanding_deepseek"],
+        "google": ["understanding_google"],
+        "openai": ["understanding_openai"],
+        "anthropic": ["understanding_anthropic"],
+        
+        # Multi-provider understanding
+        "standard": ["understanding_multi_cheap"],  # DeepSeek + Google
+        "premium": ["understanding_multi_all"],     # All providers
+        "full": ["understanding_multi_all"],
+        
+        # Custom
+        "custom": getattr(pipeline_config, "stages", []),
+    }
+    
+    stage_names = stages_map.get(mode, [])
+    
+    for stage_name in stage_names:
+        stage = _create_stage_instance(stage_name, pipeline_config)
+        if stage:
+            stages.append(stage)
+            logger.info(f"Initialized pipeline stage: {stage_name}")
+        else:
+            logger.warning(f"Failed to initialize stage: {stage_name}")
+    
+    return stages if stages else None
+
+
+def _create_stage_instance(stage_name: str, pipeline_config: DictConfig) -> Optional[PipelineStage]:
+    """Create a pipeline stage instance by name.
+    
+    Args:
+        stage_name: Name of the stage to create
+        pipeline_config: Pipeline configuration
+        
+    Returns:
+        Pipeline stage instance or None if creation failed
+    """
+    # Image understanding stages
+    if stage_name.startswith("understanding_"):
+        # Dynamic import to avoid circular imports
+        from ..understanding.pipeline_stages import ImageUnderstandingStage, MultiProviderUnderstandingStage
+        
+        # Extract provider from stage name
+        provider = stage_name.replace("understanding_", "")
+        
+        if provider == "multi_cheap":
+            # Cost-effective multi-provider
+            return MultiProviderUnderstandingStage(
+                providers=["deepseek", "google"],
+                merge_tags=True,
+                detailed=getattr(pipeline_config, "detailed", False)
+            )
+        elif provider == "multi_all":
+            # All available providers
+            return MultiProviderUnderstandingStage(
+                providers=["anthropic", "openai", "google", "deepseek"],
+                merge_tags=True,
+                detailed=getattr(pipeline_config, "detailed", True)
+            )
+        else:
+            # Single provider understanding
+            return ImageUnderstandingStage(
+                provider=provider if provider in ["anthropic", "openai", "google", "deepseek"] else None,
+                detailed=getattr(pipeline_config, "detailed", False),
+                generate_prompt=True,
+                extract_tags=True
+            )
+    
+    # Legacy quality assessment stages (deprecated)
+    elif stage_name in ["brisque", "sightengine", "claude"]:
+        logger.warning(f"Quality assessment stage '{stage_name}' is deprecated. Use image understanding instead.")
+        return None
+    
+    else:
+        logger.error(f"Unknown pipeline stage: {stage_name}")
+        return None
 
 
 class PipelineOrganizer(MediaOrganizer):
@@ -94,45 +175,8 @@ class PipelineOrganizer(MediaOrganizer):
         Returns:
             Pipeline stage instance or None if creation failed
         """
-        # Image understanding stages
-        if stage_name.startswith("understanding_"):
-            # Dynamic import to avoid circular imports
-            from ..understanding.pipeline_stages import ImageUnderstandingStage, MultiProviderUnderstandingStage
-            
-            # Extract provider from stage name
-            provider = stage_name.replace("understanding_", "")
-            
-            if provider == "multi_cheap":
-                # Cost-effective multi-provider
-                return MultiProviderUnderstandingStage(
-                    providers=["deepseek", "google"],
-                    merge_tags=True,
-                    detailed=self.pipeline_config.get("detailed", False)
-                )
-            elif provider == "multi_all":
-                # All available providers
-                return MultiProviderUnderstandingStage(
-                    providers=["anthropic", "openai", "google", "deepseek"],
-                    merge_tags=True,
-                    detailed=self.pipeline_config.get("detailed", True)
-                )
-            else:
-                # Single provider understanding
-                return ImageUnderstandingStage(
-                    provider=provider if provider in ["anthropic", "openai", "google", "deepseek"] else None,
-                    detailed=self.pipeline_config.get("detailed", False),
-                    generate_prompt=True,
-                    extract_tags=True
-                )
-        
-        # Legacy quality assessment stages (deprecated)
-        elif stage_name in ["brisque", "sightengine", "claude"]:
-            logger.warning(f"Quality assessment stage '{stage_name}' is deprecated. Use image understanding instead.")
-            return None
-        
-        else:
-            logger.error(f"Unknown pipeline stage: {stage_name}")
-            return None
+        # Use the shared helper function
+        return _create_stage_instance(stage_name, self.pipeline_config)
 
     def _analyze_media(self, media_path: Path, project_folder: str) -> dict:
         """Analyze media file with pipeline stages.

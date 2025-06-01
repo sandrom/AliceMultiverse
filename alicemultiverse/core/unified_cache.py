@@ -1,5 +1,6 @@
 """Unified cache implementation that consolidates all caching functionality."""
 
+import json
 import logging
 from datetime import datetime
 from pathlib import Path
@@ -327,9 +328,9 @@ class UnifiedCache:
         loaded = 0
         for cache_file in cache_dir.rglob("*.json"):
             try:
-                # Use cache's load method
-                dummy_path = Path("dummy")  # We'll extract from the metadata
-                metadata = self.cache.load(dummy_path)
+                # Load directly from JSON file
+                with open(cache_file, "r") as f:
+                    metadata = json.load(f)
 
                 if metadata and "enhanced_metadata" in metadata:
                     enhanced = metadata["enhanced_metadata"]
@@ -346,8 +347,14 @@ class UnifiedCache:
 # Backward compatibility aliases
 def get_file_hash(file_path: Path) -> str:
     """Get SHA256 hash of a file (backward compatible)."""
-    cache = MetadataCache(file_path.parent)
-    return cache.get_content_hash(file_path)
+    # Avoid creating a new cache instance - use direct hashing
+    import hashlib
+    
+    hasher = hashlib.sha256()
+    with open(file_path, "rb") as f:
+        for chunk in iter(lambda: f.read(8192), b""):
+            hasher.update(chunk)
+    return hasher.hexdigest()
 
 
 def get_content_hash(file_path: Path) -> str:

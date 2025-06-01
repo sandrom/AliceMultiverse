@@ -15,6 +15,18 @@ from typing import Any
 # Use image understanding for content analysis instead.
 
 
+def get_quality_folder_name(stars: int) -> str:
+    """Get folder name for quality star rating.
+    
+    Args:
+        stars: Star rating (1-5)
+        
+    Returns:
+        Folder name like "5-star"
+    """
+    return f"{stars}-star"
+
+
 def extract_project_folder(media_path: Path, source_dir: Path) -> str:
     """Extract project folder name from file path.
 

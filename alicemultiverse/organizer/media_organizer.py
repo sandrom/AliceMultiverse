@@ -18,6 +18,7 @@ from ..core.logging import get_logger
 from ..core.types import AnalysisResult, MediaType, OrganizeResult, Statistics
 from .organization_helpers import (
     extract_project_folder,
+    get_quality_folder_name,
     match_ai_source_patterns,
 )
 
@@ -600,6 +601,7 @@ class MediaOrganizer:
             by_date=defaultdict(int),
             by_source=defaultdict(int),
             by_project=defaultdict(int),
+            by_quality=defaultdict(int),
             quality_assessed=0,
             quality_skipped=0,
             images_found=0,
