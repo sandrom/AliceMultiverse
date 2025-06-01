@@ -1,12 +1,9 @@
-"""Pipeline module for multi-stage quality assessment."""
+"""Pipeline module for media analysis and understanding."""
 
 from .pipeline_organizer import PipelineOrganizer
-from .stages import BRISQUEStage, ClaudeStage, PipelineStage, SightEngineStage
+from .stages import PipelineStage
 
 __all__ = [
-    "BRISQUEStage",
-    "ClaudeStage",
     "PipelineOrganizer",
     "PipelineStage",
-    "SightEngineStage",
 ]

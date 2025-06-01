@@ -42,9 +42,7 @@ class EnhancedMediaOrganizer(MediaOrganizer):
             cache_dir = Path(
                 getattr(config.paths, "cache_dir", Path.home() / ".alicemultiverse" / "cache")
             )
-            quality_config = getattr(config, "quality", {})
-            quality_thresholds = getattr(quality_config, "thresholds", {})
-            self.persistent_metadata = PersistentMetadataManager(cache_dir, quality_thresholds)
+            self.persistent_metadata = PersistentMetadataManager(cache_dir, {})
             logger.info("Persistent metadata embedding enabled")
 
         # Create search engine
@@ -84,8 +82,8 @@ class EnhancedMediaOrganizer(MediaOrganizer):
                     project_folder=result.get("project_folder", "unknown"),
                     media_type=result.get("media_type", MediaType.UNKNOWN),
                     file_number=result.get("file_number"),
-                    quality_stars=result.get("quality_stars"),
-                    brisque_score=result.get("brisque_score"),
+                    quality_stars=None,
+                    brisque_score=None,
                     pipeline_result=result.get("pipeline_result"),
                 )
 
@@ -115,9 +113,6 @@ class EnhancedMediaOrganizer(MediaOrganizer):
                             "asset_id": enhanced_metadata["asset_id"],
                             "prompt": enhanced_metadata.get("prompt"),
                             "generation_params": enhanced_metadata.get("generation_params"),
-                            # Raw analysis scores
-                            "brisque_score": result.get("brisque_score"),
-                            "brisque_normalized": result.get("brisque_normalized"),
                             # Semantic tags
                             "style_tags": enhanced_metadata.get("style_tags", []),
                             "mood_tags": enhanced_metadata.get("mood_tags", []),

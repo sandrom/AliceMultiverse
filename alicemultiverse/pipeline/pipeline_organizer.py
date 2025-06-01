@@ -1,4 +1,4 @@
-"""Pipeline-based media organizer with multi-stage quality assessment."""
+"""Pipeline-based media organizer with multi-stage analysis."""
 
 import logging
 import time
@@ -9,7 +9,8 @@ from omegaconf import DictConfig
 from ..core.types import MediaType, OrganizeResult
 from ..core.keys import APIKeyManager
 from ..organizer.media_organizer import MediaOrganizer
-from .stages import BRISQUEStage, ClaudeStage, PipelineStage, SightEngineStage
+from .stages import PipelineStage
+from ..understanding.pipeline_stages import ImageUnderstandingStage, MultiProviderUnderstandingStage
 
 logger = logging.getLogger(__name__)
 
@@ -37,20 +38,21 @@ class PipelineOrganizer(MediaOrganizer):
         """Initialize pipeline stages based on mode.
 
         Args:
-            mode: Pipeline mode (basic, standard, premium, custom)
+            mode: Pipeline mode (understanding modes or custom)
         """
         stages_map = {
-            # Single stage pipelines
-            "basic": ["brisque"],
-            "brisque": ["brisque"],
-            # Two stage pipelines
-            "standard": ["brisque", "sightengine"],
-            "brisque-sightengine": ["brisque", "sightengine"],
-            "brisque-claude": ["brisque", "claude"],
-            # Three stage pipeline
-            "premium": ["brisque", "sightengine", "claude"],
-            "full": ["brisque", "sightengine", "claude"],
-            "brisque-sightengine-claude": ["brisque", "sightengine", "claude"],
+            # Single provider understanding
+            "basic": ["understanding_deepseek"],  # Most cost-effective
+            "deepseek": ["understanding_deepseek"],
+            "google": ["understanding_google"],
+            "openai": ["understanding_openai"],
+            "anthropic": ["understanding_anthropic"],
+            
+            # Multi-provider understanding
+            "standard": ["understanding_multi_cheap"],  # DeepSeek + Google
+            "premium": ["understanding_multi_all"],     # All providers
+            "full": ["understanding_multi_all"],
+            
             # Custom
             "custom": self.pipeline_config.get("stages", []),
         }
@@ -74,70 +76,39 @@ class PipelineOrganizer(MediaOrganizer):
         Returns:
             Pipeline stage instance or None if creation failed
         """
-        if stage_name == "brisque":
-            thresholds = self._parse_quality_thresholds(self.config.quality.thresholds)
-            return BRISQUEStage(thresholds)
-
-        elif stage_name == "sightengine":
-            # Get API keys
-            key_manager = APIKeyManager()
-
-            # Try pipeline-specific key first, then fall back to general key
-            api_user = None
-            api_secret = None
-
-            if hasattr(self, "sightengine_key") and self.sightengine_key:
-                if "," in self.sightengine_key:
-                    api_user, api_secret = self.sightengine_key.split(",", 1)
-
-            if not api_user or not api_secret:
-                # Try both naming conventions
-                api_user = key_manager.get_api_key("sightengine_api_user")
-                api_secret = key_manager.get_api_key("sightengine_api_secret")
-
-                if not api_user:
-                    api_user = key_manager.get_api_key("sightengine_user")
-                if not api_secret:
-                    api_secret = key_manager.get_api_key("sightengine_secret")
-
-            if not api_user or not api_secret:
-                logger.error(
-                    "SightEngine API credentials not found. Use 'alice keys setup' to configure."
+        # Image understanding stages
+        if stage_name.startswith("understanding_"):
+            # Extract provider from stage name
+            provider = stage_name.replace("understanding_", "")
+            
+            if provider == "multi_cheap":
+                # Cost-effective multi-provider
+                return MultiProviderUnderstandingStage(
+                    providers=["deepseek", "google"],
+                    merge_tags=True,
+                    detailed=self.pipeline_config.get("detailed", False)
                 )
-                return None
-
-            min_stars = self.pipeline_config.thresholds.get("brisque_min_stars", 3)
-
-            # Get scoring weights and thresholds
-            weights = self.pipeline_config.scoring_weights.get("standard", {})
-            star_thresholds = self.pipeline_config.get("star_thresholds", {})
-
-            return SightEngineStage(api_user, api_secret, min_stars, weights, star_thresholds)
-
-        elif stage_name == "claude":
-            # Get API key
-            key_manager = APIKeyManager()
-
-            # Try pipeline-specific key first, then fall back to general key
-            api_key = getattr(self, "claude_key", None)
-
-            if not api_key:
-                api_key = key_manager.get_api_key("anthropic_api_key")
-
-            if not api_key:
-                logger.error("Anthropic API key not found. Use 'alice keys setup' to configure.")
-                return None
-
-            min_stars = self.pipeline_config.thresholds.get("sightengine_min_stars", 4)
-
-            # Get scoring weights and thresholds
-            weights = self.pipeline_config.scoring_weights.get("premium", {})
-            star_thresholds = self.pipeline_config.get("star_thresholds", {})
-
-            return ClaudeStage(
-                api_key, min_stars, "claude-3-haiku-20240307", weights, star_thresholds
-            )
-
+            elif provider == "multi_all":
+                # All available providers
+                return MultiProviderUnderstandingStage(
+                    providers=["anthropic", "openai", "google", "deepseek"],
+                    merge_tags=True,
+                    detailed=self.pipeline_config.get("detailed", True)
+                )
+            else:
+                # Single provider understanding
+                return ImageUnderstandingStage(
+                    provider=provider if provider in ["anthropic", "openai", "google", "deepseek"] else None,
+                    detailed=self.pipeline_config.get("detailed", False),
+                    generate_prompt=True,
+                    extract_tags=True
+                )
+        
+        # Legacy quality assessment stages (deprecated)
+        elif stage_name in ["brisque", "sightengine", "claude"]:
+            logger.warning(f"Quality assessment stage '{stage_name}' is deprecated. Use image understanding instead.")
+            return None
+        
         else:
             logger.error(f"Unknown pipeline stage: {stage_name}")
             return None

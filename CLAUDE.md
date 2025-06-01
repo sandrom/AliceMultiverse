@@ -315,7 +315,7 @@ python scripts/event_monitor.py --metrics
 ```
 
 ### Event Types
-- **Asset Events**: `asset.discovered`, `asset.processed`, `asset.organized`, `quality.assessed`
+- **Asset Events**: `asset.discovered`, `asset.processed`, `asset.organized`, `asset.analyzed`
 - **Workflow Events**: `workflow.started`, `workflow.completed`, `workflow.failed`
 - **Creative Events**: `project.created`, `style.chosen`, `context.updated`
 

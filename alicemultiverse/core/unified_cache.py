@@ -8,7 +8,7 @@ from typing import Any
 from ..metadata.embedder import MetadataEmbedder
 from ..metadata.extractor import MetadataExtractor
 from ..metadata.models import AssetMetadata
-from ..quality.scorer import QualityScorer
+# from ..quality.scorer import QualityScorer  # Quality assessment removed
 from .metadata_cache import MetadataCache
 from .types import AnalysisResult
 
@@ -47,7 +47,7 @@ class UnifiedCache:
         self.cache = MetadataCache(source_root, force_reindex)
         self.embedder = MetadataEmbedder()
         self.extractor = MetadataExtractor()
-        self.scorer = QualityScorer(quality_thresholds)
+        # self.scorer = QualityScorer(quality_thresholds)  # Quality assessment removed
 
         # Ensure cache directory exists
         cache_dir = source_root / ".metadata"
@@ -221,9 +221,8 @@ class UnifiedCache:
         claude = analysis.get("claude_results")
 
         # Calculate merged quality
-        return self.scorer.merge_pipeline_results(
-            brisque_score=brisque, sightengine_results=sightengine, claude_results=claude
-        )
+        # Quality assessment removed - return default
+        return {"overall_score": 0.5, "star_rating": 3}
 
     # ===== Search Interface =====
 

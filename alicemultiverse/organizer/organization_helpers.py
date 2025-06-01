@@ -1,9 +1,9 @@
 """
 Media Organization Helper Functions
 
-Utility functions for quality folder management, project extraction, and AI source
-detection patterns. Used throughout the organizer modules for consistent file
-organization and source identification.
+Utility functions for project extraction and AI source detection patterns. 
+Used throughout the organizer modules for consistent file organization 
+and source identification.
 """
 
 import re
@@ -11,54 +11,8 @@ from pathlib import Path
 from typing import Any
 
 
-def get_quality_folder_name(stars: int) -> str:
-    """Get the folder name for a quality rating.
-
-    Args:
-        stars: Quality rating (1-5)
-
-    Returns:
-        Folder name like "5-star"
-    """
-    return f"{stars}-star"
-
-
-def get_quality_from_folder_name(folder_name: str) -> int | None:
-    """Extract quality rating from folder name.
-
-    Args:
-        folder_name: Folder name like "5-star"
-
-    Returns:
-        Quality rating (1-5) or None if not a quality folder
-    """
-    match = re.match(r"^(\d)-star$", folder_name)
-    if match:
-        return int(match.group(1))
-    return None
-
-
-def get_possible_quality_locations(base_path: Path, filename: str) -> list[Path]:
-    """Get all possible locations for a file in quality folders.
-
-    Args:
-        base_path: Base directory path
-        filename: Name of the file
-
-    Returns:
-        List of possible file paths in quality folders
-    """
-    possible_locations = []
-
-    # Check for quality subfolders
-    for quality_folder in base_path.glob("*-star"):
-        possible_file = quality_folder / filename
-        possible_locations.append(possible_file)
-
-    # Also check base path
-    possible_locations.append(base_path / filename)
-
-    return possible_locations
+# Quality assessment functions have been removed.
+# Use image understanding for content analysis instead.
 
 
 def extract_project_folder(media_path: Path, source_dir: Path) -> str:
@@ -118,8 +72,6 @@ def create_organize_result(
         "source_type": analysis.get("source_type"),
         "media_type": analysis.get("media_type"),
         "file_number": analysis.get("file_number"),
-        "quality_stars": analysis.get("quality_stars"),
-        "brisque_score": analysis.get("brisque_score"),
         "pipeline_result": analysis.get("pipeline_result"),
         "error": error,
     }

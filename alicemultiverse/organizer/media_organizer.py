@@ -16,12 +16,8 @@ from ..core.constants import OUTPUT_DATE_FORMAT, SEQUENCE_FORMAT
 from ..core.file_operations import FileHandler
 from ..core.logging import get_logger
 from ..core.types import AnalysisResult, MediaType, OrganizeResult, Statistics
-from ..quality.brisque import BRISQUEAssessor
-from ..quality.brisque import is_available as brisque_available
-from ..quality.pipeline_stages import create_pipeline_stages
 from .organization_helpers import (
     extract_project_folder,
-    get_quality_folder_name,
     match_ai_source_patterns,
 )
 
@@ -48,15 +44,8 @@ class MediaOrganizer:
             self.source_dir, force_reindex=config.processing.force_reindex
         )
 
-        # Initialize quality assessor if enabled
-        self.quality_enabled = config.processing.quality
-        self.quality_assessor = None
-        if self.quality_enabled and brisque_available():
-            thresholds = self._parse_quality_thresholds(config.quality.thresholds)
-            self.quality_assessor = BRISQUEAssessor(thresholds)
-        elif self.quality_enabled:
-            logger.warning("Quality assessment requested but BRISQUE not available")
-            self.quality_enabled = False
+        # Quality assessment has been replaced with image understanding
+        self.quality_enabled = False
 
         # Initialize pipeline stages if configured
         self.pipeline_stages = create_pipeline_stages(config)
@@ -280,8 +269,6 @@ class MediaOrganizer:
                 source_type=None,
                 media_type=None,
                 file_number=None,
-                quality_stars=None,
-                brisque_score=None,
                 pipeline_result=None,
                 error=str(e),
             )
@@ -308,21 +295,7 @@ class MediaOrganizer:
             "file_number": file_number,
         }
 
-        # Quality assessment for images
-        quality_stars = None
-        brisque_score = None
-
-        if media_type == MediaType.IMAGE:
-            # Run pipeline stages if configured (includes BRISQUE)
-            if self.pipeline_enabled:
-                metadata = self._run_pipeline_stages(media_path, metadata)
-                quality_stars = metadata.get("quality_stars")
-                brisque_score = metadata.get("brisque_score")
-            # Otherwise just run BRISQUE if enabled
-            elif self.quality_enabled:
-                brisque_score, quality_stars = self.quality_assessor.assess_quality(media_path)
-                metadata["quality_stars"] = quality_stars
-                metadata["brisque_score"] = brisque_score
+        # Image analysis happens in pipeline stages if configured
 
         return AnalysisResult(
             source_type=source_type,
@@ -330,8 +303,8 @@ class MediaOrganizer:
             project_folder=project_folder,
             media_type=media_type,
             file_number=file_number,
-            quality_stars=quality_stars,
-            brisque_score=brisque_score,
+            quality_stars=None,
+            brisque_score=None,
             pipeline_result=metadata.get("pipeline_stages"),  # Include pipeline results
         )
 
@@ -432,12 +405,11 @@ class MediaOrganizer:
                     project_dir.glob(f"{project_folder}-*{source_path.suffix}")
                 )
 
-                # Quality folders
-                for stars in range(1, 6):
-                    star_dir = project_dir / get_quality_folder_name(stars)
-                    if star_dir.exists():
+                # Check subdirectories
+                for subdir in project_dir.iterdir():
+                    if subdir.is_dir():
                         possible_locations.extend(
-                            star_dir.glob(f"{project_folder}-*{source_path.suffix}")
+                            subdir.glob(f"{project_folder}-*{source_path.suffix}")
                         )
 
                 for existing_path in possible_locations:
@@ -604,13 +576,6 @@ class MediaOrganizer:
 
         return dest_dir / filename
 
-    def _parse_quality_thresholds(self, thresholds_config: dict) -> dict:
-        """Parse quality thresholds from config format."""
-        thresholds = {}
-        for star_key, bounds in thresholds_config.items():
-            stars = int(star_key.split("_")[0])
-            thresholds[stars] = (bounds["min"], bounds["max"])
-        return thresholds
 
     def _init_statistics(self) -> Statistics:
         """Initialize statistics tracking."""
@@ -624,7 +589,6 @@ class MediaOrganizer:
             by_date=defaultdict(int),
             by_source=defaultdict(int),
             by_project=defaultdict(int),
-            by_quality=defaultdict(int),
             quality_assessed=0,
             quality_skipped=0,
             images_found=0,

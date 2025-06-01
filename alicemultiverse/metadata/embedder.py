@@ -169,40 +169,41 @@ class MetadataEmbedder:
                 "analysis": {},
             }
 
-            # Store analysis results
-            if "brisque_score" in metadata:
-                alice_data["analysis"]["brisque"] = {
-                    "score": metadata["brisque_score"],
-                    "normalized": metadata.get("brisque_normalized"),
-                }
+            # Store any legacy quality analysis (being phased out)
+            if any(key in metadata for key in ["brisque_score", "sightengine_quality", "claude_defects_found"]):
+                alice_data["legacy_quality"] = {}
+                if "brisque_score" in metadata:
+                    alice_data["legacy_quality"]["brisque_score"] = metadata["brisque_score"]
+                if "sightengine_quality" in metadata:
+                    alice_data["legacy_quality"]["sightengine_quality"] = metadata["sightengine_quality"]
+                if "claude_defects_found" in metadata:
+                    alice_data["legacy_quality"]["claude_defects"] = metadata["claude_defects_found"]
 
-            if "sightengine_quality" in metadata:
-                alice_data["analysis"]["sightengine"] = {
-                    "quality": metadata["sightengine_quality"],
-                    "sharpness": metadata.get("sightengine_sharpness"),
-                    "contrast": metadata.get("sightengine_contrast"),
-                    "brightness": metadata.get("sightengine_brightness"),
-                    "ai_generated": metadata.get("sightengine_ai_generated"),
-                    "ai_probability": metadata.get("sightengine_ai_probability"),
-                }
-
-            if "claude_defects_found" in metadata:
-                alice_data["analysis"]["claude"] = {
-                    "defects_found": metadata["claude_defects_found"],
-                    "defect_count": metadata.get("claude_defect_count", 0),
-                    "severity": metadata.get("claude_severity", "unknown"),
-                    "confidence": metadata.get("claude_confidence", 0.0),
-                    "quality_score": metadata.get("claude_quality_score"),
-                }
-
-            # Store semantic tags
-            if any(key in metadata for key in ["style_tags", "mood_tags", "subject_tags"]):
+            # Store semantic tags (both old format and new format)
+            if "tags" in metadata and isinstance(metadata["tags"], dict):
+                # New format: already structured as dict
+                alice_data["tags"] = metadata["tags"]
+            elif any(key in metadata for key in ["style_tags", "mood_tags", "subject_tags"]):
+                # Old format: separate fields
                 alice_data["tags"] = {
                     "style": metadata.get("style_tags", []),
                     "mood": metadata.get("mood_tags", []),
                     "subject": metadata.get("subject_tags", []),
                     "color": metadata.get("color_tags", []),
                     "custom": metadata.get("custom_tags", []),
+                }
+            
+            # Store image understanding results
+            if "image_description" in metadata:
+                alice_data["understanding"] = {
+                    "description": metadata.get("image_description"),
+                    "detailed_description": metadata.get("detailed_description"),
+                    "generated_prompt": metadata.get("generated_prompt"),
+                    "generated_negative_prompt": metadata.get("generated_negative_prompt"),
+                    "provider": metadata.get("understanding_provider"),
+                    "model": metadata.get("understanding_model"),
+                    "cost": metadata.get("understanding_cost"),
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
 
             # Store relationships
