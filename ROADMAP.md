@@ -26,12 +26,17 @@ AliceMultiverse is an AI-native service that operates exclusively through AI ass
 - [ ] Handle asynchronous generation pattern
 - [ ] Parse and extract seed/parameters
 
-### 3. DuckDB + Redis Streams Migration
-- [ ] Replace PostgreSQL with DuckDB for all metadata/search (OLAP)
-- [ ] Implement Redis Streams for event system
+### 3. DuckDB + Redis Streams Migration (IN PROGRESS)
+- [x] Replace PostgreSQL with DuckDB for all metadata/search (OLAP)
+- [x] Implement DuckDB search cache with content-addressed storage
+- [x] Write comprehensive tests for DuckDB (13 tests passing)
+- [x] Create file scanner to rebuild cache from embedded metadata
+- [x] Update metadata embedder for new structure
+- [ ] Implement Redis Streams for event system (in progress)
+- [ ] Migrate existing PostgreSQL event consumers
+- [ ] Update all event publishers to use Redis Streams
 - [ ] Native array/JSON support for complex queries
 - [ ] Direct Parquet file queries for archival data
-- [ ] Write comprehensive tests for new system
 
 ### 4. Multi-Location Storage System
 - [ ] Implement storage location registry in DuckDB
