@@ -86,7 +86,14 @@ class DatabasePoolMonitor:
                 await asyncio.sleep(self.log_interval)
                 self.log_stats()
         
-        loop = asyncio.get_event_loop()
+        try:
+            # Try to get the running event loop
+            loop = asyncio.get_running_loop()
+        except RuntimeError:
+            # No running loop, create a new one
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+        
         self._monitoring_task = loop.create_task(_monitor_loop())
     
     def get_pool_status(self) -> Dict[str, Any]:

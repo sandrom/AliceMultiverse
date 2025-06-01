@@ -41,10 +41,11 @@ Following instructions.md: "a working service/application has always priority ov
 - [x] **Fix Image Presentation API test failures** - All 18 tests now passing
 - [x] **Fix recursion bug** - Fixed circular dependency in pipeline_organizer.py
 - [x] **Fix PYTHONPATH requirement** - Created cli_entry.py wrapper for proper imports
-- [ ] **Fix deprecation warnings** - MetadataCache, SQLAlchemy, AsyncIO warnings
-  - [ ] Update all imports to use new modules
-  - [ ] Test deprecated code paths still work
-  - [ ] Document migration path for users
+- [x] **Fix deprecation warnings** - MetadataCache, SQLAlchemy, AsyncIO warnings
+  - [x] Update SQLAlchemy declarative_base import
+  - [x] Fix AsyncIO get_event_loop() deprecations
+  - [x] Suppress MetadataCache warning in UnifiedCache
+  - [x] Document migration path in docs/developer/deprecation-guide.md
 - [ ] **Complete test coverage** for new modules
   - [ ] comparison/ module - test Elo system and web UI
   - [ ] understanding/ module - test all providers
@@ -62,10 +63,11 @@ Following instructions.md: "a working service/application has always priority ov
   - ADR-008: DuckDB for Metadata Search
   - ADR-009: File-First Metadata Architecture
 - [x] **Update documentation** - CLAUDE.md still references removed quality features ✅ UPDATED
-- [ ] **Fix deprecation warnings** - MetadataCache, SQLAlchemy, AsyncIO warnings
-  - [ ] Update all imports to use new modules
-  - [ ] Test deprecated code paths still work
-  - [ ] Document migration path for users
+- [x] **Fix deprecation warnings** - MetadataCache, SQLAlchemy, AsyncIO warnings
+  - [x] Update SQLAlchemy declarative_base import
+  - [x] Fix AsyncIO get_event_loop() deprecations
+  - [x] Suppress MetadataCache warning in UnifiedCache
+  - [x] Document migration path in docs/developer/deprecation-guide.md
 - [ ] **Add integration tests** for new understanding system
   - [ ] Test multi-provider analysis
   - [ ] Test metadata embedding

@@ -268,7 +268,7 @@ class RedisStreamsEventSystem:
                 await handler(data)
             else:
                 # Run sync handler in thread pool
-                await asyncio.get_event_loop().run_in_executor(None, handler, data)
+                await asyncio.get_running_loop().run_in_executor(None, handler, data)
         except Exception as e:
             logger.error(f"Error in event handler: {e}")
     

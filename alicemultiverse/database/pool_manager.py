@@ -252,7 +252,7 @@ class EnhancedSessionManager:
         """Async version of get_session."""
         # For now, wrap sync version
         # In future, could use async SQLAlchemy
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         session = await loop.run_in_executor(None, SessionLocal)
         
         try:
