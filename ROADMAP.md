@@ -51,11 +51,11 @@ Following instructions.md: "a working service/application has always priority ov
   - [ ] understanding/ module - test all providers
   - [ ] storage/ module - test location registry
   - [ ] Document test requirements for each module
-- [ ] **Add integration tests** for new understanding system
-  - [ ] Test multi-provider analysis
-  - [ ] Test metadata embedding
-  - [ ] Test tag search functionality
-  - [ ] Document test scenarios
+- [x] **Add integration tests** for new understanding system
+  - [x] Test multi-provider analysis - 3 tests covering single, multi, and failure scenarios
+  - [x] Test metadata embedding - 3 tests for embed/extract, persistence, and cache integration
+  - [x] Test tag search functionality - 2 tests for basic search and exclusion filtering
+  - [x] Document test scenarios - Created README_UNDERSTANDING_TESTS.md
 
 ### Additional Issues
 - [x] **Write ADRs** for major architectural changes ✅ DONE
@@ -68,11 +68,11 @@ Following instructions.md: "a working service/application has always priority ov
   - [x] Fix AsyncIO get_event_loop() deprecations
   - [x] Suppress MetadataCache warning in UnifiedCache
   - [x] Document migration path in docs/developer/deprecation-guide.md
-- [ ] **Add integration tests** for new understanding system
-  - [ ] Test multi-provider analysis
-  - [ ] Test metadata embedding
-  - [ ] Test tag search functionality
-  - [ ] Document test scenarios
+- [x] **Add integration tests** for new understanding system
+  - [x] Test multi-provider analysis - 3 tests covering single, multi, and failure scenarios
+  - [x] Test metadata embedding - 3 tests for embed/extract, persistence, and cache integration
+  - [x] Test tag search functionality - 2 tests for basic search and exclusion filtering
+  - [x] Document test scenarios - Created README_UNDERSTANDING_TESTS.md
 
 ### Important (This Week - MEDIUM PRIORITY)
 - [ ] **Complete test coverage** for new modules
