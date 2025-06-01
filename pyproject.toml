@@ -29,8 +29,6 @@ dependencies = [
     "aiohttp>=3.9.0",
     "requests>=2.31.0",
     "pyyaml>=6.0.0",
-    # "sqlalchemy>=2.0.0",  # Being phased out - will be removed in v3.0
-    # "alembic>=1.12.0",     # Being phased out - will be removed in v3.0
     "duckdb>=0.10.0",
     "redis>=5.0.0",
     "click>=8.1.0",
@@ -127,10 +125,6 @@ ignore = [
 "scripts/*" = [
     "INP001",  # implicit namespace packages are fine for scripts
     "T201",    # print() is expected in CLI scripts
-]
-"alembic/*" = [
-    "INP001",  # implicit namespace packages
-    "F401",    # unused imports in migration files
 ]
 
 [tool.ruff.format]
