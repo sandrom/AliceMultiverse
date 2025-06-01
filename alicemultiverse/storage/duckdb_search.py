@@ -699,6 +699,16 @@ class DuckDBSearch:
         
         return stats
     
+    def clear_index(self):
+        """Clear all data from the search index."""
+        logger.warning("Clearing search index...")
+        
+        # Delete all data from tables
+        self.conn.execute("DELETE FROM tags")
+        self.conn.execute("DELETE FROM assets")
+        
+        logger.info("Search index cleared")
+    
     def close(self):
         """Close the database connection."""
         self.conn.close()

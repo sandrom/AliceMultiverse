@@ -22,10 +22,10 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
    - Intelligent prompt generation for video
    - Collaborative exploration with context
 4. **What's broken RIGHT NOW?** 
-   - Search functionality (needs DuckDB implementation)
-   - Project management (no storage without PostgreSQL)
-   - Missing similarity search
+   - Search index needs to be populated from existing files
+   - Missing similarity search (needs perceptual hashing)
    - No soft-delete workflow
+   - Storage paths not configurable (hardcoded to test_data/)
 
 ## Immediate: Restore Core Functionality (HIGHEST PRIORITY)
 
@@ -41,11 +41,11 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
   - [ ] Add similarity search support (needs perceptual hashing)
   - [ ] Performance benchmarks
 
-### Project Management Without Database
-- [ ] **File-based project storage**
-  - [ ] Design project.yaml format for metadata and context
-  - [ ] Implement file-based ProjectService
-  - [ ] Support project folder structure:
+### Project Management Without Database ✅
+- [x] **File-based project storage**
+  - [x] Design project.yaml format for metadata and context
+  - [x] Implement FileProjectService with full functionality
+  - [x] Support project folder structure:
     ```
     project-name/
     ├── project.yaml         # Metadata, budget, context
@@ -60,9 +60,24 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
     │   └── final/
     └── exports/             # Final deliverables
     ```
-  - [ ] Global registry in ~/.alice/projects/registry.yaml
-  - [ ] Asset copying/linking from global library
-  - [ ] Selection tracking with provenance
+  - [x] Registry stored in first configured storage path
+  - [x] Find project from current directory
+  - [x] Budget tracking with cost breakdown by provider
+
+### Search Index Population
+- [ ] **Populate search index from existing files**
+  - [x] Create SearchIndexBuilder class
+  - [x] Create rebuild_search_index.py script
+  - [ ] Add index rebuilding to alice CLI
+  - [ ] Auto-index new files during organization
+  - [ ] Background indexing for watch mode
+
+### Configuration Updates
+- [ ] **Make storage paths configurable**
+  - [ ] Add storage.paths to settings.yaml
+  - [ ] Support multiple storage locations
+  - [ ] Handle cloud URLs (s3://, gcs://)
+  - [ ] Update all hardcoded paths
 
 ## Next Up: Creative Workflow Support
 

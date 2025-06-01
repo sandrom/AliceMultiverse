@@ -65,8 +65,8 @@ class AliceStructuredInterface:
         # Initialize rate limiter
         self.rate_limiter = RateLimiter()
         
-        # Initialize optimized search handler
-        self.search_handler = OptimizedSearchHandler()
+        # Initialize optimized search handler with config
+        self.search_handler = OptimizedSearchHandler(config=self.config)
 
     def _ensure_organizer(self) -> None:
         """Ensure organizer is initialized."""

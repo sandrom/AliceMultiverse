@@ -9,13 +9,13 @@ from typing import Any, Optional
 # from alicemultiverse.database.models import Generation, Project
 
 from alicemultiverse.events import publish_event_sync
+from .file_service import FileProjectService
 
 
 class ProjectService:
     """Service for managing projects and tracking budgets.
     
-    Note: This service requires PostgreSQL which has been removed.
-    All methods will return None or empty results.
+    Uses file-based storage when database is not available.
     """
     
     def __init__(self, db_session: Optional[Any] = None, event_bus: Optional[Any] = None):
@@ -25,8 +25,9 @@ class ProjectService:
             db_session: Database session (no longer used)
             event_bus: Deprecated, kept for compatibility
         """
-        self.db = None
-        # PostgreSQL removed - service is non-functional
+        self.db = None  # PostgreSQL removed
+        # Always use file-based service
+        self._file_service = FileProjectService()
     
     def _publish_event(self, event_type: str, **data) -> None:
         """Publish event using Redis Streams."""
@@ -42,12 +43,22 @@ class ProjectService:
     ) -> dict | None:
         """Create a new project.
         
-        PostgreSQL removed - this method is non-functional.
+        Uses file-based storage when database is not available.
         
         Returns:
-            None (database not available)
+            Project dict or None
         """
-        # Publish event even though we can't store in database
+        if self._file_service:
+            return self._file_service.create_project(
+                name=name,
+                description=description,
+                budget_total=budget_total,
+                creative_context=creative_context,
+                settings=settings
+            )
+        
+        # Database implementation would go here
+        # For now, just publish event
         self._publish_event(
             "project.created",
             source="project_service",
@@ -62,21 +73,27 @@ class ProjectService:
     def get_project(self, project_id: str) -> dict | None:
         """Get project by ID.
         
-        PostgreSQL removed - this method is non-functional.
+        Uses file-based storage when database is not available.
         
         Returns:
-            None (database not available)
+            Project dict or None
         """
+        if self._file_service:
+            return self._file_service.get_project(project_id)
+        
         return None
     
     def list_projects(self, status: str | None = None) -> list:
         """List all projects, optionally filtered by status.
         
-        PostgreSQL removed - this method is non-functional.
+        Uses file-based storage when database is not available.
         
         Returns:
-            Empty list (database not available)
+            List of project dicts
         """
+        if self._file_service:
+            return self._file_service.list_projects(status)
+        
         return []
     
     def update_project_context(
@@ -86,11 +103,14 @@ class ProjectService:
     ) -> dict | None:
         """Update project creative context.
         
-        PostgreSQL removed - this method is non-functional.
+        Uses file-based storage when database is not available.
         
         Returns:
-            None (database not available)
+            Updated project dict or None
         """
+        if self._file_service:
+            return self._file_service.update_project_context(project_id, creative_context)
+        
         # Publish event even though we can't update database
         self._publish_event(
             "project.context.updated",
@@ -108,11 +128,14 @@ class ProjectService:
     ) -> dict | None:
         """Update project status.
         
-        PostgreSQL removed - this method is non-functional.
+        Uses file-based storage when database is not available.
         
         Returns:
-            None (database not available)
+            Updated project dict or None
         """
+        if self._file_service:
+            return self._file_service.update_project_status(project_id, status)
+        
         # Publish event even though we can't update database
         self._publish_event(
             "project.status.changed",
@@ -135,9 +158,18 @@ class ProjectService:
     ) -> None:
         """Record a generation and update project budget.
         
-        PostgreSQL removed - budget tracking not available.
-        Only publishes events.
+        Uses file-based storage when database is not available.
         """
+        if self._file_service:
+            return self._file_service.record_generation(
+                project_id=project_id,
+                provider=provider,
+                cost=cost,
+                request_params=request_params,
+                result_metadata=result_metadata,
+                file_path=file_path
+            )
+        
         # Publish event for generation
         self._publish_event(
             "generation.completed",
@@ -161,19 +193,55 @@ class ProjectService:
     def get_project_budget_status(self, project_id: str) -> dict[str, Any] | None:
         """Get project budget status.
         
-        PostgreSQL removed - this method is non-functional.
+        Uses file-based storage when database is not available.
         
         Returns:
-            None (database not available)
+            Budget status dict or None
         """
+        if self._file_service:
+            return self._file_service.get_project_budget_status(project_id)
+        
         return None
     
     def get_project_cost_breakdown(self, project_id: str) -> dict[str, float]:
         """Get cost breakdown by provider.
         
-        PostgreSQL removed - this method is non-functional.
+        Uses file-based storage when database is not available.
         
         Returns:
-            Empty dict (database not available)
+            Dict mapping providers to costs
         """
+        if self._file_service:
+            return self._file_service.get_project_cost_breakdown(project_id)
+        
         return {}
+    
+    def find_project_from_path(self, current_path: str | None = None) -> dict | None:
+        """Find project based on current directory.
+        
+        Uses file-based storage when database is not available.
+        
+        Returns:
+            Project dict or None
+        """
+        if self._file_service:
+            return self._file_service.find_project_from_path(current_path)
+        
+        return None
+    
+    def get_or_create_project_from_path(
+        self, 
+        path: str | None = None,
+        create_if_missing: bool = True
+    ) -> dict | None:
+        """Get project from path or create one if missing.
+        
+        Uses file-based storage when database is not available.
+        
+        Returns:
+            Project dict or None
+        """
+        if self._file_service:
+            return self._file_service.get_or_create_project_from_path(path, create_if_missing)
+        
+        return None

@@ -22,18 +22,24 @@ logger = logging.getLogger(__name__)
 class OptimizedSearchHandler:
     """Handles search operations with database optimization."""
     
-    def __init__(self, db_path: str = None):
+    def __init__(self, db_path: str = None, config=None):
         """Initialize search handler.
         
         Args:
-            db_path: Path to DuckDB database file. If None, uses default location.
+            db_path: Path to DuckDB database file. If None, uses config or local test path.
+            config: Optional configuration object
         """
         # Initialize DuckDB search
         if not db_path:
-            # Use default path in user's data directory
-            data_dir = Path.home() / ".alice" / "data"
-            data_dir.mkdir(parents=True, exist_ok=True)
-            db_path = data_dir / "search.duckdb"
+            if config and hasattr(config, 'storage') and hasattr(config.storage, 'search_db'):
+                db_path = config.storage.search_db
+            else:
+                # Use local test directory for development
+                db_path = "test_data/search.duckdb"
+        
+        # Ensure parent directory exists
+        db_path = Path(db_path)
+        db_path.parent.mkdir(parents=True, exist_ok=True)
         
         self.search_db = DuckDBSearch(db_path)
         
