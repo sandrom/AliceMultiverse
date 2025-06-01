@@ -67,6 +67,10 @@ class MetadataEmbedder:
             True if successful, False otherwise
         """
         try:
+            # Ensure we have a Path object
+            if not isinstance(image_path, Path):
+                image_path = Path(image_path)
+                
             suffix = image_path.suffix.lower()
 
             if suffix == ".png":
@@ -99,6 +103,10 @@ class MetadataEmbedder:
         metadata = {}
 
         try:
+            # Ensure we have a Path object
+            if not isinstance(image_path, Path):
+                image_path = Path(image_path)
+                
             suffix = image_path.suffix.lower()
 
             if suffix == ".png":
@@ -166,45 +174,24 @@ class MetadataEmbedder:
             alice_data = {
                 "version": METADATA_VERSION,
                 "timestamp": datetime.now(UTC).isoformat(),
-                "analysis": {},
             }
-
-            # Store any legacy quality analysis (being phased out)
-            if any(key in metadata for key in ["brisque_score", "sightengine_quality", "claude_defects_found"]):
-                alice_data["legacy_quality"] = {}
-                if "brisque_score" in metadata:
-                    alice_data["legacy_quality"]["brisque_score"] = metadata["brisque_score"]
-                if "sightengine_quality" in metadata:
-                    alice_data["legacy_quality"]["sightengine_quality"] = metadata["sightengine_quality"]
-                if "claude_defects_found" in metadata:
-                    alice_data["legacy_quality"]["claude_defects"] = metadata["claude_defects_found"]
-
-            # Store semantic tags (both old format and new format)
-            if "tags" in metadata and isinstance(metadata["tags"], dict):
-                # New format: already structured as dict
-                alice_data["tags"] = metadata["tags"]
-            elif any(key in metadata for key in ["style_tags", "mood_tags", "subject_tags"]):
-                # Old format: separate fields
-                alice_data["tags"] = {
-                    "style": metadata.get("style_tags", []),
-                    "mood": metadata.get("mood_tags", []),
-                    "subject": metadata.get("subject_tags", []),
-                    "color": metadata.get("color_tags", []),
-                    "custom": metadata.get("custom_tags", []),
-                }
             
-            # Store image understanding results
-            if "image_description" in metadata:
-                alice_data["understanding"] = {
-                    "description": metadata.get("image_description"),
-                    "detailed_description": metadata.get("detailed_description"),
-                    "generated_prompt": metadata.get("generated_prompt"),
-                    "generated_negative_prompt": metadata.get("generated_negative_prompt"),
-                    "provider": metadata.get("understanding_provider"),
-                    "model": metadata.get("understanding_model"),
-                    "cost": metadata.get("understanding_cost"),
-                    "timestamp": datetime.now(UTC).isoformat(),
-                }
+            # Copy all top-level fields that match our schema
+            for key in ["content_hash", "media_type", "metadata_version"]:
+                if key in metadata:
+                    alice_data[key] = metadata[key]
+
+            # Store tags (new format)
+            if "tags" in metadata and isinstance(metadata["tags"], dict):
+                alice_data["tags"] = metadata["tags"]
+            
+            # Store understanding (new format)
+            if "understanding" in metadata and isinstance(metadata["understanding"], dict):
+                alice_data["understanding"] = metadata["understanding"]
+            
+            # Store generation info (new format)
+            if "generation" in metadata and isinstance(metadata["generation"], dict):
+                alice_data["generation"] = metadata["generation"]
 
             # Store relationships
             if "relationships" in metadata:
@@ -276,22 +263,11 @@ class MetadataEmbedder:
                             for key, value in analysis["claude"].items():
                                 metadata[f"claude_{key}"] = value
 
-                    # Restore tags
-                    if "tags" in alice_data:
-                        tags = alice_data["tags"]
-                        metadata["style_tags"] = tags.get("style", [])
-                        metadata["mood_tags"] = tags.get("mood", [])
-                        metadata["subject_tags"] = tags.get("subject", [])
-                        metadata["color_tags"] = tags.get("color", [])
-                        metadata["custom_tags"] = tags.get("custom", [])
-
-                    # Restore other fields
-                    if "relationships" in alice_data:
-                        metadata["relationships"] = alice_data["relationships"]
-                    if "role" in alice_data:
-                        metadata["role"] = alice_data["role"]
-                    if "project_id" in alice_data:
-                        metadata["project_id"] = alice_data["project_id"]
+                    # Restore all fields from alice_data
+                    for key in ["content_hash", "media_type", "metadata_version",
+                               "tags", "understanding", "generation"]:
+                        if key in alice_data:
+                            metadata[key] = alice_data[key]
 
         except Exception as e:
             logger.error(f"Failed to extract PNG metadata: {e}")
@@ -341,12 +317,16 @@ class MetadataEmbedder:
             else:
                 exif_dict = {"0th": {}, "Exif": {}, "GPS": {}, "1st": {}}
 
-            # Use ImageDescription field for our JSON data
+            # Create alice_data with all metadata
             alice_data = {
                 "version": METADATA_VERSION,
                 "timestamp": datetime.now(UTC).isoformat(),
-                "metadata": metadata,
             }
+            
+            # Copy all relevant fields
+            for key in ["content_hash", "media_type", "tags", "understanding", "generation"]:
+                if key in metadata:
+                    alice_data[key] = metadata[key]
 
             # Store in ImageDescription (0x010e)
             exif_dict["0th"][piexif.ImageIFD.ImageDescription] = json.dumps(alice_data).encode(
@@ -386,8 +366,12 @@ class MetadataEmbedder:
 
                     try:
                         alice_data = json.loads(desc)
-                        if alice_data.get("version") == METADATA_VERSION:
-                            metadata = alice_data.get("metadata", {})
+                        if "version" in alice_data:
+                            # Extract all fields from alice_data
+                            for key in ["content_hash", "media_type", "tags", 
+                                       "understanding", "generation"]:
+                                if key in alice_data:
+                                    metadata[key] = alice_data[key]
                     except json.JSONDecodeError:
                         # Might be regular description, not our data
                         pass
@@ -457,8 +441,13 @@ class MetadataEmbedder:
                 alice_data = {
                     "version": METADATA_VERSION,
                     "namespace": ALICE_NAMESPACE,
-                    "metadata": metadata,
+                    "timestamp": datetime.now(UTC).isoformat(),
                 }
+                
+                # Copy all relevant fields
+                for key in ["content_hash", "media_type", "tags", "understanding", "generation"]:
+                    if key in metadata:
+                        alice_data[key] = metadata[key]
                 info["comment"] = json.dumps(alice_data)
 
                 # Also store prompt separately if available
@@ -505,8 +494,22 @@ class MetadataEmbedder:
             with Image.open(image_path) as img:
                 # Check PIL info dict
                 if hasattr(img, "info") and img.info:
-                    # Direct metadata fields
-                    for key in ["prompt", "workflow", "parameters", "comment"]:
+                    # Check for our alice data in comment field
+                    if "comment" in img.info:
+                        try:
+                            alice_data = json.loads(img.info["comment"])
+                            if "version" in alice_data and "namespace" in alice_data:
+                                # This is our metadata
+                                for key in ["content_hash", "media_type", "tags", 
+                                           "understanding", "generation"]:
+                                    if key in alice_data:
+                                        metadata[key] = alice_data[key]
+                        except json.JSONDecodeError:
+                            # Not our JSON, treat as regular comment
+                            metadata["comment"] = img.info["comment"]
+                    
+                    # Other direct metadata fields
+                    for key in ["prompt", "workflow", "parameters"]:
                         if key in img.info:
                             metadata[key] = img.info[key]
 
