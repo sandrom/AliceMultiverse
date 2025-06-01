@@ -34,7 +34,7 @@ Following instructions.md: "a working service/application has always priority ov
   - ADR-007: Quality → Understanding System
   - ADR-008: DuckDB for Metadata Search
   - ADR-009: File-First Metadata Architecture
-- [ ] **Update documentation** - CLAUDE.md still references removed quality features
+- [x] **Update documentation** - CLAUDE.md still references removed quality features ✅ UPDATED
 - [ ] **Fix deprecation warnings** - MetadataCache, SQLAlchemy, AsyncIO warnings
 - [ ] **Add integration tests** for new understanding system
 

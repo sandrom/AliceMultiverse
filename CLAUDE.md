@@ -50,48 +50,39 @@ alice -o ~/Pictures/AI                               # Output folder only
 alice -i ~/Downloads/ai-images -o ~/Pictures/AI     # Both folders (short form)
 alice --inbox ~/Downloads/ai-images --organized ~/Pictures/AI  # Both folders (long form)
 
-# Organize with quality assessment (adds star rating folders)
-alice --quality
-alice -q        # Short form
-
 # Watch mode: continuously monitor for new files
 alice -w        # Short form
 alice --watch   # Long form
 
-# Watch mode with quality assessment
-alice -w -q
-alice --watch --quality
+# Enable image understanding (semantic tagging)
+alice --understand
+alice -u        # Short form
+
+# Watch mode with understanding
+alice -w -u
+alice --watch --understand
 
 # Override settings via command line
-alice --paths.inbox=~/Downloads --quality.thresholds.3_star.max=70
+alice --paths.inbox=~/Downloads --understanding.providers=openai,anthropic
 
-# Pipeline variants (4 main options)
-alice --pipeline brisque                      # 1. BRISQUE only (free)
-alice --pipeline brisque-sightengine          # 2. BRISQUE + SightEngine (~$0.001/image)
-alice --pipeline brisque-claude               # 3. BRISQUE + Claude (~$0.002/image for Haiku)
-alice --pipeline brisque-sightengine-claude   # 4. BRISQUE + SightEngine + Claude (~$0.003/image)
+# Understanding providers (can combine multiple)
+alice --understand --providers openai          # Use OpenAI Vision
+alice --understand --providers anthropic       # Use Claude Vision
+alice --understand --providers google          # Use Google AI
+alice --understand --providers all             # Use all available providers
 
-# Convenience aliases
-alice --pipeline basic      # Same as 'brisque'
-alice --pipeline standard   # Same as 'brisque-sightengine'
-alice --pipeline premium    # Same as 'brisque-sightengine-claude'
-alice --pipeline full       # Same as 'brisque-sightengine-claude'
+# Custom understanding with specific providers
+alice --understand --providers "openai,anthropic"
 
-# Custom pipeline with specific stages
-alice --pipeline custom --stages "brisque,sightengine"
+# Understanding with API keys (better to use 'alice keys setup')
+alice --understand --openai-key "sk-..."
+alice --understand --anthropic-key "sk-ant-..."
 
-# Pipeline with API keys (better to use 'alice keys setup')
-alice --pipeline standard --sightengine-key "user,secret"
-alice --pipeline premium --anthropic-key "sk-ant-..."
+# Understanding with cost limit
+alice --understand --cost-limit 10.0
 
-# Pipeline with cost limit
-alice --pipeline premium --cost-limit 10.0
-
-# Dry run to estimate costs
-alice --pipeline premium --dry-run
-
-# Resume interrupted pipeline
-alice --pipeline premium --resume
+# Dry run to preview understanding
+alice --understand --dry-run
 
 # Move files instead of copying
 alice --move
@@ -105,9 +96,8 @@ alice -n         # Short form
 alice --force-reindex
 alice -f              # Short form
 
-# Note: The separate detect-claude.py and detect-sightengine.py scripts have been 
-# removed. All quality assessment is now integrated into the pipeline system. 
-# Use --pipeline options as shown above.
+# Note: The quality assessment system has been replaced with the understanding system.
+# Use --understand for semantic tagging and content analysis.
 ```
 
 ### Dependencies Installation
@@ -116,11 +106,11 @@ alice -f              # Short form
 # Core dependencies
 pip install pillow numpy opencv-python tqdm
 
-# For photo quality assessment
-pip install image-quality
+# For understanding system (optional providers)
+pip install openai anthropic google-generativeai
 
 # For database support
-pip install sqlalchemy alembic
+pip install duckdb redis
 
 # System dependencies (macOS)
 brew install ffmpeg
@@ -135,40 +125,40 @@ The system processes AI-generated media through a pipeline:
    - All formats support metadata embedding for self-contained assets
 2. **Detection**: Identifies AI source through metadata and filename patterns
 3. **Organization**: Creates structured output in `/organized/YYYY-MM-DD/project/source-type/`
-4. **Quality Assessment**: Optional quality scoring and defect detection with persistent metadata embedding
+4. **Understanding**: Optional semantic tagging and content analysis with metadata embedding
 
 ### Key Modules
 
-- **alice**: Main command with unified caching system (UnifiedCache class) for performance. Handles 15+ AI generation tools. Includes integrated BRISQUE quality assessment with --quality flag and watch mode (-w) for continuous monitoring.
-- **Pipeline system**: Integrated quality assessment with BRISQUE, SightEngine, and Claude stages that can be combined in 4 different configurations.
+- **alice**: Main command with unified caching system (UnifiedCache class) for performance. Handles 15+ AI generation tools. Includes understanding system with --understand flag and watch mode (-w) for continuous monitoring.
+- **Understanding system**: Multi-provider image analysis that generates semantic tags for content discovery and organization.
 
-### Quality Assessment Integration
+### Understanding System Integration
 
-When using `--quality` flag with alice:
-- Images are assessed using BRISQUE scores (0-100, lower is better)
-- Organized into star rating subfolders (5-star, 4-star, etc.)
-- Videos are skipped for quality assessment
-- Quality scores are cached in `.metadata` folders alongside source files
-- Images are re-assessed only if the source file is modified
-- Final structure: `organized/YYYY-MM-DD/project/source/5-star/file.png`
-- **Image numbering is consistent at the project level** - numbers increment sequentially across all quality folders, ensuring stable references (e.g., `project-00023.png` remains the same image regardless of quality folder)
-- **Automatic re-creation**: If you delete the organized folder, the system will recreate it with the same structure and quality ratings using cached metadata from source folders
+When using `--understand` flag with alice:
+- Images are analyzed by AI providers to generate semantic tags
+- Tags describe content, style, mood, colors, and technical aspects
+- Multiple providers can be used for comprehensive analysis
+- Tags are embedded directly in file metadata (EXIF/XMP)
+- Analysis results are cached to avoid re-processing
+- Final structure: `organized/YYYY-MM-DD/project/source/file.png`
+- **Tags enable semantic search**: Find images by content, not just filename
+- **Portable metadata**: Tags travel with files when moved or shared
 
-**Quality Thresholds** (optimized for studio shots):
-- 5-star: 0-25 (was 0-20) - Excellent quality
-- 4-star: 25-45 (was 20-40) - Good quality  
-- 3-star: 45-65 (was 40-60) - Average quality (many great studio shots)
-- 2-star: 65-80 - Below average
-- 1-star: 80-100 - Poor quality
+**Tag Categories**:
+- **Content**: Objects, people, scenes (e.g., "portrait", "landscape", "cat")
+- **Style**: Artistic style (e.g., "cyberpunk", "minimalist", "baroque")
+- **Mood**: Emotional tone (e.g., "serene", "dramatic", "playful")
+- **Technical**: Camera/render details (e.g., "shallow depth of field", "high contrast")
+- **Colors**: Dominant colors and schemes (e.g., "blue tones", "warm palette")
 
-The thresholds have been adjusted because BRISQUE sometimes rates high-quality studio shots with simple backgrounds as lower quality. You can further adjust via `settings.yaml` or command line.
+The understanding system provides objective content description instead of subjective quality ratings.
 
 ### Metadata Storage Strategy
 
 **All metadata is stored at the source level, NEVER in the destination:**
 - A single `.metadata/` folder is created in the inbox root directory
 - Files are tracked by content hash, allowing reorganization within inbox
-- Quality assessments and analysis results are saved by content hash
+- Understanding results and semantic tags are saved by content hash
 - The organized folder contains ONLY the reorganized media files
 - This allows you to delete and recreate the organized folder with different structures anytime
 - Files can be moved around within the inbox without losing their metadata
@@ -179,74 +169,75 @@ The thresholds have been adjusted because BRISQUE sometimes rates high-quality s
 Use `-w` or `--watch` flag to continuously monitor the inbox for new files:
 - Processes new files as they appear (checks every 5 seconds)
 - Tracks processed files to avoid reprocessing
-- Can be combined with --quality for automatic quality assessment
+- Can be combined with --understand for automatic content analysis
 - Press Ctrl+C to stop watching
 
 ```bash
 # Watch default folders
 alice -w
 
-# Watch custom folders with quality
-alice -i ~/Downloads -o ~/Pictures/AI -w -q
+# Watch custom folders with understanding
+alice -i ~/Downloads -o ~/Pictures/AI -w -u
 
 # Long form equivalent
-alice --inbox ~/Downloads --organized ~/Pictures/AI --watch --quality
+alice --inbox ~/Downloads --organized ~/Pictures/AI --watch --understand
 ```
 
-### Multi-Stage Pipeline Assessment
+### Understanding System Details
 
-The `--pipeline` flag enables quality refinement through multiple assessment stages:
+The understanding system analyzes images to generate semantic tags for search and discovery:
 
-#### Pipeline Modes:
-- **basic**: BRISQUE only (free, local processing)
-- **standard**: BRISQUE → SightEngine (~$0.001/image)
-- **premium**: BRISQUE → SightEngine → Claude (~$0.003/image)
-- **custom**: Define your own stages with `--stages`
+#### Provider Capabilities:
+- **OpenAI Vision**: Excellent at object detection and scene understanding
+- **Claude Vision**: Superior at artistic style and mood analysis
+- **Google AI**: Strong technical analysis and color detection
+- **DeepSeek**: Cost-effective general understanding
 
-#### Quality Refinement:
-The pipeline combines scores from multiple sources to refine the star rating:
-1. **BRISQUE**: Local quality assessment (0-100, lower is better)
-2. **SightEngine**: Technical quality check (0-1, higher is better)
-3. **Claude**: AI defect detection (penalizes anatomical/rendering errors)
-
-#### Configurable Scoring Weights:
-Edit `settings.yaml` to adjust how scores are combined:
+#### Multi-Provider Analysis:
+Combine multiple providers for comprehensive understanding:
 
 ```yaml
-pipeline:
-  scoring_weights:
-    # Standard pipeline weights (must sum to 1.0)
-    standard:
-      brisque: 0.6      # 60% weight on BRISQUE
-      sightengine: 0.4  # 40% weight on SightEngine
-    
-    # Premium pipeline weights (must sum to 1.0)
-    premium:
-      brisque: 0.4      # 40% weight on BRISQUE
-      sightengine: 0.3  # 30% weight on SightEngine
-      claude: 0.3       # 30% weight on Claude
-  
-  # Adjust star rating thresholds (0-1 scale)
-  star_thresholds:
-    5_star: 0.80  # Combined score >= 0.80 gets 5 stars
-    4_star: 0.65  # Combined score >= 0.65 gets 4 stars
-                  # Combined score < 0.65 gets 3 stars
+understanding:
+  providers:
+    - name: openai
+      focus: ["objects", "scenes", "text"]
+      model: gpt-4-vision-preview
+    - name: anthropic
+      focus: ["style", "mood", "composition"]
+      model: claude-3-haiku
+    - name: google
+      focus: ["technical", "colors", "lighting"]
+      model: gemini-pro-vision
 ```
 
-#### Folder Structure:
-Images are distributed across star-rating folders based on combined scores:
+#### Tag Hierarchy:
+Tags are organized hierarchically for better search:
 ```
-organized/2024-03-15/project/stablediffusion/
-├── 5-star/   # Best quality (combined score >= 0.80)
-├── 4-star/   # Good quality (combined score >= 0.65)
-└── 3-star/   # Average quality (combined score < 0.65)
+art_style/
+├── digital_art/
+│   ├── cyberpunk
+│   ├── vaporwave
+│   └── glitch_art
+├── traditional/
+│   ├── oil_painting
+│   └── watercolor
+└── photography/
+    ├── portrait
+    └── landscape
 ```
+
+#### Metadata Embedding:
+Tags are embedded directly in files using standard formats:
+- **JPEG/PNG**: EXIF and XMP metadata
+- **WebP**: XMP metadata
+- **HEIC**: EXIF metadata
+- **Videos**: MP4 metadata tags
 
 #### Cost Optimization:
-- Progressive filtering: Higher-cost APIs only process higher-quality images
-- Use `--dry-run` to preview without API calls
-- Set `--cost-limit` to cap spending
-- Cached results prevent reprocessing
+- Use specific providers based on your needs
+- Set `--cost-limit` to control spending
+- Cached results prevent re-analysis
+- Batch processing for efficiency
 
 ## Important Notes
 
