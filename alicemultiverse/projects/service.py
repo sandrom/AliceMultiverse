@@ -7,7 +7,7 @@ from typing import Any, Optional
 from sqlalchemy.orm import Session
 
 from alicemultiverse.database.models import Generation, Project
-from alicemultiverse.events.postgres_events import publish_event
+from alicemultiverse.events import publish_event_sync
 
 
 class ProjectService:
@@ -24,8 +24,8 @@ class ProjectService:
         # event_bus parameter kept for backward compatibility but not used
     
     def _publish_event(self, event_type: str, **data) -> None:
-        """Publish event using PostgreSQL events."""
-        publish_event(event_type, data)
+        """Publish event using Redis Streams."""
+        publish_event_sync(event_type, data)
     
     def create_project(
         self, 

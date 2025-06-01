@@ -22,7 +22,7 @@ from .types import (
 from ..core.exceptions import ValidationError
 from .provider import ProviderError
 from ..core.structured_logging import get_logger
-from ..events.postgres_events import publish_event
+from ..events import publish_event_sync
 
 logger = get_logger(__name__)
 
@@ -297,7 +297,7 @@ class HedraProvider(BaseProvider):
                     generation_id = result["id"]
                 
                 # Publish generation started event
-                await publish_event(
+                publish_event_sync(
                     "generation.started",
                     {
                         "generation_id": generation_id,
@@ -314,7 +314,7 @@ class HedraProvider(BaseProvider):
                 
                 if status_response["status"] == "error":
                     error_msg = status_response.get("error_message", "Unknown error")
-                    await publish_event(
+                    publish_event_sync(
                         "generation.failed",
                         {
                             "generation_id": generation_id,
@@ -343,7 +343,7 @@ class HedraProvider(BaseProvider):
                 cost = self.get_model_info("character-2")["cost_per_generation"]
                 
                 # Publish completion event
-                await publish_event(
+                publish_event_sync(
                     "generation.completed",
                     {
                         "generation_id": generation_id,

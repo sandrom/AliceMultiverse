@@ -437,7 +437,7 @@ class AliceOrchestrator:
 
             # Publish workflow started event
             workflow_id = f"create_{datetime.now(UTC).timestamp()}"
-            publish_event(
+            await publish_event(
                 "workflow.started",
                 {
                     "workflow_id": workflow_id,
@@ -645,7 +645,7 @@ class AliceOrchestrator:
         if self.project_id and self.project_repo:
             try:
                 # Update project context
-                publish_event(
+                await publish_event(
                     "context.updated",
                     {
                         "project_id": self.project_id,

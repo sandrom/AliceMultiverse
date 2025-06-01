@@ -9,7 +9,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Optional, TypeVar, Callable
 from functools import wraps
 
-from ..events.postgres_events import publish_event
+from ..events import publish_event_sync
 from .types import (
     CostEstimate,
     GenerationRequest,
@@ -421,7 +421,7 @@ class Provider(ABC):
     
     def _publish_started(self, request: GenerationRequest):
         """Publish generation started event."""
-        publish_event(
+        publish_event_sync(
             "generation.started",
             {
                 "source": f"provider:{self.name}",
@@ -436,7 +436,7 @@ class Provider(ABC):
     def _publish_success(self, request: GenerationRequest, result: GenerationResult):
         """Publish success event."""
         if result.file_path:
-            publish_event(
+            publish_event_sync(
                 "asset.generated",
                 {
                     "source": f"provider:{self.name}",
@@ -454,7 +454,7 @@ class Provider(ABC):
 
     def _publish_failure(self, request: GenerationRequest, error: str):
         """Publish failure event."""
-        publish_event(
+        publish_event_sync(
             "generation.failed",
             {
                 "source": f"provider:{self.name}",
