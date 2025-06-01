@@ -380,20 +380,30 @@ class TestMidjourneyProvider:
             image_response.read = AsyncMock(return_value=b"fake image data")
             image_response.headers = {"content-type": "image/jpeg"}
             
+            # Create async context managers
             mock_post = AsyncMock()
-            mock_post.__aenter__.return_value = post_response
+            mock_post.__aenter__ = AsyncMock(return_value=post_response)
+            mock_post.__aexit__ = AsyncMock(return_value=None)
             
             mock_get_status = AsyncMock()
-            mock_get_status.__aenter__.return_value = status_response
+            mock_get_status.__aenter__ = AsyncMock(return_value=status_response)
+            mock_get_status.__aexit__ = AsyncMock(return_value=None)
             
             mock_get_image = AsyncMock()
-            mock_get_image.__aenter__.return_value = image_response
+            mock_get_image.__aenter__ = AsyncMock(return_value=image_response)
+            mock_get_image.__aexit__ = AsyncMock(return_value=None)
             
+            # Create session instance
             session_instance = AsyncMock()
-            session_instance.post.return_value = mock_post
-            session_instance.get.side_effect = [mock_get_status, mock_get_image]
+            session_instance.post = MagicMock(return_value=mock_post)
+            session_instance.get = MagicMock(side_effect=[mock_get_status, mock_get_image])
             
-            mock_session.return_value.__aenter__.return_value = session_instance
+            # Create async context manager for session
+            mock_session_cm = AsyncMock()
+            mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+            mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session.return_value = mock_session_cm
             
             # Create request
             request = GenerationRequest(
@@ -418,17 +428,26 @@ class TestMidjourneyProvider:
     async def test_submit_generation_error(self, provider_useapi):
         """Test error handling during job submission."""
         with patch("aiohttp.ClientSession") as mock_session:
+            # Create proper async mock for response
             post_response = AsyncMock()
             post_response.status = 400
             post_response.text = AsyncMock(return_value="Invalid prompt")
             
+            # Create async context manager for post
             mock_post = AsyncMock()
-            mock_post.__aenter__.return_value = post_response
+            mock_post.__aenter__ = AsyncMock(return_value=post_response)
+            mock_post.__aexit__ = AsyncMock(return_value=None)
             
+            # Create session instance with post method
             session_instance = AsyncMock()
-            session_instance.post.return_value = mock_post
+            session_instance.post = MagicMock(return_value=mock_post)
             
-            mock_session.return_value.__aenter__.return_value = session_instance
+            # Create async context manager for session
+            mock_session_cm = AsyncMock()
+            mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+            mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session.return_value = mock_session_cm
             
             generation_request = {"prompt": "test"}
             
@@ -450,13 +469,21 @@ class TestMidjourneyProvider:
                 "status": "processing"
             })
             
+            # Create async context manager for get
             mock_get = AsyncMock()
-            mock_get.__aenter__.return_value = status_response
+            mock_get.__aenter__ = AsyncMock(return_value=status_response)
+            mock_get.__aexit__ = AsyncMock(return_value=None)
             
+            # Create session instance with get method
             session_instance = AsyncMock()
-            session_instance.get.return_value = mock_get
+            session_instance.get = MagicMock(return_value=mock_get)
             
-            mock_session.return_value.__aenter__.return_value = session_instance
+            # Create async context manager for session
+            mock_session_cm = AsyncMock()
+            mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+            mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session.return_value = mock_session_cm
             
             # Reduce timeout for testing
             provider_useapi.MAX_POLL_TIME = 0.1
@@ -480,13 +507,21 @@ class TestMidjourneyProvider:
                 "error": "Content policy violation"
             })
             
+            # Create async context manager for get
             mock_get = AsyncMock()
-            mock_get.__aenter__.return_value = status_response
+            mock_get.__aenter__ = AsyncMock(return_value=status_response)
+            mock_get.__aexit__ = AsyncMock(return_value=None)
             
+            # Create session instance with get method
             session_instance = AsyncMock()
-            session_instance.get.return_value = mock_get
+            session_instance.get = MagicMock(return_value=mock_get)
             
-            mock_session.return_value.__aenter__.return_value = session_instance
+            # Create async context manager for session
+            mock_session_cm = AsyncMock()
+            mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+            mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session.return_value = mock_session_cm
             
             with pytest.raises(GenerationError) as exc_info:
                 await provider_useapi._wait_for_completion("test-123")
@@ -501,13 +536,21 @@ class TestMidjourneyProvider:
             download_response = AsyncMock()
             download_response.status = 404
             
+            # Create async context manager for get
             mock_get = AsyncMock()
-            mock_get.__aenter__.return_value = download_response
+            mock_get.__aenter__ = AsyncMock(return_value=download_response)
+            mock_get.__aexit__ = AsyncMock(return_value=None)
             
+            # Create session instance with get method
             session_instance = AsyncMock()
-            session_instance.get.return_value = mock_get
+            session_instance.get = MagicMock(return_value=mock_get)
             
-            mock_session.return_value.__aenter__.return_value = session_instance
+            # Create async context manager for session
+            mock_session_cm = AsyncMock()
+            mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+            mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session.return_value = mock_session_cm
             
             with pytest.raises(GenerationError) as exc_info:
                 await provider_useapi._download_image("https://example.com/missing.jpg", "test-123")
@@ -532,13 +575,21 @@ class TestMidjourneyProvider:
                 download_response.read = AsyncMock(return_value=b"fake image data")
                 download_response.headers = {"content-type": content_type}
                 
+                # Create async context manager for get
                 mock_get = AsyncMock()
-                mock_get.__aenter__.return_value = download_response
+                mock_get.__aenter__ = AsyncMock(return_value=download_response)
+                mock_get.__aexit__ = AsyncMock(return_value=None)
                 
+                # Create session instance with get method
                 session_instance = AsyncMock()
-                session_instance.get.return_value = mock_get
+                session_instance.get = MagicMock(return_value=mock_get)
                 
-                mock_session.return_value.__aenter__.return_value = session_instance
+                # Create async context manager for session
+                mock_session_cm = AsyncMock()
+                mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+                mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+                
+                mock_session.return_value = mock_session_cm
                 
                 output_path = await provider_useapi._download_image(
                     "https://example.com/image",
@@ -547,7 +598,8 @@ class TestMidjourneyProvider:
                 
                 assert output_path.suffix == expected_ext
     
-    def test_cost_estimation_different_models(self, provider_useapi):
+    @pytest.mark.asyncio
+    async def test_cost_estimation_different_models(self, provider_useapi):
         """Test cost estimation for different models."""
         test_cases = [
             ("v6.1", 0.30),
@@ -567,10 +619,11 @@ class TestMidjourneyProvider:
                 model=model
             )
             
-            cost = provider_useapi.estimate_cost(request)
-            assert cost == expected_cost
+            cost_estimate = await provider_useapi.estimate_cost(request)
+            assert cost_estimate.estimated_cost == expected_cost
     
-    def test_cost_estimation_unknown_model(self, provider_useapi):
+    @pytest.mark.asyncio
+    async def test_cost_estimation_unknown_model(self, provider_useapi):
         """Test cost estimation for unknown model."""
         request = GenerationRequest(
             prompt="Test",
@@ -578,9 +631,9 @@ class TestMidjourneyProvider:
             model="unknown-model"
         )
         
-        # Should default to 0.30
-        cost = provider_useapi.estimate_cost(request)
-        assert cost == 0.30
+        # Should default to 0.0 for unknown models
+        cost_estimate = await provider_useapi.estimate_cost(request)
+        assert cost_estimate.estimated_cost == 0.0
     
     @pytest.mark.asyncio
     async def test_check_status_useapi(self, provider_useapi):
@@ -590,16 +643,24 @@ class TestMidjourneyProvider:
             health_response = AsyncMock()
             health_response.status = 200
             
+            # Create async context manager for get
             mock_get = AsyncMock()
-            mock_get.__aenter__.return_value = health_response
+            mock_get.__aenter__ = AsyncMock(return_value=health_response)
+            mock_get.__aexit__ = AsyncMock(return_value=None)
             
+            # Create session instance with get method
             session_instance = AsyncMock()
-            session_instance.get.return_value = mock_get
+            session_instance.get = MagicMock(return_value=mock_get)
             
-            mock_session.return_value.__aenter__.return_value = session_instance
+            # Create async context manager for session
+            mock_session_cm = AsyncMock()
+            mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+            mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session.return_value = mock_session_cm
             
             status = await provider_useapi.check_status()
-            assert status == ProviderStatus.READY
+            assert status == ProviderStatus.AVAILABLE
             
             # Verify correct endpoint was called
             session_instance.get.assert_called_with(
@@ -616,16 +677,24 @@ class TestMidjourneyProvider:
             health_response = AsyncMock()
             health_response.status = 503
             
+            # Create async context manager for get
             mock_get = AsyncMock()
-            mock_get.__aenter__.return_value = health_response
+            mock_get.__aenter__ = AsyncMock(return_value=health_response)
+            mock_get.__aexit__ = AsyncMock(return_value=None)
             
+            # Create session instance with get method
             session_instance = AsyncMock()
-            session_instance.get.return_value = mock_get
+            session_instance.get = MagicMock(return_value=mock_get)
             
-            mock_session.return_value.__aenter__.return_value = session_instance
+            # Create async context manager for session
+            mock_session_cm = AsyncMock()
+            mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+            mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session.return_value = mock_session_cm
             
             status = await provider_useapi.check_status()
-            assert status == ProviderStatus.ERROR
+            assert status == ProviderStatus.UNAVAILABLE
     
     @pytest.mark.asyncio
     async def test_check_status_exception(self, provider_useapi):
@@ -635,10 +704,15 @@ class TestMidjourneyProvider:
             session_instance = AsyncMock()
             session_instance.get.side_effect = aiohttp.ClientError("Network error")
             
-            mock_session.return_value.__aenter__.return_value = session_instance
+            # Create async context manager for session
+            mock_session_cm = AsyncMock()
+            mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+            mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+            
+            mock_session.return_value = mock_session_cm
             
             status = await provider_useapi.check_status()
-            assert status == ProviderStatus.ERROR
+            assert status == ProviderStatus.UNAVAILABLE
     
     def test_get_model_info(self, provider_useapi):
         """Test getting model information."""
@@ -664,54 +738,69 @@ class TestMidjourneyProvider:
             "imageUrl": "https://example.com/result.png"
         }
         
-        with patch("aiohttp.ClientSession") as mock_session:
-            # Set up mocks
-            post_response = AsyncMock()
-            post_response.status = 202
-            post_response.json = AsyncMock(return_value=mock_submit_response)
+        # Mock the event publishing to avoid event loop issues
+        with patch("alicemultiverse.providers.provider.publish_event_sync") as mock_publish:
+            mock_publish.return_value = "event-123"
             
-            status_response = AsyncMock()
-            status_response.status = 200
-            status_response.json = AsyncMock(return_value=mock_status_response)
-            
-            image_response = AsyncMock()
-            image_response.status = 200
-            image_response.read = AsyncMock(return_value=b"fake image data")
-            image_response.headers = {"content-type": "image/png"}
-            
-            mock_post = AsyncMock()
-            mock_post.__aenter__.return_value = post_response
-            
-            mock_get_status = AsyncMock()
-            mock_get_status.__aenter__.return_value = status_response
-            
-            mock_get_image = AsyncMock()
-            mock_get_image.__aenter__.return_value = image_response
-            
-            session_instance = AsyncMock()
-            session_instance.post.return_value = mock_post
-            session_instance.get.side_effect = [mock_get_status, mock_get_image]
-            
-            mock_session.return_value.__aenter__.return_value = session_instance
-            
-            # Create request with image URL
-            request = GenerationRequest(
-                prompt="Make it more vibrant --v 6.1",
-                generation_type=GenerationType.IMAGE,
-                model="v6.1",
-                image_url="https://example.com/source.jpg"
-            )
-            
-            # Generate
-            result = await provider_useapi.generate(request)
-            
-            # Verify result
-            assert result.success is True
-            
-            # Verify API was called with image URL
-            call_args = session_instance.post.call_args
-            payload = call_args[1]["json"]
-            assert payload["image_url"] == "https://example.com/source.jpg"
+            with patch("aiohttp.ClientSession") as mock_session:
+                # Set up mocks
+                post_response = AsyncMock()
+                post_response.status = 202
+                post_response.json = AsyncMock(return_value=mock_submit_response)
+                
+                status_response = AsyncMock()
+                status_response.status = 200
+                status_response.json = AsyncMock(return_value=mock_status_response)
+                
+                image_response = AsyncMock()
+                image_response.status = 200
+                image_response.read = AsyncMock(return_value=b"fake image data")
+                image_response.headers = {"content-type": "image/png"}
+                
+                # Create async context managers
+                mock_post = AsyncMock()
+                mock_post.__aenter__ = AsyncMock(return_value=post_response)
+                mock_post.__aexit__ = AsyncMock(return_value=None)
+                
+                mock_get_status = AsyncMock()
+                mock_get_status.__aenter__ = AsyncMock(return_value=status_response)
+                mock_get_status.__aexit__ = AsyncMock(return_value=None)
+                
+                mock_get_image = AsyncMock()
+                mock_get_image.__aenter__ = AsyncMock(return_value=image_response)
+                mock_get_image.__aexit__ = AsyncMock(return_value=None)
+                
+                # Create session instance
+                session_instance = AsyncMock()
+                session_instance.post = MagicMock(return_value=mock_post)
+                session_instance.get = MagicMock(side_effect=[mock_get_status, mock_get_image])
+                
+                # Create async context manager for session
+                mock_session_cm = AsyncMock()
+                mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+                mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+                
+                mock_session.return_value = mock_session_cm
+                
+                # Create request with image URL
+                request = GenerationRequest(
+                    prompt="Make it more vibrant --v 6.1",
+                    generation_type=GenerationType.IMAGE,
+                    model="v6.1",
+                    reference_assets=["https://example.com/source.jpg"]
+                )
+                
+                # Generate
+                result = await provider_useapi.generate(request)
+                
+                # Verify result
+                assert result.success is True
+                
+                # Verify API was called with image URL
+                call_args = session_instance.post.call_args
+                payload = call_args[1]["json"]
+                # UseAPI uses 'image_url' field
+                assert payload["image_url"] == "https://example.com/source.jpg"
     
     @pytest.mark.asyncio
     async def test_generate_no_image_url_in_response(self, provider_useapi):
@@ -723,35 +812,49 @@ class TestMidjourneyProvider:
             # No imageUrl or url field
         }
         
-        with patch("aiohttp.ClientSession") as mock_session:
-            # Set up mocks
-            post_response = AsyncMock()
-            post_response.status = 202
-            post_response.json = AsyncMock(return_value=mock_submit_response)
+        # Mock the event publishing to avoid event loop issues
+        with patch("alicemultiverse.providers.provider.publish_event_sync") as mock_publish:
+            mock_publish.return_value = "event-123"
             
-            status_response = AsyncMock()
-            status_response.status = 200
-            status_response.json = AsyncMock(return_value=mock_status_response)
-            
-            mock_post = AsyncMock()
-            mock_post.__aenter__.return_value = post_response
-            
-            mock_get = AsyncMock()
-            mock_get.__aenter__.return_value = status_response
-            
-            session_instance = AsyncMock()
-            session_instance.post.return_value = mock_post
-            session_instance.get.return_value = mock_get
-            
-            mock_session.return_value.__aenter__.return_value = session_instance
-            
-            request = GenerationRequest(
-                prompt="Test",
-                generation_type=GenerationType.IMAGE,
-                model="v6.1"
-            )
-            
-            result = await provider_useapi.generate(request)
-            
-            assert result.success is False
-            assert "No image URL in response" in result.error
+            with patch("aiohttp.ClientSession") as mock_session:
+                # Set up mocks
+                post_response = AsyncMock()
+                post_response.status = 202
+                post_response.json = AsyncMock(return_value=mock_submit_response)
+                
+                status_response = AsyncMock()
+                status_response.status = 200
+                status_response.json = AsyncMock(return_value=mock_status_response)
+                
+                # Create async context managers
+                mock_post = AsyncMock()
+                mock_post.__aenter__ = AsyncMock(return_value=post_response)
+                mock_post.__aexit__ = AsyncMock(return_value=None)
+                
+                mock_get = AsyncMock()
+                mock_get.__aenter__ = AsyncMock(return_value=status_response)
+                mock_get.__aexit__ = AsyncMock(return_value=None)
+                
+                # Create session instance
+                session_instance = AsyncMock()
+                session_instance.post = MagicMock(return_value=mock_post)
+                session_instance.get = MagicMock(return_value=mock_get)
+                
+                # Create async context manager for session
+                mock_session_cm = AsyncMock()
+                mock_session_cm.__aenter__ = AsyncMock(return_value=session_instance)
+                mock_session_cm.__aexit__ = AsyncMock(return_value=None)
+                
+                mock_session.return_value = mock_session_cm
+                
+                request = GenerationRequest(
+                    prompt="Test",
+                    generation_type=GenerationType.IMAGE,
+                    model="v6.1"
+                )
+                
+                # Should raise GenerationError when no image URL in response
+                with pytest.raises(GenerationError) as exc_info:
+                    await provider_useapi.generate(request)
+                
+                assert "No image URL in response" in str(exc_info.value)

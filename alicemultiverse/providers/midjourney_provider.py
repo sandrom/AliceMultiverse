@@ -154,13 +154,13 @@ class MidjourneyProvider(Provider):
                     timeout=aiohttp.ClientTimeout(total=10)
                 ) as response:
                     if response.status == 200:
-                        self._status = ProviderStatus.READY
+                        self._status = ProviderStatus.AVAILABLE
                     else:
-                        self._status = ProviderStatus.ERROR
+                        self._status = ProviderStatus.UNAVAILABLE
                         
         except Exception as e:
             logger.error(f"Failed to check Midjourney proxy status: {e}")
-            self._status = ProviderStatus.ERROR
+            self._status = ProviderStatus.UNAVAILABLE
             
         self._last_check = datetime.now()
         return self._status
