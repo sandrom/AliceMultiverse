@@ -3,6 +3,8 @@
 ## Overview
 Migrate from PostgreSQL to DuckDB for metadata/search (OLAP) and evaluate alternatives for event streaming.
 
+**CRITICAL**: DuckDB is just a search cache. All metadata is embedded in files. The database can be rebuilt at any time by scanning files. No JSON sidecar files - everything goes in standard file metadata (EXIF/XMP/ID3).
+
 ## Current State
 - PostgreSQL used for everything (metadata, search, events)
 - Most queries are analytical (OLAP), not transactional
@@ -17,26 +19,30 @@ Migrate from PostgreSQL to DuckDB for metadata/search (OLAP) and evaluate altern
 
 ### 1.1 Create DuckDB Schema
 ```python
-# alicemultiverse/storage/duckdb_store.py
-class DuckDBMetadataStore:
+# alicemultiverse/storage/duckdb_cache.py
+class DuckDBSearchCache:
     """
+    Search cache that can be rebuilt from files at any time.
+    This is NOT the source of truth - files are!
+    
     CREATE TABLE assets (
         -- Identity
         content_hash VARCHAR PRIMARY KEY,
         
-        -- Locations (array of paths/URLs)
+        -- Locations (array of paths/URLs where file exists)
         locations STRUCT(
             path VARCHAR,
             type VARCHAR,  -- local, s3, gcs
-            last_verified TIMESTAMP
+            last_verified TIMESTAMP,
+            has_embedded_metadata BOOLEAN
         )[],
         
-        -- Core metadata
+        -- Core metadata (extracted from files)
         media_type VARCHAR,
         file_size BIGINT,
         created_at TIMESTAMP,
         
-        -- Tags as nested structure
+        -- Tags as nested structure (from file metadata)
         tags STRUCT(
             style VARCHAR[],
             mood VARCHAR[],
@@ -46,7 +52,7 @@ class DuckDBMetadataStore:
             custom MAP(VARCHAR, VARCHAR[])
         ),
         
-        -- AI Understanding
+        -- AI Understanding (from file metadata)
         understanding STRUCT(
             description TEXT,
             generated_prompt TEXT,
@@ -60,11 +66,12 @@ class DuckDBMetadataStore:
         -- Embeddings for similarity
         embedding FLOAT[1536],  -- OpenAI ada-002 size
         
-        -- Full metadata as JSON
-        metadata JSON
+        -- When we last extracted metadata from file
+        last_file_scan TIMESTAMP,
+        metadata_version VARCHAR
     );
     
-    -- Indexes
+    -- Indexes for fast search
     CREATE INDEX idx_media_type ON assets(media_type);
     CREATE INDEX idx_created ON assets(created_at);
     """
@@ -236,6 +243,56 @@ class FileEventLog:
 **Cons:**
 - No real-time pub/sub
 - Manual cleanup needed
+
+## Phase 3.5: Parquet Files for Analytics (Optional)
+
+### When to Use Parquet
+Parquet files are **NOT** for primary storage. Use them for:
+
+1. **Archival Snapshots**: Periodic exports of metadata state
+2. **Data Analysis**: Complex analytics across millions of files
+3. **Data Sharing**: Send metadata subsets to collaborators
+4. **Performance**: Columnar format for analytical queries
+
+```python
+# Export current state to Parquet (for archival)
+def export_metadata_snapshot(self, output_dir: Path):
+    """Export current metadata state to Parquet files."""
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    
+    # Export main assets table
+    self.conn.execute(f"""
+        COPY (SELECT * FROM assets) 
+        TO '{output_dir}/assets_{timestamp}.parquet' 
+        (FORMAT PARQUET, COMPRESSION ZSTD)
+    """)
+    
+    # Export location tracking
+    self.conn.execute(f"""
+        COPY (SELECT * FROM file_locations) 
+        TO '{output_dir}/locations_{timestamp}.parquet' 
+        (FORMAT PARQUET, COMPRESSION ZSTD)
+    """)
+
+# Query Parquet files directly (without importing)
+def analyze_historical_data(self, parquet_dir: Path):
+    """Run analytics on historical Parquet files."""
+    return self.conn.execute(f"""
+        SELECT 
+            date_trunc('month', created_at) as month,
+            count(*) as files_created,
+            list_unique(flatten(list_transform(tags.style, x -> x))) as unique_styles
+        FROM read_parquet('{parquet_dir}/assets_*.parquet')
+        GROUP BY month
+        ORDER BY month
+    """).df()
+```
+
+### What Parquet is NOT Used For
+- **NOT the source of truth** - Files are
+- **NOT required for operation** - Optional analytics
+- **NOT real-time data** - Periodic snapshots only
+- **NOT a backup** - Backup the actual files
 
 ## Phase 4: Implementation Timeline
 
