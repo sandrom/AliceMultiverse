@@ -1,4 +1,4 @@
-# ADR-006: AI-Native Service Architecture
+# ADR-010: AI-Native Service Architecture
 
 **Status**: Implemented  
 **Date**: 2025-01-28  

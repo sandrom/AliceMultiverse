@@ -16,6 +16,10 @@ An Architecture Decision Record captures an important architectural decision mad
 | [ADR-004](ADR-004-alice-sole-orchestrator.md) | Alice as Sole Orchestrator | Accepted | 2024-01-26 |
 | [ADR-005](ADR-005-code-quality-security-tooling.md) | Code Quality and Security Tooling | Accepted | 2025-01-27 |
 | [ADR-006](ADR-006-simplification-over-abstraction.md) | Simplification Over Abstraction | Accepted | 2025-01-29 |
+| [ADR-007](ADR-007-quality-to-understanding-system.md) | Transition from Quality to Understanding | Accepted | 2025-01-31 |
+| [ADR-008](ADR-008-duckdb-for-metadata-search.md) | DuckDB for Metadata Search | Accepted | 2025-01-31 |
+| [ADR-009](ADR-009-file-first-metadata-architecture.md) | File-First Metadata Architecture | Accepted | 2025-01-31 |
+| [ADR-010](ADR-010-ai-native-service-architecture.md) | AI-Native Service Architecture | Implemented | 2025-01-28 |
 
 ## ADR Template
 
