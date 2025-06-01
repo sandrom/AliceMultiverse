@@ -2,14 +2,29 @@
 
 ## Vision
 
-AliceMultiverse is an AI-native service that operates exclusively through AI assistants. It bridges creative professionals with AI generation tools and APIs, excelling at detecting, organizing, and assessing AI-generated content while maintaining context across extended creative sessions.
+AliceMultiverse is an AI-native creative workflow orchestrator that enables collaborative exploration between humans and AI. It excels at understanding large image collections, facilitating creative discovery, and supporting multiple video creation workflows - from storyboard-driven to emergent visual narratives. The system maintains context across extended creative sessions, helping users navigate from thousands of possibilities to polished video stories.
 
 ## Critical Questions (Re-evaluate Daily)
 
-1. **Are we solving real problems?** Media organization ✓, Image understanding ✓, Multi-location storage ✓
-2. **Is the architecture still simple?** Quality code removed ✓, Flexible storage ✓, Self-contained files ✓
-3. **What would users pay for?** Sound effects > Semantic search > Cross-platform sync > AI insights
-4. **What's broken RIGHT NOW?** Quality assessment removed - need docs update
+1. **Are we solving real problems?** 
+   - Media organization ✓
+   - Collaborative image discovery ✓ 
+   - Video creation workflows ✓
+   - Large collection navigation ✓
+2. **Is the architecture still simple?** 
+   - Understanding over quality ✓
+   - File-first metadata ✓
+   - AI-native interface ✓
+3. **What would users pay for?** 
+   - Creative workflow acceleration
+   - AI-assisted curation from thousands to dozens
+   - Intelligent prompt generation for video
+   - Collaborative exploration with context
+4. **What's broken RIGHT NOW?** 
+   - Recursion bug in metadata loading
+   - Need image presentation in chat UI
+   - Missing similarity search
+   - No soft-delete workflow
 
 ## ✅ CRITICAL: Code Cleanup COMPLETED
 
@@ -21,6 +36,14 @@ Following instructions.md: "a working service/application has always priority ov
 - [x] **Implement missing create_pipeline_stages()** function with dynamic import system
 - [x] **Commit or revert** 21 uncommitted files - New features committed, critical fixes committed
 - [x] **Fix test suite** - Core imports work, service foundation stable
+
+### IMMEDIATE: Enable Creative Workflows (HIGHEST PRIORITY)
+- [ ] **Image Presentation API** - Return images to AI for display in chat
+- [ ] **Selection Tracking** - Record which images user selected and why
+- [ ] **Similarity Search** - "Find more like these selected ones"
+- [ ] **Soft Delete API** - Move rejected images to 'sorted-out' folder
+- [ ] **Exclusion List** - Skip 'sorted-out' folders in scans
+- [ ] **Prompt Generation** - Create engaging Kling prompts from selected images
 
 ### Remaining Issues (Next Session - HIGH PRIORITY)
 - [ ] **Fix recursion bug** - Metadata loading causes infinite recursion in organizer
@@ -39,18 +62,75 @@ Following instructions.md: "a working service/application has always priority ov
 - [ ] **Add integration tests** for new understanding system
 
 ### Important (This Week - MEDIUM PRIORITY)
+- [ ] **Image Presentation UI** - Show images in AI chat for selection
+- [ ] **Feedback Loop** - Capture user preferences and reasons
+- [ ] **Similarity Search** - Find images based on selected examples
+- [ ] **Soft Delete Implementation** - Move unwanted images to excluded folders
 - [ ] **Complete test coverage** for new modules (comparison/, understanding/, storage/)
-- [ ] **Clean up temporary files** - Remove research docs, fix services/asset-processor
-- [ ] **Align documentation** with actual implementation
 - [ ] **Performance testing** of DuckDB integration
 
-## Next Up (After Cleanup Complete)
+## Next Up: Creative Workflow Support
 
-### 1. Semantic Search & Discovery
-- [ ] Semantic similarity search with DuckDB VSS extension
-- [ ] Model selection based on performance data
-- [ ] Vector embeddings for image similarity
-- [ ] Cross-modal search (text-to-image, image-to-text)
+### Implementation Plan for Image Discovery Workflow
+
+**User Story**: "I have thousands of images and need to find a small set for video creation"
+
+1. **Initial Browse**
+   - AI shows grid of images based on initial query
+   - User clicks to select/deselect with reasons
+   - AI learns preferences in real-time
+
+2. **Iterative Refinement**
+   - "Show me more cyberpunk but less neon"
+   - "These three work well together, find complementary ones"
+   - "This style but different subjects"
+
+3. **Curation Tools**
+   - Mark broken/unwanted → moves to 'sorted-out/broken/'
+   - Mark maybe-later → moves to 'sorted-out/archive/'
+   - These folders excluded from future searches
+
+4. **Video Preparation**
+   - Selected images → generate Kling prompts
+   - Suggest transitions and narrative flow
+   - Export selection with prompts
+
+### Technical Requirements
+
+1. **Search API Enhancements**
+   ```python
+   # Current: Simple tag search
+   search(tags=["cyberpunk"])
+   
+   # Needed: Similarity and exclusion
+   search(
+       similar_to=["image_hash_1", "image_hash_2"],
+       exclude_tags=["neon"],
+       exclude_folders=["sorted-out/"],
+       limit=20
+   )
+   ```
+
+2. **Selection Tracking**
+   ```python
+   # Store user feedback
+   track_selection({
+       "image_hash": "abc123",
+       "selected": True,
+       "reason": "love the mood and color palette",
+       "session_id": "exploration_001"
+   })
+   ```
+
+3. **Soft Delete API**
+   ```python
+   # Move to sorted folder
+   soft_delete({
+       "image_hash": "def456",
+       "reason": "broken/artifacts",
+       "destination": "sorted-out/broken/"
+   })
+   ```
 
 ## Backlog (Re-evaluate Weekly)
 
