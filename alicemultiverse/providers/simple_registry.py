@@ -65,6 +65,7 @@ class ProviderRegistry:
         from .google_ai_provider import GoogleAIProvider
         from .ideogram_provider import IdeogramProvider
         from .leonardo_provider import LeonardoProvider
+        from .elevenlabs_provider import ElevenLabsProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
@@ -94,6 +95,9 @@ class ProviderRegistry:
         self.register_provider("leonardo", LeonardoProvider)
         self.register_provider("leonardo-ai", LeonardoProvider)  # Alias
         self.register_provider("leonardo.ai", LeonardoProvider)  # Alias
+        self.register_provider("elevenlabs", ElevenLabsProvider)
+        self.register_provider("eleven-labs", ElevenLabsProvider)  # Alias
+        self.register_provider("11labs", ElevenLabsProvider)  # Alias
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
@@ -170,6 +174,9 @@ class ProviderRegistry:
                 "leonardo": "LEONARDO_API_KEY",
                 "leonardo-ai": "LEONARDO_API_KEY",
                 "leonardo.ai": "LEONARDO_API_KEY",
+                "elevenlabs": "ELEVENLABS_API_KEY",
+                "eleven-labs": "ELEVENLABS_API_KEY",
+                "11labs": "ELEVENLABS_API_KEY",
             }
             if name_lower in env_vars:
                 api_key = os.getenv(env_vars[name_lower])

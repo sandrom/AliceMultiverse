@@ -24,6 +24,7 @@ from .provider import (
 from .anthropic_provider import AnthropicProvider
 from .fal_provider import FalProvider
 from .openai_provider import OpenAIProvider
+from .elevenlabs_provider import ElevenLabsProvider
 from .registry import (
     ProviderRegistry, 
     get_provider, 
@@ -51,6 +52,7 @@ __all__ = [
     "AnthropicProvider",
     "FalProvider",
     "OpenAIProvider",
+    "ElevenLabsProvider",
     "ProviderRegistry",
     "get_provider",
     "get_provider_async",

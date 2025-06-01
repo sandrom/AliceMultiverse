@@ -26,6 +26,7 @@ class ProcessingConfig:
     copy_mode: bool = True
     force_reindex: bool = False
     quality: bool = False
+    understanding: bool = False  # Image understanding enabled
     watch: bool = False
     watch_interval: int = 5
     dry_run: bool = False
