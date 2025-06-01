@@ -90,6 +90,13 @@ Following instructions.md: "a working service/application has always priority ov
   - [x] Update QUICKSTART.md - Removed quality assessment references
   - [x] Update storage-location-registry.md - Changed quality_stars to tags
   - [x] Remove references to deprecated features - BRISQUE, pipeline, quality ratings
+- [x] **Remove PostgreSQL Integration** - Complete database removal per ADR-010
+  - [x] Delete alembic/ directory and all migrations
+  - [x] Remove database module PostgreSQL code  
+  - [x] Update all module imports to remove database dependencies
+  - [x] Update docker-compose.yml to remove postgres service
+  - [x] Document changes in CHANGELOG.md
+  - [x] Create ADR-010 documenting the decision
 - [ ] **Performance testing** of DuckDB integration
   - [ ] Benchmark search operations
   - [ ] Test with large datasets (10k+ images)

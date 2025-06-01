@@ -7,8 +7,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Set, Tuple
 
-from ..database.models import Asset, Tag
-from ..database.repository import AssetRepository
+# PostgreSQL removed - Asset, Tag, and AssetRepository no longer available
 from .base import ImageAnalysisResult
 
 logger = logging.getLogger(__name__)
@@ -211,7 +210,7 @@ class TagVocabulary:
 class ProjectTagVocabulary:
     """Manages project-specific tag vocabularies."""
     
-    def __init__(self, project_id: str, repository: AssetRepository):
+    def __init__(self, project_id: str, repository: Any):
         """Initialize project vocabulary.
         
         Args:
@@ -226,18 +225,9 @@ class ProjectTagVocabulary:
     
     def _load_project_tags(self):
         """Load existing tags from the project."""
-        try:
-            # Get all unique tags for this project
-            with self.repository.get_session() as session:
-                project_tags = (
-                    session.query(Tag.tag_type, Tag.tag_value)
-                    .join(Asset)
-                    .filter(Asset.project_id == self.project_id)
-                    .distinct()
-                    .all()
-                )
-                
-                for tag_type, tag_value in project_tags:
+        # PostgreSQL removed - cannot load project tags from database
+        logger.debug(f"Project tag loading skipped for {self.project_id} - PostgreSQL removed")
+        return
                     self.custom_tags[tag_type].add(tag_value)
                     
             logger.info(f"Loaded {sum(len(tags) for tags in self.custom_tags.values())} "
@@ -304,7 +294,7 @@ class ProjectTagVocabulary:
 class AdvancedTagger:
     """Advanced tagging system with hierarchical and custom vocabularies."""
     
-    def __init__(self, repository: AssetRepository):
+    def __init__(self, repository: Any):
         """Initialize the advanced tagger.
         
         Args:

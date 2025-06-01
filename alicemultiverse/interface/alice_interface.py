@@ -7,8 +7,9 @@ from typing import Any
 
 from ..core.ai_errors import AIFriendlyError
 from ..core.config import load_config
-from ..database.config import init_db
-from ..database.repository import AssetRepository, ProjectRepository
+# PostgreSQL removed - database imports no longer available
+# from ..database.config import init_db
+# from ..database.repository import AssetRepository, ProjectRepository
 from ..metadata.models import AssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
 from ..projects import ProjectService
@@ -60,14 +61,11 @@ class AliceInterface:
             self.initialization_error = e
             logger.warning(f"Failed to initialize organizer: {e}")
         
-        # Initialize database
-        db_session = init_db()
-        self.asset_repo = AssetRepository()
-        self.project_repo = ProjectRepository()
-        
-        # Initialize project service (event_bus parameter is deprecated)
-        self.project_service = ProjectService(db_session)
-        logger.info("Database and services initialized")
+        # PostgreSQL removed - no database initialization
+        self.asset_repo = None
+        self.project_repo = None
+        self.project_service = None
+        logger.info("Running without database - PostgreSQL removed")
 
     def _ensure_organizer(self) -> None:
         """Ensure organizer is initialized."""

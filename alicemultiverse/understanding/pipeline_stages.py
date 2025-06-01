@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from ..core.types import MediaType
-from ..database.repository import AssetRepository
+# PostgreSQL removed - repository parameter is now unused
 from ..pipeline.stages import PipelineStage
 from .advanced_tagger import AdvancedTagger
 from .analyzer import ImageAnalyzer
@@ -35,7 +35,7 @@ class ImageUnderstandingStage(PipelineStage):
         use_provider_optimization: bool = False,
         budget_limit: Optional[float] = None,
         project_id: Optional[str] = None,
-        repository: Optional[AssetRepository] = None,
+        repository: Optional[Any] = None,  # Deprecated - kept for compatibility
     ):
         """Initialize advanced image understanding stage.
         
@@ -450,7 +450,7 @@ class AdvancedBatchUnderstandingStage(PipelineStage):
         max_concurrent: int = 5,
         budget_limit: Optional[float] = None,
         project_id: Optional[str] = None,
-        repository: Optional[AssetRepository] = None,
+        repository: Optional[Any] = None,  # Deprecated - kept for compatibility
         use_optimization: bool = True,
         checkpoint_interval: int = 10,
     ):

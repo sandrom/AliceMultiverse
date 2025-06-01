@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking Changes (2025-06-01)
+- **Removed PostgreSQL Integration**: Complete removal of PostgreSQL dependency
+  - Deleted alembic/ directory and all migrations
+  - Removed SQLAlchemy models and repository classes
+  - Updated all modules to work without database
+  - Search functionality temporarily disabled (will use DuckDB)
+  - Project management temporarily non-functional
+  - Asset discovery limited to filesystem operations
+- **Simplified Deployment**: No database server required
+- **Reduced Dependencies**: Removed SQLAlchemy, Alembic, psycopg2
+- **File-First Architecture**: All metadata stored in files, not database
+
 ### Architecture Simplification (2025-01-29)
 - **Simplified Event System**: Replaced 2,600 lines across 5 implementations with 300-line PostgreSQL-native solution
 - **Unified Provider Base**: Reduced 4 abstraction layers to 1 unified base class

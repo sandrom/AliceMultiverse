@@ -10,8 +10,9 @@ import uvicorn
 
 from .metrics import get_metrics, get_metrics_content_type
 from .structured_logging import get_logger
-from ..database.config import get_pool_monitor
-from ..database.pool_manager import get_pool_diagnostics
+# PostgreSQL removed - pool monitoring no longer available
+# from ..database.config import get_pool_monitor
+# from ..database.pool_manager import get_pool_diagnostics
 from ..providers.health_monitor import health_monitor
 
 logger = get_logger(__name__)
@@ -53,25 +54,8 @@ async def update_dynamic_metrics():
         db_connections_total
     )
     
-    # Update database pool metrics
-    try:
-        pool_monitor = get_pool_monitor()
-        if pool_monitor:
-            stats = pool_monitor.get_stats()
-            update_db_pool_metrics(stats)
-            
-            # Also update using pool diagnostics
-            diag = get_pool_diagnostics()
-            if diag and 'pool_stats' in diag:
-                pool_status = diag['pool_stats'].get('pool_status', {})
-                db_connections_active.set(pool_status.get('checked_out', 0))
-                db_connections_total.set(pool_status.get('total', 0))
-    except Exception as e:
-        logger.error(
-            "Failed to update database pool metrics",
-            error=str(e),
-            exc_info=True
-        )
+    # PostgreSQL removed - database pool metrics no longer available
+    logger.debug("Database pool metrics skipped - PostgreSQL removed")
     
     # Update provider health metrics
     try:

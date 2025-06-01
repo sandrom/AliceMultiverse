@@ -5,9 +5,10 @@ import os
 from datetime import datetime
 from pathlib import Path
 
-from ..database.repository import AssetRepository
-from ..database.models import Asset as DBAsset
-from ..database.redis_cache import RedisCache
+# PostgreSQL removed - using DuckDB for search
+# from ..database.repository import AssetRepository
+# from ..database.models import Asset as DBAsset
+from ..database.cache import RedisCache
 from .structured_models import (
     Asset,
     MediaType,
@@ -25,7 +26,8 @@ class OptimizedSearchHandler:
     
     def __init__(self):
         """Initialize search handler."""
-        self.repo = AssetRepository()
+        # PostgreSQL removed - would use DuckDB for search
+        # self.repo = AssetRepository()
         
         # Initialize Redis cache
         self.cache = RedisCache(
@@ -35,6 +37,9 @@ class OptimizedSearchHandler:
             prefix="alice",
             ttl=300  # 5 minutes for search results
         )
+        
+        # TODO: Initialize DuckDB connection for search
+        logger.warning("Search functionality needs to be reimplemented with DuckDB")
     
     def search_assets(self, request: SearchRequest) -> SearchResponse:
         """Execute optimized search query.
@@ -108,8 +113,11 @@ class OptimizedSearchHandler:
                 db_params["tags"] = {"custom": all_tags}
                 db_params["tag_mode"] = "any" if filters.get("any_tags") else "all"
         
-        # Execute search with count
-        assets, total_count = self.repo.search_with_count(**db_params)
+        # TODO: Execute search with DuckDB
+        # For now, return empty results until DuckDB integration is complete
+        logger.warning("Search not yet implemented with DuckDB")
+        assets = []
+        total_count = 0
         
         # Convert database models to API models
         api_results = []
@@ -145,7 +153,7 @@ class OptimizedSearchHandler:
         
         return response
     
-    def _convert_db_to_api_asset(self, db_asset: DBAsset) -> Asset:
+    def _convert_db_to_api_asset(self, db_asset: dict) -> Asset:
         """Convert database asset to API asset model.
         
         Args:
@@ -246,7 +254,7 @@ class OptimizedSearchHandler:
         
         return True
     
-    def _calculate_facets(self, assets: list[DBAsset]) -> SearchFacets:
+    def _calculate_facets(self, assets: list[dict]) -> SearchFacets:
         """Calculate facets from database results.
         
         Args:
@@ -315,7 +323,7 @@ class OptimizedSearchHandler:
             "offset": request.get("offset", 0)
         }
     
-    def _serialize_db_asset(self, asset: DBAsset) -> dict:
+    def _serialize_db_asset(self, asset: dict) -> dict:
         """Serialize database asset for caching.
         
         Args:

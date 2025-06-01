@@ -11,8 +11,7 @@ from typing import Any, Dict, List, Optional, Set, Tuple
 
 from tqdm.asyncio import tqdm
 
-from ..database.models import Asset
-from ..database.repository import AssetRepository
+# PostgreSQL removed - Asset and AssetRepository no longer available
 from .analyzer import ImageAnalyzer
 from .base import ImageAnalysisResult
 
@@ -161,7 +160,7 @@ class BatchAnalysisRequest:
 class BatchAnalyzer:
     """Handles batch analysis of images with progress tracking and cost management."""
     
-    def __init__(self, analyzer: ImageAnalyzer, repository: Optional[AssetRepository] = None):
+    def __init__(self, analyzer: ImageAnalyzer, repository: Optional[Any] = None):
         """Initialize batch analyzer.
         
         Args:
@@ -362,27 +361,14 @@ class BatchAnalyzer:
             images = request.image_paths
         
         elif request.project_id and self.repository:
-            # Get images from project
-            with self.repository.get_session() as session:
-                assets = session.query(Asset).filter(
-                    Asset.project_id == request.project_id,
-                    Asset.media_type.in_(request.media_types)
-                ).all()
-                
-                for asset in assets:
-                    if asset.file_path and Path(asset.file_path).exists():
-                        images.append(Path(asset.file_path))
+            # PostgreSQL removed - project queries not supported
+            logger.warning("Project-based batch analysis not available without PostgreSQL")
+            pass
         
         elif request.content_hashes and self.repository:
-            # Get images by content hash
-            with self.repository.get_session() as session:
-                assets = session.query(Asset).filter(
-                    Asset.content_hash.in_(request.content_hashes)
-                ).all()
-                
-                for asset in assets:
-                    if asset.file_path and Path(asset.file_path).exists():
-                        images.append(Path(asset.file_path))
+            # PostgreSQL removed - content hash queries not supported
+            logger.warning("Content hash-based batch analysis not available without PostgreSQL")
+            pass
         
         # Filter by media type
         valid_extensions = {
@@ -411,28 +397,5 @@ class BatchAnalyzer:
         if not self.repository:
             return
         
-        try:
-            with self.repository.get_session() as session:
-                # Update asset with analysis results
-                asset = session.query(Asset).filter(
-                    Asset.content_hash == content_hash
-                ).first()
-                
-                if asset:
-                    # Update analysis results
-                    if not asset.analysis_results:
-                        asset.analysis_results = {}
-                    
-                    asset.analysis_results[result.provider] = {
-                        "description": result.description,
-                        "tags": result.tags,
-                        "generated_prompt": result.generated_prompt,
-                        "negative_prompt": result.negative_prompt,
-                        "cost": result.cost,
-                        "analyzed_at": datetime.now().isoformat()
-                    }
-                    
-                    session.commit()
-                    
-        except Exception as e:
-            logger.error(f"Failed to save analysis results: {e}")
+        # PostgreSQL removed - database saving not supported
+        logger.debug("Database saving skipped - PostgreSQL integration removed")

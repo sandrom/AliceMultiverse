@@ -12,8 +12,9 @@ from typing import Any
 
 from ..assets.discovery import AssetDiscovery
 from ..core.structured_logging import get_logger, trace_operation, CorrelationContext
-from ..database import get_session
-from ..database.repository import AssetRepository, ProjectRepository
+# PostgreSQL removed - database imports no longer available
+# from ..database import get_session
+# from ..database.repository import AssetRepository, ProjectRepository
 from ..events import publish_event
 
 logger = get_logger(__name__)
@@ -89,16 +90,12 @@ class AliceOrchestrator:
 
     def _init_session(self) -> None:
         """Initialize database session."""
-        try:
-            self.session = next(get_session())
-            self.asset_repo = AssetRepository()
-            self.project_repo = ProjectRepository()
-            self.discovery = AssetDiscovery(search_paths=[])
-        except Exception as e:
-            logger.warning(f"Database not available: {e}. Running in limited mode.")
-            self.asset_repo = None
-            self.project_repo = None
-            self.discovery = None
+        # PostgreSQL removed - running in limited mode
+        logger.info("Running without database - PostgreSQL integration removed")
+        self.session = None
+        self.asset_repo = None
+        self.project_repo = None
+        self.discovery = AssetDiscovery(search_paths=[])
 
     def _load_context(self) -> None:
         """Load project context if available."""
