@@ -508,7 +508,6 @@ def main(argv: list[str] | None = None) -> int:
     # Handle index subcommand
     if args.command == "index":
         from ..storage.index_builder import SearchIndexBuilder
-        from ..core.config import load_config
         
         # Load config to get DB path
         config = load_config()

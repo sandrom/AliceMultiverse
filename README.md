@@ -53,6 +53,27 @@ AliceMultiverse is transitioning from a command-line tool to an AI-native servic
 - "Tag these images as references for my new project"
 - "Find similar images to this one"
 
+## 📦 Requirements
+
+### System Dependencies
+
+```bash
+# macOS
+brew install ffmpeg redis
+
+# Ubuntu/Debian
+sudo apt-get install ffmpeg redis-server
+
+# Start Redis (required for event system)
+redis-server
+```
+
+### Python Dependencies
+
+Core dependencies are installed automatically, but Redis must be running:
+- **Redis**: Required for event system (workflow tracking, real-time updates)
+- **FFmpeg**: Required for video metadata extraction
+
 ## 🔧 Debug CLI (Developers Only)
 
 ⚠️ **Direct CLI usage is deprecated.** The CLI is maintained only for debugging purposes.

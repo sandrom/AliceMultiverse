@@ -53,8 +53,27 @@ class MediaOrganizer:
 
         # Initialize components
         self.file_handler = FileHandler(dry_run=getattr(config.processing, "dry_run", False))
+        
+        # Check if understanding is enabled
+        enable_understanding = getattr(config.processing, "understanding", False)
+        understanding_provider = None
+        
+        # Understanding config is in pipeline.extra_fields
+        if enable_understanding and hasattr(config, "pipeline"):
+            if hasattr(config.pipeline, "extra_fields") and "understanding" in config.pipeline.extra_fields:
+                understanding_config = config.pipeline.extra_fields["understanding"]
+                understanding_provider = understanding_config.get("preferred_provider")
+                
+            # If no preferred provider, use anthropic since we have the key
+            if understanding_provider is None:
+                understanding_provider = "anthropic"
+                logger.info("Using anthropic provider for understanding (API key configured)")
+        
         self.metadata_cache = MetadataCache(
-            self.source_dir, force_reindex=config.processing.force_reindex
+            self.source_dir, 
+            force_reindex=config.processing.force_reindex,
+            enable_understanding=enable_understanding,
+            understanding_provider=understanding_provider
         )
 
         # Quality assessment has been replaced with image understanding
@@ -208,19 +227,41 @@ class MediaOrganizer:
     def _find_media_files(self) -> list[Path]:
         """Find all media files in source directory."""
         media_files = []
+        
+        # Folders to exclude from scanning
+        exclude_folders = {'sorted-out', 'sorted_out', '.metadata', '.alice'}
+        excluded_count = 0
 
         # Find all project folders
         for project_dir in self.source_dir.iterdir():
             if not project_dir.is_dir():
                 continue
 
-            if project_dir.name.startswith("."):
+            if project_dir.name.startswith(".") or project_dir.name.lower() in exclude_folders:
+                if project_dir.name.lower() in {'sorted-out', 'sorted_out'}:
+                    excluded_count += 1
+                    logger.debug(f"Skipping excluded folder: {project_dir.name}")
                 continue
 
             # Find media files in project
             for file_path in project_dir.rglob("*"):
                 if file_path.is_file() and self._is_media_file(file_path):
-                    media_files.append(file_path)
+                    # Check if any parent directory is excluded
+                    should_exclude = False
+                    for parent in file_path.parents:
+                        if parent == self.source_dir:
+                            break
+                        if parent.name.lower() in exclude_folders:
+                            should_exclude = True
+                            break
+                    
+                    if not should_exclude:
+                        media_files.append(file_path)
+                    else:
+                        excluded_count += 1
+
+        if excluded_count > 0:
+            logger.info(f"Excluded {excluded_count} files in 'sorted-out' folders")
 
         return sorted(media_files)
 
@@ -324,16 +365,20 @@ class MediaOrganizer:
 
         # Image analysis happens in pipeline stages if configured
 
-        return AnalysisResult(
-            source_type=source_type,
-            date_taken=date_taken,
-            project_folder=project_folder,
-            media_type=media_type,
-            file_number=file_number,
-            quality_stars=None,
-            brisque_score=None,
-            pipeline_result=metadata.get("pipeline_stages"),  # Include pipeline results
-        )
+        # Create the analysis result dict instead of AnalysisResult
+        analysis = {
+            "source_type": source_type,
+            "date_taken": date_taken,
+            "project_folder": project_folder,
+            "media_type": media_type,
+            "file_number": file_number,
+            "quality_stars": None,
+            "brisque_score": None,
+            "pipeline_result": metadata.get("pipeline_stages"),
+            "content_hash": content_hash,  # Include content hash
+        }
+        
+        return analysis
 
     def _detect_ai_source(self, media_path: Path, media_type: MediaType) -> str:
         """Detect AI generation source from filename and metadata."""
@@ -654,7 +699,7 @@ class MediaOrganizer:
         elif result.get("media_type") == MediaType.VIDEO:
             self.stats["videos_found"] += 1
 
-        if result["quality_stars"] is not None:
+        if result.get("quality_stars") is not None:
             self.stats["by_quality"][result["quality_stars"]] += 1
             self.stats["quality_assessed"] += 1
         elif self.quality_enabled and result.get("media_type") == MediaType.IMAGE:
@@ -722,6 +767,15 @@ class MediaOrganizer:
             # Include content hash from cache
             if "content_hash" in cached_metadata:
                 analysis["content_hash"] = cached_metadata["content_hash"]
+            
+            # Include understanding data if available (v4.0 cache format)
+            if "understanding" in analysis:
+                # Understanding data is already in analysis
+                pass
+            elif "version" in cached_metadata and cached_metadata["version"] == "4.0":
+                # Check if understanding is at root level
+                if "understanding" in cached_metadata:
+                    analysis["understanding"] = cached_metadata["understanding"]
 
             # If no file number in cache, assign one now
             if "file_number" not in analysis or analysis["file_number"] is None:
@@ -729,9 +783,19 @@ class MediaOrganizer:
                     project_folder, analysis["source_type"]
                 )
                 # Update cache with the new file number
-                self.metadata_cache.set_metadata(
-                    media_path, analysis, cached_metadata.get("analysis_time", 0)
-                )
+                # Force re-analysis if understanding is enabled but no tags exist
+                if self.metadata_cache.enable_understanding and "understanding" not in analysis:
+                    logger.info(f"Re-analyzing {media_path.name} to add understanding tags")
+                    # Clear from cache to force fresh analysis
+                    self.metadata_cache.cache.cache_file.unlink(missing_ok=True) if hasattr(self.metadata_cache.cache, 'cache_file') else None
+                    # Re-analyze with understanding
+                    analysis = self._analyze_media(media_path, project_folder)
+                    analysis_time = time.time() - start_time
+                    self.metadata_cache.set_metadata(media_path, analysis, analysis_time)
+                else:
+                    self.metadata_cache.set_metadata(
+                        media_path, analysis, cached_metadata.get("analysis_time", 0)
+                    )
 
             analysis_time = cached_metadata.get("analysis_time", 0)
             self.metadata_cache.update_stats(True, analysis_time)
@@ -740,9 +804,15 @@ class MediaOrganizer:
             analysis = self._analyze_media(media_path, project_folder)
             analysis_time = time.time() - start_time
 
-            # Cache the results
+            # Cache the results - this should trigger understanding if enabled
             self.metadata_cache.set_metadata(media_path, analysis, analysis_time)
             self.metadata_cache.update_stats(False)
+            
+            # Log if understanding was supposed to run
+            if self.metadata_cache.enable_understanding:
+                logger.debug(f"Understanding enabled with provider: {self.metadata_cache.understanding_provider}")
+                if "understanding" not in analysis:
+                    logger.warning(f"Understanding enabled but no tags generated for {media_path.name}")
 
         return analysis
 
@@ -859,12 +929,13 @@ class MediaOrganizer:
             self.file_handler.move_file(media_path, dest_path)
         
         # Update search index with new file location
+        logger.debug(f"About to update search index for {dest_path.name}")
         self._update_search_index(dest_path, analysis)
 
         return OrganizeResult(
             source=str(media_path),
             project_folder=project_folder,
-            status="success" if not self.config.processing.get("dry_run") else "dry_run",
+            status="success" if not self.config.processing.dry_run else "dry_run",
             destination=str(dest_path),
             date=analysis["date_taken"],
             source_type=analysis["source_type"],
@@ -885,15 +956,17 @@ class MediaOrganizer:
             analysis: Analysis results containing metadata
         """
         if not self.search_db or self.config.processing.dry_run:
+            logger.warning(f"Skipping search index update: search_db={bool(self.search_db)}, dry_run={self.config.processing.dry_run}")
             return
             
+        logger.info(f"_update_search_index called for {file_path.name}")
         try:
             # Build metadata for indexing
             metadata = {
                 "content_hash": analysis.get("content_hash"),
                 "file_path": str(file_path),
                 "file_size": file_path.stat().st_size,
-                "media_type": analysis.get("media_type", "image"),
+                "media_type": analysis.get("media_type", MediaType.IMAGE),
                 "ai_source": analysis.get("source_type"),
                 "quality_rating": analysis.get("quality_stars"),
                 "quality_score": analysis.get("final_combined_score"),
@@ -903,6 +976,17 @@ class MediaOrganizer:
                 "modified_at": datetime.fromtimestamp(file_path.stat().st_mtime),
                 "discovered_at": datetime.now(),
             }
+            
+            # Extract tags from understanding data if available
+            if "understanding" in analysis:
+                understanding = analysis["understanding"]
+                if isinstance(understanding, dict) and "tags" in understanding:
+                    metadata["tags"] = understanding["tags"]
+                    # Also extract description and prompts
+                    if "description" in understanding:
+                        metadata["description"] = understanding["description"]
+                    if "positive_prompt" in understanding:
+                        metadata["prompt"] = understanding["positive_prompt"]
             
             # Extract prompt from filename if not in analysis
             if not metadata["prompt"] and "_" in file_path.name:
@@ -914,7 +998,54 @@ class MediaOrganizer:
             
             # Index the asset
             self.search_db.index_asset(metadata)
-            logger.debug(f"Indexed asset in search: {file_path.name}")
+            logger.info(f"Indexed asset in search: {file_path.name}")
+            
+            # Calculate and index perceptual hashes for images
+            media_type = metadata.get("media_type")
+            logger.debug(f"Media type for perceptual hashing: {media_type} (type: {type(media_type)})")
+            if (media_type == MediaType.IMAGE or 
+                media_type == "image" or 
+                (hasattr(media_type, 'value') and media_type.value == "image") or
+                str(media_type) == "MediaType.IMAGE"):
+                logger.debug(f"Calculating perceptual hashes for {file_path.name}")
+                self._index_perceptual_hashes(file_path, metadata.get("content_hash"))
             
         except Exception as e:
-            logger.warning(f"Failed to update search index for {file_path}: {e}")
+            logger.error(f"Failed to update search index for {file_path}: {e}", exc_info=True)
+    
+    def _index_perceptual_hashes(self, file_path: Path, content_hash: str) -> None:
+        """Calculate and index perceptual hashes for an image.
+        
+        Args:
+            file_path: Path to image file  
+            content_hash: Content hash of the file
+        """
+        if not self.search_db or not content_hash:
+            return
+            
+        try:
+            from ..assets.perceptual_hashing import (
+                calculate_perceptual_hash,
+                calculate_difference_hash,
+                calculate_average_hash
+            )
+            
+            # Calculate different hash types
+            phash = calculate_perceptual_hash(file_path)
+            dhash = calculate_difference_hash(file_path) 
+            ahash = calculate_average_hash(file_path)
+            
+            # Store in database
+            if any([phash, dhash, ahash]):
+                self.search_db.index_perceptual_hashes(
+                    content_hash=content_hash,
+                    phash=phash,
+                    dhash=dhash,
+                    ahash=ahash
+                )
+                logger.info(f"Indexed perceptual hashes for {file_path.name}: phash={phash}, dhash={dhash}, ahash={ahash}")
+                
+        except ImportError:
+            logger.debug("Perceptual hashing not available")
+        except Exception as e:
+            logger.warning(f"Failed to calculate perceptual hashes: {e}")

@@ -142,12 +142,23 @@ def populate_from_directory(
     return added
 
 
-def populate_default_directories(manager: ComparisonManager, limit: int = None) -> int:
-    """Populate from default organized directories."""
-    default_dirs = [
-        Path.home() / "Pictures" / "AI" / "organized",
-        Path.cwd() / "organized",
-    ]
+def populate_default_directories(manager: ComparisonManager, limit: int = None, config=None) -> int:
+    """Populate from default organized directories.
+    
+    Args:
+        manager: ComparisonManager instance
+        limit: Optional limit on number of assets to add
+        config: Optional configuration object
+    """
+    # Use configured paths if available
+    if config and hasattr(config, 'paths') and hasattr(config.paths, 'organized'):
+        default_dirs = [Path(config.paths.organized)]
+    else:
+        # Fallback to reasonable defaults
+        default_dirs = [
+            Path("organized"),
+            Path.home() / "Pictures" / "AI" / "organized",
+        ]
     
     total_added = 0
     

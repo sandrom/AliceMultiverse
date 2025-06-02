@@ -8,9 +8,9 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
 
 1. **Are we solving real problems?** 
    - Media organization ✓
-   - Collaborative image discovery ✓ 
+   - Collaborative image discovery ✓ (semantic tags working!)
    - Video creation workflows ✓
-   - Large collection navigation ✓
+   - Large collection navigation ✓ (semantic search via DuckDB)
 2. **Is the architecture still simple?** 
    - Understanding over quality ✓
    - File-first metadata ✓
@@ -22,11 +22,19 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
    - Intelligent prompt generation for video
    - Collaborative exploration with context
 4. **What's broken RIGHT NOW?** 
-   - Search index needs proper metadata extraction to work
-   - Missing similarity search (needs perceptual hashing)
-   - Storage paths not configurable (hardcoded to test_data/)
+   - Redis connection errors need better documentation
+   - API keys must be configured for understanding to work
 
 ## Immediate: Restore Core Functionality (HIGHEST PRIORITY)
+
+### Fix Hardcoded Storage Paths ✅ COMPLETED
+- [x] **Update hardcoded paths to use configuration**
+  - [x] Fix FileProjectService to use `config.storage.project_paths` instead of "test_data/projects"
+  - [x] Fix SearchHandler to use `config.storage.search_db` instead of "test_data/search.duckdb"
+  - [x] Update comparison system to use configured paths
+  - [x] Update web server image serving to use configured paths
+  - [x] Test all path configurations work correctly
+  - [x] Created test_path_configuration.py to verify no hardcoded paths remain
 
 ### DuckDB Search Implementation ✅
 - [x] **Implement DuckDB search backend**
@@ -67,15 +75,56 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
   - [x] Create rebuild_search_index.py script
   - [x] Add index rebuilding to alice CLI (`alice index rebuild/update/verify/stats`)
   - [ ] Fix metadata extraction to work with current metadata format
+    - Current cache (v3.0) contains quality assessment data, not semantic tags
+    - Options:
+      1. Update UnifiedCache to run understanding system during organization
+      2. Run understanding as part of index building (expensive)
+      3. Create migration script to add tags to existing cache
+    - Recommendation: Option 1 - integrate understanding with organization flow
   - [ ] Auto-index new files during organization
   - [ ] Background indexing for watch mode
 
-### Configuration Updates
-- [ ] **Make storage paths configurable**
-  - [ ] Add storage.paths to settings.yaml
-  - [ ] Support multiple storage locations
-  - [ ] Handle cloud URLs (s3://, gcs://)
-  - [ ] Update all hardcoded paths
+### Configuration Updates ✅
+- [x] **Storage configuration exists in settings.yaml**
+  - [x] StorageConfig dataclass implemented
+  - [x] search_db, project_paths, asset_paths configured
+- [x] **Fix code to use configuration**
+  - [x] All hardcoded test_data/ paths removed
+  - [x] Services now use configuration values
+
+## Next Up: Fix Understanding Integration ✅
+
+### Understanding System Integration  
+- [x] **Connect understanding to caching system**
+  - [x] Update UnifiedCache to store understanding results
+  - [x] Ensure tags are embedded in image metadata
+  - [x] Update cache format to v4.0 with understanding data
+  - [x] Test tag extraction and storage
+- [x] **Enable understanding by default**
+  - [x] Change processing.understanding default to true
+  - [x] Document cost implications in settings.yaml
+  - [x] Provider selection configurable
+
+## Completed Today (January 6, 2025)
+
+### Understanding System Fixed ✅
+- [x] **API Key Loading** - Keys now loaded from keychain automatically
+- [x] **Understanding Integration** - AI analysis runs during organization
+- [x] **Semantic Tags Generated** - Rich tags in multiple categories (style, mood, subject, etc.)
+- [x] **Metadata Embedding** - Tags embedded in image files (PNG, JPEG, WebP, HEIC)
+- [x] **JSON Serialization** - Fixed enum serialization issues
+- [x] **Cache Format v4.0** - New format stores understanding results
+
+### Search & Organization Improvements
+- [x] **Auto-indexing** - Files indexed automatically during organization
+- [x] **Exclusion Lists** - Scanner skips 'sorted-out' folders
+- [x] **Similarity Search** - Perceptual hashing fully integrated! ✅
+  - [x] pHash (DCT-based) for robust similarity
+  - [x] dHash (difference hash) for fast comparison
+  - [x] aHash (average hash) for simple matching
+  - [x] Hamming distance calculation
+  - [x] DuckDB storage and search methods
+  - [x] Automatic computation during organization
 
 ## Next Up: Creative Workflow Support
 
@@ -205,6 +254,29 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
 - **Storage**: Multi-location registry with content addressing
 - **Search**: DuckDB for OLAP queries (implementation pending)
 
+## Current State (January 6, 2025)
+
+### What's Working ✅
+1. **Path Configuration**: All paths configurable, no hardcoded test_data/
+2. **Understanding Integration**: AI analysis runs automatically during organization
+3. **Semantic Tags**: Rich tags generated in 11+ categories (style, mood, subject, color, etc.)
+4. **Perceptual Hashing**: All three hash types computed and stored during organization
+5. **Search Foundation**: DuckDB stores tags, metadata, and perceptual hashes
+6. **Cache v4.0**: New format stores understanding results with semantic tags
+7. **Metadata Embedding**: Tags embedded directly in image files for portability
+8. **Similarity Search**: Can find similar images using perceptual hash comparison
+
+### What Needs Work ⚠️  
+1. **Search UI**: Need interface to actually search by tags (API exists)
+2. **Redis Documentation**: Required dependency but errors are confusing
+3. **API Key Setup**: Must run `alice keys setup` before understanding works
+
+### Architecture Summary
+- **Quality System**: Removed (was subjective and expensive)
+- **Understanding System**: Integrated and working (objective content description)
+- **Search System**: Working with semantic tags from understanding
+- **Cache System**: UnifiedCache v4.0 with understanding support
+
 ## Design Principles
 
 1. **Working Service First**: Never break existing functionality
@@ -215,6 +287,24 @@ AliceMultiverse is an AI-native creative workflow orchestrator that enables coll
 6. **Clean as You Go**: Remove old code when adding new
 7. **Test Everything**: No feature without comprehensive tests
 8. **Document First**: Write docs before implementation
+
+## Migration Path (January 2025)
+
+### Phase 1: Fix Critical Paths ✅ COMPLETED (January 6, 2025)
+1. ✓ Updated all hardcoded test_data/ references
+2. ✓ Tested with configurable directories
+3. ✓ Created path configuration test suite
+
+### Phase 2: Understanding Integration ✅ COMPLETED (January 6, 2025)
+1. ✓ Updated UnifiedCache to run understanding when enabled
+2. ✓ Tags stored in cache v4.0 format
+3. ✓ Index builder extracts tags from new format
+4. ✓ DuckDB search works with semantic tags
+
+### Phase 3: Legacy Support ❌ SKIPPED
+- No users yet, no need for migration
+- Fresh start with v4.0 cache format
+- Old quality assessment already removed
 
 ## Development Guidelines
 

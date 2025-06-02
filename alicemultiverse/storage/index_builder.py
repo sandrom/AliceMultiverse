@@ -78,6 +78,11 @@ class SearchIndexBuilder:
                 if metadata:
                     # Add to search index
                     self.search_db.index_asset(metadata)
+                    
+                    # Calculate and index perceptual hashes for images
+                    if metadata.get("media_type") == "image":
+                        self._index_perceptual_hashes(file_path, metadata.get("content_hash"))
+                    
                     indexed_count += 1
                     
                     if show_progress and indexed_count % 100 == 0:
@@ -96,6 +101,38 @@ class SearchIndexBuilder:
         )
         
         return indexed_count
+    
+    def _index_perceptual_hashes(self, file_path: Path, content_hash: str) -> None:
+        """Calculate and index perceptual hashes for an image.
+        
+        Args:
+            file_path: Path to image file
+            content_hash: Content hash of the file
+        """
+        try:
+            from ..assets.perceptual_hashing import (
+                calculate_perceptual_hash,
+                calculate_difference_hash,
+                calculate_average_hash
+            )
+            
+            # Calculate different hash types
+            phash = calculate_perceptual_hash(file_path)
+            dhash = calculate_difference_hash(file_path)
+            ahash = calculate_average_hash(file_path)
+            
+            # Store in database
+            if any([phash, dhash, ahash]):
+                self.search_db.index_perceptual_hashes(
+                    content_hash=content_hash,
+                    phash=phash,
+                    dhash=dhash,
+                    ahash=ahash
+                )
+                logger.debug(f"Indexed perceptual hashes for {file_path.name}")
+                
+        except Exception as e:
+            logger.warning(f"Failed to calculate perceptual hashes for {file_path}: {e}")
     
     def update_from_path(self, path: str) -> int:
         """Update index with new or modified files from a path.
@@ -333,13 +370,32 @@ class SearchIndexBuilder:
             # Understanding data (tags)
             if "understanding" in analysis:
                 understanding = analysis["understanding"]
-                # Extract tags from understanding data
-                tags = []
-                for provider_data in understanding.values():
-                    if isinstance(provider_data, dict) and "tags" in provider_data:
-                        tags.extend(provider_data["tags"])
-                if tags:
-                    metadata["tags"] = list(set(tags))  # Deduplicate
+                # Handle new v4.0 format where understanding is a dict with structured data
+                if isinstance(understanding, dict):
+                    # Extract tags - they should be a dict of categories
+                    if "tags" in understanding and isinstance(understanding["tags"], dict):
+                        # Flatten all tag categories into a single list
+                        all_tags = []
+                        for category, tag_list in understanding["tags"].items():
+                            if isinstance(tag_list, list):
+                                all_tags.extend(tag_list)
+                        metadata["tags"] = list(set(all_tags))  # Deduplicate
+                    
+                    # Extract prompt if available
+                    if "positive_prompt" in understanding:
+                        metadata["prompt"] = understanding["positive_prompt"]
+                    
+                    # Extract description
+                    if "description" in understanding:
+                        metadata["description"] = understanding["description"]
+                else:
+                    # Legacy format - multiple provider data
+                    tags = []
+                    for provider_data in understanding.values():
+                        if isinstance(provider_data, dict) and "tags" in provider_data:
+                            tags.extend(provider_data["tags"])
+                    if tags:
+                        metadata["tags"] = list(set(tags))  # Deduplicate
             
             # Quality information (legacy - now using understanding system)
             if "quality_stars" in analysis:

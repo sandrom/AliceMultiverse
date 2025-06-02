@@ -13,8 +13,12 @@ import uvicorn
 
 from .elo_system import ComparisonManager
 from .models import Asset, Comparison, ComparisonStrength
+from ..core.config import load_config
 
 logger = logging.getLogger(__name__)
+
+# Load configuration
+config = load_config()
 
 # API models
 class VoteRequest(BaseModel):
@@ -149,12 +153,16 @@ async def get_stats() -> List[StatsResponse]:
 @app.get("/static/images/{path:path}")
 async def serve_image(path: str):
     """Serve images from the organized directory."""
-    # Try multiple possible locations
-    possible_dirs = [
+    # Try configured path first
+    possible_dirs = []
+    if hasattr(config, 'paths') and hasattr(config.paths, 'organized'):
+        possible_dirs.append(Path(config.paths.organized))
+    
+    # Add fallback locations
+    possible_dirs.extend([
+        Path("organized"),
         Path.home() / "Pictures" / "AI" / "organized",
-        Path.cwd() / "organized",
-        Path.home() / ".alice" / "organized",
-    ]
+    ])
     
     # Also check if path is already absolute
     if Path(path).is_absolute() and Path(path).exists():
@@ -174,7 +182,7 @@ def populate_test_data():
     from .populate import populate_default_directories
     
     logger.info("Populating comparison system with assets...")
-    count = populate_default_directories(comparison_manager, limit=1000)
+    count = populate_default_directories(comparison_manager, limit=1000, config=config)
     logger.info(f"Populated with {count} assets")
 
 

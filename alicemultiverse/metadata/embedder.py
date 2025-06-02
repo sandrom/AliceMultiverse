@@ -36,6 +36,16 @@ except ImportError:
 
 logger = logging.getLogger(__name__)
 
+
+class MetadataEncoder(json.JSONEncoder):
+    """Custom JSON encoder that handles enums and other non-serializable types."""
+    def default(self, obj):
+        if hasattr(obj, 'value'):  # Handle enums
+            return obj.value
+        if hasattr(obj, '__dict__'):  # Handle objects with __dict__
+            return obj.__dict__
+        return super().default(obj)
+
 # Metadata field mappings
 ALICE_NAMESPACE = "alice-multiverse"
 METADATA_VERSION = "1.0"
@@ -145,7 +155,7 @@ class MetadataEmbedder:
 </x:xmpmeta>"""
 
         # Convert metadata to JSON string
-        metadata_json = json.dumps(metadata, ensure_ascii=False)
+        metadata_json = json.dumps(metadata, ensure_ascii=False, cls=MetadataEncoder)
 
         # Get description from prompt or use default
         description = metadata.get("prompt", "AI-generated content")
@@ -204,7 +214,7 @@ class MetadataEmbedder:
                 alice_data["project_id"] = metadata["project_id"]
 
             # Serialize and add to PNG
-            pnginfo.add_text(f"{ALICE_NAMESPACE}:metadata", json.dumps(alice_data))
+            pnginfo.add_text(f"{ALICE_NAMESPACE}:metadata", json.dumps(alice_data, cls=MetadataEncoder))
 
             # Store generation parameters separately for compatibility
             if "prompt" in metadata:
@@ -296,7 +306,7 @@ class MetadataEmbedder:
 </x:xmpmeta>"""
 
         # Convert metadata to JSON string
-        metadata_json = json.dumps(metadata, ensure_ascii=False)
+        metadata_json = json.dumps(metadata, ensure_ascii=False, cls=MetadataEncoder)
 
         # Get description from prompt or use default
         description = metadata.get("prompt", "AI-generated content")
@@ -329,7 +339,7 @@ class MetadataEmbedder:
                     alice_data[key] = metadata[key]
 
             # Store in ImageDescription (0x010e)
-            exif_dict["0th"][piexif.ImageIFD.ImageDescription] = json.dumps(alice_data).encode(
+            exif_dict["0th"][piexif.ImageIFD.ImageDescription] = json.dumps(alice_data, cls=MetadataEncoder).encode(
                 "utf-8"
             )
 
@@ -412,7 +422,7 @@ class MetadataEmbedder:
 </x:xmpmeta>"""
 
         # Convert metadata to JSON string
-        metadata_json = json.dumps(metadata, ensure_ascii=False)
+        metadata_json = json.dumps(metadata, ensure_ascii=False, cls=MetadataEncoder)
 
         # Get description from prompt or use default
         description = metadata.get("prompt", "AI-generated content")
@@ -448,7 +458,7 @@ class MetadataEmbedder:
                 for key in ["content_hash", "media_type", "tags", "understanding", "generation"]:
                     if key in metadata:
                         alice_data[key] = metadata[key]
-                info["comment"] = json.dumps(alice_data)
+                info["comment"] = json.dumps(alice_data, cls=MetadataEncoder)
 
                 # Also store prompt separately if available
                 if "prompt" in metadata:
@@ -565,7 +575,7 @@ class MetadataEmbedder:
 </x:xmpmeta>"""
 
         # Convert metadata to JSON string
-        metadata_json = json.dumps(metadata, ensure_ascii=False)
+        metadata_json = json.dumps(metadata, ensure_ascii=False, cls=MetadataEncoder)
 
         # Get description from prompt or use default
         description = metadata.get("prompt", "AI-generated content")
@@ -620,7 +630,7 @@ class MetadataEmbedder:
 </x:xmpmeta>"""
 
         # Convert metadata to JSON string
-        metadata_json = json.dumps(metadata, ensure_ascii=False)
+        metadata_json = json.dumps(metadata, ensure_ascii=False, cls=MetadataEncoder)
 
         # Get description from prompt or use default
         description = metadata.get("prompt", "AI-generated content")

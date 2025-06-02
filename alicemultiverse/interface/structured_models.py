@@ -213,3 +213,74 @@ class SoftDeleteRequest(TypedDict):
     asset_ids: list[str]
     category: Literal["broken", "duplicate", "maybe-later", "rejected", "archive"]
     reason: str | None
+
+
+class SelectionPurpose(str, Enum):
+    """Purpose of a selection."""
+    CURATION = "curation"
+    PRESENTATION = "presentation"
+    EXPORT = "export"
+    REFERENCE = "reference"
+    TRAINING = "training"
+    PORTFOLIO = "portfolio"
+    SOCIAL_MEDIA = "social_media"
+    CUSTOM = "custom"
+
+
+class SelectionStatus(str, Enum):
+    """Status of a selection."""
+    DRAFT = "draft"
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+    EXPORTED = "exported"
+
+
+class SelectionCreateRequest(TypedDict):
+    """Request to create a new selection."""
+    project_id: str
+    name: str
+    purpose: SelectionPurpose | None
+    description: str | None
+    criteria: dict[str, Any] | None
+    constraints: dict[str, Any] | None
+    tags: list[str] | None
+    metadata: dict[str, Any] | None
+
+
+class SelectionItemRequest(TypedDict):
+    """Request to add/update selection items."""
+    asset_hash: str
+    file_path: str
+    selection_reason: str | None
+    quality_notes: str | None
+    usage_notes: str | None
+    tags: list[str] | None
+    role: str | None
+    related_assets: list[str] | None
+    alternatives: list[str] | None
+    custom_metadata: dict[str, Any] | None
+
+
+class SelectionUpdateRequest(TypedDict, total=False):
+    """Request to update selection items."""
+    selection_id: str
+    add_items: list[SelectionItemRequest] | None
+    remove_items: list[str] | None  # asset hashes
+    update_status: SelectionStatus | None
+    update_metadata: dict[str, Any] | None
+    notes: str | None
+
+
+class SelectionExportRequest(TypedDict):
+    """Request to export a selection."""
+    selection_id: str
+    export_path: str
+    export_settings: dict[str, Any] | None
+
+
+class SelectionSearchRequest(TypedDict, total=False):
+    """Request to search for selections."""
+    project_id: str
+    status: SelectionStatus | None
+    purpose: SelectionPurpose | None
+    containing_asset: str | None  # Find selections containing this asset hash

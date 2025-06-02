@@ -228,13 +228,6 @@ class ProjectTagVocabulary:
         # PostgreSQL removed - cannot load project tags from database
         logger.debug(f"Project tag loading skipped for {self.project_id} - PostgreSQL removed")
         return
-                    self.custom_tags[tag_type].add(tag_value)
-                    
-            logger.info(f"Loaded {sum(len(tags) for tags in self.custom_tags.values())} "
-                       f"tags for project {self.project_id}")
-                       
-        except Exception as e:
-            logger.warning(f"Failed to load project tags: {e}")
     
     def add_custom_tag(self, category: str, tag: str):
         """Add a custom tag to the project vocabulary."""

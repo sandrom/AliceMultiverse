@@ -34,8 +34,8 @@ class OptimizedSearchHandler:
             if config and hasattr(config, 'storage') and hasattr(config.storage, 'search_db'):
                 db_path = config.storage.search_db
             else:
-                # Use local test directory for development
-                db_path = "test_data/search.duckdb"
+                # Default to data directory
+                db_path = "data/search.duckdb"
         
         # Ensure parent directory exists
         db_path = Path(db_path)

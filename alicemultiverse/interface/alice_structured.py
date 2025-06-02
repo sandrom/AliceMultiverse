@@ -9,6 +9,8 @@ from ..core.config import load_config
 from ..core.exceptions import ValidationError
 from ..metadata.models import AssetRole as MetadataAssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
+from ..projects.service import ProjectService
+from ..selections.service import SelectionService
 from .rate_limiter import RateLimiter
 from .search_handler import OptimizedSearchHandler
 from .structured_models import (
@@ -25,6 +27,12 @@ from .structured_models import (
     SearchFacets,
     SearchRequest,
     SearchResponse,
+    SelectionCreateRequest,
+    SelectionExportRequest,
+    SelectionPurpose,
+    SelectionSearchRequest,
+    SelectionStatus,
+    SelectionUpdateRequest,
     SoftDeleteRequest,
     SortField,
     SortOrder,
@@ -38,6 +46,10 @@ from .validation import (
     validate_organize_request,
     validate_project_request,
     validate_search_request,
+    validate_selection_create_request,
+    validate_selection_export_request,
+    validate_selection_search_request,
+    validate_selection_update_request,
     validate_soft_delete_request,
     validate_tag_update_request,
     validate_workflow_request,
@@ -69,6 +81,10 @@ class AliceStructuredInterface:
         
         # Initialize optimized search handler with config
         self.search_handler = OptimizedSearchHandler(config=self.config)
+        
+        # Initialize project and selection services
+        self.project_service = ProjectService(config=self.config)
+        self.selection_service = SelectionService(project_service=self.project_service)
 
     def _ensure_organizer(self) -> None:
         """Ensure organizer is initialized."""
@@ -745,6 +761,526 @@ class AliceStructuredInterface:
             return AliceResponse(
                 success=False,
                 message="Role setting failed",
+                data=None,
+                error=str(e)
+            )
+
+    def create_selection(self, request: SelectionCreateRequest, client_id: str = "default") -> AliceResponse:
+        """Create a new selection for a project.
+        
+        Args:
+            request: Selection creation request
+            client_id: Client identifier for rate limiting
+            
+        Returns:
+            Response with created selection
+        """
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "create_selection")
+            
+            # Validate request
+            request = validate_selection_create_request(request)
+            
+            # Create selection
+            selection = self.selection_service.create_selection(
+                project_id=request["project_id"],
+                name=request["name"],
+                purpose=request.get("purpose", SelectionPurpose.CURATION),
+                description=request.get("description"),
+                criteria=request.get("criteria"),
+                constraints=request.get("constraints"),
+                tags=request.get("tags"),
+                metadata=request.get("metadata"),
+            )
+            
+            if selection:
+                return AliceResponse(
+                    success=True,
+                    message=f"Created selection '{selection.name}'",
+                    data={
+                        "selection_id": selection.id,
+                        "name": selection.name,
+                        "purpose": selection.purpose.value,
+                        "status": selection.status.value,
+                        "created_at": selection.created_at.isoformat(),
+                    },
+                    error=None
+                )
+            else:
+                return AliceResponse(
+                    success=False,
+                    message="Failed to create selection",
+                    data=None,
+                    error="Project not found or creation failed"
+                )
+                
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
+        except Exception as e:
+            logger.error(f"Selection creation failed: {e}", exc_info=True)
+            return AliceResponse(
+                success=False,
+                message="Selection creation failed",
+                data=None,
+                error=str(e)
+            )
+
+    def update_selection(self, request: SelectionUpdateRequest, client_id: str = "default") -> AliceResponse:
+        """Update a selection (add/remove items, change status, etc).
+        
+        Args:
+            request: Selection update request
+            client_id: Client identifier for rate limiting
+            
+        Returns:
+            Response with updated selection
+        """
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "update_selection")
+            
+            # Validate request
+            request = validate_selection_update_request(request)
+            
+            # Get project ID from selection
+            selection = None
+            project_id = None
+            
+            # First, find the selection to get project ID
+            for project in self.project_service.list_projects():
+                test_selection = self.selection_service.get_selection(
+                    project["id"], request["selection_id"]
+                )
+                if test_selection:
+                    selection = test_selection
+                    project_id = project["id"]
+                    break
+            
+            if not selection:
+                return AliceResponse(
+                    success=False,
+                    message="Selection not found",
+                    data=None,
+                    error=f"Selection '{request['selection_id']}' not found"
+                )
+            
+            # Process updates
+            updated = False
+            
+            # Add items
+            if request.get("add_items"):
+                result = self.selection_service.add_items_to_selection(
+                    project_id=project_id,
+                    selection_id=request["selection_id"],
+                    items=request["add_items"],
+                    notes=request.get("notes")
+                )
+                if result:
+                    selection = result
+                    updated = True
+            
+            # Remove items
+            if request.get("remove_items"):
+                result = self.selection_service.remove_items_from_selection(
+                    project_id=project_id,
+                    selection_id=request["selection_id"],
+                    asset_hashes=request["remove_items"],
+                    reason=request.get("notes")
+                )
+                if result:
+                    selection = result
+                    updated = True
+            
+            # Update status
+            if request.get("update_status"):
+                result = self.selection_service.update_selection_status(
+                    project_id=project_id,
+                    selection_id=request["selection_id"],
+                    status=request["update_status"],
+                    notes=request.get("notes")
+                )
+                if result:
+                    selection = result
+                    updated = True
+            
+            if updated and selection:
+                return AliceResponse(
+                    success=True,
+                    message="Selection updated successfully",
+                    data={
+                        "selection_id": selection.id,
+                        "name": selection.name,
+                        "status": selection.status.value,
+                        "item_count": len(selection.items),
+                        "updated_at": selection.updated_at.isoformat(),
+                    },
+                    error=None
+                )
+            else:
+                return AliceResponse(
+                    success=False,
+                    message="No updates performed",
+                    data=None,
+                    error="No valid update operations provided"
+                )
+                
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
+        except Exception as e:
+            logger.error(f"Selection update failed: {e}", exc_info=True)
+            return AliceResponse(
+                success=False,
+                message="Selection update failed",
+                data=None,
+                error=str(e)
+            )
+
+    def search_selections(self, request: SelectionSearchRequest, client_id: str = "default") -> AliceResponse:
+        """Search for selections in a project.
+        
+        Args:
+            request: Selection search request
+            client_id: Client identifier for rate limiting
+            
+        Returns:
+            Response with matching selections
+        """
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "search_selections")
+            
+            # Validate request
+            request = validate_selection_search_request(request)
+            
+            # Search selections
+            selections = self.selection_service.list_selections(
+                project_id=request["project_id"],
+                status=request.get("status"),
+                purpose=request.get("purpose")
+            )
+            
+            # Filter by containing asset if requested
+            if request.get("containing_asset"):
+                selections = [
+                    s for s in selections
+                    if request["containing_asset"] in s.get_asset_hashes()
+                ]
+            
+            # Format response
+            selection_data = []
+            for selection in selections:
+                stats = self.selection_service.get_selection_statistics(
+                    request["project_id"], selection.id
+                )
+                selection_data.append({
+                    "selection_id": selection.id,
+                    "name": selection.name,
+                    "purpose": selection.purpose.value,
+                    "status": selection.status.value,
+                    "description": selection.description,
+                    "item_count": stats.get("item_count", 0),
+                    "created_at": selection.created_at.isoformat(),
+                    "updated_at": selection.updated_at.isoformat(),
+                    "tags": selection.tags,
+                })
+            
+            return AliceResponse(
+                success=True,
+                message=f"Found {len(selection_data)} selections",
+                data={
+                    "selections": selection_data,
+                    "total_count": len(selection_data),
+                },
+                error=None
+            )
+                
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
+        except Exception as e:
+            logger.error(f"Selection search failed: {e}", exc_info=True)
+            return AliceResponse(
+                success=False,
+                message="Selection search failed",
+                data=None,
+                error=str(e)
+            )
+
+    def export_selection(self, request: SelectionExportRequest, client_id: str = "default") -> AliceResponse:
+        """Export a selection to a directory.
+        
+        Args:
+            request: Selection export request
+            client_id: Client identifier for rate limiting
+            
+        Returns:
+            Response with export status
+        """
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "export_selection")
+            
+            # Validate request
+            request = validate_selection_export_request(request)
+            
+            # Find the selection to get project ID
+            selection = None
+            project_id = None
+            
+            for project in self.project_service.list_projects():
+                test_selection = self.selection_service.get_selection(
+                    project["id"], request["selection_id"]
+                )
+                if test_selection:
+                    selection = test_selection
+                    project_id = project["id"]
+                    break
+            
+            if not selection:
+                return AliceResponse(
+                    success=False,
+                    message="Selection not found",
+                    data=None,
+                    error=f"Selection '{request['selection_id']}' not found"
+                )
+            
+            # Export selection
+            success = self.selection_service.export_selection(
+                project_id=project_id,
+                selection_id=request["selection_id"],
+                export_path=Path(request["export_path"]),
+                export_settings=request.get("export_settings")
+            )
+            
+            if success:
+                return AliceResponse(
+                    success=True,
+                    message=f"Exported selection to {request['export_path']}",
+                    data={
+                        "selection_id": selection.id,
+                        "name": selection.name,
+                        "export_path": request["export_path"],
+                        "item_count": len(selection.items),
+                    },
+                    error=None
+                )
+            else:
+                return AliceResponse(
+                    success=False,
+                    message="Export failed",
+                    data=None,
+                    error="Failed to export selection"
+                )
+                
+        except ValidationError as e:
+            logger.error(f"Validation error: {e}")
+            return AliceResponse(
+                success=False,
+                message="Invalid request",
+                data=None,
+                error=str(e)
+            )
+        except Exception as e:
+            logger.error(f"Selection export failed: {e}", exc_info=True)
+            return AliceResponse(
+                success=False,
+                message="Selection export failed",
+                data=None,
+                error=str(e)
+            )
+
+    def get_selection(self, project_id: str, selection_id: str, client_id: str = "default") -> AliceResponse:
+        """Get detailed information about a selection.
+        
+        Args:
+            project_id: Project ID or name
+            selection_id: Selection ID
+            client_id: Client identifier for rate limiting
+            
+        Returns:
+            Response with selection details
+        """
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "get_selection")
+            
+            # Get selection
+            selection = self.selection_service.get_selection(project_id, selection_id)
+            
+            if not selection:
+                return AliceResponse(
+                    success=False,
+                    message="Selection not found",
+                    data=None,
+                    error=f"Selection '{selection_id}' not found in project '{project_id}'"
+                )
+            
+            # Get statistics
+            stats = self.selection_service.get_selection_statistics(project_id, selection_id)
+            
+            # Format selection data
+            selection_data = {
+                "selection_id": selection.id,
+                "project_id": selection.project_id,
+                "name": selection.name,
+                "purpose": selection.purpose.value,
+                "status": selection.status.value,
+                "description": selection.description,
+                "criteria": selection.criteria,
+                "constraints": selection.constraints,
+                "created_at": selection.created_at.isoformat(),
+                "updated_at": selection.updated_at.isoformat(),
+                "created_by": selection.created_by,
+                "tags": selection.tags,
+                "metadata": selection.metadata,
+                "statistics": stats,
+                "items": [
+                    {
+                        "asset_hash": item.asset_hash,
+                        "file_path": item.file_path,
+                        "added_at": item.added_at.isoformat(),
+                        "selection_reason": item.selection_reason,
+                        "quality_notes": item.quality_notes,
+                        "usage_notes": item.usage_notes,
+                        "tags": item.tags,
+                        "role": item.role,
+                        "sequence_order": item.sequence_order,
+                    }
+                    for item in selection.items
+                ],
+                "groups": selection.groups,
+                "sequence": selection.sequence,
+                "export_history": selection.export_history,
+            }
+            
+            return AliceResponse(
+                success=True,
+                message=f"Retrieved selection '{selection.name}'",
+                data=selection_data,
+                error=None
+            )
+                
+        except Exception as e:
+            logger.error(f"Get selection failed: {e}", exc_info=True)
+            return AliceResponse(
+                success=False,
+                message="Get selection failed",
+                data=None,
+                error=str(e)
+            )
+    
+    def find_similar_to_selection(
+        self, 
+        project_id: str, 
+        selection_id: str,
+        threshold: int = 10,
+        limit: int = 50,
+        exclude_existing: bool = True,
+        client_id: str = "default"
+    ) -> AliceResponse:
+        """Find images similar to those in a selection.
+        
+        Uses perceptual hashing to find visually similar images.
+        
+        Args:
+            project_id: Project ID or name
+            selection_id: Selection ID
+            threshold: Maximum Hamming distance (0-64, lower is more similar)
+            limit: Maximum results to return
+            exclude_existing: Whether to exclude items already in selection
+            client_id: Client identifier for rate limiting
+            
+        Returns:
+            Response with similar images sorted by recommendation score
+        """
+        try:
+            # Rate limiting
+            self.rate_limiter.check_request(client_id, "find_similar")
+            
+            # Find similar images
+            similar_images = self.selection_service.find_similar_to_selection(
+                project_id=project_id,
+                selection_id=selection_id,
+                threshold=threshold,
+                limit=limit,
+                exclude_existing=exclude_existing
+            )
+            
+            if not similar_images:
+                return AliceResponse(
+                    success=True,
+                    message="No similar images found",
+                    data={
+                        "selection_id": selection_id,
+                        "results": [],
+                        "parameters": {
+                            "threshold": threshold,
+                            "limit": limit,
+                            "exclude_existing": exclude_existing
+                        }
+                    },
+                    error=None
+                )
+            
+            # Format results
+            results = []
+            for img in similar_images:
+                result = {
+                    "asset": {
+                        "content_hash": img["content_hash"],
+                        "file_path": img["file_path"],
+                        "ai_source": img.get("ai_source"),
+                        "quality_rating": img.get("quality_rating"),
+                        "created_at": img.get("created_at"),
+                        "tags": img.get("tags", []),
+                    },
+                    "similarity": {
+                        "min_distance": img["min_distance"],
+                        "recommendation_score": img["recommendation_score"],
+                        "similar_to_count": len(img.get("similar_to", [])),
+                        "similar_to_items": img.get("similar_to_items", [])
+                    }
+                }
+                results.append(result)
+            
+            return AliceResponse(
+                success=True,
+                message=f"Found {len(results)} similar images",
+                data={
+                    "selection_id": selection_id,
+                    "results": results,
+                    "parameters": {
+                        "threshold": threshold,
+                        "limit": limit,
+                        "exclude_existing": exclude_existing
+                    }
+                },
+                error=None
+            )
+            
+        except Exception as e:
+            logger.error(f"Find similar to selection failed: {e}", exc_info=True)
+            return AliceResponse(
+                success=False,
+                message="Find similar images failed",
                 data=None,
                 error=str(e)
             )

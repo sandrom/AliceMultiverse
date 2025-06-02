@@ -88,6 +88,18 @@ class DuckDBSearch:
             )
         """)
         
+        # Perceptual hashes table for similarity search
+        self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS perceptual_hashes (
+                content_hash VARCHAR PRIMARY KEY,
+                phash VARCHAR,       -- Perceptual hash (DCT-based)
+                dhash VARCHAR,       -- Difference hash
+                ahash VARCHAR,       -- Average hash
+                
+                FOREIGN KEY (content_hash) REFERENCES assets(content_hash)
+            )
+        """)
+        
         # Create indexes for performance
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_media_type ON assets(media_type)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ai_source ON assets(ai_source)")
@@ -99,6 +111,11 @@ class DuckDBSearch:
         # Create full-text search index on text fields
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_prompt ON assets(prompt)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_description ON assets(description)")
+        
+        # Create indexes for perceptual hashes
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_phash ON perceptual_hashes(phash)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_dhash ON perceptual_hashes(dhash)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ahash ON perceptual_hashes(ahash)")
         
         logger.debug("DuckDB schema created")
     
@@ -112,6 +129,9 @@ class DuckDBSearch:
         content_hash = metadata["content_hash"]
         file_path = metadata.get("file_path", "")
         media_type = metadata.get("media_type", "unknown")
+        # Handle MediaType enum
+        if hasattr(media_type, 'value'):
+            media_type = media_type.value
         file_size = metadata.get("file_size", 0)
         
         # Extract dimensions
@@ -663,6 +683,199 @@ class DuckDBSearch:
             stats["storage_size_mb"] = 0.0
         
         return stats
+    
+    def index_perceptual_hashes(
+        self, 
+        content_hash: str, 
+        phash: str | None = None,
+        dhash: str | None = None,
+        ahash: str | None = None
+    ) -> None:
+        """Store perceptual hashes for an asset.
+        
+        Args:
+            content_hash: Asset content hash
+            phash: Perceptual hash (DCT-based)
+            dhash: Difference hash
+            ahash: Average hash
+        """
+        self.conn.execute("""
+            INSERT INTO perceptual_hashes (content_hash, phash, dhash, ahash)
+            VALUES (?, ?, ?, ?)
+            ON CONFLICT (content_hash) DO UPDATE SET
+                phash = EXCLUDED.phash,
+                dhash = EXCLUDED.dhash,
+                ahash = EXCLUDED.ahash
+        """, [content_hash, phash, dhash, ahash])
+        
+        logger.debug(f"Indexed perceptual hashes for: {content_hash}")
+    
+    def find_similar_by_phash(
+        self, 
+        target_hash: str, 
+        threshold: int = 10,
+        limit: int = 20
+    ) -> List[Tuple[str, str, int]]:
+        """Find similar images by perceptual hash.
+        
+        Uses a simple character-by-character comparison for now.
+        For production, consider using Hamming distance UDF.
+        
+        Args:
+            target_hash: Target perceptual hash
+            threshold: Maximum difference threshold
+            limit: Maximum results
+            
+        Returns:
+            List of (content_hash, file_path, distance) tuples
+        """
+        # For now, use exact match as DuckDB doesn't have built-in Hamming distance
+        # In production, you'd want to implement a UDF or use an extension
+        results = self.conn.execute("""
+            SELECT 
+                p.content_hash,
+                a.file_path,
+                p.phash
+            FROM perceptual_hashes p
+            JOIN assets a ON p.content_hash = a.content_hash
+            WHERE p.phash IS NOT NULL
+            LIMIT ?
+        """, [limit * 10]).fetchall()  # Get more to filter
+        
+        # Calculate distances in Python
+        from ..assets.perceptual_hashing import hamming_distance
+        
+        similar = []
+        for content_hash, file_path, phash in results:
+            if phash and phash != target_hash:
+                try:
+                    distance = hamming_distance(target_hash, phash)
+                    if distance <= threshold:
+                        similar.append((content_hash, file_path, distance))
+                except ValueError:
+                    continue
+        
+        # Sort by distance and limit
+        similar.sort(key=lambda x: x[2])
+        return similar[:limit]
+    
+    def get_perceptual_hash(self, content_hash: str) -> Dict[str, str | None]:
+        """Get perceptual hashes for an asset.
+        
+        Args:
+            content_hash: Asset content hash
+            
+        Returns:
+            Dict with phash, dhash, ahash keys
+        """
+        result = self.conn.execute("""
+            SELECT phash, dhash, ahash
+            FROM perceptual_hashes
+            WHERE content_hash = ?
+        """, [content_hash]).fetchone()
+        
+        if result:
+            return {
+                "phash": result[0],
+                "dhash": result[1],
+                "ahash": result[2]
+            }
+        
+        return {"phash": None, "dhash": None, "ahash": None}
+    
+    def find_similar_to_multiple(
+        self,
+        content_hashes: List[str],
+        threshold: int = 10,
+        limit: int = 50,
+        exclude_hashes: Optional[Set[str]] = None
+    ) -> List[Dict[str, Any]]:
+        """Find images similar to multiple source images.
+        
+        This method finds images similar to any of the provided source images,
+        useful for finding more like a selection.
+        
+        Args:
+            content_hashes: List of content hashes to find similar to
+            threshold: Maximum Hamming distance for similarity
+            limit: Maximum results to return
+            exclude_hashes: Optional set of hashes to exclude from results
+            
+        Returns:
+            List of result dicts with content_hash, file_path, min_distance,
+            and similar_to (list of source hashes it's similar to)
+        """
+        if not content_hashes:
+            return []
+        
+        exclude_hashes = exclude_hashes or set()
+        # Always exclude the source hashes
+        exclude_hashes.update(content_hashes)
+        
+        # Get perceptual hashes for all source images
+        source_hashes = {}
+        for content_hash in content_hashes:
+            hashes = self.get_perceptual_hash(content_hash)
+            if hashes.get("phash"):
+                source_hashes[content_hash] = hashes["phash"]
+        
+        if not source_hashes:
+            logger.warning("No perceptual hashes found for source images")
+            return []
+        
+        # Get all candidates with perceptual hashes
+        candidates = self.conn.execute("""
+            SELECT 
+                p.content_hash,
+                a.file_path,
+                p.phash,
+                a.ai_source,
+                a.quality_rating,
+                a.created_at,
+                t.tags
+            FROM perceptual_hashes p
+            JOIN assets a ON p.content_hash = a.content_hash
+            LEFT JOIN asset_tags t ON a.content_hash = t.content_hash
+            WHERE p.phash IS NOT NULL
+            LIMIT ?
+        """, [limit * 20]).fetchall()  # Get more candidates to filter
+        
+        # Calculate distances to all source images
+        from ..assets.perceptual_hashing import hamming_distance
+        
+        results = {}
+        for content_hash, file_path, phash, ai_source, quality_rating, created_at, tags in candidates:
+            if content_hash in exclude_hashes or not phash:
+                continue
+            
+            # Calculate minimum distance to any source image
+            min_distance = float('inf')
+            similar_to = []
+            
+            for source_hash, source_phash in source_hashes.items():
+                try:
+                    distance = hamming_distance(source_phash, phash)
+                    if distance <= threshold:
+                        similar_to.append(source_hash)
+                        min_distance = min(min_distance, distance)
+                except ValueError:
+                    continue
+            
+            if similar_to:
+                results[content_hash] = {
+                    "content_hash": content_hash,
+                    "file_path": file_path,
+                    "min_distance": min_distance,
+                    "similar_to": similar_to,
+                    "ai_source": ai_source,
+                    "quality_rating": quality_rating,
+                    "created_at": created_at.isoformat() if created_at else None,
+                    "tags": tags or [],
+                }
+        
+        # Sort by minimum distance and return top results
+        sorted_results = sorted(results.values(), key=lambda x: x["min_distance"])
+        return sorted_results[:limit]
     
     def close(self):
         """Close the database connection."""

@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed (2025-01-06) - Part 2
+- **Understanding System Integration**: Fixed multiple issues preventing AI analysis
+  - API keys now loaded from keychain automatically via APIKeyManager
+  - Fixed ImageAnalysisResult attribute errors (positive_prompt → generated_prompt, removed timestamp/processing_time)
+  - Fixed JSON serialization of MediaType enums with custom encoder
+  - Fixed MetadataCacheAdapter missing enable_understanding attribute
+  - Fixed ProcessingConfig.get() error (using dataclass attribute access)
+  - Fixed quality_stars KeyError in statistics update
+- **Import Issues**: Fixed scoped import conflict in main_cli.py causing UnboundLocalError
+- **Understanding Provider**: Defaults to 'anthropic' when API key is available
+- **Perceptual Hashing Integration**: Fixed perceptual hash computation
+  - Fixed missing content_hash in AnalysisResult causing database constraint error
+  - Fixed MediaType enum comparison in search index update
+  - Perceptual hashes (pHash, dHash, aHash) now computed and stored during organization
+  - Added proper error handling and logging for hash computation
+
+### Fixed (2025-01-06)
+- **Removed Hardcoded Paths**: Fixed all hardcoded test_data/ references
+  - FileProjectService now uses config.storage.project_paths
+  - SearchHandler uses config.storage.search_db
+  - Comparison system uses config.paths.organized
+  - All paths now configurable via settings.yaml
+  - Added test_path_configuration.py to verify fixes
+- **Production Ready**: System can now be deployed with custom paths
+
+### Added (2025-01-06)
+- **Understanding Integration**: Connected AI understanding to caching and search
+  - UnifiedCache runs understanding analysis when enabled
+  - Tags stored in v4.0 cache format with structured categories
+  - Search index builder extracts semantic tags from cache
+  - DuckDB search supports tag-based queries and facets
+  - Understanding enabled by default in settings
+  - Provider selection configurable (deepseek default for cost)
+- **Lazy Loading**: Fixed circular imports with lazy module loading
+- **Auto-indexing**: Files automatically indexed in DuckDB during organization
+  - Metadata and tags indexed when files are processed
+  - Understanding data flows through to search index
+- **Exclusion Lists**: Scanner skips 'sorted-out' folders
+  - Prevents re-processing of rejected files
+  - Supports 'sorted-out' and 'sorted_out' variants
+  - Also excludes .metadata and .alice folders
+- **Similarity Search**: Implemented perceptual hashing
+  - Three hash types: pHash (DCT), dHash (difference), aHash (average)
+  - Hamming distance calculation for similarity matching
+  - DuckDB table and indexes for perceptual hashes
+  - find_similar_by_phash method with configurable threshold
+  - Automatic hash calculation during organization and indexing
+
 ### Breaking Changes (2025-06-01)
 - **Removed PostgreSQL Integration**: Complete removal of PostgreSQL dependency
   - Deleted alembic/ directory and all migrations

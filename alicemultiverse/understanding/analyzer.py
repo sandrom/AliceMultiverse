@@ -34,7 +34,29 @@ class ImageAnalyzer:
     def _initialize_available_analyzers(self):
         """Initialize analyzers for which we have API keys."""
         import os
+        from ..core.keys.manager import APIKeyManager
         
+        # Initialize key manager
+        key_manager = APIKeyManager()
+        
+        # Try to load API keys from keychain/config and set in environment
+        anthropic_key = key_manager.get_api_key("anthropic_api_key")
+        if anthropic_key:
+            os.environ["ANTHROPIC_API_KEY"] = anthropic_key
+            
+        openai_key = key_manager.get_api_key("openai")
+        if openai_key:
+            os.environ["OPENAI_API_KEY"] = openai_key
+            
+        google_key = key_manager.get_api_key("google")
+        if google_key:
+            os.environ["GOOGLE_AI_API_KEY"] = google_key
+            os.environ["GEMINI_API_KEY"] = google_key
+            
+        deepseek_key = key_manager.get_api_key("deepseek")
+        if deepseek_key:
+            os.environ["DEEPSEEK_API_KEY"] = deepseek_key
+            
         # Check for API keys and initialize available analyzers
         if os.getenv("ANTHROPIC_API_KEY"):
             try:

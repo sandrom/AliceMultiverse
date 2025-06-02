@@ -9,7 +9,6 @@ from typing import Any
 from ..metadata.embedder import MetadataEmbedder
 from ..metadata.extractor import MetadataExtractor
 from ..metadata.models import AssetMetadata
-# from ..quality.scorer import QualityScorer  # Quality assessment removed
 import warnings
 with warnings.catch_warnings():
     warnings.simplefilter("ignore", DeprecationWarning)
@@ -38,6 +37,8 @@ class UnifiedCache:
         project_id: str = "default",
         force_reindex: bool = False,
         quality_thresholds: dict[str, dict[str, float]] | None = None,
+        enable_understanding: bool = False,
+        understanding_provider: str | None = None,
     ):
         """Initialize unified cache.
 
@@ -46,12 +47,22 @@ class UnifiedCache:
             project_id: Current project identifier
             force_reindex: Whether to bypass cache and force re-analysis
             quality_thresholds: Quality thresholds for star ratings
+            enable_understanding: Whether to enable AI understanding
+            understanding_provider: Specific provider to use for understanding
         """
         # Core components
         self.cache = MetadataCache(source_root, force_reindex)
         self.embedder = MetadataEmbedder()
         self.extractor = MetadataExtractor()
-        # self.scorer = QualityScorer(quality_thresholds)  # Quality assessment removed
+        
+        # Understanding system
+        self.enable_understanding = enable_understanding
+        self.understanding_analyzer = None
+        self.understanding_provider = understanding_provider
+        
+        # Lazy load understanding to avoid circular imports
+        if enable_understanding:
+            self._init_understanding()
 
         # Ensure cache directory exists
         cache_dir = source_root / ".metadata"
@@ -62,6 +73,7 @@ class UnifiedCache:
         self.source_root = source_root
         self.project_id = project_id
         self.force_reindex = force_reindex
+        self.cache_version = "4.0"  # Updated for understanding support
 
         # In-memory index for enhanced search
         self.metadata_index: dict[str, AssetMetadata] = {}
@@ -120,12 +132,31 @@ class UnifiedCache:
         """Save metadata for a media file (backward compatible).
 
         Saves to both cache and embeds in image if possible.
+        If understanding is enabled, runs understanding analysis.
 
         Args:
             media_path: Path to the media file
             analysis: Analysis results to cache
             analysis_time: Time taken for analysis
         """
+        # Run understanding if enabled and not already present
+        if self.enable_understanding and "understanding" not in analysis:
+            import asyncio
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            try:
+                understanding_result = loop.run_until_complete(
+                    self.analyze_with_understanding(media_path)
+                )
+                if understanding_result:
+                    analysis = self._merge_understanding_into_analysis(
+                        analysis, understanding_result
+                    )
+                    # Add cost to analysis time (as proxy for time spent)
+                    analysis_time += understanding_result.cost * 10  # Rough estimate: $0.01 = 0.1s
+            finally:
+                loop.close()
+        
         # First embed in image if supported (this modifies the file)
         if media_path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
             # The embedder expects the metadata directly, not wrapped
@@ -201,6 +232,82 @@ class UnifiedCache:
 
         # Save through normal interface
         self.save(media_path, analysis, analysis_time)
+
+    def _init_understanding(self):
+        """Initialize understanding system lazily to avoid circular imports."""
+        try:
+            from ..understanding.analyzer import ImageAnalyzer
+            self.understanding_analyzer = ImageAnalyzer()
+            logger.info("Understanding system enabled in UnifiedCache")
+        except Exception as e:
+            logger.warning(f"Failed to initialize understanding system: {e}")
+            self.enable_understanding = False
+            self.understanding_analyzer = None
+    
+    # ===== Understanding Interface =====
+    
+    async def analyze_with_understanding(self, media_path: Path) -> Any:
+        """Run AI understanding analysis on media file.
+        
+        Args:
+            media_path: Path to the media file
+            
+        Returns:
+            Understanding analysis result or None
+        """
+        if not self.enable_understanding or not self.understanding_analyzer:
+            return None
+            
+        try:
+            result = await self.understanding_analyzer.analyze(
+                media_path,
+                provider=self.understanding_provider,
+                generate_prompt=True,
+                extract_tags=True,
+                detailed=False
+            )
+            return result
+        except Exception as e:
+            logger.error(f"Understanding analysis failed for {media_path}: {e}")
+            return None
+    
+    def _merge_understanding_into_analysis(
+        self, 
+        analysis: AnalysisResult, 
+        understanding: Any
+    ) -> AnalysisResult:
+        """Merge understanding results into analysis.
+        
+        Args:
+            analysis: Basic analysis results
+            understanding: Understanding analysis results
+            
+        Returns:
+            Merged analysis
+        """
+        # Convert to dict if needed
+        if hasattr(analysis, '_asdict'):
+            analysis = analysis._asdict()
+        else:
+            analysis = dict(analysis)
+            
+        # Add understanding data
+        analysis["understanding"] = {
+            "description": understanding.description,
+            "tags": understanding.tags,
+            "positive_prompt": understanding.generated_prompt,  # Use generated_prompt
+            "negative_prompt": understanding.negative_prompt,
+            "technical_details": understanding.technical_details,
+            "provider": understanding.provider,
+            "model": understanding.model,
+            "cost": understanding.cost,
+            "timestamp": datetime.now().isoformat()  # Use current time since results don't have timestamp
+        }
+        
+        # Update cache version
+        analysis["version"] = self.cache_version
+        
+        return analysis
 
     # ===== Quality Scoring Interface =====
 

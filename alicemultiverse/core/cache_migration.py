@@ -19,9 +19,22 @@ class MetadataCacheAdapter:
     This allows existing code to continue working while we migrate.
     """
 
-    def __init__(self, source_root: Path, force_reindex: bool = False):
-        """Initialize adapter with UnifiedCache."""
-        self._unified = UnifiedCache(source_root=source_root, force_reindex=force_reindex)
+    def __init__(self, source_root: Path, force_reindex: bool = False, 
+                 enable_understanding: bool = False, understanding_provider: str | None = None):
+        """Initialize adapter with UnifiedCache.
+        
+        Args:
+            source_root: Root directory for source files
+            force_reindex: Whether to bypass cache
+            enable_understanding: Whether to enable AI understanding
+            understanding_provider: Specific provider for understanding
+        """
+        self._unified = UnifiedCache(
+            source_root=source_root, 
+            force_reindex=force_reindex,
+            enable_understanding=enable_understanding,
+            understanding_provider=understanding_provider
+        )
 
         # Expose same attributes as old MetadataCache
         self.source_root = source_root
@@ -29,6 +42,10 @@ class MetadataCacheAdapter:
         self.cache_hits = 0
         self.cache_misses = 0
         self.analysis_time_saved = 0.0
+        
+        # Expose understanding settings
+        self.enable_understanding = enable_understanding
+        self.understanding_provider = understanding_provider
 
     def get_content_hash(self, file_path: Path) -> str:
         """Get content hash (delegates to unified cache)."""
@@ -102,10 +119,23 @@ class MetadataCacheAdapter:
 class EnhancedMetadataCacheAdapter(MetadataCacheAdapter):
     """Adapter that makes UnifiedCache look like the old EnhancedMetadataCache."""
 
-    def __init__(self, source_root: Path, project_id: str, force_reindex: bool = False):
-        """Initialize adapter with project support."""
+    def __init__(self, source_root: Path, project_id: str, force_reindex: bool = False,
+                 enable_understanding: bool = False, understanding_provider: str | None = None):
+        """Initialize adapter with project support.
+        
+        Args:
+            source_root: Root directory for source files
+            project_id: Project identifier
+            force_reindex: Whether to bypass cache
+            enable_understanding: Whether to enable AI understanding
+            understanding_provider: Specific provider for understanding
+        """
         self._unified = UnifiedCache(
-            source_root=source_root, project_id=project_id, force_reindex=force_reindex
+            source_root=source_root, 
+            project_id=project_id, 
+            force_reindex=force_reindex,
+            enable_understanding=enable_understanding,
+            understanding_provider=understanding_provider
         )
         self.source_root = source_root
         self.project_id = project_id

@@ -29,10 +29,19 @@ class EnhancedMediaOrganizer(MediaOrganizer):
 
         # Replace standard cache with enhanced cache
         project_id = self._get_project_id(config)
+        
+        # Check if understanding is enabled
+        enable_understanding = getattr(config.processing, "understanding", False)
+        understanding_provider = None
+        if enable_understanding and hasattr(config, "pipeline") and hasattr(config.pipeline, "understanding"):
+            understanding_provider = getattr(config.pipeline.understanding, "preferred_provider", None)
+            
         self.metadata_cache = EnhancedMetadataCache(
             source_root=Path(config.paths.inbox),
             project_id=project_id,
             force_reindex=getattr(config.processing, "force_reindex", False),
+            enable_understanding=enable_understanding,
+            understanding_provider=understanding_provider
         )
 
         # Initialize persistent metadata manager if configured

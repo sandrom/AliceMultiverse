@@ -28,7 +28,7 @@ class FileProjectService:
             storage_paths: List of paths where projects can be stored
                          Can include local paths or cloud URLs (s3://, gcs://)
         """
-        self.storage_paths = storage_paths or ["test_data/projects"]
+        self.storage_paths = storage_paths or ["projects"]
         self.registry_file = "project_registry.yaml"
         self._ensure_storage_paths()
     
@@ -44,8 +44,8 @@ class FileProjectService:
         for path in self.storage_paths:
             if not path.startswith(("s3://", "gcs://", "http")):
                 return Path(path) / self.registry_file
-        # Fallback to test_data
-        return Path("test_data/projects") / self.registry_file
+        # Fallback to first path even if it's remote
+        return Path(self.storage_paths[0]) / self.registry_file
     
     def _load_registry(self) -> Dict[str, str]:
         """Load the project registry mapping names to paths."""
@@ -144,7 +144,8 @@ class FileProjectService:
                     project_path = Path(storage_path) / name
                     break
             else:
-                project_path = Path("test_data/projects") / name
+                # Use first path even if remote
+                project_path = Path(self.storage_paths[0]) / name
         
         # Create project directory structure
         project_path.mkdir(parents=True, exist_ok=True)
