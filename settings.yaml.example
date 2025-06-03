@@ -1,0 +1,84 @@
+# AliceMultiverse Configuration Example
+# Copy this to settings.yaml and customize for your setup
+
+# Directory paths
+paths:
+  # Where to look for new AI-generated images
+  inbox: ~/Downloads/ai-images
+  
+  # Where to organize images into dated/project folders  
+  organized: ~/Pictures/AI-Organized
+
+# Processing options
+processing:
+  # Enable AI understanding (requires API keys)
+  understanding: true
+  
+  # Copy files instead of moving them (safer)
+  copy_mode: true
+  
+  # Watch for new files continuously
+  watch: false
+  
+  # Preview mode - don't actually move/copy files
+  dry_run: false
+  
+  # Force re-analysis even if cached
+  force_reindex: false
+
+# Storage configuration
+storage:
+  # DuckDB search index location
+  search_db: data/search.duckdb
+  
+  # Project directories to scan
+  project_paths:
+    - ~/Pictures/AI-Projects
+  
+  # Asset directories to index
+  asset_paths:
+    - ~/Pictures/AI-Organized
+
+# AI Understanding configuration
+understanding:
+  # Providers to use (in order of preference)
+  providers:
+    - google      # Free tier: 50 images/day
+    - deepseek    # Cheapest: ~$0.001/image
+    - anthropic   # Best quality: ~$0.01/image
+    - openai      # Alternative: ~$0.005/image
+  
+  # Preferred provider for new images
+  preferred_provider: google
+
+# Cost management
+cost_management:
+  # Budget limits
+  budgets:
+    daily: 1.00
+    weekly: 5.00
+    monthly: 20.00
+  
+  # Alert when spending reaches percentage
+  alert_threshold: 0.8
+
+# Pipeline configuration (optional)
+pipeline:
+  # Processing mode
+  mode: basic  # basic, standard, premium
+  
+  # Cost limits per operation
+  cost_limits:
+    total: 10.0
+    per_image: 0.05
+
+# Event system (optional)
+events:
+  # Use Redis for events (requires Redis server)
+  use_redis: false
+  
+  # Redis connection settings
+  redis:
+    host: localhost
+    port: 6379
+    db: 0
