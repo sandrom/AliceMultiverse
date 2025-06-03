@@ -64,6 +64,9 @@ Thumbs.db
 # Project specific
 inbox/
 organized/
+output/
+!output/README.md
+!output/.gitkeep
 .metadata/
 .alicemultiverse/
 .alicemultiverse_cache/
@@ -71,6 +74,13 @@ api_keys.json
 settings.local.yaml
 *.local.yaml
 *.local.yml
+
+# DuckDB databases
+data/*.duckdb
+data/*.duckdb.wal
+
+# Test/mock directories
+MagicMock/
 
 # Sensitive files and security
 .env
