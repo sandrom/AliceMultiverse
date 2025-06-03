@@ -64,9 +64,9 @@ Welcome to AliceMultiverse! This guide covers both AI-assisted and traditional C
     
     Turn selected images into engaging videos
 
-- **[Multi-Path Storage](multi-path-storage-migration.md)** 📁
+- **[Multi-Path Storage Guide](multi-path-storage-guide.md)** 📁
     
-    Manage assets across multiple storage locations
+    Complete guide to managing assets across multiple storage locations
 
 </div>
 

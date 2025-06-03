@@ -7,6 +7,59 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2025-06-03) - Multi-Path Storage Enhancements
+- **Progress Tracking**: Visual feedback for long operations
+  - Added `tqdm` progress bars to file scanning and discovery
+  - Progress callbacks for external monitoring integration
+  - `--no-progress` flag for all storage commands
+  - Progress shown by default in `discover`, `scan`, and `consolidate`
+  
+- **Cloud Storage Support**: S3 and GCS integration
+  - `S3Scanner` with full upload/download capabilities
+  - `GCSScanner` for Google Cloud Storage
+  - Automatic content hash calculation for cloud files
+  - Configurable credentials (environment or config)
+  - Cloud file transfer in `_transfer_file` method
+  
+- **Auto-Migration System**: Rule-based lifecycle management
+  - `AutoMigrationService` analyzes files against storage rules
+  - Automatically moves/copies files to appropriate locations
+  - Dry-run mode for safe previewing
+  - Concurrent transfer operations with semaphore control
+  - `MigrationScheduler` for periodic background runs
+  - CLI: `alice storage migrate [--dry-run] [--move]`
+  
+- **Sync Tracking & Versioning**: Consistency across locations
+  - `SyncTracker` detects conflicts across storage locations
+  - Multiple resolution strategies:
+    - Newest wins (most recent modification)
+    - Largest wins (highest quality assumed)
+    - Primary wins (highest priority location)
+    - Manual (user intervention required)
+  - Sync queue for batch processing pending operations
+  - `VersionTracker` maintains file version history
+  - CLI commands:
+    - `alice storage sync-status`: Check conflicts
+    - `alice storage resolve-conflict <hash> --strategy <strategy>`
+    - `alice storage sync-process`: Process sync queue
+  
+- **New CLI Commands**:
+  - `alice storage consolidate <project> <location>`: Consolidate project assets
+  - All commands support `--no-progress` flag
+  
+- **Documentation & Examples**:
+  - Comprehensive multi-path storage guide: `docs/user-guide/multi-path-storage-guide.md`
+  - Cloud storage configuration: `examples/cloud_storage_config.yaml`
+  - Demo scripts:
+    - `storage_progress_demo.py`: Progress tracking demonstration
+    - `auto_migration_demo.py`: Lifecycle management example
+    - `sync_tracking_demo.py`: Conflict detection and resolution
+
+### Fixed (2025-06-03)
+- DuckDB foreign key constraints (removed unsupported CASCADE)
+- Array query compatibility in DuckDB
+- Test stability with separated scan operations
+
 ### Added (2025-01-06) - Multi-Path Storage Architecture
 - **Multi-Path Storage System**: Store and manage assets across multiple locations
   - `LocationRegistry` class with DuckDB backend for tracking files across locations
