@@ -21,6 +21,13 @@ from .registry import (
     list_workflows,
     register_workflow,
 )
+from .video_creation import (
+    VideoCreationWorkflow,
+    VideoStoryboard,
+    ShotDescription,
+    CameraMotion,
+    TransitionType,
+)
 
 __all__ = [
     # Base classes
@@ -36,4 +43,10 @@ __all__ = [
     "get_workflow",
     "list_workflows",
     "register_workflow",
+    # Video creation
+    "VideoCreationWorkflow",
+    "VideoStoryboard",
+    "ShotDescription",
+    "CameraMotion",
+    "TransitionType",
 ]
