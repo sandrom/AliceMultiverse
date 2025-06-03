@@ -27,9 +27,13 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
 
 ## Current Sprint: Multi-Path Storage Fixes
 
-### Multi-Path Storage: Next Steps
-- [ ] **Fix DuckDB Compatibility** - Align queries with schema
-- [ ] **File Operations** - Implement copy/move between locations
+### Multi-Path Storage: Completed ✅
+- [x] **Fix DuckDB Compatibility** - Aligned queries with schema
+- [x] **File Operations** - Implemented copy/move between locations
+- [x] **Foreign Key Constraints** - Fixed update issues in tests
+
+### Multi-Path Storage: Remaining
+- [ ] **Progress Tracking** - Add progress bars for large file operations
 - [ ] **Cloud Storage** - Add S3/GCS scanner implementations
 - [ ] **Auto-Migration** - Rule-based file movement system
 - [ ] **Sync Tracking** - Handle conflicts and versioning

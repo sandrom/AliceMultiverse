@@ -286,6 +286,18 @@ class StorageRegistry:
         
         logger.info(f"Updated storage location: {location.name}")
     
+    def update_scan_time(self, location_id: UUID) -> None:
+        """Update only the last scan time for a location.
+        
+        Args:
+            location_id: ID of the location to update
+        """
+        self.conn.execute("""
+            UPDATE storage_locations 
+            SET last_scan = ?, updated_at = ?
+            WHERE location_id = ?
+        """, [datetime.now(), datetime.now(), str(location_id)])
+    
     def get_locations(
         self, 
         status: Optional[LocationStatus] = None,
@@ -764,3 +776,16 @@ class StorageRegistry:
     def close(self):
         """Close the database connection."""
         self.conn.close()
+    
+    def cleanup_for_tests(self):
+        """Clean up all data for tests. WARNING: This deletes all data!"""
+        # Disable foreign key constraints temporarily
+        self.conn.execute("SET foreign_keys=false")
+        
+        # Delete in reverse order of dependencies
+        self.conn.execute("DELETE FROM rule_evaluations")
+        self.conn.execute("DELETE FROM file_locations")
+        self.conn.execute("DELETE FROM storage_locations")
+        
+        # Re-enable foreign key constraints
+        self.conn.execute("SET foreign_keys=true")

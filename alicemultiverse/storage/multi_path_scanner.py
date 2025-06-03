@@ -76,10 +76,11 @@ class MultiPathScanner:
                     show_progress
                 )
                 
-                stats["locations_scanned"] += 1
-                stats["total_files_found"] += location_stats["files_found"]
-                stats["new_files_discovered"] += location_stats["new_files"]
-                stats["projects_found"].update(location_stats["projects"])
+                if location_stats:  # Only count if scan was successful
+                    stats["locations_scanned"] += 1
+                    stats["total_files_found"] += location_stats["files_found"]
+                    stats["new_files_discovered"] += location_stats["new_files"]
+                    stats["projects_found"].update(location_stats["projects"])
                 
             except Exception as e:
                 logger.error(f"Error scanning location {location.name}: {e}")
@@ -96,6 +97,15 @@ class MultiPathScanner:
             f"{stats['new_files_discovered']} new files, "
             f"{len(stats['projects_found'])} projects"
         )
+        
+        # Update scan times for successfully scanned locations
+        # Do this after all file operations are complete to avoid FK issues
+        for location in locations:
+            if not any(e["location"] == location.name for e in stats["errors"]):
+                try:
+                    self.registry.update_scan_time(location.location_id)
+                except Exception as e:
+                    logger.warning(f"Could not update scan time for {location.name}: {e}")
         
         return stats
     
@@ -143,9 +153,9 @@ class MultiPathScanner:
         elif location.type == StorageType.NETWORK:
             stats = await self._scan_network_location(location)
         
-        # Update last scan time
-        location.last_scan = datetime.now()
-        self.registry.update_location(location)
+        # Don't update last scan time here - it causes FK constraint issues
+        # when file_locations are added during the scan
+        # Instead, let the caller handle this if needed
         
         return stats
     
@@ -250,27 +260,32 @@ class MultiPathScanner:
             base_path: Base path that was scanned
         """
         # Get all files from this location in the cache
-        # This is a simplified query - in production would be paginated
+        # Note: DuckDB arrays are 1-indexed
         results = self.cache.conn.execute("""
-            SELECT content_hash, locations, file_size
+            SELECT 
+                content_hash, 
+                locations,
+                file_size
             FROM assets
-            WHERE locations[1].storage_type = 'local'
+            WHERE len(locations) > 0
         """).fetchall()
         
         for content_hash, locations, file_size in results:
             # Check if any location matches this base path
-            for loc in locations:
-                if loc and loc.get("path", "").startswith(str(base_path)):
-                    # Track in registry
-                    metadata_embedded = loc.get("has_embedded_metadata", False)
-                    
-                    self.registry.track_file(
-                        content_hash,
-                        location.location_id,
-                        loc["path"],
-                        file_size,
-                        metadata_embedded
-                    )
+            if locations:  # Make sure locations is not None
+                for loc in locations:
+                    # DuckDB returns structs as dicts
+                    if loc and loc.get("path", "").startswith(str(base_path)):
+                        # Track in registry
+                        metadata_embedded = loc.get("has_embedded_metadata", False)
+                        
+                        self.registry.track_file(
+                            content_hash,
+                            location.location_id,
+                            loc["path"],
+                            file_size,
+                            metadata_embedded
+                        )
     
     async def find_project_assets(
         self,
@@ -292,15 +307,14 @@ class MultiPathScanner:
         assets = []
         
         # Query cache for project assets
+        # DuckDB doesn't support EXISTS with UNNEST in WHERE clause
+        # Instead, we'll fetch all assets and filter in Python
         query = """
-            SELECT a.content_hash, a.locations, a.media_type
-            FROM assets a
-            WHERE EXISTS (
-                SELECT 1 FROM unnest(a.locations) AS loc 
-                WHERE loc.path LIKE ?
-            )
+            SELECT content_hash, locations, media_type
+            FROM assets
+            WHERE len(locations) > 0
         """
-        params = [f"%/{project_name}/%"]
+        params = []
         
         # Add type filter if specified
         if asset_types:
@@ -310,20 +324,32 @@ class MultiPathScanner:
         
         results = self.cache.conn.execute(query, params).fetchall()
         
+        # Filter for project assets
+        project_pattern = f"/{project_name}/"
+        
         for content_hash, locations, media_type in results:
-            # Get all locations from registry
-            registry_locations = self.registry.get_file_locations(content_hash)
-            
-            # Get primary path from first location
-            primary_path = locations[0]["path"] if locations else ""
-            
-            assets.append({
-                "content_hash": content_hash,
-                "path": primary_path,
-                "metadata": {"media_type": media_type},
-                "locations": locations,
-                "registry_locations": registry_locations
-            })
+            # Check if any location contains the project name
+            if locations:
+                project_match = False
+                primary_path = ""
+                
+                for loc in locations:
+                    if loc and project_pattern in loc.get("path", ""):
+                        project_match = True
+                        primary_path = loc["path"]
+                        break
+                
+                if project_match:
+                    # Get all locations from registry
+                    registry_locations = self.registry.get_file_locations(content_hash)
+                    
+                    assets.append({
+                        "content_hash": content_hash,
+                        "path": primary_path,
+                        "metadata": {"media_type": media_type},
+                        "locations": locations,
+                        "registry_locations": registry_locations
+                    })
         
         logger.info(f"Found {len(assets)} assets for project {project_name}")
         return assets
@@ -374,17 +400,26 @@ class MultiPathScanner:
                 )
                 
                 if not in_target:
-                    # Copy/move to target location
-                    # TODO: Implement actual file operations
-                    logger.info(
-                        f"Would {'move' if move_files else 'copy'} "
-                        f"{asset['path']} to {target_location.name}"
-                    )
-                    
-                    if move_files:
-                        stats["files_moved"] += 1
-                    else:
-                        stats["files_copied"] += 1
+                    # Perform actual file operation
+                    try:
+                        await self._transfer_file(
+                            asset["path"],
+                            asset["content_hash"],
+                            target_location,
+                            move=move_files
+                        )
+                        
+                        if move_files:
+                            stats["files_moved"] += 1
+                        else:
+                            stats["files_copied"] += 1
+                            
+                    except Exception as e:
+                        logger.error(f"Failed to transfer {asset['path']}: {e}")
+                        stats["errors"].append({
+                            "file": asset["path"],
+                            "error": str(e)
+                        })
                         
             except Exception as e:
                 logger.error(f"Error processing {asset['path']}: {e}")
@@ -429,3 +464,77 @@ class MultiPathScanner:
             })
         
         return sorted(summaries, key=lambda x: x["priority"], reverse=True)
+    
+    async def _transfer_file(
+        self,
+        source_path: str,
+        content_hash: str,
+        target_location: StorageLocation,
+        move: bool = False
+    ) -> None:
+        """Transfer a file to a target location.
+        
+        Args:
+            source_path: Source file path
+            content_hash: File content hash
+            target_location: Target storage location
+            move: Whether to move (vs copy) the file
+        """
+        import shutil
+        from pathlib import Path
+        
+        source = Path(source_path)
+        
+        if target_location.type == StorageType.LOCAL:
+            # Local file transfer
+            target_base = Path(target_location.path).expanduser()
+            
+            # Preserve directory structure
+            # Extract relative path after finding common pattern
+            relative_parts = []
+            for part in source.parts:
+                if part in ["organized", "inbox", "projects"]:
+                    # Start collecting after these known directories
+                    relative_parts = []
+                else:
+                    relative_parts.append(part)
+            
+            # Create target path
+            if relative_parts:
+                target_path = target_base / Path(*relative_parts[1:])  # Skip first part (date or project)
+            else:
+                target_path = target_base / source.name
+            
+            # Ensure target directory exists
+            target_path.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Perform operation
+            if move:
+                shutil.move(str(source), str(target_path))
+                logger.info(f"Moved {source} to {target_path}")
+            else:
+                shutil.copy2(str(source), str(target_path))
+                logger.info(f"Copied {source} to {target_path}")
+            
+            # Track in registry
+            self.registry.track_file(
+                content_hash,
+                target_location.location_id,
+                str(target_path),
+                source.stat().st_size,
+                metadata_embedded=True  # Assume embedded if we're moving organized files
+            )
+            
+            # Update cache with new location
+            self.cache._add_file_location(content_hash, target_path, "local")
+            
+        elif target_location.type == StorageType.S3:
+            # S3 upload would go here
+            raise NotImplementedError("S3 transfers not yet implemented")
+            
+        elif target_location.type == StorageType.GCS:
+            # GCS upload would go here
+            raise NotImplementedError("GCS transfers not yet implemented")
+            
+        else:
+            raise ValueError(f"Unsupported storage type: {target_location.type}")
