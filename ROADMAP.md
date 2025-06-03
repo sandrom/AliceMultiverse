@@ -34,7 +34,11 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
 
 ### Multi-Path Storage: Remaining
 - [x] **Progress Tracking** - Add progress bars for large file operations ✅
-- [ ] **Cloud Storage** - Add S3/GCS scanner implementations
+- [x] **Cloud Storage** - Add S3/GCS scanner implementations ✅
+  - [x] S3 scanner with upload/download support
+  - [x] GCS scanner with upload/download support
+  - [x] Integrated with MultiPathScanner
+  - [x] Example configuration for cloud storage
 - [ ] **Auto-Migration** - Rule-based file movement system
 - [ ] **Sync Tracking** - Handle conflicts and versioning
 

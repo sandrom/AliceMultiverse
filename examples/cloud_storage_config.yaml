@@ -1,0 +1,70 @@
+# Example configuration for multi-path storage with cloud locations
+
+storage:
+  # Where to store the search index
+  search_db: data/search.duckdb
+  
+  # Where to store the location registry
+  location_registry_db: data/locations.duckdb
+  
+  # Storage locations with priorities and rules
+  locations:
+    # Fast local SSD for recent/active work
+    - name: "Fast SSD"
+      type: "local"
+      path: "~/Pictures/AI-Active"
+      priority: 100
+      rules:
+        - max_age_days: 30
+          min_quality_stars: 4
+    
+    # Network drive for medium-term storage
+    - name: "Network Archive"
+      type: "network"
+      path: "/Volumes/NAS/AI-Archive"
+      priority: 75
+      rules:
+        - min_age_days: 30
+          max_age_days: 180
+    
+    # S3 bucket for long-term cloud storage
+    - name: "AWS S3 Archive"
+      type: "s3"
+      path: "my-ai-archive-bucket"  # Bucket name
+      priority: 50
+      config:
+        # Optional: specify AWS credentials (otherwise uses default AWS config)
+        # aws_access_key_id: "YOUR_ACCESS_KEY"
+        # aws_secret_access_key: "YOUR_SECRET_KEY"
+        region: "us-west-2"
+        prefix: "alice-archive/"  # Optional prefix for all objects
+      rules:
+        - min_age_days: 180
+          exclude_types: ["video/mp4", "video/mov"]  # Don't archive videos to S3
+    
+    # Google Cloud Storage for backup
+    - name: "GCS Backup"
+      type: "gcs"
+      path: "my-ai-backup-bucket"  # Bucket name
+      priority: 25
+      config:
+        # Optional: path to service account credentials
+        # credentials_path: "~/path/to/service-account-key.json"
+        prefix: "alice-backup/"
+      rules:
+        - min_quality_stars: 5  # Only backup the best assets
+
+# Example usage patterns:
+
+# 1. Files are automatically placed based on rules:
+#    - New files (< 30 days) with quality >= 4 → Fast SSD
+#    - Files 30-180 days old → Network Archive
+#    - Files > 180 days old (not videos) → S3 Archive
+#    - 5-star quality files → Also backed up to GCS
+
+# 2. Manual consolidation:
+#    alice storage consolidate "my-project" <location-id>
+
+# 3. Cloud sync commands:
+#    alice storage sync --from local --to s3
+#    alice storage sync --from s3 --to gcs

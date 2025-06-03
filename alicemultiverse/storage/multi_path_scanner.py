@@ -246,9 +246,60 @@ class MultiPathScanner:
         Returns:
             Scan statistics
         """
-        # TODO: Implement S3 scanning
-        logger.warning(f"S3 scanning not yet implemented for {location.name}")
-        return {"files_found": 0, "new_files": 0, "projects": set()}
+        from .cloud_scanners import S3Scanner
+        
+        scanner = S3Scanner(location)
+        scan_results = await scanner.scan(show_progress=True)
+        
+        # Track files in cache and registry
+        new_files = 0
+        projects = set()
+        
+        for file_info in scan_results.get("media_files", []):
+            # Add to cache
+            metadata = {
+                "path": file_info["path"],
+                "file_size": file_info["size"],
+                "last_modified": file_info["last_modified"].isoformat() if hasattr(file_info["last_modified"], 'isoformat') else str(file_info["last_modified"]),
+                "content_hash": file_info["content_hash"],
+                "media_type": self._guess_media_type(file_info["key"])
+            }
+            
+            # Check if file already exists
+            existing = self.cache.search(content_hash=file_info["content_hash"])
+            if not existing:
+                new_files += 1
+            
+            # Add to cache with S3 location
+            self.cache.add_asset(
+                path=Path(file_info["path"]),
+                metadata=metadata,
+                content_hash=file_info["content_hash"],
+                storage_type="s3"
+            )
+            
+            # Track in registry
+            self.registry.track_file(
+                file_info["content_hash"],
+                location.location_id,
+                file_info["path"],
+                file_info["size"],
+                metadata_embedded=False  # Cloud files don't have embedded metadata yet
+            )
+            
+            # Extract project from path
+            key_parts = file_info["key"].split('/')
+            if len(key_parts) > 1:
+                # Assume first non-empty part might be project
+                potential_project = key_parts[0]
+                if potential_project and not potential_project.startswith('.'):
+                    projects.add(potential_project)
+        
+        return {
+            "files_found": scan_results["files_found"],
+            "new_files": new_files,
+            "projects": projects
+        }
     
     async def _scan_gcs_location(self, location: StorageLocation) -> Dict[str, any]:
         """Scan a Google Cloud Storage location.
@@ -259,9 +310,60 @@ class MultiPathScanner:
         Returns:
             Scan statistics
         """
-        # TODO: Implement GCS scanning
-        logger.warning(f"GCS scanning not yet implemented for {location.name}")
-        return {"files_found": 0, "new_files": 0, "projects": set()}
+        from .cloud_scanners import GCSScanner
+        
+        scanner = GCSScanner(location)
+        scan_results = await scanner.scan(show_progress=True)
+        
+        # Track files in cache and registry
+        new_files = 0
+        projects = set()
+        
+        for file_info in scan_results.get("media_files", []):
+            # Add to cache
+            metadata = {
+                "path": file_info["path"],
+                "file_size": file_info["size"],
+                "last_modified": file_info["last_modified"].isoformat() if hasattr(file_info["last_modified"], 'isoformat') else str(file_info["last_modified"]),
+                "content_hash": file_info["content_hash"],
+                "media_type": self._guess_media_type(file_info["name"])
+            }
+            
+            # Check if file already exists
+            existing = self.cache.search(content_hash=file_info["content_hash"])
+            if not existing:
+                new_files += 1
+            
+            # Add to cache with GCS location
+            self.cache.add_asset(
+                path=Path(file_info["path"]),
+                metadata=metadata,
+                content_hash=file_info["content_hash"],
+                storage_type="gcs"
+            )
+            
+            # Track in registry
+            self.registry.track_file(
+                file_info["content_hash"],
+                location.location_id,
+                file_info["path"],
+                file_info["size"],
+                metadata_embedded=False  # Cloud files don't have embedded metadata yet
+            )
+            
+            # Extract project from path
+            name_parts = file_info["name"].split('/')
+            if len(name_parts) > 1:
+                # Assume first non-empty part might be project
+                potential_project = name_parts[0]
+                if potential_project and not potential_project.startswith('.'):
+                    projects.add(potential_project)
+        
+        return {
+            "files_found": scan_results["files_found"],
+            "new_files": new_files,
+            "projects": projects
+        }
     
     async def _scan_network_location(self, location: StorageLocation) -> Dict[str, any]:
         """Scan a network drive location.
@@ -583,12 +685,121 @@ class MultiPathScanner:
             self.cache._add_file_location(content_hash, target_path, "local")
             
         elif target_location.type == StorageType.S3:
-            # S3 upload would go here
-            raise NotImplementedError("S3 transfers not yet implemented")
+            # S3 upload
+            from .cloud_scanners import S3Scanner
+            
+            scanner = S3Scanner(target_location)
+            
+            # Determine S3 key from source path
+            # Try to preserve some directory structure
+            source_parts = source.parts
+            key_parts = []
+            
+            # Find project or date pattern
+            for i, part in enumerate(source_parts):
+                if part in ["organized", "inbox", "projects"] and i < len(source_parts) - 1:
+                    # Start from the next part
+                    key_parts = source_parts[i+1:]
+                    break
+            
+            if not key_parts:
+                # Fallback to just filename
+                key_parts = [source.name]
+            
+            # Add prefix if configured
+            prefix = target_location.config.get("prefix", "")
+            if prefix:
+                s3_key = f"{prefix.rstrip('/')}/{'/'.join(key_parts)}"
+            else:
+                s3_key = '/'.join(key_parts)
+            
+            # Upload file
+            await scanner.upload_file(source, s3_key)
+            
+            # Track in registry
+            s3_path = f"s3://{target_location.path}/{s3_key}"
+            self.registry.track_file(
+                content_hash,
+                target_location.location_id,
+                s3_path,
+                source.stat().st_size,
+                metadata_embedded=False  # Cloud files don't have embedded metadata yet
+            )
+            
+            # Update cache with new location
+            self.cache._add_file_location(content_hash, Path(s3_path), "s3")
+            
+            logger.info(f"Uploaded {source} to {s3_path}")
             
         elif target_location.type == StorageType.GCS:
-            # GCS upload would go here
-            raise NotImplementedError("GCS transfers not yet implemented")
+            # GCS upload
+            from .cloud_scanners import GCSScanner
+            
+            scanner = GCSScanner(target_location)
+            
+            # Determine GCS blob name from source path
+            # Try to preserve some directory structure
+            source_parts = source.parts
+            name_parts = []
+            
+            # Find project or date pattern
+            for i, part in enumerate(source_parts):
+                if part in ["organized", "inbox", "projects"] and i < len(source_parts) - 1:
+                    # Start from the next part
+                    name_parts = source_parts[i+1:]
+                    break
+            
+            if not name_parts:
+                # Fallback to just filename
+                name_parts = [source.name]
+            
+            # Add prefix if configured
+            prefix = target_location.config.get("prefix", "")
+            if prefix:
+                blob_name = f"{prefix.rstrip('/')}/{'/'.join(name_parts)}"
+            else:
+                blob_name = '/'.join(name_parts)
+            
+            # Upload file
+            await scanner.upload_file(source, blob_name)
+            
+            # Track in registry
+            gcs_path = f"gs://{target_location.path}/{blob_name}"
+            self.registry.track_file(
+                content_hash,
+                target_location.location_id,
+                gcs_path,
+                source.stat().st_size,
+                metadata_embedded=False  # Cloud files don't have embedded metadata yet
+            )
+            
+            # Update cache with new location
+            self.cache._add_file_location(content_hash, Path(gcs_path), "gcs")
+            
+            logger.info(f"Uploaded {source} to {gcs_path}")
             
         else:
             raise ValueError(f"Unsupported storage type: {target_location.type}")
+    
+    def _guess_media_type(self, filename: str) -> str:
+        """Guess media type from filename extension.
+        
+        Args:
+            filename: File name or path
+            
+        Returns:
+            Media type string
+        """
+        ext = Path(filename).suffix.lower()
+        
+        # Image types
+        if ext in ['.png', '.jpg', '.jpeg', '.webp', '.heic', '.heif']:
+            return 'image'
+        # Video types
+        elif ext in ['.mp4', '.mov', '.avi', '.mkv', '.webm']:
+            return 'video'
+        # Audio types
+        elif ext in ['.mp3', '.wav', '.m4a', '.aac']:
+            return 'audio'
+        else:
+            return 'unknown'
