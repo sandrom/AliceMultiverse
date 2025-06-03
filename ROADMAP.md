@@ -39,7 +39,12 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
   - [x] GCS scanner with upload/download support
   - [x] Integrated with MultiPathScanner
   - [x] Example configuration for cloud storage
-- [ ] **Auto-Migration** - Rule-based file movement system
+- [x] **Auto-Migration** - Rule-based file movement system ✅
+  - [x] AutoMigrationService for analyzing files based on rules
+  - [x] Execute migrations (copy or move files)
+  - [x] MigrationScheduler for periodic runs
+  - [x] CLI command `alice storage migrate`
+  - [x] Dry-run support for previewing migrations
 - [ ] **Sync Tracking** - Handle conflicts and versioning
 
 ## Next Up: Video Creation Workflow

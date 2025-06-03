@@ -426,3 +426,84 @@ def consolidate(project_name: str, target_location_id: str, move: bool, no_progr
     finally:
         registry.close()
         cache.close()
+
+
+@storage.command()
+@click.option("--dry-run", is_flag=True, help="Only show what would be migrated")
+@click.option("--move", is_flag=True, help="Move files instead of copying")
+@click.option("--no-progress", is_flag=True, help="Disable progress bars")
+def migrate(dry_run: bool, move: bool, no_progress: bool):
+    """Run auto-migration based on storage rules."""
+    from .auto_migration import AutoMigrationService
+    
+    config = load_config()
+    registry = StorageRegistry(Path(config.storage.location_registry_db))
+    cache = DuckDBSearchCache(Path(config.storage.search_db))
+    
+    try:
+        # Create migration service
+        service = AutoMigrationService(cache, registry)
+        
+        # Run migration
+        async def run_migration():
+            return await service.run_auto_migration(
+                dry_run=dry_run,
+                move_files=move,
+                show_progress=not no_progress
+            )
+        
+        results = asyncio.run(run_migration())
+        
+        # Display results
+        if dry_run:
+            console.print("\n[bold]Migration Analysis (DRY RUN)[/bold]")
+        else:
+            console.print("\n[bold]Migration Results[/bold]")
+        
+        analysis = results['analysis']
+        console.print(f"Files to migrate: {analysis['files_to_migrate']}")
+        
+        if analysis['migrations']:
+            # Create table for migrations
+            table = Table(title="Proposed Migrations" if dry_run else "Completed Migrations")
+            table.add_column("File", style="cyan")
+            table.add_column("Size", justify="right")
+            table.add_column("From", style="yellow")
+            table.add_column("To", style="green")
+            table.add_column("Reason")
+            
+            for migration in analysis['migrations'][:20]:  # Show first 20
+                size_mb = migration['size'] / (1024 * 1024)
+                from_locs = ", ".join(migration['from'])
+                
+                table.add_row(
+                    migration['file'],
+                    f"{size_mb:.1f} MB",
+                    from_locs,
+                    migration['to'],
+                    migration['reason'][:50] + "..." if len(migration['reason']) > 50 else migration['reason']
+                )
+            
+            console.print(table)
+            
+            if len(analysis['migrations']) > 20:
+                console.print(f"\n... and {len(analysis['migrations']) - 20} more")
+        
+        # Show execution results if not dry run
+        if not dry_run and results['execution']:
+            exec_stats = results['execution']
+            console.print(f"\n[green]✓[/green] Migration complete")
+            console.print(f"  Files migrated: {exec_stats['files_migrated']}")
+            console.print(f"  Files failed: {exec_stats['files_failed']}")
+            console.print(f"  Data transferred: {exec_stats['bytes_transferred'] / (1024**3):.2f} GB")
+            
+            if exec_stats['errors']:
+                console.print(f"\n[yellow]Errors:[/yellow]")
+                for error in exec_stats['errors'][:5]:
+                    console.print(f"  - {error['content_hash'][:8]}...: {error['error']}")
+                
+    except Exception as e:
+        console.print(f"[red]Error during migration:[/red] {e}")
+    finally:
+        registry.close()
+        cache.close()
