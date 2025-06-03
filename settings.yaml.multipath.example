@@ -1,0 +1,107 @@
+# AliceMultiverse Multi-Path Storage Configuration Example
+# This shows how to configure multiple storage locations with rules
+
+# Directory paths (legacy - still supported)
+paths:
+  inbox: ~/Downloads/ai-images
+  organized: ~/Pictures/AI-Organized
+
+# Processing options
+processing:
+  understanding: true
+  copy_mode: true
+  watch: false
+  dry_run: false
+  force_reindex: false
+
+# Storage configuration with multiple locations
+storage:
+  # Database locations
+  search_db: data/search.duckdb
+  location_registry_db: data/locations.duckdb
+  
+  # Use new multi-path system (set to false for legacy mode)
+  use_legacy_paths: false
+  
+  # Define multiple storage locations with rules
+  locations:
+    # Primary fast SSD for recent/active work
+    - name: "Primary SSD"
+      type: "local"
+      path: "~/Pictures/AI-Active"
+      priority: 100  # Highest priority for new files
+      rules:
+        - max_age_days: 30  # Keep files < 30 days old
+        - min_quality_stars: 4  # Only high quality
+        - include_types: ["image/png", "image/jpeg"]
+    
+    # Secondary storage for older files
+    - name: "Archive HDD"
+      type: "local"
+      path: "/Volumes/Archive/AI-Images"
+      priority: 50
+      rules:
+        - min_age_days: 30  # Files > 30 days old
+        - max_age_days: 365  # But < 1 year
+    
+    # Network drive for team shared assets
+    - name: "Team Share"
+      type: "network"
+      path: "/Volumes/TeamDrive/AI-Assets"
+      priority: 75
+      rules:
+        - require_tags: ["approved", "team-share"]
+        - min_quality_stars: 3
+    
+    # Cloud storage for long-term archive
+    - name: "S3 Archive"
+      type: "s3"
+      path: "my-ai-archive-bucket"
+      priority: 25
+      config:
+        region: "us-west-2"
+        storage_class: "GLACIER"
+      rules:
+        - min_age_days: 365  # Files > 1 year old
+        - exclude_tags: ["work-in-progress", "draft"]
+    
+    # Special location for video projects
+    - name: "Video Projects"
+      type: "local"
+      path: "~/Movies/AI-Videos"
+      priority: 90
+      rules:
+        - include_types: ["video/mp4", "video/quicktime"]
+        - min_size_bytes: 10485760  # > 10MB
+
+# Project paths remain the same
+  project_paths:
+    - ~/Pictures/AI-Projects
+    - /Volumes/Archive/AI-Projects
+  
+  # Asset paths for indexing
+  asset_paths:
+    - ~/Pictures/AI-Active
+    - /Volumes/Archive/AI-Images
+    - /Volumes/TeamDrive/AI-Assets
+
+# AI Understanding configuration
+understanding:
+  providers:
+    - google
+    - deepseek
+    - anthropic
+    - openai
+  preferred_provider: google
+
+# Cost management
+cost_management:
+  budgets:
+    daily: 1.00
+    weekly: 5.00
+    monthly: 20.00
+  alert_threshold: 0.8
+
+# Event system
+events:
+  use_redis: false

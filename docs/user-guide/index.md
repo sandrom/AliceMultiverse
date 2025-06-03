@@ -56,6 +56,18 @@ Welcome to AliceMultiverse! This guide covers both AI-assisted and traditional C
     
     Generate images and videos with FLUX and Kling
 
+- **[Selection Workflow](selection-workflow-guide.md)** 🎯
+    
+    Collaborative image selection and curation
+
+- **[Video Creation Workflow](video-creation-workflow-guide.md)** 🎬
+    
+    Turn selected images into engaging videos
+
+- **[Multi-Path Storage](multi-path-storage-migration.md)** 📁
+    
+    Manage assets across multiple storage locations
+
 </div>
 
 ## 🎯 Usage Modes

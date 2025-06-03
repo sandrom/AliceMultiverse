@@ -7,6 +7,106 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2025-01-06) - Multi-Path Storage Architecture
+- **Multi-Path Storage System**: Store and manage assets across multiple locations
+  - `LocationRegistry` class with DuckDB backend for tracking files across locations
+  - Support for local, S3, GCS, and network storage types
+  - Storage rules for automatic file placement based on:
+    - Age (max_age_days, min_age_days)
+    - Quality (min_quality_stars, max_quality_stars)
+    - Type (include_types, exclude_types)
+    - Size (min_size_bytes, max_size_bytes)
+    - Tags (require_tags, exclude_tags)
+  - Priority-based location selection for new files
+  - Content-addressed tracking with SHA-256 hashes
+  - `MultiPathScanner` for project-aware file discovery
+  - Project consolidation features
+- **Storage CLI Commands**: Full command-line interface
+  - `alice storage init`: Initialize storage registry
+  - `alice storage add`: Add new storage location
+  - `alice storage list`: List all locations
+  - `alice storage scan`: Scan specific location
+  - `alice storage discover`: Discover all assets
+  - `alice storage stats`: View storage statistics
+  - `alice storage find-project`: Find project assets
+  - `alice storage update`: Update location settings
+  - `alice storage from-config`: Load from configuration
+- **Configuration Support**: Enhanced settings for multi-path
+  - New `storage.locations` array in settings.yaml
+  - Example: settings.yaml.multipath.example
+  - Backward compatibility with legacy inbox/organized paths
+- **Documentation**: Complete migration guide
+  - docs/user-guide/multi-path-storage-migration.md
+  - Storage rule examples and best practices
+  - Troubleshooting guide
+
+### Added (2025-01-06) - Better First-Run Experience
+- **Interactive Setup Wizard**: Comprehensive first-time setup
+  - New `alice setup` command launches interactive wizard
+  - Auto-detects first run and prompts for configuration
+  - System requirements checking (Python version, dependencies, disk space)
+  - Step-by-step API key setup with provider recommendations
+  - Directory configuration with sensible defaults
+  - Test organization to verify everything works
+  - Shows next steps and quick start commands
+- **Welcome Messages**: Friendly guidance for new users
+  - `welcome.py` module provides context-aware messages
+  - Shows setup status and warnings
+  - Quick command reference for common tasks
+  - Explains AI-native usage through Claude Desktop
+- **Configuration Template**: Added `settings.yaml.example`
+  - Fully documented configuration options
+  - Cost management settings
+  - Provider preferences with pricing notes
+- **First-Run Detection**: Automatic setup prompt
+  - Checks for existing configuration and API keys
+  - Offers to run wizard or shows quick start guide
+  - Can be skipped and run later with `alice setup`
+
+### Added (2025-01-06) - Improved Error Messages
+- **User-Friendly Error Handling**: Created comprehensive error handling system
+  - New `error_handling.py` module with context-aware error messages
+  - Provides actionable suggestions for common issues:
+    - API key errors: Shows how to run `alice keys setup`
+    - File path errors: Suggests checking permissions and using absolute paths
+    - Cost limit errors: Shows current spending and how to increase limits
+    - Dependency errors: Provides specific install commands
+  - Error categories: API_KEY, FILE_PATH, PERMISSION, DEPENDENCY, CONFIGURATION, NETWORK, COST_LIMIT, DATABASE, PROVIDER
+  - Integrated into main CLI with formatted output
+  - Shows technical details only with --debug flag
+
+### Added (2025-01-06) - Auto-Indexing During Organization
+- **Auto-indexing to DuckDB**: Files are now automatically indexed during organization
+  - MediaOrganizer calls `_update_search_index` after file operations
+  - PipelineOrganizer calls `_auto_index_to_search` after metadata caching
+  - Extracts tags from understanding data (v4.0 cache format)
+  - Automatically calculates and stores perceptual hashes for images
+  - Only runs when understanding is enabled in configuration
+  - Handles both flat tag lists and categorized tag dictionaries
+- **Improved Search Population**: Search index stays up-to-date as files are processed
+  - No need to manually rebuild index after organization
+  - New files immediately searchable by tags and similarity
+  - Perceptual hashes enable "find similar" functionality
+
+### Added (2025-01-06) - Video Creation Workflow
+- **Video Creation Workflow**: Complete system for turning images into videos
+  - `VideoCreationWorkflow` class analyzes images for video potential
+  - Generates storyboards with shot descriptions and transitions
+  - Creates Kling-ready prompts with camera movements (11 types)
+  - Prepares enhanced keyframes using Flux Kontext
+  - Exports transition guides for video editing
+- **MCP Tools for Video**:
+  - `analyze_for_video`: Analyze images for video generation potential
+  - `generate_video_storyboard`: Create complete storyboards from selections
+  - `create_kling_prompts`: Generate formatted prompts for Kling
+  - `prepare_flux_keyframes`: Create enhanced keyframes with Flux
+  - `create_transition_guide`: Generate video editing guides
+- **Video Styles**: 5 predefined styles (cinematic, documentary, music_video, narrative, abstract)
+- **Camera Motion Analysis**: Intelligent camera movement suggestions based on image composition
+- **Storyboard Persistence**: JSON format for saving and loading video projects
+- **Documentation**: Comprehensive video-creation-workflow-guide.md
+- **Demo Script**: examples/advanced/video_creation_demo.py
+
 ### Fixed (2025-01-06) - Part 2
 - **Understanding System Integration**: Fixed multiple issues preventing AI analysis
   - API keys now loaded from keychain automatically via APIKeyManager

@@ -79,6 +79,17 @@ For normal usage, use Alice through an AI assistant instead.
     # Keys - setup
     keys_setup = keys_subparsers.add_parser("setup", help="Interactive setup wizard")
     
+    # Setup subcommand (first-run wizard)
+    setup_parser = subparsers.add_parser(
+        "setup", 
+        help="Run first-time setup wizard"
+    )
+    setup_parser.add_argument(
+        "--reconfigure", 
+        action="store_true", 
+        help="Reconfigure even if already set up"
+    )
+    
     # Recreate subcommand
     recreate_parser = subparsers.add_parser("recreate", help="Recreate AI generations")
     recreate_subparsers = recreate_parser.add_subparsers(
@@ -188,6 +199,52 @@ For normal usage, use Alice through an AI assistant instead.
     
     # Index - stats
     index_stats = index_subparsers.add_parser("stats", help="Show index statistics")
+    
+    # Storage subcommand for multi-path storage management
+    storage_parser = subparsers.add_parser("storage", help="Manage storage locations")
+    storage_subparsers = storage_parser.add_subparsers(
+        dest="storage_command", help="Storage management commands"
+    )
+    
+    # Storage - init
+    storage_init = storage_subparsers.add_parser("init", help="Initialize storage registry")
+    storage_init.add_argument("--db-path", help="Path to location registry database")
+    
+    # Storage - add
+    storage_add = storage_subparsers.add_parser("add", help="Add a storage location")
+    storage_add.add_argument("--name", required=True, help="Name of the storage location")
+    storage_add.add_argument("--path", required=True, help="Path to the storage location")
+    storage_add.add_argument("--type", choices=["local", "s3", "gcs", "network"], default="local")
+    storage_add.add_argument("--priority", type=int, default=50, help="Priority (0-100)")
+    storage_add.add_argument("--rule", action="append", help="Storage rule in JSON format")
+    
+    # Storage - list
+    storage_list = storage_subparsers.add_parser("list", help="List storage locations")
+    
+    # Storage - scan
+    storage_scan = storage_subparsers.add_parser("scan", help="Scan a storage location")
+    storage_scan.add_argument("location_id", help="Location ID to scan")
+    
+    # Storage - discover
+    storage_discover = storage_subparsers.add_parser("discover", help="Discover all assets")
+    storage_discover.add_argument("--force", action="store_true", help="Force re-scan")
+    
+    # Storage - stats
+    storage_stats = storage_subparsers.add_parser("stats", help="Show storage statistics")
+    
+    # Storage - find-project
+    storage_find = storage_subparsers.add_parser("find-project", help="Find project assets")
+    storage_find.add_argument("project_name", help="Project name")
+    storage_find.add_argument("--type", action="append", help="Asset types to include")
+    
+    # Storage - update
+    storage_update = storage_subparsers.add_parser("update", help="Update storage location")
+    storage_update.add_argument("--location-id", help="Location ID")
+    storage_update.add_argument("--priority", type=int, help="New priority")
+    storage_update.add_argument("--status", choices=["active", "archived", "offline"])
+    
+    # Storage - from-config
+    storage_from_config = storage_subparsers.add_parser("from-config", help="Load from config")
 
     # Directory arguments
     parser.add_argument(
@@ -417,6 +474,11 @@ def main(argv: list[str] | None = None) -> int:
     parser = create_parser()
     args, unknown = parser.parse_known_args(argv)
 
+    # Handle setup subcommand
+    if args.command == "setup":
+        from ..core.first_run import run_setup_command
+        return run_setup_command()
+    
     # Handle keys subcommand
     if args.command == "keys":
         from ..core.keys.cli import run_keys_command
@@ -552,6 +614,46 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  Unique tags: {stats.get('unique_tags', 0)}")
             print(f"  Storage size: {stats.get('storage_size_mb', 0):.1f} MB")
             return 0
+    
+    # Handle storage subcommand
+    if args.command == "storage":
+        from ..storage.cli import storage as storage_cli
+        
+        # Build command line args for click
+        click_args = [args.storage_command]
+        
+        if args.storage_command == "init":
+            if hasattr(args, "db_path") and args.db_path:
+                click_args.extend(["--db-path", args.db_path])
+        elif args.storage_command == "add":
+            click_args.extend(["--name", args.name])
+            click_args.extend(["--path", args.path])
+            click_args.extend(["--type", args.type])
+            click_args.extend(["--priority", str(args.priority)])
+            if hasattr(args, "rule") and args.rule:
+                for rule in args.rule:
+                    click_args.extend(["--rule", rule])
+        elif args.storage_command == "scan":
+            click_args.append(args.location_id)
+        elif args.storage_command == "discover":
+            if hasattr(args, "force") and args.force:
+                click_args.append("--force")
+        elif args.storage_command == "find-project":
+            click_args.append(args.project_name)
+            if hasattr(args, "type") and args.type:
+                for t in args.type:
+                    click_args.extend(["--type", t])
+        elif args.storage_command == "update":
+            if hasattr(args, "location_id") and args.location_id:
+                click_args.extend(["--location-id", args.location_id])
+            if hasattr(args, "priority") and args.priority:
+                click_args.extend(["--priority", str(args.priority)])
+            if hasattr(args, "status") and args.status:
+                click_args.extend(["--status", args.status])
+        # list, stats, from-config don't need additional args
+        
+        storage_cli(click_args)
+        return 0
 
     # Setup logging for main command
     log_level = args.log_level if hasattr(args, "log_level") else "INFO"
@@ -568,7 +670,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     
     # Show deprecation warning for direct CLI usage (except for allowed commands)
-    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison"]
+    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage"]
     force_cli = hasattr(args, "force_cli") and args.force_cli
     debug_mode = hasattr(args, "debug") and args.debug
     check_deps = hasattr(args, "check_deps") and args.check_deps
@@ -600,6 +702,12 @@ def main(argv: list[str] | None = None) -> int:
         return 0 if deps_ok else 1
 
     try:
+        # Check first run for organize command
+        if args.command is None:  # Default organize command
+            from ..core.first_run import check_first_run
+            if not check_first_run():
+                return 1
+        
         # Load configuration
         config_path = Path(args.config) if hasattr(args, "config") and args.config else None
         cli_overrides = parse_cli_overrides(unknown)
@@ -650,15 +758,21 @@ def main(argv: list[str] | None = None) -> int:
         return 130
 
     except ConfigurationError as e:
-        logger.error(f"Configuration error: {e}")
+        from ..core.error_handling import wrap_error, format_error_for_user
+        wrapped = wrap_error(e, "configuration")
+        print(format_error_for_user(wrapped, include_traceback=args.debug if 'args' in locals() else False))
         return 1
 
     except AliceMultiverseError as e:
-        logger.error(f"Error: {e}")
+        from ..core.error_handling import wrap_error, format_error_for_user
+        wrapped = wrap_error(e, "processing")
+        print(format_error_for_user(wrapped, include_traceback=args.debug if 'args' in locals() else False))
         return 1
 
     except Exception as e:
-        logger.exception(f"Unexpected error: {e}")
+        from ..core.error_handling import wrap_error, format_error_for_user
+        wrapped = wrap_error(e, "unexpected error")
+        print(format_error_for_user(wrapped, include_traceback=args.debug if 'args' in locals() else False))
         return 2
 
 
