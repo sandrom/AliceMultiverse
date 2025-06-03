@@ -37,6 +37,25 @@ For normal usage, use Alice through an AI assistant instead.
     # Subparsers for commands
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
+    # Cost subcommand for cost tracking
+    cost_parser = subparsers.add_parser("cost", help="Cost tracking and budget management")
+    cost_subparsers = cost_parser.add_subparsers(dest="cost_command", help="Cost management commands")
+    
+    # Cost - report
+    cost_report = cost_subparsers.add_parser("report", help="Show cost report")
+    cost_report.add_argument("--days", type=int, default=30, help="Number of days to include")
+    
+    # Cost - set-budget
+    cost_budget = cost_subparsers.add_parser("set-budget", help="Set spending budget")
+    cost_budget.add_argument("--daily", type=float, help="Daily budget limit (USD)")
+    cost_budget.add_argument("--monthly", type=float, help="Monthly budget limit (USD)")
+    cost_budget.add_argument("--alert", type=float, default=0.8, help="Alert threshold (0-1)")
+    
+    # Cost - providers
+    cost_providers = cost_subparsers.add_parser("providers", help="Compare provider costs")
+    cost_providers.add_argument("--category", choices=["understanding", "generation", "enhancement", "audio"], 
+                               help="Filter by category")
+    
     # Keys subcommand
     keys_parser = subparsers.add_parser("keys", help="Manage API keys")
     keys_subparsers = keys_parser.add_subparsers(
@@ -479,6 +498,48 @@ def main(argv: list[str] | None = None) -> int:
         from ..core.first_run import run_setup_command
         return run_setup_command()
     
+    # Handle cost subcommand
+    if args.command == "cost":
+        from ..core.cost_tracker import get_cost_tracker, CostCategory
+        
+        cost_tracker = get_cost_tracker()
+        
+        if args.cost_command == "report":
+            report = cost_tracker.format_cost_report()
+            print(report)
+            return 0
+            
+        elif args.cost_command == "set-budget":
+            if args.daily:
+                cost_tracker.set_budget("daily", args.daily, args.alert)
+                print(f"✅ Set daily budget: ${args.daily:.2f}")
+            if args.monthly:
+                cost_tracker.set_budget("monthly", args.monthly, args.alert)
+                print(f"✅ Set monthly budget: ${args.monthly:.2f}")
+            if not args.daily and not args.monthly:
+                print("❌ Please specify --daily and/or --monthly budget")
+                return 1
+            return 0
+            
+        elif args.cost_command == "providers":
+            category = CostCategory[args.category.upper()] if args.category else None
+            comparison = cost_tracker.get_provider_comparison(category)
+            
+            print("\n📊 Provider Cost Comparison")
+            print("=" * 60)
+            for provider in comparison:
+                print(f"\n{provider['provider']}:")
+                print(f"  Category: {provider['category']}")
+                print(f"  Total spent: ${provider['total_spent']:.2f}")
+                print(f"  Requests: {provider['request_count']}")
+                if provider['request_count'] > 0:
+                    print(f"  Average cost: ${provider['average_cost']:.4f}")
+                print(f"  Pricing: {provider['pricing_model']}")
+                if 'typical_cost' in provider:
+                    print(f"  Typical cost: ${provider['typical_cost']:.4f}")
+                print(f"  Free tier: {provider['free_tier']}")
+            return 0
+    
     # Handle keys subcommand
     if args.command == "keys":
         from ..core.keys.cli import run_keys_command
@@ -670,7 +731,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     
     # Show deprecation warning for direct CLI usage (except for allowed commands)
-    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage"]
+    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage", "cost"]
     force_cli = hasattr(args, "force_cli") and args.force_cli
     debug_mode = hasattr(args, "debug") and args.debug
     check_deps = hasattr(args, "check_deps") and args.check_deps

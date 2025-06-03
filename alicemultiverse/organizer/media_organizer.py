@@ -134,6 +134,10 @@ class MediaOrganizer:
             True if successful, False otherwise
         """
         try:
+            # Show cost warnings if understanding is enabled
+            if self.metadata_cache.enable_understanding:
+                self._show_cost_warning()
+            
             if self.watch_mode:
                 return self._watch_and_organize()
             else:
@@ -1059,3 +1063,61 @@ class MediaOrganizer:
             logger.debug("Perceptual hashing not available")
         except Exception as e:
             logger.warning(f"Failed to calculate perceptual hashes: {e}")
+    
+    def _show_cost_warning(self) -> None:
+        """Show cost warning when understanding is enabled."""
+        from ..core.cost_tracker import get_cost_tracker
+        
+        # Count media files
+        media_files = self._find_media_files()
+        if not media_files:
+            return
+            
+        # Get cost tracker
+        cost_tracker = get_cost_tracker()
+        
+        # Estimate costs for understanding
+        provider = self.metadata_cache.understanding_provider or "anthropic"
+        estimate = cost_tracker.estimate_batch_cost(
+            file_count=len(media_files),
+            providers=[provider],
+            operation="image_analysis"
+        )
+        
+        # Show warning
+        print("\n" + "="*70)
+        print("💸 COST ESTIMATE FOR AI UNDERSTANDING")
+        print("="*70)
+        print(f"\nProvider: {provider}")
+        print(f"Images to analyze: {len(media_files)}")
+        print(f"Estimated cost: {estimate['total_cost']['formatted']}")
+        
+        # Show cheaper alternatives if available
+        if estimate['breakdown'][provider]['per_item'] > 0.001:
+            print("\n💡 Cheaper alternatives:")
+            if provider != "deepseek":
+                print("  • DeepSeek: ~$0.0002 per image")
+            if provider != "google":
+                print("  • Google AI: FREE (50 images/day)")
+        
+        # Check budget warnings
+        if estimate['budget_warnings']:
+            print("\n⚠️  BUDGET WARNINGS:")
+            for warning in estimate['budget_warnings']:
+                print(f"  • {warning}")
+        
+        # Show current spending
+        spending = cost_tracker.get_spending_summary()
+        if spending['daily']['total'] > 0:
+            print(f"\n📊 Today's spending: ${spending['daily']['total']:.2f}")
+        
+        if not self.config.processing.dry_run:
+            print("\n🔍 This is a preview. Add --dry-run to see what would happen without cost.")
+            response = input("\nProceed with analysis? (y/N): ").strip().lower()
+            if response != 'y':
+                print("Analysis cancelled.")
+                raise KeyboardInterrupt("User cancelled due to cost")
+        else:
+            print("\n✅ DRY RUN - No actual API calls will be made")
+        
+        print("="*70 + "\n")

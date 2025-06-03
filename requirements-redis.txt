@@ -1,4 +1,5 @@
-# Optional Redis support for distributed deployments
+# Optional Redis dependencies for distributed event system
 # Install with: pip install -r requirements-redis.txt
 
-redis>=5.0.0            # Redis client for caching and streams
+redis>=5.0.0
+hiredis>=2.0.0  # C parser for improved performance

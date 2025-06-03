@@ -121,7 +121,7 @@ async def monitor_live_events(verbose: bool = False):
         try:
             while True:
                 # Get recent events
-                events = await event_system.get_recent_events(limit=100)
+                events = event_system.get_recent_events(limit=100)
                 
                 # Show only new events
                 new_events = events[:len(events) - last_event_count]
@@ -146,7 +146,7 @@ async def show_recent_events(limit: int = 20, verbose: bool = False):
     print(f"📜 Showing last {limit} events...\n")
     
     # Get recent events
-    events = await event_system.get_recent_events(limit=limit)
+    events = event_system.get_recent_events(limit=limit)
     
     if not events:
         print("No events found.")

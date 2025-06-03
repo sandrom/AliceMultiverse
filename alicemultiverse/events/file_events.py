@@ -1,94 +1,43 @@
 """File-based event system for local development.
 
-A simple, reliable event system that writes to local files instead of Redis.
-Perfect for personal tools and development environments.
+This module provides a simple file-based event system that mimics the Redis Streams API,
+allowing AliceMultiverse to run without Redis for personal/development use.
 """
 
 import asyncio
 import json
+import logging
 import time
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
 from threading import Lock
+from typing import Any, Callable, Dict, List, Optional
 
-from alicemultiverse.core.structured_logging import get_logger
-from alicemultiverse.core.metrics import events_published_total, event_processing_duration_seconds
+from ..core.structured_logging import get_logger
 
 logger = get_logger(__name__)
 
 
 class FileBasedEventSystem:
-    """Simple file-based event system for local development.
+    """Simple file-based event system for local development."""
     
-    Writes events to JSON Lines files organized by date.
-    Provides the same API as RedisStreamsEventSystem for compatibility.
-    """
-    
-    def __init__(self, event_log_dir: Optional[str] = None):
-        """Initialize the event system.
+    def __init__(self, event_log_dir: Optional[Path] = None):
+        """Initialize file-based event system.
         
         Args:
-            event_log_dir: Directory for event logs. Defaults to ~/.alice/events
+            event_log_dir: Directory to store event logs (defaults to ~/.alice/events)
         """
-        if event_log_dir:
-            self.event_log_dir = Path(event_log_dir)
-        else:
-            self.event_log_dir = Path.home() / ".alice" / "events"
-            
+        self.event_log_dir = event_log_dir or Path.home() / ".alice" / "events"
         self.event_log_dir.mkdir(parents=True, exist_ok=True)
         self._lock = Lock()
         self._listeners: Dict[str, List[Callable]] = {}
-        self._running: bool = False
+        self._running = False
         
         logger.info(f"Initialized file-based event system at {self.event_log_dir}")
-        
+    
     def publish_sync(self, event_type: str, data: Dict[str, Any]) -> str:
-        """Publish an event synchronously.
-        
-        Args:
-            event_type: Type of event (e.g., "asset.processed")
-            data: Event data
-            
-        Returns:
-            Event ID
-        """
-        event_id = str(uuid.uuid4())
-        timestamp = datetime.now(timezone.utc)
-        
-        # Track metrics
-        events_published_total.labels(event_type=event_type).inc()
-        
-        event = {
-            "id": event_id,
-            "type": event_type,
-            "data": data,
-            "timestamp": timestamp.isoformat()
-        }
-        
-        # Write to daily log file
-        log_file = self.event_log_dir / f"events_{timestamp.strftime('%Y%m%d')}.jsonl"
-        
-        try:
-            with self._lock:
-                with open(log_file, "a") as f:
-                    f.write(json.dumps(event, ensure_ascii=False) + "\n")
-                    
-            logger.debug(f"Published event {event_type} with ID {event_id}")
-            
-            # Notify local listeners (synchronous)
-            self._notify_listeners_sync(event_type, event)
-            
-            return event_id
-            
-        except Exception as e:
-            # Log error but don't crash - events are not critical
-            logger.error(f"Failed to publish event {event_type}: {e}")
-            return event_id  # Return ID anyway for compatibility
-            
-    async def publish(self, event_type: str, data: Dict[str, Any]) -> str:
-        """Publish an event asynchronously.
+        """Publish event synchronously to file.
         
         Args:
             event_type: Type of event
@@ -97,106 +46,161 @@ class FileBasedEventSystem:
         Returns:
             Event ID
         """
-        # For file-based system, just wrap the sync version
-        return self.publish_sync(event_type, data)
+        event_id = str(uuid.uuid4())
+        timestamp = datetime.now(timezone.utc).isoformat()
         
-    async def subscribe(self, event_type: str, handler: Callable[[Dict[str, Any]], None]) -> None:
-        """Subscribe to events of a specific type.
+        event = {
+            "id": event_id,
+            "type": event_type,
+            "data": data,
+            "timestamp": timestamp
+        }
+        
+        # Write to daily log file
+        log_file = self.event_log_dir / f"events_{datetime.now().strftime('%Y%m%d')}.jsonl"
+        
+        try:
+            with self._lock:
+                with open(log_file, "a") as f:
+                    f.write(json.dumps(event) + "\n")
+                    
+            logger.debug(f"Published event {event_type} with ID {event_id}")
+            
+            # Call local listeners (for same-process subscriptions)
+            self._notify_listeners(event_type, event)
+            
+        except Exception as e:
+            # Log error but don't crash - graceful degradation
+            logger.error(f"Failed to write event to file: {e}")
+        
+        return event_id
+    
+    async def publish(self, event_type: str, data: Dict[str, Any]) -> str:
+        """Async wrapper for compatibility with Redis interface.
         
         Args:
-            event_type: Event type to subscribe to (supports wildcards like "asset.*")
-            handler: Function to call when event is received
+            event_type: Type of event
+            data: Event data
+            
+        Returns:
+            Event ID
         """
-        if event_type not in self._listeners:
-            self._listeners[event_type] = []
-        self._listeners[event_type].append(handler)
-        logger.debug(f"Subscribed to {event_type}")
-        
-    async def unsubscribe(self, event_type: str, handler: Callable[[Dict[str, Any]], None]) -> None:
-        """Unsubscribe from events.
+        # Run in thread pool to avoid blocking
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(None, self.publish_sync, event_type, data)
+    
+    def subscribe(self, event_types: List[str], callback: Callable) -> None:
+        """Subscribe to events.
         
         Args:
-            event_type: Event type to unsubscribe from
-            handler: Handler to remove
+            event_types: List of event types to subscribe to
+            callback: Function to call when event is received
         """
-        if event_type in self._listeners:
-            self._listeners[event_type].remove(handler)
-            if not self._listeners[event_type]:
-                del self._listeners[event_type]
-                
-    async def start_listening(self) -> None:
-        """Start listening for events (no-op for file-based system)."""
+        for event_type in event_types:
+            if event_type not in self._listeners:
+                self._listeners[event_type] = []
+            self._listeners[event_type].append(callback)
+            
+        logger.debug(f"Subscribed to events: {event_types}")
+    
+    async def listen(self) -> None:
+        """Start listening for events.
+        
+        This method monitors the event log files for new events.
+        In a file-based system, this is less efficient than Redis
+        but suitable for personal use.
+        """
         self._running = True
-        logger.info("File-based event system started (local only)")
+        last_position = {}
         
-    async def stop_listening(self) -> None:
+        logger.info("Started file-based event listener")
+        
+        while self._running:
+            try:
+                # Get today's log file
+                log_file = self.event_log_dir / f"events_{datetime.now().strftime('%Y%m%d')}.jsonl"
+                
+                if log_file.exists():
+                    # Track file position
+                    if str(log_file) not in last_position:
+                        last_position[str(log_file)] = 0
+                    
+                    # Read new events
+                    with open(log_file, "r") as f:
+                        f.seek(last_position[str(log_file)])
+                        
+                        for line in f:
+                            if line.strip():
+                                try:
+                                    event = json.loads(line)
+                                    self._notify_listeners(event["type"], event)
+                                except json.JSONDecodeError:
+                                    logger.warning(f"Invalid JSON in event log: {line}")
+                        
+                        last_position[str(log_file)] = f.tell()
+                
+                # Clean up old position tracking
+                for file_path in list(last_position.keys()):
+                    if file_path != str(log_file) and len(last_position) > 5:
+                        del last_position[file_path]
+                
+            except Exception as e:
+                logger.error(f"Error in event listener: {e}")
+            
+            # Check for new events every second
+            await asyncio.sleep(1.0)
+    
+    def stop(self) -> None:
         """Stop listening for events."""
         self._running = False
-        logger.info("File-based event system stopped")
+        logger.info("Stopped file-based event listener")
+    
+    def _notify_listeners(self, event_type: str, event: Dict[str, Any]) -> None:
+        """Notify listeners of an event.
         
-    def _notify_listeners_sync(self, event_type: str, event: Dict[str, Any]) -> None:
-        """Notify local listeners synchronously."""
-        start_time = time.time()
-        
-        # Exact match
-        if event_type in self._listeners:
-            for handler in self._listeners[event_type]:
-                try:
-                    handler(event)
-                except Exception as e:
-                    logger.error(f"Error in event handler: {e}")
-                    
-        # Wildcard patterns
-        for pattern, handlers in self._listeners.items():
-            if pattern != event_type and self._matches_pattern(event_type, pattern):
-                for handler in handlers:
-                    try:
-                        handler(event)
-                    except Exception as e:
-                        logger.error(f"Error in event handler: {e}")
-                        
-        # Record metrics
-        duration = time.time() - start_time
-        event_processing_duration_seconds.labels(event_type=event_type).observe(duration)
-        
-    def _matches_pattern(self, event_type: str, pattern: str) -> bool:
-        """Check if event type matches subscription pattern.
-        
-        Supports exact matches and wildcards:
-        - "asset.processed" matches "asset.processed"
-        - "asset.*" matches "asset.processed", "asset.created", etc.
-        - "*" matches everything
+        Args:
+            event_type: Type of event
+            event: Full event data
         """
-        if pattern == "*":
-            return True
-        if pattern == event_type:
-            return True
-        if pattern.endswith(".*"):
-            prefix = pattern[:-2]
-            return event_type.startswith(prefix + ".")
-        return False
+        # Notify exact matches
+        if event_type in self._listeners:
+            for callback in self._listeners[event_type]:
+                try:
+                    if asyncio.iscoroutinefunction(callback):
+                        asyncio.create_task(callback(event))
+                    else:
+                        callback(event)
+                except Exception as e:
+                    logger.error(f"Error in event callback: {e}")
         
-    async def get_recent_events(
-        self, 
-        limit: int = 100, 
-        event_type: Optional[str] = None,
-        start_time: Optional[str] = None,
-        end_time: Optional[str] = None
-    ) -> List[Dict[str, Any]]:
+        # Notify wildcard listeners
+        if "*" in self._listeners:
+            for callback in self._listeners["*"]:
+                try:
+                    if asyncio.iscoroutinefunction(callback):
+                        asyncio.create_task(callback(event))
+                    else:
+                        callback(event)
+                except Exception as e:
+                    logger.error(f"Error in wildcard event callback: {e}")
+    
+    def get_recent_events(self, 
+                         event_types: Optional[List[str]] = None,
+                         limit: int = 100,
+                         since: Optional[datetime] = None) -> List[Dict[str, Any]]:
         """Get recent events from log files.
         
         Args:
+            event_types: Filter by event types (None for all)
             limit: Maximum number of events to return
-            event_type: Filter by event type (optional)
-            start_time: Start time filter (ISO format)
-            end_time: End time filter (ISO format)
+            since: Only return events after this time
             
         Returns:
-            List of events (most recent first)
+            List of events (newest first)
         """
         events = []
         
-        # Get all event log files, sorted by date (newest first)
+        # Get all log files, sorted by date (newest first)
         log_files = sorted(
             self.event_log_dir.glob("events_*.jsonl"),
             reverse=True
@@ -208,73 +212,89 @@ class FileBasedEventSystem:
                 
             try:
                 with open(log_file, "r") as f:
-                    # Read file in reverse order for recent events
+                    # Read file backwards for efficiency
                     lines = f.readlines()
+                    
                     for line in reversed(lines):
                         if len(events) >= limit:
                             break
                             
-                        try:
-                            event = json.loads(line.strip())
-                            
-                            # Apply filters
-                            if event_type and event.get("type") != event_type:
-                                continue
+                        if line.strip():
+                            try:
+                                event = json.loads(line)
                                 
-                            if start_time and event.get("timestamp", "") < start_time:
-                                continue
+                                # Apply filters
+                                if event_types and event["type"] not in event_types:
+                                    continue
+                                    
+                                if since:
+                                    event_time = datetime.fromisoformat(
+                                        event["timestamp"].replace("Z", "+00:00")
+                                    )
+                                    if event_time < since:
+                                        # Stop reading this file - older events follow
+                                        break
                                 
-                            if end_time and event.get("timestamp", "") > end_time:
-                                continue
+                                events.append(event)
                                 
-                            events.append(event)
-                            
-                        except json.JSONDecodeError:
-                            continue
-                            
+                            except json.JSONDecodeError:
+                                logger.warning(f"Invalid JSON in event log: {line}")
+                                
             except Exception as e:
                 logger.error(f"Error reading event log {log_file}: {e}")
-                
+        
         return events
+    
+    def cleanup_old_logs(self, days_to_keep: int = 7) -> int:
+        """Clean up old event log files.
         
-    async def get_pending_messages(self, event_type: str) -> List[Dict[str, Any]]:
-        """Get pending messages (not applicable for file-based system).
-        
-        Returns empty list for compatibility.
+        Args:
+            days_to_keep: Number of days of logs to keep
+            
+        Returns:
+            Number of files deleted
         """
-        return []
+        cutoff_date = datetime.now() - timedelta(days=days_to_keep)
+        deleted = 0
         
-    async def claim_abandoned_messages(self, event_type: str, idle_time_ms: int = 60000) -> int:
-        """Claim abandoned messages (not applicable for file-based system).
+        for log_file in self.event_log_dir.glob("events_*.jsonl"):
+            try:
+                # Parse date from filename
+                date_str = log_file.stem.replace("events_", "")
+                file_date = datetime.strptime(date_str, "%Y%m%d")
+                
+                if file_date < cutoff_date:
+                    log_file.unlink()
+                    deleted += 1
+                    logger.debug(f"Deleted old event log: {log_file}")
+                    
+            except Exception as e:
+                logger.warning(f"Error processing log file {log_file}: {e}")
         
-        Returns 0 for compatibility.
-        """
-        return 0
+        if deleted > 0:
+            logger.info(f"Cleaned up {deleted} old event log files")
+            
+        return deleted
 
 
-# Global instance for convenience
-_event_system: Optional[FileBasedEventSystem] = None
-
+# Convenience functions to match Redis interface
+_event_system = None
 
 def get_event_system() -> FileBasedEventSystem:
-    """Get the global event system instance."""
+    """Get the singleton event system instance."""
     global _event_system
     if _event_system is None:
         _event_system = FileBasedEventSystem()
     return _event_system
 
-
-# Convenience functions for simple usage
-async def publish_event(event_type: str, data: Dict[str, Any]) -> str:
-    """Publish an event using the global event system."""
-    return await get_event_system().publish(event_type, data)
-
-
 def publish_event_sync(event_type: str, data: Dict[str, Any]) -> str:
-    """Publish an event synchronously using the global event system."""
+    """Publish event synchronously."""
     return get_event_system().publish_sync(event_type, data)
 
+async def publish_event(event_type: str, data: Dict[str, Any]) -> str:
+    """Publish event asynchronously."""
+    return await get_event_system().publish(event_type, data)
 
-async def subscribe_to_events(event_type: str, handler: Callable[[Dict[str, Any]], None]) -> None:
-    """Subscribe to events using the global event system."""
-    await get_event_system().subscribe(event_type, handler)
+def subscribe_to_events(event_types: List[str], callback: Callable) -> None:
+    """Subscribe to events."""
+    get_event_system().subscribe(event_types, callback)
