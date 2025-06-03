@@ -22,9 +22,71 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
    - Budget limits enforced ✓
    - `alice cost report` for visibility ✓
 4. **What's broken RIGHT NOW?** 
-   - Documentation implies this is a product (needs update)
-   - No --understand CLI flag (uses config only)
-   - First-run experience could be smoother
+   - Documentation implies this is a product (needs update) ✅ (fixed)
+   - No --understand CLI flag (uses config only) ✅ (fixed)
+   - First-run experience could be smoother ✅ (improved)
+   - Repository needs cleanup (duplicate files, old code, media in git)
+
+## 🧹 Repository Cleanup Plan (HIGH PRIORITY)
+
+### Why This Matters
+The repo has accumulated cruft during rapid development. A clean repo = easier maintenance, faster AI context loading, and clearer for anyone (including future me) to understand.
+
+### Phase 1: Immediate Cleanup (Do First)
+- [ ] **Fix .gitignore**
+  - [ ] Add: `*.egg-info/`, `__pycache__/`, `.pytest_cache/`
+  - [ ] Add: `inbox/`, `organized/`, `output/`, `training/` (except READMEs)
+  - [ ] Add: `*.log`, `data/*.duckdb` (user-specific)
+  - [ ] Remove tracked files that should be ignored
+- [ ] **Remove media files from git**
+  - [ ] Delete all images/videos in inbox/, organized/, output/, training/
+  - [ ] Add placeholder READMEs explaining these directories
+- [ ] **Commit current changes**
+  - [ ] main_cli.py (--understand flag addition)
+  - [ ] first_run.py (improved setup wizard)
+
+### Phase 2: Code Cleanup
+- [ ] **Remove deprecated interface files**
+  - [ ] Verify alice_structured.py is the current API
+  - [ ] Remove alice_interface.py, alice_interface_v2.py
+  - [ ] Consolidate cli_handler.py and cli_handler_structured.py
+- [ ] **Clean up migration files**
+  - [ ] Remove PostgreSQL event migration code
+  - [ ] Move completed migrations to legacy/ folder
+  - [ ] Update docs to reflect current architecture
+- [ ] **Consolidate storage modules**
+  - [ ] Review overlapping functionality in storage modules
+  - [ ] Merge or remove redundant code
+  - [ ] Update imports and tests
+
+### Phase 3: Documentation Cleanup
+- [ ] **Consolidate settings examples**
+  - [ ] Merge settings.yaml.example and settings.yaml.multipath.example
+  - [ ] Create one comprehensive example with all options
+- [ ] **Remove temporary docs**
+  - [ ] Integrate README_STORAGE.md into main docs
+  - [ ] Complete and remove REDIS_REMOVAL_PLAN.md
+  - [ ] Update all Redis references to show it's optional
+- [ ] **Update stale documentation**
+  - [ ] Remove references to deprecated features
+  - [ ] Ensure all examples use current API
+
+### Phase 4: Final Polish
+- [ ] **Clean test/temporary files**
+  - [ ] Remove MagicMock directory
+  - [ ] Clean up one-time maintenance scripts
+  - [ ] Archive or remove old test data
+- [ ] **Verify everything works**
+  - [ ] Run full test suite
+  - [ ] Test fresh install experience
+  - [ ] Update CHANGELOG.md with cleanup notes
+
+### Success Criteria
+- Repository size reduced by >50% (removing media files)
+- No duplicate or deprecated code
+- Clear, consistent structure
+- All tests pass
+- Fresh clone + install works perfectly
 
 ## Completed: Multi-Path Storage ✅
 

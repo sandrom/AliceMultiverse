@@ -315,6 +315,20 @@ For normal usage, use Alice through an AI assistant instead.
     )
 
     parser.add_argument(
+        "-u",
+        "--understand",
+        "--understanding",
+        dest="understand",
+        action="store_true",
+        help="Enable AI understanding to analyze and tag images (costs apply)",
+    )
+    
+    parser.add_argument(
+        "--providers",
+        help="AI providers to use for understanding (comma-separated: google,deepseek,anthropic,openai)",
+    )
+
+    parser.add_argument(
         "-w",
         "--watch",
         "--monitor",
@@ -434,6 +448,16 @@ def apply_cli_args_to_config(config: DictConfig, args: argparse.Namespace) -> No
         config.processing.force_reindex = True
     if hasattr(args, "quality") and args.quality:
         config.processing.quality = True
+    if hasattr(args, "understand") and args.understand:
+        config.processing.understanding = True
+    if hasattr(args, "providers") and args.providers:
+        # Set understanding providers
+        providers = [p.strip() for p in args.providers.split(",")]
+        if not hasattr(config, "understanding"):
+            from omegaconf import OmegaConf
+            config.understanding = OmegaConf.create({})
+        config.understanding.providers = providers
+        config.understanding.preferred_provider = providers[0] if providers else None
     if hasattr(args, "watch") and args.watch:
         config.processing.watch = True
     if hasattr(args, "dry_run") and args.dry_run:

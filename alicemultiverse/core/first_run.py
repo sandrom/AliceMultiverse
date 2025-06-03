@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Dict, Any, Optional, List, Tuple
 from datetime import datetime
 
-from .config import load_config, save_config
+from .config import load_config
 from .keys import APIKeyManager
 from .structured_logging import get_logger
 
@@ -116,11 +116,16 @@ class FirstRunWizard:
 ║                                                               ║
 ║               Welcome to AliceMultiverse! 🎨                  ║
 ║                                                               ║
-║   Your AI-Native Creative Asset Management System             ║
+║     Sandro's Personal Tool for AI Image Organization          ║
 ║                                                               ║
 ╚═══════════════════════════════════════════════════════════════╝
 
-This wizard will help you get started in just a few minutes.
+Hi! I'm the setup wizard. I'll help you:
+  ✓ Set up API keys (with cost info)
+  ✓ Configure your directories
+  ✓ Test that everything works
+
+This takes about 2 minutes. Let's start!
 """)
     
     def _is_already_configured(self) -> bool:
@@ -240,9 +245,13 @@ This wizard will help you get started in just a few minutes.
 AliceMultiverse uses AI providers to understand your images.
 You can start with just one provider and add more later.
 
-Recommended for beginners:
-  • Google AI (FREE - 50 images/day)
-  • DeepSeek (Cheap - ~$0.001/image)
+💰 COST COMPARISON:
+  • Google AI:    FREE (50 images/day) ⭐ BEST FOR BEGINNERS
+  • DeepSeek:     ~$0.0002/image (~$0.10 for 500 images)
+  • Anthropic:    ~$0.0025/image (~$1.25 for 500 images)
+  • OpenAI:       ~$0.0050/image (~$2.50 for 500 images)
+
+💡 TIP: Start with Google AI's free tier, add others if needed.
 """)
         
         # Check existing keys
@@ -253,8 +262,12 @@ Recommended for beginners:
                 existing_keys[provider] = True
                 self.has_any_key = True
         
-        # Ask about each provider
-        for provider, info in self.PROVIDERS.items():
+        # Ask about each provider in recommended order
+        provider_order = ["google", "deepseek", "anthropic", "openai"]
+        for provider in provider_order:
+            if provider not in self.PROVIDERS:
+                continue
+            info = self.PROVIDERS[provider]
             if missing_only and provider in existing_keys:
                 continue
                 
@@ -272,12 +285,23 @@ Recommended for beginners:
                 if change != 'y':
                     continue
             
+            # Ask if they want to set up this provider
+            setup_provider = input(f"\nSet up {info['name']}? (y/N): ").strip().lower()
+            if setup_provider != 'y':
+                print(f"  Skipped {info['name']}")
+                continue
+            
+            print(f"\n  📝 Get your API key from: {info['signup_url']}")
+            
             while True:
-                key = input(f"\nEnter {provider} API key (or press Enter to skip): ").strip()
+                key = input(f"  Enter {provider} API key: ").strip()
                 
                 if not key:
-                    print(f"  Skipped {info['name']}")
-                    break
+                    skip = input("  Skip this provider? (Y/n): ").strip().lower()
+                    if skip != 'n':
+                        print(f"  Skipped {info['name']}")
+                        break
+                    continue
                 
                 # Validate key format
                 if self._validate_api_key(provider, key):
@@ -319,14 +343,22 @@ Recommended for beginners:
         default_inbox = Path.home() / "Downloads" / "ai-images"
         default_organized = Path.home() / "Pictures" / "AI-Organized"
         
-        print("\nWhere should Alice look for new AI images?")
-        print(f"Default: {default_inbox}")
-        inbox_input = input("Inbox directory (press Enter for default): ").strip()
+        print("""
+Alice needs two directories:
+1. INBOX: Where you save new AI-generated images
+2. ORGANIZED: Where Alice will organize them by date/project/source
+""")
+        
+        print("📥 INBOX - Where do you save AI-generated images?")
+        print(f"   Default: {default_inbox}")
+        print("   (This is where you download from Midjourney, DALL-E, etc.)")
+        inbox_input = input("\nInbox path (Enter for default): ").strip()
         inbox = Path(inbox_input) if inbox_input else default_inbox
         
-        print("\nWhere should Alice organize your images?")
-        print(f"Default: {default_organized}")
-        organized_input = input("Organized directory (press Enter for default): ").strip()
+        print("\n📂 ORGANIZED - Where should Alice organize your images?")
+        print(f"   Default: {default_organized}")
+        print("   (Alice will create dated folders here)")
+        organized_input = input("\nOrganized path (Enter for default): ").strip()
         organized = Path(organized_input) if organized_input else default_organized
         
         # Create directories
@@ -437,15 +469,33 @@ Recommended for beginners:
         print("\n📋 Quick Start Commands:")
         
         if self.has_any_key:
+            # Show provider-specific costs
+            providers_configured = []
+            for provider in ["google", "deepseek", "anthropic", "openai"]:
+                if self.key_manager.get_api_key(provider):
+                    providers_configured.append(provider)
+            
+            print("\n💰 Your Configured Providers:")
+            for provider in providers_configured:
+                if provider == "google":
+                    print("  • Google AI: FREE (50 images/day)")
+                elif provider == "deepseek":
+                    print("  • DeepSeek: ~$0.0002/image")
+                elif provider == "anthropic":
+                    print("  • Anthropic: ~$0.0025/image")
+                elif provider == "openai":
+                    print("  • OpenAI: ~$0.0050/image")
+            
             print("""
-1. Organize images with AI understanding:
-   alice --understand
-
-2. Watch for new images continuously:
-   alice --watch --understand
-
-3. Preview without making changes:
+1. Test with dry run (no cost, no changes):
    alice --dry-run
+
+2. Organize with understanding (uses cheapest provider):
+   alice
+
+3. Monitor costs:
+   alice cost report
+   alice cost set-budget --daily 1.00
 """)
         else:
             print("""
