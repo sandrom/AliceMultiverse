@@ -1,0 +1,4 @@
+# Optional Redis support for distributed deployments
+# Install with: pip install -r requirements-redis.txt
+
+redis>=5.0.0            # Redis client for caching and streams
