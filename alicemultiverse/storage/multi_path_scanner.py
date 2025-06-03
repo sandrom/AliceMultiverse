@@ -8,7 +8,9 @@ import asyncio
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional, Set, Tuple, Callable
+
+from tqdm import tqdm
 
 from ..core.structured_logging import get_logger
 from ..projects.service import ProjectService
@@ -43,13 +45,15 @@ class MultiPathScanner:
     async def discover_all_assets(
         self,
         force_scan: bool = False,
-        show_progress: bool = True
+        show_progress: bool = True,
+        progress_callback: Optional[Callable[[str, int, int], None]] = None
     ) -> Dict[str, any]:
         """Discover all assets across all registered storage locations.
         
         Args:
             force_scan: Force re-scan even if location was recently scanned
             show_progress: Show progress bars
+            progress_callback: Optional callback for progress updates (message, current, total)
             
         Returns:
             Dictionary with discovery statistics
@@ -68,7 +72,22 @@ class MultiPathScanner:
         from .location_registry import LocationStatus
         locations = self.registry.get_locations(status=LocationStatus.ACTIVE)
         
-        for location in locations:
+        # Create progress bar if needed
+        location_progress = None
+        if show_progress and locations:
+            location_progress = tqdm(
+                total=len(locations),
+                desc="Scanning locations",
+                unit="location"
+            )
+        
+        for idx, location in enumerate(locations):
+            if progress_callback:
+                progress_callback(
+                    f"Scanning {location.name}",
+                    idx + 1,
+                    len(locations)
+                )
             try:
                 location_stats = await self._scan_location(
                     location,
@@ -82,15 +101,23 @@ class MultiPathScanner:
                     stats["new_files_discovered"] += location_stats["new_files"]
                     stats["projects_found"].update(location_stats["projects"])
                 
+                if location_progress:
+                    location_progress.update(1)
+                
             except Exception as e:
                 logger.error(f"Error scanning location {location.name}: {e}")
                 stats["errors"].append({
                     "location": location.name,
                     "error": str(e)
                 })
+                if location_progress:
+                    location_progress.update(1)
         
         # Convert set to list for JSON serialization
         stats["projects_found"] = list(stats["projects_found"])
+        
+        if location_progress:
+            location_progress.close()
         
         logger.info(
             f"Discovery complete: {stats['total_files_found']} files found, "
@@ -358,7 +385,9 @@ class MultiPathScanner:
         self,
         project_name: str,
         target_location_id: str,
-        move_files: bool = False
+        move_files: bool = False,
+        show_progress: bool = True,
+        progress_callback: Optional[Callable[[str, int, int], None]] = None
     ) -> Dict[str, any]:
         """Consolidate all project assets to a single location.
         
@@ -366,6 +395,8 @@ class MultiPathScanner:
             project_name: Name of the project
             target_location_id: Target location ID
             move_files: Whether to move files (vs copy)
+            show_progress: Whether to show progress bar
+            progress_callback: Optional callback for progress updates
             
         Returns:
             Consolidation statistics
@@ -390,8 +421,23 @@ class MultiPathScanner:
         assets = await self.find_project_assets(project_name)
         stats["files_found"] = len(assets)
         
+        # Create progress bar if needed
+        file_progress = None
+        if show_progress and assets:
+            file_progress = tqdm(
+                total=len(assets),
+                desc=f"{'Moving' if move_files else 'Copying'} files",
+                unit="file"
+            )
+        
         # Process each asset
-        for asset in assets:
+        for idx, asset in enumerate(assets):
+            if progress_callback:
+                progress_callback(
+                    f"Processing {Path(asset['path']).name}",
+                    idx + 1,
+                    len(assets)
+                )
             try:
                 # Check if already in target location
                 in_target = any(
@@ -420,6 +466,9 @@ class MultiPathScanner:
                             "file": asset["path"],
                             "error": str(e)
                         })
+                
+                if file_progress:
+                    file_progress.update(1)
                         
             except Exception as e:
                 logger.error(f"Error processing {asset['path']}: {e}")
@@ -427,6 +476,11 @@ class MultiPathScanner:
                     "file": asset["path"],
                     "error": str(e)
                 })
+                if file_progress:
+                    file_progress.update(1)
+        
+        if file_progress:
+            file_progress.close()
         
         return stats
     

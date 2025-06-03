@@ -33,7 +33,7 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
 - [x] **Foreign Key Constraints** - Fixed update issues in tests
 
 ### Multi-Path Storage: Remaining
-- [ ] **Progress Tracking** - Add progress bars for large file operations
+- [x] **Progress Tracking** - Add progress bars for large file operations ✅
 - [ ] **Cloud Storage** - Add S3/GCS scanner implementations
 - [ ] **Auto-Migration** - Rule-based file movement system
 - [ ] **Sync Tracking** - Handle conflicts and versioning

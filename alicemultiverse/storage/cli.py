@@ -130,7 +130,8 @@ def list():
 
 @storage.command()
 @click.argument("location_id")
-def scan(location_id: str):
+@click.option("--no-progress", is_flag=True, help="Disable progress bars")
+def scan(location_id: str, no_progress: bool):
     """Scan a storage location for assets."""
     config = load_config()
     registry = StorageRegistry(Path(config.storage.location_registry_db))
@@ -147,7 +148,11 @@ def scan(location_id: str):
         scanner = MultiPathScanner(cache, registry)
         
         async def run_scan():
-            return await scanner._scan_location(location, force_scan=True, show_progress=True)
+            return await scanner._scan_location(
+                location, 
+                force_scan=True, 
+                show_progress=not no_progress
+            )
         
         stats = asyncio.run(run_scan())
         
@@ -165,7 +170,8 @@ def scan(location_id: str):
 
 @storage.command()
 @click.option("--force", is_flag=True, help="Force re-scan all locations")
-def discover(force: bool):
+@click.option("--no-progress", is_flag=True, help="Disable progress bars")
+def discover(force: bool, no_progress: bool):
     """Discover all assets across all storage locations."""
     config = load_config()
     registry = StorageRegistry(Path(config.storage.location_registry_db))
@@ -175,7 +181,10 @@ def discover(force: bool):
         scanner = MultiPathScanner(cache, registry)
         
         async def run_discovery():
-            return await scanner.discover_all_assets(force_scan=force, show_progress=True)
+            return await scanner.discover_all_assets(
+                force_scan=force, 
+                show_progress=not no_progress
+            )
         
         stats = asyncio.run(run_discovery())
         
@@ -374,3 +383,46 @@ def from_config():
         console.print(f"[red]Error loading from config:[/red] {e}")
     finally:
         registry.close()
+
+
+@storage.command()
+@click.argument("project_name")
+@click.argument("target_location_id")
+@click.option("--move", is_flag=True, help="Move files instead of copying")
+@click.option("--no-progress", is_flag=True, help="Disable progress bars")
+def consolidate(project_name: str, target_location_id: str, move: bool, no_progress: bool):
+    """Consolidate all project assets to a single location."""
+    config = load_config()
+    registry = StorageRegistry(Path(config.storage.location_registry_db))
+    cache = DuckDBSearchCache(Path(config.storage.search_db))
+    
+    try:
+        scanner = MultiPathScanner(cache, registry)
+        
+        async def run_consolidate():
+            return await scanner.consolidate_project(
+                project_name,
+                target_location_id,
+                move_files=move,
+                show_progress=not no_progress
+            )
+        
+        stats = asyncio.run(run_consolidate())
+        
+        console.print(f"[green]✓[/green] Consolidation complete for project {project_name}")
+        console.print(f"  Files found: {stats['files_found']}")
+        if move:
+            console.print(f"  Files moved: {stats['files_moved']}")
+        else:
+            console.print(f"  Files copied: {stats['files_copied']}")
+        
+        if stats['errors']:
+            console.print("[yellow]Errors:[/yellow]")
+            for error in stats['errors']:
+                console.print(f"  - {error['file']}: {error['error']}")
+                
+    except Exception as e:
+        console.print(f"[red]Error during consolidation:[/red] {e}")
+    finally:
+        registry.close()
+        cache.close()
