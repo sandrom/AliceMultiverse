@@ -24,7 +24,10 @@ from .interface import AliceInterface
 from .interface.models import OrganizeRequest, SearchRequest, TagRequest
 from .interface.image_presentation import ImagePresentationAPI
 from .interface.image_presentation_mcp import register_image_presentation_tools
+from .interface.video_creation_mcp import register_video_creation_tools
 from .storage.duckdb_cache import DuckDBSearchCache
+from .storage.duckdb_search import DuckDBSearch
+from .core.cost_tracker import get_cost_tracker
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -36,6 +39,9 @@ alice = AliceInterface()
 # Initialize image presentation API
 storage = DuckDBSearchCache()
 image_api = ImagePresentationAPI(storage=storage)
+
+# Initialize DuckDB search for video creation tools
+search_db = DuckDBSearch()
 
 if MCP_AVAILABLE:
     server = Server("alice-multiverse")
@@ -53,6 +59,7 @@ else:
 # Register image presentation tools (works with both real and dummy server)
 if MCP_AVAILABLE:
     register_image_presentation_tools(server, image_api)
+    register_video_creation_tools(server, search_db)
 
 
 @server.tool()
@@ -252,6 +259,125 @@ async def get_organization_stats() -> dict[str, Any]:
         return {"success": False, "error": str(e), "message": "Failed to get statistics"}
 
 
+@server.tool()
+async def estimate_cost(
+    operation: str,
+    file_count: int = 1,
+    providers: list[str] | None = None,
+    detailed: bool = False,
+) -> dict[str, Any]:
+    """
+    Estimate cost for an operation before running it.
+    
+    Parameters:
+    - operation: Type of operation ("organize", "understand", "generate", etc.)
+    - file_count: Number of files to process
+    - providers: List of providers to use (defaults to configured providers)
+    - detailed: Whether detailed analysis is requested
+    
+    Returns cost estimate with breakdown and budget warnings.
+    """
+    try:
+        cost_tracker = get_cost_tracker()
+        
+        # Map operation to providers if not specified
+        if not providers:
+            if operation in ["organize", "understand", "analyze"]:
+                # Get configured understanding providers
+                from .core.config import load_config
+                config = load_config()
+                if hasattr(config, "understanding") and hasattr(config.understanding, "providers"):
+                    providers = [p["name"] for p in config.understanding.providers]
+                else:
+                    providers = ["anthropic"]  # Default
+            else:
+                providers = []
+        
+        # Get batch estimate
+        estimate = cost_tracker.estimate_batch_cost(
+            file_count=file_count,
+            providers=providers,
+            operation=operation,
+            detailed=detailed
+        )
+        
+        return {
+            "success": True,
+            "message": f"Cost estimate for {operation}",
+            "data": estimate
+        }
+    except Exception as e:
+        logger.error(f"Cost estimation failed: {e}")
+        return {"success": False, "error": str(e), "message": "Cost estimation failed"}
+
+
+@server.tool()
+async def get_spending_report() -> dict[str, Any]:
+    """
+    Get spending report showing costs by provider and time period.
+    
+    Returns daily, weekly, monthly spending with budget status.
+    """
+    try:
+        cost_tracker = get_cost_tracker()
+        
+        # Get spending summary
+        summary = cost_tracker.get_spending_summary()
+        
+        # Get provider comparison
+        comparison = cost_tracker.get_provider_comparison()
+        
+        # Format report
+        report = cost_tracker.format_cost_report()
+        
+        return {
+            "success": True,
+            "message": "Spending report generated",
+            "data": {
+                "summary": summary,
+                "providers": comparison,
+                "formatted_report": report
+            }
+        }
+    except Exception as e:
+        logger.error(f"Spending report failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to generate spending report"}
+
+
+@server.tool()
+async def set_budget(
+    period: str,
+    limit: float,
+    alert_threshold: float = 0.8
+) -> dict[str, Any]:
+    """
+    Set a spending budget to control costs.
+    
+    Parameters:
+    - period: Budget period ("daily", "weekly", "monthly", "total")
+    - limit: Budget limit in dollars
+    - alert_threshold: Alert when spending reaches this fraction (0-1)
+    
+    Returns confirmation of budget setting.
+    """
+    try:
+        cost_tracker = get_cost_tracker()
+        cost_tracker.set_budget(period, limit, alert_threshold)
+        
+        return {
+            "success": True,
+            "message": f"Set {period} budget to ${limit:.2f}",
+            "data": {
+                "period": period,
+                "limit": limit,
+                "alert_threshold": alert_threshold
+            }
+        }
+    except Exception as e:
+        logger.error(f"Set budget failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to set budget"}
+
+
 def main():
     """Run the MCP server."""
     if not MCP_AVAILABLE:
@@ -275,6 +401,14 @@ def main():
     logger.info("  - track_selection: Record image selection decisions")
     logger.info("  - soft_delete_image: Move unwanted images to sorted folder")
     logger.info("  - get_selection_summary: Get summary of selected images")
+    logger.info("  - estimate_cost: Preview costs before running operations")
+    logger.info("  - get_spending_report: View spending by provider and time")
+    logger.info("  - set_budget: Set spending limits with alerts")
+    logger.info("  - analyze_for_video: Analyze image for video generation potential")
+    logger.info("  - generate_video_storyboard: Create video storyboard from images")
+    logger.info("  - create_kling_prompts: Generate Kling-ready prompts")
+    logger.info("  - prepare_flux_keyframes: Create enhanced keyframes with Flux")
+    logger.info("  - create_transition_guide: Generate video editing guide")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))
