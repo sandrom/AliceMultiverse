@@ -128,6 +128,16 @@ class PipelineOrganizer(MediaOrganizer):
         self.pipeline_config = config.pipeline
         self.total_cost = 0.0
         self.cost_limit = config.pipeline.cost_limits.get("total", float("inf"))
+        
+        # Initialize DuckDB search for auto-indexing
+        self.search_db = None
+        if self._is_auto_indexing_enabled():
+            try:
+                from ..storage.duckdb_search import DuckDBSearch
+                self.search_db = DuckDBSearch()
+                logger.info("Auto-indexing to DuckDB enabled")
+            except Exception as e:
+                logger.warning(f"Failed to initialize DuckDB for auto-indexing: {e}")
 
         # Initialize pipeline stages based on mode
         if config.pipeline.mode:
@@ -351,6 +361,10 @@ class PipelineOrganizer(MediaOrganizer):
                 # Cache the results
                 self.metadata_cache.set_metadata(media_path, analysis, analysis_time)
                 self.metadata_cache.update_stats(False)
+                
+                # Auto-index in DuckDB if understanding data is available
+                if self._should_auto_index(analysis):
+                    self._auto_index_to_search(media_path, analysis)
 
             # Ensure output directory exists
             self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -480,3 +494,126 @@ class PipelineOrganizer(MediaOrganizer):
             logger.info(f"  Total: ${self.total_cost:.2f}")
 
             # TODO: Add detailed stage cost breakdown in future
+    
+    def _is_auto_indexing_enabled(self) -> bool:
+        """Check if auto-indexing is enabled in configuration."""
+        # Auto-indexing is enabled if understanding is enabled
+        return getattr(self.config.processing, "understanding", False)
+    
+    def _should_auto_index(self, analysis: dict) -> bool:
+        """Check if we should auto-index this file."""
+        if not self.search_db:
+            return False
+            
+        # Index if we have understanding data with tags
+        if "understanding" in analysis:
+            understanding = analysis["understanding"]
+            if isinstance(understanding, dict) and "tags" in understanding:
+                return True
+                
+        # Also index if we have pipeline stages with understanding results
+        pipeline_stages = analysis.get("pipeline_stages", {})
+        for stage_name, stage_data in pipeline_stages.items():
+            if "understanding" in stage_name and "tags" in stage_data:
+                return True
+                
+        return False
+    
+    def _auto_index_to_search(self, media_path: Path, analysis: dict) -> None:
+        """Auto-index file metadata to DuckDB search.
+        
+        Args:
+            media_path: Path to media file
+            analysis: Analysis results containing metadata
+        """
+        try:
+            # Build metadata for indexing
+            metadata = {
+                "content_hash": analysis.get("content_hash") or self.metadata_cache.get_content_hash(media_path),
+                "file_path": str(media_path),
+                "file_size": media_path.stat().st_size,
+                "media_type": analysis.get("media_type", MediaType.IMAGE).value if hasattr(analysis.get("media_type", MediaType.IMAGE), "value") else str(analysis.get("media_type", "image")),
+                "ai_source": analysis.get("source_type", "unknown"),
+                "created_at": analysis.get("date_taken"),
+                "discovered_at": analysis.get("cached_at"),
+                "project": analysis.get("project_folder", "uncategorized"),
+                "tags": [],
+                "prompt": None,
+                "quality_rating": analysis.get("quality_stars"),
+            }
+            
+            # Extract tags from understanding data
+            if "understanding" in analysis:
+                understanding = analysis["understanding"]
+                if isinstance(understanding, dict):
+                    # Handle structured tags (v4.0 format)
+                    if "tags" in understanding:
+                        tags_data = understanding["tags"]
+                        if isinstance(tags_data, dict):
+                            # Flatten all tag categories
+                            all_tags = []
+                            for category, tag_list in tags_data.items():
+                                if isinstance(tag_list, list):
+                                    all_tags.extend(tag_list)
+                            metadata["tags"] = all_tags
+                        elif isinstance(tags_data, list):
+                            metadata["tags"] = tags_data
+                    
+                    # Extract prompt if available
+                    if "positive_prompt" in understanding:
+                        metadata["prompt"] = understanding["positive_prompt"]
+            
+            # Also check pipeline stages for understanding data
+            pipeline_stages = analysis.get("pipeline_stages", {})
+            for stage_name, stage_data in pipeline_stages.items():
+                if "understanding" in stage_name and isinstance(stage_data, dict):
+                    if "tags" in stage_data and isinstance(stage_data["tags"], list):
+                        metadata["tags"].extend(stage_data["tags"])
+                    if "positive_prompt" in stage_data and not metadata["prompt"]:
+                        metadata["prompt"] = stage_data["positive_prompt"]
+            
+            # Deduplicate tags
+            metadata["tags"] = list(set(metadata["tags"]))
+            
+            # Index to DuckDB
+            self.search_db.index_asset(metadata)
+            
+            # Also index perceptual hashes if it's an image
+            if metadata["media_type"] == "image":
+                self._index_perceptual_hashes(media_path, metadata["content_hash"])
+            
+            logger.debug(f"Auto-indexed {media_path.name} with {len(metadata['tags'])} tags")
+            
+        except Exception as e:
+            logger.warning(f"Failed to auto-index {media_path}: {e}")
+    
+    def _index_perceptual_hashes(self, file_path: Path, content_hash: str) -> None:
+        """Calculate and index perceptual hashes for an image.
+        
+        Args:
+            file_path: Path to image file
+            content_hash: Content hash of the file
+        """
+        try:
+            from ..assets.perceptual_hashing import (
+                calculate_perceptual_hash,
+                calculate_difference_hash,
+                calculate_average_hash
+            )
+            
+            # Calculate different hash types
+            phash = calculate_perceptual_hash(file_path)
+            dhash = calculate_difference_hash(file_path)
+            ahash = calculate_average_hash(file_path)
+            
+            # Store in database
+            if any([phash, dhash, ahash]):
+                self.search_db.index_perceptual_hashes(
+                    content_hash=content_hash,
+                    phash=phash,
+                    dhash=dhash,
+                    ahash=ahash
+                )
+                
+        except Exception as e:
+            logger.debug(f"Failed to calculate perceptual hashes for {file_path}: {e}")

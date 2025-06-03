@@ -1,13 +1,13 @@
 # AliceMultiverse Documentation
 
 <div align="center">
-<h2>Creative Workflow Hub for AI-Assisted Production</h2>
-<p>Evolving from media organization to comprehensive creative orchestration</p>
+<h2>Personal AI Creative Assistant</h2>
+<p>A tool I built to manage my AI-generated media through natural conversation</p>
 </div>
 
 ## What is AliceMultiverse?
 
-AliceMultiverse is transforming from a media organization tool into a comprehensive creative workflow hub. It bridges AI assistants (Claude, ChatGPT) with creative tools and APIs, designed for professionals who work iteratively with AI over extended periods.
+AliceMultiverse is my personal creative workflow orchestrator. I built it because I generate thousands of images with various AI tools and needed a way to find, organize, and use them through natural conversation with Claude. It's designed around my specific workflow, though others are welcome to adapt it for their needs.
 
 ### Current Capabilities (AI-Native Service)
 - 🤖 **Natural Conversations** - Use Alice through Claude or ChatGPT
@@ -18,7 +18,7 @@ AliceMultiverse is transforming from a media organization tool into a comprehens
 
 ### Technical Foundation
 - 💾 **Content-Addressed Storage** - Efficient metadata management
-- 🔄 **Event System** - PostgreSQL-based event streaming
+- 🔄 **Event System** - File-based event logging (Redis optional)
 - 🚀 **Provider Integration** - Extensible AI tool connections
 - 📊 **Structured APIs** - No fuzzy NLP in core system
 - 🔒 **Security First** - Input validation and rate limiting
@@ -41,7 +41,7 @@ AliceMultiverse is transforming from a media organization tool into a comprehens
 
 - :material-calendar-clock: **[Event System](architecture/event-driven-architecture.md)**
     
-    PostgreSQL-native event streaming
+    File-based events with optional Redis Streams
 
 </div>
 
@@ -73,17 +73,19 @@ graph TB
     style C fill:#ff9999,stroke:#333,stroke-width:4px
 ```
 
-## For Creative Professionals
+## How I Use It
 
-AliceMultiverse understands that creativity doesn't follow linear paths:
+I talk to Claude like a creative assistant:
 
 > "Remember that cool cyberpunk thing we were working on last month with the neon colors?"
+> "Find all the portraits that would work for a moody video"
+> "Show me what I rejected last time and why"
 
-The system is designed to:
-- **Preserve Context** - Maintain creative decisions across months
-- **Support Chaos** - Work with your creative process, not against it
-- **Enable Continuity** - Resume projects seamlessly after breaks
-- **Hide Complexity** - Technical details managed behind the scenes
+The system helps me:
+- **Find needles in haystacks** - Semantic search across thousands of images
+- **Track my decisions** - Remember why I selected or rejected images
+- **Control costs** - Monitor API spending (it adds up fast!)
+- **Stay in flow** - Natural conversation instead of file browsers
 
 ## Documentation Structure
 

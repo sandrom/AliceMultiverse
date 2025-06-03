@@ -9,7 +9,7 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union, Set
 
 import duckdb
 
@@ -630,6 +630,8 @@ class DuckDBSearch:
     
     def clear_index(self) -> None:
         """Clear the entire search index."""
+        # Delete in order to respect foreign key constraints
+        self.conn.execute("DELETE FROM perceptual_hashes")
         self.conn.execute("DELETE FROM asset_tags")
         self.conn.execute("DELETE FROM assets")
         logger.info("Search index cleared")

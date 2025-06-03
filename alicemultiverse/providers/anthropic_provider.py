@@ -190,7 +190,7 @@ class AnthropicProvider(Provider):
             if response.status == 429:
                 raise RateLimitError("Anthropic rate limit exceeded")
             elif response.status == 401:
-                raise AuthenticationError("Invalid Anthropic API key")
+                raise AuthenticationError("anthropic", "Invalid Anthropic API key")
             elif response.status != 200:
                 error_data = await response.json()
                 raise GenerationError(f"Anthropic API error: {error_data.get('error', {}).get('message', 'Unknown error')}")
@@ -254,7 +254,7 @@ class AnthropicProvider(Provider):
             if response.status == 429:
                 raise RateLimitError("Anthropic rate limit exceeded")
             elif response.status == 401:
-                raise AuthenticationError("Invalid Anthropic API key")
+                raise AuthenticationError("anthropic", "Invalid Anthropic API key")
             elif response.status != 200:
                 error_data = await response.json()
                 raise GenerationError(f"Anthropic API error: {error_data.get('error', {}).get('message', 'Unknown error')}")

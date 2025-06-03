@@ -267,39 +267,52 @@ This will store your API keys securely in macOS Keychain. For containerized envi
 - `SIGHTENGINE_API_USER` and `SIGHTENGINE_API_SECRET`
 - `ANTHROPIC_API_KEY`
 
-## Database Setup
+## Storage System
 
-AliceMultiverse uses PostgreSQL for all database operations:
+AliceMultiverse uses a file-first approach with DuckDB for search:
 
-### Local Development
+### File-Based Storage
 ```bash
-# Start PostgreSQL with docker-compose
-docker-compose up -d postgres
+# All metadata stored in .metadata/ folders
+# No database server required
+# Search powered by embedded DuckDB
 
-# Run database migrations
-alembic upgrade head
-
-# Database connection (set in environment)
-export DATABASE_URL="postgresql://alice:alice@localhost:5432/alicemultiverse"
+# Rebuild search index after adding files
+alice index rebuild
 ```
 
-### Production (Kubernetes)
-The database is managed by CloudNativePG operator and connection is provided via environment variable:
-```bash
-# Migrations are run automatically on deployment
-# Connection string is injected from Kubernetes secret
-DATABASE_URL=postgresql://alice:password@postgres-rw:5432/alicemultiverse
+### Configuration
+```yaml
+# settings.yaml
+storage:
+  search_db: data/search.duckdb
+  project_paths:
+    - ~/Projects/AI
 ```
 
-See README_DATABASE.md for details on the content-addressed storage system and PostgreSQL configuration.
+See README_STORAGE.md for details on the content-addressed storage system and file-based architecture.
 
 ## Event System
 
-AliceMultiverse now includes an event-driven architecture foundation:
+AliceMultiverse includes an event-driven architecture with two backend options:
+
+### Event System Backends
+
+1. **File-based Events (Default)**: Perfect for personal use and development
+   - Events are written to JSON files in `~/.alice/events/`
+   - No external dependencies required
+   - Automatic daily log rotation
+   - Simple and reliable
+
+2. **Redis Streams (Optional)**: For distributed deployments
+   - High-performance event streaming
+   - Requires Redis server
+   - Enable with: `export USE_REDIS_EVENTS=true`
+   - Install with: `pip install -r requirements-redis.txt`
 
 ### Monitoring Events
 ```bash
-# Monitor all events in real-time
+# Monitor all events in real-time (works with both backends)
 python scripts/event_monitor.py
 
 # Verbose mode with full event data
@@ -314,4 +327,25 @@ python scripts/event_monitor.py --metrics
 - **Workflow Events**: `workflow.started`, `workflow.completed`, `workflow.failed`
 - **Creative Events**: `project.created`, `style.chosen`, `context.updated`
 
+### Cache System
+
+Similarly, AliceMultiverse supports two cache backends:
+
+1. **File-based Cache (Default)**: Local JSON file cache
+   - Stored in `~/.alice/cache/`
+   - No Redis required
+   - Perfect for personal use
+
+2. **Redis Cache (Optional)**: For high-performance caching
+   - Enable with: `export USE_REDIS_CACHE=true`
+   - Requires Redis server
+
 See `docs/architecture/event-driven-architecture.md` for full documentation.
+
+## Personal Tool Context
+
+This is Sandro's personal tool, not a product. Design decisions should optimize for:
+1. His specific workflow (thousands of AI images, natural search)
+2. His money (API costs matter)
+3. His maintenance burden (keep it simple)
+4. His preferences (AI-native interface, file-based storage)

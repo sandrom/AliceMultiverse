@@ -6,15 +6,25 @@ import uuid
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
-from redis.exceptions import ResponseError
 
-from alicemultiverse.events.redis_streams import (
-    RedisStreamsEventSystem,
-    get_event_system,
-    publish_event,
-    publish_event_sync,
-    subscribe_to_events
-)
+# Skip all tests if Redis is not available
+try:
+    from redis.exceptions import ResponseError
+    from alicemultiverse.events.redis_streams import (
+        RedisStreamsEventSystem,
+        get_event_system,
+        publish_event,
+        publish_event_sync,
+        subscribe_to_events
+    )
+    REDIS_AVAILABLE = True
+except ImportError:
+    REDIS_AVAILABLE = False
+    # Create dummy classes to prevent NameError
+    ResponseError = Exception
+    RedisStreamsEventSystem = None
+
+pytestmark = pytest.mark.skipif(not REDIS_AVAILABLE, reason="Redis not installed")
 
 
 @pytest.fixture

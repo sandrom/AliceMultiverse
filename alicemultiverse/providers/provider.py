@@ -45,7 +45,11 @@ class RateLimitError(ProviderError):
 
 class AuthenticationError(ProviderError):
     """Raised when authentication fails."""
-    pass
+    def __init__(self, provider: str, message: str = None):
+        self.provider = provider
+        if message is None:
+            message = f"Authentication failed for {provider}"
+        super().__init__(message)
 
 
 class GenerationError(ProviderError):

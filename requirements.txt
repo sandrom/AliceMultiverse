@@ -28,7 +28,7 @@ mutagen>=1.47.0      # Audio/video metadata (ID3, MP4)
 
 # Database & Storage
 duckdb>=0.10.0          # DuckDB for OLAP/search cache
-redis>=5.0.0            # Redis for caching and streams
+# redis>=5.0.0          # Redis (optional - see requirements-redis.txt)
 
 # Logging and monitoring
 structlog>=24.0.0       # Structured logging

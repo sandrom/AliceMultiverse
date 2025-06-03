@@ -1,8 +1,8 @@
-# AliceMultiverse - AI Native Creative Workflow Hub
+# AliceMultiverse - Personal AI Creative Assistant
 
 <div align="center">
 
-**Connect AI assistants with your creative workflows through natural conversation**
+**A personal tool for organizing AI-generated media through natural conversation**
 
 [![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
@@ -11,7 +11,7 @@
 
 ## 🎯 What is AliceMultiverse?
 
-AliceMultiverse is transitioning from a command-line tool to an AI-native service. It enables AI assistants like Claude and ChatGPT to help you organize media, manage creative projects, and automate workflows through natural conversation.
+AliceMultiverse is my personal creative workflow orchestrator. I built it to help me manage thousands of AI-generated images and videos through natural conversation with AI assistants. While others are welcome to use it, it's designed around my specific workflow needs.
 
 > **🚀 New**: Direct integration with Claude Desktop via MCP (Model Context Protocol)
 
@@ -47,11 +47,21 @@ AliceMultiverse is transitioning from a command-line tool to an AI-native servic
 
 ### What Can You Ask?
 
-- "Organize my AI-generated images by quality and source"
-- "Find all my cyberpunk-style portraits from last week"
-- "Show me statistics about my creative projects"
-- "Tag these images as references for my new project"
-- "Find similar images to this one"
+**Search & Discovery:**
+- "Find all my cyberpunk images with neon lighting"
+- "Show me portraits from last week"
+- "Find images similar to this one" (after selecting an image)
+- "What moody landscape images do I have?"
+
+**Organization & Curation:**
+- "Organize my AI-generated images from Downloads"
+- "Move these rejected images to sorted-out folder"
+- "Track which images I selected for the video project"
+
+**Understanding Content:**
+- "What's in this image?" (semantic tagging)
+- "Find all images with cats"
+- "Show me minimalist style images"
 
 ## 📦 Requirements
 
@@ -59,20 +69,17 @@ AliceMultiverse is transitioning from a command-line tool to an AI-native servic
 
 ```bash
 # macOS
-brew install ffmpeg redis
+brew install ffmpeg
 
-# Ubuntu/Debian
-sudo apt-get install ffmpeg redis-server
-
-# Start Redis (required for event system)
-redis-server
+# Ubuntu/Debian  
+sudo apt-get install ffmpeg
 ```
 
 ### Python Dependencies
 
-Core dependencies are installed automatically, but Redis must be running:
-- **Redis**: Required for event system (workflow tracking, real-time updates)
+Core dependencies are installed automatically:
 - **FFmpeg**: Required for video metadata extraction
+- **Redis**: Optional, only needed for future microservices architecture
 
 ## 🔧 Debug CLI (Developers Only)
 
@@ -88,6 +95,14 @@ alice mcp-server                     # Start MCP server
 
 For normal usage, please use Alice through AI assistants as shown above.
 
+## 🎯 Why I Built This
+
+I work with multiple AI generation tools daily (Midjourney, DALL-E, Stable Diffusion, Kling, etc.) and needed a way to:
+1. **Find specific images** from thousands without manual tagging
+2. **Talk naturally** to search ("that cyberpunk cat from last week")
+3. **Track my creative decisions** during curation
+4. **Keep costs under control** with multiple AI APIs
+
 ## ✨ Key Features
 
 ### Media Organization
@@ -102,43 +117,60 @@ For normal usage, please use Alice through AI assistants as shown above.
 - **🔄 Event Monitoring**: Real-time visibility into all operations
 - **🎨 Style Analysis**: Understand and categorize your creative outputs
 
-## 📋 Configuration
+## 🚀 Getting Started
 
-Create `settings.yaml` for persistent settings:
+### First-Time Setup (New!)
+
+Run the interactive setup wizard:
+```bash
+alice setup
+```
+
+This will help you:
+- ✓ Check system requirements
+- ✓ Configure API keys with provider recommendations
+- ✓ Set up your directories
+- ✓ Test that everything works
+
+### Manual Configuration
+
+Or create `settings.yaml` manually (see `settings.yaml.example`):
 ```yaml
 paths:
   inbox: ~/Downloads/AI-Images
   organized: ~/Pictures/AI-Organized
 
 processing:
-  quality: true        # Enable quality assessment
-  watch: false         # Enable watch mode
+  understanding: true   # Enable AI understanding
+  copy_mode: true      # Copy instead of move (safer)
 
-pipeline:
-  default_mode: standard  # basic, standard, premium
+understanding:
+  providers:
+    - google    # Free tier: 50/day
+    - deepseek  # Cheapest: ~$0.001/image
 ```
 
 ### API Keys
 
-For advanced features, configure API keys:
+Configure API keys for AI features:
 ```bash
 alice keys setup
 ```
 
-This will guide you through setting up:
-- **Anthropic Claude**: Advanced image understanding and tagging
-- **OpenAI GPT-4**: Vision analysis and prompt generation
-- **Google AI**: Free tier image analysis
-- **DeepSeek**: Cost-effective batch processing
+Supported providers:
+- **Google AI**: Free tier (50 images/day) - RECOMMENDED
+- **DeepSeek**: Most cost-effective (~$0.001/image)
+- **Anthropic Claude**: Best quality understanding
+- **OpenAI GPT-4**: Alternative vision analysis
 
-## 🏗️ Architecture
+## 🏗️ Architecture Philosophy
 
-AliceMultiverse uses an event-driven architecture designed for AI orchestration:
+Designed for my workflow:
 
-- **Structured APIs**: AI translates natural language to precise operations
-- **Event System**: Monitor long-running operations in real-time
-- **Service Boundaries**: Clean separation for reliable AI control
-- **Persistent State**: Maintains context between conversations
+- **AI-First Interface**: I talk to Claude, Claude talks to Alice
+- **File-Based Truth**: All metadata lives with files, portable and simple
+- **Cost Aware**: Track every API call (it's my money)
+- **Pragmatic Choices**: DuckDB for search, files for storage, simplicity over scale
 
 ## 📚 Documentation
 
@@ -175,14 +207,14 @@ Would you like me to show you specific types?"
 alice --debug --dry-run --verbose
 ```
 
-## 🔮 Roadmap
+## 🔮 Personal Development Roadmap
 
-AliceMultiverse is evolving into a comprehensive creative workflow orchestrator:
+This is my personal tool, evolving based on my needs:
 
-1. **Current**: Media organization with AI understanding
-2. **Phase 1**: Full AI-native interface (in progress)
-3. **Phase 2**: Multi-agent creative workflows
-4. **Phase 3**: Integration with creative tools (ComfyUI, Photoshop, etc.)
+1. **Current**: AI-native search and organization through Claude Desktop
+2. **Next**: Better cost tracking (I'm spending too much on API calls)
+3. **Future**: Video creation workflow (Flux Kontext → Kling pipeline)
+4. **Maybe**: Share as a product if others find it useful
 
 See [ROADMAP.md](ROADMAP.md) for detailed plans.
 

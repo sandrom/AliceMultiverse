@@ -52,10 +52,18 @@ class SearchIndexBuilder:
                 continue
             
             if path.is_file() and path.suffix.lower() in extensions:
-                media_files.append(path)
+                # Check if file is in sorted-out folder
+                if not any(part in ['sorted-out', 'sorted_out'] for part in path.parts):
+                    media_files.append(path)
             elif path.is_dir():
                 for ext in extensions:
-                    media_files.extend(path.rglob(f"*{ext}"))
+                    # Find all files but filter out sorted-out folders
+                    all_files = path.rglob(f"*{ext}")
+                    filtered_files = [
+                        f for f in all_files 
+                        if not any(part in ['sorted-out', 'sorted_out'] for part in f.parts)
+                    ]
+                    media_files.extend(filtered_files)
         
         logger.info(f"Found {len(media_files)} media files to index")
         

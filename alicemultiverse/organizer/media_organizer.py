@@ -54,6 +54,16 @@ class MediaOrganizer:
         # Initialize components
         self.file_handler = FileHandler(dry_run=getattr(config.processing, "dry_run", False))
         
+        # Initialize DuckDB search for auto-indexing
+        self.search_db = None
+        if getattr(config.processing, "understanding", False):
+            try:
+                from ..storage.duckdb_search import DuckDBSearch
+                self.search_db = DuckDBSearch()
+                logger.info("Auto-indexing to DuckDB enabled during organization")
+            except Exception as e:
+                logger.warning(f"Failed to initialize DuckDB for auto-indexing: {e}")
+        
         # Check if understanding is enabled
         enable_understanding = getattr(config.processing, "understanding", False)
         understanding_provider = None

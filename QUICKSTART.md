@@ -7,6 +7,9 @@
 1. **Install AliceMultiverse**:
    ```bash
    pip install -e .
+   
+   # First time? Run setup wizard:
+   alice setup
    ```
 
 2. **Configure Claude Desktop**:
@@ -48,6 +51,21 @@ You: "Show me all the cyberpunk images I generated last week"
 Claude: "Let me search for cyberpunk-style images from last week..."
 ```
 
+## 🚀 First-Time Setup (New!)
+
+If you're new to Alice, we have an interactive setup wizard:
+
+```bash
+# Run the setup wizard
+alice setup
+
+# This will help you:
+# ✓ Check system requirements
+# ✓ Configure API keys (with recommendations)
+# ✓ Set up directories
+# ✓ Test everything works
+```
+
 ## 🔧 Debug CLI (Developers Only)
 
 ⚠️ **The CLI is deprecated for normal use.** Alice is an AI-native service.
@@ -59,10 +77,13 @@ git clone https://github.com/yourusername/AliceMultiverse.git
 cd AliceMultiverse
 pip install -e .
 
+# Setup and configuration
+alice setup                   # Interactive setup wizard (NEW!)
+alice keys setup              # Configure API keys only
+
 # Debug commands
 alice --debug --dry-run       # Test organization logic
 alice --check-deps            # Verify dependencies
-alice keys setup              # Configure API keys
 ```
 
 See [Debug CLI Reference](docs/user-guide/cli-usage.md) if you're a developer.

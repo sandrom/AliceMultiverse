@@ -5,6 +5,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Union
 
+from ..core.cost_tracker import get_cost_tracker, CostCategory
 from .base import ImageAnalysisResult
 from .providers import (
     AnthropicImageAnalyzer,
@@ -157,6 +158,20 @@ class ImageAnalyzer:
                 f"(cost: ${result.cost:.4f}, tokens: {result.tokens_used})"
             )
             
+            # Record actual cost
+            cost_tracker = get_cost_tracker()
+            cost_tracker.record_cost(
+                provider=analyzer.name,
+                operation="image_analysis",
+                cost=result.cost,
+                category=CostCategory.UNDERSTANDING,
+                details={
+                    "detailed": detailed,
+                    "tokens_used": result.tokens_used,
+                    "image_path": str(image_path)
+                }
+            )
+            
             return result
             
         except Exception as e:
@@ -241,6 +256,28 @@ class ImageAnalyzer:
                 logger.error(f"Failed to analyze with {provider}: {e}")
         
         return results
+    
+    async def estimate_batch_cost(self, image_count: int, providers: Optional[List[str]] = None, detailed: bool = False) -> Dict[str, Any]:
+        """Estimate cost for analyzing a batch of images.
+        
+        Args:
+            image_count: Number of images to analyze
+            providers: List of providers to use (None = all available)
+            detailed: Whether detailed analysis is requested
+            
+        Returns:
+            Cost estimate with breakdown
+        """
+        if not providers:
+            providers = list(self.analyzers.keys())
+        
+        cost_tracker = get_cost_tracker()
+        return cost_tracker.estimate_batch_cost(
+            file_count=image_count,
+            providers=providers,
+            operation="image_analysis",
+            detailed=detailed
+        )
     
     def _get_cheapest_analyzer(self, detailed: bool = False):
         """Get the cheapest available analyzer."""

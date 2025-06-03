@@ -136,8 +136,12 @@ class FileScanner:
             for ext in self.SUPPORTED_EXTENSIONS:
                 files.extend(directory.glob(f"*{ext}"))
         
-        # Filter out hidden files and directories
-        files = [f for f in files if not any(part.startswith('.') for part in f.parts)]
+        # Filter out hidden files and directories, and sorted-out folders
+        files = [
+            f for f in files 
+            if not any(part.startswith('.') for part in f.parts)
+            and not any(part in ['sorted-out', 'sorted_out'] for part in f.parts)
+        ]
         
         return sorted(files)
     
