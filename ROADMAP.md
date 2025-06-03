@@ -10,20 +10,21 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
    - Finding specific images in my collection ✓
    - Natural language search through Claude ✓ 
    - Tracking creative decisions ✓
-   - Managing API costs ⚠️ (needs work)
+   - Managing API costs ✓ (cost warnings + CLI tools)
 2. **Is the architecture still simple?** 
    - File-first approach ✓
    - AI-native interface ✓
    - DuckDB for search ✓
-   - Redis dependency ✗ (remove it)
+   - Redis optional ✓ (file-based events by default)
 3. **What am I spending money on?** 
-   - Understanding API calls (adds up fast)
-   - Need better cost visibility
-   - Should cache more aggressively
+   - Understanding API calls tracked ✓
+   - Cost warnings before operations ✓
+   - Budget limits enforced ✓
+   - `alice cost report` for visibility ✓
 4. **What's broken RIGHT NOW?** 
-   - Redis not needed yet (remove until microservices)
-   - No cost tracking/warnings before expensive operations
-   - Documentation implies this is a product (it's not)
+   - Documentation implies this is a product (needs update)
+   - No --understand CLI flag (uses config only)
+   - First-run experience could be smoother
 
 ## Completed: Multi-Path Storage ✅
 
@@ -139,11 +140,18 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
 7. **Auto-Indexing** - Files indexed during organization
 8. **Similarity Search** - Perceptual hashing (pHash, dHash, aHash)
 
+### Today's Completions (January 6) ✅
+1. **Redis Removal** - Made Redis optional, file-based events by default
+2. **Cost Warnings** - Shows cost estimate before expensive operations
+3. **Cost CLI Commands** - `alice cost report/set-budget/providers`
+4. **Event Monitor Fixed** - Works with both Redis and file backends
+
 ### Architecture Improvements
 - File-based event system (Redis now optional)
 - DuckDB for search (PostgreSQL removed)
 - Configuration-driven paths (no hardcoded test_data/)
 - File-first metadata with content addressing
+- Cost tracking integrated throughout
 
 ## Current State (January 6, 2025)
 
@@ -156,9 +164,9 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
 - **Video Workflows**: Storyboards, Kling prompts, Flux keyframes
 
 ### Known Issues ⚠️
-1. **Multi-Path Storage Queries**: DuckDB compatibility needs fixes
-2. **Documentation Confusion**: Still implies this is a product (it's not)
-3. **Performance at Scale**: Not tested with 100k+ images yet
+1. **Documentation Confusion**: Still implies this is a product (it's not)
+2. **Performance at Scale**: Not tested with 100k+ images yet
+3. **Understanding Flag**: No --understand CLI flag (uses config only)
 
 ## My Development Principles
 

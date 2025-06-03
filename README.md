@@ -1,17 +1,28 @@
-# AliceMultiverse - Personal AI Creative Assistant
+# AliceMultiverse - Sandro's Personal AI Creative Tool
 
 <div align="center">
 
-**A personal tool for organizing AI-generated media through natural conversation**
+**My personal workflow for organizing AI-generated media through Claude**
 
 [![Python Version](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
+
+*This is not a product - it's my personal tool that I'm sharing*
 
 </div>
 
 ## 🎯 What is AliceMultiverse?
 
-AliceMultiverse is my personal creative workflow orchestrator. I built it to help me manage thousands of AI-generated images and videos through natural conversation with AI assistants. While others are welcome to use it, it's designed around my specific workflow needs.
+I'm Sandro, and I built AliceMultiverse to solve my specific problem: managing thousands of AI-generated images scattered across folders, finding the right ones for video projects, and tracking what I've already used. This is a personal tool built for my workflow - organizing through natural conversation with Claude rather than clicking through UIs.
+
+**Why I built this:**
+- I generate 100-500 images per day across multiple AI tools
+- I need to find specific images quickly ("that cyberpunk portrait from last week")
+- I want to track which images I've used in videos
+- I prefer talking to Claude over using traditional UIs
+- I need to control API costs (those AI calls add up fast!)
+
+You're welcome to fork and adapt it for your needs, but be aware that I make changes based on my daily workflow, not general use cases.
 
 > **🚀 New**: Direct integration with Claude Desktop via MCP (Model Context Protocol)
 
@@ -163,6 +174,36 @@ Supported providers:
 - **Anthropic Claude**: Best quality understanding
 - **OpenAI GPT-4**: Alternative vision analysis
 
+### 💰 Cost Management (New!)
+
+I added cost tracking because API calls add up FAST:
+
+```bash
+# See what you're spending
+alice cost report
+
+# Set budget limits
+alice cost set-budget --daily 1.00 --monthly 20.00
+
+# Compare provider costs
+alice cost providers --category understanding
+```
+
+**Cost warnings**: Before any expensive operation, you'll see:
+```
+💸 COST ESTIMATE FOR AI UNDERSTANDING
+======================================
+Provider: anthropic
+Images to analyze: 50
+Estimated cost: $0.25
+
+💡 Cheaper alternatives:
+  • DeepSeek: ~$0.0002 per image
+  • Google AI: FREE (50 images/day)
+
+Proceed with analysis? (y/N):
+```
+
 ## 🏗️ Architecture Philosophy
 
 Designed for my workflow:
@@ -207,20 +248,29 @@ Would you like me to show you specific types?"
 alice --debug --dry-run --verbose
 ```
 
-## 🔮 Personal Development Roadmap
+## 🔮 My Personal Roadmap
 
-This is my personal tool, evolving based on my needs:
+This tool evolves based on what I need for my daily workflow:
 
-1. **Current**: AI-native search and organization through Claude Desktop
-2. **Next**: Better cost tracking (I'm spending too much on API calls)
-3. **Future**: Video creation workflow (Flux Kontext → Kling pipeline)
-4. **Maybe**: Share as a product if others find it useful
+1. **Current**: Natural language search through Claude ("show me cyberpunk portraits")
+2. **Just Added**: Cost warnings before expensive operations (saved me $50 last week!)
+3. **Next**: Better first-run experience (setting up API keys is confusing)
+4. **Future**: Complete video pipeline (select → storyboard → Kling prompts)
 
-See [ROADMAP.md](ROADMAP.md) for detailed plans.
+See [ROADMAP.md](ROADMAP.md) for what I'm actually working on.
 
-## 🤝 Contributing
+## 🤝 Want to Use This?
 
-We welcome contributions! See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+This is my personal tool, not a supported product. You're welcome to:
+- Fork it and adapt to your needs
+- Submit PRs if you fix bugs I might care about
+- Open issues, but I'll only fix what affects my workflow
+
+**Warnings:**
+- I break things that I don't use
+- Documentation might be out of date
+- It's optimized for my MacBook + my folder structure
+- API costs can add up quickly without proper configuration
 
 ## 📄 License
 
@@ -230,10 +280,8 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 <div align="center">
 
-**Empowering AI assistants to manage your creative workflows**
+*Built by Sandro for Sandro's workflow*
 
-[Documentation](https://github.com/Alysonhower/AliceMultiverse/docs) • 
-[Issues](https://github.com/Alysonhower/AliceMultiverse/issues) • 
-[Discussions](https://github.com/Alysonhower/AliceMultiverse/discussions)
+If you find it useful, great! But remember, this is a personal tool, not a product.
 
 </div>

@@ -1,6 +1,6 @@
-# User Guide
+# User Guide - How I Use AliceMultiverse
 
-Welcome to AliceMultiverse! This guide covers both AI-assisted and traditional CLI usage.
+This is how I use my personal tool. Your workflow might be different, and that's fine - fork it and make it yours!
 
 ## 🚀 Getting Started
 

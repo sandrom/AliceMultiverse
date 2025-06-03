@@ -1,13 +1,16 @@
 # AliceMultiverse Documentation
 
 <div align="center">
-<h2>Personal AI Creative Assistant</h2>
-<p>A tool I built to manage my AI-generated media through natural conversation</p>
+<h2>Sandro's Personal AI Creative Tool</h2>
+<p>My workflow for managing AI-generated media through Claude</p>
+<p><em>Not a product - just my personal tool that I'm sharing</em></p>
 </div>
 
 ## What is AliceMultiverse?
 
-AliceMultiverse is my personal creative workflow orchestrator. I built it because I generate thousands of images with various AI tools and needed a way to find, organize, and use them through natural conversation with Claude. It's designed around my specific workflow, though others are welcome to adapt it for their needs.
+I'm Sandro. I generate 100-500 AI images daily and needed a way to find them later. Traditional folder organization wasn't cutting it - I'd forget which folder had "that cool cyberpunk portrait" or spend 20 minutes scrolling through thumbnails. So I built AliceMultiverse to let me search through natural conversation with Claude.
+
+**This is not a product.** It's my personal tool optimized for my workflow on my MacBook. I share it because others might find it useful, but I make no promises about support, stability, or fitness for your needs.
 
 ### Current Capabilities (AI-Native Service)
 - 🤖 **Natural Conversations** - Use Alice through Claude or ChatGPT
