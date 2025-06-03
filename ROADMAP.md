@@ -25,14 +25,14 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
    - No cost tracking/warnings before expensive operations
    - Documentation implies this is a product (it's not)
 
-## Current Sprint: Multi-Path Storage Fixes
+## Completed: Multi-Path Storage ✅
 
-### Multi-Path Storage: Completed ✅
+### Multi-Path Storage: Core Features
 - [x] **Fix DuckDB Compatibility** - Aligned queries with schema
 - [x] **File Operations** - Implemented copy/move between locations
 - [x] **Foreign Key Constraints** - Fixed update issues in tests
 
-### Multi-Path Storage: Remaining
+### Multi-Path Storage: Advanced Features
 - [x] **Progress Tracking** - Add progress bars for large file operations ✅
 - [x] **Cloud Storage** - Add S3/GCS scanner implementations ✅
   - [x] S3 scanner with upload/download support
@@ -45,7 +45,12 @@ AliceMultiverse is my personal creative workflow orchestrator that I access thro
   - [x] MigrationScheduler for periodic runs
   - [x] CLI command `alice storage migrate`
   - [x] Dry-run support for previewing migrations
-- [ ] **Sync Tracking** - Handle conflicts and versioning
+- [x] **Sync Tracking** - Handle conflicts and versioning ✅
+  - [x] SyncTracker for detecting sync status and conflicts
+  - [x] Multiple conflict resolution strategies (newest, largest, primary wins)
+  - [x] Sync queue for batch processing
+  - [x] VersionTracker for maintaining file history
+  - [x] CLI commands: `sync-status`, `resolve-conflict`, `sync-process`
 
 ## Next Up: Video Creation Workflow
 

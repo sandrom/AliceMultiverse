@@ -507,3 +507,158 @@ def migrate(dry_run: bool, move: bool, no_progress: bool):
     finally:
         registry.close()
         cache.close()
+
+
+@storage.command()
+@click.option("--show-all", is_flag=True, help="Show all files, not just conflicts")
+def sync_status(show_all: bool):
+    """Check synchronization status across locations."""
+    from .sync_tracker import SyncTracker
+    
+    config = load_config()
+    registry = StorageRegistry(Path(config.storage.location_registry_db))
+    
+    try:
+        tracker = SyncTracker(registry)
+        
+        # Get sync conflicts
+        async def check_conflicts():
+            return await tracker.detect_conflicts(show_progress=True)
+        
+        conflicts = asyncio.run(check_conflicts())
+        
+        if not conflicts:
+            console.print("[green]✓[/green] All files are synchronized")
+        else:
+            console.print(f"[yellow]![/yellow] Found {len(conflicts)} files with sync conflicts")
+            
+            # Create table
+            table = Table(title="Sync Conflicts")
+            table.add_column("File Hash", style="cyan")
+            table.add_column("Locations", justify="center")
+            table.add_column("Versions", justify="center")
+            table.add_column("Status")
+            
+            for conflict in conflicts[:20]:  # Show first 20
+                hash_short = conflict['content_hash'][:12] + "..."
+                location_count = len(conflict['locations'])
+                version_count = conflict['status']['version_count']
+                
+                table.add_row(
+                    hash_short,
+                    str(location_count),
+                    str(version_count),
+                    "conflict"
+                )
+            
+            console.print(table)
+            
+            if len(conflicts) > 20:
+                console.print(f"\n... and {len(conflicts) - 20} more conflicts")
+        
+        # Show pending syncs
+        pending = tracker.get_sync_queue()
+        if pending:
+            console.print(f"\n[yellow]Pending sync operations:[/yellow] {len(pending)}")
+            
+    except Exception as e:
+        console.print(f"[red]Error checking sync status:[/red] {e}")
+    finally:
+        registry.close()
+
+
+@storage.command()
+@click.argument("content_hash")
+@click.option("--strategy", type=click.Choice(["newest", "largest", "primary", "manual"]), default="newest")
+def resolve_conflict(content_hash: str, strategy: str):
+    """Resolve a sync conflict for a specific file."""
+    from .sync_tracker import SyncTracker, ConflictResolution
+    
+    config = load_config()
+    registry = StorageRegistry(Path(config.storage.location_registry_db))
+    
+    try:
+        tracker = SyncTracker(registry)
+        
+        # Map strategy
+        strategy_map = {
+            "newest": ConflictResolution.NEWEST_WINS,
+            "largest": ConflictResolution.LARGEST_WINS,
+            "primary": ConflictResolution.PRIMARY_WINS,
+            "manual": ConflictResolution.MANUAL
+        }
+        
+        async def resolve():
+            return await tracker.resolve_conflict(
+                content_hash,
+                strategy_map[strategy]
+            )
+        
+        result = asyncio.run(resolve())
+        
+        if result['resolved']:
+            console.print(f"[green]✓[/green] Conflict resolved using {strategy} strategy")
+            
+            winner = result['winner']
+            console.print(f"  Winner: {winner['file_path']}")
+            console.print(f"  Location: {winner['location_name']}")
+            
+            if result['actions']:
+                console.print(f"\n[bold]Sync actions required:[/bold]")
+                for action in result['actions']:
+                    console.print(f"  - Update {action['target']} from {action['source']}")
+        else:
+            console.print(f"[yellow]![/yellow] Could not resolve: {result['reason']}")
+            
+            if 'options' in result:
+                console.print("\n[bold]Available versions:[/bold]")
+                for i, opt in enumerate(result['options']):
+                    console.print(f"  {i+1}. {opt['file_path']}")
+                    console.print(f"     Location: {opt['location_name']}")
+                    console.print(f"     Size: {opt['file_size']} bytes")
+                    console.print(f"     Last verified: {opt['last_verified']}")
+                
+    except Exception as e:
+        console.print(f"[red]Error resolving conflict:[/red] {e}")
+    finally:
+        registry.close()
+
+
+@storage.command()
+@click.option("--max-concurrent", type=int, default=5, help="Maximum concurrent operations")
+@click.option("--no-progress", is_flag=True, help="Disable progress bars")
+def sync_process(max_concurrent: int, no_progress: bool):
+    """Process pending sync operations."""
+    from .sync_tracker import SyncTracker
+    
+    config = load_config()
+    registry = StorageRegistry(Path(config.storage.location_registry_db))
+    cache = DuckDBSearchCache(Path(config.storage.search_db))
+    
+    try:
+        tracker = SyncTracker(registry)
+        scanner = MultiPathScanner(cache, registry)
+        
+        async def process():
+            return await tracker.process_sync_queue(
+                scanner=scanner,
+                max_concurrent=max_concurrent,
+                show_progress=not no_progress
+            )
+        
+        stats = asyncio.run(process())
+        
+        console.print("\n[bold]Sync Processing Results[/bold]")
+        console.print(f"  Processed: {stats['processed']}")
+        console.print(f"  Failed: {stats['failed']}")
+        
+        if stats.get('errors'):
+            console.print("\n[yellow]Errors:[/yellow]")
+            for error in stats['errors'][:5]:
+                console.print(f"  - {error}")
+                
+    except Exception as e:
+        console.print(f"[red]Error processing sync queue:[/red] {e}")
+    finally:
+        registry.close()
+        cache.close()
