@@ -31,6 +31,12 @@ storage:
   # DuckDB search index location
   search_db: data/search.duckdb
   
+  # Location registry for multi-path storage (optional)
+  location_registry_db: data/locations.duckdb
+  
+  # Use legacy simple paths (true) or multi-path system (false)
+  use_legacy_paths: true  # Set to false to enable locations below
+  
   # Project directories to scan
   project_paths:
     - ~/Pictures/AI-Projects
@@ -38,6 +44,38 @@ storage:
   # Asset directories to index
   asset_paths:
     - ~/Pictures/AI-Organized
+  
+  # Multi-path storage locations (when use_legacy_paths: false)
+  # Uncomment and customize these examples:
+  # locations:
+  #   # Primary fast SSD for recent/active work
+  #   - name: "Primary SSD"
+  #     type: "local"
+  #     path: "~/Pictures/AI-Active"
+  #     priority: 100  # Highest priority for new files
+  #     rules:
+  #       - max_age_days: 30  # Keep files < 30 days old
+  #       - min_quality_stars: 4  # Only high quality
+  #       - include_types: ["image/png", "image/jpeg"]
+  #   
+  #   # Secondary storage for older files
+  #   - name: "Archive HDD"
+  #     type: "local"
+  #     path: "/Volumes/Archive/AI-Images"
+  #     priority: 50
+  #     rules:
+  #       - min_age_days: 30  # Files > 30 days old
+  #   
+  #   # Cloud storage for long-term archive
+  #   - name: "S3 Archive"
+  #     type: "s3"
+  #     path: "my-ai-archive-bucket"
+  #     priority: 25
+  #     config:
+  #       region: "us-west-2"
+  #       storage_class: "GLACIER"
+  #     rules:
+  #       - min_age_days: 365  # Files > 1 year old
 
 # AI Understanding configuration
 understanding:
@@ -59,13 +97,13 @@ cost_management:
     weekly: 5.00
     monthly: 20.00
   
-  # Alert when spending reaches percentage
+  # Alert when spending reaches percentage (0.0-1.0)
   alert_threshold: 0.8
 
 # Pipeline configuration (optional)
 pipeline:
-  # Processing mode
-  mode: basic  # basic, standard, premium
+  # Processing mode: basic (free), standard, premium
+  mode: basic
   
   # Cost limits per operation
   cost_limits:
@@ -75,10 +113,15 @@ pipeline:
 # Event system (optional)
 events:
   # Use Redis for events (requires Redis server)
+  # If false, uses file-based events in ~/.alice/events/
   use_redis: false
   
-  # Redis connection settings
+  # Redis connection settings (when use_redis: true)
   redis:
     host: localhost
     port: 6379
     db: 0
+
+# Advanced options (usually not needed)
+# enhanced_metadata: false  # Enable enhanced metadata extraction
+# log_level: INFO          # Logging level: DEBUG, INFO, WARNING, ERROR
