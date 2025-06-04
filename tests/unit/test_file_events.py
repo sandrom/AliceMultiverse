@@ -26,7 +26,7 @@ def temp_event_dir():
 @pytest.fixture
 def event_system(temp_event_dir):
     """Create event system with temporary directory."""
-    return FileBasedEventSystem(event_log_dir=temp_event_dir)
+    return FileBasedEventSystem(event_log_dir=Path(temp_event_dir))
 
 
 def test_publish_sync(event_system, temp_event_dir):

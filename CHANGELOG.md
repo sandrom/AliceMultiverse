@@ -7,6 +7,43 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2025-06-04) - Cost Tracking & CLI Improvements
+- **Cost Tracking System**: Monitor and control AI API spending
+  - Real-time cost tracking per provider and category
+  - Budget management with daily/monthly limits
+  - Cost warnings before expensive operations
+  - CLI commands: `alice cost report/set-budget/providers`
+  - Free tier awareness (Google AI 50/day)
+  
+- **CLI Enhancements**:
+  - Added `-u/--understand` flag to enable AI understanding
+  - Added `--providers` flag to specify which AI providers to use
+  - Improved first-run setup wizard with cost comparisons
+  - Better provider recommendations (Google first as it's free)
+
+- **File-Based Event System**: Redis now optional
+  - Created `FileBasedEventSystem` in `events/file_events.py`
+  - Events stored as daily JSON logs in `~/.alice/events/`
+  - Redis can be enabled with `USE_REDIS_EVENTS=true`
+  - Separated Redis requirements to `requirements-redis.txt`
+
+### Changed
+- **Documentation**: Updated to clarify personal tool nature
+  - README.md now states "Sandro's Personal AI Creative Tool"
+  - Added warnings about lack of product support
+  - Emphasized AI-native usage over CLI
+
+### Fixed
+- Fixed missing `--understand` CLI flag
+- Improved error handling in first-run setup
+- Made Redis dependency optional (was required)
+
+### Removed
+- Removed PostgreSQL event migration code (`events/migration.py`)
+- Removed redundant `settings.yaml.multipath.example`
+- Removed tracked DuckDB files from git
+- Removed empty MagicMock test directory
+
 ### Added (2025-06-03) - Multi-Path Storage Enhancements
 - **Progress Tracking**: Visual feedback for long operations
   - Added `tqdm` progress bars to file scanning and discovery
