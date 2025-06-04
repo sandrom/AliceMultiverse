@@ -6,7 +6,7 @@ AliceMultiverse is an AI-native service designed to operate exclusively through 
 > - **AI-Native**: Natural language in, structured API calls internally
 > - **Simplified**: 50% less code after removing over-engineering
 > - **Secure**: Input validation and rate limiting on all endpoints
-> - **Event-Driven**: PostgreSQL NOTIFY/LISTEN for real-time updates
+> - **Event-Driven**: File-based events by default, Redis optional for scaling
 
 ## High-Level Architecture
 
@@ -39,9 +39,10 @@ graph TB
     end
     
     subgraph "Data Layer"
-        META --> PG[(PostgreSQL)]
-        PG --> EVENT[Event Stream]
-        META --> CACHE[Content Cache]
+        META --> DUCK[(DuckDB)]
+        DUCK --> SEARCH[Search Index]
+        META --> CACHE[File Cache]
+        EVENT[File Events] --> LOG[Event Logs]
     end
     
     style API fill:#f9f,stroke:#333,stroke-width:4px
