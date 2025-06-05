@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2025-06-05) - Code Cleanup Sprint
+- **Repository Cleanup**: Reduced clutter and improved maintainability
+  - Updated ROADMAP.md with focused priorities
+  - Removed performance testing from immediate priorities (focus on smaller subsets first)
+  - Added detailed implementation plans for next focus areas
+
+### Removed (2025-06-05)
+- Removed `alice_interface_v2.py` - incomplete compatibility layer that was never used
+- Removed `redis_event_migration.py` example - migration to optional Redis completed
+
 ### Added (2025-06-04) - Cost Tracking & CLI Improvements
 - **Cost Tracking System**: Monitor and control AI API spending
   - Real-time cost tracking per provider and category
