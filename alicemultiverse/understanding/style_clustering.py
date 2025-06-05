@@ -201,7 +201,8 @@ class StyleClusteringSystem:
         feature_matrix_scaled = scaler.fit_transform(feature_matrix)
         
         # Apply PCA for dimensionality reduction if needed
-        if feature_matrix.shape[1] > 10:
+        # Only use PCA if we have enough samples
+        if feature_matrix.shape[1] > 10 and feature_matrix.shape[0] > 10:
             pca = PCA(n_components=10)
             feature_matrix_scaled = pca.fit_transform(feature_matrix_scaled)
         
