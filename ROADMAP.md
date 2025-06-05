@@ -1,271 +1,237 @@
-# AliceMultiverse Roadmap - Personal Development Plan
+# AliceMultiverse Roadmap - Personal Creative Tool
 
 ## Vision
 
-AliceMultiverse is my personal creative workflow orchestrator that I access through natural conversation with Claude. Built for my specific needs: managing thousands of AI-generated images, finding specific content through semantic search, and preparing assets for video creation. This is a tool by me, for me - though others are welcome to fork and adapt it.
+My personal AI creative workflow orchestrator, accessed through Claude. Built for managing thousands of AI-generated images, semantic search, and video creation. Not a product - a personal tool that solves my specific problems.
 
-## Critical Questions (Re-evaluate Daily)
+## Daily Reality Check
 
-1. **Is this solving MY problems?** 
-   - Finding specific images in my collection ✓
-   - Natural language search through Claude ✓ 
-   - Tracking creative decisions ✓
-   - Managing API costs ✓ (cost warnings + CLI tools)
-2. **Is the architecture still simple?** 
-   - File-first approach ✓
-   - AI-native interface ✓
-   - DuckDB for search ✓
-   - Redis optional ✓ (file-based events by default)
-3. **What am I spending money on?** 
-   - Understanding API calls tracked ✓
-   - Cost warnings before operations ✓
-   - Budget limits enforced ✓
-   - `alice cost report` for visibility ✓
-4. **What's broken RIGHT NOW?** 
-   - Documentation implies this is a product (needs update) ✅ (fixed)
-   - No --understand CLI flag (uses config only) ✅ (fixed)
-   - First-run experience could be smoother ✅ (improved)
-   - Repository needs cleanup (duplicate files, old code, media in git)
+1. **What's broken TODAY?** Fix it first
+2. **What costs money?** Track and optimize it
+3. **What's complex?** Simplify it
+4. **What's unused?** Remove it
 
-## 🧹 Repository Cleanup Plan (HIGH PRIORITY)
+## Current State (June 2025)
 
-### Why This Matters
-The repo has accumulated cruft during rapid development. A clean repo = easier maintenance, faster AI context loading, and clearer for anyone (including future me) to understand.
+### ✅ What's Working
+- **AI-Native Interface**: Search and organize through Claude MCP
+- **Semantic Search**: Find images by content, style, mood
+- **Multi-Path Storage**: Assets across multiple locations with rules
+- **Cost Tracking**: Know exactly what I'm spending
+- **Video Workflows**: Storyboards, Kling prompts, Flux keyframes
+- **File-Based Everything**: No database servers required
 
-### Phase 1: Immediate Cleanup (Do First)
-- [ ] **Fix .gitignore**
-  - [ ] Add: `*.egg-info/`, `__pycache__/`, `.pytest_cache/`
-  - [ ] Add: `inbox/`, `organized/`, `output/`, `training/` (except READMEs)
-  - [ ] Add: `*.log`, `data/*.duckdb` (user-specific)
-  - [ ] Remove tracked files that should be ignored
-- [ ] **Remove media files from git**
-  - [ ] Delete all images/videos in inbox/, organized/, output/, training/
-  - [ ] Add placeholder READMEs explaining these directories
-- [ ] **Commit current changes**
-  - [ ] main_cli.py (--understand flag addition)
-  - [ ] first_run.py (improved setup wizard)
+### ⚠️ Active Pain Points
+1. **Code Cleanup Needed**: Multiple deprecated interface files
+2. **Documentation Confusion**: Still reads like a product in places
+3. **Daily Workflow Friction**: Small annoyances that add up
 
-### Phase 2: Code Cleanup
-- [ ] **Remove deprecated interface files**
-  - [ ] Verify alice_structured.py is the current API
-  - [ ] Remove alice_interface.py, alice_interface_v2.py
-  - [ ] Consolidate cli_handler.py and cli_handler_structured.py
-- [ ] **Clean up migration files**
-  - [ ] Remove PostgreSQL event migration code
-  - [ ] Move completed migrations to legacy/ folder
-  - [ ] Update docs to reflect current architecture
-- [ ] **Consolidate storage modules**
-  - [ ] Review overlapping functionality in storage modules
-  - [ ] Merge or remove redundant code
-  - [ ] Update imports and tests
+## Immediate Priorities
 
-### Phase 3: Documentation Cleanup
-- [ ] **Consolidate settings examples**
-  - [ ] Merge settings.yaml.example and settings.yaml.multipath.example
-  - [ ] Create one comprehensive example with all options
-- [ ] **Remove temporary docs**
-  - [ ] Integrate README_STORAGE.md into main docs
-  - [ ] Complete and remove REDIS_REMOVAL_PLAN.md
-  - [ ] Update all Redis references to show it's optional
-- [ ] **Update stale documentation**
-  - [ ] Remove references to deprecated features
-  - [ ] Ensure all examples use current API
+### 1. Code Cleanup Sprint 🧹
+**Why**: Clean code = easier maintenance = less frustration
 
-### Phase 4: Final Polish
-- [ ] **Clean test/temporary files**
-  - [ ] Remove MagicMock directory
-  - [ ] Clean up one-time maintenance scripts
-  - [ ] Archive or remove old test data
-- [ ] **Verify everything works**
-  - [ ] Run full test suite
-  - [ ] Test fresh install experience
-  - [ ] Update CHANGELOG.md with cleanup notes
+- [ ] Remove deprecated interface files
+  - [ ] Confirm alice_structured.py is current
+  - [ ] Delete alice_interface.py, alice_interface_v2.py
+  - [ ] Update all imports and tests
+- [ ] Remove completed migration code
+  - [ ] Archive PostgreSQL migration files
+  - [ ] Clean up Redis migration remnants
+- [ ] Consolidate duplicate functionality
+  - [ ] Merge overlapping storage modules
+  - [ ] Remove redundant CLI handlers
 
-### Success Criteria
-- Repository size reduced by >50% (removing media files)
-- No duplicate or deprecated code
-- Clear, consistent structure
-- All tests pass
-- Fresh clone + install works perfectly
+### 2. Workflow Polish ✨
+**Why**: Daily friction adds up
 
-## Completed: Multi-Path Storage ✅
+- [ ] Fix any Claude MCP issues
+- [ ] Streamline project creation flow
+- [ ] Better duplicate detection  
+- [ ] Quick selection workflow (mark favorites faster)
 
-### Multi-Path Storage: Core Features
-- [x] **Fix DuckDB Compatibility** - Aligned queries with schema
-- [x] **File Operations** - Implemented copy/move between locations
-- [x] **Foreign Key Constraints** - Fixed update issues in tests
+## My Actual Workflow (What Matters)
 
-### Multi-Path Storage: Advanced Features
-- [x] **Progress Tracking** - Add progress bars for large file operations ✅
-- [x] **Cloud Storage** - Add S3/GCS scanner implementations ✅
-  - [x] S3 scanner with upload/download support
-  - [x] GCS scanner with upload/download support
-  - [x] Integrated with MultiPathScanner
-  - [x] Example configuration for cloud storage
-- [x] **Auto-Migration** - Rule-based file movement system ✅
-  - [x] AutoMigrationService for analyzing files based on rules
-  - [x] Execute migrations (copy or move files)
-  - [x] MigrationScheduler for periodic runs
-  - [x] CLI command `alice storage migrate`
-  - [x] Dry-run support for previewing migrations
-- [x] **Sync Tracking** - Handle conflicts and versioning ✅
-  - [x] SyncTracker for detecting sync status and conflicts
-  - [x] Multiple conflict resolution strategies (newest, largest, primary wins)
-  - [x] Sync queue for batch processing
-  - [x] VersionTracker for maintaining file history
-  - [x] CLI commands: `sync-status`, `resolve-conflict`, `sync-process`
+1. **Discover & Import**
+   - Download AI generations → inbox/
+   - Auto-detect source (Midjourney, DALL-E, etc.)
+   - Extract all metadata
 
-## Next Up: Video Creation Workflow
-
-### Video Creation Workflow (IN PROGRESS ⚡)
-- [x] **Prompt Generation** - Create engaging Kling prompts from selected images ✅
-  - [x] Study successful Kling prompts (analyzed existing provider)
-  - [x] Build prompt templates (5 styles: cinematic, documentary, etc.)
-  - [x] Add motion suggestions (11 camera motion types)
-- [x] **Flux Kontext Integration** - Enable image editing/combination workflows ✅
-  - [x] Implement Flux Kontext provider (already exists in fal_provider)
-  - [x] Create keyframe workflows (prepare_flux_keyframes)
-  - [x] Test multi-image combinations (flux-kontext-multi support)
-  - [x] Build transition templates (morph, dissolve, fade)
-- [x] **MCP Tools Added** ✅
-  - [x] analyze_for_video - Analyze images for video potential
-  - [x] generate_video_storyboard - Create complete storyboards
-  - [x] create_kling_prompts - Format prompts for Kling
-  - [x] prepare_flux_keyframes - Enhanced keyframes with Flux
-  - [x] create_transition_guide - Video editing guides
-
-## My Actual Workflow
-
-**Real scenario**: "I generated 200 images yesterday, need 20 for a video"
-
-1. **Search & Select** via Claude
-   - "Show me cyberpunk portraits from this week"
-   - "Find more like these three"
-   - "Exclude anything with neon"
-
-2. **Curate & Clean**
-   - Mark rejects → 'sorted-out/rejected/'
-   - Mark maybe-later → 'sorted-out/archive/'
-   - Track selections with reasons
+2. **Search & Select**
+   - "Show me cyberpunk portraits from last week"
+   - "Find similar to these three"
+   - Track why I selected each
 
 3. **Prepare for Video**
-   - Generate storyboard from selections
-   - Create Kling prompts with camera movements
-   - Use Flux Kontext for keyframe variations
+   - Generate storyboards
+   - Create Kling prompts
+   - Export organized sets
 
-4. **Project Organization**
-   ```
-   project-name/
-   ├── created/     # New generations
-   ├── selected/    # From global library
-   ├── rounds/      # Curation iterations
-   └── exports/     # Final deliverables
-   ```
+## Next Focus Areas
 
-## Backlog (Re-evaluate Weekly)
+### Enhanced Understanding System 🧠
+**Why**: Better tags = better search = finding exactly what I need
 
-### Performance & Scale
-- [ ] **DuckDB Performance Optimization**
-  - [ ] Benchmark vs PostgreSQL baseline
-  - [ ] Optimize for 100k+ image collections
-  - [ ] Add query result caching
-  - [ ] Document performance tips
+#### Batch Analysis Optimization
+- [ ] **Smart batching**: Group similar images for single API calls
+  - Detect near-duplicates before analysis
+  - Combine multiple images in one prompt when possible
+  - Track cost savings from batching
+- [ ] **Progressive analysis**: Start with cheap providers, escalate if needed
+  - Google AI first (free tier)
+  - Add Claude/GPT only for complex images
+  - Skip analysis for obvious duplicates
+- [ ] **Caching strategy**: Reuse analysis from similar images
+  - Perceptual hash similarity threshold
+  - Tag inheritance from variants
+  - Manual override capability
 
-### Cloud Integration
-- [ ] **S3/GCS Direct Querying**
-  - [ ] DuckDB cloud storage support
-  - [ ] Metadata extraction from cloud
-  - [ ] Cost-aware scanning strategies
-  - [ ] Hybrid local/cloud search
+#### Local Vision Models Integration
+- [ ] **Ollama support**: Free, private, no API costs
+  - LLaVA for basic object detection
+  - CLIP for style understanding
+  - Fallback to cloud for complex cases
+- [ ] **Hybrid approach**: Local first, cloud for enhancement
+  - Local: Basic tags, objects, colors
+  - Cloud: Artistic style, mood, complex scenes
+  - Cost tracking comparison
+- [ ] **Model management**: Easy switching between providers
+  - Provider capabilities matrix
+  - Automatic model selection based on image type
+  - Performance benchmarks per model
 
-### Developer Experience
-- [x] **Improved Error Messages** ✅ (Partially Complete)
-  - [x] Add suggestions for common issues
-    - Created `error_handling.py` with context-aware suggestions
-    - Handles API keys, file paths, permissions, dependencies, costs
-  - [x] Better file path debugging
-    - Shows exact paths and permission check commands
-  - [x] Clear API error responses
-    - Enhanced AuthenticationError with provider context
-    - Wrapped errors show user-friendly messages
-  - [ ] Migration guides (future enhancement)
+#### Intelligent Tag Hierarchies
+- [ ] **Semantic relationships**: Tags that understand context
+  ```
+  portrait → person → face → expression → happy
+  cyberpunk → sci-fi → futuristic → neon
+  ```
+- [ ] **Auto-grouping**: Similar concepts cluster together
+  - "sunset/sunrise/golden hour" → lighting conditions
+  - "oil painting/watercolor/acrylic" → traditional media
+  - "3D render/CGI/digital art" → digital media
+- [ ] **Custom taxonomies**: My personal organization style
+  - Project-specific tag groups
+  - Mood boards as tag collections
+  - Export/import tag schemes
 
-## Recent Achievements (January 2025)
+#### Style Similarity Clusters
+- [ ] **Visual DNA**: Extract style fingerprints
+  - Color palettes
+  - Composition patterns
+  - Texture characteristics
+  - Lighting styles
+- [ ] **Auto-collections**: Find images that "feel" similar
+  - "More like this" but for style
+  - Discover unexpected connections
+  - Build mood boards automatically
+- [ ] **Style transfer hints**: Identify reusable prompts
+  - Extract style elements from successful images
+  - Generate prompt suggestions
+  - Track which styles work well together
 
-### This Week's Completions ✅
-1. **Multi-Path Storage Architecture** - Store assets across multiple locations with rules
-2. **Video Creation Workflow** - Complete system for turning images into videos
-3. **Selection & Curation Tools** - Track selections, find similar, soft delete
-4. **Cost Management** - Track spending, free tier limits, budget alerts
-5. **First-Run Experience** - Interactive setup wizard, better error messages
-6. **Understanding Integration** - AI analysis with semantic tags
-7. **Auto-Indexing** - Files indexed during organization
-8. **Similarity Search** - Perceptual hashing (pHash, dHash, aHash)
+### Video Creation 2.0 🎬
+**Why**: Turn static images into compelling narratives
 
-### Today's Completions (January 6) ✅
-1. **Redis Removal** - Made Redis optional, file-based events by default
-2. **Cost Warnings** - Shows cost estimate before expensive operations
-3. **Cost CLI Commands** - `alice cost report/set-budget/providers`
-4. **Event Monitor Fixed** - Works with both Redis and file backends
+#### Music & Rhythm Integration
+- [ ] **Beat detection**: Sync transitions to music
+  - Upload audio track
+  - Detect BPM and rhythm points
+  - Generate cut points automatically
+- [ ] **Mood matching**: Suggest images based on music
+  - Analyze music mood/energy
+  - Match with image tags
+  - Create emotional arcs
+- [ ] **Duration calculator**: Perfect timing for each shot
+  - Based on music tempo
+  - Scene complexity consideration
+  - Viewer attention patterns
 
-### Architecture Improvements
-- File-based event system (Redis now optional)
-- DuckDB for search (PostgreSQL removed)
-- Configuration-driven paths (no hardcoded test_data/)
-- File-first metadata with content addressing
-- Cost tracking integrated throughout
+#### Advanced Scene Transitions
+- [ ] **Motion matching**: Smooth visual flow
+  - Analyze image composition
+  - Find compatible entry/exit points
+  - Suggest camera movements
+- [ ] **Narrative transitions**: Tell a story
+  - Time of day progression
+  - Zoom in/out sequences
+  - Color temperature shifts
+  - Emotional journey mapping
+- [ ] **Effect library**: Ready-to-use transition styles
+  - Morph between similar subjects
+  - Match cuts on movement
+  - Color/light transitions
+  - Portal/doorway effects
 
-## Current State (January 6, 2025)
+#### Export Optimization
+- [ ] **Editor presets**: One-click export for different tools
+  - Premiere Pro XML
+  - DaVinci Resolve EDL
+  - Final Cut Pro FCPXML
+  - After Effects compositions
+- [ ] **Asset preparation**: Ready-to-edit packages
+  - Consistent resolution/format
+  - Color space management
+  - Proxy generation
+  - Folder structure templates
+- [ ] **Metadata preservation**: Keep all context
+  - Embed project info
+  - Shot descriptions
+  - Original prompts
+  - Edit decision lists
 
-### What's Working ✅
-- **AI-Native Interface**: Search and organize through Claude/ChatGPT
-- **Semantic Search**: Tags, similarity, and natural language queries
-- **Multi-Path Storage**: Assets across multiple locations with rules
-- **Cost Tracking**: Know exactly what you're spending
-- **Project Management**: File-based with budget tracking
-- **Video Workflows**: Storyboards, Kling prompts, Flux keyframes
+#### Smart Project Templates
+- [ ] **Genre templates**: Common video types
+  - Music video (beat-synced cuts)
+  - Story progression (narrative arc)
+  - Showcase reel (best of collection)
+  - Social media (platform-optimized)
+- [ ] **Workflow automation**: From selection to export
+  - Auto-generate shot lists
+  - Calculate optimal durations
+  - Create rough cuts
+  - Export multiple versions
+- [ ] **Learning system**: Improve with usage
+  - Track successful exports
+  - Remember preferences
+  - Suggest improvements
+  - Build personal style
 
-### Known Issues ⚠️
-1. **Documentation Confusion**: Still implies this is a product (it's not)
-2. **Performance at Scale**: Not tested with 100k+ images yet
-3. **Understanding Flag**: No --understand CLI flag (uses config only)
+## Backlog (When Actually Needed)
 
-## My Development Principles
+### Performance (Future)
+- [ ] Test with larger collections (10k+ images)
+- [ ] Profile DuckDB queries
+- [ ] Optimize hot paths
+- [ ] Cache embeddings for similarity search
 
-1. **It has to work**: I use this daily, can't break it
-2. **My money matters**: Track every API call
-3. **Simplicity**: I maintain this alone
-4. **Natural workflow**: Talk to Claude, not click UIs
-5. **File-based**: I want portable data
-6. **Test what matters**: Core workflows must work
-7. **Document for future me**: I forget things
+### Nice to Have
+- [ ] Web UI for quick previews
+- [ ] Mobile companion app
+- [ ] Plugin system for providers
+- [ ] Advanced deduplication
 
+### Never
+- [ ] Multi-user support (it's MY tool)
+- [ ] Cloud hosting (local is fine)
+- [ ] Enterprise features (not a product)
 
-## Development Guidelines
+## Development Principles
 
-### Before Starting Any Task
-1. Ask: "Is this solving a real user problem?"
-2. Ask: "Will this make the system simpler or more complex?"
-3. Ask: "Can we test this thoroughly?"
-4. Ask: "Will users understand how to use this?"
+1. **It works or it's deleted**
+2. **Every API call costs money**
+3. **Simpler > Clever**
+4. **File-based > Database**
+5. **Test the happy path**
+6. **Document for future me**
 
-### Implementation Checklist
-- [ ] Write tests first (TDD)
-- [ ] Update documentation
-- [ ] Clean up old code
-- [ ] Run full test suite
-- [ ] Update CHANGELOG.md
-- [ ] Consider writing an ADR
+## Success Metrics
 
-### Testing Requirements
-```bash
-# Before ANY commit:
-pytest tests/unit/test_new_feature.py -v        # Unit tests
-pytest tests/integration/ -v                    # Integration tests  
-pytest --cov=alicemultiverse --cov-report=html # Coverage
-alice --dry-run                                 # CLI smoke test
-```
+- Can I find the image I'm thinking of quickly?
+- Do I know what I spent this month?
+- Does it work smoothly for my daily workflow?
+- Can I explain it in one paragraph?
 
 ---
 
-**Note**: This roadmap follows kanban principles. We work on the highest value task that solves real problems, learn from implementation, and continuously re-evaluate priorities.
+**Remember**: This is a personal tool. Every feature should make MY life easier, not impress hypothetical users.
