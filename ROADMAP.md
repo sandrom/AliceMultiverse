@@ -42,16 +42,23 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
   - [x] Identified overlapping storage modules:
     - DuckDBSearchCache (primary, used by MCP server)
     - DuckDBSearch (legacy/specialized, used by search handler)
-  - [ ] Merge DuckDB implementations into single module
   - [ ] Keep both CLI handlers (legacy + structured) for now
-  - [ ] Clean up PostgreSQL references in comments
-  - [ ] Plan removal of deprecated cache modules (v3.0)
+
+### Future Cleanup (Lower Priority)
+- [ ] Merge DuckDB implementations (DuckDBSearchCache + DuckDBSearch)
+- [ ] Clean up PostgreSQL references in comments  
+- [ ] Remove deprecated cache modules in v3.0
+- [ ] Consolidate storage modules further
 
 ### 2. Workflow Polish ✨
 **Why**: Daily friction adds up
 
 - [x] Check Claude MCP issues (no known issues, good docs)
-- [ ] Streamline project creation flow
+- [x] Streamline project creation flow
+  - [x] Added `create_project` MCP tool
+  - [x] Added `list_projects` MCP tool
+  - [x] Added `get_project_context` MCP tool
+  - [x] Added `update_project_context` MCP tool
 - [ ] Better duplicate detection  
 - [ ] Quick selection workflow (mark favorites faster)
 

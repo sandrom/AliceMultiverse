@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added (2025-06-05) - Code Cleanup Sprint
+### Added (2025-06-05) - Code Cleanup Sprint & Workflow Polish
 - **Repository Cleanup**: Reduced clutter and improved maintainability
   - Updated ROADMAP.md with focused priorities
   - Removed performance testing from immediate priorities (focus on smaller subsets first)
@@ -16,6 +16,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     - DuckDBSearchCache (primary, used by MCP server)
     - DuckDBSearch (legacy/specialized, used by search handler)
   - Verified Claude MCP integration is working properly
+
+- **Project Management via MCP**: Streamlined project creation workflow
+  - Added `create_project` tool - Create projects with creative context
+  - Added `list_projects` tool - View all projects with budget status
+  - Added `get_project_context` tool - Get project details and statistics
+  - Added `update_project_context` tool - Update creative parameters
+  - Projects now fully accessible through AI assistant interface
 
 ### Removed (2025-06-05)
 - Removed `alice_interface_v2.py` - incomplete compatibility layer that was never used

@@ -28,6 +28,7 @@ from .interface.video_creation_mcp import register_video_creation_tools
 from .storage.duckdb_cache import DuckDBSearchCache
 from .storage.duckdb_search import DuckDBSearch
 from .core.cost_tracker import get_cost_tracker
+from .projects.service import ProjectService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -42,6 +43,9 @@ image_api = ImagePresentationAPI(storage=storage)
 
 # Initialize DuckDB search for video creation tools
 search_db = DuckDBSearch()
+
+# Initialize project service
+project_service = ProjectService()
 
 if MCP_AVAILABLE:
     server = Server("alice-multiverse")
@@ -378,6 +382,210 @@ async def set_budget(
         return {"success": False, "error": str(e), "message": "Failed to set budget"}
 
 
+@server.tool()
+async def create_project(
+    name: str,
+    description: str = "",
+    budget: float | None = None,
+    style: str | None = None,
+    mood: str | None = None,
+    theme: str | None = None
+) -> dict[str, Any]:
+    """
+    Create a new creative project with optional context.
+    
+    Parameters:
+    - name: Project name (will be folder name)
+    - description: Project description
+    - budget: Optional budget limit for AI generation costs
+    - style: Creative style (e.g., "cyberpunk", "minimalist")
+    - mood: Desired mood (e.g., "dark", "energetic")
+    - theme: Project theme (e.g., "nature", "technology")
+    
+    Creates project structure with folders for created/selected/rounds/exports.
+    """
+    try:
+        # Build creative context from parameters
+        creative_context = {}
+        if style:
+            creative_context["style"] = style
+        if mood:
+            creative_context["mood"] = mood
+        if theme:
+            creative_context["theme"] = theme
+            
+        project = project_service.create_project(
+            name=name,
+            description=description,
+            budget_total=budget,
+            creative_context=creative_context
+        )
+        
+        return {
+            "success": True,
+            "message": f"Project '{name}' created successfully",
+            "data": {
+                "name": project.name,
+                "path": str(project.path),
+                "folders": ["created", "selected", "rounds", "exports"],
+                "budget": project.budget.total if project.budget else None,
+                "creative_context": project.creative_context
+            }
+        }
+    except Exception as e:
+        logger.error(f"Project creation failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to create project"}
+
+
+@server.tool()
+async def list_projects() -> dict[str, Any]:
+    """
+    List all available projects with their status and budget info.
+    
+    Returns project names, descriptions, budgets, and file counts.
+    """
+    try:
+        projects = project_service.list_projects()
+        
+        project_list = []
+        for project in projects:
+            project_info = {
+                "name": project.name,
+                "description": project.description,
+                "created_at": project.created_at.isoformat() if project.created_at else None,
+                "updated_at": project.updated_at.isoformat() if project.updated_at else None,
+                "creative_context": project.creative_context
+            }
+            
+            # Add budget info if available
+            if project.budget:
+                project_info["budget"] = {
+                    "total": project.budget.total,
+                    "spent": project.budget.spent,
+                    "remaining": project.budget.total - project.budget.spent,
+                    "alerts_enabled": project.budget.alerts_enabled
+                }
+            
+            project_list.append(project_info)
+        
+        return {
+            "success": True,
+            "message": f"Found {len(project_list)} projects",
+            "data": project_list
+        }
+    except Exception as e:
+        logger.error(f"List projects failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to list projects"}
+
+
+@server.tool()
+async def get_project_context(name: str) -> dict[str, Any]:
+    """
+    Get creative context and current status for a specific project.
+    
+    Parameters:
+    - name: Project name
+    
+    Returns creative context, budget status, and file statistics.
+    """
+    try:
+        project = project_service.get_project(name)
+        if not project:
+            return {
+                "success": False,
+                "message": f"Project '{name}' not found"
+            }
+        
+        # Get file statistics if possible
+        stats = {}
+        if project.path and project.path.exists():
+            for folder in ["created", "selected", "rounds", "exports"]:
+                folder_path = project.path / folder
+                if folder_path.exists():
+                    stats[folder] = len(list(folder_path.glob("*")))
+        
+        response_data = {
+            "name": project.name,
+            "description": project.description,
+            "creative_context": project.creative_context,
+            "settings": project.settings,
+            "statistics": stats
+        }
+        
+        # Add budget info if available
+        if project.budget:
+            response_data["budget"] = {
+                "total": project.budget.total,
+                "spent": project.budget.spent,
+                "remaining": project.budget.total - project.budget.spent,
+                "percentage_used": (project.budget.spent / project.budget.total * 100) if project.budget.total > 0 else 0
+            }
+        
+        return {
+            "success": True,
+            "message": f"Project context for '{name}'",
+            "data": response_data
+        }
+    except Exception as e:
+        logger.error(f"Get project context failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to get project context"}
+
+
+@server.tool()
+async def update_project_context(
+    name: str,
+    style: str | None = None,
+    mood: str | None = None,
+    theme: str | None = None,
+    notes: str | None = None
+) -> dict[str, Any]:
+    """
+    Update creative context for an existing project.
+    
+    Parameters:
+    - name: Project name
+    - style: Update creative style
+    - mood: Update mood
+    - theme: Update theme
+    - notes: Add creative notes
+    
+    Updates are merged with existing context.
+    """
+    try:
+        project = project_service.get_project(name)
+        if not project:
+            return {
+                "success": False,
+                "message": f"Project '{name}' not found"
+            }
+        
+        # Build context updates
+        context_updates = {}
+        if style is not None:
+            context_updates["style"] = style
+        if mood is not None:
+            context_updates["mood"] = mood
+        if theme is not None:
+            context_updates["theme"] = theme
+        if notes is not None:
+            context_updates["notes"] = notes
+        
+        # Update project context
+        updated_project = project_service.update_project_context(name, context_updates)
+        
+        return {
+            "success": True,
+            "message": f"Updated context for project '{name}'",
+            "data": {
+                "name": updated_project.name,
+                "creative_context": updated_project.creative_context
+            }
+        }
+    except Exception as e:
+        logger.error(f"Update project context failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to update project context"}
+
+
 def main():
     """Run the MCP server."""
     if not MCP_AVAILABLE:
@@ -409,6 +617,10 @@ def main():
     logger.info("  - create_kling_prompts: Generate Kling-ready prompts")
     logger.info("  - prepare_flux_keyframes: Create enhanced keyframes with Flux")
     logger.info("  - create_transition_guide: Generate video editing guide")
+    logger.info("  - create_project: Create new creative project with context")
+    logger.info("  - list_projects: List all projects with status and budget")
+    logger.info("  - get_project_context: Get project creative context and status")
+    logger.info("  - update_project_context: Update project creative context")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))
