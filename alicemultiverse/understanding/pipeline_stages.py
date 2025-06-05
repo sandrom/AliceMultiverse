@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 from ..core.types import MediaType
-# PostgreSQL removed - repository parameter is now unused
 from ..pipeline.stages import PipelineStage
 from .advanced_tagger import AdvancedTagger
 from .analyzer import ImageAnalyzer

@@ -4,9 +4,6 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any, Optional
 
-# PostgreSQL removed - SQLAlchemy and database models no longer available
-# from sqlalchemy.orm import Session
-# from alicemultiverse.database.models import Generation, Project
 
 from alicemultiverse.events import publish_event_sync
 from alicemultiverse.core.config import load_config
@@ -27,7 +24,7 @@ class ProjectService:
             event_bus: Deprecated, kept for compatibility
             config: Optional configuration object
         """
-        self.db = None  # PostgreSQL removed
+        self.db = None
         
         # Load config if not provided
         if not config:

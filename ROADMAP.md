@@ -45,9 +45,11 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
   - [ ] Keep both CLI handlers (legacy + structured) for now
 
 ### Future Cleanup (Lower Priority)
-- [ ] Merge DuckDB implementations (DuckDBSearchCache + DuckDBSearch)
-- [ ] Clean up PostgreSQL references in comments  
-- [ ] Remove deprecated cache modules in v3.0
+- [x] Analyze DuckDB merge strategy (significant work, postponed)
+- [x] Clean up PostgreSQL references in comments  
+- [x] Document deprecated cache modules for v3.0 removal
+  - Created v3-cleanup-plan.md with removal checklist
+- [ ] Actually merge DuckDB implementations (major task)
 - [ ] Consolidate storage modules further
 
 ### 2. Workflow Polish ✨

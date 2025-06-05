@@ -4,7 +4,6 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-# PostgreSQL removed - SQLAlchemy and database imports no longer available
 # from sqlalchemy.orm import Session
 
 from ..core.constants import IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
@@ -46,7 +45,7 @@ class AssetDiscovery:
     def find_by_content_hash(self, content_hash: str) -> Path | None:
         """Find asset by content hash.
 
-        PostgreSQL removed - this method searches filesystem only.
+        Search filesystem for media assets.
 
         Args:
             content_hash: Content hash to search for

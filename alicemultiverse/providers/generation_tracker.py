@@ -6,7 +6,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 
-# PostgreSQL removed - AssetRepository no longer available
 from ..metadata.embedder import MetadataEmbedder
 from ..core.file_operations import FileHandler
 from ..core.structured_logging import get_logger
@@ -19,7 +18,6 @@ class GenerationTracker:
     """Tracks generation context and ensures it's stored in multiple places."""
     
     def __init__(self):
-        # PostgreSQL removed - no database tracking available
         self.asset_repo = None
         self.embedder = MetadataEmbedder()
         self.file_handler = FileHandler()

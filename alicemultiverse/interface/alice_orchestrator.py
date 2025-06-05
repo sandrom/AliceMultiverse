@@ -12,9 +12,6 @@ from typing import Any
 
 from ..assets.discovery import AssetDiscovery
 from ..core.structured_logging import get_logger, trace_operation, CorrelationContext
-# PostgreSQL removed - database imports no longer available
-# from ..database import get_session
-# from ..database.repository import AssetRepository, ProjectRepository
 from ..events import publish_event
 
 logger = get_logger(__name__)
@@ -90,8 +87,7 @@ class AliceOrchestrator:
 
     def _init_session(self) -> None:
         """Initialize database session."""
-        # PostgreSQL removed - running in limited mode
-        logger.info("Running without database - PostgreSQL integration removed")
+        logger.info("Running in file-based mode")
         self.session = None
         self.asset_repo = None
         self.project_repo = None

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added (2025-06-05) - Code Cleanup Sprint & Workflow Polish
+### Added (2025-06-05) - Code Cleanup Sprint, Workflow Polish & Deep Cleanup
 - **Repository Cleanup**: Reduced clutter and improved maintainability
   - Updated ROADMAP.md with focused priorities
   - Removed performance testing from immediate priorities (focus on smaller subsets first)
@@ -29,6 +29,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Shows duplicate groups sorted by wasted space
   - Calculates total wasted storage from duplicates
   - Foundation for future perceptual similarity detection
+
+- **Deep Cleanup**: Addressed future cleanup opportunities
+  - Analyzed DuckDB implementations merge strategy (complex, postponed)
+  - Cleaned up PostgreSQL references in comments throughout codebase
+  - Created v3-cleanup-plan.md documenting deprecated cache modules
+  - Identified that DuckDB merge would be significant undertaking
 
 ### Removed (2025-06-05)
 - Removed `alice_interface_v2.py` - incomplete compatibility layer that was never used
