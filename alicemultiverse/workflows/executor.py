@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional
 
 from alicemultiverse.providers.registry import get_provider_async
 from alicemultiverse.providers.types import GenerationRequest, GenerationType
-from alicemultiverse.events import EventBus
+from alicemultiverse.events import publish_event
 from alicemultiverse.events.workflow_events import (
     WorkflowStartedEvent,
     WorkflowCompletedEvent,
@@ -32,13 +32,8 @@ logger = logging.getLogger(__name__)
 class WorkflowExecutor:
     """Executes workflow templates with state management and error handling."""
     
-    def __init__(self, event_bus: Optional[EventBus] = None):
-        """Initialize workflow executor.
-        
-        Args:
-            event_bus: Event bus for publishing workflow events
-        """
-        self.event_bus = event_bus or EventBus()
+    def __init__(self):
+        """Initialize workflow executor."""
         self._running_workflows: Dict[str, WorkflowContext] = {}
     
     async def execute(
@@ -389,13 +384,12 @@ class WorkflowExecutor:
         total_steps: int
     ):
         """Publish workflow started event."""
-        if self.event_bus:
-            event = WorkflowStartedEvent(
-                workflow_name=workflow_name,
-                workflow_id=workflow_id,
-                total_steps=total_steps
-            )
-            await self.event_bus.publish(event)
+        event = WorkflowStartedEvent(
+            workflow_name=workflow_name,
+            workflow_id=workflow_id,
+            total_steps=total_steps
+        )
+        await publish_event(event)
     
     async def _publish_workflow_completed(
         self,
@@ -404,16 +398,15 @@ class WorkflowExecutor:
         result: WorkflowResult
     ):
         """Publish workflow completed event."""
-        if self.event_bus:
-            event = WorkflowCompletedEvent(
-                workflow_name=workflow_name,
-                workflow_id=workflow_id,
-                total_cost=result.total_cost,
-                execution_time=result.execution_time,
-                completed_steps=result.completed_steps,
-                total_steps=result.total_steps
-            )
-            await self.event_bus.publish(event)
+        event = WorkflowCompletedEvent(
+            workflow_name=workflow_name,
+            workflow_id=workflow_id,
+            total_cost=result.total_cost,
+            execution_time=result.execution_time,
+            completed_steps=result.completed_steps,
+            total_steps=result.total_steps
+        )
+        await publish_event(event)
     
     async def _publish_workflow_failed(
         self,
@@ -422,22 +415,20 @@ class WorkflowExecutor:
         error: str
     ):
         """Publish workflow failed event."""
-        if self.event_bus:
-            event = WorkflowFailedEvent(
-                workflow_name=workflow_name,
-                workflow_id=workflow_id,
-                error=error
-            )
-            await self.event_bus.publish(event)
+        event = WorkflowFailedEvent(
+            workflow_name=workflow_name,
+            workflow_id=workflow_id,
+            error=error
+        )
+        await publish_event(event)
     
     async def _publish_step_started(self, workflow_id: str, step_name: str):
         """Publish step started event."""
-        if self.event_bus:
-            event = WorkflowStepStartedEvent(
-                workflow_id=workflow_id,
-                step_name=step_name
-            )
-            await self.event_bus.publish(event)
+        event = WorkflowStepStartedEvent(
+            workflow_id=workflow_id,
+            step_name=step_name
+        )
+        await publish_event(event)
     
     async def _publish_step_completed(
         self,
@@ -446,11 +437,10 @@ class WorkflowExecutor:
         result: Any
     ):
         """Publish step completed event."""
-        if self.event_bus:
-            event = WorkflowStepCompletedEvent(
-                workflow_id=workflow_id,
-                step_name=step_name,
-                success=result.success if hasattr(result, "success") else True,
-                cost=result.cost if hasattr(result, "cost") else 0.0
-            )
-            await self.event_bus.publish(event)
+        event = WorkflowStepCompletedEvent(
+            workflow_id=workflow_id,
+            step_name=step_name,
+            success=result.success if hasattr(result, "success") else True,
+            cost=result.cost if hasattr(result, "cost") else 0.0
+        )
+        await publish_event(event)

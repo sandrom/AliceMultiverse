@@ -2316,6 +2316,267 @@ async def suggest_cuts_for_mood(
         return {"success": False, "error": str(e), "message": "Failed to suggest cuts"}
 
 
+@server.tool()
+async def export_timeline(
+    timeline_data: dict,
+    output_formats: list[str] = ["edl", "xml", "capcut"],
+    generate_proxies: bool = False,
+    proxy_resolution: list[int] | None = None
+) -> dict[str, Any]:
+    """
+    Export a timeline to various video editor formats.
+    
+    Parameters:
+    - timeline_data: Timeline dict with clips, duration, etc.
+    - output_formats: List of formats - "edl", "xml", "capcut"
+    - generate_proxies: Create low-res proxy files for editing
+    - proxy_resolution: [width, height] for proxies (default [1280, 720])
+    
+    Returns paths to exported files and proxy mappings.
+    """
+    try:
+        from .workflows.video_export import (
+            Timeline, TimelineClip, VideoExportManager
+        )
+        
+        # Parse timeline data
+        timeline = Timeline(
+            name=timeline_data.get("name", "Untitled"),
+            duration=timeline_data.get("duration", 60.0),
+            frame_rate=timeline_data.get("frame_rate", 30.0),
+            resolution=tuple(timeline_data.get("resolution", [1920, 1080]))
+        )
+        
+        # Add clips
+        for clip_data in timeline_data.get("clips", []):
+            clip = TimelineClip(
+                asset_path=Path(clip_data["path"]),
+                start_time=clip_data["start_time"],
+                duration=clip_data["duration"],
+                in_point=clip_data.get("in_point", 0.0),
+                out_point=clip_data.get("out_point"),
+                transition_in=clip_data.get("transition_in"),
+                transition_in_duration=clip_data.get("transition_in_duration", 0.5),
+                beat_aligned=clip_data.get("beat_aligned", False),
+                sync_point=clip_data.get("sync_point")
+            )
+            timeline.clips.append(clip)
+        
+        # Add markers
+        timeline.markers = timeline_data.get("markers", [])
+        timeline.metadata = timeline_data.get("metadata", {})
+        
+        # Export
+        export_manager = VideoExportManager()
+        output_dir = Path.home() / "Documents" / "AliceExports" / timeline.name
+        
+        results = await export_manager.export_timeline(
+            timeline,
+            output_dir,
+            formats=output_formats,
+            generate_proxies=generate_proxies,
+            proxy_resolution=tuple(proxy_resolution) if proxy_resolution else (1280, 720)
+        )
+        
+        return {
+            "success": results["success"],
+            "message": f"Exported timeline to {len(results['exports'])} formats",
+            "data": {
+                "exports": {
+                    fmt: str(path) for fmt, path in results["exports"].items()
+                },
+                "proxies": {
+                    src: str(proxy) for src, proxy in results["proxies"].items()
+                },
+                "output_directory": str(output_dir)
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Timeline export failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to export timeline"}
+
+
+@server.tool()
+async def create_video_timeline(
+    image_paths: list[str],
+    audio_path: str | None = None,
+    duration_per_image: float = 2.0,
+    transition_type: str = "crossfade",
+    transition_duration: float = 0.5,
+    sync_to_beat: bool = False,
+    export_formats: list[str] = ["xml", "capcut"]
+) -> dict[str, Any]:
+    """
+    Create a video timeline from images and optionally sync to music.
+    
+    Parameters:
+    - image_paths: List of image paths in order
+    - audio_path: Optional audio file for music sync
+    - duration_per_image: Seconds per image (if not syncing to beat)
+    - transition_type: Type of transition between images
+    - transition_duration: Transition length in seconds
+    - sync_to_beat: If True and audio provided, sync cuts to beats
+    - export_formats: Formats to export ("edl", "xml", "capcut")
+    
+    Creates and exports a complete timeline ready for editing.
+    """
+    try:
+        from .workflows.video_export import (
+            Timeline, TimelineClip, VideoExportManager
+        )
+        
+        # Calculate total duration
+        if audio_path and Path(audio_path).exists():
+            # Get audio duration
+            import importlib.util
+            spec = importlib.util.spec_from_file_location(
+                "music_analyzer", 
+                Path(__file__).parent / "workflows" / "music_analyzer.py"
+            )
+            music_module = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(music_module)
+            
+            analyzer = music_module.MusicAnalyzer()
+            analysis = await analyzer.analyze(Path(audio_path), analyze_beats=sync_to_beat)
+            total_duration = analysis.duration
+            
+            # Get sync points if requested
+            sync_points = []
+            if sync_to_beat:
+                sync_points = analysis.beat_info.beats
+        else:
+            total_duration = len(image_paths) * duration_per_image
+            sync_points = []
+        
+        # Create timeline
+        timeline = Timeline(
+            name=f"Alice_Timeline_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
+            duration=total_duration,
+            frame_rate=30.0,
+            resolution=(1920, 1080)
+        )
+        
+        # Add audio track
+        if audio_path:
+            timeline.audio_tracks.append({
+                "path": audio_path,
+                "start_time": 0,
+                "duration": total_duration,
+                "volume": 1.0
+            })
+        
+        # Calculate clip timings
+        if sync_to_beat and sync_points:
+            # Distribute images across beat points
+            images_per_beat = max(1, len(sync_points) // len(image_paths))
+            current_time = 0.0
+            
+            for i, image_path in enumerate(image_paths):
+                # Find appropriate beat point
+                beat_index = min(i * images_per_beat, len(sync_points) - 1)
+                start_time = sync_points[beat_index] if beat_index < len(sync_points) else current_time
+                
+                # Calculate duration to next beat or end
+                if i < len(image_paths) - 1 and beat_index + images_per_beat < len(sync_points):
+                    end_time = sync_points[beat_index + images_per_beat]
+                else:
+                    end_time = total_duration if i == len(image_paths) - 1 else start_time + duration_per_image
+                
+                duration = end_time - start_time
+                
+                clip = TimelineClip(
+                    asset_path=Path(image_path),
+                    start_time=start_time,
+                    duration=duration,
+                    transition_in=transition_type if i > 0 else None,
+                    transition_in_duration=transition_duration if i > 0 else 0,
+                    beat_aligned=True,
+                    sync_point=sync_points[beat_index] if beat_index < len(sync_points) else None
+                )
+                timeline.clips.append(clip)
+                current_time = end_time
+                
+                # Add beat marker
+                if clip.sync_point:
+                    timeline.markers.append({
+                        "time": clip.sync_point,
+                        "name": f"Beat {beat_index + 1}",
+                        "type": "beat"
+                    })
+        else:
+            # Simple sequential timeline
+            current_time = 0.0
+            for i, image_path in enumerate(image_paths):
+                clip = TimelineClip(
+                    asset_path=Path(image_path),
+                    start_time=current_time,
+                    duration=duration_per_image,
+                    transition_in=transition_type if i > 0 else None,
+                    transition_in_duration=transition_duration if i > 0 else 0
+                )
+                timeline.clips.append(clip)
+                current_time += duration_per_image - (transition_duration if i < len(image_paths) - 1 else 0)
+        
+        # Add mood metadata if we analyzed audio
+        if audio_path and sync_to_beat:
+            timeline.metadata["mood"] = analysis.mood.get_mood_category()
+            timeline.metadata["bpm"] = analysis.beat_info.tempo
+        
+        # Export timeline
+        export_manager = VideoExportManager()
+        output_dir = Path.home() / "Documents" / "AliceExports" / timeline.name
+        
+        results = await export_manager.export_timeline(
+            timeline,
+            output_dir,
+            formats=export_formats,
+            generate_proxies=True
+        )
+        
+        # Build timeline data for response
+        timeline_data = {
+            "name": timeline.name,
+            "duration": timeline.duration,
+            "frame_rate": timeline.frame_rate,
+            "resolution": list(timeline.resolution),
+            "clips": [
+                {
+                    "path": str(clip.asset_path),
+                    "start_time": clip.start_time,
+                    "duration": clip.duration,
+                    "transition_in": clip.transition_in,
+                    "beat_aligned": clip.beat_aligned
+                }
+                for clip in timeline.clips
+            ],
+            "markers": timeline.markers,
+            "metadata": timeline.metadata
+        }
+        
+        return {
+            "success": True,
+            "message": f"Created timeline with {len(timeline.clips)} clips",
+            "data": {
+                "timeline": timeline_data,
+                "exports": {
+                    fmt: str(path) for fmt, path in results["exports"].items()
+                },
+                "output_directory": str(output_dir),
+                "sync_info": {
+                    "beat_synced": sync_to_beat and bool(sync_points),
+                    "beat_count": len(sync_points) if sync_points else 0,
+                    "bpm": timeline.metadata.get("bpm"),
+                    "mood": timeline.metadata.get("mood")
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Timeline creation failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to create timeline"}
+
+
 def main():
     """Run the MCP server."""
     if not MCP_AVAILABLE:
@@ -2373,6 +2634,8 @@ def main():
     logger.info("  - analyze_music: Analyze audio for beats, BPM, and mood")
     logger.info("  - sync_images_to_music: Create beat-synced image timelines")
     logger.info("  - suggest_cuts_for_mood: Get mood-based edit suggestions")
+    logger.info("  - export_timeline: Export to DaVinci/CapCut formats")
+    logger.info("  - create_video_timeline: Build complete video from images")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))
