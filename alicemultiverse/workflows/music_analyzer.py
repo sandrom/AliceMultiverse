@@ -11,7 +11,6 @@ from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Any
 import numpy as np
 import librosa
-import librosa.display
 from collections import defaultdict
 
 logger = logging.getLogger(__name__)

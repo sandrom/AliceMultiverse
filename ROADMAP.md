@@ -13,28 +13,62 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 
 ## Current State (June 2025)
 
-### ✅ What's Working
-- **AI-Native Interface**: 33 MCP tools for complete workflow control
-- **Semantic Search**: Find images by content, style, mood, tags
+### ✅ What's Actually Working
+- **Core AI Interface**: Basic search and organize through Claude MCP
+- **Basic Search**: Find images by date, source, project
 - **Multi-Path Storage**: Assets across multiple locations with rules
 - **Cost Tracking**: Detailed spending reports and budget warnings
 - **Video Workflows**: Storyboards, Kling prompts, Flux keyframes
-- **File-Based Everything**: No database servers required
-- **Project Management**: Full creative context tracking via MCP
-- **Quick Selection**: Instant marking of favorites/hero shots
-- **Duplicate Detection**: Find and manage exact duplicates
-- **Batch Analysis**: 20-40% cost savings with similarity detection
-- **Local Vision Models**: Free analysis with Ollama integration
-- **Tag Hierarchies**: Semantic organization with clustering
-- **Style Analysis**: Visual DNA extraction and similarity search
+- **File-Based Storage**: No database servers required
+- **Project Structure**: Folders created, basic context saved
+- **Quick Selection**: Tool exists (untested if it actually saves)
+- **Duplicate Detection**: Tool exists (untested if it finds duplicates)
+
+### 🔧 What's Implemented But Broken/Untested
+- **Batch Analysis**: Missing tests, one import fixed
+- **Local Vision Models**: Probably works if Ollama installed (untested)
+- **Tag Hierarchies**: BROKEN - missing scikit-learn dependency
+- **Style Analysis**: BROKEN - missing scikit-learn dependency
+- **Enhanced Analyzer**: BROKEN - can't import due to dependencies
+- **Music Analyzer**: EXISTS but NO MCP integration, missing librosa
 
 ### ⚠️ What's Actually Broken
-1. **DuckDB Duplication**: Maintaining two implementations = double the bugs
-2. **Music sync is manual**: Have to count beats myself = tedious
-3. **Export is manual**: Re-create timelines every time = time waste
-4. **No large-scale testing**: Will it handle 10k images? Unknown
+1. **Tag & Style Features DON'T WORK**: Missing scikit-learn dependency
+   - Tag clustering fails on import
+   - Style analysis fails on import
+   - Enhanced analyzer can't load
+   - MCP tools exist but crash
+2. **Music Analyzer NOT INTEGRATED**: Module exists but no MCP tools
+   - Missing librosa dependency
+   - Can't access through Claude
+   - Manual beat counting continues
+3. **NO TESTS FOR ANY NEW FEATURES**: Everything untested = probably broken
+   - Batch optimization: untested
+   - Ollama integration: untested
+   - Quick selection: untested
+   - All 8 new features: ZERO tests
+4. **DuckDB Duplication**: Maintaining two implementations = double the bugs
+5. **Export is manual**: Re-create timelines every time = time waste
 
 ## Immediate Priorities (Fix What's Broken)
+
+### 0. CRITICAL: Fix Dependencies & Tests 🚨
+**Why**: Features literally don't work without dependencies
+
+- [ ] Add missing dependencies to requirements.txt
+  - [ ] Add `scikit-learn>=1.0.0` for clustering
+  - [ ] Add `librosa>=0.10.0` for music analysis
+- [ ] Fix the one import error already fixed locally
+  - [x] Fixed optimized_batch_analyzer.py import
+- [ ] Write basic smoke tests for EACH feature
+  - [ ] Test batch optimization actually groups images
+  - [ ] Test Ollama can analyze if available
+  - [ ] Test tag hierarchy loads default structure
+  - [ ] Test style analyzer extracts colors
+  - [ ] Test quick selection creates marks
+  - [ ] Test project creation works
+  - [ ] Test duplicate detection finds matches
+  - [ ] Test music analyzer detects beats
 
 ### 1. DuckDB Consolidation 🔧
 **Why**: Two implementations = double maintenance = confusion
