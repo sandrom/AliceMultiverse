@@ -29,6 +29,8 @@ from .storage.duckdb_cache import DuckDBSearchCache
 from .storage.duckdb_search import DuckDBSearch
 from .core.cost_tracker import get_cost_tracker
 from .projects.service import ProjectService
+from .selections.service import SelectionService
+from .selections.models import SelectionPurpose, SelectionStatus
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -46,6 +48,9 @@ search_db = DuckDBSearch()
 
 # Initialize project service
 project_service = ProjectService()
+
+# Initialize selection service
+selection_service = SelectionService()
 
 if MCP_AVAILABLE:
     server = Server("alice-multiverse")
@@ -637,6 +642,222 @@ async def find_duplicates(
 
 
 @server.tool()
+async def quick_mark(
+    asset_ids: list[str],
+    mark_type: str = "favorite",
+    project_name: str | None = None
+) -> dict[str, Any]:
+    """
+    Quickly mark assets as favorites or other quick categories.
+    
+    Parameters:
+    - asset_ids: List of asset content hashes to mark
+    - mark_type: Type of mark - "favorite", "hero", "maybe", "review"
+    - project_name: Optional project to associate with
+    
+    Fast marking without detailed metadata for rapid triage.
+    """
+    try:
+        # Map mark types to selection purposes
+        purpose_map = {
+            "favorite": SelectionPurpose.CURATION,
+            "hero": SelectionPurpose.PRESENTATION,
+            "maybe": SelectionPurpose.REVIEW,
+            "review": SelectionPurpose.REVIEW
+        }
+        purpose = purpose_map.get(mark_type, SelectionPurpose.CURATION)
+        
+        # Create or get quick selection for today
+        from datetime import datetime
+        today = datetime.now().strftime("%Y-%m-%d")
+        selection_name = f"quick-{mark_type}-{today}"
+        
+        # Check if selection exists
+        existing = None
+        selections = selection_service.list_selections(project_name=project_name)
+        for sel in selections:
+            if sel.name == selection_name:
+                existing = sel
+                break
+        
+        # Create selection if it doesn't exist
+        if not existing:
+            selection = selection_service.create_selection(
+                name=selection_name,
+                purpose=purpose,
+                project_name=project_name,
+                description=f"Quick {mark_type} selections for {today}"
+            )
+        else:
+            selection = existing
+        
+        # Add assets to selection
+        added_count = 0
+        already_added = []
+        
+        for asset_id in asset_ids:
+            try:
+                selection_service.add_asset(
+                    selection_id=selection.id,
+                    content_hash=asset_id,
+                    reason=f"Quick marked as {mark_type}",
+                    tags=[mark_type, "quick-mark"]
+                )
+                added_count += 1
+            except Exception as e:
+                if "already in selection" in str(e):
+                    already_added.append(asset_id)
+                else:
+                    logger.debug(f"Failed to add asset {asset_id}: {e}")
+        
+        return {
+            "success": True,
+            "message": f"Marked {added_count} assets as {mark_type}",
+            "data": {
+                "selection_id": selection.id,
+                "selection_name": selection.name,
+                "added_count": added_count,
+                "already_added_count": len(already_added),
+                "total_in_selection": len(selection.assets)
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Quick mark failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to mark assets"}
+
+
+@server.tool()
+async def list_quick_marks(
+    mark_type: str | None = None,
+    project_name: str | None = None,
+    days_back: int = 7
+) -> dict[str, Any]:
+    """
+    List recent quick marks/favorites.
+    
+    Parameters:
+    - mark_type: Filter by type - "favorite", "hero", "maybe", "review" 
+    - project_name: Filter by project
+    - days_back: How many days back to look (default 7)
+    
+    Returns recent quick selections with asset counts.
+    """
+    try:
+        from datetime import datetime, timedelta
+        
+        # Get all selections
+        selections = selection_service.list_selections(project_name=project_name)
+        
+        # Filter to quick marks
+        quick_selections = []
+        cutoff_date = datetime.now() - timedelta(days=days_back)
+        
+        for sel in selections:
+            # Check if it's a quick selection
+            if not sel.name.startswith("quick-"):
+                continue
+                
+            # Check mark type filter
+            if mark_type and f"quick-{mark_type}" not in sel.name:
+                continue
+                
+            # Check date
+            if sel.created_at < cutoff_date:
+                continue
+                
+            # Extract mark type from name
+            parts = sel.name.split("-")
+            if len(parts) >= 2:
+                sel_mark_type = parts[1]
+            else:
+                sel_mark_type = "unknown"
+            
+            quick_selections.append({
+                "id": sel.id,
+                "name": sel.name,
+                "mark_type": sel_mark_type,
+                "project": sel.project_name,
+                "created_at": sel.created_at.isoformat(),
+                "asset_count": len(sel.assets),
+                "description": sel.description
+            })
+        
+        # Sort by creation date descending
+        quick_selections.sort(key=lambda x: x["created_at"], reverse=True)
+        
+        return {
+            "success": True,
+            "message": f"Found {len(quick_selections)} quick mark collections",
+            "data": {
+                "selections": quick_selections,
+                "days_back": days_back,
+                "mark_type_filter": mark_type
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"List quick marks failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to list quick marks"}
+
+
+@server.tool()
+async def export_quick_marks(
+    selection_id: str,
+    export_path: str | None = None,
+    copy_files: bool = True
+) -> dict[str, Any]:
+    """
+    Export quick marked assets to a folder.
+    
+    Parameters:
+    - selection_id: ID of the quick selection to export
+    - export_path: Where to export (defaults to exports/selection-name/)
+    - copy_files: Whether to copy files or just create manifest
+    
+    Exports marked assets for use in other tools.
+    """
+    try:
+        from pathlib import Path
+        
+        # Get the selection
+        selection = selection_service.get_selection(selection_id)
+        if not selection:
+            return {
+                "success": False,
+                "message": f"Selection {selection_id} not found"
+            }
+        
+        # Determine export path
+        if not export_path:
+            export_path = f"exports/{selection.name}"
+        
+        export_dir = Path(export_path)
+        
+        # Export the selection
+        manifest_path = selection_service.export_selection(
+            selection_id=selection_id,
+            export_dir=export_dir,
+            copy_files=copy_files
+        )
+        
+        return {
+            "success": True,
+            "message": f"Exported {len(selection.assets)} assets",
+            "data": {
+                "export_path": str(export_dir),
+                "manifest_path": str(manifest_path),
+                "asset_count": len(selection.assets),
+                "copy_files": copy_files
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Export quick marks failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to export marks"}
+
+
+@server.tool()
 async def update_project_context(
     name: str,
     style: str | None = None,
@@ -727,6 +948,9 @@ def main():
     logger.info("  - get_project_context: Get project creative context and status")
     logger.info("  - update_project_context: Update project creative context")
     logger.info("  - find_duplicates: Find exact duplicate files in collection")
+    logger.info("  - quick_mark: Fast mark assets as favorites/hero/maybe")
+    logger.info("  - list_quick_marks: View recent quick selections")
+    logger.info("  - export_quick_marks: Export marked assets to folder")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))

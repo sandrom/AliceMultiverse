@@ -36,6 +36,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Created v3-cleanup-plan.md documenting deprecated cache modules
   - Identified that DuckDB merge would be significant undertaking
 
+- **Quick Selection Workflow**: Fast favorites marking system
+  - Added `quick_mark` tool - Instantly mark as favorite/hero/maybe/review
+  - Added `list_quick_marks` tool - View recent quick selections
+  - Added `export_quick_marks` tool - Export marked assets to folders
+  - Auto-creates daily collections by mark type
+  - Integrates with comprehensive selection service for persistence
+  - Created quick-selection-guide.md with workflow examples
+
 ### Removed (2025-06-05)
 - Removed `alice_interface_v2.py` - incomplete compatibility layer that was never used
 - Removed `redis_event_migration.py` example - migration to optional Redis completed

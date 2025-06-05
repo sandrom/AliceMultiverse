@@ -65,7 +65,12 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
   - [x] Added `find_duplicates` MCP tool for exact duplicates
   - [x] Shows wasted space and duplicate groups
   - [ ] TODO: Add perceptual hash similarity comparison
-- [ ] Quick selection workflow (mark favorites faster)
+- [x] Quick selection workflow (mark favorites faster)
+  - [x] Added `quick_mark` tool for instant favorites/hero/maybe marking
+  - [x] Added `list_quick_marks` to view recent selections
+  - [x] Added `export_quick_marks` to export marked assets
+  - [x] Integrates with comprehensive selection service
+  - [x] Daily quick selections auto-created by mark type
 
 ## My Actual Workflow (What Matters)
 
