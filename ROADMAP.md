@@ -31,16 +31,18 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 ### 1. Code Cleanup Sprint 🧹
 **Why**: Clean code = easier maintenance = less frustration
 
-- [ ] Remove deprecated interface files
-  - [ ] Confirm alice_structured.py is current
-  - [ ] Delete alice_interface.py, alice_interface_v2.py
-  - [ ] Update all imports and tests
-- [ ] Remove completed migration code
+- [x] Remove deprecated interface files
+  - [x] Confirm alice_structured.py is current
+  - [x] Delete alice_interface_v2.py (incomplete, unused)
+  - [x] Keep alice_interface.py (still needed by MCP server)
+- [x] Remove completed migration code
+  - [x] Removed redis_event_migration.py example
   - [ ] Archive PostgreSQL migration files
-  - [ ] Clean up Redis migration remnants
 - [ ] Consolidate duplicate functionality
   - [ ] Merge overlapping storage modules
-  - [ ] Remove redundant CLI handlers
+  - [ ] Keep both CLI handlers (legacy + structured) for now
+  - [ ] Clean up PostgreSQL references in comments
+  - [ ] Plan removal of deprecated cache modules (v3.0)
 
 ### 2. Workflow Polish ✨
 **Why**: Daily friction adds up
