@@ -532,6 +532,111 @@ async def get_project_context(name: str) -> dict[str, Any]:
 
 
 @server.tool()
+async def find_duplicates(
+    check_similar: bool = False,
+    similarity_threshold: float = 0.95,
+    limit: int = 100
+) -> dict[str, Any]:
+    """
+    Find duplicate or near-duplicate assets in your collection.
+    
+    Parameters:
+    - check_similar: If True, use perceptual hashing to find similar (not just identical) images
+    - similarity_threshold: For similar images, how similar (0.0-1.0, higher = more similar)
+    - limit: Maximum number of duplicate sets to return
+    
+    Returns groups of duplicate/similar assets with their locations and sizes.
+    """
+    try:
+        # Get all assets from the search cache
+        all_assets = []
+        
+        # Query the DuckDB cache for all assets with hashes
+        conn = storage.get_connection()
+        cursor = conn.cursor()
+        
+        if check_similar:
+            # Get assets with perceptual hashes
+            cursor.execute("""
+                SELECT content_hash, file_path, file_size, 
+                       perceptual_hash, difference_hash, average_hash
+                FROM assets 
+                WHERE perceptual_hash IS NOT NULL
+                ORDER BY file_path
+            """)
+        else:
+            # Get all assets for exact duplicate check
+            cursor.execute("""
+                SELECT content_hash, file_path, file_size
+                FROM assets
+                ORDER BY file_path
+            """)
+        
+        rows = cursor.fetchall()
+        
+        # Group by hash
+        if check_similar:
+            # TODO: Implement perceptual hash similarity comparison
+            # For now, we'll just return a message that this feature is coming
+            return {
+                "success": True,
+                "message": "Similar image detection coming soon",
+                "data": {
+                    "note": "Currently only exact duplicates are detected. Perceptual similarity search is in development."
+                }
+            }
+        else:
+            # Group by content hash for exact duplicates
+            hash_groups = {}
+            for row in rows:
+                content_hash, file_path, file_size = row
+                if content_hash not in hash_groups:
+                    hash_groups[content_hash] = []
+                hash_groups[content_hash].append({
+                    "path": file_path,
+                    "size": file_size
+                })
+            
+            # Filter to only groups with duplicates
+            duplicate_groups = []
+            total_wasted_space = 0
+            
+            for content_hash, files in hash_groups.items():
+                if len(files) > 1:
+                    # Calculate wasted space (all but one copy)
+                    wasted = sum(f["size"] for f in files[1:])
+                    total_wasted_space += wasted
+                    
+                    duplicate_groups.append({
+                        "hash": content_hash,
+                        "count": len(files),
+                        "files": files,
+                        "wasted_space": wasted
+                    })
+            
+            # Sort by wasted space descending
+            duplicate_groups.sort(key=lambda x: x["wasted_space"], reverse=True)
+            
+            # Limit results
+            duplicate_groups = duplicate_groups[:limit]
+            
+            return {
+                "success": True,
+                "message": f"Found {len(duplicate_groups)} sets of duplicates",
+                "data": {
+                    "duplicate_groups": duplicate_groups,
+                    "total_duplicate_sets": len(hash_groups),
+                    "total_wasted_space": total_wasted_space,
+                    "total_wasted_space_mb": round(total_wasted_space / 1024 / 1024, 2)
+                }
+            }
+            
+    except Exception as e:
+        logger.error(f"Find duplicates failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to find duplicates"}
+
+
+@server.tool()
 async def update_project_context(
     name: str,
     style: str | None = None,
@@ -621,6 +726,7 @@ def main():
     logger.info("  - list_projects: List all projects with status and budget")
     logger.info("  - get_project_context: Get project creative context and status")
     logger.info("  - update_project_context: Update project creative context")
+    logger.info("  - find_duplicates: Find exact duplicate files in collection")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))

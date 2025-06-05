@@ -24,6 +24,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Added `update_project_context` tool - Update creative parameters
   - Projects now fully accessible through AI assistant interface
 
+- **Duplicate Detection via MCP**: Better duplicate management
+  - Added `find_duplicates` tool - Find exact duplicate files
+  - Shows duplicate groups sorted by wasted space
+  - Calculates total wasted storage from duplicates
+  - Foundation for future perceptual similarity detection
+
 ### Removed (2025-06-05)
 - Removed `alice_interface_v2.py` - incomplete compatibility layer that was never used
 - Removed `redis_event_migration.py` example - migration to optional Redis completed

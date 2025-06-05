@@ -59,7 +59,10 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
   - [x] Added `list_projects` MCP tool
   - [x] Added `get_project_context` MCP tool
   - [x] Added `update_project_context` MCP tool
-- [ ] Better duplicate detection  
+- [x] Better duplicate detection
+  - [x] Added `find_duplicates` MCP tool for exact duplicates
+  - [x] Shows wasted space and duplicate groups
+  - [ ] TODO: Add perceptual hash similarity comparison
 - [ ] Quick selection workflow (mark favorites faster)
 
 ## My Actual Workflow (What Matters)
