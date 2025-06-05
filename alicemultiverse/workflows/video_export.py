@@ -409,7 +409,6 @@ class ProxyGenerator:
         Returns mapping of original path to proxy path.
         """
         import asyncio
-        import aiofiles
         
         proxy_map = {}
         output_dir.mkdir(parents=True, exist_ok=True)

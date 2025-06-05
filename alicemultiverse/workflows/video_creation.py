@@ -20,7 +20,6 @@ from xml.dom import minidom
 
 from ..core.structured_logging import get_logger
 from ..storage.duckdb_search import DuckDBSearch
-from ..understanding.providers import UnderstandingProvider
 from ..providers.types import GenerationRequest, GenerationType
 
 logger = get_logger(__name__)
@@ -185,7 +184,7 @@ class VideoCreationWorkflow:
         CameraMotion.STATIC: ["still", "fixed", "stationary", "stable"]
     }
     
-    def __init__(self, search_db: DuckDBSearch, understanding_provider: Optional[UnderstandingProvider] = None):
+    def __init__(self, search_db: DuckDBSearch, understanding_provider: Optional[Any] = None):
         """Initialize video creation workflow.
         
         Args:

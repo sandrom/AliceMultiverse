@@ -65,7 +65,7 @@ class TestVideoExport:
         assert "TITLE: Test_Timeline" in content
         assert "FCM: NON-DROP FRAME" in content
         assert "001" in content  # First edit number
-        assert "crossfade" in content.upper()  # Transition
+        assert "CROSSFADE" in content  # Transition
         
     def test_xml_export(self, sample_timeline, tmp_path):
         """Test XML export functionality."""

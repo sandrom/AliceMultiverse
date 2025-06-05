@@ -13,6 +13,10 @@ class WorkflowStartedEvent(Event):
     workflow_id: str
     total_steps: int
     
+    def __post_init__(self):
+        """Initialize base event fields."""
+        super().__init__()
+    
     @property
     def event_type(self) -> str:
         return "workflow.started"
@@ -28,6 +32,10 @@ class WorkflowCompletedEvent(Event):
     completed_steps: int
     total_steps: int
     
+    def __post_init__(self):
+        """Initialize base event fields."""
+        super().__init__()
+    
     @property
     def event_type(self) -> str:
         return "workflow.completed"
@@ -40,6 +48,10 @@ class WorkflowFailedEvent(Event):
     workflow_id: str
     error: str
     
+    def __post_init__(self):
+        """Initialize base event fields."""
+        super().__init__()
+    
     @property
     def event_type(self) -> str:
         return "workflow.failed"
@@ -50,6 +62,10 @@ class WorkflowStepStartedEvent(Event):
     """Published when a workflow step starts."""
     workflow_id: str
     step_name: str
+    
+    def __post_init__(self):
+        """Initialize base event fields."""
+        super().__init__()
     
     @property
     def event_type(self) -> str:
@@ -63,6 +79,10 @@ class WorkflowStepCompletedEvent(Event):
     step_name: str
     success: bool
     cost: float
+    
+    def __post_init__(self):
+        """Initialize base event fields."""
+        super().__init__()
     
     @property
     def event_type(self) -> str:
