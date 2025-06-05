@@ -25,7 +25,7 @@ from ..assets.perceptual_hashing import (
 from ..core.cost_tracker import get_cost_tracker
 from .analyzer import ImageAnalyzer
 from .batch_analyzer import BatchAnalysisRequest, BatchProgress
-from .models import ImageAnalysisResult
+from .base import ImageAnalysisResult
 
 logger = logging.getLogger(__name__)
 
