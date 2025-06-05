@@ -2024,6 +2024,298 @@ async def check_style_compatibility(
         return {"success": False, "error": str(e), "message": "Failed to check compatibility"}
 
 
+@server.tool()
+async def analyze_music(
+    audio_path: str,
+    detect_sections: bool = True,
+    extract_mood: bool = True
+) -> dict[str, Any]:
+    """
+    Analyze music track for beat detection and mood analysis.
+    
+    Parameters:
+    - audio_path: Path to audio file (mp3, wav, m4a, etc.)
+    - detect_sections: Detect musical sections (verse, chorus, etc.)
+    - extract_mood: Analyze mood and energy levels
+    
+    Returns beat timing, BPM, mood analysis, and section markers.
+    """
+    try:
+        # Import music analyzer directly to avoid workflow module issues
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "music_analyzer", 
+            Path(__file__).parent / "workflows" / "music_analyzer.py"
+        )
+        music_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(music_module)
+        
+        analyzer = music_module.MusicAnalyzer()
+        audio_file = Path(audio_path)
+        
+        if not audio_file.exists():
+            return {
+                "success": False,
+                "error": "Audio file not found",
+                "message": f"File not found: {audio_path}"
+            }
+        
+        # Analyze the music
+        analysis = await analyzer.analyze(
+            audio_file,
+            analyze_beats=True,
+            analyze_sections=detect_sections,
+            analyze_mood=extract_mood
+        )
+        
+        return {
+            "success": True,
+            "message": f"Analyzed music: {audio_file.name}",
+            "data": {
+                "file": str(audio_file),
+                "duration": analysis.duration,
+                "beat_info": {
+                    "bpm": analysis.beat_info.tempo,
+                    "beat_count": len(analysis.beat_info.beats),
+                    "time_signature": analysis.beat_info.time_signature,
+                    "downbeats": analysis.beat_info.downbeats[:10],  # First 10
+                    "beat_times": analysis.beat_info.beats[:20]  # First 20
+                },
+                "mood": {
+                    "energy": analysis.mood.energy,
+                    "valence": analysis.mood.valence,
+                    "intensity": analysis.mood.intensity,
+                    "category": analysis.mood.get_mood_category(),
+                    "tags": analysis.mood.mood_tags
+                },
+                "sections": [
+                    {
+                        "name": s.name,
+                        "start": s.start_time,
+                        "end": s.end_time,
+                        "duration": s.duration
+                    }
+                    for s in analysis.sections
+                ] if detect_sections else []
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Music analysis failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to analyze music"}
+
+
+@server.tool()
+async def sync_images_to_music(
+    audio_path: str,
+    image_paths: list[str],
+    sync_mode: str = "beat",
+    transition_duration: float = 0.5
+) -> dict[str, Any]:
+    """
+    Create a synchronized timeline matching images to music.
+    
+    Parameters:
+    - audio_path: Path to audio file
+    - image_paths: List of image paths to sync
+    - sync_mode: "beat" (change on beat), "measure" (change on downbeat), or "section"
+    - transition_duration: Transition time between images (seconds)
+    
+    Returns timeline with image timings synced to music.
+    """
+    try:
+        # Import music analyzer
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "music_analyzer", 
+            Path(__file__).parent / "workflows" / "music_analyzer.py"
+        )
+        music_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(music_module)
+        
+        analyzer = music_module.MusicAnalyzer()
+        audio_file = Path(audio_path)
+        
+        # Analyze music
+        analysis = await analyzer.analyze(audio_file, analyze_beats=True)
+        
+        # Get sync points based on mode
+        if sync_mode == "beat":
+            sync_points = analysis.beat_info.beats
+        elif sync_mode == "measure":
+            sync_points = analysis.beat_info.downbeats
+        elif sync_mode == "section":
+            sync_points = [s.start_time for s in analysis.sections]
+        else:
+            sync_points = analysis.beat_info.beats
+        
+        # Create timeline
+        timeline = []
+        image_duration = analysis.duration / len(image_paths)
+        
+        for i, image_path in enumerate(image_paths):
+            # Find nearest sync point
+            target_time = i * image_duration
+            nearest_sync = min(sync_points, key=lambda x: abs(x - target_time))
+            
+            timeline.append({
+                "image": image_path,
+                "start_time": nearest_sync,
+                "duration": image_duration,
+                "transition": {
+                    "type": "crossfade",
+                    "duration": transition_duration
+                },
+                "beat_aligned": True
+            })
+        
+        # Adjust durations to avoid gaps
+        for i in range(len(timeline) - 1):
+            timeline[i]["duration"] = timeline[i + 1]["start_time"] - timeline[i]["start_time"]
+        timeline[-1]["duration"] = analysis.duration - timeline[-1]["start_time"]
+        
+        return {
+            "success": True,
+            "message": f"Created timeline with {len(timeline)} images synced to music",
+            "data": {
+                "audio": str(audio_file),
+                "total_duration": analysis.duration,
+                "bpm": analysis.beat_info.tempo,
+                "sync_mode": sync_mode,
+                "timeline": timeline,
+                "export_hints": {
+                    "davinci_resolve": "Import as XML with beat markers",
+                    "capcut": "Use JSON timeline for precise sync"
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Music sync failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to sync images to music"}
+
+
+@server.tool()
+async def suggest_cuts_for_mood(
+    audio_path: str,
+    target_mood: str = "auto",
+    cut_frequency: str = "medium"
+) -> dict[str, Any]:
+    """
+    Suggest cut points based on music mood and energy.
+    
+    Parameters:
+    - audio_path: Path to audio file
+    - target_mood: Desired mood ("energetic", "calm", "dramatic", "auto")
+    - cut_frequency: "fast" (many cuts), "medium", or "slow" (few cuts)
+    
+    Returns suggested cut points with mood-based recommendations.
+    """
+    try:
+        # Import music analyzer
+        import importlib.util
+        spec = importlib.util.spec_from_file_location(
+            "music_analyzer", 
+            Path(__file__).parent / "workflows" / "music_analyzer.py"
+        )
+        music_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(music_module)
+        
+        analyzer = music_module.MusicAnalyzer()
+        audio_file = Path(audio_path)
+        
+        # Analyze music
+        analysis = await analyzer.analyze(
+            audio_file, 
+            analyze_beats=True,
+            analyze_sections=True,
+            analyze_mood=True
+        )
+        
+        # Determine cut frequency multiplier
+        freq_multiplier = {
+            "fast": 2.0,
+            "medium": 1.0,
+            "slow": 0.5
+        }.get(cut_frequency, 1.0)
+        
+        # Get base cut points
+        cut_points = []
+        
+        # Add section transitions
+        for section in analysis.sections:
+            cut_points.append({
+                "time": section.start_time,
+                "type": "section_change",
+                "strength": 1.0,
+                "reason": f"New section: {section.name}"
+            })
+        
+        # Add beat-based cuts based on mood
+        if target_mood == "auto":
+            target_mood = analysis.mood.get_mood_category()
+        
+        if target_mood in ["energetic", "upbeat", "intense"]:
+            # More frequent cuts on strong beats
+            for i, (beat, strength) in enumerate(zip(
+                analysis.beat_info.beats, 
+                analysis.beat_info.beat_strength
+            )):
+                if strength > 0.7 and i % int(4 / freq_multiplier) == 0:
+                    cut_points.append({
+                        "time": beat,
+                        "type": "strong_beat",
+                        "strength": strength,
+                        "reason": "Strong beat for energy"
+                    })
+        else:
+            # Fewer cuts, focus on downbeats
+            for i, downbeat in enumerate(analysis.beat_info.downbeats):
+                if i % int(8 / freq_multiplier) == 0:
+                    cut_points.append({
+                        "time": downbeat,
+                        "type": "downbeat",
+                        "strength": 0.8,
+                        "reason": "Measure boundary for flow"
+                    })
+        
+        # Sort by time
+        cut_points.sort(key=lambda x: x["time"])
+        
+        # Generate recommendations
+        recommendations = []
+        if analysis.mood.energy > 0.7:
+            recommendations.append("High energy detected - consider fast cuts and dynamic transitions")
+        if analysis.mood.valence < 0.4:
+            recommendations.append("Melancholic mood - use longer shots and subtle transitions")
+        if len(analysis.sections) > 5:
+            recommendations.append("Multiple sections detected - emphasize section changes")
+        
+        return {
+            "success": True,
+            "message": f"Generated {len(cut_points)} cut suggestions for {target_mood} mood",
+            "data": {
+                "audio": str(audio_file),
+                "duration": analysis.duration,
+                "detected_mood": analysis.mood.get_mood_category(),
+                "target_mood": target_mood,
+                "cut_count": len(cut_points),
+                "cuts_per_minute": len(cut_points) / (analysis.duration / 60),
+                "cut_points": cut_points[:50],  # Limit to first 50
+                "recommendations": recommendations,
+                "mood_analysis": {
+                    "energy": analysis.mood.energy,
+                    "valence": analysis.mood.valence,
+                    "intensity": analysis.mood.intensity
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Cut suggestion failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to suggest cuts"}
+
+
 def main():
     """Run the MCP server."""
     if not MCP_AVAILABLE:
@@ -2078,6 +2370,9 @@ def main():
     logger.info("  - extract_style_prompts: Get reusable style prompts")
     logger.info("  - build_style_collections: Auto-create style collections")
     logger.info("  - check_style_compatibility: Check visual coherence")
+    logger.info("  - analyze_music: Analyze audio for beats, BPM, and mood")
+    logger.info("  - sync_images_to_music: Create beat-synced image timelines")
+    logger.info("  - suggest_cuts_for_mood: Get mood-based edit suggestions")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))
