@@ -14,63 +14,80 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 ## Current State (June 2025)
 
 ### ✅ What's Working
-- **AI-Native Interface**: Search and organize through Claude MCP
-- **Semantic Search**: Find images by content, style, mood
+- **AI-Native Interface**: 33 MCP tools for complete workflow control
+- **Semantic Search**: Find images by content, style, mood, tags
 - **Multi-Path Storage**: Assets across multiple locations with rules
-- **Cost Tracking**: Know exactly what I'm spending
+- **Cost Tracking**: Detailed spending reports and budget warnings
 - **Video Workflows**: Storyboards, Kling prompts, Flux keyframes
 - **File-Based Everything**: No database servers required
+- **Project Management**: Full creative context tracking via MCP
+- **Quick Selection**: Instant marking of favorites/hero shots
+- **Duplicate Detection**: Find and manage exact duplicates
+- **Batch Analysis**: 20-40% cost savings with similarity detection
+- **Local Vision Models**: Free analysis with Ollama integration
+- **Tag Hierarchies**: Semantic organization with clustering
+- **Style Analysis**: Visual DNA extraction and similarity search
 
-### ⚠️ Active Pain Points
-1. **Code Cleanup Needed**: Multiple deprecated interface files
-2. **Documentation Confusion**: Still reads like a product in places
-3. **Daily Workflow Friction**: Small annoyances that add up
+### ⚠️ What's Actually Broken
+1. **DuckDB Duplication**: Maintaining two implementations = double the bugs
+2. **Music sync is manual**: Have to count beats myself = tedious
+3. **Export is manual**: Re-create timelines every time = time waste
+4. **No large-scale testing**: Will it handle 10k images? Unknown
 
-## Immediate Priorities
+## Immediate Priorities (Fix What's Broken)
 
-### 1. Code Cleanup Sprint 🧹
-**Why**: Clean code = easier maintenance = less frustration
+### 1. DuckDB Consolidation 🔧
+**Why**: Two implementations = double maintenance = confusion
 
-- [x] Remove deprecated interface files
-  - [x] Confirm alice_structured.py is current
-  - [x] Delete alice_interface_v2.py (incomplete, unused)
-  - [x] Keep alice_interface.py (still needed by MCP server)
-- [x] Remove completed migration code
-  - [x] Removed redis_event_migration.py example
-  - [ ] Remove PostgreSQL migration files (if any remain)
-- [ ] Consolidate duplicate functionality
-  - [x] Identified overlapping storage modules:
-    - DuckDBSearchCache (primary, used by MCP server)
-    - DuckDBSearch (legacy/specialized, used by search handler)
-  - [ ] Keep both CLI handlers (legacy + structured) for now
+- [ ] Merge DuckDBSearchCache and DuckDBSearch
+  - [ ] Map all usage points for both implementations
+  - [ ] Create unified interface preserving both APIs
+  - [ ] Migrate MCP server to unified version
+  - [ ] Migrate search handler to unified version
+  - [ ] Remove deprecated implementation
+  - [ ] Update all imports and tests
 
-### Future Cleanup (Lower Priority)
-- [x] Analyze DuckDB merge strategy (significant work, postponed)
-- [x] Clean up PostgreSQL references in comments  
-- [x] Document deprecated cache modules for v3.0 removal
-  - Created v3-cleanup-plan.md with removal checklist
-- [ ] Actually merge DuckDB implementations (major task)
-- [ ] Consolidate storage modules further
+### 2. Video Creation 2.0 - Music Integration 🎵
+**Why**: Manual sync is tedious, music drives emotion
 
-### 2. Workflow Polish ✨
-**Why**: Daily friction adds up
+- [x] Basic music analyzer module created (music_analyzer.py)
+- [ ] Integrate music analyzer with MCP tools
+  - [ ] Add `analyze_music` tool for beat/mood detection
+  - [ ] Add `sync_to_music` tool for timeline generation
+  - [ ] Add `suggest_cuts` tool based on rhythm
+- [ ] Connect mood analysis to image selection
+  - [ ] Match image tags to music mood
+  - [ ] Create emotional arc suggestions
+- [ ] Export sync data to editors
+  - [ ] DaVinci Resolve markers at beat points
+  - [ ] CapCut timing JSON
 
-- [x] Check Claude MCP issues (no known issues, good docs)
-- [x] Streamline project creation flow
-  - [x] Added `create_project` MCP tool
-  - [x] Added `list_projects` MCP tool
-  - [x] Added `get_project_context` MCP tool
-  - [x] Added `update_project_context` MCP tool
-- [x] Better duplicate detection
-  - [x] Added `find_duplicates` MCP tool for exact duplicates
-  - [x] Shows wasted space and duplicate groups
-  - [ ] TODO: Add perceptual hash similarity comparison
-- [x] Quick selection workflow (mark favorites faster)
-  - [x] Added `quick_mark` tool for instant favorites/hero/maybe marking
-  - [x] Added `list_quick_marks` to view recent selections
-  - [x] Added `export_quick_marks` to export marked assets
-  - [x] Integrates with comprehensive selection service
-  - [x] Daily quick selections auto-created by mark type
+### 3. Export Templates 📹
+**Why**: Re-creating export settings every time wastes time
+
+- [ ] Add DaVinci Resolve EDL/XML export
+  - [ ] Timeline with markers for beat sync
+  - [ ] Color metadata preservation
+  - [ ] Compound clips for sequences
+- [ ] Build CapCut project export
+  - [ ] JSON format for mobile editing
+  - [ ] Transition suggestions
+  - [ ] Effect presets
+- [ ] Include proxy generation for smooth editing
+
+## Recently Completed (2025-06)
+
+### Enhanced Understanding System ✅
+- **Batch Analysis Optimization**: 20-40% cost savings via similarity detection
+- **Local Vision Models**: Ollama integration for free, private analysis
+- **Intelligent Tag Hierarchies**: Semantic organization with clustering
+- **Style Similarity Clusters**: Visual DNA extraction and matching
+
+### Workflow Improvements ✅
+- **Project Management**: Full MCP integration with creative context
+- **Quick Selection**: Instant marking system for favorites
+- **Duplicate Detection**: Find and manage exact duplicates
+- **Code Cleanup**: Removed deprecated files, documented future removals
 
 ## My Actual Workflow (What Matters)
 
@@ -82,75 +99,16 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 2. **Search & Select**
    - "Show me cyberpunk portraits from last week"
    - "Find similar to these three"
+   - Mark favorites with quick_mark
    - Track why I selected each
 
 3. **Prepare for Video**
    - Generate storyboards
    - Create Kling prompts
    - Export organized sets
+   - (Missing: Music sync automation)
 
 ## Next Focus Areas
-
-### Enhanced Understanding System 🧠
-**Why**: Better tags = better search = finding exactly what I need
-
-#### Batch Analysis Optimization ✅
-- [x] **Smart batching**: Group similar images for single API calls
-  - [x] Detect near-duplicates using perceptual hashing
-  - [x] Analyze one representative per group
-  - [x] Track cost savings from optimization
-- [x] **Progressive analysis**: Start with cheap providers, escalate if needed
-  - [x] Google AI first (free tier)
-  - [x] Add Claude/GPT only if results insufficient
-  - [x] Skip analysis for similar images in groups
-- [x] **Optimization tools**: MCP integration
-  - [x] Added `analyze_images_optimized` tool
-  - [x] Added `estimate_analysis_cost` tool
-  - [x] Shows savings percentage and API calls saved
-
-#### Local Vision Models Integration
-- [ ] **Ollama support**: Free, private, no API costs
-  - LLaVA for basic object detection
-  - CLIP for style understanding
-  - Fallback to cloud for complex cases
-- [ ] **Hybrid approach**: Local first, cloud for enhancement
-  - Local: Basic tags, objects, colors
-  - Cloud: Artistic style, mood, complex scenes
-  - Cost tracking comparison
-- [ ] **Model management**: Easy switching between providers
-  - Provider capabilities matrix
-  - Automatic model selection based on image type
-  - Performance benchmarks per model
-
-#### Intelligent Tag Hierarchies
-- [ ] **Semantic relationships**: Tags that understand context
-  ```
-  portrait → person → face → expression → happy
-  cyberpunk → sci-fi → futuristic → neon
-  ```
-- [ ] **Auto-grouping**: Similar concepts cluster together
-  - "sunset/sunrise/golden hour" → lighting conditions
-  - "oil painting/watercolor/acrylic" → traditional media
-  - "3D render/CGI/digital art" → digital media
-- [ ] **Custom taxonomies**: My personal organization style
-  - Project-specific tag groups
-  - Mood boards as tag collections
-  - Export/import tag schemes
-
-#### Style Similarity Clusters
-- [ ] **Visual DNA**: Extract style fingerprints
-  - Color palettes
-  - Composition patterns
-  - Texture characteristics
-  - Lighting styles
-- [ ] **Auto-collections**: Find images that "feel" similar
-  - "More like this" but for style
-  - Discover unexpected connections
-  - Build mood boards automatically
-- [ ] **Style transfer hints**: Identify reusable prompts
-  - Extract style elements from successful images
-  - Generate prompt suggestions
-  - Track which styles work well together
 
 ### Video Creation 2.0 🎬
 **Why**: Turn static images into compelling narratives
@@ -186,21 +144,19 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
   - Portal/doorway effects
 
 #### Export Optimization
-- [ ] **Editor presets**: One-click export for different tools
-  - Premiere Pro XML
-  - DaVinci Resolve EDL
-  - Final Cut Pro FCPXML
-  - After Effects compositions
+- [ ] **Editor presets**: One-click export for my tools
+  - DaVinci Resolve EDL/XML with full metadata
+  - CapCut JSON for mobile editing
 - [ ] **Asset preparation**: Ready-to-edit packages
   - Consistent resolution/format
-  - Color space management
-  - Proxy generation
-  - Folder structure templates
+  - Color space management (Resolve ACES workflow)
+  - Proxy generation for 4K+ content
+  - Organized bin structure
 - [ ] **Metadata preservation**: Keep all context
-  - Embed project info
-  - Shot descriptions
-  - Original prompts
-  - Edit decision lists
+  - Embed AI generation prompts
+  - Shot descriptions and tags
+  - Music sync markers
+  - Scene transition notes
 
 #### Smart Project Templates
 - [ ] **Genre templates**: Common video types
@@ -229,31 +185,34 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 
 ### Nice to Have
 - [ ] Web UI for quick previews
-- [ ] Mobile companion app
-- [ ] Plugin system for providers
-- [ ] Advanced deduplication
-
-### Never
-- [ ] Multi-user support (it's MY tool)
-- [ ] Cloud hosting (local is fine)
-- [ ] Enterprise features (not a product)
+- [ ] Mobile companion app for on-the-go selection
+- [ ] Plugin system for custom providers
+- [ ] Perceptual hash deduplication (beyond exact matches)
 
 ## Development Principles
 
-1. **It works or it's deleted**
-2. **Every API call costs money**
-3. **Simpler > Clever**
-4. **File-based > Database**
-5. **Test the happy path**
-6. **Document for future me**
+1. **Working > Perfect**: Fix what's broken before adding new
+2. **Track costs**: Every API call = money spent
+3. **Simple > Complex**: Less code = less bugs
+4. **Files > Servers**: Everything portable and local
+5. **Test reality**: Focus on actual daily workflow
+6. **Document clearly**: Future me needs to understand
 
 ## Success Metrics
 
-- Can I find the image I'm thinking of quickly?
-- Do I know what I spent this month?
-- Does it work smoothly for my daily workflow?
-- Can I explain it in one paragraph?
+- Can I find any image in seconds using natural queries?
+- Is my monthly AI spend under control and visible?
+- Does my daily workflow have zero friction?
+- Can I explain what each module does in one sentence?
+
+## Priority Framework
+
+**Daily Reality Check** (from top of file):
+1. What's broken TODAY? → Immediate priority
+2. What costs money? → Track and optimize
+3. What's complex? → Simplify it
+4. What's unused? → Delete it
 
 ---
 
-**Remember**: This is a personal tool. Every feature should make MY life easier, not impress hypothetical users.
+**Remember**: This is MY personal tool. Every decision should optimize for my specific workflow, not hypothetical users.

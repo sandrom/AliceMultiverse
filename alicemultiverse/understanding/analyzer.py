@@ -13,6 +13,7 @@ from .providers import (
     GoogleAIImageAnalyzer,
     DeepSeekImageAnalyzer,
 )
+from .ollama_provider import OllamaImageAnalyzer
 
 logger = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ class ImageAnalyzer:
         "openai": OpenAIImageAnalyzer,
         "google": GoogleAIImageAnalyzer,
         "deepseek": DeepSeekImageAnalyzer,
+        "ollama": OllamaImageAnalyzer,
     }
     
     def __init__(self):
@@ -86,6 +88,13 @@ class ImageAnalyzer:
                 logger.info("Initialized DeepSeek image analyzer")
             except Exception as e:
                 logger.warning(f"Failed to initialize DeepSeek analyzer: {e}")
+        
+        # Always try to initialize Ollama (no API key needed)
+        try:
+            self.analyzers["ollama"] = OllamaImageAnalyzer()
+            logger.info("Initialized Ollama local image analyzer")
+        except Exception as e:
+            logger.debug(f"Ollama not available: {e}")
     
     def add_analyzer(self, name: str, api_key: str, model: Optional[str] = None):
         """Add a specific analyzer.
@@ -325,7 +334,7 @@ class ImageAnalyzer:
         cost_per_image = budget / num_images
         
         # Get providers sorted by quality (assumed order)
-        provider_order = ["anthropic", "openai", "google", "deepseek"]
+        provider_order = ["anthropic", "openai", "google", "deepseek", "ollama"]
         
         for provider in provider_order:
             if provider in self.analyzers:

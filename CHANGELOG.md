@@ -53,6 +53,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Created optimized_batch_analyzer.py module
   - Created batch-analysis-optimization.md guide
 
+- **Local Vision Models Integration**: Free, private image analysis with Ollama
+  - Created `ollama_provider.py` with OllamaImageAnalyzer class
+  - Support for multiple vision models (LLaVA, BakLLaVA, Phi3)
+  - Integrated Ollama into main analyzer with automatic detection
+  - Added `check_ollama_status` tool - Check local model availability
+  - Added `analyze_with_local` tool - Hybrid local/cloud analysis
+  - Added `pull_ollama_model` tool - Download vision models
+  - Cost tracking shows $0 for local analysis
+  - Created local-vision-models-guide.md documentation
+  - Fallback to cloud providers when local unavailable
+
+- **Intelligent Tag Hierarchies**: Semantic tag organization and clustering
+  - Created `tag_hierarchy.py` with hierarchical tag relationships
+  - Created `tag_clustering.py` for automatic tag grouping
+  - Created `taxonomy_manager.py` for personal organization schemes
+  - Created `enhanced_analyzer.py` integrating all tag intelligence
+  - Default hierarchies for art styles, subjects, moods, lighting, colors
+  - Tag aliasing and normalization (b&w → black_and_white)
+  - Co-occurrence tracking for pattern detection
+  - DBSCAN clustering for similarity grouping
+  - Project-specific tag collections
+  - Mood board support with tags, colors, and images
+  - Export/import custom taxonomies
+  - Added 5 MCP tools for tag management
+  - Created intelligent-tag-hierarchies-guide.md documentation
+
+- **Style Similarity Clusters**: Visual style analysis and clustering
+  - Created `style_analyzer.py` for extracting visual DNA
+  - Created `style_clustering.py` for style-based grouping
+  - Color palette extraction using KMeans (dominant colors, temperature, harmony)
+  - Composition analysis (rule of thirds, symmetry, balance, focal points)
+  - Lighting analysis (mood, direction, contrast, time of day detection)
+  - Texture analysis (smoothness, patterns, grain, detail density)
+  - Style fingerprint vectors for mathematical similarity comparison
+  - "More like this" style-based image search
+  - Automatic style collections ("Warm Dramatic", "Cool Minimalist")
+  - Style transfer hint extraction with reusable prompt fragments
+  - Style compatibility checking for coherent sets
+  - Success rate estimation for style transfers
+  - Added 5 MCP tools for style analysis
+  - Created style-similarity-clusters-guide.md documentation
+
 ### Removed (2025-06-05)
 - Removed `alice_interface_v2.py` - incomplete compatibility layer that was never used
 - Removed `redis_event_migration.py` example - migration to optional Redis completed

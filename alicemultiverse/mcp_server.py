@@ -1085,6 +1085,945 @@ async def update_project_context(
         return {"success": False, "error": str(e), "message": "Failed to update project context"}
 
 
+@server.tool()
+async def check_ollama_status() -> dict[str, Any]:
+    """
+    Check if Ollama is running and what vision models are available.
+    
+    Returns information about local vision model availability.
+    """
+    try:
+        from .understanding.ollama_provider import OllamaImageAnalyzer
+        
+        analyzer = OllamaImageAnalyzer()
+        is_available = await analyzer.check_availability()
+        
+        if is_available:
+            # Get available models
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.get("http://localhost:11434/api/tags") as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        models = data.get("models", [])
+                        vision_models = [m["name"] for m in models if any(
+                            keyword in m["name"].lower() 
+                            for keyword in ["llava", "bakllava", "phi3"]
+                        )]
+                        
+                        return {
+                            "success": True,
+                            "message": "Ollama is running with vision models available",
+                            "data": {
+                                "available": True,
+                                "vision_models": vision_models,
+                                "recommended": OllamaImageAnalyzer.get_recommended_model("general"),
+                                "capabilities": {
+                                    "free": True,
+                                    "private": True,
+                                    "supports_batch": False,
+                                    "speed": "fast"
+                                }
+                            }
+                        }
+        
+        return {
+            "success": True,
+            "message": "Ollama is not available",
+            "data": {
+                "available": False,
+                "install_instructions": "Install Ollama from https://ollama.ai, then run: ollama pull llava"
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to check Ollama status: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to check Ollama status"}
+
+
+@server.tool()
+async def analyze_with_local(
+    image_paths: list[str],
+    model: str = "llava:latest",
+    fallback_to_cloud: bool = True,
+    cloud_provider: str | None = None
+) -> dict[str, Any]:
+    """
+    Analyze images using local Ollama models.
+    
+    Parameters:
+    - image_paths: List of image paths to analyze
+    - model: Ollama vision model to use (llava:latest, llava:13b, etc.)
+    - fallback_to_cloud: If local fails, use cloud provider
+    - cloud_provider: Specific cloud provider for fallback
+    
+    Free, private analysis using local vision models.
+    """
+    try:
+        from pathlib import Path
+        from .understanding.analyzer import ImageAnalyzer
+        from .understanding.ollama_provider import OllamaImageAnalyzer
+        
+        results = []
+        failed_local = []
+        
+        # Try local analysis first
+        analyzer = ImageAnalyzer()
+        
+        # Check if Ollama is available
+        if "ollama" in analyzer.get_available_providers():
+            for image_path in image_paths:
+                try:
+                    result = await analyzer.analyze(
+                        Path(image_path),
+                        provider="ollama",
+                        extract_tags=True,
+                        generate_prompt=True
+                    )
+                    
+                    results.append({
+                        "path": image_path,
+                        "success": True,
+                        "provider": "ollama",
+                        "model": model,
+                        "description": result.description,
+                        "tags": result.tags,
+                        "cost": 0.0,
+                        "local": True
+                    })
+                    
+                except Exception as e:
+                    logger.warning(f"Local analysis failed for {image_path}: {e}")
+                    failed_local.append(image_path)
+        else:
+            # Ollama not available, all images fail local
+            failed_local = image_paths
+        
+        # Fallback to cloud if needed
+        if failed_local and fallback_to_cloud:
+            for image_path in failed_local:
+                try:
+                    result = await analyzer.analyze(
+                        Path(image_path),
+                        provider=cloud_provider,  # Will use cheapest if None
+                        extract_tags=True,
+                        generate_prompt=True
+                    )
+                    
+                    results.append({
+                        "path": image_path,
+                        "success": True,
+                        "provider": result.provider,
+                        "model": result.model,
+                        "description": result.description,
+                        "tags": result.tags,
+                        "cost": result.cost,
+                        "local": False
+                    })
+                    
+                except Exception as e:
+                    logger.error(f"Cloud analysis also failed for {image_path}: {e}")
+                    results.append({
+                        "path": image_path,
+                        "success": False,
+                        "error": str(e),
+                        "local": False
+                    })
+        
+        # Calculate stats
+        local_count = sum(1 for r in results if r.get("local", False))
+        cloud_count = sum(1 for r in results if r.get("success") and not r.get("local", False))
+        failed_count = sum(1 for r in results if not r.get("success"))
+        total_cost = sum(r.get("cost", 0) for r in results)
+        
+        return {
+            "success": True,
+            "message": f"Analyzed {len(results)} images ({local_count} local, {cloud_count} cloud)",
+            "data": {
+                "results": results,
+                "stats": {
+                    "total": len(image_paths),
+                    "local_analyzed": local_count,
+                    "cloud_analyzed": cloud_count,
+                    "failed": failed_count,
+                    "total_cost": round(total_cost, 4),
+                    "savings": round(local_count * 0.001, 4)  # Estimate cloud cost savings
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Hybrid analysis failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to analyze images"}
+
+
+@server.tool()
+async def pull_ollama_model(
+    model: str = "llava:latest"
+) -> dict[str, Any]:
+    """
+    Download an Ollama vision model for local analysis.
+    
+    Parameters:
+    - model: Model to download (llava:latest, llava:13b, bakllava:latest, etc.)
+    
+    Downloads vision models for free, private image analysis.
+    """
+    try:
+        from .understanding.ollama_provider import OllamaImageAnalyzer
+        
+        analyzer = OllamaImageAnalyzer(model=model)
+        
+        # Check if already available
+        if await analyzer.check_availability():
+            return {
+                "success": True,
+                "message": f"Model {model} is already available",
+                "data": {"model": model, "status": "ready"}
+            }
+        
+        # Pull the model
+        logger.info(f"Pulling Ollama model {model}...")
+        success = await analyzer.pull_model(model)
+        
+        if success:
+            return {
+                "success": True,
+                "message": f"Successfully pulled model {model}",
+                "data": {"model": model, "status": "downloaded"}
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Failed to pull model {model}",
+                "data": {"model": model, "status": "failed"}
+            }
+            
+    except Exception as e:
+        logger.error(f"Failed to pull Ollama model: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to pull model"}
+
+
+@server.tool()
+async def analyze_with_hierarchy(
+    image_paths: list[str],
+    project_id: str | None = None,
+    expand_tags: bool = True,
+    auto_cluster: bool = True
+) -> dict[str, Any]:
+    """
+    Analyze images with intelligent tag hierarchies.
+    
+    Parameters:
+    - image_paths: List of image paths to analyze
+    - project_id: Optional project for project-specific tags
+    - expand_tags: Include parent/related tags from hierarchy
+    - auto_cluster: Group similar tags automatically
+    
+    Provides semantic relationships and tag organization.
+    """
+    try:
+        from pathlib import Path
+        from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
+        
+        analyzer = EnhancedImageAnalyzer()
+        results = []
+        
+        for image_path in image_paths:
+            try:
+                enhanced = await analyzer.analyze_with_hierarchy(
+                    Path(image_path),
+                    project_id=project_id,
+                    expand_tags=expand_tags,
+                    cluster_tags=auto_cluster
+                )
+                
+                results.append({
+                    "path": image_path,
+                    "success": True,
+                    "tags": enhanced["normalized_tags"],
+                    "expanded_tags": enhanced.get("expanded_tags", []),
+                    "hierarchical_tags": enhanced.get("hierarchical_tags", {}),
+                    "tag_clusters": enhanced.get("tag_clusters", []),
+                    "suggested_tags": enhanced.get("suggested_tags", []),
+                    "coherence_score": enhanced.get("tag_statistics", {}).get("coherence_score", 0)
+                })
+                
+            except Exception as e:
+                logger.error(f"Failed to analyze {image_path}: {e}")
+                results.append({
+                    "path": image_path,
+                    "success": False,
+                    "error": str(e)
+                })
+        
+        # Get overall insights
+        successful = [r for r in results if r.get("success")]
+        insights = analyzer.get_tag_insights() if successful else {}
+        
+        return {
+            "success": True,
+            "message": f"Analyzed {len(successful)} images with tag hierarchies",
+            "data": {
+                "results": results,
+                "insights": insights,
+                "stats": {
+                    "total_images": len(image_paths),
+                    "successful": len(successful),
+                    "unique_tags": len(set(
+                        tag for r in successful 
+                        for tag in r.get("tags", [])
+                    ))
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Hierarchical analysis failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to analyze with hierarchy"}
+
+
+@server.tool()
+async def create_tag_mood_board(
+    name: str,
+    tags: list[str] | None = None,
+    image_paths: list[str] | None = None,
+    colors: list[str] | None = None,
+    description: str = ""
+) -> dict[str, Any]:
+    """
+    Create a mood board from tags and images.
+    
+    Parameters:
+    - name: Mood board name
+    - tags: Tags to include in mood board
+    - image_paths: Reference images
+    - colors: Hex color codes
+    - description: Board description
+    
+    Mood boards help organize creative concepts.
+    """
+    try:
+        from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
+        
+        analyzer = EnhancedImageAnalyzer()
+        
+        # Create mood board
+        board = analyzer.taxonomy.create_mood_board(name, description)
+        
+        # Add elements
+        if tags or image_paths or colors:
+            analyzer.taxonomy.add_to_mood_board(
+                board.id,
+                tags=tags,
+                colors=colors,
+                reference_images=image_paths
+            )
+        
+        # Analyze mood board
+        analysis = analyzer.taxonomy.analyze_mood_board(board.id)
+        
+        return {
+            "success": True,
+            "message": f"Created mood board '{name}'",
+            "data": {
+                "board_id": board.id,
+                "name": board.name,
+                "description": board.description,
+                "tag_count": len(board.tags),
+                "color_count": len(board.colors),
+                "image_count": len(board.reference_images),
+                "analysis": analysis
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to create mood board: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to create mood board"}
+
+
+@server.tool()
+async def get_tag_insights() -> dict[str, Any]:
+    """
+    Get insights about tag usage patterns and relationships.
+    
+    Returns tag statistics, co-occurrence patterns, and trends.
+    """
+    try:
+        from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
+        
+        analyzer = EnhancedImageAnalyzer()
+        insights = analyzer.get_tag_insights()
+        
+        return {
+            "success": True,
+            "message": "Tag insights retrieved",
+            "data": insights
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get tag insights: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to get insights"}
+
+
+@server.tool()
+async def batch_cluster_images(
+    image_paths: list[str] | None = None,
+    project_name: str | None = None,
+    min_cluster_size: int = 3,
+    provider: str | None = None
+) -> dict[str, Any]:
+    """
+    Analyze and cluster images by tag similarity.
+    
+    Parameters:
+    - image_paths: Images to cluster (or use project)
+    - project_name: Cluster all images in project
+    - min_cluster_size: Minimum images per cluster
+    - provider: Analysis provider to use
+    
+    Groups similar images for better organization.
+    """
+    try:
+        from pathlib import Path
+        from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
+        
+        # Get image paths
+        if project_name and not image_paths:
+            # TODO: Get images from project
+            return {
+                "success": False,
+                "message": "Project-based clustering not yet implemented"
+            }
+        
+        if not image_paths:
+            return {
+                "success": False,
+                "message": "No images provided"
+            }
+        
+        analyzer = EnhancedImageAnalyzer()
+        
+        # Analyze and cluster
+        batch_result = await analyzer.analyze_batch_with_clustering(
+            [Path(p) for p in image_paths],
+            provider=provider,
+            auto_cluster=True,
+            min_cluster_size=min_cluster_size
+        )
+        
+        return {
+            "success": True,
+            "message": f"Clustered {batch_result['images_analyzed']} images",
+            "data": {
+                "image_clusters": batch_result["image_clusters"],
+                "common_themes": batch_result["common_themes"],
+                "tag_frequency": dict(batch_result["tag_frequency"]),
+                "stats": {
+                    "total_images": len(image_paths),
+                    "analyzed": batch_result["images_analyzed"],
+                    "failed": batch_result["images_failed"],
+                    "clusters_found": len(batch_result["image_clusters"])
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Batch clustering failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to cluster images"}
+
+
+@server.tool()
+async def suggest_tags_for_project(
+    project_id: str,
+    existing_tags: list[str] | None = None
+) -> dict[str, Any]:
+    """
+    Suggest additional tags for a project based on existing ones.
+    
+    Parameters:
+    - project_id: Project identifier
+    - existing_tags: Current project tags (auto-detected if not provided)
+    
+    Helps build comprehensive tag sets for projects.
+    """
+    try:
+        from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
+        
+        analyzer = EnhancedImageAnalyzer()
+        
+        # Get existing tags if not provided
+        if not existing_tags:
+            existing_tags = list(analyzer.taxonomy.get_project_tags(project_id))
+        
+        if not existing_tags:
+            return {
+                "success": True,
+                "message": "No existing tags to base suggestions on",
+                "data": {"suggestions": []}
+            }
+        
+        # Get suggestions
+        suggestions = analyzer.taxonomy.suggest_project_tags(project_id, existing_tags)
+        
+        # Get related tags for each suggestion
+        detailed_suggestions = []
+        for tag in suggestions:
+            related = analyzer.taxonomy.hierarchy.get_related(tag, max_depth=1)
+            detailed_suggestions.append({
+                "tag": tag,
+                "category": analyzer.taxonomy.hierarchy.nodes.get(tag, {}).category
+                           if tag in analyzer.taxonomy.hierarchy.nodes else None,
+                "related_tags": [t for t, score in related.items() if score > 0.5][:5]
+            })
+        
+        return {
+            "success": True,
+            "message": f"Generated {len(suggestions)} tag suggestions",
+            "data": {
+                "current_tags": existing_tags,
+                "suggestions": detailed_suggestions,
+                "tag_hierarchy": {
+                    tag: analyzer.taxonomy.hierarchy.get_ancestors(tag)
+                    for tag in existing_tags
+                    if analyzer.taxonomy.hierarchy.get_ancestors(tag)
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to suggest tags: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to suggest tags"}
+
+
+@server.tool()
+async def analyze_style_similarity(
+    image_paths: list[str],
+    extract_fingerprints: bool = True,
+    find_clusters: bool = True,
+    min_cluster_size: int = 3
+) -> dict[str, Any]:
+    """
+    Analyze visual style similarity between images.
+    
+    Parameters:
+    - image_paths: List of images to analyze
+    - extract_fingerprints: Extract detailed style fingerprints
+    - find_clusters: Auto-group by visual style
+    - min_cluster_size: Minimum images per style group
+    
+    Extracts visual DNA including colors, composition, lighting.
+    """
+    try:
+        from pathlib import Path
+        from .understanding.style_clustering import StyleClusteringSystem
+        
+        system = StyleClusteringSystem()
+        results = []
+        
+        # Extract style fingerprints
+        for image_path in image_paths:
+            try:
+                fp = await system.analyze_image_style(Path(image_path))
+                
+                result = {
+                    "path": image_path,
+                    "success": True,
+                    "style_tags": fp.style_tags,
+                    "color_palette": {
+                        "dominant_colors": [
+                            f"rgb{color}" for color in fp.color_palette.dominant_colors[:3]
+                        ],
+                        "temperature": fp.color_palette.temperature,
+                        "saturation": fp.color_palette.saturation,
+                        "brightness": fp.color_palette.brightness
+                    },
+                    "composition": {
+                        "type": fp.composition.complexity,
+                        "balance": fp.composition.balance_type,
+                        "rule_of_thirds": fp.composition.rule_of_thirds,
+                        "negative_space": fp.composition.negative_space_ratio
+                    },
+                    "lighting": {
+                        "mood": fp.lighting.mood_lighting,
+                        "contrast": fp.lighting.contrast_level,
+                        "direction": fp.lighting.light_direction,
+                        "time_of_day": fp.lighting.time_of_day
+                    },
+                    "texture": {
+                        "type": fp.texture.overall_texture,
+                        "grain": fp.texture.grain_level,
+                        "detail": fp.texture.detail_density
+                    }
+                }
+                results.append(result)
+                
+            except Exception as e:
+                logger.error(f"Failed to analyze {image_path}: {e}")
+                results.append({
+                    "path": image_path,
+                    "success": False,
+                    "error": str(e)
+                })
+        
+        # Find style clusters
+        clusters = []
+        if find_clusters and len([r for r in results if r["success"]]) >= min_cluster_size:
+            style_clusters = await system.cluster_by_style(
+                [Path(p) for p in image_paths],
+                min_cluster_size=min_cluster_size
+            )
+            
+            for cluster in style_clusters:
+                clusters.append({
+                    "id": cluster.id,
+                    "name": cluster.name,
+                    "size": cluster.size,
+                    "images": cluster.images,
+                    "centroid": cluster.centroid_image,
+                    "coherence": cluster.coherence_score,
+                    "style_summary": cluster.style_summary
+                })
+        
+        return {
+            "success": True,
+            "message": f"Analyzed {len(results)} images for style",
+            "data": {
+                "fingerprints": results,
+                "style_clusters": clusters,
+                "stats": {
+                    "total_images": len(image_paths),
+                    "analyzed": len([r for r in results if r["success"]]),
+                    "clusters_found": len(clusters)
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Style analysis failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to analyze style"}
+
+
+@server.tool()
+async def find_similar_style(
+    reference_image: str,
+    search_in: list[str] | None = None,
+    similarity_threshold: float = 0.8,
+    max_results: int = 10
+) -> dict[str, Any]:
+    """
+    Find images with similar visual style to reference.
+    
+    Parameters:
+    - reference_image: Image to match style
+    - search_in: Images to search (or use all analyzed)
+    - similarity_threshold: Minimum similarity (0-1)
+    - max_results: Maximum results to return
+    
+    "More like this" for visual style.
+    """
+    try:
+        from pathlib import Path
+        from .understanding.style_clustering import StyleClusteringSystem
+        
+        system = StyleClusteringSystem()
+        
+        # Analyze reference
+        reference_fp = await system.analyze_image_style(Path(reference_image))
+        
+        # If search_in provided, analyze those first
+        if search_in:
+            for image_path in search_in:
+                try:
+                    await system.analyze_image_style(Path(image_path))
+                except Exception as e:
+                    logger.warning(f"Failed to analyze {image_path}: {e}")
+        
+        # Find similar
+        similar = await system.find_similar_styles(
+            Path(reference_image),
+            similarity_threshold=similarity_threshold,
+            max_results=max_results
+        )
+        
+        # Format results
+        results = []
+        for image_path, score in similar:
+            if image_path in system.fingerprints:
+                fp = system.fingerprints[image_path]
+                results.append({
+                    "path": image_path,
+                    "similarity_score": score,
+                    "style_match": {
+                        "color_match": fp.color_palette.temperature == reference_fp.color_palette.temperature,
+                        "lighting_match": fp.lighting.mood_lighting == reference_fp.lighting.mood_lighting,
+                        "composition_match": fp.composition.complexity == reference_fp.composition.complexity
+                    },
+                    "style_tags": fp.style_tags
+                })
+        
+        return {
+            "success": True,
+            "message": f"Found {len(results)} similar images",
+            "data": {
+                "reference": {
+                    "path": reference_image,
+                    "style_tags": reference_fp.style_tags,
+                    "dominant_color": f"rgb{reference_fp.color_palette.dominant_colors[0]}" if reference_fp.color_palette.dominant_colors else None
+                },
+                "similar_images": results
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Similar style search failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to find similar styles"}
+
+
+@server.tool()
+async def extract_style_prompts(
+    image_paths: list[str] | None = None,
+    cluster_id: str | None = None
+) -> dict[str, Any]:
+    """
+    Extract style transfer hints and reusable prompts.
+    
+    Parameters:
+    - image_paths: Images to analyze for style
+    - cluster_id: Or use existing style cluster
+    
+    Identifies prompt fragments that recreate the style.
+    """
+    try:
+        from pathlib import Path
+        from .understanding.style_clustering import StyleClusteringSystem
+        
+        system = StyleClusteringSystem()
+        
+        # Get or create cluster
+        if cluster_id and cluster_id in system.clusters:
+            cluster = system.clusters[cluster_id]
+        elif image_paths:
+            # Create temporary cluster
+            clusters = await system.cluster_by_style(
+                [Path(p) for p in image_paths],
+                min_cluster_size=1
+            )
+            cluster = clusters[0] if clusters else None
+        else:
+            return {
+                "success": False,
+                "message": "Provide either image_paths or cluster_id"
+            }
+        
+        if not cluster:
+            return {
+                "success": False,
+                "message": "No style cluster found"
+            }
+        
+        # Extract hints
+        hints = system.extract_style_transfer_hints(cluster)
+        
+        # Format results
+        formatted_hints = []
+        for hint in hints:
+            formatted_hints.append({
+                "source_image": hint.source_image,
+                "prompt_fragments": hint.prompt_fragments,
+                "style_elements": hint.style_elements,
+                "color_palette": [f"rgb{color}" for color in hint.color_palette],
+                "technical_params": hint.technical_params,
+                "confidence": hint.success_rate
+            })
+        
+        # Combine best fragments
+        all_fragments = []
+        for hint in hints:
+            all_fragments.extend(hint.prompt_fragments)
+        
+        # Count frequency
+        from collections import Counter
+        fragment_counts = Counter(all_fragments)
+        top_fragments = [f for f, _ in fragment_counts.most_common(10)]
+        
+        return {
+            "success": True,
+            "message": f"Extracted {len(hints)} style transfer hints",
+            "data": {
+                "style_hints": formatted_hints,
+                "combined_prompt": ", ".join(top_fragments[:5]),
+                "key_elements": {
+                    "colors": list(set(h.style_elements.get("color_scheme", "") for h in hints)),
+                    "lighting": list(set(h.style_elements.get("lighting", "") for h in hints)),
+                    "composition": list(set(h.style_elements.get("composition", "") for h in hints))
+                },
+                "cluster_info": {
+                    "name": cluster.name,
+                    "coherence": cluster.coherence_score,
+                    "size": cluster.size
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Style prompt extraction failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to extract prompts"}
+
+
+@server.tool()
+async def build_style_collections(
+    min_collection_size: int = 5,
+    coherence_threshold: float = 0.7
+) -> dict[str, Any]:
+    """
+    Build automatic collections based on visual style.
+    
+    Parameters:
+    - min_collection_size: Minimum images per collection
+    - coherence_threshold: Minimum style coherence
+    
+    Creates collections like "Warm Dramatic", "Cool Minimalist".
+    """
+    try:
+        from .understanding.style_clustering import StyleClusteringSystem
+        
+        system = StyleClusteringSystem()
+        
+        # Build collections
+        collections = system.build_auto_collections(min_collection_size)
+        
+        # Format results
+        formatted_collections = []
+        for name, images in collections.items():
+            # Calculate style compatibility
+            if len(images) >= 2:
+                from pathlib import Path
+                compatibility = system.get_style_compatibility(
+                    [Path(img) for img in images[:10]]  # Sample for speed
+                )
+            else:
+                compatibility = 1.0
+            
+            if compatibility >= coherence_threshold:
+                formatted_collections.append({
+                    "name": name,
+                    "size": len(images),
+                    "images": images[:20],  # Limit for response size
+                    "compatibility_score": compatibility,
+                    "sample_image": images[0] if images else None
+                })
+        
+        # Sort by size
+        formatted_collections.sort(key=lambda x: x["size"], reverse=True)
+        
+        return {
+            "success": True,
+            "message": f"Created {len(formatted_collections)} style collections",
+            "data": {
+                "collections": formatted_collections,
+                "stats": {
+                    "total_collections": len(formatted_collections),
+                    "total_images": sum(c["size"] for c in formatted_collections),
+                    "avg_collection_size": sum(c["size"] for c in formatted_collections) / len(formatted_collections) if formatted_collections else 0
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Collection building failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to build collections"}
+
+
+@server.tool()
+async def check_style_compatibility(
+    image_paths: list[str]
+) -> dict[str, Any]:
+    """
+    Check if images work well together stylistically.
+    
+    Parameters:
+    - image_paths: Images to check compatibility
+    
+    Useful for curating cohesive sets.
+    """
+    try:
+        from pathlib import Path
+        from .understanding.style_clustering import StyleClusteringSystem
+        
+        system = StyleClusteringSystem()
+        
+        # Analyze all images
+        paths = [Path(p) for p in image_paths]
+        for path in paths:
+            try:
+                await system.analyze_image_style(path)
+            except Exception as e:
+                logger.warning(f"Failed to analyze {path}: {e}")
+        
+        # Calculate overall compatibility
+        overall_score = system.get_style_compatibility(paths)
+        
+        # Find style outliers
+        outliers = []
+        if len(paths) > 2:
+            for i, path in enumerate(paths):
+                # Check compatibility without this image
+                other_paths = paths[:i] + paths[i+1:]
+                score_without = system.get_style_compatibility(other_paths)
+                
+                if score_without > overall_score * 1.2:  # 20% improvement
+                    outliers.append({
+                        "path": str(path),
+                        "impact": score_without - overall_score
+                    })
+        
+        # Get pairwise compatibility for details
+        pairwise = []
+        for i in range(len(paths)):
+            for j in range(i + 1, len(paths)):
+                if str(paths[i]) in system.fingerprints and str(paths[j]) in system.fingerprints:
+                    fp1 = system.fingerprints[str(paths[i])]
+                    fp2 = system.fingerprints[str(paths[j])]
+                    score = fp1.similarity_score(fp2)
+                    
+                    pairwise.append({
+                        "image1": str(paths[i]),
+                        "image2": str(paths[j]),
+                        "compatibility": score
+                    })
+        
+        # Sort pairwise by compatibility
+        pairwise.sort(key=lambda x: x["compatibility"], reverse=True)
+        
+        return {
+            "success": True,
+            "message": f"Analyzed compatibility of {len(paths)} images",
+            "data": {
+                "overall_compatibility": overall_score,
+                "compatibility_rating": (
+                    "excellent" if overall_score > 0.8 else
+                    "good" if overall_score > 0.6 else
+                    "moderate" if overall_score > 0.4 else
+                    "low"
+                ),
+                "outliers": outliers,
+                "best_pairs": pairwise[:5],
+                "worst_pairs": pairwise[-5:] if len(pairwise) > 5 else [],
+                "recommendation": (
+                    "This set has excellent style coherence!" if overall_score > 0.8 else
+                    "This set works well together." if overall_score > 0.6 else
+                    "Consider removing outliers for better coherence." if outliers else
+                    "These images have diverse styles - consider grouping by style."
+                )
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Compatibility check failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to check compatibility"}
+
+
 def main():
     """Run the MCP server."""
     if not MCP_AVAILABLE:
@@ -1126,6 +2065,19 @@ def main():
     logger.info("  - export_quick_marks: Export marked assets to folder")
     logger.info("  - analyze_images_optimized: Analyze with similarity detection")
     logger.info("  - estimate_analysis_cost: Estimate costs with optimization")
+    logger.info("  - check_ollama_status: Check local vision model availability")
+    logger.info("  - analyze_with_local: Analyze using free local models")
+    logger.info("  - pull_ollama_model: Download vision models for local use")
+    logger.info("  - analyze_with_hierarchy: Analyze with tag relationships")
+    logger.info("  - create_tag_mood_board: Create mood boards from tags")
+    logger.info("  - get_tag_insights: View tag patterns and trends")
+    logger.info("  - batch_cluster_images: Auto-group similar images")
+    logger.info("  - suggest_tags_for_project: Get smart tag suggestions")
+    logger.info("  - analyze_style_similarity: Extract visual style fingerprints")
+    logger.info("  - find_similar_style: Find visually similar images")
+    logger.info("  - extract_style_prompts: Get reusable style prompts")
+    logger.info("  - build_style_collections: Auto-create style collections")
+    logger.info("  - check_style_compatibility: Check visual coherence")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))
