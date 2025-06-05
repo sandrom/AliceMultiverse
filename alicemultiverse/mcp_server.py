@@ -858,6 +858,179 @@ async def export_quick_marks(
 
 
 @server.tool()
+async def analyze_images_optimized(
+    image_paths: list[str] | None = None,
+    project_name: str | None = None,
+    provider: str | None = None,
+    similarity_threshold: float = 0.9,
+    use_progressive: bool = True,
+    max_cost: float | None = None,
+    show_details: bool = False
+) -> dict[str, Any]:
+    """
+    Analyze images with cost optimization through similarity detection.
+    
+    Parameters:
+    - image_paths: List of image paths to analyze (or use project)
+    - project_name: Analyze all images in a project
+    - provider: Specific provider to use (or auto-select cheapest)
+    - similarity_threshold: How similar images must be to share analysis (0-1)
+    - use_progressive: Start with cheap providers, escalate if needed
+    - max_cost: Maximum cost limit for the batch
+    - show_details: Include detailed analysis
+    
+    Groups similar images and analyzes representatives to save costs.
+    """
+    try:
+        from pathlib import Path
+        from .understanding.analyzer import ImageAnalyzer
+        from .understanding.optimized_batch_analyzer import OptimizedBatchAnalyzer
+        from .understanding.batch_analyzer import BatchAnalysisRequest
+        
+        # Convert string paths to Path objects
+        if image_paths:
+            paths = [Path(p) for p in image_paths]
+        else:
+            paths = None
+        
+        # Create analyzer and batch request
+        analyzer = ImageAnalyzer()
+        optimizer = OptimizedBatchAnalyzer(
+            analyzer=analyzer,
+            similarity_threshold=similarity_threshold,
+            use_progressive_providers=use_progressive
+        )
+        
+        # Build batch request
+        request = BatchAnalysisRequest(
+            image_paths=paths,
+            project_id=project_name,  # Will be handled by project lookup
+            provider=provider,
+            detailed=show_details,
+            max_cost=max_cost,
+            extract_tags=True,
+            show_progress=False  # No progress in MCP
+        )
+        
+        # Run optimized analysis
+        results, stats = await optimizer.analyze_batch_optimized(request)
+        
+        # Format results
+        analyzed_images = []
+        for img_path, result in results:
+            if result:
+                analyzed_images.append({
+                    "path": str(img_path),
+                    "description": result.description,
+                    "tags": result.tags,
+                    "provider": result.provider,
+                    "cost": result.cost,
+                    "confidence": getattr(result, 'confidence_score', 1.0)
+                })
+        
+        return {
+            "success": True,
+            "message": f"Analyzed {stats.images_analyzed} unique images, applied to {stats.total_images} total",
+            "data": {
+                "results": analyzed_images,
+                "optimization_stats": {
+                    "total_images": stats.total_images,
+                    "unique_groups": stats.unique_groups,
+                    "images_analyzed": stats.images_analyzed,
+                    "images_reused": stats.images_reused,
+                    "api_calls_saved": stats.api_calls_saved,
+                    "cost_saved": round(stats.cost_saved, 4),
+                    "total_cost": round(stats.total_cost, 4),
+                    "savings_percentage": round((stats.cost_saved / (stats.total_cost + stats.cost_saved) * 100) if stats.total_cost > 0 else 0, 1)
+                }
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Optimized analysis failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to analyze images"}
+
+
+@server.tool()
+async def estimate_analysis_cost(
+    image_count: int,
+    provider: str | None = None,
+    detailed: bool = False,
+    with_optimization: bool = True,
+    similarity_rate: float = 0.3
+) -> dict[str, Any]:
+    """
+    Estimate cost for analyzing a batch of images.
+    
+    Parameters:
+    - image_count: Number of images to analyze
+    - provider: Specific provider (or compare all)
+    - detailed: Whether detailed analysis is requested
+    - with_optimization: Include similarity optimization estimate
+    - similarity_rate: Estimated rate of similar images (0-1)
+    
+    Returns cost estimates with and without optimization.
+    """
+    try:
+        from .understanding.analyzer import ImageAnalyzer
+        
+        analyzer = ImageAnalyzer()
+        available_providers = analyzer.get_available_providers()
+        
+        estimates = {}
+        
+        # Get base costs per provider
+        for prov in available_providers:
+            if provider and prov != provider:
+                continue
+                
+            if prov in analyzer.analyzers:
+                cost_per_image = analyzer.analyzers[prov].estimate_cost(detailed)
+                base_cost = cost_per_image * image_count
+                
+                # Calculate optimized cost
+                if with_optimization:
+                    # Estimate unique images after similarity grouping
+                    unique_images = int(image_count * (1 - similarity_rate))
+                    optimized_cost = cost_per_image * unique_images
+                    savings = base_cost - optimized_cost
+                else:
+                    optimized_cost = base_cost
+                    savings = 0
+                
+                estimates[prov] = {
+                    "cost_per_image": cost_per_image,
+                    "base_cost": round(base_cost, 4),
+                    "optimized_cost": round(optimized_cost, 4),
+                    "savings": round(savings, 4),
+                    "savings_percentage": round((savings / base_cost * 100) if base_cost > 0 else 0, 1)
+                }
+        
+        # Find cheapest option
+        if estimates:
+            cheapest = min(estimates.items(), key=lambda x: x[1]["optimized_cost"])
+            cheapest_provider = cheapest[0]
+        else:
+            cheapest_provider = None
+        
+        return {
+            "success": True,
+            "message": f"Cost estimate for {image_count} images",
+            "data": {
+                "image_count": image_count,
+                "estimates": estimates,
+                "cheapest_provider": cheapest_provider,
+                "similarity_rate": similarity_rate,
+                "with_optimization": with_optimization
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Cost estimation failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to estimate costs"}
+
+
+@server.tool()
 async def update_project_context(
     name: str,
     style: str | None = None,
@@ -951,6 +1124,8 @@ def main():
     logger.info("  - quick_mark: Fast mark assets as favorites/hero/maybe")
     logger.info("  - list_quick_marks: View recent quick selections")
     logger.info("  - export_quick_marks: Export marked assets to folder")
+    logger.info("  - analyze_images_optimized: Analyze with similarity detection")
+    logger.info("  - estimate_analysis_cost: Estimate costs with optimization")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))

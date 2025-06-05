@@ -94,19 +94,19 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 ### Enhanced Understanding System 🧠
 **Why**: Better tags = better search = finding exactly what I need
 
-#### Batch Analysis Optimization
-- [ ] **Smart batching**: Group similar images for single API calls
-  - Detect near-duplicates before analysis
-  - Combine multiple images in one prompt when possible
-  - Track cost savings from batching
-- [ ] **Progressive analysis**: Start with cheap providers, escalate if needed
-  - Google AI first (free tier)
-  - Add Claude/GPT only for complex images
-  - Skip analysis for obvious duplicates
-- [ ] **Caching strategy**: Reuse analysis from similar images
-  - Perceptual hash similarity threshold
-  - Tag inheritance from variants
-  - Manual override capability
+#### Batch Analysis Optimization ✅
+- [x] **Smart batching**: Group similar images for single API calls
+  - [x] Detect near-duplicates using perceptual hashing
+  - [x] Analyze one representative per group
+  - [x] Track cost savings from optimization
+- [x] **Progressive analysis**: Start with cheap providers, escalate if needed
+  - [x] Google AI first (free tier)
+  - [x] Add Claude/GPT only if results insufficient
+  - [x] Skip analysis for similar images in groups
+- [x] **Optimization tools**: MCP integration
+  - [x] Added `analyze_images_optimized` tool
+  - [x] Added `estimate_analysis_cost` tool
+  - [x] Shows savings percentage and API calls saved
 
 #### Local Vision Models Integration
 - [ ] **Ollama support**: Free, private, no API costs

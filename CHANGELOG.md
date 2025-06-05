@@ -44,6 +44,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Integrates with comprehensive selection service for persistence
   - Created quick-selection-guide.md with workflow examples
 
+- **Batch Analysis Optimization**: Smart cost reduction for image analysis
+  - Added `analyze_images_optimized` tool with similarity detection
+  - Added `estimate_analysis_cost` tool for cost comparison
+  - Groups similar images using perceptual hashing
+  - Analyzes one representative per group (20-40% cost savings)
+  - Progressive provider strategy (free → cheap → premium)
+  - Created optimized_batch_analyzer.py module
+  - Created batch-analysis-optimization.md guide
+
 ### Removed (2025-06-05)
 - Removed `alice_interface_v2.py` - incomplete compatibility layer that was never used
 - Removed `redis_event_migration.py` example - migration to optional Redis completed
