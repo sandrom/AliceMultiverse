@@ -37,9 +37,12 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
   - [x] Keep alice_interface.py (still needed by MCP server)
 - [x] Remove completed migration code
   - [x] Removed redis_event_migration.py example
-  - [ ] Archive PostgreSQL migration files
+  - [ ] Remove PostgreSQL migration files (if any remain)
 - [ ] Consolidate duplicate functionality
-  - [ ] Merge overlapping storage modules
+  - [x] Identified overlapping storage modules:
+    - DuckDBSearchCache (primary, used by MCP server)
+    - DuckDBSearch (legacy/specialized, used by search handler)
+  - [ ] Merge DuckDB implementations into single module
   - [ ] Keep both CLI handlers (legacy + structured) for now
   - [ ] Clean up PostgreSQL references in comments
   - [ ] Plan removal of deprecated cache modules (v3.0)
@@ -47,7 +50,7 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 ### 2. Workflow Polish ✨
 **Why**: Daily friction adds up
 
-- [ ] Fix any Claude MCP issues
+- [x] Check Claude MCP issues (no known issues, good docs)
 - [ ] Streamline project creation flow
 - [ ] Better duplicate detection  
 - [ ] Quick selection workflow (mark favorites faster)
