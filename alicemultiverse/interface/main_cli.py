@@ -265,6 +265,23 @@ For normal usage, use Alice through an AI assistant instead.
     # Storage - from-config
     storage_from_config = storage_subparsers.add_parser("from-config", help="Load from config")
 
+    # Transitions subcommand for scene transition analysis
+    transitions_parser = subparsers.add_parser("transitions", help="Analyze scene transitions")
+    transitions_subparsers = transitions_parser.add_subparsers(
+        dest="transitions_command", help="Transition analysis commands"
+    )
+    
+    # Transitions - analyze
+    transitions_analyze = transitions_subparsers.add_parser("analyze", help="Analyze transitions between images")
+    transitions_analyze.add_argument("images", nargs="+", help="Image files to analyze (in sequence order)")
+    transitions_analyze.add_argument("-o", "--output", help="Output JSON file for results")
+    transitions_analyze.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+    
+    # Transitions - motion
+    transitions_motion = transitions_subparsers.add_parser("motion", help="Analyze motion in a single image")
+    transitions_motion.add_argument("image", help="Image file to analyze")
+    transitions_motion.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+
     # Directory arguments
     parser.add_argument(
         "-i",
@@ -739,6 +756,27 @@ def main(argv: list[str] | None = None) -> int:
         
         storage_cli(click_args)
         return 0
+    
+    # Handle transitions subcommand
+    if args.command == "transitions":
+        from ..transitions.cli import transitions as transitions_cli
+        
+        # Build command line args for click
+        click_args = [args.transitions_command]
+        
+        if args.transitions_command == "analyze":
+            click_args.extend(args.images)
+            if hasattr(args, "output") and args.output:
+                click_args.extend(["-o", args.output])
+            if hasattr(args, "verbose") and args.verbose:
+                click_args.append("-v")
+        elif args.transitions_command == "motion":
+            click_args.append(args.image)
+            if hasattr(args, "verbose") and args.verbose:
+                click_args.append("-v")
+        
+        transitions_cli(click_args)
+        return 0
 
     # Setup logging for main command
     log_level = args.log_level if hasattr(args, "log_level") else "INFO"
@@ -755,7 +793,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     
     # Show deprecation warning for direct CLI usage (except for allowed commands)
-    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage", "cost"]
+    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage", "cost", "transitions"]
     force_cli = hasattr(args, "force_cli") and args.force_cli
     debug_mode = hasattr(args, "debug") and args.debug
     check_deps = hasattr(args, "check_deps") and args.check_deps
