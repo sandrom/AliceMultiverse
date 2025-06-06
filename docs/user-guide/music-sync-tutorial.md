@@ -1,22 +1,24 @@
 # Music Sync Tutorial
 
-This comprehensive guide covers how to create perfectly synchronized music videos using AliceMultiverse's beat detection and timeline automation features.
+This tutorial guides you through creating perfectly synchronized video edits that match the rhythm and energy of your music tracks using AliceMultiverse's music analysis capabilities.
 
 ## Overview
 
-AliceMultiverse can analyze your music to automatically:
-- Detect beats, downbeats, and musical sections
-- Match image energy to music intensity
-- Create beat-synced timelines
-- Export to your favorite editing software
+Music synchronization in AliceMultiverse provides:
+- **Beat Detection**: Precise beat and tempo analysis
+- **Downbeat Recognition**: Identifies strong beats for impactful cuts
+- **Mood Analysis**: Detects energy levels and emotional tone
+- **Section Detection**: Finds verse, chorus, bridge transitions
+- **Automatic Cut Placement**: Aligns edits to musical rhythm
+- **Marker Generation**: Creates timeline markers for manual editing
 
 ## Prerequisites
 
-- Music file (MP3, WAV, or M4A format)
+- Music file (MP3, WAV, FLAC, M4A, OGG format)
 - Collection of images or video clips
 - Alice installed with music analysis dependencies:
   ```bash
-  pip install librosa>=0.10.0
+  pip install librosa>=0.10.0 soundfile>=0.12.0
   ```
 
 ## Quick Start

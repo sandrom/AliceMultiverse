@@ -31,6 +31,7 @@ from .core.cost_tracker import get_cost_tracker
 from .projects.service import ProjectService
 from .selections.service import SelectionService
 from .selections.models import SelectionPurpose, SelectionStatus
+from .prompts.mcp_tools import PromptMCPTools
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -51,6 +52,9 @@ project_service = ProjectService()
 
 # Initialize selection service
 selection_service = SelectionService()
+
+# Initialize prompt tools
+prompt_tools = PromptMCPTools()
 
 if MCP_AVAILABLE:
     server = Server("alice-multiverse")
@@ -2577,6 +2581,172 @@ async def create_video_timeline(
         return {"success": False, "error": str(e), "message": "Failed to create timeline"}
 
 
+@server.tool()
+async def prompt_find_effective(
+    category: str | None = None,
+    style: str | None = None,
+    min_success_rate: float = 0.7
+) -> dict[str, Any]:
+    """
+    Find effective prompts for a specific use case.
+    
+    Parameters:
+    - category: Type of generation (image_generation, video_generation, etc.)
+    - style: Visual style (cyberpunk, photorealistic, etc.)
+    - min_success_rate: Minimum success rate threshold (0-1)
+    
+    Returns prompts with high success rates and usage recommendations.
+    """
+    return await prompt_tools.find_effective_prompts(
+        category=category,
+        style=style,
+        min_success_rate=min_success_rate
+    )
+
+
+@server.tool()
+async def prompt_search(
+    query: str,
+    project: str | None = None,
+    limit: int = 20
+) -> dict[str, Any]:
+    """
+    Search for prompts containing specific terms or concepts.
+    
+    Parameters:
+    - query: Search query for finding prompts
+    - project: Filter by project name
+    - limit: Maximum results to return
+    
+    Returns prompts matching the search criteria.
+    """
+    return await prompt_tools.search_prompts(
+        query=query,
+        project=project,
+        limit=limit
+    )
+
+
+@server.tool()
+async def prompt_create(
+    text: str,
+    category: str,
+    providers: list[str],
+    project: str | None = None,
+    tags: list[str] | None = None,
+    style: str | None = None,
+    description: str | None = None
+) -> dict[str, Any]:
+    """
+    Create a new prompt with metadata for tracking.
+    
+    Parameters:
+    - text: The prompt text
+    - category: Category (image_generation, video_generation, etc.)
+    - providers: List of provider names (midjourney, flux, etc.)
+    - project: Project name for organization
+    - tags: List of descriptive tags
+    - style: Visual style (cyberpunk, photorealistic, etc.)
+    - description: What this prompt is good for
+    
+    Creates and saves prompt to project if specified.
+    """
+    return await prompt_tools.create_prompt(
+        text=text,
+        category=category,
+        providers=providers,
+        project=project,
+        tags=tags,
+        style=style,
+        description=description
+    )
+
+
+@server.tool()
+async def prompt_track_usage(
+    prompt_id: str,
+    provider: str,
+    success: bool,
+    cost: float | None = None,
+    notes: str | None = None
+) -> dict[str, Any]:
+    """
+    Track usage of a prompt for effectiveness analysis.
+    
+    Parameters:
+    - prompt_id: Prompt ID (supports partial matching)
+    - provider: Provider used for generation
+    - success: Whether generation was successful
+    - cost: Cost of generation in dollars
+    - notes: Additional notes about the result
+    
+    Updates prompt statistics and success rates.
+    """
+    return await prompt_tools.track_prompt_usage(
+        prompt_id=prompt_id,
+        provider=provider,
+        success=success,
+        cost=cost,
+        notes=notes
+    )
+
+
+@server.tool()
+async def prompt_get_project(
+    project_name: str
+) -> dict[str, Any]:
+    """
+    Get all prompts for a project with insights.
+    
+    Parameters:
+    - project_name: Name of the project
+    
+    Returns prompts and statistics for the project.
+    """
+    return await prompt_tools.get_project_prompts(project_name)
+
+
+@server.tool()
+async def prompt_suggest_improvements(
+    prompt_id: str
+) -> dict[str, Any]:
+    """
+    Get improvement suggestions for a prompt.
+    
+    Parameters:
+    - prompt_id: Prompt ID (supports partial matching)
+    
+    Returns suggestions based on performance analysis.
+    """
+    return await prompt_tools.suggest_improvements(prompt_id)
+
+
+@server.tool()
+async def prompt_render_template(
+    template_name: str,
+    variables: dict[str, str],
+    save_as_prompt: bool = False,
+    project: str | None = None
+) -> dict[str, Any]:
+    """
+    Render a prompt template with variables.
+    
+    Parameters:
+    - template_name: Name of the template (landscape, portrait, etc.)
+    - variables: Variable values for the template
+    - save_as_prompt: Whether to save the rendered result
+    - project: Project to save to if saving
+    
+    Returns rendered prompt text.
+    """
+    return await prompt_tools.render_template(
+        template_name=template_name,
+        variables=variables,
+        save_as_prompt=save_as_prompt,
+        project=project
+    )
+
+
 def main():
     """Run the MCP server."""
     if not MCP_AVAILABLE:
@@ -2636,6 +2806,13 @@ def main():
     logger.info("  - suggest_cuts_for_mood: Get mood-based edit suggestions")
     logger.info("  - export_timeline: Export to DaVinci/CapCut formats")
     logger.info("  - create_video_timeline: Build complete video from images")
+    logger.info("  - prompt_find_effective: Find high-performing prompts")
+    logger.info("  - prompt_search: Search prompts by terms or concepts")
+    logger.info("  - prompt_create: Create and track new prompts")
+    logger.info("  - prompt_track_usage: Record prompt usage results")
+    logger.info("  - prompt_get_project: Get project prompts with insights")
+    logger.info("  - prompt_suggest_improvements: Get prompt optimization tips")
+    logger.info("  - prompt_render_template: Use prompt templates")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))

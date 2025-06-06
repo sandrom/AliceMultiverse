@@ -315,6 +315,137 @@ For normal usage, use Alice through an AI assistant instead.
     scenes_extract.add_argument("--scenes-file", help="Use existing scenes JSON")
     scenes_extract.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
+    # Prompts subcommand for prompt management
+    prompts_parser = subparsers.add_parser("prompts", help="Manage AI prompts and their effectiveness")
+    prompts_subparsers = prompts_parser.add_subparsers(
+        dest="prompts_command", help="Prompt management commands"
+    )
+    
+    # Prompts - add
+    prompts_add = prompts_subparsers.add_parser("add", help="Add a new prompt")
+    prompts_add.add_argument("-t", "--text", required=True, help="The prompt text")
+    prompts_add.add_argument("-c", "--category", required=True, 
+                            choices=["image_generation", "video_generation", "music_generation", 
+                                    "text_generation", "style_transfer", "enhancement", 
+                                    "analysis", "other"],
+                            help="Prompt category")
+    prompts_add.add_argument("-p", "--providers", required=True, nargs="+",
+                            choices=["midjourney", "dalle", "stable_diffusion", "flux", 
+                                    "ideogram", "leonardo", "firefly", "kling", "runway",
+                                    "anthropic", "openai", "google", "elevenlabs", "other"],
+                            help="Providers this prompt works with")
+    prompts_add.add_argument("--tags", nargs="+", help="Tags for organization")
+    prompts_add.add_argument("--project", help="Project name")
+    prompts_add.add_argument("--style", help="Style (e.g., cyberpunk, minimalist)")
+    prompts_add.add_argument("-d", "--description", help="What this prompt is good for")
+    prompts_add.add_argument("-n", "--notes", help="Additional notes or tips")
+    prompts_add.add_argument("--keywords", nargs="+", help="Additional search keywords")
+    
+    # Prompts - search
+    prompts_search = prompts_subparsers.add_parser("search", help="Search for prompts")
+    prompts_search.add_argument("-q", "--query", help="Search in prompt text, description, and notes")
+    prompts_search.add_argument("-c", "--category",
+                               choices=["image_generation", "video_generation", "music_generation", 
+                                       "text_generation", "style_transfer", "enhancement", 
+                                       "analysis", "other"],
+                               help="Filter by category")
+    prompts_search.add_argument("-p", "--provider",
+                               choices=["midjourney", "dalle", "stable_diffusion", "flux", 
+                                       "ideogram", "leonardo", "firefly", "kling", "runway",
+                                       "anthropic", "openai", "google", "elevenlabs", "other"],
+                               help="Filter by provider")
+    prompts_search.add_argument("-t", "--tag", nargs="+", help="Filter by tags")
+    prompts_search.add_argument("--project", help="Filter by project")
+    prompts_search.add_argument("--style", help="Filter by style")
+    prompts_search.add_argument("--min-effectiveness", type=float, help="Minimum effectiveness rating")
+    prompts_search.add_argument("--min-success-rate", type=float, help="Minimum success rate")
+    prompts_search.add_argument("--effective", action="store_true", help="Show only highly effective prompts")
+    prompts_search.add_argument("--limit", type=int, default=20, help="Maximum results to show")
+    prompts_search.add_argument("--export", help="Export results to JSON")
+    
+    # Prompts - show
+    prompts_show = prompts_subparsers.add_parser("show", help="Show detailed prompt info")
+    prompts_show.add_argument("prompt_id", help="Prompt ID (supports partial matching)")
+    
+    # Prompts - use
+    prompts_use = prompts_subparsers.add_parser("use", help="Record usage of a prompt")
+    prompts_use.add_argument("prompt_id", help="Prompt ID (supports partial matching)")
+    prompts_use.add_argument("-p", "--provider", required=True,
+                            choices=["midjourney", "dalle", "stable_diffusion", "flux", 
+                                    "ideogram", "leonardo", "firefly", "kling", "runway",
+                                    "anthropic", "openai", "google", "elevenlabs", "other"],
+                            help="Provider used")
+    prompts_use.add_argument("--success/--failure", default=True, help="Was it successful?")
+    prompts_use.add_argument("-o", "--output", help="Path to generated output")
+    prompts_use.add_argument("--cost", type=float, help="API cost")
+    prompts_use.add_argument("--duration", type=float, help="Generation time in seconds")
+    prompts_use.add_argument("-n", "--notes", help="Notes about this usage")
+    
+    # Prompts - update
+    prompts_update = prompts_subparsers.add_parser("update", help="Update prompt metadata")
+    prompts_update.add_argument("prompt_id", help="Prompt ID (supports partial matching)")
+    prompts_update.add_argument("-r", "--rating", type=float, help="Effectiveness rating (0-10)")
+    prompts_update.add_argument("--add-tag", nargs="+", help="Add tags")
+    prompts_update.add_argument("--remove-tag", nargs="+", help="Remove tags")
+    prompts_update.add_argument("-n", "--notes", help="Update notes")
+    prompts_update.add_argument("-d", "--description", help="Update description")
+    
+    # Prompts - effective
+    prompts_effective = prompts_subparsers.add_parser("effective", help="Show most effective prompts")
+    prompts_effective.add_argument("-c", "--category",
+                                  choices=["image_generation", "video_generation", "music_generation", 
+                                          "text_generation", "style_transfer", "enhancement", 
+                                          "analysis", "other"],
+                                  help="Filter by category")
+    prompts_effective.add_argument("-p", "--provider",
+                                  choices=["midjourney", "dalle", "stable_diffusion", "flux", 
+                                          "ideogram", "leonardo", "firefly", "kling", "runway",
+                                          "anthropic", "openai", "google", "elevenlabs", "other"],
+                                  help="Filter by provider")
+    prompts_effective.add_argument("--min-success-rate", type=float, default=0.7, help="Minimum success rate")
+    prompts_effective.add_argument("--min-uses", type=int, default=3, help="Minimum number of uses")
+    prompts_effective.add_argument("--limit", type=int, default=10, help="Number of results")
+    
+    # Prompts - import
+    prompts_import = prompts_subparsers.add_parser("import", help="Import prompts from JSON")
+    prompts_import.add_argument("input_file", help="JSON file to import")
+    
+    # Prompts - export
+    prompts_export = prompts_subparsers.add_parser("export", help="Export prompts to JSON")
+    prompts_export.add_argument("output_file", help="Output JSON file")
+    prompts_export.add_argument("-c", "--category",
+                               choices=["image_generation", "video_generation", "music_generation", 
+                                       "text_generation", "style_transfer", "enhancement", 
+                                       "analysis", "other"],
+                               help="Export only this category")
+    
+    # Prompts - project
+    prompts_project = prompts_subparsers.add_parser("project", help="Manage prompts in project directory")
+    prompts_project.add_argument("project_path", help="Path to project directory")
+    prompts_project.add_argument("--sync-to-index", action="store_true", help="Sync to central index")
+    prompts_project.add_argument("--sync-from-index", action="store_true", help="Sync from central index")
+    prompts_project.add_argument("--project-name", help="Project name for sync-from-index")
+    
+    # Prompts - discover
+    prompts_discover = prompts_subparsers.add_parser("discover", help="Discover project prompts")
+    prompts_discover.add_argument("--base-paths", nargs="+", help="Base paths to search")
+    prompts_discover.add_argument("--sync-all", action="store_true", help="Sync all to index")
+    
+    # Prompts - init
+    prompts_init = prompts_subparsers.add_parser("init", help="Initialize prompt storage in project")
+    prompts_init.add_argument("project_path", help="Path to project directory")
+    prompts_init.add_argument("--format", choices=["yaml", "json"], default="yaml",
+                             help="Storage format (default: yaml)")
+    
+    # Prompts - template
+    prompts_template = prompts_subparsers.add_parser("template", help="Work with prompt templates")
+    prompts_template.add_argument("--list", action="store_true", help="List available templates")
+    prompts_template.add_argument("--show", help="Show template details")
+    prompts_template.add_argument("--render", help="Render a template")
+    prompts_template.add_argument("--save", action="store_true", help="Save rendered prompt")
+    prompts_template.add_argument("--create", help="Create new template")
+    prompts_template.add_argument("--from-prompt", help="Create template from existing prompt")
+
     # Directory arguments
     parser.add_argument(
         "-i",
@@ -854,6 +985,148 @@ def main(argv: list[str] | None = None) -> int:
         
         scenes_cli(click_args)
         return 0
+    
+    # Handle prompts subcommand
+    if args.command == "prompts":
+        from ..prompts.cli import prompts_cli
+        
+        # Build command line args for click
+        click_args = [args.prompts_command]
+        
+        if args.prompts_command == "add":
+            click_args.extend(["-t", args.text])
+            click_args.extend(["-c", args.category])
+            for provider in args.providers:
+                click_args.extend(["-p", provider])
+            if hasattr(args, "tags") and args.tags:
+                for tag in args.tags:
+                    click_args.extend(["--tags", tag])
+            if hasattr(args, "project") and args.project:
+                click_args.extend(["--project", args.project])
+            if hasattr(args, "style") and args.style:
+                click_args.extend(["--style", args.style])
+            if hasattr(args, "description") and args.description:
+                click_args.extend(["-d", args.description])
+            if hasattr(args, "notes") and args.notes:
+                click_args.extend(["-n", args.notes])
+            if hasattr(args, "keywords") and args.keywords:
+                for keyword in args.keywords:
+                    click_args.extend(["--keywords", keyword])
+        
+        elif args.prompts_command == "search":
+            if hasattr(args, "query") and args.query:
+                click_args.extend(["-q", args.query])
+            if hasattr(args, "category") and args.category:
+                click_args.extend(["-c", args.category])
+            if hasattr(args, "provider") and args.provider:
+                click_args.extend(["-p", args.provider])
+            if hasattr(args, "tag") and args.tag:
+                for tag in args.tag:
+                    click_args.extend(["-t", tag])
+            if hasattr(args, "project") and args.project:
+                click_args.extend(["--project", args.project])
+            if hasattr(args, "style") and args.style:
+                click_args.extend(["--style", args.style])
+            if hasattr(args, "min_effectiveness") and args.min_effectiveness:
+                click_args.extend(["--min-effectiveness", str(args.min_effectiveness)])
+            if hasattr(args, "min_success_rate") and args.min_success_rate:
+                click_args.extend(["--min-success-rate", str(args.min_success_rate)])
+            if hasattr(args, "effective") and args.effective:
+                click_args.append("--effective")
+            if hasattr(args, "limit") and args.limit:
+                click_args.extend(["--limit", str(args.limit)])
+            if hasattr(args, "export") and args.export:
+                click_args.extend(["--export", args.export])
+        
+        elif args.prompts_command == "show":
+            click_args.append(args.prompt_id)
+        
+        elif args.prompts_command == "use":
+            click_args.append(args.prompt_id)
+            click_args.extend(["-p", args.provider])
+            if not args.success:
+                click_args.append("--failure")
+            if hasattr(args, "output") and args.output:
+                click_args.extend(["-o", args.output])
+            if hasattr(args, "cost") and args.cost:
+                click_args.extend(["--cost", str(args.cost)])
+            if hasattr(args, "duration") and args.duration:
+                click_args.extend(["--duration", str(args.duration)])
+            if hasattr(args, "notes") and args.notes:
+                click_args.extend(["-n", args.notes])
+        
+        elif args.prompts_command == "update":
+            click_args.append(args.prompt_id)
+            if hasattr(args, "rating") and args.rating:
+                click_args.extend(["-r", str(args.rating)])
+            if hasattr(args, "add_tag") and args.add_tag:
+                for tag in args.add_tag:
+                    click_args.extend(["--add-tag", tag])
+            if hasattr(args, "remove_tag") and args.remove_tag:
+                for tag in args.remove_tag:
+                    click_args.extend(["--remove-tag", tag])
+            if hasattr(args, "notes") and args.notes:
+                click_args.extend(["-n", args.notes])
+            if hasattr(args, "description") and args.description:
+                click_args.extend(["-d", args.description])
+        
+        elif args.prompts_command == "effective":
+            if hasattr(args, "category") and args.category:
+                click_args.extend(["-c", args.category])
+            if hasattr(args, "provider") and args.provider:
+                click_args.extend(["-p", args.provider])
+            if hasattr(args, "min_success_rate"):
+                click_args.extend(["--min-success-rate", str(args.min_success_rate)])
+            if hasattr(args, "min_uses"):
+                click_args.extend(["--min-uses", str(args.min_uses)])
+            if hasattr(args, "limit"):
+                click_args.extend(["--limit", str(args.limit)])
+        
+        elif args.prompts_command == "import":
+            click_args.append(args.input_file)
+        
+        elif args.prompts_command == "export":
+            click_args.append(args.output_file)
+            if hasattr(args, "category") and args.category:
+                click_args.extend(["-c", args.category])
+        
+        elif args.prompts_command == "project":
+            click_args.append(args.project_path)
+            if hasattr(args, "sync_to_index") and args.sync_to_index:
+                click_args.append("--sync-to-index")
+            if hasattr(args, "sync_from_index") and args.sync_from_index:
+                click_args.append("--sync-from-index")
+            if hasattr(args, "project_name") and args.project_name:
+                click_args.extend(["--project-name", args.project_name])
+        
+        elif args.prompts_command == "discover":
+            if hasattr(args, "base_paths") and args.base_paths:
+                for path in args.base_paths:
+                    click_args.extend(["--base-paths", path])
+            if hasattr(args, "sync_all") and args.sync_all:
+                click_args.append("--sync-all")
+        
+        elif args.prompts_command == "init":
+            click_args.append(args.project_path)
+            if hasattr(args, "format") and args.format:
+                click_args.extend(["--format", args.format])
+        
+        elif args.prompts_command == "template":
+            if hasattr(args, "list") and args.list:
+                click_args.append("--list")
+            if hasattr(args, "show") and args.show:
+                click_args.extend(["--show", args.show])
+            if hasattr(args, "render") and args.render:
+                click_args.extend(["--render", args.render])
+            if hasattr(args, "save") and args.save:
+                click_args.append("--save")
+            if hasattr(args, "create") and args.create:
+                click_args.extend(["--create", args.create])
+            if hasattr(args, "from_prompt") and args.from_prompt:
+                click_args.extend(["--from-prompt", args.from_prompt])
+        
+        prompts_cli(click_args)
+        return 0
 
     # Setup logging for main command
     log_level = args.log_level if hasattr(args, "log_level") else "INFO"
@@ -870,7 +1143,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     
     # Show deprecation warning for direct CLI usage (except for allowed commands)
-    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage", "cost", "transitions", "scenes"]
+    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage", "cost", "transitions", "scenes", "prompts"]
     force_cli = hasattr(args, "force_cli") and args.force_cli
     debug_mode = hasattr(args, "debug") and args.debug
     check_deps = hasattr(args, "check_deps") and args.check_deps

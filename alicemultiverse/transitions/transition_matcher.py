@@ -476,3 +476,63 @@ class TransitionMatcher:
                 morph_points.append((sp, closest[0]))
                 
         return morph_points
+    
+    async def analyze_sequence_with_morphing(self, image_paths: List[str]) -> List[TransitionSuggestion]:
+        """
+        Analyze a sequence with enhanced morphing detection.
+        
+        This method integrates subject morphing analysis with traditional
+        transition analysis for more sophisticated transitions.
+        
+        Args:
+            image_paths: List of image file paths in sequence order
+            
+        Returns:
+            List of transition suggestions including morphing opportunities
+        """
+        # Get basic transition analysis
+        suggestions = self.analyze_sequence(image_paths)
+        
+        # Import morphing components
+        from .morphing import SubjectMorpher
+        
+        morpher = SubjectMorpher()
+        
+        # Enhance with morphing analysis
+        for i, suggestion in enumerate(suggestions):
+            if i < len(image_paths) - 1:
+                try:
+                    # Detect subjects in both images
+                    source_subjects = await morpher.detect_subjects(suggestion.source_image)
+                    target_subjects = await morpher.detect_subjects(suggestion.target_image)
+                    
+                    if source_subjects and target_subjects:
+                        # Check for morphing opportunities
+                        matches = morpher.find_similar_subjects(source_subjects, target_subjects)
+                        
+                        if matches:
+                            # Create morph transition
+                            morph_transition = morpher.create_morph_transition(
+                                suggestion.source_image,
+                                suggestion.target_image,
+                                source_subjects,
+                                target_subjects
+                            )
+                            
+                            if morph_transition:
+                                # Update suggestion to use morphing
+                                suggestion.transition_type = TransitionType.MORPH
+                                suggestion.duration = morph_transition.duration
+                                suggestion.effects = {
+                                    "morph_data": morph_transition.to_dict(),
+                                    "subject_count": len(morph_transition.subject_pairs),
+                                    "morph_type": morph_transition.morph_type
+                                }
+                                # Boost confidence if good match
+                                match_ratio = len(matches) / max(len(source_subjects), len(target_subjects))
+                                suggestion.confidence = max(suggestion.confidence, match_ratio)
+                                
+                except Exception as e:
+                    logger.warning(f"Morphing analysis failed for transition {i}: {e}")
+                    
+        return suggestions

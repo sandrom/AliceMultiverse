@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2025-06-06) - Color Flow Transitions
+- **Color Flow Transitions**: Advanced color-based transition analysis
+  - Added `ColorFlowAnalyzer` class for analyzing color palettes between shots
+  - Extracts dominant colors using K-means clustering
+  - Analyzes lighting direction and intensity using gradient detection
+  - Creates gradient transitions (linear, radial, diagonal) based on shot properties
+  - Calculates compatibility scores for smooth visual flow
+  - Suggests transition effects based on color and lighting differences
+  - Exports editor-specific formats:
+    - DaVinci Resolve: JSON + color matching LUTs
+    - Adobe Premiere: Keyframe data for color effects
+    - Final Cut Pro X: Motion template parameters
+    - Blackmagic Fusion: Node-based compositions
+  - Added CLI commands:
+    - `alice transitions colorflow` - Analyze color flow in image sequences
+    - `alice transitions colorpair` - Detailed analysis of a single transition
+  - Created comprehensive test suite and demo script
+
 ### Added (2025-06-05) - Code Cleanup Sprint, Workflow Polish & Deep Cleanup
 - **Repository Cleanup**: Reduced clutter and improved maintainability
   - Updated ROADMAP.md with focused priorities
