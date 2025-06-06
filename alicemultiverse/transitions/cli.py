@@ -11,6 +11,9 @@ from typing import List
 from .transition_matcher import TransitionMatcher
 from .morphing import MorphingTransitionMatcher, SubjectMorpher
 from .color_flow import ColorFlowAnalyzer, analyze_sequence, export_analysis_for_editor
+from .match_cuts import MatchCutDetector, find_match_cuts, export_match_cuts
+from .portal_effects import PortalEffectGenerator, export_portal_effect
+from .visual_rhythm import VisualRhythmAnalyzer, export_rhythm_analysis
 from ..core.logging import setup_logging
 
 
@@ -490,3 +493,180 @@ def colorpair(shot1: str, shot2: str, output: str, duration: int, verbose: bool)
         with open(output, 'w') as f:
             json.dump(analysis.to_dict(), f, indent=2)
         click.echo(f"\nAnalysis saved to: {output}")
+
+
+@transitions.command()
+@click.argument('images', nargs=-1, required=True, type=click.Path(exists=True))
+@click.option('--output', '-o', type=click.Path(), default='match_cuts.json', help='Output file')
+@click.option('--threshold', '-t', type=float, default=0.7, help='Match confidence threshold (0-1)')
+@click.option('--format', '-f', type=click.Choice(['json', 'edl']), default='json', help='Export format')
+@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
+def matchcuts(images: List[str], output: str, threshold: float, format: str, verbose: bool):
+    """
+    Find and analyze match cuts in image sequence.
+    
+    Match cuts are edits where movement, shapes, or composition
+    align between shots for seamless transitions.
+    
+    Example:
+        alice transitions matchcuts shot*.jpg -o cuts.json
+    """
+    setup_logging(debug=verbose)
+    
+    if len(images) < 2:
+        click.echo("Error: Need at least 2 images for match cut analysis", err=True)
+        return
+    
+    click.echo(f"Analyzing {len(images)} images for match cuts...")
+    click.echo(f"Threshold: {threshold}")
+    
+    # Find match cuts
+    matches = find_match_cuts([Path(img) for img in images], threshold)
+    
+    if not matches:
+        click.echo("\nNo match cuts found with the current threshold.")
+        click.echo("Try lowering the threshold with -t option.")
+        return
+    
+    click.echo(f"\nFound {len(matches)} potential match cuts:")
+    
+    for i, j, analysis in matches:
+        click.echo(f"\n{Path(images[i]).name} → {Path(images[j]).name}")
+        click.echo(f"  Type: {analysis.match_type}")
+        click.echo(f"  Confidence: {analysis.confidence:.2%}")
+        click.echo(f"  Action continuity: {analysis.action_continuity:.2%}")
+        
+        if verbose:
+            click.echo(f"  Motion matches: {len(analysis.motion_matches)}")
+            click.echo(f"  Shape matches: {len(analysis.shape_matches)}")
+            
+            for shape in analysis.shape_matches[:3]:
+                click.echo(f"    - {shape.shape_type} match (confidence: {shape.confidence:.2%})")
+    
+    # Export
+    export_match_cuts(matches, Path(output), format)
+    click.echo(f"\nMatch cut data exported to: {output}")
+
+
+@transitions.command()
+@click.argument('shot1', type=click.Path(exists=True))
+@click.argument('shot2', type=click.Path(exists=True))
+@click.option('--output', '-o', type=click.Path(), default='portal_effect.json', help='Output file')
+@click.option('--format', '-f', type=click.Choice(['after_effects', 'json']), 
+              default='after_effects', help='Export format')
+@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
+def portal(shot1: str, shot2: str, output: str, format: str, verbose: bool):
+    """
+    Detect portal shapes for creative transitions.
+    
+    Finds circles, rectangles, and arch shapes that can be used
+    as "portals" to transition between shots.
+    
+    Example:
+        alice transitions portal door_shot.jpg destination.jpg
+    """
+    setup_logging(debug=verbose)
+    
+    generator = PortalEffectGenerator()
+    
+    click.echo("Analyzing portal transition...")
+    click.echo(f"Shot 1: {Path(shot1).name}")
+    click.echo(f"Shot 2: {Path(shot2).name}")
+    
+    analysis = generator.analyze_portal_transition(Path(shot1), Path(shot2))
+    
+    # Show detected portals
+    click.echo(f"\nPortals in shot 1: {len(analysis.portals_shot1)}")
+    for i, portal in enumerate(analysis.portals_shot1[:3]):
+        click.echo(f"  {i+1}. {portal.shape_type} at ({portal.center[0]:.2f}, {portal.center[1]:.2f})")
+        click.echo(f"     Quality: {portal.quality_score:.2f}")
+        if verbose:
+            click.echo(f"     Size: {portal.size[0]:.2f} x {portal.size[1]:.2f}")
+            click.echo(f"     Darkness: {portal.darkness_ratio:.2f}")
+            click.echo(f"     Edge strength: {portal.edge_strength:.2f}")
+    
+    click.echo(f"\nPortals in shot 2: {len(analysis.portals_shot2)}")
+    for i, portal in enumerate(analysis.portals_shot2[:3]):
+        click.echo(f"  {i+1}. {portal.shape_type} at ({portal.center[0]:.2f}, {portal.center[1]:.2f})")
+        click.echo(f"     Quality: {portal.quality_score:.2f}")
+    
+    if analysis.best_match:
+        click.echo(f"\nBest portal match:")
+        click.echo(f"  {analysis.best_match.portal1.shape_type} → {analysis.best_match.portal2.shape_type}")
+        click.echo(f"  Alignment: {analysis.best_match.alignment_score:.2%}")
+        click.echo(f"  Size compatibility: {analysis.best_match.size_compatibility:.2%}")
+        click.echo(f"  Transition: {analysis.best_match.transition_type}")
+        click.echo(f"  Overall score: {analysis.best_match.overall_score:.2%}")
+        click.echo(f"\nRecommended effect: {analysis.recommended_effect}")
+    else:
+        click.echo("\nNo good portal matches found.")
+    
+    # Export
+    export_portal_effect(analysis, Path(output), format)
+    click.echo(f"\nPortal effect data exported to: {output}")
+
+
+@transitions.command()
+@click.argument('images', nargs=-1, required=True, type=click.Path(exists=True))
+@click.option('--output', '-o', type=click.Path(), default='rhythm_analysis.json', help='Output file')
+@click.option('--duration', '-d', type=float, help='Target total duration in seconds')
+@click.option('--bpm', '-b', type=float, help='Music BPM for rhythm matching')
+@click.option('--format', '-f', type=click.Choice(['json', 'csv']), default='json', help='Export format')
+@click.option('--verbose', '-v', is_flag=True, help='Verbose output')
+def rhythm(images: List[str], output: str, duration: float, bpm: float, format: str, verbose: bool):
+    """
+    Analyze visual rhythm and suggest pacing.
+    
+    Analyzes visual complexity and energy to suggest optimal
+    shot durations for rhythmic editing.
+    
+    Example:
+        alice transitions rhythm shot*.jpg -d 30 -b 120
+    """
+    setup_logging(debug=verbose)
+    
+    if len(images) < 2:
+        click.echo("Error: Need at least 2 images for rhythm analysis", err=True)
+        return
+    
+    analyzer = VisualRhythmAnalyzer()
+    
+    click.echo(f"Analyzing visual rhythm for {len(images)} images...")
+    if duration:
+        click.echo(f"Target duration: {duration}s")
+    if bpm:
+        click.echo(f"Music BPM: {bpm}")
+    
+    # Analyze
+    analysis = analyzer.analyze_sequence_rhythm(
+        [Path(img) for img in images],
+        target_duration=duration,
+        music_bpm=bpm
+    )
+    
+    # Show results
+    total_duration = sum(p.hold_duration for p in analysis.pacing_suggestions)
+    click.echo(f"\nSuggested timeline duration: {total_duration:.1f}s")
+    click.echo(f"Balance score: {analysis.balance_score:.2%}")
+    
+    click.echo("\nPacing suggestions:")
+    for i, (img, pacing) in enumerate(zip(images, analysis.pacing_suggestions)):
+        click.echo(f"\n{i+1}. {Path(img).name}")
+        click.echo(f"   Duration: {pacing.hold_duration:.2f}s")
+        click.echo(f"   Style: {pacing.cut_style}")
+        click.echo(f"   Complexity: {pacing.complexity_score:.2f}")
+        click.echo(f"   Energy: {pacing.energy_score:.2f}")
+        
+        if verbose:
+            click.echo(f"   Reasoning: {pacing.reasoning}")
+    
+    # Show rhythm curve
+    if verbose and len(analysis.rhythm_curve) > 0:
+        click.echo("\nRhythm curve (normalized pace):")
+        for i, value in enumerate(analysis.rhythm_curve):
+            bars = int(value * 20)
+            click.echo(f"   {i+1}: {'█' * bars}")
+    
+    # Export
+    export_rhythm_analysis(analysis, Path(output), format)
+    click.echo(f"\nRhythm analysis exported to: {output}")

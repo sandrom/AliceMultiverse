@@ -21,6 +21,31 @@ from .color_flow import (
     analyze_sequence,
     export_analysis_for_editor
 )
+from .match_cuts import (
+    MatchCutDetector,
+    MatchCutAnalysis,
+    find_match_cuts,
+    export_match_cuts,
+    MotionVector as MatchMotionVector,
+    ShapeMatch
+)
+from .portal_effects import (
+    PortalDetector,
+    PortalEffectGenerator,
+    PortalEffectAnalysis,
+    Portal,
+    PortalMatch,
+    export_portal_effect
+)
+from .visual_rhythm import (
+    VisualRhythmAnalyzer,
+    RhythmAnalysis,
+    VisualComplexity,
+    EnergyProfile,
+    PacingSuggestion,
+    match_rhythm_to_music,
+    export_rhythm_analysis
+)
 
 __all__ = [
     'MotionAnalyzer',
@@ -39,5 +64,24 @@ __all__ = [
     'GradientTransition',
     'ColorFlowAnalysis',
     'analyze_sequence',
-    'export_analysis_for_editor'
+    'export_analysis_for_editor',
+    'MatchCutDetector',
+    'MatchCutAnalysis',
+    'find_match_cuts',
+    'export_match_cuts',
+    'MatchMotionVector',
+    'ShapeMatch',
+    'PortalDetector',
+    'PortalEffectGenerator',
+    'PortalEffectAnalysis',
+    'Portal',
+    'PortalMatch',
+    'export_portal_effect',
+    'VisualRhythmAnalyzer',
+    'RhythmAnalysis',
+    'VisualComplexity',
+    'EnergyProfile',
+    'PacingSuggestion',
+    'match_rhythm_to_music',
+    'export_rhythm_analysis'
 ]

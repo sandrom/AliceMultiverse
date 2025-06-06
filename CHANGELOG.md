@@ -7,7 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Added (2025-06-06) - Color Flow Transitions
+### Added (2025-01-07) - Advanced Transition Effects
+- **Match Cut Detection**: Find seamless transitions where motion/shapes align
+  - Motion vector analysis for movement continuity
+  - Shape matching for circles, rectangles, lines
+  - Action continuity scoring
+  - Export to EDL format with annotations
+  - CLI: `alice transitions matchcuts`
+  
+- **Portal Effects**: "Through the looking glass" transitions
+  - Detect circles, rectangles, arches as portals
+  - Quality scoring based on darkness, edges, size
+  - Portal matching between shots
+  - After Effects script export
+  - CLI: `alice transitions portal`
+  
+- **Visual Rhythm Engine**: Intelligent pacing suggestions
+  - Visual complexity analysis (edges, color, texture)
+  - Energy profiling (brightness, motion, emotion)
+  - Automatic duration suggestions
+  - BPM synchronization support
+  - Balance scoring for variety
+  - CSV export for timing sheets
+  - CLI: `alice transitions rhythm`
+
+### Added (2025-01-06) - Color Flow Transitions
 - **Color Flow Transitions**: Advanced color-based transition analysis
   - Added `ColorFlowAnalyzer` class for analyzing color palettes between shots
   - Extracts dominant colors using K-means clustering
