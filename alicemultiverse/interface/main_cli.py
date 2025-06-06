@@ -282,6 +282,39 @@ For normal usage, use Alice through an AI assistant instead.
     transitions_motion.add_argument("image", help="Image file to analyze")
     transitions_motion.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
+    # Scenes subcommand for scene detection
+    scenes_parser = subparsers.add_parser("scenes", help="Scene detection and shot list generation")
+    scenes_subparsers = scenes_parser.add_subparsers(
+        dest="scenes_command", help="Scene detection commands"
+    )
+    
+    # Scenes - detect
+    scenes_detect = scenes_subparsers.add_parser("detect", help="Detect scenes in video or images")
+    scenes_detect.add_argument("input_path", help="Video file or image directory")
+    scenes_detect.add_argument("-o", "--output", help="Output JSON file")
+    scenes_detect.add_argument("-t", "--threshold", type=float, default=0.3, help="Detection threshold")
+    scenes_detect.add_argument("--min-duration", type=float, default=1.0, help="Minimum scene duration")
+    scenes_detect.add_argument("--use-ai/--no-ai", default=True, help="Use AI for analysis")
+    scenes_detect.add_argument("--ai-provider", help="AI provider")
+    scenes_detect.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+    
+    # Scenes - shotlist
+    scenes_shotlist = scenes_subparsers.add_parser("shotlist", help="Generate shot list from scenes")
+    scenes_shotlist.add_argument("scenes_file", help="Scenes JSON file")
+    scenes_shotlist.add_argument("-o", "--output", required=True, help="Output file")
+    scenes_shotlist.add_argument("-f", "--format", choices=["json", "csv", "markdown"], default="json")
+    scenes_shotlist.add_argument("-p", "--project-name", default="Untitled Project")
+    scenes_shotlist.add_argument("-s", "--style", choices=["cinematic", "documentary", "commercial"], default="cinematic")
+    scenes_shotlist.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+    
+    # Scenes - extract
+    scenes_extract = scenes_subparsers.add_parser("extract", help="Extract frames from scenes")
+    scenes_extract.add_argument("video", help="Video file")
+    scenes_extract.add_argument("-o", "--output", help="Output directory")
+    scenes_extract.add_argument("-f", "--format", choices=["jpg", "png"], default="jpg")
+    scenes_extract.add_argument("--scenes-file", help="Use existing scenes JSON")
+    scenes_extract.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
+
     # Directory arguments
     parser.add_argument(
         "-i",
@@ -777,6 +810,50 @@ def main(argv: list[str] | None = None) -> int:
         
         transitions_cli(click_args)
         return 0
+    
+    # Handle scenes subcommand
+    if args.command == "scenes":
+        from ..scene_detection.cli import scenes as scenes_cli
+        
+        # Build command line args for click
+        click_args = [args.scenes_command]
+        
+        if args.scenes_command == "detect":
+            click_args.append(args.input_path)
+            if hasattr(args, "output") and args.output:
+                click_args.extend(["-o", args.output])
+            if hasattr(args, "threshold"):
+                click_args.extend(["-t", str(args.threshold)])
+            if hasattr(args, "min_duration"):
+                click_args.extend(["--min-duration", str(args.min_duration)])
+            if not args.use_ai:
+                click_args.append("--no-ai")
+            if hasattr(args, "ai_provider") and args.ai_provider:
+                click_args.extend(["--ai-provider", args.ai_provider])
+            if hasattr(args, "verbose") and args.verbose:
+                click_args.append("-v")
+                
+        elif args.scenes_command == "shotlist":
+            click_args.append(args.scenes_file)
+            click_args.extend(["-o", args.output])
+            click_args.extend(["-f", args.format])
+            click_args.extend(["-p", args.project_name])
+            click_args.extend(["-s", args.style])
+            if hasattr(args, "verbose") and args.verbose:
+                click_args.append("-v")
+                
+        elif args.scenes_command == "extract":
+            click_args.append(args.video)
+            if hasattr(args, "output") and args.output:
+                click_args.extend(["-o", args.output])
+            click_args.extend(["-f", args.format])
+            if hasattr(args, "scenes_file") and args.scenes_file:
+                click_args.extend(["--scenes-file", args.scenes_file])
+            if hasattr(args, "verbose") and args.verbose:
+                click_args.append("-v")
+        
+        scenes_cli(click_args)
+        return 0
 
     # Setup logging for main command
     log_level = args.log_level if hasattr(args, "log_level") else "INFO"
@@ -793,7 +870,7 @@ def main(argv: list[str] | None = None) -> int:
     )
     
     # Show deprecation warning for direct CLI usage (except for allowed commands)
-    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage", "cost", "transitions"]
+    allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage", "cost", "transitions", "scenes"]
     force_cli = hasattr(args, "force_cli") and args.force_cli
     debug_mode = hasattr(args, "debug") and args.debug
     check_deps = hasattr(args, "check_deps") and args.check_deps

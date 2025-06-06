@@ -234,21 +234,20 @@ platforms:
 
 #### Intelligent Automation
 
-##### Shot List Generation
-- [ ] **AI Scene Detection**
-  ```python
-  # Proposed workflow
-  project = alice.create_project(
-      template="music_video",
-      music="track.mp3",
-      images=selection
-  )
+##### Shot List Generation ✅
+- [x] **AI Scene Detection**
+  ```bash
+  # Implemented workflow
+  alice scenes detect video.mp4 -o scenes.json
+  alice scenes shotlist scenes.json -o shotlist.md --style cinematic
+  alice scenes extract video.mp4 -o ./shots/
   
-  # Auto-generates:
-  # - Beat-aligned shot list
-  # - Transition suggestions
-  # - Effect recommendations
-  # - Duration calculations
+  # Features:
+  # - Content-based scene boundary detection
+  # - AI-powered scene analysis (type, mood, subject)
+  # - Professional shot list generation
+  # - Style-specific technical details
+  # - Multiple export formats (JSON, CSV, Markdown)
   ```
 
 ##### Multi-Version Export
