@@ -10,7 +10,7 @@
 - **Visual Analysis Tools**: Complexity scoring, energy profiling, pacing suggestions
 - **Export Enhancements**: Support for After Effects, Fusion, EDL annotations
 - **Google Veo 3 Integration**: State-of-the-art video generation with native audio
-- **60+ MCP Tools**: Complete creative control through AI assistant
+- **61+ MCP Tools**: Complete creative control through AI assistant
 
 **Documentation:**
 - 10+ comprehensive user guides covering all new features
@@ -190,7 +190,7 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
    - Transition analysis ✅
    - Export to EDL/XML/CapCut ✅
 
-## Complete MCP Tools Summary (60+ Tools) ✅
+## Complete MCP Tools Summary (61+ Tools) ✅
 
 ### Core Operations
 - `search_assets` - Natural language search with tags

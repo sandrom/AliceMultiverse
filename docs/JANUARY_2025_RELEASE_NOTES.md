@@ -80,6 +80,7 @@ State-of-the-art video generation with unique capabilities.
 
 **Usage:**
 ```python
+# Direct Python API
 request = GenerationRequest(
     prompt="A thunderstorm over mountains with sound",
     model="veo-3",
@@ -89,6 +90,9 @@ request = GenerationRequest(
         "enable_audio": True
     }
 )
+
+# Or via MCP tool in Claude
+"Generate a 5-second video of ocean waves with sound using Veo 3"
 ```
 
 ## 📚 Documentation
@@ -128,7 +132,7 @@ request = GenerationRequest(
 
 ## 📊 Statistics
 
-- **Total MCP Tools**: 60+ (up from 52)
+- **Total MCP Tools**: 61+ (up from 52)
 - **New Lines of Code**: ~15,000+
 - **Test Coverage**: Maintained at >80%
 - **Documentation Pages**: 10+ new guides

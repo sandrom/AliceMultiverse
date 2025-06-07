@@ -2582,6 +2582,115 @@ async def create_video_timeline(
 
 
 @server.tool()
+async def generate_veo3_video(
+    prompt: str,
+    duration: int = 5,
+    aspect_ratio: str = "16:9",
+    enable_audio: bool = False,
+    enable_speech: bool = False,
+    output_path: str | None = None
+) -> dict[str, Any]:
+    """
+    Generate a video using Google Veo 3 via fal.ai.
+    
+    Veo 3 features:
+    - State-of-the-art video quality with realistic physics
+    - Native audio generation (ambient sounds, music, effects)
+    - Speech capabilities with accurate lip sync
+    - 5-8 second video generation
+    
+    Parameters:
+    - prompt: Text description of the video to generate
+    - duration: Video length in seconds (5-8)
+    - aspect_ratio: Video aspect ratio (16:9, 9:16, 1:1)
+    - enable_audio: Generate native audio with the video
+    - enable_speech: Enable speech generation (requires enable_audio=True)
+    - output_path: Optional output directory path
+    
+    Note: Costs $0.50/second without audio, $0.75/second with audio.
+    """
+    try:
+        from .providers.fal_provider import FalProvider
+        from .providers.types import GenerationRequest, GenerationType
+        from pathlib import Path
+        
+        # Validate parameters
+        if duration < 5 or duration > 8:
+            return {
+                "success": False,
+                "message": "Duration must be between 5 and 8 seconds for Veo 3"
+            }
+            
+        if enable_speech and not enable_audio:
+            enable_audio = True  # Speech requires audio
+            
+        # Set output path
+        if output_path:
+            output_dir = Path(output_path)
+        else:
+            output_dir = Path.home() / "Documents" / "AliceGenerated" / "veo3"
+            
+        # Initialize provider
+        provider = FalProvider()
+        await provider.initialize()
+        
+        # Create generation request
+        request = GenerationRequest(
+            prompt=prompt,
+            model="veo-3",
+            generation_type=GenerationType.VIDEO,
+            output_path=output_dir,
+            parameters={
+                "duration": duration,
+                "aspect_ratio": aspect_ratio,
+                "enable_audio": enable_audio
+            }
+        )
+        
+        # Estimate cost
+        cost_per_second = 0.75 if enable_audio else 0.50
+        estimated_cost = cost_per_second * duration
+        
+        # Generate video
+        result = await provider.generate(request)
+        
+        # Clean up
+        await provider.cleanup()
+        
+        if result.success:
+            return {
+                "success": True,
+                "message": f"Generated Veo 3 video successfully",
+                "data": {
+                    "file_path": str(result.file_path),
+                    "cost": result.cost or estimated_cost,
+                    "duration": duration,
+                    "has_audio": enable_audio,
+                    "has_speech": enable_speech,
+                    "aspect_ratio": aspect_ratio,
+                    "model": "veo-3",
+                    "provider": "fal.ai",
+                    "features": [
+                        "state-of-the-art quality",
+                        "realistic physics",
+                        "native audio" if enable_audio else "no audio",
+                        "speech with lip sync" if enable_speech else "no speech"
+                    ]
+                }
+            }
+        else:
+            return {
+                "success": False,
+                "message": f"Video generation failed: {result.error}",
+                "error": result.error
+            }
+            
+    except Exception as e:
+        logger.error(f"Veo 3 video generation failed: {e}")
+        return {"success": False, "error": str(e), "message": "Failed to generate Veo 3 video"}
+
+
+@server.tool()
 async def prompt_find_effective(
     category: str | None = None,
     style: str | None = None,

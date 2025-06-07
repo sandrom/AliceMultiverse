@@ -25,6 +25,14 @@ alice prompts export --format yaml --output my_prompts.yaml
 "Track this prompt's effectiveness"
 ```
 
+### Video Generation (in Claude)
+```
+"Generate a 5-second video of ocean waves with sound using Veo 3"
+"Create a video with speech: 'News anchor saying Breaking news...'"
+"Make a vertical video for social media with Veo 3"
+"Generate a silent video of clouds moving over mountains"
+```
+
 ## 🎬 Video Generation
 
 ### Google Veo 3
