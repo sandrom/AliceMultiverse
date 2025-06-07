@@ -9,6 +9,7 @@
 - **Advanced Transitions Suite**: 5 transition effects (morphing, color flow, match cuts, portals, rhythm)
 - **Visual Analysis Tools**: Complexity scoring, energy profiling, pacing suggestions
 - **Export Enhancements**: Support for After Effects, Fusion, EDL annotations
+- **Google Veo 3 Integration**: State-of-the-art video generation with native audio
 - **59+ MCP Tools**: Complete creative control through AI assistant
 
 **Documentation:**

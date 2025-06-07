@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2025-01-07) - Google Veo 3 Integration
+- **Google Veo 3 Support**: Added state-of-the-art video generation
+  - Integrated via fal.ai provider with model ID `veo-3`
+  - Added to Google AI provider for future Vertex AI access
+  - Native audio generation with ambient sounds and music
+  - Speech capabilities with accurate lip sync
+  - Improved physics simulation and realism
+  - 5-8 second video generation
+  - Pricing: $0.50/second (no audio) or $0.75/second (with audio)
+  - Created comprehensive Veo 3 guide and examples
+  - Added unit tests for both providers
+
 ### Added (2025-01-07) - Advanced Transition Effects
 - **Match Cut Detection**: Find seamless transitions where motion/shapes align
   - Motion vector analysis for movement continuity

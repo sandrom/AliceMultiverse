@@ -45,8 +45,10 @@ class GoogleAIProvider(Provider):
         "imagen-3-fast": "imagen-3.0-fast-generate-001",
         
         # Veo models
+        "veo-3": "veo-3.0-generate-preview",  # Latest Veo 3 (preview)
+        "veo-3.0": "veo-3.0-generate-preview",
+        "veo": "veo-3.0-generate-preview",  # Default to latest
         "veo-2": "veo-002",
-        "veo": "veo-002",  # Default alias
         "veo-001": "veo-001",  # Earlier version
     }
     
@@ -58,6 +60,7 @@ class GoogleAIProvider(Provider):
     PRICING = {
         "imagen-3.0-generate-002": 0.03,  # $0.03 per image
         "imagen-3.0-fast-generate-001": 0.02,  # Faster, slightly lower quality
+        "veo-3.0-generate-preview": 0.35,  # ~$0.35 per second (8s = $2.80)
         "veo-002": 0.10,  # Estimated for 8-second video
         "veo-001": 0.08,  # Earlier version
     }
@@ -65,7 +68,7 @@ class GoogleAIProvider(Provider):
     # Supported aspect ratios
     ASPECT_RATIOS = {
         "imagen": ["1:1", "16:9", "9:16", "4:3", "3:4"],
-        "veo": ["16:9", "9:16"],
+        "veo": ["16:9", "9:16", "1:1"],  # Veo 3 supports more aspect ratios
     }
     
     def __init__(self, api_key: str = None, backend: GoogleAIBackend = GoogleAIBackend.GEMINI,
@@ -123,6 +126,9 @@ class GoogleAIProvider(Provider):
                 "negative_prompt",
                 "seed_control",
                 "safety_filtering",
+                "native_sound_generation",  # Veo 3
+                "prompt_rewriting",  # Veo 3
+                "speech_generation",  # Veo 3
             ],
             pricing=self.PRICING,
             supports_streaming=False,
@@ -251,6 +257,8 @@ class GoogleAIProvider(Provider):
     async def _prepare_veo_request(self, request: GenerationRequest) -> Dict[str, Any]:
         """Prepare request body for Veo API."""
         params = request.parameters or {}
+        model_key = self.MODELS.get(request.model, request.model)
+        is_veo3 = "veo-3" in model_key
         
         if self.backend == GoogleAIBackend.GEMINI:
             # Gemini API format
@@ -280,6 +288,12 @@ class GoogleAIProvider(Provider):
             if params.get("seed") is not None:
                 body["config"]["seed"] = params["seed"]
                 
+            # Veo 3 specific parameters
+            if is_veo3:
+                body["config"]["enable_sound"] = params.get("enable_sound", False)
+                body["config"]["enable_prompt_rewriting"] = params.get("enable_prompt_rewriting", True)
+                body["config"]["number_of_videos"] = params.get("number_of_videos", 1)  # Max 2
+                
         else:
             # Vertex AI format
             body = {
@@ -307,6 +321,12 @@ class GoogleAIProvider(Provider):
                 
             if params.get("seed") is not None:
                 body["parameters"]["seed"] = params["seed"]
+                
+            # Veo 3 specific parameters for Vertex AI
+            if is_veo3:
+                body["parameters"]["enableSound"] = params.get("enable_sound", False)
+                body["parameters"]["enablePromptRewriting"] = params.get("enable_prompt_rewriting", True)
+                body["parameters"]["sampleCount"] = params.get("number_of_videos", 1)  # Max 2
                 
         return body
         

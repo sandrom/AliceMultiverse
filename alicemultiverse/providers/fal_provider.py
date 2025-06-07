@@ -75,6 +75,10 @@ class FalProvider(Provider):
         "kling-elements": "fal-ai/kling-video/v1.6/pro/elements",
         "kling-lipsync": "fal-ai/kling-video/lipsync/audio-to-video",
         
+        # Google Veo models
+        "veo-3": "fal-ai/veo3",  # Google Veo 3 - state-of-the-art video generation
+        "veo3": "fal-ai/veo3",  # Alias for veo-3
+        
         # Audio models
         "mmaudio-v2": "fal-ai/mmaudio-v2",  # Multimodal audio generation for video
         
@@ -114,6 +118,8 @@ class FalProvider(Provider):
         "kling-v2.1-master-image": 0.30,  # Kling 2.1 Master tier - highest quality
         "kling-elements": 0.15,
         "kling-lipsync": 0.20,
+        "veo-3": 0.50,  # $0.50 per second without audio
+        "veo3": 0.50,  # Alias
         "mmaudio-v2": 0.05,  # Multimodal audio generation
         "face-swap": 0.02,
         "ccsr": 0.02,
@@ -156,6 +162,9 @@ class FalProvider(Provider):
                 "face_swap",
                 "upscaling",
                 "video_generation",
+                "native_audio_generation",  # Veo 3
+                "speech_capabilities",  # Veo 3
+                "lip_sync",  # Veo 3 and Kling
                 "audio_generation",
                 "video_to_audio"
             ],
