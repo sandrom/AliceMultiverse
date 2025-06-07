@@ -5,12 +5,13 @@ import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any
+import hashlib
 
 from ..metadata.embedder import MetadataEmbedder
 from ..metadata.extractor import MetadataExtractor
 from ..metadata.models import AssetMetadata
-from .cache_migration import MetadataCacheAdapter as MetadataCache
 from .types import AnalysisResult
+from ..database.file_cache import FileCache
 
 logger = logging.getLogger(__name__)
 
@@ -47,8 +48,21 @@ class UnifiedCache:
             enable_understanding: Whether to enable AI understanding
             understanding_provider: Specific provider to use for understanding
         """
-        # Core components
-        self.cache = MetadataCache(source_root, force_reindex)
+        # Core components - create a simple cache wrapper
+        self.source_root = source_root
+        self.force_reindex = force_reindex
+        self.project_id = project_id
+        self.cache_dir = source_root / ".metadata"
+        if not force_reindex:
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Initialize cache stats
+        self.cache_hits = 0
+        self.cache_misses = 0
+        self.analysis_time_saved = 0.0
+        
+        # Create wrapper object for compatibility
+        self.cache = self  # Self-reference for compatibility
         self.embedder = MetadataEmbedder()
         self.extractor = MetadataExtractor()
         
@@ -417,11 +431,61 @@ class UnifiedCache:
         Returns:
             Cache performance statistics
         """
-        stats = self.cache.get_stats()
-        stats["indexed_assets"] = len(self.metadata_index)
-        stats["project_id"] = self.project_id
+        stats = {
+            "cache_hits": self.cache_hits,
+            "cache_misses": self.cache_misses,
+            "hit_rate": self.cache_hits / (self.cache_hits + self.cache_misses) if (self.cache_hits + self.cache_misses) > 0 else 0,
+            "analysis_time_saved": self.analysis_time_saved,
+            "indexed_assets": len(self.metadata_index),
+            "project_id": self.project_id
+        }
         return stats
+    
+    def get_content_hash(self, file_path: Path) -> str:
+        """Get content hash for a file.
+        
+        Args:
+            file_path: Path to file
+            
+        Returns:
+            SHA256 hash of file content
+        """
+        hasher = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            for chunk in iter(lambda: f.read(8192), b""):
+                hasher.update(chunk)
+        return hasher.hexdigest()
 
+    def save(self, media_path: Path, analysis: Any, analysis_time: float) -> None:
+        """Save analysis to cache (for backward compatibility).
+        
+        Args:
+            media_path: Path to media file
+            analysis: Analysis result
+            analysis_time: Time taken for analysis
+        """
+        # Get cache file path
+        content_hash = self.get_content_hash(media_path)
+        cache_file = self.cache_dir / f"{content_hash}.json"
+        
+        # Create cache metadata
+        metadata = {
+            "version": "1.0",
+            "content_hash": content_hash,
+            "original_path": str(media_path),
+            "file_name": media_path.name,
+            "file_size": media_path.stat().st_size if media_path.exists() else 0,
+            "last_modified": media_path.stat().st_mtime if media_path.exists() else 0,
+            "analysis": analysis,
+            "analysis_time": analysis_time,
+            "cached_at": datetime.now().isoformat()
+        }
+        
+        # Save to cache file
+        cache_file.parent.mkdir(parents=True, exist_ok=True)
+        with open(cache_file, 'w') as f:
+            json.dump(metadata, f, indent=2, default=str)
+    
     # ===== Private Methods =====
 
     def _load_metadata_index(self) -> None:
