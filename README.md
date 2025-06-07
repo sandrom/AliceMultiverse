@@ -21,10 +21,16 @@ I'm Sandro, and I built AliceMultiverse to solve my specific problem: managing t
 - I want to track which images I've used in videos
 - I prefer talking to Claude over using traditional UIs
 - I need to control API costs (those AI calls add up fast!)
+- I create AI videos and need professional transitions
+- I want to track which prompts actually work
 
 You're welcome to fork and adapt it for your needs, but be aware that I make changes based on my daily workflow, not general use cases.
 
-> **🚀 New**: Direct integration with Claude Desktop via MCP (Model Context Protocol)
+> **🚀 New in January 2025**: 
+> - Google Veo 3 video generation with native audio
+> - Advanced transition effects (morphing, portals, match cuts)
+> - Prompt management system with effectiveness tracking
+> - 60+ MCP tools for complete creative control
 
 ## 🤖 AI-First Usage (Recommended)
 
@@ -73,6 +79,23 @@ You're welcome to fork and adapt it for your needs, but be aware that I make cha
 - "What's in this image?" (semantic tagging)
 - "Find all images with cats"
 - "Show me minimalist style images"
+
+**Video Creation (NEW):**
+- "Generate a video of ocean waves with sound using Veo 3"
+- "Create a music video from these images synced to this song"
+- "Find match cuts in this image sequence"
+- "Analyze the pacing for my video shots"
+
+**Prompt Management (NEW):**
+- "Find prompts that worked well for cyberpunk style"
+- "Track how effective this prompt was"
+- "Show me my most successful Midjourney prompts"
+
+**Transitions & Effects (NEW):**
+- "Create a morph transition between these two faces"
+- "Find portal shapes for transitions"
+- "Analyze color flow between these shots"
+- "Detect match cuts in my action sequence"
 
 ## 📦 Requirements
 
