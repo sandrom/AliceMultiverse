@@ -23,15 +23,24 @@ class WorkflowRegistry:
             from .templates.image_enhancement import ImageEnhancementWorkflow
             from .templates.video_pipeline import VideoProductionWorkflow
             from .templates.style_transfer import StyleTransferWorkflow
+            from .templates.music_video import (
+                MusicVideoTemplate,
+                QuickMusicVideoTemplate,
+                CinematicMusicVideoTemplate
+            )
             
             self.register("image_enhancement", ImageEnhancementWorkflow)
             self.register("video_production", VideoProductionWorkflow)
             self.register("style_transfer", StyleTransferWorkflow)
+            self.register("music_video", MusicVideoTemplate)
+            self.register("quick_music_video", QuickMusicVideoTemplate)
+            self.register("cinematic_music_video", CinematicMusicVideoTemplate)
             
             # Aliases for convenience
             self.register("enhance", ImageEnhancementWorkflow)
             self.register("upscale", ImageEnhancementWorkflow)
             self.register("video", VideoProductionWorkflow)
+            self.register("music", MusicVideoTemplate)
             
         except ImportError as e:
             logger.warning(f"Could not import built-in workflows: {e}")
