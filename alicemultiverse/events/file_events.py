@@ -6,8 +6,6 @@ allowing AliceMultiverse to run without Redis for personal/development use.
 
 import asyncio
 import json
-import logging
-import time
 import uuid
 from datetime import datetime, timedelta, timezone
 from pathlib import Path

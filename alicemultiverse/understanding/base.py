@@ -114,7 +114,6 @@ class ImageAnalyzer(ABC):
         Returns:
             ImageAnalysisResult with extracted information
         """
-        pass
     
     @abstractmethod
     def estimate_cost(self, detailed: bool = False) -> float:
@@ -126,19 +125,16 @@ class ImageAnalyzer(ABC):
         Returns:
             Estimated cost in USD
         """
-        pass
     
     @property
     @abstractmethod
     def name(self) -> str:
         """Provider name."""
-        pass
     
     @property
     @abstractmethod
     def supports_batch(self) -> bool:
         """Whether this analyzer supports batch processing."""
-        pass
     
     def _extract_tags_from_text(self, text: str) -> Dict[str, List[str]]:
         """Extract tags from descriptive text.

@@ -7,14 +7,12 @@ This module implements cost-saving optimizations:
 4. Uses progressive provider strategy (cheap → expensive)
 """
 
-import asyncio
 import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Any
+from typing import Dict, List, Optional, Tuple
 
-import numpy as np
 from tqdm import tqdm
 
 from ..assets.perceptual_hashing import (
@@ -24,7 +22,7 @@ from ..assets.perceptual_hashing import (
 )
 from ..core.cost_tracker import get_cost_tracker
 from .analyzer import ImageAnalyzer
-from .batch_analyzer import BatchAnalysisRequest, BatchProgress
+from .batch_analyzer import BatchAnalysisRequest
 from .base import ImageAnalysisResult
 
 logger = logging.getLogger(__name__)

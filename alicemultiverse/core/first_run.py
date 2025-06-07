@@ -8,14 +8,9 @@ This module provides a friendly first-run experience that:
 5. Provides next steps
 """
 
-import os
 import sys
-import json
 import shutil
-import logging
 from pathlib import Path
-from typing import Dict, Any, Optional, List, Tuple
-from datetime import datetime
 
 from .config import load_config
 from .keys import APIKeyManager
@@ -193,16 +188,14 @@ This takes about 2 minutes. Let's start!
         
         # Check essential dependencies
         try:
-            import PIL
-            import cv2
-            import numpy
+            pass
         except ImportError as e:
             issues.append(f"Missing dependency: {e.name}")
         
         # Check optional but recommended
         warnings = []
         try:
-            import redis
+            pass
         except ImportError:
             warnings.append("Redis not installed (optional - file-based events will be used)")
         

@@ -11,7 +11,7 @@ from enum import Enum
 from typing import Any
 
 from ..assets.discovery import AssetDiscovery
-from ..core.structured_logging import get_logger, trace_operation, CorrelationContext
+from ..core.structured_logging import get_logger, trace_operation
 from ..events import publish_event
 
 logger = get_logger(__name__)

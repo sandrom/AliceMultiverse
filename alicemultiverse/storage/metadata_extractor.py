@@ -7,14 +7,11 @@ This module extracts embedded metadata from various file types:
 """
 
 import json
-import logging
-from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Dict
 
 from PIL import Image
 from PIL.ExifTags import TAGS
-import piexif
 
 from ..core.structured_logging import get_logger
 

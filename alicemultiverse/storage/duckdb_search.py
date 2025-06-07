@@ -6,7 +6,6 @@ tag-based filtering, and faceted search results.
 """
 
 import json
-import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union, Set

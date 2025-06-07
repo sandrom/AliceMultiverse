@@ -5,7 +5,7 @@ This module defines how we store both individual model outputs
 and merged results in file metadata.
 """
 
-from typing import Dict, List, Any, Optional
+from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
 

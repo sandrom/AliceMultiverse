@@ -9,7 +9,6 @@ from omegaconf import DictConfig
 
 from ..core.config import load_config
 from ..core.exceptions import AliceMultiverseError, ConfigurationError
-from ..core.logging import setup_logging
 from ..core.structured_logging import setup_structured_logging
 from ..version import __version__
 
@@ -676,7 +675,6 @@ def check_dependencies() -> bool:
 
     # Check for understanding system
     try:
-        from ..understanding import analyzer
         print("✓ Understanding system available (advanced analysis)")
     except ImportError:
         print("ℹ Understanding system not available - advanced analysis disabled")

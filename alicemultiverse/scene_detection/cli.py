@@ -5,7 +5,7 @@ CLI commands for scene detection and shot list generation.
 import click
 import json
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 from .scene_detector import SceneDetector
 from .shot_list_generator import ShotListGenerator
@@ -15,7 +15,6 @@ from ..core.logging import setup_logging
 @click.group()
 def scenes():
     """Detect scenes and generate shot lists."""
-    pass
 
 
 @scenes.command()

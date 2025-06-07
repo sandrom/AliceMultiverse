@@ -9,12 +9,11 @@ This module provides:
 """
 
 import json
-import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple, Any
+from typing import Dict, List, Optional, Any
 from enum import Enum
 
 from ..core.structured_logging import get_logger
@@ -963,7 +962,7 @@ class CostTracker:
             lines.append("⚠️  Budget Status:")
             for period, limit in self.budgets.items():
                 if period in summary:
-                    spent = summary[period]['total']
+                    summary[period]['total']
                     remaining = summary[period]['remaining']
                     utilization = summary[period]['utilization']
                     

@@ -1,7 +1,6 @@
 """Base event definitions for the event system."""
 
 from abc import ABC, abstractmethod
-from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Any, Dict
 import uuid
@@ -20,7 +19,6 @@ class Event(ABC):
     @abstractmethod
     def event_type(self) -> str:
         """Return the event type string."""
-        pass
     
     def to_dict(self) -> Dict[str, Any]:
         """Convert event to dictionary."""

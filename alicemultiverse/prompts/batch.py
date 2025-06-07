@@ -1,12 +1,10 @@
 """Batch operations for prompt management."""
 
-import asyncio
 from typing import List, Dict, Any, Optional, Callable, Tuple
 from pathlib import Path
 import csv
 import json
 from datetime import datetime
-from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ..core.logging import get_logger
 from ..providers.types import GenerationResult

@@ -1,6 +1,5 @@
 """OpenAI provider implementation for DALL-E image generation."""
 
-import asyncio
 import base64
 import logging
 import os

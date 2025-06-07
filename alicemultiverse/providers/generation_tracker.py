@@ -1,10 +1,9 @@
 """Track and store generation context for reproducibility."""
 
 import yaml
-import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional
 
 from ..metadata.embedder import MetadataEmbedder
 from ..core.file_operations import FileHandler

@@ -3,12 +3,12 @@
 import asyncio
 import logging
 import os
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from typing import Any, Dict, List, Optional, Type
 
-from .provider import Provider, BudgetExceededError
-from .types import GenerationRequest, GenerationType
+from .provider import Provider
+from .types import GenerationType
 from .health_monitor import health_monitor
 
 logger = logging.getLogger(__name__)

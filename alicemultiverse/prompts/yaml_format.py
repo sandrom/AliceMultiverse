@@ -5,7 +5,7 @@ from datetime import datetime
 import yaml
 from pathlib import Path
 
-from .models import Prompt, PromptCategory, ProviderType
+from .models import Prompt
 
 
 class PromptYAMLFormatter:

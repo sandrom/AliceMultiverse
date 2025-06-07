@@ -4,16 +4,12 @@ This module integrates tag hierarchy, clustering, and taxonomy management
 into the image analysis pipeline for better organization and discovery.
 """
 
-import asyncio
 import logging
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Union, Tuple
 from collections import defaultdict
 
 from .analyzer import ImageAnalyzer
-from .base import ImageAnalysisResult
-from .tag_hierarchy import TagHierarchy
-from .tag_clustering import TagClusteringSystem
 from .taxonomy_manager import TaxonomyManager
 
 logger = logging.getLogger(__name__)

@@ -9,12 +9,10 @@ Supports:
 """
 
 import asyncio
-import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 from datetime import datetime
-from pathlib import Path
 import aiohttp
 
 from .provider import Provider, GenerationError, AuthenticationError

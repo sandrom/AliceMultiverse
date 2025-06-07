@@ -5,8 +5,6 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 
 from mcp.server import Server
-from mcp.server.models import Tool
-from mcp.types import TextContent, ImageContent
 
 from alicemultiverse.interface.image_presentation import ImagePresentationAPI, SoftDeleteCategory
 from alicemultiverse.storage.duckdb_cache import DuckDBSearchCache
@@ -152,7 +150,7 @@ def register_image_presentation_tools(server: Server, api: ImagePresentationAPI)
                 "reason": reason
             }
             
-        except FileNotFoundError as e:
+        except FileNotFoundError:
             return {
                 "success": False,
                 "error": f"Image not found: {image_hash}"

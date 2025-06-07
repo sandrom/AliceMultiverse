@@ -3,9 +3,8 @@ Intelligent transition matching between scenes.
 """
 
 import numpy as np
-from typing import List, Dict, Optional, Tuple
+from typing import List, Dict, Tuple
 import logging
-from pathlib import Path
 
 from .models import (
     TransitionType, 

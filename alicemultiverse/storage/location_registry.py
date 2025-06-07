@@ -5,12 +5,11 @@ This module provides a registry for tracking files across multiple storage locat
 """
 
 import json
-import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, List, Optional
 from uuid import UUID, uuid4
 
 import duckdb

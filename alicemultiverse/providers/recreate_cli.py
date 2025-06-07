@@ -21,7 +21,6 @@ logger = get_logger(__name__)
 @click.group()
 def cli():
     """Commands for recreating AI generations."""
-    pass
 
 
 @cli.command()
@@ -188,7 +187,7 @@ def catalog(directory, recursive):
     table.add_column("Has Context", style="yellow")
     
     embedder = MetadataEmbedder()
-    file_handler = FileHandler()
+    FileHandler()
     
     for file_path in sorted(files):
         # Check for generation context

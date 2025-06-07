@@ -6,7 +6,6 @@ Provides copy/move operations with automatic directory creation and hash-based
 file comparison for deduplication.
 """
 
-import asyncio
 import hashlib
 import logging
 import shutil

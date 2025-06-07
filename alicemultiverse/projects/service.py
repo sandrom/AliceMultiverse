@@ -1,7 +1,6 @@
 """Project service for managing projects and budget tracking."""
 
 import uuid
-from datetime import datetime, timezone
 from typing import Any, Optional
 
 

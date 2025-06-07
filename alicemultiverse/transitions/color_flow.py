@@ -7,11 +7,10 @@ direction for seamless visual flow between consecutive shots.
 
 import numpy as np
 from typing import List, Tuple, Dict, Optional, Any
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from PIL import Image
 import cv2
 from sklearn.cluster import KMeans
-import colorsys
 from pathlib import Path
 import json
 

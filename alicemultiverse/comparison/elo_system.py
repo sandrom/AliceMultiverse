@@ -1,6 +1,5 @@
 """Elo rating system implementation for model comparison."""
 
-import math
 import random
 import duckdb
 from datetime import datetime

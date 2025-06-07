@@ -4,11 +4,9 @@ This module extends the file scanner to work with multiple storage locations
 and provides project-aware file discovery across all registered paths.
 """
 
-import asyncio
-import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple, Callable
+from typing import Dict, List, Optional, Callable
 
 from tqdm import tqdm
 

@@ -7,12 +7,10 @@ import numpy as np
 from typing import List, Optional, Dict, Any, Tuple, Union
 from pathlib import Path
 import logging
-from dataclasses import dataclass
 import json
 
 from ..understanding.analyzer import ImageAnalyzer
-from ..core.types import MediaType
-from .models import Scene, SceneType, DetectionMethod, SceneTransition, TransitionType
+from .models import Scene, SceneType, DetectionMethod
 
 logger = logging.getLogger(__name__)
 
@@ -435,7 +433,7 @@ class SceneDetector:
             # Convert frame to PIL Image
             from PIL import Image
             rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            pil_image = Image.fromarray(rgb_frame)
+            Image.fromarray(rgb_frame)
             
             # Create prompt for scene analysis
             prompt = """Analyze this video frame and provide:

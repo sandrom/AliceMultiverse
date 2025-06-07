@@ -1,6 +1,5 @@
 """Unified provider base class for AI generation services."""
 
-import logging
 import time
 import random
 import asyncio
@@ -20,12 +19,11 @@ from .types import (
 )
 from .health_monitor import health_monitor
 from .generation_tracker import get_generation_tracker
-from ..core.structured_logging import get_logger, trace_operation, CorrelationContext
+from ..core.structured_logging import get_logger
 from ..core.metrics import (
     api_requests_total,
     api_request_duration_seconds,
-    api_request_cost_dollars,
-    update_provider_health_metrics
+    api_request_cost_dollars
 )
 
 logger = get_logger(__name__)
@@ -35,12 +33,10 @@ T = TypeVar('T')
 
 class ProviderError(Exception):
     """Base exception for provider errors."""
-    pass
 
 
 class RateLimitError(ProviderError):
     """Raised when provider rate limit is exceeded."""
-    pass
 
 
 class AuthenticationError(ProviderError):
@@ -54,12 +50,10 @@ class AuthenticationError(ProviderError):
 
 class GenerationError(ProviderError):
     """Raised when generation fails."""
-    pass
 
 
 class BudgetExceededError(ProviderError):
     """Raised when generation would exceed budget."""
-    pass
 
 
 class Provider(ABC):
@@ -104,13 +98,11 @@ class Provider(ABC):
     @abstractmethod
     def name(self) -> str:
         """Provider name."""
-        pass
 
     @property
     @abstractmethod
     def capabilities(self) -> ProviderCapabilities:
         """Provider capabilities."""
-        pass
 
     async def generate(self, request: GenerationRequest) -> GenerationResult:
         """Generate content based on request with retry logic and health monitoring.
@@ -244,7 +236,6 @@ class Provider(ABC):
         Raises:
             ProviderError: If generation fails
         """
-        pass
 
     @abstractmethod
     async def check_status(self) -> ProviderStatus:
@@ -253,7 +244,6 @@ class Provider(ABC):
         Returns:
             Provider status
         """
-        pass
     
     def get_health_status(self) -> ProviderStatus:
         """Get provider health status from monitor.
@@ -480,7 +470,6 @@ class Provider(ABC):
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
         # Subclasses should override to clean up resources
-        pass
     
     # Retry logic methods
     

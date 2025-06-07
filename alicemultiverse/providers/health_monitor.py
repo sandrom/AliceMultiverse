@@ -303,7 +303,7 @@ def with_circuit_breaker(provider_name: str):
                 health_monitor.record_success(provider_name, response_time)
                 return result
                 
-            except Exception as e:
+            except Exception:
                 # Record failure
                 health_monitor.record_failure(provider_name)
                 raise

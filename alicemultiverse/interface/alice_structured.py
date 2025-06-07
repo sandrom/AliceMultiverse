@@ -7,7 +7,6 @@ from pathlib import Path
 
 from ..core.config import load_config
 from ..core.exceptions import ValidationError
-from ..metadata.models import AssetRole as MetadataAssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
 from ..projects.service import ProjectService
 from ..selections.service import SelectionService
@@ -26,16 +25,12 @@ from .structured_models import (
     SearchFacet,
     SearchFacets,
     SearchRequest,
-    SearchResponse,
     SelectionCreateRequest,
     SelectionExportRequest,
     SelectionPurpose,
     SelectionSearchRequest,
-    SelectionStatus,
     SelectionUpdateRequest,
     SoftDeleteRequest,
-    SortField,
-    SortOrder,
     TagUpdateRequest,
     WorkflowRequest,
 )

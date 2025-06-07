@@ -3,7 +3,7 @@ AI-powered shot list generation from detected scenes.
 """
 
 import logging
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Optional, Tuple
 from pathlib import Path
 import json
 

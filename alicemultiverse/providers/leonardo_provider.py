@@ -9,11 +9,9 @@ Leonardo.ai is a powerful AI image generation platform offering:
 """
 
 import asyncio
-import json
 import logging
 import os
-from typing import Any, Dict, List, Optional, Tuple
-from datetime import datetime
+from typing import Any, Dict, List, Optional
 from pathlib import Path
 import aiohttp
 from enum import Enum

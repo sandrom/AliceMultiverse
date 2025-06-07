@@ -1,7 +1,7 @@
 """Health check endpoints for provider monitoring."""
 
 import logging
-from typing import Dict, Any, List
+from typing import Dict, Any
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -19,7 +19,7 @@ health_app = FastAPI(title="Provider Health API", version="1.0.0")
 async def health_check() -> Dict[str, Any]:
     """Overall system health check."""
     registry = get_registry()
-    providers = registry.list_providers()
+    registry.list_providers()
     
     all_statuses = health_monitor.get_all_statuses()
     

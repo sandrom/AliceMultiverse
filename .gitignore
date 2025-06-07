@@ -140,6 +140,13 @@ alicemultiverse.db
 *.backup
 *.old
 .cache/
+*.pyc
+*.pyo
+*.swp
+*.swo
+*~
+.DS_Store
+__pycache__/
 
 # Documentation build
 docs/_build/

@@ -160,15 +160,13 @@ class BatchAnalysisRequest:
 class BatchAnalyzer:
     """Handles batch analysis of images with progress tracking and cost management."""
     
-    def __init__(self, analyzer: ImageAnalyzer, repository: Optional[Any] = None):
+    def __init__(self, analyzer: ImageAnalyzer):
         """Initialize batch analyzer.
         
         Args:
             analyzer: Image analyzer instance
-            repository: Optional asset repository for database operations
         """
         self.analyzer = analyzer
-        self.repository = repository
         self._rate_limiter = asyncio.Semaphore(1)  # For rate limiting
     
     async def estimate_cost(self, request: BatchAnalysisRequest) -> Tuple[float, Dict[str, Any]]:
@@ -300,9 +298,7 @@ class BatchAnalyzer:
                         progress.total_cost += result.cost
                         progress.processed_hashes.add(content_hash)
                         
-                        # Save to database if available
-                        if self.repository and result.tags:
-                            await self._save_to_database(content_hash, result)
+                        # Database saving removed with PostgreSQL
                         
                         # Checkpoint periodically
                         if progress.processed % request.checkpoint_interval == 0:
@@ -360,15 +356,15 @@ class BatchAnalyzer:
         if request.image_paths:
             images = request.image_paths
         
-        elif request.project_id and self.repository:
+        elif request.project_id:
             # PostgreSQL removed - project queries not supported
             logger.warning("Project-based batch analysis not available without PostgreSQL")
-            pass
+            raise ValueError("Project-based batch analysis requires database integration")
         
-        elif request.content_hashes and self.repository:
+        elif request.content_hashes:
             # PostgreSQL removed - content hash queries not supported
             logger.warning("Content hash-based batch analysis not available without PostgreSQL")
-            pass
+            raise ValueError("Content hash-based batch analysis requires database integration")
         
         # Filter by media type
         valid_extensions = {
@@ -392,10 +388,3 @@ class BatchAnalyzer:
         hash_input = f"{image_path}:{stat.st_size}:{stat.st_mtime}"
         return hashlib.sha256(hash_input.encode()).hexdigest()
     
-    async def _save_to_database(self, content_hash: str, result: ImageAnalysisResult):
-        """Save analysis results to database."""
-        if not self.repository:
-            return
-        
-        # PostgreSQL removed - database saving not supported
-        logger.debug("Database saving skipped - PostgreSQL integration removed")

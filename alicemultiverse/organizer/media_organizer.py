@@ -1,6 +1,5 @@
 """Media organizer implementation."""
 
-import hashlib
 import re
 import signal
 import time
@@ -17,7 +16,6 @@ from ..core.constants import OUTPUT_DATE_FORMAT, SEQUENCE_FORMAT
 from ..core.file_operations import FileHandler
 from ..core.logging import get_logger
 from ..core.types import AnalysisResult, MediaType, OrganizeResult, Statistics
-from ..storage.duckdb_search import DuckDBSearch
 from .organization_helpers import (
     extract_project_folder,
     get_quality_folder_name,

@@ -13,7 +13,6 @@ logger = logging.getLogger(__name__)
 @click.group()
 def cli():
     """Comparison system commands."""
-    pass
 
 
 @cli.command()

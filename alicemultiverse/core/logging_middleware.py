@@ -10,9 +10,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from .structured_logging import (
     get_logger, 
     set_correlation_id, 
-    set_request_id,
-    CorrelationContext,
-    RequestContext
+    set_request_id
 )
 
 logger = get_logger(__name__)

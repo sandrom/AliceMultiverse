@@ -1,7 +1,6 @@
 """Prometheus metrics server for AliceMultiverse."""
 
 import asyncio
-import logging
 from typing import Optional
 
 from fastapi import FastAPI, Response
@@ -47,10 +46,7 @@ async def health_endpoint():
 async def update_dynamic_metrics():
     """Update metrics that need to be fetched dynamically."""
     from ..core.metrics import (
-        update_db_pool_metrics,
-        update_provider_health_metrics,
-        db_connections_active,
-        db_connections_total
+        update_provider_health_metrics
     )
     
     logger.debug("Database pool metrics not available")

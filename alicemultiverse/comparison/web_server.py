@@ -5,14 +5,14 @@ from pathlib import Path
 from typing import Optional, List, Dict
 import logging
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from pydantic import BaseModel
 import uvicorn
 
 from .elo_system import ComparisonManager
-from .models import Asset, Comparison, ComparisonStrength
+from .models import Comparison, ComparisonStrength
 from ..core.config import load_config
 
 logger = logging.getLogger(__name__)

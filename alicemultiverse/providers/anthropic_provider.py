@@ -1,12 +1,11 @@
 """Anthropic provider implementation for Claude vision and analysis."""
 
-import asyncio
 import base64
 import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 import aiohttp
 

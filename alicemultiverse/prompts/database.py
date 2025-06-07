@@ -2,11 +2,11 @@
 
 import duckdb
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import List, Optional
 import json
 from datetime import datetime
 
-from .models import Prompt, PromptVariation, PromptUsage, PromptSearchCriteria
+from .models import Prompt, PromptUsage, PromptSearchCriteria
 
 
 class PromptDatabase:

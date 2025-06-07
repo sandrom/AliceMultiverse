@@ -8,7 +8,6 @@ from typing import List, Optional
 from omegaconf import DictConfig
 
 from ..core.types import MediaType, OrganizeResult
-from ..core.keys import APIKeyManager
 from ..organizer.media_organizer import MediaOrganizer
 from .stages import PipelineStage
 # Import understanding stages dynamically to avoid circular imports

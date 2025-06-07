@@ -1,7 +1,6 @@
 """Asset discovery and tracking system."""
 
 import logging
-from datetime import datetime
 from pathlib import Path
 
 # from sqlalchemy.orm import Session

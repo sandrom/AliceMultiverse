@@ -13,7 +13,6 @@ from typing import List, Tuple, Dict, Any, Optional
 from pathlib import Path
 from dataclasses import dataclass
 import cv2
-from PIL import Image
 import json
 
 from ..core.types import ImagePath

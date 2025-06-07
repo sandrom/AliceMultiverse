@@ -29,7 +29,6 @@ console = Console()
 @click.group()
 def storage():
     """Manage storage locations and file discovery."""
-    pass
 
 
 @storage.command()

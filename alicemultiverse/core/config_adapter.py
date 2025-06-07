@@ -6,7 +6,7 @@ from typing import Any
 
 # Try to import dataclass config first, fall back to OmegaConf
 try:
-    from .config_dataclass import Config, DictConfig
+    from .config_dataclass import DictConfig
     from .config_dataclass import load_config as load_dataclass_config
 
     USE_DATACLASS = True

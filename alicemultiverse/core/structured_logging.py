@@ -1,6 +1,5 @@
 """Structured logging with correlation IDs for distributed tracing."""
 
-import json
 import logging
 import sys
 import time
@@ -8,7 +7,7 @@ import uuid
 from contextvars import ContextVar
 from datetime import datetime
 from functools import wraps
-from typing import Any, Dict, Optional, Union
+from typing import Any, Dict, Optional
 
 import structlog
 from structlog.processors import CallsiteParameter

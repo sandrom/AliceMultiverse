@@ -12,8 +12,6 @@ from pathlib import Path
 from typing import Dict, List, Set, Optional, Tuple
 import numpy as np
 from sklearn.cluster import DBSCAN
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
 
 from .tag_hierarchy import TagHierarchy
 

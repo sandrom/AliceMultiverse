@@ -2,7 +2,7 @@
 
 import time
 from functools import wraps
-from typing import Callable, Optional, Dict, Any
+from typing import Callable, Dict, Any
 
 from prometheus_client import (
     Counter,
@@ -177,7 +177,7 @@ def track_api_metrics(
                 
                 return result
                 
-            except Exception as e:
+            except Exception:
                 status = 'error'
                 raise
                 

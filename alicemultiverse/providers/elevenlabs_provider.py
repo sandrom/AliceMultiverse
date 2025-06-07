@@ -1,7 +1,5 @@
 """ElevenLabs provider implementation for AI sound effects generation."""
 
-import asyncio
-import base64
 import logging
 import os
 from datetime import datetime

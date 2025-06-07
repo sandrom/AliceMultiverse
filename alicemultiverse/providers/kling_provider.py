@@ -1,13 +1,11 @@
 """Official Kling API provider for video and image generation."""
 
 import asyncio
-import json
 import logging
 import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Dict, Optional
-from urllib.parse import urlparse
 
 import aiohttp
 

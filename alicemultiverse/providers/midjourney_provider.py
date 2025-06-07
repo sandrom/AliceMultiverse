@@ -9,13 +9,11 @@ import os
 import time
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from urllib.parse import urlparse
+from typing import Any, Dict, Optional
 
 import aiohttp
 
 from ..core.structured_logging import get_logger
-from ..events import publish_event_sync
 from .provider import Provider, GenerationError, ProviderError
 from .types import (
     GenerationRequest,

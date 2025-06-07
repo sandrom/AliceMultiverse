@@ -1,7 +1,6 @@
 """Welcome messages and first-time user guidance."""
 
 from pathlib import Path
-from typing import Optional
 
 from .keys import APIKeyManager
 

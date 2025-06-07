@@ -327,9 +327,9 @@ class UnifiedCache:
 
         # Extract raw scores
         analysis = metadata.get("analysis", {})
-        brisque = analysis.get("brisque_score")
-        sightengine = analysis.get("sightengine_results")
-        claude = analysis.get("claude_results")
+        analysis.get("brisque_score")
+        analysis.get("sightengine_results")
+        analysis.get("claude_results")
 
         # Calculate merged quality
         # Quality assessment removed - return default

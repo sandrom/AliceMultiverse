@@ -9,7 +9,7 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Set, Tuple, Optional, Any
+from typing import Dict, List, Tuple, Optional, Any
 import numpy as np
 from sklearn.cluster import DBSCAN, AgglomerativeClustering
 from sklearn.decomposition import PCA

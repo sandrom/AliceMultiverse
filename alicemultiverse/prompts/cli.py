@@ -2,7 +2,6 @@
 
 import click
 from pathlib import Path
-from datetime import datetime
 from typing import List, Optional
 # tabulate is optional, fallback to simple display
 try:
@@ -20,7 +19,6 @@ logger = get_logger(__name__)
 @click.group(name="prompts")
 def prompts_cli():
     """Manage AI prompts and their effectiveness."""
-    pass
 
 
 @prompts_cli.command()
@@ -679,7 +677,7 @@ def template(list_templates: bool, show: Optional[str], render: Optional[str],
                 variables[var] = desc
         
         # Providers
-        provider_choices = [p.value for p in ProviderType]
+        [p.value for p in ProviderType]
         providers_str = click.prompt("Providers (comma-separated)", 
                                    default="midjourney,flux")
         providers = [ProviderType(p.strip()) for p in providers_str.split(",")]

@@ -6,9 +6,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional
 
-from alicemultiverse.providers.types import GenerationRequest, GenerationResult
+from alicemultiverse.providers.types import GenerationResult
 
 logger = logging.getLogger(__name__)
 
@@ -192,7 +192,6 @@ class WorkflowTemplate(ABC):
         Returns:
             List of workflow steps to execute
         """
-        pass
     
     def validate(self, context: WorkflowContext) -> List[str]:
         """Validate the workflow can execute.

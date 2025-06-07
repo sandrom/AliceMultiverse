@@ -5,7 +5,6 @@ Simple A/B comparison with optional strength rating for comparing
 AI model outputs. Uses Elo rating system to track performance.
 """
 
-import json
 import random
 import uuid
 from datetime import datetime

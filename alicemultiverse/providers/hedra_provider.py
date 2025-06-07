@@ -1,13 +1,10 @@
 """Hedra provider for AI avatar video generation."""
 
 import os
-import time
-import logging
 from pathlib import Path
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
-import requests
 import aiohttp
 import asyncio
 

@@ -8,8 +8,8 @@ import json
 
 from ..core.logging import get_logger
 from .models import (
-    Prompt, PromptVariation, PromptUsage, PromptSearchCriteria,
-    PromptCategory, ProviderType
+    Prompt, PromptUsage, PromptSearchCriteria, PromptCategory,
+    ProviderType
 )
 from .database import PromptDatabase
 

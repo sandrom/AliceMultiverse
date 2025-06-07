@@ -1,6 +1,6 @@
 """Hooks for integrating prompt tracking with provider generation."""
 
-from typing import Optional, Dict, Any, Callable
+from typing import Optional, Any, Callable
 from functools import wraps
 import time
 

@@ -11,7 +11,6 @@ import numpy as np
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Any
 from dataclasses import dataclass, asdict
-from collections import defaultdict
 import cv2
 
 from ..understanding.analyzer import ImageAnalyzer

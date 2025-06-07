@@ -11,7 +11,7 @@ import logging
 from typing import Any
 
 try:
-    from mcp import Server, Tool
+    from mcp import Server
     from mcp.server import stdio
 
     MCP_AVAILABLE = True
@@ -30,7 +30,7 @@ from .storage.duckdb_search import DuckDBSearch
 from .core.cost_tracker import get_cost_tracker
 from .projects.service import ProjectService
 from .selections.service import SelectionService
-from .selections.models import SelectionPurpose, SelectionStatus
+from .selections.models import SelectionPurpose
 from .prompts.mcp_tools import PromptMCPTools
 
 # Configure logging
@@ -558,7 +558,7 @@ async def find_duplicates(
     """
     try:
         # Get all assets from the search cache
-        all_assets = []
+        pass
         
         # Query the DuckDB cache for all assets with hashes
         conn = storage.get_connection()
@@ -1166,7 +1166,6 @@ async def analyze_with_local(
     try:
         from pathlib import Path
         from .understanding.analyzer import ImageAnalyzer
-        from .understanding.ollama_provider import OllamaImageAnalyzer
         
         results = []
         failed_local = []

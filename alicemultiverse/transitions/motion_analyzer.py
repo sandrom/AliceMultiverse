@@ -4,15 +4,13 @@ Motion and composition analyzer for images.
 
 import cv2
 import numpy as np
-from typing import List, Tuple, Optional, Dict, Union
+from typing import List, Tuple, Dict, Union
 from pathlib import Path
 import logging
-from PIL import Image
 from .models import (
     MotionVector, 
     MotionDirection, 
-    CompositionAnalysis,
-    TransitionType
+    CompositionAnalysis
 )
 
 
@@ -157,7 +155,7 @@ class MotionAnalyzer:
     def _analyze_colors(self, img: np.ndarray, hsv: np.ndarray) -> Dict[str, any]:
         """Analyze color properties of the image."""
         # Calculate color histogram
-        hist_h = cv2.calcHist([hsv], [0], None, [180], [0, 180])
+        cv2.calcHist([hsv], [0], None, [180], [0, 180])
         hist_s = cv2.calcHist([hsv], [1], None, [256], [0, 256])
         hist_v = cv2.calcHist([hsv], [2], None, [256], [0, 256])
         

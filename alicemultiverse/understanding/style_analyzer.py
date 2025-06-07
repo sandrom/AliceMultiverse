@@ -8,7 +8,7 @@ import colorsys
 import logging
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Tuple, Optional, Set
+from typing import List, Tuple, Optional
 import numpy as np
 from PIL import Image
 import cv2

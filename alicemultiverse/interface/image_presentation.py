@@ -1,7 +1,6 @@
 """Image Presentation API for collaborative browsing with AI assistants."""
 
 import base64
-import logging
 from datetime import datetime
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict, Any

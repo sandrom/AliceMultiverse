@@ -10,7 +10,7 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Set, Optional, Any
-from collections import defaultdict, Counter
+from collections import Counter
 
 from .tag_hierarchy import TagHierarchy
 from .tag_clustering import TagClusteringSystem, TagCluster

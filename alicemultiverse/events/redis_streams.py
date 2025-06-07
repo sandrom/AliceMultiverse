@@ -6,11 +6,10 @@ Provides reliable, persistent event delivery with automatic retries.
 
 import asyncio
 import json
-import logging
 import time
 import uuid
 from datetime import datetime, timezone
-from typing import Any, Callable, Dict, List, Optional, Set
+from typing import Any, Callable, Dict, List, Optional
 
 import redis.asyncio as redis
 from redis.exceptions import ResponseError
@@ -152,7 +151,7 @@ class RedisStreamsEventSystem:
             return
             
         self._running = True
-        client = await self._get_redis()
+        await self._get_redis()
         
         # Create consumer group for each subscribed event type
         for event_type in self._listeners:

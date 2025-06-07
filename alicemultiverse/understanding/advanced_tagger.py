@@ -1,7 +1,6 @@
 """Advanced hierarchical tagging system for image understanding."""
 
 import logging
-from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path

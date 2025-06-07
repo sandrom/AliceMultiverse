@@ -1,9 +1,7 @@
 """MCP tools for prompt management through AI assistants."""
 
-import json
 from typing import Dict, Any, List, Optional
 from pathlib import Path
-from datetime import datetime
 
 from ..core.logging import get_logger
 from .service import PromptService

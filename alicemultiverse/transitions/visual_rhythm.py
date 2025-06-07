@@ -6,11 +6,10 @@ rhythmic video edits that match musical or narrative flow.
 """
 
 import numpy as np
-from typing import List, Tuple, Dict, Any, Optional
+from typing import List, Dict, Any, Optional
 from pathlib import Path
 from dataclasses import dataclass
 import cv2
-from PIL import Image
 import json
 from scipy import signal
 
@@ -199,7 +198,7 @@ class VisualRhythmAnalyzer:
     def _analyze_energy(self, image_path: ImagePath) -> EnergyProfile:
         """Analyze energy profile of an image."""
         img = cv2.imread(str(image_path))
-        img_rgb = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+        cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
         hsv = cv2.cvtColor(img, cv2.COLOR_BGR2HSV)
         
         # Brightness energy

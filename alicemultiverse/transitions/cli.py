@@ -11,7 +11,7 @@ from typing import List
 from .transition_matcher import TransitionMatcher
 from .morphing import MorphingTransitionMatcher, SubjectMorpher
 from .color_flow import ColorFlowAnalyzer, analyze_sequence, export_analysis_for_editor
-from .match_cuts import MatchCutDetector, find_match_cuts, export_match_cuts
+from .match_cuts import find_match_cuts, export_match_cuts
 from .portal_effects import PortalEffectGenerator, export_portal_effect
 from .visual_rhythm import VisualRhythmAnalyzer, export_rhythm_analysis
 from ..core.logging import setup_logging
@@ -20,7 +20,6 @@ from ..core.logging import setup_logging
 @click.group()
 def transitions():
     """Analyze and suggest transitions between images."""
-    pass
 
 
 @transitions.command()

@@ -4,12 +4,10 @@ This module scans directories and extracts metadata from files
 to populate the DuckDB search cache.
 """
 
-import asyncio
 import hashlib
-import logging
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Set
+from typing import List, Set
 
 from tqdm import tqdm
 

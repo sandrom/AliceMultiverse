@@ -5,7 +5,6 @@ and timing data for synchronized video creation.
 """
 
 import logging
-import json
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Any

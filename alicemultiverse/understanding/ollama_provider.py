@@ -4,12 +4,10 @@ This provider enables free, private image analysis using local models
 through Ollama, eliminating API costs for basic understanding tasks.
 """
 
-import base64
 import json
 import logging
-import os
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 import aiohttp
 

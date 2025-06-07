@@ -9,7 +9,6 @@ import yaml
 from pathlib import Path
 from typing import List, Optional, Dict, Any, Literal
 from datetime import datetime
-import shutil
 
 from ..core.logging import get_logger
 from .models import Prompt, PromptCategory, ProviderType

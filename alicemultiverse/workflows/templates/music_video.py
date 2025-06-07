@@ -4,13 +4,12 @@ Integrates music analysis, transition matching, and timeline generation.
 """
 
 import logging
-from typing import List, Dict, Optional, Any
+from typing import List, Dict, Any
 from pathlib import Path
 
 from alicemultiverse.workflows.base import WorkflowTemplate, WorkflowStep, WorkflowContext
 from alicemultiverse.workflows.music_analyzer import MusicAnalyzer
 from alicemultiverse.transitions import TransitionMatcher
-from alicemultiverse.workflows import video_export
 
 logger = logging.getLogger(__name__)
 

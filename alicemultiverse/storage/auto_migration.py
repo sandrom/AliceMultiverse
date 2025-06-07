@@ -5,16 +5,15 @@ enabling automatic archival, tiering, and lifecycle management.
 """
 
 import asyncio
-import logging
-from datetime import datetime, timedelta
+from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Set, Tuple
+from typing import Dict, List, Optional
 
 from tqdm import tqdm
 
 from ..core.structured_logging import get_logger
 from .duckdb_cache import DuckDBSearchCache
-from .location_registry import StorageLocation, StorageRegistry, StorageType
+from .location_registry import StorageLocation, StorageRegistry
 from .multi_path_scanner import MultiPathScanner
 
 logger = get_logger(__name__)
