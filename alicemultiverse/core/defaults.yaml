@@ -1,0 +1,173 @@
+# Default configuration values for AliceMultiverse
+# These can be overridden by environment variables or user settings
+
+# Provider API Configuration
+providers:
+  openai:
+    base_url: "https://api.openai.com/v1"
+    timeout: 120
+    max_retries: 3
+  
+  anthropic:
+    base_url: "https://api.anthropic.com"
+    timeout: 120
+    max_retries: 3
+  
+  google:
+    base_url: "https://generativelanguage.googleapis.com"
+    timeout: 180
+    max_retries: 3
+  
+  fal:
+    base_url: "https://fal.run"
+    timeout: 300
+    poll_interval: 5
+    max_poll_attempts: 60
+  
+  ideogram:
+    base_url: "https://api.ideogram.ai"
+    timeout: 180
+    max_retries: 3
+  
+  leonardo:
+    base_url: "https://cloud.leonardo.ai/api/rest/v1"
+    timeout: 300
+    poll_interval: 5
+  
+  firefly:
+    base_url: "https://firefly-api.adobe.io"
+    timeout: 180
+    max_retries: 3
+  
+  midjourney:
+    webhook_timeout: 300
+    poll_interval: 10
+  
+  kling:
+    base_url: "https://api.klingai.com"
+    timeout: 300
+    poll_interval: 5
+  
+  elevenlabs:
+    base_url: "https://api.elevenlabs.io"
+    timeout: 120
+  
+  hedra:
+    base_url: "https://api.hedra.com"
+    timeout: 600
+    poll_interval: 10
+  
+  bfl:
+    base_url: "https://api.bfl.ai"
+    timeout: 300
+    poll_interval: 2
+  
+  freepik:
+    base_url: "https://api.freepik.com"
+    magnific_base_url: "https://magnific-api.freepik.com"
+    timeout: 180
+
+# Local Services
+services:
+  ollama:
+    base_url: "http://localhost:11434"
+    timeout: 60
+  
+  web_server:
+    host: "0.0.0.0"
+    port: 8000
+    max_pending_comparisons: 100
+  
+  metrics_server:
+    host: "0.0.0.0"
+    port: 9090
+    update_interval: 10
+
+# Cache Configuration
+cache:
+  redis:
+    host: "localhost"
+    port: 6379
+    db: 0
+    ttl: 3600
+    socket_connect_timeout: 5
+    health_check_interval: 30
+  
+  file:
+    ttl: 3600
+    cleanup_interval: 86400  # 24 hours
+
+# Storage Configuration
+storage:
+  default_inbox: "inbox"
+  default_organized: "organized"
+  metadata_dir: ".metadata"
+  search_db: "data/search.duckdb"
+  location_registry_db: "data/locations.duckdb"
+  
+  # File size limits
+  max_file_size: 104857600  # 100 MB
+  min_file_size: 1024       # 1 KB
+
+# Processing Configuration
+processing:
+  watch_interval: 5
+  batch_size: 50
+  max_concurrent: 10
+  
+  # Rate limits
+  rate_limits:
+    sightengine: 60
+    claude: 10
+    default: 100
+
+# Event System
+events:
+  file:
+    log_dir: "~/.alice/events"
+    rotation_interval: 86400  # 24 hours
+    max_file_size: 10485760   # 10 MB
+  
+  redis:
+    stream_prefix: "alice:events"
+    consumer_group: "alice-consumers"
+    block_timeout: 1000
+
+# Understanding System
+understanding:
+  max_batch_size: 20
+  cost_limit: 10.0
+  cache_results: true
+  
+  # Provider-specific settings
+  provider_settings:
+    openai:
+      model: "gpt-4-vision-preview"
+      max_tokens: 300
+    anthropic:
+      model: "claude-3-haiku-20240307"
+      max_tokens: 300
+    google:
+      model: "gemini-pro-vision"
+
+# Quality Assessment (Deprecated - for backward compatibility)
+quality:
+  brisque:
+    enabled: false
+    thresholds:
+      5_star: 20
+      4_star: 40
+      3_star: 60
+      2_star: 80
+
+# Pipeline Configuration
+pipeline:
+  max_cost_per_item: 1.0
+  default_timeout: 300
+  max_retries: 3
+
+# Project Defaults
+projects:
+  default_name: "untitled"
+  auto_create: true
+  metadata_version: "2.0"
