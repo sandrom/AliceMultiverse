@@ -221,7 +221,7 @@ class HedraProvider(BaseProvider):
         
         # Validate request
         if request.generation_type != GenerationType.VIDEO:
-            raise ValidationError(f"Hedra only supports video generation")
+            raise ValidationError("Hedra only supports video generation")
         
         if not request.reference_assets or len(request.reference_assets) < 2:
             raise ValidationError("Hedra requires an image and audio file")

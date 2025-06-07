@@ -156,7 +156,7 @@ This takes about 2 minutes. Let's start!
         
         # Show directories
         if self.config:
-            print(f"\n📁 Directories:")
+            print("\n📁 Directories:")
             print(f"  • Inbox: {self.config.paths.inbox}")
             print(f"  • Organized: {self.config.paths.organized}")
         
@@ -267,9 +267,9 @@ You can start with just one provider and add more later.
             print(f"\n{info['name']}:")
             print(f"  • Used for: {info['required_for']}")
             if info['free_tier']:
-                print(f"  • ✨ FREE TIER AVAILABLE")
+                print("  • ✨ FREE TIER AVAILABLE")
             if info['recommended']:
-                print(f"  • 👍 RECOMMENDED")
+                print("  • 👍 RECOMMENDED")
             print(f"  • Sign up: {info['signup_url']}")
             
             if provider in existing_keys:
@@ -448,7 +448,7 @@ Alice needs two directories:
                     print("\n✅ Test run successful!")
                     print("Images would be organized without --dry-run")
                 else:
-                    print(f"\n⚠️  Test run encountered issues:")
+                    print("\n⚠️  Test run encountered issues:")
                     print(result.stderr[:500])
                     
             except Exception as e:

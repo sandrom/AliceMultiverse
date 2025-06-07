@@ -134,7 +134,7 @@ def recreate(asset_id, provider, model, output, dry_run):
         # Determine provider
         provider_name = provider or context.get('provider', 'fal')
         
-        console.print(f"\n[bold]Recreating with:[/bold]")
+        console.print("\n[bold]Recreating with:[/bold]")
         console.print(f"Provider: {provider_name}")
         console.print(f"Model: {request.model}")
         
@@ -146,7 +146,7 @@ def recreate(asset_id, provider, model, output, dry_run):
             result = await provider_instance.generate(request)
         
         if result.success:
-            console.print(f"\n[green]✓ Recreation successful![/green]")
+            console.print("\n[green]✓ Recreation successful![/green]")
             console.print(f"Output: {result.file_path}")
             console.print(f"Cost: ${result.cost:.3f}")
             console.print(f"New Asset ID: {result.asset_id}")
@@ -245,7 +245,7 @@ def catalog(directory, recursive):
         or f.with_suffix(f.suffix + '.json').exists() 
         or embedder.extract_metadata(f)
     )
-    console.print(f"\n[bold]Summary:[/bold]")
+    console.print("\n[bold]Summary:[/bold]")
     console.print(f"Total files: {len(files)}")
     console.print(f"With context: {with_context} ({with_context/len(files)*100:.1f}%)")
 

@@ -18,7 +18,15 @@ logger = logging.getLogger(__name__)
 def create_parser() -> argparse.ArgumentParser:
     """Create and configure argument parser."""
     parser = argparse.ArgumentParser(
-        description="AliceMultiverse Debug CLI - For Development and Debugging Only\n\n⚠️  DEPRECATION WARNING: Direct CLI usage is deprecated!\nAlice is now an AI-native service designed to be used through AI assistants.\n\nFor normal usage, configure Alice with Claude Desktop or another AI assistant.\nSee: https://github.com/yourusername/AliceMultiverse/docs/integrations/claude-desktop.md\n\nThis CLI is maintained only for debugging and development purposes.",
+        description="""AliceMultiverse Debug CLI - For Development and Debugging Only
+
+⚠️  DEPRECATION WARNING: Direct CLI usage is deprecated!
+Alice is now an AI-native service designed to be used through AI assistants.
+
+For normal usage, configure Alice with Claude Desktop or another AI assistant.
+See: https://github.com/yourusername/AliceMultiverse/docs/integrations/claude-desktop.md
+
+This CLI is maintained only for debugging and development purposes.""",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Debug Examples:
@@ -26,7 +34,7 @@ Debug Examples:
   %(prog)s --dry-run --verbose       # Debug organization logic
   %(prog)s keys setup                # Configure API keys
   %(prog)s mcp-server                # Start MCP server
-  
+
 For normal usage, use Alice through an AI assistant instead.
         """,
     )
@@ -39,22 +47,22 @@ For normal usage, use Alice through an AI assistant instead.
     # Cost subcommand for cost tracking
     cost_parser = subparsers.add_parser("cost", help="Cost tracking and budget management")
     cost_subparsers = cost_parser.add_subparsers(dest="cost_command", help="Cost management commands")
-    
+
     # Cost - report
     cost_report = cost_subparsers.add_parser("report", help="Show cost report")
     cost_report.add_argument("--days", type=int, default=30, help="Number of days to include")
-    
+
     # Cost - set-budget
     cost_budget = cost_subparsers.add_parser("set-budget", help="Set spending budget")
     cost_budget.add_argument("--daily", type=float, help="Daily budget limit (USD)")
     cost_budget.add_argument("--monthly", type=float, help="Monthly budget limit (USD)")
     cost_budget.add_argument("--alert", type=float, default=0.8, help="Alert threshold (0-1)")
-    
+
     # Cost - providers
     cost_providers = cost_subparsers.add_parser("providers", help="Compare provider costs")
-    cost_providers.add_argument("--category", choices=["understanding", "generation", "enhancement", "audio"], 
+    cost_providers.add_argument("--category", choices=["understanding", "generation", "enhancement", "audio"],
                                help="Filter by category")
-    
+
     # Keys subcommand
     keys_parser = subparsers.add_parser("keys", help="Manage API keys")
     keys_subparsers = keys_parser.add_subparsers(
@@ -92,14 +100,14 @@ For normal usage, use Alice through an AI assistant instead.
     )
 
     # Keys - list
-    keys_list = keys_subparsers.add_parser("list", help="List stored API keys")
+    keys_subparsers.add_parser("list", help="List stored API keys")
 
     # Keys - setup
-    keys_setup = keys_subparsers.add_parser("setup", help="Interactive setup wizard")
-    
+    keys_subparsers.add_parser("setup", help="Interactive setup wizard")
+
     # Setup subcommand (first-run wizard)
     setup_parser = subparsers.add_parser(
-        "setup", 
+        "setup",
         help="Run first-time setup wizard"
     )
     setup_parser.add_argument(
@@ -107,17 +115,17 @@ For normal usage, use Alice through an AI assistant instead.
         action="store_true", 
         help="Reconfigure even if already set up"
     )
-    
+
     # Recreate subcommand
     recreate_parser = subparsers.add_parser("recreate", help="Recreate AI generations")
     recreate_subparsers = recreate_parser.add_subparsers(
         dest="recreate_command", help="Recreation commands"
     )
-    
+
     # Recreate - inspect
     recreate_inspect = recreate_subparsers.add_parser("inspect", help="Inspect generation metadata")
     recreate_inspect.add_argument("file_path", help="Path to media file")
-    
+
     # Recreate - recreate
     recreate_recreate = recreate_subparsers.add_parser("recreate", help="Recreate a generation")
     recreate_recreate.add_argument("asset_id", help="Asset ID or file path")
@@ -125,7 +133,7 @@ For normal usage, use Alice through an AI assistant instead.
     recreate_recreate.add_argument("--model", help="Override model")
     recreate_recreate.add_argument("-o", "--output", help="Output path")
     recreate_recreate.add_argument("-n", "--dry-run", action="store_true", help="Show what would be done")
-    
+
     # Recreate - catalog
     recreate_catalog = recreate_subparsers.add_parser("catalog", help="Catalog generations in directory")
     recreate_catalog.add_argument("directory", help="Directory to catalog")
@@ -147,7 +155,7 @@ For normal usage, use Alice through an AI assistant instead.
     mcp_parser.add_argument(
         "--port", type=int, help="Port to run on (for TCP mode, not implemented yet)"
     )
-    
+
     # Metrics server subcommand
     metrics_parser = subparsers.add_parser("metrics-server", help="Start Prometheus metrics server")
     metrics_parser.add_argument(
@@ -156,13 +164,13 @@ For normal usage, use Alice through an AI assistant instead.
     metrics_parser.add_argument(
         "--port", type=int, default=9090, help="Port to listen on (default: 9090)"
     )
-    
+
     # Comparison subcommand with subcommands
     comparison_parser = subparsers.add_parser("comparison", help="Model comparison system")
     comparison_subparsers = comparison_parser.add_subparsers(
         dest="comparison_command", help="Comparison commands"
     )
-    
+
     # Comparison - server
     comparison_server = comparison_subparsers.add_parser("server", help="Start web interface")
     comparison_server.add_argument(
@@ -174,29 +182,29 @@ For normal usage, use Alice through an AI assistant instead.
     comparison_server.add_argument(
         "--populate-test-data", action="store_true", help="Populate with test data (development only)"
     )
-    
+
     # Comparison - populate
     comparison_populate = comparison_subparsers.add_parser("populate", help="Populate with images")
     comparison_populate.add_argument("directory", help="Directory to scan")
     comparison_populate.add_argument("-r", "--recursive", action="store_true", help="Search recursively")
     comparison_populate.add_argument("-l", "--limit", type=int, help="Maximum number to add")
-    
+
     # Comparison - populate-default
     comparison_populate_default = comparison_subparsers.add_parser("populate-default", help="Populate from default dirs")
     comparison_populate_default.add_argument("-l", "--limit", type=int, help="Maximum number to add")
-    
+
     # Comparison - stats
-    comparison_stats = comparison_subparsers.add_parser("stats", help="Show model rankings")
-    
+    comparison_subparsers.add_parser("stats", help="Show model rankings")
+
     # Comparison - reset
-    comparison_reset = comparison_subparsers.add_parser("reset", help="Reset all comparison data")
-    
+    comparison_subparsers.add_parser("reset", help="Reset all comparison data")
+
     # Index subcommand for search index management
     index_parser = subparsers.add_parser("index", help="Manage search index")
     index_subparsers = index_parser.add_subparsers(
         dest="index_command", help="Index management commands"
     )
-    
+
     # Index - rebuild
     index_rebuild = index_subparsers.add_parser("rebuild", help="Rebuild search index from files")
     index_rebuild.add_argument(
@@ -205,29 +213,29 @@ For normal usage, use Alice through an AI assistant instead.
     index_rebuild.add_argument(
         "--no-progress", action="store_true", help="Disable progress bar"
     )
-    
+
     # Index - update
     index_update = index_subparsers.add_parser("update", help="Update index with new/modified files")
     index_update.add_argument(
         "path", help="Path to scan for updates"
     )
-    
+
     # Index - verify
-    index_verify = index_subparsers.add_parser("verify", help="Verify index integrity")
-    
+    index_subparsers.add_parser("verify", help="Verify index integrity")
+
     # Index - stats
-    index_stats = index_subparsers.add_parser("stats", help="Show index statistics")
-    
+    index_subparsers.add_parser("stats", help="Show index statistics")
+
     # Storage subcommand for multi-path storage management
     storage_parser = subparsers.add_parser("storage", help="Manage storage locations")
     storage_subparsers = storage_parser.add_subparsers(
         dest="storage_command", help="Storage management commands"
     )
-    
+
     # Storage - init
     storage_init = storage_subparsers.add_parser("init", help="Initialize storage registry")
     storage_init.add_argument("--db-path", help="Path to location registry database")
-    
+
     # Storage - add
     storage_add = storage_subparsers.add_parser("add", help="Add a storage location")
     storage_add.add_argument("--name", required=True, help="Name of the storage location")
@@ -235,47 +243,47 @@ For normal usage, use Alice through an AI assistant instead.
     storage_add.add_argument("--type", choices=["local", "s3", "gcs", "network"], default="local")
     storage_add.add_argument("--priority", type=int, default=50, help="Priority (0-100)")
     storage_add.add_argument("--rule", action="append", help="Storage rule in JSON format")
-    
+
     # Storage - list
-    storage_list = storage_subparsers.add_parser("list", help="List storage locations")
-    
+    storage_subparsers.add_parser("list", help="List storage locations")
+
     # Storage - scan
     storage_scan = storage_subparsers.add_parser("scan", help="Scan a storage location")
     storage_scan.add_argument("location_id", help="Location ID to scan")
-    
+
     # Storage - discover
     storage_discover = storage_subparsers.add_parser("discover", help="Discover all assets")
     storage_discover.add_argument("--force", action="store_true", help="Force re-scan")
-    
+
     # Storage - stats
-    storage_stats = storage_subparsers.add_parser("stats", help="Show storage statistics")
-    
+    storage_subparsers.add_parser("stats", help="Show storage statistics")
+
     # Storage - find-project
     storage_find = storage_subparsers.add_parser("find-project", help="Find project assets")
     storage_find.add_argument("project_name", help="Project name")
     storage_find.add_argument("--type", action="append", help="Asset types to include")
-    
+
     # Storage - update
     storage_update = storage_subparsers.add_parser("update", help="Update storage location")
     storage_update.add_argument("--location-id", help="Location ID")
     storage_update.add_argument("--priority", type=int, help="New priority")
     storage_update.add_argument("--status", choices=["active", "archived", "offline"])
-    
+
     # Storage - from-config
-    storage_from_config = storage_subparsers.add_parser("from-config", help="Load from config")
+    storage_subparsers.add_parser("from-config", help="Load from config")
 
     # Transitions subcommand for scene transition analysis
     transitions_parser = subparsers.add_parser("transitions", help="Analyze scene transitions")
     transitions_subparsers = transitions_parser.add_subparsers(
         dest="transitions_command", help="Transition analysis commands"
     )
-    
+
     # Transitions - analyze
     transitions_analyze = transitions_subparsers.add_parser("analyze", help="Analyze transitions between images")
     transitions_analyze.add_argument("images", nargs="+", help="Image files to analyze (in sequence order)")
     transitions_analyze.add_argument("-o", "--output", help="Output JSON file for results")
     transitions_analyze.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    
+
     # Transitions - motion
     transitions_motion = transitions_subparsers.add_parser("motion", help="Analyze motion in a single image")
     transitions_motion.add_argument("image", help="Image file to analyze")
@@ -286,7 +294,7 @@ For normal usage, use Alice through an AI assistant instead.
     scenes_subparsers = scenes_parser.add_subparsers(
         dest="scenes_command", help="Scene detection commands"
     )
-    
+
     # Scenes - detect
     scenes_detect = scenes_subparsers.add_parser("detect", help="Detect scenes in video or images")
     scenes_detect.add_argument("input_path", help="Video file or image directory")
@@ -296,7 +304,7 @@ For normal usage, use Alice through an AI assistant instead.
     scenes_detect.add_argument("--use-ai/--no-ai", default=True, help="Use AI for analysis")
     scenes_detect.add_argument("--ai-provider", help="AI provider")
     scenes_detect.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    
+
     # Scenes - shotlist
     scenes_shotlist = scenes_subparsers.add_parser("shotlist", help="Generate shot list from scenes")
     scenes_shotlist.add_argument("scenes_file", help="Scenes JSON file")
@@ -305,7 +313,7 @@ For normal usage, use Alice through an AI assistant instead.
     scenes_shotlist.add_argument("-p", "--project-name", default="Untitled Project")
     scenes_shotlist.add_argument("-s", "--style", choices=["cinematic", "documentary", "commercial"], default="cinematic")
     scenes_shotlist.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
-    
+
     # Scenes - extract
     scenes_extract = scenes_subparsers.add_parser("extract", help="Extract frames from scenes")
     scenes_extract.add_argument("video", help="Video file")
@@ -319,13 +327,13 @@ For normal usage, use Alice through an AI assistant instead.
     prompts_subparsers = prompts_parser.add_subparsers(
         dest="prompts_command", help="Prompt management commands"
     )
-    
+
     # Prompts - add
     prompts_add = prompts_subparsers.add_parser("add", help="Add a new prompt")
     prompts_add.add_argument("-t", "--text", required=True, help="The prompt text")
-    prompts_add.add_argument("-c", "--category", required=True, 
-                            choices=["image_generation", "video_generation", "music_generation", 
-                                    "text_generation", "style_transfer", "enhancement", 
+    prompts_add.add_argument("-c", "--category", required=True,
+                            choices=["image_generation", "video_generation", "music_generation",
+                                    "text_generation", "style_transfer", "enhancement",
                                     "analysis", "other"],
                             help="Prompt category")
     prompts_add.add_argument("-p", "--providers", required=True, nargs="+",
@@ -339,7 +347,7 @@ For normal usage, use Alice through an AI assistant instead.
     prompts_add.add_argument("-d", "--description", help="What this prompt is good for")
     prompts_add.add_argument("-n", "--notes", help="Additional notes or tips")
     prompts_add.add_argument("--keywords", nargs="+", help="Additional search keywords")
-    
+
     # Prompts - search
     prompts_search = prompts_subparsers.add_parser("search", help="Search for prompts")
     prompts_search.add_argument("-q", "--query", help="Search in prompt text, description, and notes")
@@ -361,11 +369,11 @@ For normal usage, use Alice through an AI assistant instead.
     prompts_search.add_argument("--effective", action="store_true", help="Show only highly effective prompts")
     prompts_search.add_argument("--limit", type=int, default=20, help="Maximum results to show")
     prompts_search.add_argument("--export", help="Export results to JSON")
-    
+
     # Prompts - show
     prompts_show = prompts_subparsers.add_parser("show", help="Show detailed prompt info")
     prompts_show.add_argument("prompt_id", help="Prompt ID (supports partial matching)")
-    
+
     # Prompts - use
     prompts_use = prompts_subparsers.add_parser("use", help="Record usage of a prompt")
     prompts_use.add_argument("prompt_id", help="Prompt ID (supports partial matching)")
@@ -379,7 +387,7 @@ For normal usage, use Alice through an AI assistant instead.
     prompts_use.add_argument("--cost", type=float, help="API cost")
     prompts_use.add_argument("--duration", type=float, help="Generation time in seconds")
     prompts_use.add_argument("-n", "--notes", help="Notes about this usage")
-    
+
     # Prompts - update
     prompts_update = prompts_subparsers.add_parser("update", help="Update prompt metadata")
     prompts_update.add_argument("prompt_id", help="Prompt ID (supports partial matching)")
@@ -388,7 +396,7 @@ For normal usage, use Alice through an AI assistant instead.
     prompts_update.add_argument("--remove-tag", nargs="+", help="Remove tags")
     prompts_update.add_argument("-n", "--notes", help="Update notes")
     prompts_update.add_argument("-d", "--description", help="Update description")
-    
+
     # Prompts - effective
     prompts_effective = prompts_subparsers.add_parser("effective", help="Show most effective prompts")
     prompts_effective.add_argument("-c", "--category",
@@ -404,11 +412,11 @@ For normal usage, use Alice through an AI assistant instead.
     prompts_effective.add_argument("--min-success-rate", type=float, default=0.7, help="Minimum success rate")
     prompts_effective.add_argument("--min-uses", type=int, default=3, help="Minimum number of uses")
     prompts_effective.add_argument("--limit", type=int, default=10, help="Number of results")
-    
+
     # Prompts - import
     prompts_import = prompts_subparsers.add_parser("import", help="Import prompts from JSON")
     prompts_import.add_argument("input_file", help="JSON file to import")
-    
+
     # Prompts - export
     prompts_export = prompts_subparsers.add_parser("export", help="Export prompts to JSON")
     prompts_export.add_argument("output_file", help="Output JSON file")
@@ -417,25 +425,25 @@ For normal usage, use Alice through an AI assistant instead.
                                        "text_generation", "style_transfer", "enhancement", 
                                        "analysis", "other"],
                                help="Export only this category")
-    
+
     # Prompts - project
     prompts_project = prompts_subparsers.add_parser("project", help="Manage prompts in project directory")
     prompts_project.add_argument("project_path", help="Path to project directory")
     prompts_project.add_argument("--sync-to-index", action="store_true", help="Sync to central index")
     prompts_project.add_argument("--sync-from-index", action="store_true", help="Sync from central index")
     prompts_project.add_argument("--project-name", help="Project name for sync-from-index")
-    
+
     # Prompts - discover
     prompts_discover = prompts_subparsers.add_parser("discover", help="Discover project prompts")
     prompts_discover.add_argument("--base-paths", nargs="+", help="Base paths to search")
     prompts_discover.add_argument("--sync-all", action="store_true", help="Sync all to index")
-    
+
     # Prompts - init
     prompts_init = prompts_subparsers.add_parser("init", help="Initialize prompt storage in project")
     prompts_init.add_argument("project_path", help="Path to project directory")
     prompts_init.add_argument("--format", choices=["yaml", "json"], default="yaml",
                              help="Storage format (default: yaml)")
-    
+
     # Prompts - template
     prompts_template = prompts_subparsers.add_parser("template", help="Work with prompt templates")
     prompts_template.add_argument("--list", action="store_true", help="List available templates")
@@ -502,7 +510,7 @@ For normal usage, use Alice through an AI assistant instead.
         action="store_true",
         help="Enable AI understanding to analyze and tag images (costs apply)",
     )
-    
+
     parser.add_argument(
         "--providers",
         help="AI providers to use for understanding (comma-separated: google,deepseek,anthropic,openai)",
@@ -566,14 +574,14 @@ For normal usage, use Alice through an AI assistant instead.
     parser.add_argument("-q", "--quiet", action="store_true", help="Suppress non-error output")
 
     parser.add_argument("--log-file", help="Path to log file")
-    
+
     parser.add_argument(
         "--log-format",
         choices=["json", "console"],
         default="console",
         help="Log output format (default: console)"
     )
-    
+
     parser.add_argument(
         "--log-level",
         choices=["DEBUG", "INFO", "WARNING", "ERROR"],
@@ -700,18 +708,18 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "setup":
         from ..core.first_run import run_setup_command
         return run_setup_command()
-    
+
     # Handle cost subcommand
     if args.command == "cost":
         from ..core.cost_tracker import get_cost_tracker, CostCategory
-        
+
         cost_tracker = get_cost_tracker()
-        
+
         if args.cost_command == "report":
             report = cost_tracker.format_cost_report()
             print(report)
             return 0
-            
+
         elif args.cost_command == "set-budget":
             if args.daily:
                 cost_tracker.set_budget("daily", args.daily, args.alert)
@@ -723,11 +731,11 @@ def main(argv: list[str] | None = None) -> int:
                 print("❌ Please specify --daily and/or --monthly budget")
                 return 1
             return 0
-            
+
         elif args.cost_command == "providers":
             category = CostCategory[args.category.upper()] if args.category else None
             comparison = cost_tracker.get_provider_comparison(category)
-            
+
             print("\n📊 Provider Cost Comparison")
             print("=" * 60)
             for provider in comparison:
@@ -742,17 +750,17 @@ def main(argv: list[str] | None = None) -> int:
                     print(f"  Typical cost: ${provider['typical_cost']:.4f}")
                 print(f"  Free tier: {provider['free_tier']}")
             return 0
-    
+
     # Handle keys subcommand
     if args.command == "keys":
         from ..core.keys.cli import run_keys_command
 
         return run_keys_command(args)
-    
+
     # Handle recreate subcommand
     if args.command == "recreate":
         from ..providers.recreate_cli import cli as recreate_cli
-        
+
         # Build command line args for click
         click_args = [args.recreate_command]
         if args.recreate_command == "inspect":
@@ -771,7 +779,7 @@ def main(argv: list[str] | None = None) -> int:
             click_args.append(args.directory)
             if hasattr(args, "recursive") and args.recursive:
                 click_args.append("--recursive")
-        
+
         # Run the click command
         recreate_cli(click_args)
         return 0
@@ -791,32 +799,32 @@ def main(argv: list[str] | None = None) -> int:
 
         run_mcp_server()
         return 0
-    
+
     # Handle metrics server subcommand
     if args.command == "metrics-server":
         from ..core.metrics_server import run_metrics_server
-        
+
         run_metrics_server(host=args.host, port=args.port)
         return 0
-    
+
     # Handle comparison subcommand
     if args.command == "comparison":
         if args.comparison_command == "server":
             import os
             from ..comparison.web_server import run_server
-            
+
             if args.populate_test_data:
                 os.environ["ALICE_ENV"] = "development"
-            
+
             run_server(host=args.host, port=args.port)
             return 0
         else:
             # Handle other comparison commands
             from ..comparison.cli import cli as comparison_cli
-            
+
             # Build command line args for click
             click_args = [args.comparison_command]
-            
+
             if args.comparison_command == "populate":
                 click_args.append(args.directory)
                 if args.recursive:
@@ -827,22 +835,22 @@ def main(argv: list[str] | None = None) -> int:
                 if hasattr(args, "limit") and args.limit:
                     click_args.extend(["--limit", str(args.limit)])
             # stats and reset don't need additional args
-            
+
             comparison_cli(click_args)
             return 0
-    
+
     # Handle index subcommand
     if args.command == "index":
         from ..storage.index_builder import SearchIndexBuilder
-        
+
         # Load config to get DB path
         config = load_config()
         db_path = None
         if hasattr(config, 'storage') and hasattr(config.storage, 'search_db'):
             db_path = config.storage.search_db
-        
+
         builder = SearchIndexBuilder(db_path)
-        
+
         if args.index_command == "rebuild":
             print(f"Rebuilding search index from {len(args.paths)} paths...")
             count = builder.rebuild_from_paths(
@@ -851,26 +859,26 @@ def main(argv: list[str] | None = None) -> int:
             )
             print(f"\nSuccessfully indexed {count} assets")
             return 0
-            
+
         elif args.index_command == "update":
             print(f"Updating search index from {args.path}...")
             count = builder.update_from_path(args.path)
             print(f"Updated {count} assets in index")
             return 0
-            
+
         elif args.index_command == "verify":
             print("Verifying search index...")
             results = builder.verify_index()
-            print(f"\nIndex verification results:")
+            print("\nIndex verification results:")
             print(f"  Total indexed: {results['total_indexed']}")
             print(f"  Valid files: {results['valid_files']}")
             print(f"  Missing files: {results['missing_files']}")
             if results['missing_files'] > 0 and results['missing_file_paths']:
-                print(f"\nFirst few missing files:")
+                print("\nFirst few missing files:")
                 for path in results['missing_file_paths'][:10]:
                     print(f"  - {path}")
             return 0
-            
+
         elif args.index_command == "stats":
             print("Search index statistics:")
             stats = builder.search_db.get_statistics()
@@ -878,14 +886,14 @@ def main(argv: list[str] | None = None) -> int:
             print(f"  Unique tags: {stats.get('unique_tags', 0)}")
             print(f"  Storage size: {stats.get('storage_size_mb', 0):.1f} MB")
             return 0
-    
+
     # Handle storage subcommand
     if args.command == "storage":
         from ..storage.cli import storage as storage_cli
-        
+
         # Build command line args for click
         click_args = [args.storage_command]
-        
+
         if args.storage_command == "init":
             if hasattr(args, "db_path") and args.db_path:
                 click_args.extend(["--db-path", args.db_path])
@@ -915,17 +923,17 @@ def main(argv: list[str] | None = None) -> int:
             if hasattr(args, "status") and args.status:
                 click_args.extend(["--status", args.status])
         # list, stats, from-config don't need additional args
-        
+
         storage_cli(click_args)
         return 0
-    
+
     # Handle transitions subcommand
     if args.command == "transitions":
         from ..transitions.cli import transitions as transitions_cli
-        
+
         # Build command line args for click
         click_args = [args.transitions_command]
-        
+
         if args.transitions_command == "analyze":
             click_args.extend(args.images)
             if hasattr(args, "output") and args.output:
@@ -936,17 +944,17 @@ def main(argv: list[str] | None = None) -> int:
             click_args.append(args.image)
             if hasattr(args, "verbose") and args.verbose:
                 click_args.append("-v")
-        
+
         transitions_cli(click_args)
         return 0
-    
+
     # Handle scenes subcommand
     if args.command == "scenes":
         from ..scene_detection.cli import scenes as scenes_cli
-        
+
         # Build command line args for click
         click_args = [args.scenes_command]
-        
+
         if args.scenes_command == "detect":
             click_args.append(args.input_path)
             if hasattr(args, "output") and args.output:
@@ -961,7 +969,7 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.extend(["--ai-provider", args.ai_provider])
             if hasattr(args, "verbose") and args.verbose:
                 click_args.append("-v")
-                
+
         elif args.scenes_command == "shotlist":
             click_args.append(args.scenes_file)
             click_args.extend(["-o", args.output])
@@ -970,7 +978,7 @@ def main(argv: list[str] | None = None) -> int:
             click_args.extend(["-s", args.style])
             if hasattr(args, "verbose") and args.verbose:
                 click_args.append("-v")
-                
+
         elif args.scenes_command == "extract":
             click_args.append(args.video)
             if hasattr(args, "output") and args.output:
@@ -980,17 +988,17 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.extend(["--scenes-file", args.scenes_file])
             if hasattr(args, "verbose") and args.verbose:
                 click_args.append("-v")
-        
+
         scenes_cli(click_args)
         return 0
-    
+
     # Handle prompts subcommand
     if args.command == "prompts":
         from ..prompts.cli import prompts_cli
-        
+
         # Build command line args for click
         click_args = [args.prompts_command]
-        
+
         if args.prompts_command == "add":
             click_args.extend(["-t", args.text])
             click_args.extend(["-c", args.category])
@@ -1010,7 +1018,7 @@ def main(argv: list[str] | None = None) -> int:
             if hasattr(args, "keywords") and args.keywords:
                 for keyword in args.keywords:
                     click_args.extend(["--keywords", keyword])
-        
+
         elif args.prompts_command == "search":
             if hasattr(args, "query") and args.query:
                 click_args.extend(["-q", args.query])
@@ -1035,10 +1043,10 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.extend(["--limit", str(args.limit)])
             if hasattr(args, "export") and args.export:
                 click_args.extend(["--export", args.export])
-        
+
         elif args.prompts_command == "show":
             click_args.append(args.prompt_id)
-        
+
         elif args.prompts_command == "use":
             click_args.append(args.prompt_id)
             click_args.extend(["-p", args.provider])
@@ -1052,7 +1060,7 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.extend(["--duration", str(args.duration)])
             if hasattr(args, "notes") and args.notes:
                 click_args.extend(["-n", args.notes])
-        
+
         elif args.prompts_command == "update":
             click_args.append(args.prompt_id)
             if hasattr(args, "rating") and args.rating:
@@ -1067,7 +1075,7 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.extend(["-n", args.notes])
             if hasattr(args, "description") and args.description:
                 click_args.extend(["-d", args.description])
-        
+
         elif args.prompts_command == "effective":
             if hasattr(args, "category") and args.category:
                 click_args.extend(["-c", args.category])
@@ -1079,15 +1087,15 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.extend(["--min-uses", str(args.min_uses)])
             if hasattr(args, "limit"):
                 click_args.extend(["--limit", str(args.limit)])
-        
+
         elif args.prompts_command == "import":
             click_args.append(args.input_file)
-        
+
         elif args.prompts_command == "export":
             click_args.append(args.output_file)
             if hasattr(args, "category") and args.category:
                 click_args.extend(["-c", args.category])
-        
+
         elif args.prompts_command == "project":
             click_args.append(args.project_path)
             if hasattr(args, "sync_to_index") and args.sync_to_index:
@@ -1096,19 +1104,19 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.append("--sync-from-index")
             if hasattr(args, "project_name") and args.project_name:
                 click_args.extend(["--project-name", args.project_name])
-        
+
         elif args.prompts_command == "discover":
             if hasattr(args, "base_paths") and args.base_paths:
                 for path in args.base_paths:
                     click_args.extend(["--base-paths", path])
             if hasattr(args, "sync_all") and args.sync_all:
                 click_args.append("--sync-all")
-        
+
         elif args.prompts_command == "init":
             click_args.append(args.project_path)
             if hasattr(args, "format") and args.format:
                 click_args.extend(["--format", args.format])
-        
+
         elif args.prompts_command == "template":
             if hasattr(args, "list") and args.list:
                 click_args.append("--list")
@@ -1122,7 +1130,7 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.extend(["--create", args.create])
             if hasattr(args, "from_prompt") and args.from_prompt:
                 click_args.extend(["--from-prompt", args.from_prompt])
-        
+
         prompts_cli(click_args)
         return 0
 
@@ -1132,27 +1140,27 @@ def main(argv: list[str] | None = None) -> int:
         log_level = "DEBUG"
     elif hasattr(args, "quiet") and args.quiet:
         log_level = "ERROR"
-    
+
     # Use structured logging
     setup_structured_logging(
         log_level=log_level,
         json_logs=(getattr(args, "log_format", "console") == "json"),
         include_caller_info=(log_level == "DEBUG")
     )
-    
+
     # Show deprecation warning for direct CLI usage (except for allowed commands)
     allowed_commands = ["mcp-server", "metrics-server", "keys", "interface", "recreate", "index", "comparison", "setup", "storage", "cost", "transitions", "scenes", "prompts"]
     force_cli = hasattr(args, "force_cli") and args.force_cli
     debug_mode = hasattr(args, "debug") and args.debug
     check_deps = hasattr(args, "check_deps") and args.check_deps
-    
+
     # Skip warning for allowed commands or debug flags
     if (args.command not in allowed_commands and 
         not force_cli and 
         not debug_mode and 
         not check_deps and
         args.command is not None):
-        
+
         print("\n" + "="*70)
         print("⚠️  ALICE IS NOW AN AI-NATIVE SERVICE")
         print("="*70)
@@ -1178,7 +1186,7 @@ def main(argv: list[str] | None = None) -> int:
             from ..core.first_run import check_first_run
             if not check_first_run():
                 return 1
-        
+
         # Load configuration
         config_path = Path(args.config) if hasattr(args, "config") and args.config else None
         cli_overrides = parse_cli_overrides(unknown)

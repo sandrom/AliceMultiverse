@@ -70,7 +70,7 @@ class OptimizedSearchHandler:
         cached_result = self.cache.get_search_results(cache_key)
         
         if cached_result:
-            logger.debug(f"Cache hit for search query")
+            logger.debug("Cache hit for search query")
             # Convert cached database models back to API format
             api_results = []
             for asset_data in cached_result.get("results", []):

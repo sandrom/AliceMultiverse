@@ -140,7 +140,7 @@ class UserFriendlyError(Exception):
             suggestions.extend([
                 f"Check {provider} service status",
                 f"Verify {provider} API key is valid",
-                f"Try a different provider: --providers <other>",
+                "Try a different provider: --providers <other>",
                 "Check rate limits for your account"
             ])
         

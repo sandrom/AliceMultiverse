@@ -178,7 +178,7 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             if output_format == "script":
                 # Create a script format
                 lines = [
-                    f"# Kling Video Generation Script",
+                    "# Kling Video Generation Script",
                     f"# Project: {storyboard.project_name}",
                     f"# Model: {model}",
                     ""

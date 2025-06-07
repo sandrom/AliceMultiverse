@@ -162,7 +162,7 @@ class AIFriendlyError:
         elif "disk space" in error_str:
             return "Not enough disk space available"
         else:
-            return f"An unexpected error occurred while processing your request"
+            return "An unexpected error occurred while processing your request"
     
     @staticmethod
     def _default_suggestions(error_type: str) -> List[str]:
