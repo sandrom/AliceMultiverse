@@ -10,7 +10,8 @@ from unittest.mock import patch
 import pytest
 
 from alicemultiverse.core.exceptions import CacheError
-from alicemultiverse.core.metadata_cache import MetadataCache, get_content_hash, get_file_hash
+from alicemultiverse.core.cache_migration import MetadataCacheAdapter as MetadataCache
+from alicemultiverse.core.metadata_cache import get_content_hash, get_file_hash
 from alicemultiverse.core.types import MediaType
 
 

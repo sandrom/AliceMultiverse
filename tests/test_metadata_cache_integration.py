@@ -6,7 +6,7 @@ from pathlib import Path
 
 import pytest
 
-from alicemultiverse.core.metadata_cache import MetadataCache
+from alicemultiverse.core.cache_migration import MetadataCacheAdapter as MetadataCache
 from alicemultiverse.core.types import AnalysisResult
 
 

@@ -7,7 +7,7 @@ import pytest
 from PIL import Image
 
 from alicemultiverse.metadata.embedder import MetadataEmbedder
-from alicemultiverse.metadata.persistent_metadata import PersistentMetadataManager
+from alicemultiverse.core.cache_migration import PersistentMetadataManagerAdapter as PersistentMetadataManager
 
 
 class TestMetadataEmbedder:

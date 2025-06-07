@@ -15,7 +15,6 @@ from dataclasses import dataclass
 import cv2
 import json
 
-from ..core.types import ImagePath
 from ..core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -118,8 +117,8 @@ class MatchCutDetector:
         
     def analyze_match_cut(
         self,
-        image1_path: ImagePath,
-        image2_path: ImagePath
+        image1_path: str,
+        image2_path: str
     ) -> MatchCutAnalysis:
         """
         Analyze potential match cut between two images.
@@ -164,7 +163,7 @@ class MatchCutDetector:
             confidence=confidence
         )
     
-    def _load_image(self, path: ImagePath) -> np.ndarray:
+    def _load_image(self, path: str) -> np.ndarray:
         """Load and preprocess image."""
         img = cv2.imread(str(path))
         return cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
@@ -444,7 +443,7 @@ class MatchCutDetector:
 
 
 def find_match_cuts(
-    images: List[ImagePath],
+    images: List[str],
     threshold: float = 0.7
 ) -> List[Tuple[int, int, MatchCutAnalysis]]:
     """

@@ -14,7 +14,7 @@ from dataclasses import dataclass, asdict
 import cv2
 
 from ..understanding.analyzer import ImageAnalyzer
-from ..metadata.models import ExtendedMetadata
+from ..metadata.models import AssetMetadata
 from .models import TransitionType, TransitionSuggestion
 
 logger = logging.getLogger(__name__)
@@ -103,7 +103,7 @@ class SubjectMorpher:
     async def detect_subjects(
         self,
         image_path: str,
-        metadata: Optional[ExtendedMetadata] = None
+        metadata: Optional[AssetMetadata] = None
     ) -> List[SubjectRegion]:
         """
         Detect subjects in an image using AI analysis.
@@ -375,7 +375,7 @@ class SubjectMorpher:
             "duration": morph_transition.duration
         }
         
-    def _extract_subject_tags(self, metadata: ExtendedMetadata) -> List[str]:
+    def _extract_subject_tags(self, metadata: AssetMetadata) -> List[str]:
         """Extract subject-related tags from metadata."""
         subject_keywords = {
             "person", "people", "face", "portrait", "man", "woman", "child",
@@ -407,7 +407,7 @@ class SubjectMorpher:
         self,
         tag: str,
         image: np.ndarray,
-        metadata: ExtendedMetadata
+        metadata: AssetMetadata
     ) -> Optional[SubjectRegion]:
         """Create a subject region based on tag and image analysis."""
         h, w = image.shape[:2]

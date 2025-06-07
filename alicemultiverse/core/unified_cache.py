@@ -9,10 +9,7 @@ from typing import Any
 from ..metadata.embedder import MetadataEmbedder
 from ..metadata.extractor import MetadataExtractor
 from ..metadata.models import AssetMetadata
-import warnings
-with warnings.catch_warnings():
-    warnings.simplefilter("ignore", DeprecationWarning)
-    from .metadata_cache import MetadataCache
+from .cache_migration import MetadataCacheAdapter as MetadataCache
 from .types import AnalysisResult
 
 logger = logging.getLogger(__name__)

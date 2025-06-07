@@ -13,7 +13,7 @@ import cv2
 import json
 from scipy import signal
 
-from ..core.types import ImagePath
+# ImagePath type removed - using str instead
 from ..core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -114,7 +114,7 @@ class VisualRhythmAnalyzer:
         
     def analyze_sequence_rhythm(
         self,
-        images: List[ImagePath],
+        images: List[str],
         target_duration: Optional[float] = None,
         music_bpm: Optional[float] = None
     ) -> RhythmAnalysis:
@@ -160,7 +160,7 @@ class VisualRhythmAnalyzer:
             balance_score=balance
         )
     
-    def _analyze_complexity(self, image_path: ImagePath) -> VisualComplexity:
+    def _analyze_complexity(self, image_path: str) -> VisualComplexity:
         """Analyze visual complexity of an image."""
         img = cv2.imread(str(image_path))
         gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -195,7 +195,7 @@ class VisualRhythmAnalyzer:
             movement_potential=min(movement * 3, 1.0)
         )
     
-    def _analyze_energy(self, image_path: ImagePath) -> EnergyProfile:
+    def _analyze_energy(self, image_path: str) -> EnergyProfile:
         """Analyze energy profile of an image."""
         img = cv2.imread(str(image_path))
         cv2.cvtColor(img, cv2.COLOR_BGR2RGB)

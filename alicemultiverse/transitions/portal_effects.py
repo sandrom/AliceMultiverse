@@ -12,7 +12,7 @@ from dataclasses import dataclass
 import cv2
 import json
 
-from ..core.types import ImagePath
+# ImagePath type removed - using str instead
 from ..core.logging import get_logger
 
 logger = get_logger(__name__)
@@ -120,7 +120,7 @@ class PortalDetector:
         self.darkness_threshold = 0.3
         self.edge_threshold = 100
         
-    def detect_portals(self, image_path: ImagePath) -> List[Portal]:
+    def detect_portals(self, image_path: str) -> List[Portal]:
         """
         Detect portal shapes in an image.
         
@@ -320,8 +320,8 @@ class PortalEffectGenerator:
         
     def analyze_portal_transition(
         self,
-        image1_path: ImagePath,
-        image2_path: ImagePath
+        image1_path: str,
+        image2_path: str
     ) -> PortalEffectAnalysis:
         """
         Analyze potential portal transition between images.

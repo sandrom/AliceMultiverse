@@ -13,7 +13,6 @@ from alicemultiverse.interface.alice_structured import AliceStructuredInterface
 from alicemultiverse.interface.structured_models import (
     AliceResponse,
     AssetRole,
-    DateRange,
     DimensionFilter,
     MediaType,
     RangeFilter,
@@ -150,7 +149,10 @@ class TestSearchAssets:
         
         request = SearchRequest(
             filters=SearchFilters(
-                date_range=DateRange(start=start_date, end=end_date)
+                created_date=RangeFilter(
+                    min=datetime(2024, 1, 1).timestamp(),
+                    max=datetime(2024, 1, 31).timestamp()
+                )
             )
         )
         
