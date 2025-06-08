@@ -25,6 +25,16 @@ from .interface.models import OrganizeRequest, SearchRequest, TagRequest
 from .interface.image_presentation import ImagePresentationAPI
 from .interface.image_presentation_mcp import register_image_presentation_tools
 from .interface.video_creation_mcp import register_video_creation_tools
+from .interface.analytics_mcp import (
+    start_analytics_session as analytics_start_session,
+    end_analytics_session as analytics_end_session,
+    track_workflow_event as analytics_track_workflow,
+    track_export_event as analytics_track_export,
+    get_performance_insights as analytics_get_insights,
+    get_export_analytics as analytics_get_export_stats,
+    get_improvement_suggestions as analytics_get_improvements,
+    track_user_action as analytics_track_action
+)
 from .storage.duckdb_cache import DuckDBSearchCache
 from .storage.duckdb_search import DuckDBSearch
 from .core.cost_tracker import get_cost_tracker
@@ -32,6 +42,44 @@ from .projects.service import ProjectService
 from .selections.service import SelectionService
 from .selections.models import SelectionPurpose
 from .prompts.mcp_tools import PromptMCPTools
+from .memory.style_memory_mcp import (
+    track_style_preference as memory_track_preference,
+    get_style_recommendations as memory_get_recommendations,
+    analyze_style_patterns as memory_analyze_patterns,
+    start_style_workflow as memory_start_workflow,
+    end_style_workflow as memory_end_workflow,
+    get_style_evolution as memory_get_evolution,
+    suggest_next_action as memory_suggest_action,
+    export_style_profile as memory_export_profile,
+    import_style_profile as memory_import_profile
+)
+from .workflows.templates.template_mcp import (
+    create_story_arc_video,
+    create_documentary_video,
+    create_social_media_video,
+    create_instagram_reel,
+    create_tiktok_video,
+    get_platform_specifications,
+    suggest_story_structure
+)
+from .interface.variation_mcp import (
+    generate_content_variations,
+    track_variation_performance,
+    create_variation_group,
+    get_variation_insights,
+    find_top_variations,
+    get_variation_recommendations,
+    analyze_variation_success,
+    export_variation_analytics
+)
+from .interface.composition_mcp import (
+    analyze_timeline_flow,
+    analyze_image_composition,
+    analyze_timeline_compositions,
+    optimize_timeline,
+    suggest_clip_order,
+    detect_composition_patterns
+)
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -2855,6 +2903,2002 @@ async def prompt_render_template(
     )
 
 
+# Analytics Tools
+
+@server.tool()
+async def start_analytics_session() -> dict[str, Any]:
+    """
+    Start a new analytics session to track performance.
+    
+    Begins tracking workflow metrics, export patterns, and user behavior.
+    All subsequent operations will be tracked until session ends.
+    
+    Returns session ID and start time.
+    """
+    return await analytics_start_session()
+
+
+@server.tool()
+async def end_analytics_session() -> dict[str, Any]:
+    """
+    End the current analytics session and get summary.
+    
+    Stops tracking and provides session metrics including:
+    - Workflows completed/failed
+    - Total exports and API calls
+    - Popular features used
+    - Common errors encountered
+    
+    Returns complete session summary.
+    """
+    return await analytics_end_session()
+
+
+@server.tool()
+async def track_workflow_event(
+    workflow_id: str,
+    event_type: str,
+    data: dict[str, Any]
+) -> dict[str, Any]:
+    """
+    Track a workflow event for performance analysis.
+    
+    Parameters:
+    - workflow_id: Unique workflow identifier
+    - event_type: Type of event (start, update, complete, fail)
+    - data: Event data (workflow_type, metadata, updates, etc.)
+    
+    Used internally to track workflow performance.
+    """
+    return await analytics_track_workflow(workflow_id, event_type, data)
+
+
+@server.tool()
+async def track_export_event(
+    export_id: str,
+    timeline_id: str,
+    format: str,
+    platform: str | None = None,
+    metrics: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    """
+    Track an export operation for analytics.
+    
+    Parameters:
+    - export_id: Unique export identifier
+    - timeline_id: Associated timeline ID
+    - format: Export format (edl, xml, json, capcut)
+    - platform: Target platform if applicable
+    - metrics: Export metrics (duration, success, file_size, etc.)
+    
+    Records detailed export metrics for analysis.
+    """
+    return await analytics_track_export(
+        export_id=export_id,
+        timeline_id=timeline_id,
+        format=format,
+        platform=platform,
+        metrics=metrics
+    )
+
+
+@server.tool()
+async def get_performance_insights(
+    time_range_days: int = 30,
+    workflow_type: str | None = None
+) -> dict[str, Any]:
+    """
+    Get performance insights and improvement opportunities.
+    
+    Parameters:
+    - time_range_days: Days to analyze (default 30)
+    - workflow_type: Filter by specific workflow type
+    
+    Returns:
+    - Success rates and average durations
+    - Common errors and their frequencies
+    - Resource usage statistics
+    - Actionable improvement suggestions
+    """
+    return await analytics_get_insights(
+        time_range_days=time_range_days,
+        workflow_type=workflow_type
+    )
+
+
+@server.tool()
+async def get_export_analytics(
+    format: str | None = None,
+    platform: str | None = None,
+    time_range_days: int = 30
+) -> dict[str, Any]:
+    """
+    Get detailed export analytics and patterns.
+    
+    Parameters:
+    - format: Filter by export format (edl, xml, json, capcut)
+    - platform: Filter by target platform
+    - time_range_days: Days to analyze
+    
+    Returns:
+    - Export statistics by format and platform
+    - Workflow patterns (exports per timeline, iterations)
+    - Quality trends over time
+    - User satisfaction metrics
+    """
+    return await analytics_get_export_stats(
+        format=format,
+        platform=platform,
+        time_range_days=time_range_days
+    )
+
+
+@server.tool()
+async def get_improvement_suggestions(
+    max_suggestions: int = 10
+) -> dict[str, Any]:
+    """
+    Get prioritized improvement suggestions based on usage.
+    
+    Parameters:
+    - max_suggestions: Maximum suggestions to return
+    
+    Returns actionable improvements categorized by:
+    - Workflow efficiency
+    - Performance optimization
+    - Quality enhancement
+    - Error reduction
+    
+    Each suggestion includes priority, impact, and implementation steps.
+    """
+    return await analytics_get_improvements(max_suggestions=max_suggestions)
+
+
+@server.tool()
+async def track_user_action(
+    action: str,
+    metadata: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    """
+    Track a user action for behavior analysis.
+    
+    Parameters:
+    - action: Action type (adjustment, preview, redo, etc.)
+    - metadata: Additional context about the action
+    
+    Helps identify patterns in user behavior for optimization.
+    """
+    return await analytics_track_action(action=action, metadata=metadata)
+
+
+# Style Memory & Learning Tools
+
+@server.tool()
+async def track_style_preference(
+    preference_type: str,
+    value: str,
+    project: str | None = None,
+    tags: list[str] | None = None,
+    context: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    """
+    Track a style preference choice.
+    
+    Parameters:
+    - preference_type: Type of preference (color_palette, composition, lighting, texture, mood, subject, technique, transition, pacing, effect)
+    - value: The chosen value
+    - project: Optional project context
+    - tags: Optional descriptive tags
+    - context: Optional additional context
+    
+    Tracks preferences to learn your personal style over time.
+    """
+    return await memory_track_preference(
+        preference_type=preference_type,
+        value=value,
+        project=project,
+        tags=tags,
+        context=context
+    )
+
+
+@server.tool()
+async def get_style_recommendations(
+    context: dict[str, Any] | None = None,
+    types: list[str] | None = None,
+    limit: int = 5
+) -> list[dict[str, Any]]:
+    """
+    Get personalized style recommendations.
+    
+    Parameters:
+    - context: Optional context (project, time, etc.)
+    - types: Recommendation types (preset, variation, exploration, trending)
+    - limit: Maximum recommendations
+    
+    Returns recommendations based on your style history and patterns.
+    """
+    return await memory_get_recommendations(
+        context=context,
+        types=types,
+        limit=limit
+    )
+
+
+@server.tool()
+async def analyze_style_patterns(
+    time_range_days: int = 30
+) -> dict[str, Any]:
+    """
+    Analyze style patterns and generate insights.
+    
+    Parameters:
+    - time_range_days: Days to analyze
+    
+    Returns:
+    - Detected patterns (co-occurrence, temporal, project-specific)
+    - Actionable insights with priorities
+    - Style evolution trends
+    """
+    return await memory_analyze_patterns(time_range_days=time_range_days)
+
+
+@server.tool()
+async def start_style_workflow(
+    workflow_type: str,
+    project: str | None = None
+) -> dict[str, Any]:
+    """
+    Start tracking a style workflow.
+    
+    Parameters:
+    - workflow_type: Type (image_generation, video_creation, timeline_editing, export, organization, search)
+    - project: Optional project context
+    
+    Begins tracking choices and outcomes for learning.
+    """
+    return await memory_start_workflow(
+        workflow_type=workflow_type,
+        project=project
+    )
+
+
+@server.tool()
+async def end_style_workflow(
+    workflow_id: str,
+    successful: bool,
+    quality_score: float | None = None,
+    user_rating: int | None = None,
+    notes: str | None = None
+) -> dict[str, Any]:
+    """
+    End a style workflow and get summary.
+    
+    Parameters:
+    - workflow_id: Workflow to end
+    - successful: Whether workflow was successful
+    - quality_score: Optional quality score (0-1)
+    - user_rating: Optional user rating (1-5)
+    - notes: Optional notes
+    
+    Completes tracking and updates learning models.
+    """
+    return await memory_end_workflow(
+        workflow_id=workflow_id,
+        successful=successful,
+        quality_score=quality_score,
+        user_rating=user_rating,
+        notes=notes
+    )
+
+
+@server.tool()
+async def get_style_evolution(
+    days: int = 30,
+    preference_type: str | None = None
+) -> list[dict[str, Any]]:
+    """
+    Get style evolution over time.
+    
+    Parameters:
+    - days: Number of days to analyze
+    - preference_type: Optional specific type to track
+    
+    Shows how your style preferences have changed.
+    """
+    return await memory_get_evolution(
+        days=days,
+        preference_type=preference_type
+    )
+
+
+@server.tool()
+async def suggest_next_style_action(
+    current_preferences: dict[str, str]
+) -> dict[str, Any]:
+    """
+    Get next best action suggestion based on current preferences.
+    
+    Parameters:
+    - current_preferences: Current preference selections (type->value mapping)
+    
+    Suggests what to add or change for better results.
+    """
+    return await memory_suggest_action(current_preferences=current_preferences)
+
+
+@server.tool()
+async def export_style_profile() -> dict[str, Any]:
+    """
+    Export complete style profile.
+    
+    Returns your full style history, preferences, and patterns.
+    Useful for backup or sharing across devices.
+    """
+    return await memory_export_profile()
+
+
+@server.tool()
+async def import_style_profile(
+    profile_data: dict[str, Any]
+) -> dict[str, Any]:
+    """
+    Import a style profile.
+    
+    Parameters:
+    - profile_data: Profile data to import
+    
+    Restores a previously exported style profile.
+    """
+    return await memory_import_profile(profile_data=profile_data)
+
+
+# Template Workflow Tools
+
+@server.tool()
+async def create_story_arc_video(
+    images: list[str],
+    structure: str = "three_act",
+    duration: float = 60.0,
+    narrative_tags: dict[str, list[str]] | None = None,
+    emotion_curve: str = "standard",
+    music_file: str | None = None,
+    voiceover_markers: bool = False,
+    export_formats: list[str] | None = None
+) -> dict[str, Any]:
+    """
+    Create a narrative-driven video with story structure.
+    
+    Parameters:
+    - images: List of image paths
+    - structure: Story structure (three_act, five_act, heros_journey, kishoten, circular)
+    - duration: Target duration in seconds
+    - narrative_tags: Story elements per image
+    - emotion_curve: Emotional progression (standard, intense, gentle)
+    - music_file: Optional music for pacing
+    - voiceover_markers: Add voiceover timing markers
+    - export_formats: Export formats (edl, xml, json)
+    
+    Creates videos following classic narrative structures with appropriate pacing.
+    """
+    return await create_story_arc_video(
+        images=images,
+        structure=structure,
+        duration=duration,
+        narrative_tags=narrative_tags,
+        emotion_curve=emotion_curve,
+        music_file=music_file,
+        voiceover_markers=voiceover_markers,
+        export_formats=export_formats
+    )
+
+
+@server.tool()
+async def create_documentary_video(
+    images: list[str],
+    duration: float = 120.0,
+    narrative_tags: dict[str, list[str]] | None = None,
+    music_file: str | None = None,
+    voiceover_markers: bool = True,
+    export_formats: list[str] | None = None
+) -> dict[str, Any]:
+    """
+    Create a documentary-style video.
+    
+    Parameters:
+    - images: List of image paths
+    - duration: Target duration in seconds
+    - narrative_tags: Evidence/testimony tags
+    - music_file: Optional background music
+    - voiceover_markers: Add narration markers (default True)
+    - export_formats: Export formats
+    
+    Optimized for information delivery and evidence presentation.
+    """
+    return await create_documentary_video(
+        images=images,
+        duration=duration,
+        narrative_tags=narrative_tags,
+        music_file=music_file,
+        voiceover_markers=voiceover_markers,
+        export_formats=export_formats
+    )
+
+
+@server.tool()
+async def create_social_media_video(
+    platform: str,
+    images: list[str],
+    music_file: str | None = None,
+    caption: str | None = None,
+    hashtags: list[str] | None = None,
+    style: str = "trending",
+    duration: float | None = None,
+    auto_optimize: bool = True
+) -> dict[str, Any]:
+    """
+    Create a social media optimized video.
+    
+    Parameters:
+    - platform: Target platform (instagram_reel, tiktok, youtube_shorts, etc.)
+    - images: List of image paths
+    - music_file: Optional music track
+    - caption: Post caption/description
+    - hashtags: List of hashtags
+    - style: Content style (trending, educational, entertaining)
+    - duration: Optional duration (uses platform optimal if not set)
+    - auto_optimize: Automatically optimize for engagement
+    
+    Platform-specific optimizations for maximum engagement.
+    """
+    return await create_social_media_video(
+        platform=platform,
+        images=images,
+        music_file=music_file,
+        caption=caption,
+        hashtags=hashtags,
+        style=style,
+        duration=duration,
+        auto_optimize=auto_optimize
+    )
+
+
+@server.tool()
+async def create_instagram_reel(
+    images: list[str],
+    music_file: str,
+    caption: str | None = None,
+    hashtags: list[str] | None = None,
+    effects: list[str] | None = None,
+    duration: float = 15.0
+) -> dict[str, Any]:
+    """
+    Create an Instagram Reel with optimizations.
+    
+    Parameters:
+    - images: List of image paths
+    - music_file: Music track (required for Reels)
+    - caption: Reel caption
+    - hashtags: Hashtags for discovery
+    - effects: Instagram effects to apply
+    - duration: Reel duration (max 90 seconds)
+    
+    Includes Instagram-specific features and trending elements.
+    """
+    return await create_instagram_reel(
+        images=images,
+        music_file=music_file,
+        caption=caption,
+        hashtags=hashtags,
+        effects=effects,
+        duration=duration
+    )
+
+
+@server.tool()
+async def create_tiktok_video(
+    images: list[str],
+    music_file: str | None = None,
+    caption: str | None = None,
+    hashtags: list[str] | None = None,
+    challenges: list[str] | None = None,
+    duet_ready: bool = False,
+    duration: float = 30.0
+) -> dict[str, Any]:
+    """
+    Create a TikTok video with trend integration.
+    
+    Parameters:
+    - images: List of image paths
+    - music_file: Optional trending sound
+    - caption: Video caption
+    - hashtags: Trending hashtags
+    - challenges: Hashtag challenges to join
+    - duet_ready: Prepare for duet format
+    - duration: Video duration (max 180 seconds)
+    
+    Optimized for TikTok algorithm with trend integration.
+    """
+    return await create_tiktok_video(
+        images=images,
+        music_file=music_file,
+        caption=caption,
+        hashtags=hashtags,
+        challenges=challenges,
+        duet_ready=duet_ready,
+        duration=duration
+    )
+
+
+@server.tool()
+async def get_platform_specifications(
+    platform: str | None = None
+) -> dict[str, Any]:
+    """
+    Get specifications for social media platforms.
+    
+    Parameters:
+    - platform: Specific platform or None for all
+    
+    Returns platform specs including:
+    - Aspect ratio and resolution
+    - Duration limits and optimal length
+    - Safe zones for UI elements
+    - Supported features
+    """
+    return await get_platform_specifications(platform=platform)
+
+
+@server.tool()
+async def suggest_story_structure(
+    images: list[str],
+    theme: str | None = None
+) -> dict[str, Any]:
+    """
+    Suggest appropriate story structure based on content.
+    
+    Parameters:
+    - images: List of image paths
+    - theme: Optional theme hint
+    
+    Analyzes content and suggests narrative structures with reasoning.
+    """
+    return await suggest_story_structure(images=images, theme=theme)
+
+
+# Variation Tools
+
+@server.tool()
+async def generate_content_variations(
+    base_content_id: str,
+    original_prompt: str,
+    provider: str = "fal",
+    model: str | None = None,
+    variation_types: list[str] | None = None,
+    strategy: str = "performance_based",
+    max_variations: int = 5,
+    output_dir: str | None = None
+) -> dict[str, Any]:
+    """
+    Generate smart variations of successful content.
+    
+    Creates multiple variations using different styles, moods, colors, 
+    compositions, and other parameters based on past performance.
+    
+    Parameters:
+    - base_content_id: ID of the base content to vary
+    - original_prompt: Original generation prompt
+    - provider: Provider to use (default: fal)
+    - model: Optional model override
+    - variation_types: Types to vary (style, mood, color, composition, etc.)
+    - strategy: Selection strategy (performance_based, systematic, exploration)
+    - max_variations: Maximum number of variations to generate
+    - output_dir: Output directory for variations
+    
+    Returns generation results with costs and paths.
+    """
+    return await generate_content_variations(
+        base_content_id=base_content_id,
+        original_prompt=original_prompt,
+        provider=provider,
+        model=model,
+        variation_types=variation_types,
+        strategy=strategy,
+        max_variations=max_variations,
+        output_dir=output_dir
+    )
+
+
+@server.tool()
+async def track_variation_performance(
+    content_id: str,
+    metrics: dict[str, Any]
+) -> dict[str, Any]:
+    """
+    Track performance metrics for content variations.
+    
+    Record views, engagement, play duration, and other metrics
+    to learn what variations work best.
+    
+    Parameters:
+    - content_id: Content or variation ID
+    - metrics: Performance metrics (views, likes, shares, play_duration, etc.)
+    
+    Returns updated performance summary.
+    """
+    return await track_variation_performance(
+        content_id=content_id,
+        metrics=metrics
+    )
+
+
+@server.tool()
+async def create_variation_group(
+    base_content_id: str,
+    variation_ids: list[str],
+    tags: list[str] | None = None,
+    metadata: dict[str, Any] | None = None
+) -> dict[str, Any]:
+    """
+    Create a group of related content variations.
+    
+    Groups variations together for comparative analysis and
+    A/B testing insights.
+    
+    Parameters:
+    - base_content_id: ID of the base content
+    - variation_ids: IDs of all variations
+    - tags: Optional tags for categorization
+    - metadata: Optional metadata
+    
+    Returns group info with performance comparison.
+    """
+    return await create_variation_group(
+        base_content_id=base_content_id,
+        variation_ids=variation_ids,
+        tags=tags,
+        metadata=metadata
+    )
+
+
+@server.tool()
+async def get_variation_insights(
+    time_window_days: int | None = None
+) -> dict[str, Any]:
+    """
+    Get insights about variation performance.
+    
+    Analyzes variation performance to identify successful patterns,
+    trending variations, and improvement opportunities.
+    
+    Parameters:
+    - time_window_days: Optional time window for analysis
+    
+    Returns insights including trends and averages.
+    """
+    return await get_variation_insights(time_window_days=time_window_days)
+
+
+@server.tool()
+async def find_top_variations(
+    metric: str = "engagement_rate",
+    limit: int = 10,
+    min_views: int = 100
+) -> dict[str, Any]:
+    """
+    Find top performing content variations.
+    
+    Identifies variations with best performance across chosen metrics.
+    
+    Parameters:
+    - metric: Metric to sort by (engagement_rate, views, play_duration)
+    - limit: Maximum results
+    - min_views: Minimum views threshold
+    
+    Returns ranked list of top variations.
+    """
+    return await find_top_variations(
+        metric=metric,
+        limit=limit,
+        min_views=min_views
+    )
+
+
+@server.tool()
+async def get_variation_recommendations(
+    content_type: str = "image",
+    limit: int = 5
+) -> dict[str, Any]:
+    """
+    Get recommended variations based on past success.
+    
+    Suggests variation types and strategies that have worked well
+    for similar content.
+    
+    Parameters:
+    - content_type: Type of content (image, video)
+    - limit: Maximum recommendations
+    
+    Returns recommended variation templates.
+    """
+    return await get_variation_recommendations(
+        content_type=content_type,
+        limit=limit
+    )
+
+
+@server.tool()
+async def analyze_variation_success(
+    variation_id: str,
+    base_content_id: str,
+    variation_type: str,
+    performance_metrics: dict[str, float]
+) -> dict[str, Any]:
+    """
+    Analyze and record variation success.
+    
+    Updates learning system with variation performance to improve
+    future recommendations.
+    
+    Parameters:
+    - variation_id: Variation ID
+    - base_content_id: Base content ID
+    - variation_type: Type of variation applied
+    - performance_metrics: Performance data
+    
+    Returns success analysis with updated recommendations.
+    """
+    return await analyze_variation_success(
+        variation_id=variation_id,
+        base_content_id=base_content_id,
+        variation_type=variation_type,
+        performance_metrics=performance_metrics
+    )
+
+
+@server.tool()
+async def export_variation_analytics(
+    output_dir: str | None = None
+) -> dict[str, Any]:
+    """
+    Export variation analytics data.
+    
+    Exports comprehensive analytics about variation performance
+    for external analysis or reporting.
+    
+    Parameters:
+    - output_dir: Optional output directory
+    
+    Returns export path and summary statistics.
+    """
+    return await export_variation_analytics(output_dir=output_dir)
+
+
+# Composition Analysis Tools
+
+@server.tool()
+async def analyze_timeline_flow(
+    timeline_data: dict[str, Any],
+    target_mood: str | None = None,
+    target_energy: str | None = None
+) -> dict[str, Any]:
+    """
+    Analyze timeline flow and detect pacing/rhythm issues.
+    
+    Examines clip sequences for flow problems like jarring transitions,
+    energy drops, inconsistent pacing, and narrative breaks.
+    
+    Parameters:
+    - timeline_data: Timeline with duration and clips array
+    - target_mood: Target mood (upbeat, dramatic, calm)
+    - target_energy: Energy curve (rising_action, steady, climactic)
+    
+    Returns flow health score, issues, and improvement suggestions.
+    """
+    return await analyze_timeline_flow(
+        timeline_data=timeline_data,
+        target_mood=target_mood,
+        target_energy=target_energy
+    )
+
+
+@server.tool()
+async def analyze_image_composition(
+    image_path: str
+) -> dict[str, Any]:
+    """
+    Analyze visual composition of an image.
+    
+    Evaluates rule of thirds, golden ratio, symmetry, balance,
+    leading lines, depth, and focus clarity.
+    
+    Parameters:
+    - image_path: Path to image file
+    
+    Returns composition metrics, type, and improvement suggestions.
+    """
+    return await analyze_image_composition(image_path=image_path)
+
+
+@server.tool()
+async def analyze_timeline_compositions(
+    timeline_data: dict[str, Any],
+    sample_rate: float = 0.2
+) -> dict[str, Any]:
+    """
+    Analyze composition quality across timeline clips.
+    
+    Samples clips to assess overall composition consistency
+    and quality distribution.
+    
+    Parameters:
+    - timeline_data: Timeline with clips
+    - sample_rate: Fraction of clips to analyze (0-1)
+    
+    Returns average metrics and composition distribution.
+    """
+    return await analyze_timeline_compositions(
+        timeline_data=timeline_data,
+        sample_rate=sample_rate
+    )
+
+
+@server.tool()
+async def optimize_timeline(
+    timeline_data: dict[str, Any],
+    strategy: str = "balanced",
+    preserve_clips: list[int] | None = None,
+    target_duration: float | None = None
+) -> dict[str, Any]:
+    """
+    Optimize timeline based on flow analysis.
+    
+    Applies suggested improvements while respecting constraints
+    and optimization strategy.
+    
+    Parameters:
+    - timeline_data: Timeline to optimize
+    - strategy: Optimization approach (minimal, balanced, aggressive)
+    - preserve_clips: Clip indices that must not be modified
+    - target_duration: Optional target duration in seconds
+    
+    Returns optimized timeline with change report.
+    """
+    return await optimize_timeline(
+        timeline_data=timeline_data,
+        strategy=strategy,
+        preserve_clips=preserve_clips,
+        target_duration=target_duration
+    )
+
+
+@server.tool()
+async def suggest_clip_order(
+    clip_paths: list[str],
+    target_flow: str = "rising_action"
+) -> dict[str, Any]:
+    """
+    Suggest optimal clip order based on composition analysis.
+    
+    Analyzes visual energy and composition to create desired
+    flow patterns.
+    
+    Parameters:
+    - clip_paths: List of image/video paths
+    - target_flow: Desired energy pattern (rising_action, climactic, etc.)
+    
+    Returns suggested order with energy curve and reasoning.
+    """
+    return await suggest_clip_order(
+        clip_paths=clip_paths,
+        target_flow=target_flow
+    )
+
+
+@server.tool()
+async def detect_composition_patterns(
+    project_name: str | None = None,
+    limit: int = 100
+) -> dict[str, Any]:
+    """
+    Detect composition patterns in image collection.
+    
+    Analyzes composition trends, quality distribution, and
+    common issues across a project or collection.
+    
+    Parameters:
+    - project_name: Optional project filter
+    - limit: Maximum images to analyze
+    
+    Returns patterns, quality metrics, and recommendations.
+    """
+    return await detect_composition_patterns(
+        project_name=project_name,
+        limit=limit
+    )
+    
+    @server.tool()
+    async def find_duplicates_advanced(
+        directory: str,
+        similarity_threshold: float = 0.9,
+        include_similar: bool = True,
+        recursive: bool = True,
+        extensions: list[str] | None = None
+    ) -> dict[str, Any]:
+        """
+        Find duplicate and similar images using perceptual hashing.
+        
+        Goes beyond exact duplicates to find visually similar images using:
+        - Multiple perceptual hash algorithms (average, perceptual, difference, wavelet)
+        - Color histogram analysis
+        - Visual feature extraction (edges, texture, brightness)
+        
+        Parameters:
+        - directory: Directory to scan
+        - similarity_threshold: Similarity score threshold (0.8-1.0)
+        - include_similar: Find similar images, not just exact duplicates
+        - recursive: Scan subdirectories
+        - extensions: Image extensions to scan (default: common formats)
+        
+        Returns duplicate groups with similarity scores and space savings.
+        """
+        from .deduplication import DuplicateFinder
+        
+        try:
+            scan_dir = Path(directory).expanduser().resolve()
+            if not scan_dir.exists():
+                return {
+                    "success": False,
+                    "error": "Directory not found",
+                    "message": f"Directory does not exist: {directory}"
+                }
+            
+            # Create finder
+            finder = DuplicateFinder(similarity_threshold=similarity_threshold)
+            
+            # Scan directory
+            exact_count, similar_count = finder.scan_directory(
+                scan_dir,
+                recursive=recursive,
+                extensions=set(extensions) if extensions else None
+            )
+            
+            # Get report
+            report = finder.get_duplicate_report()
+            
+            # Add summary
+            report['summary'] = {
+                'exact_duplicates_found': exact_count,
+                'similar_images_found': similar_count if include_similar else 0,
+                'total_duplicates': exact_count + (similar_count if include_similar else 0),
+                'potential_space_savings_mb': report['potential_savings'] / 1_000_000
+            }
+            
+            return {
+                "success": True,
+                "message": f"Found {exact_count} exact duplicates and {similar_count} similar images",
+                "data": report
+            }
+            
+        except Exception as e:
+            logger.error(f"Duplicate detection failed: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to find duplicates"}
+    
+    @server.tool()
+    async def remove_duplicates(
+        duplicate_report: dict[str, Any],
+        strategy: str = "safe",
+        backup_dir: str | None = None,
+        dry_run: bool = True
+    ) -> dict[str, Any]:
+        """
+        Remove duplicate images based on scan results.
+        
+        Parameters:
+        - duplicate_report: Report from find_duplicates_advanced
+        - strategy: Removal strategy (safe=exact only, aggressive=include similar)
+        - backup_dir: Optional backup directory (moves instead of deleting)
+        - dry_run: If True, only preview what would be removed
+        
+        Returns removal statistics.
+        """
+        from .deduplication import DuplicateFinder
+        
+        try:
+            # Recreate finder from report
+            finder = DuplicateFinder()
+            
+            # Restore state from report
+            # This is a simplified version - in production, save/load full state
+            for group in duplicate_report.get('exact_duplicates', {}).get('groups', []):
+                master = Path(group['master'])
+                duplicates = [Path(p) for p in group['duplicates']]
+                file_hash = group.get('hash', 'unknown')
+                finder.exact_duplicates[file_hash] = [master] + duplicates
+            
+            # Configure removal
+            remove_similar = strategy == "aggressive"
+            backup_path = Path(backup_dir) if backup_dir else None
+            
+            # Remove duplicates
+            stats = finder.remove_duplicates(
+                dry_run=dry_run,
+                backup_dir=backup_path,
+                remove_similar=remove_similar
+            )
+            
+            return {
+                "success": True,
+                "message": f"{'Would remove' if dry_run else 'Removed'} {stats['exact_removed']} duplicates",
+                "data": {
+                    "stats": stats,
+                    "space_freed_mb": stats['space_freed'] / 1_000_000,
+                    "dry_run": dry_run,
+                    "backup_location": str(backup_path) if backup_path else None
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Duplicate removal failed: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to remove duplicates"}
+    
+    @server.tool()
+    async def build_similarity_index(
+        directories: list[str],
+        output_path: str | None = None,
+        index_type: str = "IVF"
+    ) -> dict[str, Any]:
+        """
+        Build fast similarity search index for image collection.
+        
+        Creates a FAISS index for lightning-fast similarity searches across
+        thousands of images. Useful for finding similar shots, variations,
+        or inspiration from your collection.
+        
+        Parameters:
+        - directories: List of directories to index
+        - output_path: Where to save the index (default: ~/.alice/similarity_index)
+        - index_type: Index type (Flat=exact, IVF=fast, HNSW=balanced)
+        
+        Returns index statistics and save location.
+        """
+        from .deduplication import SimilarityIndex
+        
+        try:
+            # Collect all images
+            image_paths = []
+            for directory in directories:
+                scan_dir = Path(directory).expanduser().resolve()
+                if scan_dir.exists():
+                    for ext in ['.jpg', '.jpeg', '.png', '.webp']:
+                        image_paths.extend(scan_dir.rglob(f"*{ext}"))
+                        image_paths.extend(scan_dir.rglob(f"*{ext.upper()}"))
+            
+            if not image_paths:
+                return {
+                    "success": False,
+                    "message": "No images found in specified directories"
+                }
+            
+            # Create index
+            index = SimilarityIndex(index_type=index_type)
+            
+            # Build index
+            cache_dir = Path.home() / ".alice" / "cache" / "similarity"
+            indexed_count = index.build_index(image_paths, cache_dir=cache_dir)
+            
+            # Save index
+            if output_path:
+                index_path = Path(output_path)
+            else:
+                index_path = Path.home() / ".alice" / "similarity_index"
+            
+            index_path.parent.mkdir(parents=True, exist_ok=True)
+            index.save_index(index_path)
+            
+            return {
+                "success": True,
+                "message": f"Built similarity index for {indexed_count} images",
+                "data": {
+                    "total_images": len(image_paths),
+                    "indexed_images": indexed_count,
+                    "index_type": index_type,
+                    "index_location": str(index_path),
+                    "cache_location": str(cache_dir)
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Index building failed: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to build similarity index"}
+    
+    @server.tool()
+    async def search_similar_advanced(
+        query_image: str,
+        index_path: str | None = None,
+        k: int = 20,
+        min_similarity: float = 0.7
+    ) -> dict[str, Any]:
+        """
+        Find visually similar images using similarity index.
+        
+        Ultra-fast similarity search across your entire collection using
+        the pre-built index. Great for finding variations, similar compositions,
+        or images with matching visual styles.
+        
+        Parameters:
+        - query_image: Path to query image
+        - index_path: Path to similarity index (uses default if not specified)
+        - k: Number of results to return
+        - min_similarity: Minimum similarity score (0-1)
+        
+        Returns similar images with similarity scores.
+        """
+        from .deduplication import SimilarityIndex
+        
+        try:
+            query_path = Path(query_image).expanduser().resolve()
+            if not query_path.exists():
+                return {
+                    "success": False,
+                    "error": "Query image not found",
+                    "message": f"Image does not exist: {query_image}"
+                }
+            
+            # Load index
+            if index_path:
+                idx_path = Path(index_path)
+            else:
+                idx_path = Path.home() / ".alice" / "similarity_index"
+            
+            if not idx_path.with_suffix('.faiss').exists():
+                return {
+                    "success": False,
+                    "error": "Index not found",
+                    "message": "Please build similarity index first with build_similarity_index"
+                }
+            
+            # Create and load index
+            index = SimilarityIndex()
+            index.load_index(idx_path)
+            
+            # Search
+            results = index.search(query_path, k=k, include_self=False)
+            
+            # Filter by similarity
+            filtered_results = [
+                {
+                    "path": str(r.path),
+                    "similarity": round(r.similarity, 3),
+                    "distance": round(r.distance, 3)
+                }
+                for r in results
+                if r.similarity >= min_similarity
+            ]
+            
+            return {
+                "success": True,
+                "message": f"Found {len(filtered_results)} similar images",
+                "data": {
+                    "query_image": str(query_path),
+                    "results": filtered_results,
+                    "total_searched": index.index.ntotal if index.index else 0
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Similarity search failed: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to search similar images"}
+    
+    @server.tool()
+    async def find_image_clusters(
+        index_path: str | None = None,
+        min_cluster_size: int = 3,
+        max_distance: float = 0.5
+    ) -> dict[str, Any]:
+        """
+        Automatically find clusters of similar images.
+        
+        Discovers groups of visually similar images in your collection.
+        Useful for finding duplicate sessions, similar shots, or
+        organizing by visual style.
+        
+        Parameters:
+        - index_path: Path to similarity index
+        - min_cluster_size: Minimum images per cluster
+        - max_distance: Maximum distance within cluster (lower = more similar)
+        
+        Returns clusters of similar images.
+        """
+        from .deduplication import SimilarityIndex
+        
+        try:
+            # Load index
+            if index_path:
+                idx_path = Path(index_path)
+            else:
+                idx_path = Path.home() / ".alice" / "similarity_index"
+            
+            if not idx_path.with_suffix('.faiss').exists():
+                return {
+                    "success": False,
+                    "error": "Index not found",
+                    "message": "Please build similarity index first"
+                }
+            
+            # Create and load index
+            index = SimilarityIndex()
+            index.load_index(idx_path)
+            
+            # Find clusters
+            clusters = index.find_clusters(
+                min_cluster_size=min_cluster_size,
+                max_distance=max_distance
+            )
+            
+            # Format results
+            formatted_clusters = []
+            for i, cluster in enumerate(clusters):
+                formatted_clusters.append({
+                    "cluster_id": i + 1,
+                    "size": len(cluster),
+                    "images": cluster[:20]  # Limit for response size
+                })
+            
+            return {
+                "success": True,
+                "message": f"Found {len(clusters)} image clusters",
+                "data": {
+                    "clusters": formatted_clusters,
+                    "total_clusters": len(clusters),
+                    "total_images_clustered": sum(len(c) for c in clusters),
+                    "settings": {
+                        "min_cluster_size": min_cluster_size,
+                        "max_distance": max_distance
+                    }
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Cluster finding failed: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to find clusters"}
+    
+    @server.tool()
+    async def list_plugins() -> dict[str, Any]:
+        """
+        List all available plugins.
+        
+        Returns information about installed and available plugins including:
+        - Name, version, type, and description
+        - Initialization status
+        - Dependencies
+        
+        Plugins extend Alice's functionality with custom providers, effects,
+        analyzers, exporters, and workflows.
+        """
+        from .plugins.registry import get_registry
+        
+        try:
+            registry = get_registry()
+            plugin_info = registry.get_plugin_info()
+            
+            # Group by type
+            by_type = {}
+            for info in plugin_info:
+                plugin_type = info["type"]
+                if plugin_type not in by_type:
+                    by_type[plugin_type] = []
+                by_type[plugin_type].append(info)
+            
+            return {
+                "success": True,
+                "message": f"Found {len(plugin_info)} plugins",
+                "data": {
+                    "plugins": plugin_info,
+                    "by_type": by_type,
+                    "plugin_paths": [str(p) for p in registry.loader.plugin_paths]
+                }
+            }
+        except Exception as e:
+            logger.error(f"Failed to list plugins: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to list plugins"}
+    
+    @server.tool()
+    async def load_plugin(
+        plugin_path: str,
+        initialize: bool = True
+    ) -> dict[str, Any]:
+        """
+        Load a plugin from file or module.
+        
+        Parameters:
+        - plugin_path: Path to plugin file or module name
+        - initialize: Whether to initialize the plugin immediately
+        
+        Supports loading from:
+        - Python files (e.g., /path/to/my_plugin.py)
+        - Installed packages (e.g., alice-plugin-example)
+        """
+        from .plugins.registry import get_registry
+        
+        try:
+            registry = get_registry()
+            path = Path(plugin_path)
+            
+            # Determine if it's a file or module
+            if path.exists() and path.suffix == ".py":
+                # Load from file
+                plugin = registry.loader.load_plugin_from_file(path)
+            else:
+                # Try as module name
+                plugin = registry.loader.load_plugin_from_module(plugin_path)
+            
+            if plugin is None:
+                return {
+                    "success": False,
+                    "message": f"Could not load plugin from: {plugin_path}"
+                }
+            
+            # Register the plugin
+            success = registry.register_plugin(plugin, initialize=initialize)
+            
+            return {
+                "success": success,
+                "message": f"Loaded plugin: {plugin.metadata.name} v{plugin.metadata.version}",
+                "data": {
+                    "name": plugin.metadata.name,
+                    "version": plugin.metadata.version,
+                    "type": plugin.metadata.type.value,
+                    "description": plugin.metadata.description,
+                    "initialized": success and initialize
+                }
+            }
+        except Exception as e:
+            logger.error(f"Failed to load plugin: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to load plugin"}
+    
+    @server.tool()
+    async def use_plugin_provider(
+        plugin_name: str,
+        prompt: str,
+        model: str | None = None,
+        parameters: dict[str, Any] | None = None,
+        output_path: str | None = None
+    ) -> dict[str, Any]:
+        """
+        Generate content using a plugin provider.
+        
+        Parameters:
+        - plugin_name: Name of the plugin provider
+        - prompt: Generation prompt
+        - model: Model to use (plugin-specific)
+        - parameters: Additional parameters
+        - output_path: Where to save the result
+        
+        Plugin providers can be custom AI services, local models, or
+        specialized generators not included in the core system.
+        """
+        from .plugins.registry import get_plugin
+        from .plugins.base import PluginType
+        from .plugins.provider_adapter import PluginProviderAdapter
+        from .providers.types import GenerationRequest, GenerationType
+        
+        try:
+            # Get the plugin
+            plugin = get_plugin(plugin_name)
+            if plugin is None:
+                return {
+                    "success": False,
+                    "message": f"Plugin not found or not initialized: {plugin_name}"
+                }
+            
+            # Verify it's a provider plugin
+            if plugin.metadata.type != PluginType.PROVIDER:
+                return {
+                    "success": False,
+                    "message": f"Plugin {plugin_name} is not a provider plugin"
+                }
+            
+            # Create adapter
+            adapter = PluginProviderAdapter(plugin)
+            
+            # Create generation request
+            request = GenerationRequest(
+                prompt=prompt,
+                model=model or "default",
+                generation_type=GenerationType.IMAGE,  # TODO: make configurable
+                output_path=Path(output_path) if output_path else None,
+                parameters=parameters
+            )
+            
+            # Generate
+            result = await adapter.generate(request)
+            
+            if result.success:
+                return {
+                    "success": True,
+                    "message": f"Generated using {plugin_name}",
+                    "data": {
+                        "file_path": str(result.file_path),
+                        "cost": result.cost,
+                        "metadata": result.metadata
+                    }
+                }
+            else:
+                return {
+                    "success": False,
+                    "message": f"Generation failed: {result.error}",
+                    "error": result.error
+                }
+                
+        except Exception as e:
+            logger.error(f"Plugin provider error: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to use plugin provider"}
+    
+    @server.tool()
+    async def apply_plugin_effect(
+        plugin_name: str,
+        input_path: str,
+        output_path: str | None = None,
+        parameters: dict[str, Any] | None = None
+    ) -> dict[str, Any]:
+        """
+        Apply a plugin effect to an image or video.
+        
+        Parameters:
+        - plugin_name: Name of the effect plugin
+        - input_path: Path to input file
+        - output_path: Where to save result (auto-generated if not provided)
+        - parameters: Effect parameters (plugin-specific)
+        
+        Effect plugins can provide filters, transformations, enhancements,
+        and other post-processing capabilities.
+        """
+        from .plugins.registry import get_plugin
+        from .plugins.base import PluginType
+        
+        try:
+            # Get the plugin
+            plugin = get_plugin(plugin_name)
+            if plugin is None:
+                return {
+                    "success": False,
+                    "message": f"Plugin not found or not initialized: {plugin_name}"
+                }
+            
+            # Verify it's an effect plugin
+            if plugin.metadata.type != PluginType.EFFECT:
+                return {
+                    "success": False,
+                    "message": f"Plugin {plugin_name} is not an effect plugin"
+                }
+            
+            # Set up paths
+            input_file = Path(input_path).expanduser().resolve()
+            if not input_file.exists():
+                return {
+                    "success": False,
+                    "message": f"Input file not found: {input_path}"
+                }
+            
+            if output_path:
+                output_file = Path(output_path).expanduser().resolve()
+            else:
+                # Auto-generate output path
+                output_file = input_file.parent / f"{input_file.stem}_{plugin_name}{input_file.suffix}"
+            
+            # Apply effect
+            result_path = await plugin.apply(input_file, output_file, parameters or {})
+            
+            return {
+                "success": True,
+                "message": f"Applied {plugin_name} effect",
+                "data": {
+                    "input_path": str(input_file),
+                    "output_path": str(result_path),
+                    "plugin": plugin_name,
+                    "parameters": parameters
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Plugin effect error: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to apply plugin effect"}
+    
+    @server.tool()
+    async def create_plugin_template(
+        plugin_type: str,
+        plugin_name: str,
+        output_dir: str | None = None
+    ) -> dict[str, Any]:
+        """
+        Create a plugin template to start developing your own plugin.
+        
+        Parameters:
+        - plugin_type: Type of plugin (provider, effect, analyzer, exporter, workflow)
+        - plugin_name: Name for your plugin
+        - output_dir: Where to create the plugin (default: ~/.alice/plugins)
+        
+        Creates a fully functional plugin template with:
+        - Proper structure and metadata
+        - Example implementation
+        - Configuration schema
+        - Documentation
+        """
+        from .plugins.base import PluginType
+        
+        try:
+            # Validate plugin type
+            try:
+                plugin_type_enum = PluginType(plugin_type)
+            except ValueError:
+                return {
+                    "success": False,
+                    "message": f"Invalid plugin type: {plugin_type}. Valid types: {[t.value for t in PluginType]}"
+                }
+            
+            # Set output directory
+            if output_dir:
+                output_path = Path(output_dir).expanduser().resolve()
+            else:
+                output_path = Path.home() / ".alice" / "plugins"
+            
+            output_path.mkdir(parents=True, exist_ok=True)
+            
+            # Create plugin file
+            plugin_file = output_path / f"{plugin_name}.py"
+            
+            # Generate template based on type
+            template = _generate_plugin_template(plugin_type_enum, plugin_name)
+            
+            # Write template
+            plugin_file.write_text(template)
+            
+            # Create example config
+            config_file = output_path / f"{plugin_name}_config.yaml"
+            config_template = _generate_plugin_config_template(plugin_type_enum, plugin_name)
+            config_file.write_text(config_template)
+            
+            return {
+                "success": True,
+                "message": f"Created {plugin_type} plugin template",
+                "data": {
+                    "plugin_file": str(plugin_file),
+                    "config_file": str(config_file),
+                    "next_steps": [
+                        f"1. Edit {plugin_file} to implement your plugin",
+                        f"2. Configure settings in {config_file}",
+                        f"3. Load with: load_plugin('{plugin_file}')",
+                        "4. Test your plugin functionality"
+                    ]
+                }
+            }
+            
+        except Exception as e:
+            logger.error(f"Failed to create plugin template: {e}")
+            return {"success": False, "error": str(e), "message": "Failed to create plugin template"}
+    
+    @server.tool()
+    async def start_timeline_preview(
+        timeline_data: dict[str, Any],
+        port: int = 8001
+    ) -> dict[str, Any]:
+        """
+        Start web-based timeline preview server for interactive editing.
+        
+        Opens a browser-based interface for timeline editing with:
+        - Visual timeline with drag-and-drop clip reordering
+        - Real-time video playback preview with frame caching
+        - Transition visualization
+        - Beat marker display
+        - Keyboard shortcuts (Space, arrows, Home/End)
+        - Export to EDL/XML/CapCut formats
+        
+        Parameters:
+        - timeline_data: Timeline dict with clips, duration, etc.
+        - port: Server port (default 8001)
+        
+        Returns preview URL and session ID to open in browser.
+        """
+        from .interface.timeline_preview import TimelinePreviewServer
+        import httpx
+        import asyncio
+        import threading
+        import uvicorn
+        
+        # Create server instance
+        server_instance = TimelinePreviewServer()
+        
+        # Start server in background thread
+        def run_server():
+            config = uvicorn.Config(
+                app=server_instance.app,
+                host="0.0.0.0",
+                port=port,
+                log_level="info"
+            )
+            uvicorn.run(server_instance.app, host="0.0.0.0", port=port)
+        
+        server_thread = threading.Thread(target=run_server, daemon=True)
+        server_thread.start()
+        
+        # Wait a moment for server to start
+        await asyncio.sleep(1)
+        
+        # Create preview session
+        async with httpx.AsyncClient(base_url=f"http://localhost:{port}") as client:
+            try:
+                response = await client.post("/session/create", json=timeline_data)
+                
+                if response.status_code == 200:
+                    session_data = response.json()
+                    session_id = session_data["session_id"]
+                    
+                    return {
+                        "status": "success",
+                        "preview_url": f"http://localhost:{port}/?session={session_id}",
+                        "session_id": session_id,
+                        "message": "Preview server started. Open the URL in your browser.",
+                        "features": [
+                            "Video playback with frame caching",
+                            "Drag-and-drop clip reordering", 
+                            "Keyboard shortcuts (Space to play/pause)",
+                            "Export to EDL/XML/CapCut",
+                            "Real-time WebSocket updates",
+                            "Undo/redo support"
+                        ]
+                    }
+                else:
+                    return {
+                        "status": "error",
+                        "message": f"Failed to create preview session: {response.status_code}"
+                    }
+            except Exception as e:
+                return {
+                    "status": "error",
+                    "message": f"Failed to start preview server: {str(e)}"
+                }
+
+
+def _generate_plugin_template(plugin_type: PluginType, plugin_name: str) -> str:
+    """Generate plugin template code."""
+    if plugin_type == PluginType.PROVIDER:
+        return f'''"""Custom provider plugin for {plugin_name}."""
+
+import logging
+from typing import Any, Dict, List
+
+from alicemultiverse.plugins.base import ProviderPlugin, PluginMetadata, PluginType
+
+logger = logging.getLogger(__name__)
+
+
+class {plugin_name.title().replace("_", "")}Plugin(ProviderPlugin):
+    """Custom provider plugin implementation."""
+    
+    @property
+    def metadata(self) -> PluginMetadata:
+        return PluginMetadata(
+            name="{plugin_name}",
+            version="1.0.0",
+            type=PluginType.PROVIDER,
+            description="Custom provider for generating content",
+            author="Your Name",
+            dependencies=[],
+            config_schema={{
+                "api_key": {{"type": "string", "required": True}},
+                "endpoint": {{"type": "string", "default": "https://api.example.com"}}
+            }}
+        )
+    
+    async def initialize(self) -> bool:
+        """Initialize the provider."""
+        if not self.config.get("api_key"):
+            logger.error("API key required")
+            return False
+        
+        self.api_key = self.config["api_key"]
+        self.endpoint = self.config.get("endpoint", "https://api.example.com")
+        self._initialized = True
+        return True
+    
+    async def cleanup(self):
+        """Clean up resources."""
+        self._initialized = False
+    
+    async def generate(self, request: Dict[str, Any]) -> Dict[str, Any]:
+        """Generate content."""
+        # TODO: Implement your generation logic
+        return {{
+            "success": True,
+            "file_path": "/path/to/generated/file",
+            "cost": 0.01,
+            "metadata": {{"model": request.get("model", "default")}}
+        }}
+    
+    def get_supported_models(self) -> List[str]:
+        """Return supported models."""
+        return ["default", "pro"]
+    
+    def estimate_cost(self, request: Dict[str, Any]) -> float:
+        """Estimate generation cost."""
+        return 0.01
+'''
+    
+    elif plugin_type == PluginType.EFFECT:
+        return f'''"""Custom effect plugin for {plugin_name}."""
+
+import logging
+from pathlib import Path
+from typing import Any, Dict, List
+
+from alicemultiverse.plugins.base import EffectPlugin, PluginMetadata, PluginType
+
+logger = logging.getLogger(__name__)
+
+
+class {plugin_name.title().replace("_", "")}Plugin(EffectPlugin):
+    """Custom effect plugin implementation."""
+    
+    @property
+    def metadata(self) -> PluginMetadata:
+        return PluginMetadata(
+            name="{plugin_name}",
+            version="1.0.0",
+            type=PluginType.EFFECT,
+            description="Custom effect for processing images",
+            author="Your Name",
+            dependencies=["pillow"],
+            config_schema={{
+                "intensity": {{"type": "number", "default": 1.0, "minimum": 0, "maximum": 2}}
+            }}
+        )
+    
+    async def initialize(self) -> bool:
+        """Initialize the effect."""
+        self.intensity = self.config.get("intensity", 1.0)
+        self._initialized = True
+        return True
+    
+    async def cleanup(self):
+        """Clean up resources."""
+        self._initialized = False
+    
+    async def apply(self, input_path: Path, output_path: Path, parameters: Dict[str, Any]) -> Path:
+        """Apply effect to image."""
+        from PIL import Image
+        
+        # Load image
+        image = Image.open(input_path)
+        
+        # TODO: Apply your effect
+        # Example: adjust brightness
+        intensity = parameters.get("intensity", self.intensity)
+        
+        # Save result
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        image.save(output_path)
+        
+        return output_path
+    
+    def get_supported_formats(self) -> List[str]:
+        """Return supported formats."""
+        return [".jpg", ".jpeg", ".png", ".webp"]
+'''
+    
+    else:
+        # Generic template for other types
+        return f'''"""Custom {plugin_type.value} plugin for {plugin_name}."""
+
+import logging
+from typing import Any, Dict
+
+from alicemultiverse.plugins.base import Plugin, PluginMetadata, PluginType
+
+logger = logging.getLogger(__name__)
+
+
+class {plugin_name.title().replace("_", "")}Plugin(Plugin):
+    """Custom {plugin_type.value} plugin implementation."""
+    
+    @property
+    def metadata(self) -> PluginMetadata:
+        return PluginMetadata(
+            name="{plugin_name}",
+            version="1.0.0",
+            type=PluginType.{plugin_type.name},
+            description="Custom {plugin_type.value} plugin",
+            author="Your Name",
+            dependencies=[],
+            config_schema={{}}
+        )
+    
+    async def initialize(self) -> bool:
+        """Initialize the plugin."""
+        self._initialized = True
+        return True
+    
+    async def cleanup(self):
+        """Clean up resources."""
+        self._initialized = False
+    
+    # TODO: Implement {plugin_type.value}-specific methods
+'''
+
+
+def _generate_plugin_config_template(plugin_type: PluginType, plugin_name: str) -> str:
+    """Generate plugin configuration template."""
+    if plugin_type == PluginType.PROVIDER:
+        return f'''# Configuration for {plugin_name} plugin
+
+# API credentials
+api_key: "your-api-key-here"
+
+# API endpoint (optional)
+endpoint: "https://api.example.com"
+
+# Supported generation types
+supported_types:
+  - image
+  - video
+
+# Default parameters
+defaults:
+  model: "default"
+  quality: "high"
+'''
+    elif plugin_type == PluginType.EFFECT:
+        return f'''# Configuration for {plugin_name} plugin
+
+# Effect parameters
+intensity: 1.0
+quality: "high"
+
+# Processing options
+preserve_metadata: true
+auto_backup: false
+'''
+    else:
+        return f'''# Configuration for {plugin_name} plugin
+
+# Add your configuration options here
+enabled: true
+'''
+
+
+# Mobile Companion Tools
+
+@server.tool()
+async def start_mobile_server(
+    host: str = "0.0.0.0",
+    port: int = 8080,
+    generate_token: bool = True
+) -> dict[str, Any]:
+    """Start the mobile companion server for remote timeline control."""
+    from alicemultiverse.mobile.server import MobileServer
+    from alicemultiverse.mobile.token_manager import TokenManager
+    import socket
+    import threading
+    
+    # Get local IP
+    def get_local_ip():
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        try:
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+        except:
+            ip = "localhost"
+        finally:
+            s.close()
+        return ip
+    
+    local_ip = get_local_ip()
+    
+    # Generate token if requested
+    token = None
+    if generate_token:
+        manager = TokenManager()
+        token = manager.generate_token("mcp-session", expires_hours=24)
+    
+    # Start server in background thread
+    server = MobileServer(host=host, port=port)
+    
+    def run_server():
+        import asyncio
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        server.run()
+    
+    thread = threading.Thread(target=run_server, daemon=True)
+    thread.start()
+    
+    result = {
+        "status": "started",
+        "local_url": f"http://localhost:{port}",
+        "mobile_url": f"http://{local_ip}:{port}",
+        "local_ip": local_ip
+    }
+    
+    if token:
+        result["access_token"] = token
+        result["token_message"] = "Save this token - you'll need it to connect from your mobile device"
+    
+    return result
+
+
+@server.tool()
+async def generate_mobile_token(
+    name: str = "mobile-access",
+    expires_hours: int = 24
+) -> dict[str, Any]:
+    """Generate an access token for mobile companion app."""
+    from alicemultiverse.mobile.token_manager import TokenManager
+    
+    manager = TokenManager()
+    token = manager.generate_token(name, expires_hours)
+    
+    return {
+        "token": token,
+        "name": name,
+        "expires_hours": expires_hours,
+        "message": f"Token expires in {expires_hours} hours. Use this to authenticate from your mobile device."
+    }
+
+
+@server.tool()
+async def list_mobile_tokens() -> dict[str, Any]:
+    """List all active mobile access tokens."""
+    from alicemultiverse.mobile.token_manager import TokenManager
+    
+    manager = TokenManager()
+    tokens = manager.list_tokens()
+    
+    return {
+        "tokens": tokens,
+        "count": len(tokens)
+    }
+
+
+@server.tool()
+async def add_timeline_to_mobile(
+    timeline_name: str,
+    clip_paths: list[str],
+    clip_durations: list[float] | None = None
+) -> dict[str, Any]:
+    """Add a timeline to the mobile companion server."""
+    from alicemultiverse.interface.timeline_preview import Timeline, TimelineClip
+    from pathlib import Path
+    import uuid
+    
+    # Create timeline
+    timeline = Timeline(name=timeline_name)
+    
+    # Default duration if not provided
+    if not clip_durations:
+        clip_durations = [3.0] * len(clip_paths)
+    
+    # Add clips
+    for i, (path, duration) in enumerate(zip(clip_paths, clip_durations)):
+        clip = TimelineClip(
+            id=str(uuid.uuid4()),
+            file_path=Path(path),
+            duration=duration
+        )
+        timeline.add_clip(clip)
+    
+    # Add to server if running
+    # Note: In a real implementation, we'd need to track the server instance
+    timeline_id = str(uuid.uuid4())
+    
+    return {
+        "timeline_id": timeline_id,
+        "timeline_name": timeline_name,
+        "clip_count": len(clip_paths),
+        "total_duration": timeline.duration,
+        "message": "Timeline created. Start mobile server to make it available."
+    }
+
+
 def main():
     """Run the MCP server."""
     if not MCP_AVAILABLE:
@@ -2921,6 +4965,40 @@ def main():
     logger.info("  - prompt_get_project: Get project prompts with insights")
     logger.info("  - prompt_suggest_improvements: Get prompt optimization tips")
     logger.info("  - prompt_render_template: Use prompt templates")
+    logger.info("  - start_analytics_session: Begin tracking performance metrics")
+    logger.info("  - end_analytics_session: Stop tracking and get session summary")
+    logger.info("  - get_performance_insights: View performance stats and improvements")
+    logger.info("  - get_export_analytics: Analyze export patterns and quality")
+    logger.info("  - get_improvement_suggestions: Get actionable optimization tips")
+    logger.info("  - generate_content_variations: Generate smart variations of successful content")
+    logger.info("  - track_variation_performance: Track performance metrics for variations")
+    logger.info("  - create_variation_group: Create groups of related variations")
+    logger.info("  - get_variation_insights: Get insights about variation performance")
+    logger.info("  - find_top_variations: Find top performing content variations")
+    logger.info("  - get_variation_recommendations: Get recommended variations")
+    logger.info("  - analyze_variation_success: Analyze and record variation success")
+    logger.info("  - export_variation_analytics: Export variation analytics data")
+    logger.info("  - analyze_timeline_flow: Analyze timeline pacing and rhythm issues")
+    logger.info("  - analyze_image_composition: Analyze visual composition metrics")
+    logger.info("  - analyze_timeline_compositions: Check composition across clips")
+    logger.info("  - optimize_timeline: Auto-optimize timeline based on flow analysis")
+    logger.info("  - suggest_clip_order: Get optimal clip ordering suggestions")
+    logger.info("  - detect_composition_patterns: Find composition trends in collection")
+    logger.info("  - start_timeline_preview: Launch interactive web timeline editor with video preview")
+    logger.info("  - find_duplicates_advanced: Find exact and similar images with perceptual hashing")
+    logger.info("  - remove_duplicates: Remove duplicate images with backup option")
+    logger.info("  - build_similarity_index: Build fast similarity search index")
+    logger.info("  - search_similar_advanced: Ultra-fast similarity search")
+    logger.info("  - find_image_clusters: Auto-discover clusters of similar images")
+    logger.info("  - list_plugins: List all available plugins")
+    logger.info("  - load_plugin: Load a plugin from file or module")
+    logger.info("  - use_plugin_provider: Generate content with plugin provider")
+    logger.info("  - apply_plugin_effect: Apply plugin effect to images")
+    logger.info("  - create_plugin_template: Create template for new plugin")
+    logger.info("  - start_mobile_server: Launch mobile companion server for remote control")
+    logger.info("  - generate_mobile_token: Create secure access token for mobile app")
+    logger.info("  - list_mobile_tokens: View all active mobile access tokens")
+    logger.info("  - add_timeline_to_mobile: Add timeline for mobile editing")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))

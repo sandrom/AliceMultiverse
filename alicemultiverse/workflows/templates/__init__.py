@@ -8,6 +8,20 @@ from .music_video import (
     QuickMusicVideoTemplate,
     CinematicMusicVideoTemplate
 )
+from .story_arc import (
+    StoryArcTemplate,
+    DocumentaryStoryTemplate,
+    EmotionalJourneyTemplate,
+    StoryStructure
+)
+from .social_media import (
+    SocialMediaTemplate,
+    InstagramReelTemplate,
+    TikTokTemplate,
+    LinkedInVideoTemplate,
+    SocialPlatform,
+    PlatformSpec
+)
 
 __all__ = [
     "ImageEnhancementWorkflow",
@@ -16,4 +30,14 @@ __all__ = [
     "MusicVideoTemplate",
     "QuickMusicVideoTemplate",
     "CinematicMusicVideoTemplate",
+    "StoryArcTemplate",
+    "DocumentaryStoryTemplate",
+    "EmotionalJourneyTemplate",
+    "StoryStructure",
+    "SocialMediaTemplate",
+    "InstagramReelTemplate",
+    "TikTokTemplate",
+    "LinkedInVideoTemplate",
+    "SocialPlatform",
+    "PlatformSpec",
 ]

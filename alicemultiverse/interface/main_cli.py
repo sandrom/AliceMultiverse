@@ -165,6 +165,101 @@ For normal usage, use Alice through an AI assistant instead.
         "--port", type=int, default=9090, help="Port to listen on (default: 9090)"
     )
 
+    # Plugins subcommand
+    plugins_parser = subparsers.add_parser("plugins", help="Manage AliceMultiverse plugins")
+    plugins_subparsers = plugins_parser.add_subparsers(
+        dest="plugins_command", help="Plugin management commands"
+    )
+    
+    # Plugins - list
+    plugins_list = plugins_subparsers.add_parser("list", help="List available plugins")
+    plugins_list.add_argument(
+        "-t", "--type", 
+        choices=["all", "provider", "effect", "analyzer", "workflow"],
+        default="all",
+        help="Filter by plugin type"
+    )
+    plugins_list.add_argument("-v", "--verbose", action="store_true", help="Show detailed info")
+    
+    # Plugins - info
+    plugins_info = plugins_subparsers.add_parser("info", help="Show plugin details")
+    plugins_info.add_argument("plugin_name", help="Plugin name")
+    
+    # Plugins - load
+    plugins_load = plugins_subparsers.add_parser("load", help="Load a plugin")
+    plugins_load.add_argument("plugin_path", help="Plugin file or module path")
+    plugins_load.add_argument("-c", "--config", help="Configuration file path")
+    
+    # Plugins - create
+    plugins_create = plugins_subparsers.add_parser("create", help="Create plugin template")
+    plugins_create.add_argument(
+        "plugin_type",
+        choices=["provider", "effect", "analyzer", "workflow"],
+        help="Type of plugin to create"
+    )
+    plugins_create.add_argument("plugin_name", help="Plugin name")
+    plugins_create.add_argument("-o", "--output", help="Output directory")
+    
+    # Plugins - config
+    plugins_config = plugins_subparsers.add_parser("config", help="Show plugin config")
+    plugins_config.add_argument("plugin_name", help="Plugin name")
+    plugins_config.add_argument(
+        "-f", "--format",
+        choices=["yaml", "json"],
+        default="yaml",
+        help="Output format"
+    )
+    
+    # Plugins - set-config
+    plugins_set_config = plugins_subparsers.add_parser("set-config", help="Set plugin config")
+    plugins_set_config.add_argument("plugin_name", help="Plugin name")
+    plugins_set_config.add_argument("config_path", help="Configuration file path")
+    
+    # Plugins - apply-effect
+    plugins_apply = plugins_subparsers.add_parser("apply-effect", help="Apply effect plugin")
+    plugins_apply.add_argument("plugin_name", help="Effect plugin name")
+    plugins_apply.add_argument("image_paths", nargs="+", help="Images to process")
+    plugins_apply.add_argument("-o", "--output", required=True, help="Output directory")
+    plugins_apply.add_argument("-p", "--params", help="Parameters as JSON")
+    
+    # Mobile companion subcommand
+    mobile_parser = subparsers.add_parser("mobile", help="Mobile companion app")
+    mobile_subparsers = mobile_parser.add_subparsers(
+        dest="mobile_command", help="Mobile companion commands"
+    )
+    
+    # Mobile - server
+    mobile_server = mobile_subparsers.add_parser("server", help="Start mobile server")
+    mobile_server.add_argument("--host", default="0.0.0.0", help="Host to bind to")
+    mobile_server.add_argument("--port", type=int, default=8080, help="Port to listen on")
+    mobile_server.add_argument("--media-dir", help="Media directory path")
+    
+    # Mobile - token (with sub-subcommands)
+    mobile_token = mobile_subparsers.add_parser("token", help="Manage access tokens")
+    mobile_token_subs = mobile_token.add_subparsers(
+        dest="token_action", help="Token actions"
+    )
+    
+    # Token - generate
+    token_generate = mobile_token_subs.add_parser("generate", help="Generate new token")
+    token_generate.add_argument("--name", default="default", help="Token name")
+    token_generate.add_argument("--expires", type=int, default=24, help="Hours until expiration")
+    token_generate.add_argument("--qr", action="store_true", help="Generate QR code")
+    
+    # Token - list
+    mobile_token_subs.add_parser("list", help="List all tokens")
+    
+    # Token - revoke
+    token_revoke = mobile_token_subs.add_parser("revoke", help="Revoke a token")
+    token_revoke.add_argument("token_prefix", help="Token prefix (first 8 chars)")
+    
+    # Token - cleanup
+    mobile_token_subs.add_parser("cleanup", help="Remove expired tokens")
+    
+    # Mobile - test
+    mobile_test = mobile_subparsers.add_parser("test", help="Test connectivity")
+    mobile_test.add_argument("--demo", action="store_true", help="Load demo timeline")
+
     # Comparison subcommand with subcommands
     comparison_parser = subparsers.add_parser("comparison", help="Model comparison system")
     comparison_subparsers = comparison_parser.add_subparsers(
@@ -322,6 +417,40 @@ For normal usage, use Alice through an AI assistant instead.
     scenes_extract.add_argument("--scenes-file", help="Use existing scenes JSON")
     scenes_extract.add_argument("-v", "--verbose", action="store_true", help="Verbose output")
 
+    # Deduplication subcommand for finding duplicates
+    dedup_parser = subparsers.add_parser("dedup", help="Advanced deduplication with perceptual hashing")
+    dedup_subparsers = dedup_parser.add_subparsers(
+        dest="dedup_command", help="Deduplication commands"
+    )
+    
+    # Dedup - find
+    dedup_find = dedup_subparsers.add_parser("find", help="Find duplicate and similar images")
+    dedup_find.add_argument("directory", help="Directory to scan")
+    dedup_find.add_argument("-t", "--threshold", type=float, default=0.9, help="Similarity threshold (0.8-1.0)")
+    dedup_find.add_argument("-r/-R", "--recursive/--no-recursive", default=True, help="Scan subdirectories")
+    dedup_find.add_argument("-s/-e", "--include-similar/--exact-only", default=True, help="Include similar images")
+    dedup_find.add_argument("-o", "--output", help="Save report to JSON file")
+    
+    # Dedup - remove
+    dedup_remove = dedup_subparsers.add_parser("remove", help="Remove duplicate images")
+    dedup_remove.add_argument("report", help="JSON report from find command")
+    dedup_remove.add_argument("-s", "--strategy", choices=["safe", "aggressive"], default="safe", help="Removal strategy")
+    dedup_remove.add_argument("-b", "--backup", help="Backup directory")
+    dedup_remove.add_argument("-n/-x", "--dry-run/--execute", default=True, help="Dry run or execute")
+    
+    # Dedup - index
+    dedup_index = dedup_subparsers.add_parser("index", help="Build similarity search index")
+    dedup_index.add_argument("directories", nargs="+", help="Directories to index")
+    dedup_index.add_argument("-o", "--output", help="Index save path")
+    dedup_index.add_argument("-t", "--type", choices=["Flat", "IVF", "HNSW"], default="IVF", help="Index type")
+    
+    # Dedup - search
+    dedup_search = dedup_subparsers.add_parser("search", help="Search for similar images")
+    dedup_search.add_argument("image", help="Query image")
+    dedup_search.add_argument("-i", "--index", help="Index path")
+    dedup_search.add_argument("-k", "--count", type=int, default=10, help="Number of results")
+    dedup_search.add_argument("-t", "--threshold", type=float, default=0.7, help="Minimum similarity")
+    
     # Prompts subcommand for prompt management
     prompts_parser = subparsers.add_parser("prompts", help="Manage AI prompts and their effectiveness")
     prompts_subparsers = prompts_parser.add_subparsers(
@@ -807,6 +936,75 @@ def main(argv: list[str] | None = None) -> int:
         run_metrics_server(host=args.host, port=args.port)
         return 0
 
+    # Handle plugins subcommand
+    if args.command == "plugins":
+        from ..plugins.cli import plugins as plugins_cli
+        
+        # Build click args from argparse args
+        click_args = [args.plugins_command]
+        
+        if args.plugins_command == "list":
+            if args.type != "all":
+                click_args.extend(["--type", args.type])
+            if args.verbose:
+                click_args.append("--verbose")
+        elif args.plugins_command == "info":
+            click_args.append(args.plugin_name)
+        elif args.plugins_command == "load":
+            click_args.append(args.plugin_path)
+            if hasattr(args, "config") and args.config:
+                click_args.extend(["--config", args.config])
+        elif args.plugins_command == "create":
+            click_args.extend([args.plugin_type, args.plugin_name])
+            if hasattr(args, "output") and args.output:
+                click_args.extend(["--output", args.output])
+        elif args.plugins_command == "config":
+            click_args.append(args.plugin_name)
+            if hasattr(args, "format") and args.format:
+                click_args.extend(["--format", args.format])
+        elif args.plugins_command == "set-config":
+            click_args.extend([args.plugin_name, args.config_path])
+        elif args.plugins_command == "apply-effect":
+            click_args.extend([args.plugin_name] + list(args.image_paths))
+            click_args.extend(["--output", args.output])
+            if hasattr(args, "params") and args.params:
+                click_args.extend(["--params", args.params])
+        
+        # Run the click command
+        plugins_cli(click_args, standalone_mode=False)
+        return 0
+
+    # Handle mobile subcommand
+    if args.command == "mobile":
+        from ..mobile.cli import mobile as mobile_cli
+        
+        # Build click args
+        click_args = []
+        
+        if args.mobile_command == "server":
+            click_args = ["server", "--host", args.host, "--port", str(args.port)]
+            if hasattr(args, "media_dir") and args.media_dir:
+                click_args.extend(["--media-dir", args.media_dir])
+                
+        elif args.mobile_command == "token":
+            click_args = ["token", args.token_action]
+            
+            if args.token_action == "generate":
+                click_args.extend(["--name", args.name, "--expires", str(args.expires)])
+                if args.qr:
+                    click_args.append("--qr")
+            elif args.token_action == "revoke":
+                click_args.append(args.token_prefix)
+                
+        elif args.mobile_command == "test":
+            click_args = ["test"]
+            if args.demo:
+                click_args.append("--demo")
+        
+        # Run the click command
+        mobile_cli(click_args, standalone_mode=False)
+        return 0
+
     # Handle comparison subcommand
     if args.command == "comparison":
         if args.comparison_command == "server":
@@ -990,6 +1188,47 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.append("-v")
 
         scenes_cli(click_args)
+        return 0
+
+    # Handle dedup subcommand
+    if args.command == "dedup":
+        from ..deduplication.cli import dedup_cli
+        
+        # Build command line args for click
+        click_args = [args.dedup_command]
+        
+        if args.dedup_command == "find":
+            click_args.append(args.directory)
+            click_args.extend(["-t", str(args.threshold)])
+            if not args.recursive:
+                click_args.append("-R")
+            if not args.include_similar:
+                click_args.append("-e")
+            if hasattr(args, "output") and args.output:
+                click_args.extend(["-o", args.output])
+                
+        elif args.dedup_command == "remove":
+            click_args.append(args.report)
+            click_args.extend(["-s", args.strategy])
+            if hasattr(args, "backup") and args.backup:
+                click_args.extend(["-b", args.backup])
+            if not args.dry_run:
+                click_args.append("-x")
+                
+        elif args.dedup_command == "index":
+            click_args.extend(args.directories)
+            if hasattr(args, "output") and args.output:
+                click_args.extend(["-o", args.output])
+            click_args.extend(["-t", args.type])
+            
+        elif args.dedup_command == "search":
+            click_args.append(args.image)
+            if hasattr(args, "index") and args.index:
+                click_args.extend(["-i", args.index])
+            click_args.extend(["-k", str(args.count)])
+            click_args.extend(["-t", str(args.threshold)])
+        
+        dedup_cli(click_args)
         return 0
 
     # Handle prompts subcommand

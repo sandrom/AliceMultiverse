@@ -40,5 +40,9 @@ fastapi>=0.110.0        # Web framework for metrics
 scikit-learn>=1.3.0     # Clustering for tag and style analysis
 librosa>=0.10.0         # Audio analysis for music sync
 
+# Advanced deduplication
+imagehash>=4.3.1        # Perceptual hashing algorithms
+faiss-cpu>=1.7.4        # Fast similarity search
+
 # Optional format support (install if needed)
 pillow-heif>=0.16.0  # HEIC/HEIF support (recommended for iPhone images)

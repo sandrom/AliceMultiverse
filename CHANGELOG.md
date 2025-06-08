@@ -7,6 +7,201 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added (2025-01-08) - Template Workflows
+- **Story Arc Templates**: Narrative-driven video creation
+  - StoryArcTemplate with 5 classic structures (3-act, 5-act, hero's journey, kishoten, circular)
+  - Narrative content analysis and emotional mapping
+  - Story beat distribution with appropriate pacing
+  - Narrative-appropriate transitions and timing
+  - Chapter markers and voiceover support
+  - DocumentaryStoryTemplate for information delivery
+  - EmotionalJourneyTemplate for mood-based narratives
+  
+- **Social Media Templates**: Platform-optimized workflows
+  - SocialMediaTemplate base with platform detection
+  - Platform specifications for 9+ social networks
+  - Instagram Reel template with music sync and effects
+  - TikTok template with trend integration
+  - LinkedIn video template for professional content
+  - Automatic aspect ratio and duration optimization
+  - Safe zone management for UI elements
+  - Platform-specific engagement features
+  
+- **MCP Tools for Templates**:
+  - `create_story_arc_video`: Create narrative videos
+  - `create_documentary_video`: Documentary style
+  - `create_social_media_video`: Platform optimization
+  - `create_instagram_reel`: Instagram-specific
+  - `create_tiktok_video`: TikTok with trends
+  - `get_platform_specifications`: Platform info
+  - `suggest_story_structure`: Content analysis
+  
+- **Template Features**:
+  - Hook optimization for engagement
+  - Caption and hashtag integration
+  - Platform-specific filters and effects
+  - Trending element detection
+  - Export optimization per platform
+
+### Added (2025-01-08) - Style Memory & Learning
+- **Comprehensive Style Preference System**: Learn and adapt to personal creative style
+  - StyleMemory class for persistent preference storage
+  - Tracks 10 preference types (color, composition, lighting, mood, etc.)
+  - Usage statistics and success tracking per preference
+  - Time-based pattern detection
+  - Project-specific style profiles
+  
+- **Real-time Workflow Tracking**:
+  - PreferenceTracker monitors choices during workflows
+  - Tracks adjustments, iterations, and outcomes
+  - Identifies improvement areas from usage patterns
+  - Session-based learning with quality metrics
+  
+- **Intelligent Learning Engine**:
+  - Pattern detection (co-occurrence, temporal, evolution)
+  - Actionable insights with priority levels
+  - Predictive preference suggestions
+  - Confidence scoring for recommendations
+  
+- **Personalized Recommendations**:
+  - 4 recommendation types: preset, variation, exploration, trending
+  - Context-aware suggestions (time, project, current state)
+  - Style fusion for creative combinations
+  - Next action guidance during workflows
+  
+- **MCP Tools for Style Management**:
+  - `track_style_preference`: Record style choices
+  - `get_style_recommendations`: Get personalized suggestions
+  - `analyze_style_patterns`: Discover usage patterns
+  - `start/end_style_workflow`: Track workflow success
+  - `get_style_evolution`: View style changes over time
+  - `suggest_next_style_action`: Get workflow guidance
+  - `export/import_style_profile`: Backup and share profiles
+  
+- **Documentation**:
+  - Comprehensive Style Memory Guide
+  - Integration examples with other features
+  - Best practices for effective learning
+
+### Added (2025-01-08) - Performance Analytics
+- **Comprehensive Performance Tracking**: Monitor workflow efficiency and success
+  - Session-based analytics with start/end tracking
+  - Workflow metrics (duration, success rate, resource usage)
+  - Export pattern analysis by format and platform
+  - User behavior tracking (adjustments, previews, iterations)
+  
+- **Export Analytics Engine**:
+  - Format preferences and usage patterns
+  - Platform compatibility scoring
+  - Quality trends over time
+  - Time-to-final tracking
+  
+- **AI-Powered Improvements**:
+  - Automated suggestion engine
+  - Prioritized by impact and effort
+  - Categories: workflow, performance, quality, efficiency
+  - Actionable implementation steps
+  
+- **MCP Tools for Analytics**:
+  - `start_analytics_session`: Begin performance tracking
+  - `end_analytics_session`: Get session summary
+  - `get_performance_insights`: View stats and improvements
+  - `get_export_analytics`: Analyze export patterns
+  - `get_improvement_suggestions`: Get optimization tips
+  - `track_user_action`: Record behavior patterns
+  
+- **Documentation**:
+  - Comprehensive Performance Analytics Guide
+  - Metrics explanation and best practices
+  - Integration examples with other features
+
+### Added (2025-01-08) - Multi-Version Export
+- **Platform-Specific Timeline Adaptations**: Export to 8 social media platforms
+  - Automatic aspect ratio conversion (16:9 → 9:16, 1:1, etc.)
+  - Smart cropping with AI subject detection
+  - Duration constraints (trim/extend to platform limits)
+  - Platform-specific pacing optimization
+  
+- **Supported Platforms**:
+  - Instagram (Reel, Story, Post)
+  - TikTok (up to 3 minutes)
+  - YouTube (Shorts, Horizontal)
+  - Twitter/X (quick view optimized)
+  - Master (4K archival)
+  
+- **Intelligent Features**:
+  - Music sync preservation during adaptation
+  - Loop-friendly transitions for Instagram
+  - Trend sync points for TikTok
+  - Safe zone management for UI elements
+  - Hook optimization for engagement
+  
+- **MCP Tools for Multi-Version Export**:
+  - `export_for_platforms`: Create platform versions
+  - `check_platform_compatibility`: Get recommendations
+  - `export_all_platforms`: Batch export workflow
+  - `get_platform_specs`: Platform specifications
+  
+- **Documentation**:
+  - Comprehensive Multi-Version Export Guide
+  - Platform feature comparison
+  - Workflow examples and best practices
+
+### Added (2025-01-08) - Natural Language Timeline Editing
+- **Natural Language Command Processing**: Edit timelines with conversational commands
+  - 9 edit intent types: pace changes, pauses, sync, energy, transitions, etc.
+  - Intelligent section detection (intro, outro, chorus, bridge, drop)
+  - Confidence scoring for command interpretation
+  - Batch command processing for complex edits
+  
+- **AI-Powered Timeline Suggestions**:
+  - Automatic timeline analysis (pace, rhythm, energy flow)
+  - Context-aware improvement suggestions
+  - Example commands by category
+  
+- **MCP Tools for Natural Language Editing**:
+  - `edit_timeline_naturally`: Process single commands
+  - `suggest_timeline_improvements`: Get AI suggestions
+  - `apply_timeline_commands`: Batch multiple edits
+  - `get_timeline_edit_examples`: Browse command examples
+  
+- **Documentation**:
+  - Comprehensive Natural Language Editing Guide
+  - Command examples by workflow type
+  - Integration with timeline preview
+
+### Added (2025-01-08) - Web Timeline Preview Interface
+- **Interactive Timeline Preview**: Web-based interface for video timeline editing
+  - FastAPI server with real-time WebSocket updates
+  - Drag-and-drop clip reordering with visual feedback
+  - Timeline visualization with clips, transitions, and markers
+  - Undo/redo support for all operations
+  - Session-based editing with unique URLs
+  - Export to EDL, XML, or JSON formats
+  
+- **MCP Tools for Timeline Preview**:
+  - `preview_video_timeline`: Open timeline in web browser
+  - `update_preview_timeline`: Modify clips (reorder, trim, transitions)
+  - `export_preview_timeline`: Export to various formats
+  - `get_timeline_preview_status`: Check server status
+  
+- **Documentation**:
+  - Comprehensive Timeline Preview Guide
+  - Integration examples and workflow tips
+  - Troubleshooting section
+
+### Added (2025-01-08) - Project Cleanup
+- **Root Directory Organization**: Reduced clutter from 18+ to 6 essential files
+  - Moved 10 documentation files to appropriate `/docs/` subdirectories
+  - Archived temporary reports and status files
+  - Created cleanup scripts for future maintenance
+  - Removed 2,350 Python cache files
+  
+- **New Cleanup Tools**:
+  - `scripts/cleanup_unnecessary_files.py`: Remove cache and temp files
+  - `scripts/reorganize_root_files.py`: Organize documentation files
+  - Both scripts support dry-run mode for safety
+
 ### Added (2025-01-07) - Google Veo 3 Integration
 - **Google Veo 3 Support**: Added state-of-the-art video generation
   - Integrated via fal.ai provider with model ID `veo-3`

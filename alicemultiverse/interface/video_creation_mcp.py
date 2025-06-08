@@ -11,6 +11,25 @@ from alicemultiverse.workflows.video_creation import (
 )
 from alicemultiverse.storage.duckdb_search import DuckDBSearch
 from alicemultiverse.core.structured_logging import get_logger
+from .timeline_preview_mcp import (
+    preview_timeline,
+    update_preview_timeline,
+    export_preview_timeline,
+    get_preview_status
+)
+from .timeline_nlp_mcp import (
+    process_timeline_command,
+    suggest_timeline_edits,
+    batch_timeline_edits,
+    get_command_examples
+)
+from .multi_version_export_mcp import (
+    create_platform_versions,
+    get_platform_recommendations,
+    export_platform_version,
+    batch_export_all_platforms,
+    get_available_platforms
+)
 
 logger = get_logger(__name__)
 
@@ -394,3 +413,284 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                 "success": False,
                 "error": str(e)
             }
+    
+    # Timeline Preview Tools
+    
+    @server.tool()
+    async def preview_video_timeline(
+        timeline_data: Dict[str, Any],
+        auto_open: bool = True
+    ) -> Dict[str, Any]:
+        """Open an interactive web preview of a video timeline.
+        
+        Allows drag-and-drop reordering, trimming, and transition editing
+        before exporting to your video editor.
+        
+        Args:
+            timeline_data: Timeline data with clips, transitions, and markers
+            auto_open: Whether to automatically open browser
+            
+        Returns:
+            Preview URL and session ID
+        """
+        return await preview_timeline(timeline_data, auto_open=auto_open)
+    
+    @server.tool()
+    async def update_preview_timeline(
+        session_id: str,
+        operation: str,
+        clips: List[Dict[str, Any]]
+    ) -> Dict[str, Any]:
+        """Update a timeline in the preview interface.
+        
+        Operations:
+        - reorder: Change clip order with drag-drop
+        - trim: Adjust clip in/out points and duration
+        - add_transition: Add or modify transitions
+        
+        Args:
+            session_id: Preview session ID
+            operation: Operation type
+            clips: List of clip updates
+            
+        Returns:
+            Updated timeline data
+        """
+        return await update_preview_timeline(session_id, operation, clips)
+    
+    @server.tool()
+    async def export_preview_timeline(
+        session_id: str,
+        format: str = "json",
+        output_path: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Export a timeline from the preview interface.
+        
+        Formats:
+        - json: Full timeline data
+        - edl: DaVinci Resolve EDL format
+        - xml: Final Cut Pro XML format
+        
+        Args:
+            session_id: Preview session ID
+            format: Export format
+            output_path: Optional file path to save
+            
+        Returns:
+            Export result with file path or data
+        """
+        output = Path(output_path) if output_path else None
+        return await export_preview_timeline(session_id, format, output)
+    
+    @server.tool()
+    async def get_timeline_preview_status() -> Dict[str, Any]:
+        """Check if timeline preview server is running.
+        
+        Returns:
+            Server status and URL
+        """
+        return await get_preview_status()
+    
+    # Natural Language Timeline Editing Tools
+    
+    @server.tool()
+    async def edit_timeline_naturally(
+        command: str,
+        timeline_data: Dict[str, Any],
+        session_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Edit timeline using natural language commands.
+        
+        Examples:
+        - "Make the intro punchier"
+        - "Add breathing room after the drop"
+        - "Sync all cuts to the beat"
+        - "Speed up the middle section"
+        - "Add dissolve transitions"
+        
+        Args:
+            command: Natural language edit command
+            timeline_data: Timeline to edit
+            session_id: Optional preview session to update
+            
+        Returns:
+            Modified timeline with applied edits
+        """
+        return await process_timeline_command(
+            command=command,
+            timeline_data=timeline_data,
+            session_id=session_id
+        )
+    
+    @server.tool()
+    async def suggest_timeline_improvements(
+        timeline_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Get AI-powered suggestions for timeline improvements.
+        
+        Analyzes your timeline and suggests edits like:
+        - Pacing adjustments
+        - Rhythm synchronization
+        - Energy flow improvements
+        - Transition recommendations
+        
+        Args:
+            timeline_data: Timeline to analyze
+            
+        Returns:
+            Suggested commands and timeline analysis
+        """
+        return await suggest_timeline_edits(timeline_data)
+    
+    @server.tool()
+    async def apply_timeline_commands(
+        commands: List[str],
+        timeline_data: Dict[str, Any],
+        session_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Apply multiple natural language edits in sequence.
+        
+        Useful for complex edits like:
+        ["Make the intro faster", "Add breathing room after", "Sync to beat"]
+        
+        Args:
+            commands: List of commands to apply in order
+            timeline_data: Timeline to edit
+            session_id: Optional preview session
+            
+        Returns:
+            Final timeline after all edits
+        """
+        return await batch_timeline_edits(
+            commands=commands,
+            timeline_data=timeline_data,
+            session_id=session_id
+        )
+    
+    @server.tool()
+    async def get_timeline_edit_examples(
+        category: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """Get examples of natural language timeline commands.
+        
+        Categories:
+        - pace: Speed and timing adjustments
+        - rhythm: Music synchronization
+        - energy: Intensity and mood changes
+        - space: Pauses and breathing room
+        - transitions: Effect changes
+        
+        Args:
+            category: Optional category filter
+            
+        Returns:
+            Example commands by category
+        """
+        examples = get_command_examples(category)
+        return {
+            "success": True,
+            "categories": list(examples.keys()),
+            "examples": examples,
+            "tip": "Combine commands for complex edits!"
+        }
+    
+    # Multi-Platform Export Tools
+    
+    @server.tool()
+    async def export_for_platforms(
+        timeline_data: Dict[str, Any],
+        platforms: List[str],
+        smart_crop: bool = True,
+        maintain_sync: bool = True
+    ) -> Dict[str, Any]:
+        """Create platform-specific versions of your timeline.
+        
+        Automatically adapts for:
+        - instagram_reel (9:16, 90s max)
+        - instagram_story (9:16, 60s max)
+        - instagram_post (1:1, 60s max)
+        - tiktok (9:16, 3min max)
+        - youtube_shorts (9:16, 60s max)
+        - youtube (16:9, no limit)
+        - twitter (16:9, 140s max)
+        
+        Args:
+            timeline_data: Master timeline to adapt
+            platforms: List of target platforms
+            smart_crop: AI-powered intelligent cropping
+            maintain_sync: Keep music sync when adapting
+            
+        Returns:
+            Platform-adapted timeline versions
+        """
+        return await create_platform_versions(
+            timeline_data=timeline_data,
+            platforms=platforms,
+            smart_crop=smart_crop,
+            maintain_sync=maintain_sync
+        )
+    
+    @server.tool()
+    async def check_platform_compatibility(
+        timeline_data: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """Check which platforms your timeline is suitable for.
+        
+        Analyzes:
+        - Duration compatibility
+        - Aspect ratio requirements
+        - Platform-specific optimizations
+        
+        Args:
+            timeline_data: Timeline to analyze
+            
+        Returns:
+            Platform recommendations and required adjustments
+        """
+        return await get_platform_recommendations(timeline_data)
+    
+    @server.tool()
+    async def export_all_platforms(
+        timeline_data: Dict[str, Any],
+        platforms: List[str],
+        output_dir: Optional[str] = None,
+        format: str = "json",
+        create_master: bool = True
+    ) -> Dict[str, Any]:
+        """Export timeline for multiple platforms in one go.
+        
+        Creates properly named files for each platform with
+        automatic adaptations applied.
+        
+        Args:
+            timeline_data: Master timeline
+            platforms: Target platforms
+            output_dir: Where to save exports
+            format: Export format (json, edl)
+            create_master: Also export master version
+            
+        Returns:
+            Export results with file paths
+        """
+        return await batch_export_all_platforms(
+            timeline_data=timeline_data,
+            platforms=platforms,
+            output_dir=output_dir,
+            format=format,
+            create_master=create_master
+        )
+    
+    @server.tool()
+    async def get_platform_specs() -> Dict[str, Any]:
+        """Get specifications for all supported platforms.
+        
+        Returns details on:
+        - Aspect ratios and resolutions
+        - Duration limits
+        - Special features
+        - File size limits
+        
+        Returns:
+            Platform specifications and categories
+        """
+        return get_available_platforms()

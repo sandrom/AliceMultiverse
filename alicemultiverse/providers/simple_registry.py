@@ -67,6 +67,10 @@ class ProviderRegistry:
         from .leonardo_provider import LeonardoProvider
         from .elevenlabs_provider import ElevenLabsProvider
         from .midjourney_provider import MidjourneyProvider
+        from .runway_provider import RunwayProvider
+        from .pika_provider import PikaProvider
+        from .luma_provider import LumaProvider
+        from .minimax_provider import MiniMaxProvider
         
         self.register_provider("fal", FalProvider)
         self.register_provider("fal.ai", FalProvider)  # Alias
@@ -101,6 +105,18 @@ class ProviderRegistry:
         self.register_provider("11labs", ElevenLabsProvider)  # Alias
         self.register_provider("midjourney", MidjourneyProvider)
         self.register_provider("mj", MidjourneyProvider)  # Alias
+        self.register_provider("runway", RunwayProvider)
+        self.register_provider("runway-gen3", RunwayProvider)  # Alias
+        self.register_provider("gen3-alpha", RunwayProvider)  # Alias
+        self.register_provider("pika", PikaProvider)
+        self.register_provider("pika-labs", PikaProvider)  # Alias
+        self.register_provider("pika-2.1", PikaProvider)  # Alias
+        self.register_provider("luma", LumaProvider)
+        self.register_provider("luma-ai", LumaProvider)  # Alias
+        self.register_provider("dream-machine", LumaProvider)  # Alias
+        self.register_provider("minimax", MiniMaxProvider)
+        self.register_provider("hailuo", MiniMaxProvider)  # Alias
+        self.register_provider("minimax-hailuo", MiniMaxProvider)  # Alias
     
     def register_provider(self, name: str, provider_class: Type[Provider]):
         """Register a provider class.
@@ -182,6 +198,18 @@ class ProviderRegistry:
                 "11labs": "ELEVENLABS_API_KEY",
                 "midjourney": "USEAPI_API_KEY",  # Default to UseAPI
                 "mj": "USEAPI_API_KEY",
+                "runway": "RUNWAY_API_KEY",
+                "runway-gen3": "RUNWAY_API_KEY",
+                "gen3-alpha": "RUNWAY_API_KEY",
+                "pika": "PIKA_API_KEY",
+                "pika-labs": "PIKA_API_KEY",
+                "pika-2.1": "PIKA_API_KEY",
+                "luma": "LUMA_API_KEY",
+                "luma-ai": "LUMA_API_KEY",
+                "dream-machine": "LUMA_API_KEY",
+                "minimax": "MINIMAX_API_KEY",
+                "hailuo": "MINIMAX_API_KEY",
+                "minimax-hailuo": "MINIMAX_API_KEY",
             }
             if name_lower in env_vars:
                 api_key = os.getenv(env_vars[name_lower])

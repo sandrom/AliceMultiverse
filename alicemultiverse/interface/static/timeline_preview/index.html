@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alice Timeline Preview</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <header>
+            <h1>Timeline Preview</h1>
+            <div class="controls">
+                <button id="play-btn" class="control-btn" title="Play/Pause">▶️</button>
+                <button id="stop-btn" class="control-btn" title="Stop">⏹️</button>
+                <span id="time-display">00:00 / 00:00</span>
+                <button id="undo-btn" class="control-btn" title="Undo">↩️</button>
+                <button id="redo-btn" class="control-btn" title="Redo">↪️</button>
+                <button id="export-btn" class="control-btn primary" title="Export">Export</button>
+            </div>
+        </header>
+
+        <main>
+            <!-- Video Preview -->
+            <div class="preview-container">
+                <video id="preview-video" width="640" height="360" controls>
+                    Your browser does not support video playback.
+                </video>
+                <canvas id="preview-canvas" width="640" height="360" style="display: none;"></canvas>
+                <div id="preview-placeholder" class="placeholder">
+                    <p>Loading preview...</p>
+                </div>
+            </div>
+
+            <!-- Timeline -->
+            <div class="timeline-container">
+                <div class="timeline-ruler" id="timeline-ruler">
+                    <!-- Time markers will be added dynamically -->
+                </div>
+                <div class="timeline-playhead" id="playhead"></div>
+                <div class="timeline-track" id="timeline-track">
+                    <!-- Clips will be added dynamically -->
+                </div>
+                <div class="beat-markers" id="beat-markers">
+                    <!-- Beat markers will be added dynamically -->
+                </div>
+            </div>
+
+            <!-- Clip Inspector -->
+            <div class="inspector" id="clip-inspector" style="display: none;">
+                <h3>Clip Properties</h3>
+                <div class="inspector-content">
+                    <label>
+                        Duration:
+                        <input type="number" id="clip-duration" step="0.1" min="0.1">
+                    </label>
+                    <label>
+                        Transition:
+                        <select id="clip-transition">
+                            <option value="">None</option>
+                            <option value="fade">Fade</option>
+                            <option value="dissolve">Dissolve</option>
+                            <option value="wipe">Wipe</option>
+                            <option value="cut">Cut</option>
+                        </select>
+                    </label>
+                    <label>
+                        Transition Duration:
+                        <input type="number" id="transition-duration" step="0.1" min="0" max="2">
+                    </label>
+                    <button id="apply-changes">Apply</button>
+                </div>
+            </div>
+        </main>
+
+        <!-- Status Bar -->
+        <footer>
+            <div id="status">Ready</div>
+            <div id="connection-status" class="connected">Connected</div>
+        </footer>
+    </div>
+
+    <!-- Export Dialog -->
+    <div id="export-dialog" class="dialog" style="display: none;">
+        <div class="dialog-content">
+            <h2>Export Timeline</h2>
+            <label>
+                Format:
+                <select id="export-format">
+                    <option value="edl">EDL (DaVinci Resolve)</option>
+                    <option value="xml">XML (Premiere/FCP)</option>
+                    <option value="capcut">CapCut</option>
+                    <option value="json">JSON</option>
+                </select>
+            </label>
+            <div class="dialog-buttons">
+                <button id="export-confirm">Export</button>
+                <button id="export-cancel">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="timeline.js"></script>
+    <script src="video-player.js"></script>
+</body>
+</html>
