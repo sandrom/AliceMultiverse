@@ -56,6 +56,9 @@ from .interface.video_creation_mcp import register_video_creation_tools
 
 # Enhanced Video Generation imports
 from .interface.video_providers_mcp import register_video_providers_tools
+
+# B-roll suggestions imports
+from .interface.broll_suggestions_mcp import register_broll_tools
 from .memory.style_memory_mcp import analyze_style_patterns as memory_analyze_patterns
 from .memory.style_memory_mcp import end_style_workflow as memory_end_workflow
 from .memory.style_memory_mcp import export_style_profile as memory_export_profile
@@ -123,6 +126,7 @@ if MCP_AVAILABLE:
     register_video_creation_tools(server, search_db)
     register_video_providers_tools(server)
     register_deduplication_tools(server)
+    register_broll_tools(server)
 
 
 @server.tool()
