@@ -507,11 +507,12 @@ async def compare_video_providers(
                 output_path=str(output_dir / "minimax_hailuo.mp4")
             )
         elif provider_name == "veo3":
-            # Import Veo3 function
-            from .video_creation_mcp import generate_video_veo3
-            task = generate_video_veo3(
+            # Import Veo3 function from mcp_server
+            from ..mcp_server import generate_veo3_video
+            task = generate_veo3_video(
                 prompt=prompt,
-                output_path=str(output_dir / "google_veo3.mp4")
+                duration=5,
+                resolution="1080p"
             )
         elif provider_name == "kling":
             task = generate_video_kling(

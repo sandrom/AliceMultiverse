@@ -165,7 +165,7 @@ async def test_compare_video_providers():
         mock_get.side_effect = get_provider_mock
         
         # Also need to mock the Veo3 import
-        with patch("alicemultiverse.interface.video_creation_mcp.generate_video_veo3", 
+        with patch("alicemultiverse.mcp_server.generate_veo3_video", 
                    new=AsyncMock(return_value={"success": True, "cost": 0.04})):
             
             result = await compare_video_providers(

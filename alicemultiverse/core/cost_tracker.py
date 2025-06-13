@@ -118,14 +118,14 @@ class CostTracker:
             category=CostCategory.UNDERSTANDING,
             per_token_input=0.003 / 1000,    # $3 per million tokens
             per_token_output=0.015 / 1000,   # $15 per million tokens
-            notes="Claude 3.5 Sonnet pricing"
+            notes="Claude 3.5 Sonnet pricing (Jan 2025)"
         ),
         "openai": ProviderPricing(
             provider_name="openai",
             category=CostCategory.UNDERSTANDING,
-            per_token_input=0.01 / 1000,     # $10 per million tokens
-            per_token_output=0.03 / 1000,    # $30 per million tokens
-            notes="GPT-4 Vision pricing"
+            per_token_input=0.00015 / 1000,  # $0.15 per million tokens (GPT-4o mini)
+            per_token_output=0.0006 / 1000,  # $0.60 per million tokens (GPT-4o mini)
+            notes="GPT-4o mini vision pricing (Jan 2025) - much cheaper than GPT-4"
         ),
         "google": ProviderPricing(
             provider_name="google",
@@ -175,17 +175,47 @@ class CostTracker:
         ),
         
         # Video generation
-        "kling": ProviderPricing(
-            provider_name="kling",
-            category=CostCategory.GENERATION,
-            per_second=0.30,                 # $0.30 per second
-            notes="Kling AI video generation"
-        ),
         "runway": ProviderPricing(
             provider_name="runway",
             category=CostCategory.GENERATION,
-            per_second=0.05,                 # $0.05 per second
-            notes="Runway Gen-2 pricing"
+            per_second=0.10,                 # $0.10 per second (~$0.50 for 5s)
+            notes="Runway Gen-3 Alpha pricing (updated Jan 2025)"
+        ),
+        "pika": ProviderPricing(
+            provider_name="pika",
+            category=CostCategory.GENERATION,
+            per_request=0.30,                # $0.30 per 3s video
+            notes="Pika 2.1 HD video generation"
+        ),
+        "luma": ProviderPricing(
+            provider_name="luma",
+            category=CostCategory.GENERATION,
+            per_request=0.40,                # $0.40 per generation
+            notes="Luma Dream Machine pricing"
+        ),
+        "minimax": ProviderPricing(
+            provider_name="minimax",
+            category=CostCategory.GENERATION,
+            per_second=0.06,                 # $0.06 per second (~$0.36 for 6s)
+            notes="MiniMax Hailuo video generation"
+        ),
+        "kling": ProviderPricing(
+            provider_name="kling",
+            category=CostCategory.GENERATION,
+            per_second=0.08,                 # $0.08 per second (~$0.40 for 5s)
+            notes="Kling AI professional video generation (updated Jan 2025)"
+        ),
+        "hedra": ProviderPricing(
+            provider_name="hedra",
+            category=CostCategory.GENERATION,
+            per_request=0.50,                # $0.50 per avatar video
+            notes="Hedra Character API pricing"
+        ),
+        "veo3": ProviderPricing(
+            provider_name="veo3",
+            category=CostCategory.GENERATION,
+            per_second=0.04,                 # $0.04 per second (~$0.20 for 5s)
+            notes="Google Veo 3 video generation (competitive pricing)"
         ),
         
         # Enhancement
@@ -1009,6 +1039,104 @@ class CostTracker:
             lines.append(f"  • Use free tiers: {', '.join(free_tier_providers[:3])}")
         
         return '\n'.join(lines)
+    
+    def get_total_cost(self, start_date: datetime, end_date: datetime) -> float:
+        """Get total cost for a date range.
+        
+        Args:
+            start_date: Start of period
+            end_date: End of period
+            
+        Returns:
+            Total cost in USD
+        """
+        total = 0.0
+        for day_records in self.spending_history.values():
+            for record in day_records:
+                if start_date <= record.timestamp <= end_date:
+                    total += record.cost
+        return total
+    
+    def get_cost_breakdown(
+        self,
+        start_date: datetime,
+        end_date: datetime,
+        group_by: str = "provider"
+    ) -> Dict[str, float]:
+        """Get cost breakdown for a date range.
+        
+        Args:
+            start_date: Start of period
+            end_date: End of period
+            group_by: How to group costs (provider, operation, model)
+            
+        Returns:
+            Dictionary of costs by group
+        """
+        breakdown = defaultdict(float)
+        
+        for day_records in self.spending_history.values():
+            for record in day_records:
+                if start_date <= record.timestamp <= end_date:
+                    if group_by == "provider":
+                        key = record.provider
+                    elif group_by == "operation":
+                        key = record.operation
+                    elif group_by == "model":
+                        key = record.model or "unknown"
+                    elif group_by == "date":
+                        key = record.timestamp.strftime("%Y-%m-%d")
+                    else:
+                        key = "other"
+                    
+                    breakdown[key] += record.cost
+        
+        return dict(breakdown)
+    
+    def get_budget_status(self) -> Dict[str, Any]:
+        """Get current budget status.
+        
+        Returns:
+            Dictionary with budget limits and current usage
+        """
+        now = datetime.now()
+        today = now.strftime("%Y-%m-%d")
+        month = now.strftime("%Y-%m")
+        
+        # Calculate daily usage
+        daily_used = sum(r.cost for r in self.spending_history.get(today, []))
+        
+        # Calculate monthly usage
+        monthly_used = 0.0
+        for day_str, records in self.spending_history.items():
+            if day_str.startswith(month):
+                monthly_used += sum(r.cost for r in records)
+        
+        return {
+            "daily_limit": self.budgets.get("daily"),
+            "weekly_limit": self.budgets.get("weekly"),
+            "monthly_limit": self.budgets.get("monthly"),
+            "daily_used": daily_used,
+            "monthly_used": monthly_used,
+            "date": today,
+            "month": month
+        }
+    
+    def set_daily_limit(self, limit: float):
+        """Set daily spending limit.
+        
+        Args:
+            limit: Daily limit in USD
+        """
+        self.set_budget("daily", limit)
+    
+    def set_monthly_limit(self, limit: float):
+        """Set monthly spending limit.
+        
+        Args:
+            limit: Monthly limit in USD
+        """
+        self.set_budget("monthly", limit)
 
 
 # Global cost tracker instance
