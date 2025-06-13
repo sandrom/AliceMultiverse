@@ -7,13 +7,14 @@
 **New Features:**
 - **Enhanced Video Generation**: 7 providers integrated (Runway, Pika, Luma, MiniMax, Veo3, Kling, Hedra)
 - **Advanced Deduplication System**: Perceptual hashing, similarity detection, smart removal strategies
+- **Automatic B-Roll Suggestions**: Intelligent b-roll recommendations based on context, mood, and visual similarity
 - **Prompt Management System**: YAML-based tracking with DuckDB search, effectiveness metrics
 - **Advanced Transitions Suite**: 5 transition effects (morphing, color flow, match cuts, portals, rhythm)
 - **Visual Analysis Tools**: Complexity scoring, energy profiling, pacing suggestions
 - **Smart Content Variations**: Performance tracking, recommendations, analytics export
 - **Visual Composition Feedback**: Timeline flow analysis, optimization, pattern detection
 - **Export Enhancements**: Support for After Effects, Fusion, EDL annotations
-- **101 MCP Tools**: Complete creative control through AI assistant (up from 77, includes new deduplication tools)
+- **106 MCP Tools**: Complete creative control through AI assistant (up from 77, includes deduplication and b-roll tools)
 
 **Documentation:**
 - 10+ comprehensive user guides covering all new features
@@ -262,7 +263,7 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
    - Transition analysis ✅
    - Export to EDL/XML/CapCut ✅
 
-## Complete MCP Tools Summary (101 Tools) ✅
+## Complete MCP Tools Summary (106 Tools) ✅
 
 ### Core Operations
 - `search_assets` - Natural language search with tags
@@ -386,6 +387,13 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 - `build_similarity_index` - Build fast similarity search index
 - `find_similar_images` - Find perceptually similar images
 - `get_deduplication_report` - Generate comprehensive deduplication analysis
+
+### B-Roll Suggestions ✅
+- `suggest_broll_for_timeline` - Analyze timeline and suggest relevant b-roll
+- `auto_insert_broll` - Automatically insert b-roll into timeline
+- `analyze_scene_for_broll` - Analyze single scene for b-roll needs
+- `find_broll_by_criteria` - Search b-roll by subject/mood/energy
+- `generate_broll_shot_list` - Create professional b-roll shot lists
 
 ## Next Focus Areas
 
@@ -699,11 +707,11 @@ platforms:
   - Cost/quality optimization ✅
   - Batch video generation ✅
   
-- [ ] **Advanced Video Workflows** (Future)
-  - Storyboard to multi-clip generation
-  - Automatic b-roll suggestions
-  - Scene consistency tracking
-  - Character persistence across shots
+- [ ] **Advanced Video Workflows** (Partially Completed)
+  - [ ] Storyboard to multi-clip generation
+  - [x] Automatic b-roll suggestions ✅
+  - [ ] Scene consistency tracking
+  - [ ] Character persistence across shots
 
 ### Smart Content Variations 🎨 ✅ (Completed)
 **Why**: Reuse successful content with intelligent modifications

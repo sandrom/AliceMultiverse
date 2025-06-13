@@ -30,9 +30,10 @@ You're welcome to fork and adapt it for your needs, but be aware that I make cha
 > - Google Veo 3 video generation with native audio
 > - Enhanced video generation with 7 providers (Runway, Pika, Luma, MiniMax, Kling, Hedra)
 > - Advanced deduplication with perceptual hashing
+> - Automatic b-roll suggestions with intelligent placement
 > - Advanced transition effects (morphing, portals, match cuts)
 > - Prompt management system with effectiveness tracking
-> - 101 MCP tools for complete creative control
+> - 106 MCP tools for complete creative control
 
 ## 🤖 AI-First Usage (Recommended)
 
