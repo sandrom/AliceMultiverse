@@ -20,65 +20,64 @@ except ImportError:
     logger = logging.getLogger(__name__)
     logger.warning("MCP package not installed. Install with: pip install mcp")
 
-from .interface import AliceInterface
-from .interface.models import OrganizeRequest, SearchRequest, TagRequest
-from .interface.image_presentation import ImagePresentationAPI
-from .interface.image_presentation_mcp import register_image_presentation_tools
-from .interface.video_creation_mcp import register_video_creation_tools
-from .interface.analytics_mcp import (
-    start_analytics_session as analytics_start_session,
-    end_analytics_session as analytics_end_session,
-    track_workflow_event as analytics_track_workflow,
-    track_export_event as analytics_track_export,
-    get_performance_insights as analytics_get_insights,
-    get_export_analytics as analytics_get_export_stats,
-    get_improvement_suggestions as analytics_get_improvements,
-    track_user_action as analytics_track_action
-)
-from .storage.duckdb_cache import DuckDBSearchCache
-from .storage.duckdb_search import DuckDBSearch
 from .core.cost_tracker import get_cost_tracker
-from .projects.service import ProjectService
-from .selections.service import SelectionService
-from .selections.models import SelectionPurpose
-from .prompts.mcp_tools import PromptMCPTools
-from .memory.style_memory_mcp import (
-    track_style_preference as memory_track_preference,
-    get_style_recommendations as memory_get_recommendations,
-    analyze_style_patterns as memory_analyze_patterns,
-    start_style_workflow as memory_start_workflow,
-    end_style_workflow as memory_end_workflow,
-    get_style_evolution as memory_get_evolution,
-    suggest_next_action as memory_suggest_action,
-    export_style_profile as memory_export_profile,
-    import_style_profile as memory_import_profile
-)
-from .workflows.templates.template_mcp import (
-    create_story_arc_video,
-    create_documentary_video,
-    create_social_media_video,
-    create_instagram_reel,
-    create_tiktok_video,
-    get_platform_specifications,
-    suggest_story_structure
-)
-from .interface.variation_mcp import (
-    generate_content_variations,
-    track_variation_performance,
-    create_variation_group,
-    get_variation_insights,
-    find_top_variations,
-    get_variation_recommendations,
-    analyze_variation_success,
-    export_variation_analytics
-)
+from .interface import AliceInterface
+from .interface.analytics_mcp import end_analytics_session as analytics_end_session
+from .interface.analytics_mcp import get_export_analytics as analytics_get_export_stats
+from .interface.analytics_mcp import get_improvement_suggestions as analytics_get_improvements
+from .interface.analytics_mcp import get_performance_insights as analytics_get_insights
+from .interface.analytics_mcp import start_analytics_session as analytics_start_session
+from .interface.analytics_mcp import track_export_event as analytics_track_export
+from .interface.analytics_mcp import track_user_action as analytics_track_action
+from .interface.analytics_mcp import track_workflow_event as analytics_track_workflow
 from .interface.composition_mcp import (
-    analyze_timeline_flow,
     analyze_image_composition,
     analyze_timeline_compositions,
+    analyze_timeline_flow,
+    detect_composition_patterns,
     optimize_timeline,
     suggest_clip_order,
-    detect_composition_patterns
+)
+from .interface.image_presentation import ImagePresentationAPI
+from .interface.image_presentation_mcp import register_image_presentation_tools
+from .interface.models import OrganizeRequest, SearchRequest, TagRequest
+from .interface.variation_mcp import (
+    analyze_variation_success,
+    create_variation_group,
+    export_variation_analytics,
+    find_top_variations,
+    generate_content_variations,
+    get_variation_insights,
+    get_variation_recommendations,
+    track_variation_performance,
+)
+from .interface.video_creation_mcp import register_video_creation_tools
+
+# Enhanced Video Generation imports
+from .interface.video_providers_mcp import register_video_providers_tools
+from .memory.style_memory_mcp import analyze_style_patterns as memory_analyze_patterns
+from .memory.style_memory_mcp import end_style_workflow as memory_end_workflow
+from .memory.style_memory_mcp import export_style_profile as memory_export_profile
+from .memory.style_memory_mcp import get_style_evolution as memory_get_evolution
+from .memory.style_memory_mcp import get_style_recommendations as memory_get_recommendations
+from .memory.style_memory_mcp import import_style_profile as memory_import_profile
+from .memory.style_memory_mcp import start_style_workflow as memory_start_workflow
+from .memory.style_memory_mcp import suggest_next_action as memory_suggest_action
+from .memory.style_memory_mcp import track_style_preference as memory_track_preference
+from .projects.service import ProjectService
+from .prompts.mcp_tools import PromptMCPTools
+from .selections.models import SelectionPurpose
+from .selections.service import SelectionService
+from .storage.duckdb_cache import DuckDBSearchCache
+from .storage.duckdb_search import DuckDBSearch
+from .workflows.templates.template_mcp import (
+    create_documentary_video,
+    create_instagram_reel,
+    create_social_media_video,
+    create_story_arc_video,
+    create_tiktok_video,
+    get_platform_specifications,
+    suggest_story_structure,
 )
 
 # Configure logging
@@ -121,6 +120,7 @@ else:
 if MCP_AVAILABLE:
     register_image_presentation_tools(server, image_api)
     register_video_creation_tools(server, search_db)
+    register_video_providers_tools(server)
 
 
 @server.tool()
@@ -340,7 +340,7 @@ async def estimate_cost(
     """
     try:
         cost_tracker = get_cost_tracker()
-        
+
         # Map operation to providers if not specified
         if not providers:
             if operation in ["organize", "understand", "analyze"]:
@@ -353,7 +353,7 @@ async def estimate_cost(
                     providers = ["anthropic"]  # Default
             else:
                 providers = []
-        
+
         # Get batch estimate
         estimate = cost_tracker.estimate_batch_cost(
             file_count=file_count,
@@ -361,7 +361,7 @@ async def estimate_cost(
             operation=operation,
             detailed=detailed
         )
-        
+
         return {
             "success": True,
             "message": f"Cost estimate for {operation}",
@@ -381,16 +381,16 @@ async def get_spending_report() -> dict[str, Any]:
     """
     try:
         cost_tracker = get_cost_tracker()
-        
+
         # Get spending summary
         summary = cost_tracker.get_spending_summary()
-        
+
         # Get provider comparison
         comparison = cost_tracker.get_provider_comparison()
-        
+
         # Format report
         report = cost_tracker.format_cost_report()
-        
+
         return {
             "success": True,
             "message": "Spending report generated",
@@ -424,7 +424,7 @@ async def set_budget(
     try:
         cost_tracker = get_cost_tracker()
         cost_tracker.set_budget(period, limit, alert_threshold)
-        
+
         return {
             "success": True,
             "message": f"Set {period} budget to ${limit:.2f}",
@@ -470,14 +470,14 @@ async def create_project(
             creative_context["mood"] = mood
         if theme:
             creative_context["theme"] = theme
-            
+
         project = project_service.create_project(
             name=name,
             description=description,
             budget_total=budget,
             creative_context=creative_context
         )
-        
+
         return {
             "success": True,
             "message": f"Project '{name}' created successfully",
@@ -503,7 +503,7 @@ async def list_projects() -> dict[str, Any]:
     """
     try:
         projects = project_service.list_projects()
-        
+
         project_list = []
         for project in projects:
             project_info = {
@@ -513,7 +513,7 @@ async def list_projects() -> dict[str, Any]:
                 "updated_at": project.updated_at.isoformat() if project.updated_at else None,
                 "creative_context": project.creative_context
             }
-            
+
             # Add budget info if available
             if project.budget:
                 project_info["budget"] = {
@@ -522,9 +522,9 @@ async def list_projects() -> dict[str, Any]:
                     "remaining": project.budget.total - project.budget.spent,
                     "alerts_enabled": project.budget.alerts_enabled
                 }
-            
+
             project_list.append(project_info)
-        
+
         return {
             "success": True,
             "message": f"Found {len(project_list)} projects",
@@ -552,7 +552,7 @@ async def get_project_context(name: str) -> dict[str, Any]:
                 "success": False,
                 "message": f"Project '{name}' not found"
             }
-        
+
         # Get file statistics if possible
         stats = {}
         if project.path and project.path.exists():
@@ -560,7 +560,7 @@ async def get_project_context(name: str) -> dict[str, Any]:
                 folder_path = project.path / folder
                 if folder_path.exists():
                     stats[folder] = len(list(folder_path.glob("*")))
-        
+
         response_data = {
             "name": project.name,
             "description": project.description,
@@ -568,7 +568,7 @@ async def get_project_context(name: str) -> dict[str, Any]:
             "settings": project.settings,
             "statistics": stats
         }
-        
+
         # Add budget info if available
         if project.budget:
             response_data["budget"] = {
@@ -577,7 +577,7 @@ async def get_project_context(name: str) -> dict[str, Any]:
                 "remaining": project.budget.total - project.budget.spent,
                 "percentage_used": (project.budget.spent / project.budget.total * 100) if project.budget.total > 0 else 0
             }
-        
+
         return {
             "success": True,
             "message": f"Project context for '{name}'",
@@ -607,11 +607,11 @@ async def find_duplicates(
     try:
         # Get all assets from the search cache
         pass
-        
+
         # Query the DuckDB cache for all assets with hashes
         conn = storage.get_connection()
         cursor = conn.cursor()
-        
+
         if check_similar:
             # Get assets with perceptual hashes
             cursor.execute("""
@@ -628,9 +628,9 @@ async def find_duplicates(
                 FROM assets
                 ORDER BY file_path
             """)
-        
+
         rows = cursor.fetchall()
-        
+
         # Group by hash
         if check_similar:
             # TODO: Implement perceptual hash similarity comparison
@@ -653,30 +653,30 @@ async def find_duplicates(
                     "path": file_path,
                     "size": file_size
                 })
-            
+
             # Filter to only groups with duplicates
             duplicate_groups = []
             total_wasted_space = 0
-            
+
             for content_hash, files in hash_groups.items():
                 if len(files) > 1:
                     # Calculate wasted space (all but one copy)
                     wasted = sum(f["size"] for f in files[1:])
                     total_wasted_space += wasted
-                    
+
                     duplicate_groups.append({
                         "hash": content_hash,
                         "count": len(files),
                         "files": files,
                         "wasted_space": wasted
                     })
-            
+
             # Sort by wasted space descending
             duplicate_groups.sort(key=lambda x: x["wasted_space"], reverse=True)
-            
+
             # Limit results
             duplicate_groups = duplicate_groups[:limit]
-            
+
             return {
                 "success": True,
                 "message": f"Found {len(duplicate_groups)} sets of duplicates",
@@ -687,7 +687,7 @@ async def find_duplicates(
                     "total_wasted_space_mb": round(total_wasted_space / 1024 / 1024, 2)
                 }
             }
-            
+
     except Exception as e:
         logger.error(f"Find duplicates failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to find duplicates"}
@@ -718,12 +718,12 @@ async def quick_mark(
             "review": SelectionPurpose.REVIEW
         }
         purpose = purpose_map.get(mark_type, SelectionPurpose.CURATION)
-        
+
         # Create or get quick selection for today
         from datetime import datetime
         today = datetime.now().strftime("%Y-%m-%d")
         selection_name = f"quick-{mark_type}-{today}"
-        
+
         # Check if selection exists
         existing = None
         selections = selection_service.list_selections(project_name=project_name)
@@ -731,7 +731,7 @@ async def quick_mark(
             if sel.name == selection_name:
                 existing = sel
                 break
-        
+
         # Create selection if it doesn't exist
         if not existing:
             selection = selection_service.create_selection(
@@ -742,11 +742,11 @@ async def quick_mark(
             )
         else:
             selection = existing
-        
+
         # Add assets to selection
         added_count = 0
         already_added = []
-        
+
         for asset_id in asset_ids:
             try:
                 selection_service.add_asset(
@@ -761,7 +761,7 @@ async def quick_mark(
                     already_added.append(asset_id)
                 else:
                     logger.debug(f"Failed to add asset {asset_id}: {e}")
-        
+
         return {
             "success": True,
             "message": f"Marked {added_count} assets as {mark_type}",
@@ -773,7 +773,7 @@ async def quick_mark(
                 "total_in_selection": len(selection.assets)
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Quick mark failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to mark assets"}
@@ -797,34 +797,34 @@ async def list_quick_marks(
     """
     try:
         from datetime import datetime, timedelta
-        
+
         # Get all selections
         selections = selection_service.list_selections(project_name=project_name)
-        
+
         # Filter to quick marks
         quick_selections = []
         cutoff_date = datetime.now() - timedelta(days=days_back)
-        
+
         for sel in selections:
             # Check if it's a quick selection
             if not sel.name.startswith("quick-"):
                 continue
-                
+
             # Check mark type filter
             if mark_type and f"quick-{mark_type}" not in sel.name:
                 continue
-                
+
             # Check date
             if sel.created_at < cutoff_date:
                 continue
-                
+
             # Extract mark type from name
             parts = sel.name.split("-")
             if len(parts) >= 2:
                 sel_mark_type = parts[1]
             else:
                 sel_mark_type = "unknown"
-            
+
             quick_selections.append({
                 "id": sel.id,
                 "name": sel.name,
@@ -834,10 +834,10 @@ async def list_quick_marks(
                 "asset_count": len(sel.assets),
                 "description": sel.description
             })
-        
+
         # Sort by creation date descending
         quick_selections.sort(key=lambda x: x["created_at"], reverse=True)
-        
+
         return {
             "success": True,
             "message": f"Found {len(quick_selections)} quick mark collections",
@@ -847,7 +847,7 @@ async def list_quick_marks(
                 "mark_type_filter": mark_type
             }
         }
-        
+
     except Exception as e:
         logger.error(f"List quick marks failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to list quick marks"}
@@ -871,7 +871,7 @@ async def export_quick_marks(
     """
     try:
         from pathlib import Path
-        
+
         # Get the selection
         selection = selection_service.get_selection(selection_id)
         if not selection:
@@ -879,20 +879,20 @@ async def export_quick_marks(
                 "success": False,
                 "message": f"Selection {selection_id} not found"
             }
-        
+
         # Determine export path
         if not export_path:
             export_path = f"exports/{selection.name}"
-        
+
         export_dir = Path(export_path)
-        
+
         # Export the selection
         manifest_path = selection_service.export_selection(
             selection_id=selection_id,
             export_dir=export_dir,
             copy_files=copy_files
         )
-        
+
         return {
             "success": True,
             "message": f"Exported {len(selection.assets)} assets",
@@ -903,7 +903,7 @@ async def export_quick_marks(
                 "copy_files": copy_files
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Export quick marks failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to export marks"}
@@ -935,16 +935,17 @@ async def analyze_images_optimized(
     """
     try:
         from pathlib import Path
+
         from .understanding.analyzer import ImageAnalyzer
-        from .understanding.optimized_batch_analyzer import OptimizedBatchAnalyzer
         from .understanding.batch_analyzer import BatchAnalysisRequest
-        
+        from .understanding.optimized_batch_analyzer import OptimizedBatchAnalyzer
+
         # Convert string paths to Path objects
         if image_paths:
             paths = [Path(p) for p in image_paths]
         else:
             paths = None
-        
+
         # Create analyzer and batch request
         analyzer = ImageAnalyzer()
         optimizer = OptimizedBatchAnalyzer(
@@ -952,7 +953,7 @@ async def analyze_images_optimized(
             similarity_threshold=similarity_threshold,
             use_progressive_providers=use_progressive
         )
-        
+
         # Build batch request
         request = BatchAnalysisRequest(
             image_paths=paths,
@@ -963,10 +964,10 @@ async def analyze_images_optimized(
             extract_tags=True,
             show_progress=False  # No progress in MCP
         )
-        
+
         # Run optimized analysis
         results, stats = await optimizer.analyze_batch_optimized(request)
-        
+
         # Format results
         analyzed_images = []
         for img_path, result in results:
@@ -979,7 +980,7 @@ async def analyze_images_optimized(
                     "cost": result.cost,
                     "confidence": getattr(result, 'confidence_score', 1.0)
                 })
-        
+
         return {
             "success": True,
             "message": f"Analyzed {stats.images_analyzed} unique images, applied to {stats.total_images} total",
@@ -997,7 +998,7 @@ async def analyze_images_optimized(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Optimized analysis failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to analyze images"}
@@ -1025,21 +1026,21 @@ async def estimate_analysis_cost(
     """
     try:
         from .understanding.analyzer import ImageAnalyzer
-        
+
         analyzer = ImageAnalyzer()
         available_providers = analyzer.get_available_providers()
-        
+
         estimates = {}
-        
+
         # Get base costs per provider
         for prov in available_providers:
             if provider and prov != provider:
                 continue
-                
+
             if prov in analyzer.analyzers:
                 cost_per_image = analyzer.analyzers[prov].estimate_cost(detailed)
                 base_cost = cost_per_image * image_count
-                
+
                 # Calculate optimized cost
                 if with_optimization:
                     # Estimate unique images after similarity grouping
@@ -1049,7 +1050,7 @@ async def estimate_analysis_cost(
                 else:
                     optimized_cost = base_cost
                     savings = 0
-                
+
                 estimates[prov] = {
                     "cost_per_image": cost_per_image,
                     "base_cost": round(base_cost, 4),
@@ -1057,14 +1058,14 @@ async def estimate_analysis_cost(
                     "savings": round(savings, 4),
                     "savings_percentage": round((savings / base_cost * 100) if base_cost > 0 else 0, 1)
                 }
-        
+
         # Find cheapest option
         if estimates:
             cheapest = min(estimates.items(), key=lambda x: x[1]["optimized_cost"])
             cheapest_provider = cheapest[0]
         else:
             cheapest_provider = None
-        
+
         return {
             "success": True,
             "message": f"Cost estimate for {image_count} images",
@@ -1076,7 +1077,7 @@ async def estimate_analysis_cost(
                 "with_optimization": with_optimization
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Cost estimation failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to estimate costs"}
@@ -1109,7 +1110,7 @@ async def update_project_context(
                 "success": False,
                 "message": f"Project '{name}' not found"
             }
-        
+
         # Build context updates
         context_updates = {}
         if style is not None:
@@ -1120,10 +1121,10 @@ async def update_project_context(
             context_updates["theme"] = theme
         if notes is not None:
             context_updates["notes"] = notes
-        
+
         # Update project context
         updated_project = project_service.update_project_context(name, context_updates)
-        
+
         return {
             "success": True,
             "message": f"Updated context for project '{name}'",
@@ -1146,10 +1147,10 @@ async def check_ollama_status() -> dict[str, Any]:
     """
     try:
         from .understanding.ollama_provider import OllamaImageAnalyzer
-        
+
         analyzer = OllamaImageAnalyzer()
         is_available = await analyzer.check_availability()
-        
+
         if is_available:
             # Get available models
             import aiohttp
@@ -1159,10 +1160,10 @@ async def check_ollama_status() -> dict[str, Any]:
                         data = await response.json()
                         models = data.get("models", [])
                         vision_models = [m["name"] for m in models if any(
-                            keyword in m["name"].lower() 
+                            keyword in m["name"].lower()
                             for keyword in ["llava", "bakllava", "phi3"]
                         )]
-                        
+
                         return {
                             "success": True,
                             "message": "Ollama is running with vision models available",
@@ -1178,7 +1179,7 @@ async def check_ollama_status() -> dict[str, Any]:
                                 }
                             }
                         }
-        
+
         return {
             "success": True,
             "message": "Ollama is not available",
@@ -1187,7 +1188,7 @@ async def check_ollama_status() -> dict[str, Any]:
                 "install_instructions": "Install Ollama from https://ollama.ai, then run: ollama pull llava"
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to check Ollama status: {e}")
         return {"success": False, "error": str(e), "message": "Failed to check Ollama status"}
@@ -1213,14 +1214,15 @@ async def analyze_with_local(
     """
     try:
         from pathlib import Path
+
         from .understanding.analyzer import ImageAnalyzer
-        
+
         results = []
         failed_local = []
-        
+
         # Try local analysis first
         analyzer = ImageAnalyzer()
-        
+
         # Check if Ollama is available
         if "ollama" in analyzer.get_available_providers():
             for image_path in image_paths:
@@ -1231,7 +1233,7 @@ async def analyze_with_local(
                         extract_tags=True,
                         generate_prompt=True
                     )
-                    
+
                     results.append({
                         "path": image_path,
                         "success": True,
@@ -1242,14 +1244,14 @@ async def analyze_with_local(
                         "cost": 0.0,
                         "local": True
                     })
-                    
+
                 except Exception as e:
                     logger.warning(f"Local analysis failed for {image_path}: {e}")
                     failed_local.append(image_path)
         else:
             # Ollama not available, all images fail local
             failed_local = image_paths
-        
+
         # Fallback to cloud if needed
         if failed_local and fallback_to_cloud:
             for image_path in failed_local:
@@ -1260,7 +1262,7 @@ async def analyze_with_local(
                         extract_tags=True,
                         generate_prompt=True
                     )
-                    
+
                     results.append({
                         "path": image_path,
                         "success": True,
@@ -1271,7 +1273,7 @@ async def analyze_with_local(
                         "cost": result.cost,
                         "local": False
                     })
-                    
+
                 except Exception as e:
                     logger.error(f"Cloud analysis also failed for {image_path}: {e}")
                     results.append({
@@ -1280,13 +1282,13 @@ async def analyze_with_local(
                         "error": str(e),
                         "local": False
                     })
-        
+
         # Calculate stats
         local_count = sum(1 for r in results if r.get("local", False))
         cloud_count = sum(1 for r in results if r.get("success") and not r.get("local", False))
         failed_count = sum(1 for r in results if not r.get("success"))
         total_cost = sum(r.get("cost", 0) for r in results)
-        
+
         return {
             "success": True,
             "message": f"Analyzed {len(results)} images ({local_count} local, {cloud_count} cloud)",
@@ -1302,7 +1304,7 @@ async def analyze_with_local(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Hybrid analysis failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to analyze images"}
@@ -1322,9 +1324,9 @@ async def pull_ollama_model(
     """
     try:
         from .understanding.ollama_provider import OllamaImageAnalyzer
-        
+
         analyzer = OllamaImageAnalyzer(model=model)
-        
+
         # Check if already available
         if await analyzer.check_availability():
             return {
@@ -1332,11 +1334,11 @@ async def pull_ollama_model(
                 "message": f"Model {model} is already available",
                 "data": {"model": model, "status": "ready"}
             }
-        
+
         # Pull the model
         logger.info(f"Pulling Ollama model {model}...")
         success = await analyzer.pull_model(model)
-        
+
         if success:
             return {
                 "success": True,
@@ -1349,7 +1351,7 @@ async def pull_ollama_model(
                 "message": f"Failed to pull model {model}",
                 "data": {"model": model, "status": "failed"}
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to pull Ollama model: {e}")
         return {"success": False, "error": str(e), "message": "Failed to pull model"}
@@ -1375,11 +1377,12 @@ async def analyze_with_hierarchy(
     """
     try:
         from pathlib import Path
+
         from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
-        
+
         analyzer = EnhancedImageAnalyzer()
         results = []
-        
+
         for image_path in image_paths:
             try:
                 enhanced = await analyzer.analyze_with_hierarchy(
@@ -1388,7 +1391,7 @@ async def analyze_with_hierarchy(
                     expand_tags=expand_tags,
                     cluster_tags=auto_cluster
                 )
-                
+
                 results.append({
                     "path": image_path,
                     "success": True,
@@ -1399,7 +1402,7 @@ async def analyze_with_hierarchy(
                     "suggested_tags": enhanced.get("suggested_tags", []),
                     "coherence_score": enhanced.get("tag_statistics", {}).get("coherence_score", 0)
                 })
-                
+
             except Exception as e:
                 logger.error(f"Failed to analyze {image_path}: {e}")
                 results.append({
@@ -1407,11 +1410,11 @@ async def analyze_with_hierarchy(
                     "success": False,
                     "error": str(e)
                 })
-        
+
         # Get overall insights
         successful = [r for r in results if r.get("success")]
         insights = analyzer.get_tag_insights() if successful else {}
-        
+
         return {
             "success": True,
             "message": f"Analyzed {len(successful)} images with tag hierarchies",
@@ -1422,13 +1425,13 @@ async def analyze_with_hierarchy(
                     "total_images": len(image_paths),
                     "successful": len(successful),
                     "unique_tags": len(set(
-                        tag for r in successful 
+                        tag for r in successful
                         for tag in r.get("tags", [])
                     ))
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Hierarchical analysis failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to analyze with hierarchy"}
@@ -1456,12 +1459,12 @@ async def create_tag_mood_board(
     """
     try:
         from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
-        
+
         analyzer = EnhancedImageAnalyzer()
-        
+
         # Create mood board
         board = analyzer.taxonomy.create_mood_board(name, description)
-        
+
         # Add elements
         if tags or image_paths or colors:
             analyzer.taxonomy.add_to_mood_board(
@@ -1470,10 +1473,10 @@ async def create_tag_mood_board(
                 colors=colors,
                 reference_images=image_paths
             )
-        
+
         # Analyze mood board
         analysis = analyzer.taxonomy.analyze_mood_board(board.id)
-        
+
         return {
             "success": True,
             "message": f"Created mood board '{name}'",
@@ -1487,7 +1490,7 @@ async def create_tag_mood_board(
                 "analysis": analysis
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to create mood board: {e}")
         return {"success": False, "error": str(e), "message": "Failed to create mood board"}
@@ -1502,16 +1505,16 @@ async def get_tag_insights() -> dict[str, Any]:
     """
     try:
         from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
-        
+
         analyzer = EnhancedImageAnalyzer()
         insights = analyzer.get_tag_insights()
-        
+
         return {
             "success": True,
             "message": "Tag insights retrieved",
             "data": insights
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get tag insights: {e}")
         return {"success": False, "error": str(e), "message": "Failed to get insights"}
@@ -1537,8 +1540,9 @@ async def batch_cluster_images(
     """
     try:
         from pathlib import Path
+
         from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
-        
+
         # Get image paths
         if project_name and not image_paths:
             # TODO: Get images from project
@@ -1546,15 +1550,15 @@ async def batch_cluster_images(
                 "success": False,
                 "message": "Project-based clustering not yet implemented"
             }
-        
+
         if not image_paths:
             return {
                 "success": False,
                 "message": "No images provided"
             }
-        
+
         analyzer = EnhancedImageAnalyzer()
-        
+
         # Analyze and cluster
         batch_result = await analyzer.analyze_batch_with_clustering(
             [Path(p) for p in image_paths],
@@ -1562,7 +1566,7 @@ async def batch_cluster_images(
             auto_cluster=True,
             min_cluster_size=min_cluster_size
         )
-        
+
         return {
             "success": True,
             "message": f"Clustered {batch_result['images_analyzed']} images",
@@ -1578,7 +1582,7 @@ async def batch_cluster_images(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Batch clustering failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to cluster images"}
@@ -1600,23 +1604,23 @@ async def suggest_tags_for_project(
     """
     try:
         from .understanding.enhanced_analyzer import EnhancedImageAnalyzer
-        
+
         analyzer = EnhancedImageAnalyzer()
-        
+
         # Get existing tags if not provided
         if not existing_tags:
             existing_tags = list(analyzer.taxonomy.get_project_tags(project_id))
-        
+
         if not existing_tags:
             return {
                 "success": True,
                 "message": "No existing tags to base suggestions on",
                 "data": {"suggestions": []}
             }
-        
+
         # Get suggestions
         suggestions = analyzer.taxonomy.suggest_project_tags(project_id, existing_tags)
-        
+
         # Get related tags for each suggestion
         detailed_suggestions = []
         for tag in suggestions:
@@ -1627,7 +1631,7 @@ async def suggest_tags_for_project(
                            if tag in analyzer.taxonomy.hierarchy.nodes else None,
                 "related_tags": [t for t, score in related.items() if score > 0.5][:5]
             })
-        
+
         return {
             "success": True,
             "message": f"Generated {len(suggestions)} tag suggestions",
@@ -1641,7 +1645,7 @@ async def suggest_tags_for_project(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to suggest tags: {e}")
         return {"success": False, "error": str(e), "message": "Failed to suggest tags"}
@@ -1667,16 +1671,17 @@ async def analyze_style_similarity(
     """
     try:
         from pathlib import Path
+
         from .understanding.style_clustering import StyleClusteringSystem
-        
+
         system = StyleClusteringSystem()
         results = []
-        
+
         # Extract style fingerprints
         for image_path in image_paths:
             try:
                 fp = await system.analyze_image_style(Path(image_path))
-                
+
                 result = {
                     "path": image_path,
                     "success": True,
@@ -1708,7 +1713,7 @@ async def analyze_style_similarity(
                     }
                 }
                 results.append(result)
-                
+
             except Exception as e:
                 logger.error(f"Failed to analyze {image_path}: {e}")
                 results.append({
@@ -1716,7 +1721,7 @@ async def analyze_style_similarity(
                     "success": False,
                     "error": str(e)
                 })
-        
+
         # Find style clusters
         clusters = []
         if find_clusters and len([r for r in results if r["success"]]) >= min_cluster_size:
@@ -1724,7 +1729,7 @@ async def analyze_style_similarity(
                 [Path(p) for p in image_paths],
                 min_cluster_size=min_cluster_size
             )
-            
+
             for cluster in style_clusters:
                 clusters.append({
                     "id": cluster.id,
@@ -1735,7 +1740,7 @@ async def analyze_style_similarity(
                     "coherence": cluster.coherence_score,
                     "style_summary": cluster.style_summary
                 })
-        
+
         return {
             "success": True,
             "message": f"Analyzed {len(results)} images for style",
@@ -1749,7 +1754,7 @@ async def analyze_style_similarity(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Style analysis failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to analyze style"}
@@ -1775,13 +1780,14 @@ async def find_similar_style(
     """
     try:
         from pathlib import Path
+
         from .understanding.style_clustering import StyleClusteringSystem
-        
+
         system = StyleClusteringSystem()
-        
+
         # Analyze reference
         reference_fp = await system.analyze_image_style(Path(reference_image))
-        
+
         # If search_in provided, analyze those first
         if search_in:
             for image_path in search_in:
@@ -1789,14 +1795,14 @@ async def find_similar_style(
                     await system.analyze_image_style(Path(image_path))
                 except Exception as e:
                     logger.warning(f"Failed to analyze {image_path}: {e}")
-        
+
         # Find similar
         similar = await system.find_similar_styles(
             Path(reference_image),
             similarity_threshold=similarity_threshold,
             max_results=max_results
         )
-        
+
         # Format results
         results = []
         for image_path, score in similar:
@@ -1812,7 +1818,7 @@ async def find_similar_style(
                     },
                     "style_tags": fp.style_tags
                 })
-        
+
         return {
             "success": True,
             "message": f"Found {len(results)} similar images",
@@ -1825,7 +1831,7 @@ async def find_similar_style(
                 "similar_images": results
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Similar style search failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to find similar styles"}
@@ -1847,10 +1853,11 @@ async def extract_style_prompts(
     """
     try:
         from pathlib import Path
+
         from .understanding.style_clustering import StyleClusteringSystem
-        
+
         system = StyleClusteringSystem()
-        
+
         # Get or create cluster
         if cluster_id and cluster_id in system.clusters:
             cluster = system.clusters[cluster_id]
@@ -1866,16 +1873,16 @@ async def extract_style_prompts(
                 "success": False,
                 "message": "Provide either image_paths or cluster_id"
             }
-        
+
         if not cluster:
             return {
                 "success": False,
                 "message": "No style cluster found"
             }
-        
+
         # Extract hints
         hints = system.extract_style_transfer_hints(cluster)
-        
+
         # Format results
         formatted_hints = []
         for hint in hints:
@@ -1887,17 +1894,17 @@ async def extract_style_prompts(
                 "technical_params": hint.technical_params,
                 "confidence": hint.success_rate
             })
-        
+
         # Combine best fragments
         all_fragments = []
         for hint in hints:
             all_fragments.extend(hint.prompt_fragments)
-        
+
         # Count frequency
         from collections import Counter
         fragment_counts = Counter(all_fragments)
         top_fragments = [f for f, _ in fragment_counts.most_common(10)]
-        
+
         return {
             "success": True,
             "message": f"Extracted {len(hints)} style transfer hints",
@@ -1916,7 +1923,7 @@ async def extract_style_prompts(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Style prompt extraction failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to extract prompts"}
@@ -1938,12 +1945,12 @@ async def build_style_collections(
     """
     try:
         from .understanding.style_clustering import StyleClusteringSystem
-        
+
         system = StyleClusteringSystem()
-        
+
         # Build collections
         collections = system.build_auto_collections(min_collection_size)
-        
+
         # Format results
         formatted_collections = []
         for name, images in collections.items():
@@ -1955,7 +1962,7 @@ async def build_style_collections(
                 )
             else:
                 compatibility = 1.0
-            
+
             if compatibility >= coherence_threshold:
                 formatted_collections.append({
                     "name": name,
@@ -1964,10 +1971,10 @@ async def build_style_collections(
                     "compatibility_score": compatibility,
                     "sample_image": images[0] if images else None
                 })
-        
+
         # Sort by size
         formatted_collections.sort(key=lambda x: x["size"], reverse=True)
-        
+
         return {
             "success": True,
             "message": f"Created {len(formatted_collections)} style collections",
@@ -1980,7 +1987,7 @@ async def build_style_collections(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Collection building failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to build collections"}
@@ -2000,10 +2007,11 @@ async def check_style_compatibility(
     """
     try:
         from pathlib import Path
+
         from .understanding.style_clustering import StyleClusteringSystem
-        
+
         system = StyleClusteringSystem()
-        
+
         # Analyze all images
         paths = [Path(p) for p in image_paths]
         for path in paths:
@@ -2011,10 +2019,10 @@ async def check_style_compatibility(
                 await system.analyze_image_style(path)
             except Exception as e:
                 logger.warning(f"Failed to analyze {path}: {e}")
-        
+
         # Calculate overall compatibility
         overall_score = system.get_style_compatibility(paths)
-        
+
         # Find style outliers
         outliers = []
         if len(paths) > 2:
@@ -2022,13 +2030,13 @@ async def check_style_compatibility(
                 # Check compatibility without this image
                 other_paths = paths[:i] + paths[i+1:]
                 score_without = system.get_style_compatibility(other_paths)
-                
+
                 if score_without > overall_score * 1.2:  # 20% improvement
                     outliers.append({
                         "path": str(path),
                         "impact": score_without - overall_score
                     })
-        
+
         # Get pairwise compatibility for details
         pairwise = []
         for i in range(len(paths)):
@@ -2037,16 +2045,16 @@ async def check_style_compatibility(
                     fp1 = system.fingerprints[str(paths[i])]
                     fp2 = system.fingerprints[str(paths[j])]
                     score = fp1.similarity_score(fp2)
-                    
+
                     pairwise.append({
                         "image1": str(paths[i]),
                         "image2": str(paths[j]),
                         "compatibility": score
                     })
-        
+
         # Sort pairwise by compatibility
         pairwise.sort(key=lambda x: x["compatibility"], reverse=True)
-        
+
         return {
             "success": True,
             "message": f"Analyzed compatibility of {len(paths)} images",
@@ -2069,7 +2077,7 @@ async def check_style_compatibility(
                 )
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Compatibility check failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to check compatibility"}
@@ -2095,22 +2103,22 @@ async def analyze_music(
         # Import music analyzer directly to avoid workflow module issues
         import importlib.util
         spec = importlib.util.spec_from_file_location(
-            "music_analyzer", 
+            "music_analyzer",
             Path(__file__).parent / "workflows" / "music_analyzer.py"
         )
         music_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(music_module)
-        
+
         analyzer = music_module.MusicAnalyzer()
         audio_file = Path(audio_path)
-        
+
         if not audio_file.exists():
             return {
                 "success": False,
                 "error": "Audio file not found",
                 "message": f"File not found: {audio_path}"
             }
-        
+
         # Analyze the music
         analysis = await analyzer.analyze(
             audio_file,
@@ -2118,7 +2126,7 @@ async def analyze_music(
             analyze_sections=detect_sections,
             analyze_mood=extract_mood
         )
-        
+
         return {
             "success": True,
             "message": f"Analyzed music: {audio_file.name}",
@@ -2150,7 +2158,7 @@ async def analyze_music(
                 ] if detect_sections else []
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Music analysis failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to analyze music"}
@@ -2178,18 +2186,18 @@ async def sync_images_to_music(
         # Import music analyzer
         import importlib.util
         spec = importlib.util.spec_from_file_location(
-            "music_analyzer", 
+            "music_analyzer",
             Path(__file__).parent / "workflows" / "music_analyzer.py"
         )
         music_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(music_module)
-        
+
         analyzer = music_module.MusicAnalyzer()
         audio_file = Path(audio_path)
-        
+
         # Analyze music
         analysis = await analyzer.analyze(audio_file, analyze_beats=True)
-        
+
         # Get sync points based on mode
         if sync_mode == "beat":
             sync_points = analysis.beat_info.beats
@@ -2199,16 +2207,16 @@ async def sync_images_to_music(
             sync_points = [s.start_time for s in analysis.sections]
         else:
             sync_points = analysis.beat_info.beats
-        
+
         # Create timeline
         timeline = []
         image_duration = analysis.duration / len(image_paths)
-        
+
         for i, image_path in enumerate(image_paths):
             # Find nearest sync point
             target_time = i * image_duration
             nearest_sync = min(sync_points, key=lambda x: abs(x - target_time))
-            
+
             timeline.append({
                 "image": image_path,
                 "start_time": nearest_sync,
@@ -2219,12 +2227,12 @@ async def sync_images_to_music(
                 },
                 "beat_aligned": True
             })
-        
+
         # Adjust durations to avoid gaps
         for i in range(len(timeline) - 1):
             timeline[i]["duration"] = timeline[i + 1]["start_time"] - timeline[i]["start_time"]
         timeline[-1]["duration"] = analysis.duration - timeline[-1]["start_time"]
-        
+
         return {
             "success": True,
             "message": f"Created timeline with {len(timeline)} images synced to music",
@@ -2240,7 +2248,7 @@ async def sync_images_to_music(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Music sync failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to sync images to music"}
@@ -2266,33 +2274,33 @@ async def suggest_cuts_for_mood(
         # Import music analyzer
         import importlib.util
         spec = importlib.util.spec_from_file_location(
-            "music_analyzer", 
+            "music_analyzer",
             Path(__file__).parent / "workflows" / "music_analyzer.py"
         )
         music_module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(music_module)
-        
+
         analyzer = music_module.MusicAnalyzer()
         audio_file = Path(audio_path)
-        
+
         # Analyze music
         analysis = await analyzer.analyze(
-            audio_file, 
+            audio_file,
             analyze_beats=True,
             analyze_sections=True,
             analyze_mood=True
         )
-        
+
         # Determine cut frequency multiplier
         freq_multiplier = {
             "fast": 2.0,
             "medium": 1.0,
             "slow": 0.5
         }.get(cut_frequency, 1.0)
-        
+
         # Get base cut points
         cut_points = []
-        
+
         # Add section transitions
         for section in analysis.sections:
             cut_points.append({
@@ -2301,16 +2309,16 @@ async def suggest_cuts_for_mood(
                 "strength": 1.0,
                 "reason": f"New section: {section.name}"
             })
-        
+
         # Add beat-based cuts based on mood
         if target_mood == "auto":
             target_mood = analysis.mood.get_mood_category()
-        
+
         if target_mood in ["energetic", "upbeat", "intense"]:
             # More frequent cuts on strong beats
             for i, (beat, strength) in enumerate(zip(
-                analysis.beat_info.beats, 
-                analysis.beat_info.beat_strength
+                analysis.beat_info.beats,
+                analysis.beat_info.beat_strength, strict=False
             )):
                 if strength > 0.7 and i % int(4 / freq_multiplier) == 0:
                     cut_points.append({
@@ -2329,10 +2337,10 @@ async def suggest_cuts_for_mood(
                         "strength": 0.8,
                         "reason": "Measure boundary for flow"
                     })
-        
+
         # Sort by time
         cut_points.sort(key=lambda x: x["time"])
-        
+
         # Generate recommendations
         recommendations = []
         if analysis.mood.energy > 0.7:
@@ -2341,7 +2349,7 @@ async def suggest_cuts_for_mood(
             recommendations.append("Melancholic mood - use longer shots and subtle transitions")
         if len(analysis.sections) > 5:
             recommendations.append("Multiple sections detected - emphasize section changes")
-        
+
         return {
             "success": True,
             "message": f"Generated {len(cut_points)} cut suggestions for {target_mood} mood",
@@ -2361,7 +2369,7 @@ async def suggest_cuts_for_mood(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Cut suggestion failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to suggest cuts"}
@@ -2386,10 +2394,8 @@ async def export_timeline(
     Returns paths to exported files and proxy mappings.
     """
     try:
-        from .workflows.video_export import (
-            Timeline, TimelineClip, VideoExportManager
-        )
-        
+        from .workflows.video_export import Timeline, TimelineClip, VideoExportManager
+
         # Parse timeline data
         timeline = Timeline(
             name=timeline_data.get("name", "Untitled"),
@@ -2397,7 +2403,7 @@ async def export_timeline(
             frame_rate=timeline_data.get("frame_rate", 30.0),
             resolution=tuple(timeline_data.get("resolution", [1920, 1080]))
         )
-        
+
         # Add clips
         for clip_data in timeline_data.get("clips", []):
             clip = TimelineClip(
@@ -2412,15 +2418,15 @@ async def export_timeline(
                 sync_point=clip_data.get("sync_point")
             )
             timeline.clips.append(clip)
-        
+
         # Add markers
         timeline.markers = timeline_data.get("markers", [])
         timeline.metadata = timeline_data.get("metadata", {})
-        
+
         # Export
         export_manager = VideoExportManager()
         output_dir = Path.home() / "Documents" / "AliceExports" / timeline.name
-        
+
         results = await export_manager.export_timeline(
             timeline,
             output_dir,
@@ -2428,7 +2434,7 @@ async def export_timeline(
             generate_proxies=generate_proxies,
             proxy_resolution=tuple(proxy_resolution) if proxy_resolution else (1280, 720)
         )
-        
+
         return {
             "success": results["success"],
             "message": f"Exported timeline to {len(results['exports'])} formats",
@@ -2442,7 +2448,7 @@ async def export_timeline(
                 "output_directory": str(output_dir)
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Timeline export failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to export timeline"}
@@ -2473,25 +2479,23 @@ async def create_video_timeline(
     Creates and exports a complete timeline ready for editing.
     """
     try:
-        from .workflows.video_export import (
-            Timeline, TimelineClip, VideoExportManager
-        )
-        
+        from .workflows.video_export import Timeline, TimelineClip, VideoExportManager
+
         # Calculate total duration
         if audio_path and Path(audio_path).exists():
             # Get audio duration
             import importlib.util
             spec = importlib.util.spec_from_file_location(
-                "music_analyzer", 
+                "music_analyzer",
                 Path(__file__).parent / "workflows" / "music_analyzer.py"
             )
             music_module = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(music_module)
-            
+
             analyzer = music_module.MusicAnalyzer()
             analysis = await analyzer.analyze(Path(audio_path), analyze_beats=sync_to_beat)
             total_duration = analysis.duration
-            
+
             # Get sync points if requested
             sync_points = []
             if sync_to_beat:
@@ -2499,7 +2503,7 @@ async def create_video_timeline(
         else:
             total_duration = len(image_paths) * duration_per_image
             sync_points = []
-        
+
         # Create timeline
         timeline = Timeline(
             name=f"Alice_Timeline_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
@@ -2507,7 +2511,7 @@ async def create_video_timeline(
             frame_rate=30.0,
             resolution=(1920, 1080)
         )
-        
+
         # Add audio track
         if audio_path:
             timeline.audio_tracks.append({
@@ -2516,26 +2520,26 @@ async def create_video_timeline(
                 "duration": total_duration,
                 "volume": 1.0
             })
-        
+
         # Calculate clip timings
         if sync_to_beat and sync_points:
             # Distribute images across beat points
             images_per_beat = max(1, len(sync_points) // len(image_paths))
             current_time = 0.0
-            
+
             for i, image_path in enumerate(image_paths):
                 # Find appropriate beat point
                 beat_index = min(i * images_per_beat, len(sync_points) - 1)
                 start_time = sync_points[beat_index] if beat_index < len(sync_points) else current_time
-                
+
                 # Calculate duration to next beat or end
                 if i < len(image_paths) - 1 and beat_index + images_per_beat < len(sync_points):
                     end_time = sync_points[beat_index + images_per_beat]
                 else:
                     end_time = total_duration if i == len(image_paths) - 1 else start_time + duration_per_image
-                
+
                 duration = end_time - start_time
-                
+
                 clip = TimelineClip(
                     asset_path=Path(image_path),
                     start_time=start_time,
@@ -2547,7 +2551,7 @@ async def create_video_timeline(
                 )
                 timeline.clips.append(clip)
                 current_time = end_time
-                
+
                 # Add beat marker
                 if clip.sync_point:
                     timeline.markers.append({
@@ -2568,23 +2572,23 @@ async def create_video_timeline(
                 )
                 timeline.clips.append(clip)
                 current_time += duration_per_image - (transition_duration if i < len(image_paths) - 1 else 0)
-        
+
         # Add mood metadata if we analyzed audio
         if audio_path and sync_to_beat:
             timeline.metadata["mood"] = analysis.mood.get_mood_category()
             timeline.metadata["bpm"] = analysis.beat_info.tempo
-        
+
         # Export timeline
         export_manager = VideoExportManager()
         output_dir = Path.home() / "Documents" / "AliceExports" / timeline.name
-        
+
         results = await export_manager.export_timeline(
             timeline,
             output_dir,
             formats=export_formats,
             generate_proxies=True
         )
-        
+
         # Build timeline data for response
         timeline_data = {
             "name": timeline.name,
@@ -2604,7 +2608,7 @@ async def create_video_timeline(
             "markers": timeline.markers,
             "metadata": timeline.metadata
         }
-        
+
         return {
             "success": True,
             "message": f"Created timeline with {len(timeline.clips)} clips",
@@ -2622,7 +2626,7 @@ async def create_video_timeline(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Timeline creation failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to create timeline"}
@@ -2657,30 +2661,31 @@ async def generate_veo3_video(
     Note: Costs $0.50/second without audio, $0.75/second with audio.
     """
     try:
+        from pathlib import Path
+
         from .providers.fal_provider import FalProvider
         from .providers.types import GenerationRequest, GenerationType
-        from pathlib import Path
-        
+
         # Validate parameters
         if duration < 5 or duration > 8:
             return {
                 "success": False,
                 "message": "Duration must be between 5 and 8 seconds for Veo 3"
             }
-            
+
         if enable_speech and not enable_audio:
             enable_audio = True  # Speech requires audio
-            
+
         # Set output path
         if output_path:
             output_dir = Path(output_path)
         else:
             output_dir = Path.home() / "Documents" / "AliceGenerated" / "veo3"
-            
+
         # Initialize provider
         provider = FalProvider()
         await provider.initialize()
-        
+
         # Create generation request
         request = GenerationRequest(
             prompt=prompt,
@@ -2693,21 +2698,21 @@ async def generate_veo3_video(
                 "enable_audio": enable_audio
             }
         )
-        
+
         # Estimate cost
         cost_per_second = 0.75 if enable_audio else 0.50
         estimated_cost = cost_per_second * duration
-        
+
         # Generate video
         result = await provider.generate(request)
-        
+
         # Clean up
         await provider.cleanup()
-        
+
         if result.success:
             return {
                 "success": True,
-                "message": f"Generated Veo 3 video successfully",
+                "message": "Generated Veo 3 video successfully",
                 "data": {
                     "file_path": str(result.file_path),
                     "cost": result.cost or estimated_cost,
@@ -2731,7 +2736,7 @@ async def generate_veo3_video(
                 "message": f"Video generation failed: {result.error}",
                 "error": result.error
             }
-            
+
     except Exception as e:
         logger.error(f"Veo 3 video generation failed: {e}")
         return {"success": False, "error": str(e), "message": "Failed to generate Veo 3 video"}
@@ -3816,7 +3821,7 @@ async def detect_composition_patterns(
         project_name=project_name,
         limit=limit
     )
-    
+
     @server.tool()
     async def find_duplicates_advanced(
         directory: str,
@@ -3843,7 +3848,7 @@ async def detect_composition_patterns(
         Returns duplicate groups with similarity scores and space savings.
         """
         from .deduplication import DuplicateFinder
-        
+
         try:
             scan_dir = Path(directory).expanduser().resolve()
             if not scan_dir.exists():
@@ -3852,20 +3857,20 @@ async def detect_composition_patterns(
                     "error": "Directory not found",
                     "message": f"Directory does not exist: {directory}"
                 }
-            
+
             # Create finder
             finder = DuplicateFinder(similarity_threshold=similarity_threshold)
-            
+
             # Scan directory
             exact_count, similar_count = finder.scan_directory(
                 scan_dir,
                 recursive=recursive,
                 extensions=set(extensions) if extensions else None
             )
-            
+
             # Get report
             report = finder.get_duplicate_report()
-            
+
             # Add summary
             report['summary'] = {
                 'exact_duplicates_found': exact_count,
@@ -3873,17 +3878,17 @@ async def detect_composition_patterns(
                 'total_duplicates': exact_count + (similar_count if include_similar else 0),
                 'potential_space_savings_mb': report['potential_savings'] / 1_000_000
             }
-            
+
             return {
                 "success": True,
                 "message": f"Found {exact_count} exact duplicates and {similar_count} similar images",
                 "data": report
             }
-            
+
         except Exception as e:
             logger.error(f"Duplicate detection failed: {e}")
             return {"success": False, "error": str(e), "message": "Failed to find duplicates"}
-    
+
     @server.tool()
     async def remove_duplicates(
         duplicate_report: dict[str, Any],
@@ -3903,11 +3908,11 @@ async def detect_composition_patterns(
         Returns removal statistics.
         """
         from .deduplication import DuplicateFinder
-        
+
         try:
             # Recreate finder from report
             finder = DuplicateFinder()
-            
+
             # Restore state from report
             # This is a simplified version - in production, save/load full state
             for group in duplicate_report.get('exact_duplicates', {}).get('groups', []):
@@ -3915,18 +3920,18 @@ async def detect_composition_patterns(
                 duplicates = [Path(p) for p in group['duplicates']]
                 file_hash = group.get('hash', 'unknown')
                 finder.exact_duplicates[file_hash] = [master] + duplicates
-            
+
             # Configure removal
             remove_similar = strategy == "aggressive"
             backup_path = Path(backup_dir) if backup_dir else None
-            
+
             # Remove duplicates
             stats = finder.remove_duplicates(
                 dry_run=dry_run,
                 backup_dir=backup_path,
                 remove_similar=remove_similar
             )
-            
+
             return {
                 "success": True,
                 "message": f"{'Would remove' if dry_run else 'Removed'} {stats['exact_removed']} duplicates",
@@ -3937,11 +3942,11 @@ async def detect_composition_patterns(
                     "backup_location": str(backup_path) if backup_path else None
                 }
             }
-            
+
         except Exception as e:
             logger.error(f"Duplicate removal failed: {e}")
             return {"success": False, "error": str(e), "message": "Failed to remove duplicates"}
-    
+
     @server.tool()
     async def build_similarity_index(
         directories: list[str],
@@ -3963,7 +3968,7 @@ async def detect_composition_patterns(
         Returns index statistics and save location.
         """
         from .deduplication import SimilarityIndex
-        
+
         try:
             # Collect all images
             image_paths = []
@@ -3973,29 +3978,29 @@ async def detect_composition_patterns(
                     for ext in ['.jpg', '.jpeg', '.png', '.webp']:
                         image_paths.extend(scan_dir.rglob(f"*{ext}"))
                         image_paths.extend(scan_dir.rglob(f"*{ext.upper()}"))
-            
+
             if not image_paths:
                 return {
                     "success": False,
                     "message": "No images found in specified directories"
                 }
-            
+
             # Create index
             index = SimilarityIndex(index_type=index_type)
-            
+
             # Build index
             cache_dir = Path.home() / ".alice" / "cache" / "similarity"
             indexed_count = index.build_index(image_paths, cache_dir=cache_dir)
-            
+
             # Save index
             if output_path:
                 index_path = Path(output_path)
             else:
                 index_path = Path.home() / ".alice" / "similarity_index"
-            
+
             index_path.parent.mkdir(parents=True, exist_ok=True)
             index.save_index(index_path)
-            
+
             return {
                 "success": True,
                 "message": f"Built similarity index for {indexed_count} images",
@@ -4007,11 +4012,11 @@ async def detect_composition_patterns(
                     "cache_location": str(cache_dir)
                 }
             }
-            
+
         except Exception as e:
             logger.error(f"Index building failed: {e}")
             return {"success": False, "error": str(e), "message": "Failed to build similarity index"}
-    
+
     @server.tool()
     async def search_similar_advanced(
         query_image: str,
@@ -4035,7 +4040,7 @@ async def detect_composition_patterns(
         Returns similar images with similarity scores.
         """
         from .deduplication import SimilarityIndex
-        
+
         try:
             query_path = Path(query_image).expanduser().resolve()
             if not query_path.exists():
@@ -4044,27 +4049,27 @@ async def detect_composition_patterns(
                     "error": "Query image not found",
                     "message": f"Image does not exist: {query_image}"
                 }
-            
+
             # Load index
             if index_path:
                 idx_path = Path(index_path)
             else:
                 idx_path = Path.home() / ".alice" / "similarity_index"
-            
+
             if not idx_path.with_suffix('.faiss').exists():
                 return {
                     "success": False,
                     "error": "Index not found",
                     "message": "Please build similarity index first with build_similarity_index"
                 }
-            
+
             # Create and load index
             index = SimilarityIndex()
             index.load_index(idx_path)
-            
+
             # Search
             results = index.search(query_path, k=k, include_self=False)
-            
+
             # Filter by similarity
             filtered_results = [
                 {
@@ -4075,7 +4080,7 @@ async def detect_composition_patterns(
                 for r in results
                 if r.similarity >= min_similarity
             ]
-            
+
             return {
                 "success": True,
                 "message": f"Found {len(filtered_results)} similar images",
@@ -4085,11 +4090,11 @@ async def detect_composition_patterns(
                     "total_searched": index.index.ntotal if index.index else 0
                 }
             }
-            
+
         except Exception as e:
             logger.error(f"Similarity search failed: {e}")
             return {"success": False, "error": str(e), "message": "Failed to search similar images"}
-    
+
     @server.tool()
     async def find_image_clusters(
         index_path: str | None = None,
@@ -4111,31 +4116,31 @@ async def detect_composition_patterns(
         Returns clusters of similar images.
         """
         from .deduplication import SimilarityIndex
-        
+
         try:
             # Load index
             if index_path:
                 idx_path = Path(index_path)
             else:
                 idx_path = Path.home() / ".alice" / "similarity_index"
-            
+
             if not idx_path.with_suffix('.faiss').exists():
                 return {
                     "success": False,
                     "error": "Index not found",
                     "message": "Please build similarity index first"
                 }
-            
+
             # Create and load index
             index = SimilarityIndex()
             index.load_index(idx_path)
-            
+
             # Find clusters
             clusters = index.find_clusters(
                 min_cluster_size=min_cluster_size,
                 max_distance=max_distance
             )
-            
+
             # Format results
             formatted_clusters = []
             for i, cluster in enumerate(clusters):
@@ -4144,7 +4149,7 @@ async def detect_composition_patterns(
                     "size": len(cluster),
                     "images": cluster[:20]  # Limit for response size
                 })
-            
+
             return {
                 "success": True,
                 "message": f"Found {len(clusters)} image clusters",
@@ -4158,11 +4163,11 @@ async def detect_composition_patterns(
                     }
                 }
             }
-            
+
         except Exception as e:
             logger.error(f"Cluster finding failed: {e}")
             return {"success": False, "error": str(e), "message": "Failed to find clusters"}
-    
+
     @server.tool()
     async def list_plugins() -> dict[str, Any]:
         """
@@ -4177,11 +4182,11 @@ async def detect_composition_patterns(
         analyzers, exporters, and workflows.
         """
         from .plugins.registry import get_registry
-        
+
         try:
             registry = get_registry()
             plugin_info = registry.get_plugin_info()
-            
+
             # Group by type
             by_type = {}
             for info in plugin_info:
@@ -4189,7 +4194,7 @@ async def detect_composition_patterns(
                 if plugin_type not in by_type:
                     by_type[plugin_type] = []
                 by_type[plugin_type].append(info)
-            
+
             return {
                 "success": True,
                 "message": f"Found {len(plugin_info)} plugins",
@@ -4202,7 +4207,7 @@ async def detect_composition_patterns(
         except Exception as e:
             logger.error(f"Failed to list plugins: {e}")
             return {"success": False, "error": str(e), "message": "Failed to list plugins"}
-    
+
     @server.tool()
     async def load_plugin(
         plugin_path: str,
@@ -4220,11 +4225,11 @@ async def detect_composition_patterns(
         - Installed packages (e.g., alice-plugin-example)
         """
         from .plugins.registry import get_registry
-        
+
         try:
             registry = get_registry()
             path = Path(plugin_path)
-            
+
             # Determine if it's a file or module
             if path.exists() and path.suffix == ".py":
                 # Load from file
@@ -4232,16 +4237,16 @@ async def detect_composition_patterns(
             else:
                 # Try as module name
                 plugin = registry.loader.load_plugin_from_module(plugin_path)
-            
+
             if plugin is None:
                 return {
                     "success": False,
                     "message": f"Could not load plugin from: {plugin_path}"
                 }
-            
+
             # Register the plugin
             success = registry.register_plugin(plugin, initialize=initialize)
-            
+
             return {
                 "success": success,
                 "message": f"Loaded plugin: {plugin.metadata.name} v{plugin.metadata.version}",
@@ -4256,7 +4261,7 @@ async def detect_composition_patterns(
         except Exception as e:
             logger.error(f"Failed to load plugin: {e}")
             return {"success": False, "error": str(e), "message": "Failed to load plugin"}
-    
+
     @server.tool()
     async def use_plugin_provider(
         plugin_name: str,
@@ -4278,11 +4283,11 @@ async def detect_composition_patterns(
         Plugin providers can be custom AI services, local models, or
         specialized generators not included in the core system.
         """
-        from .plugins.registry import get_plugin
         from .plugins.base import PluginType
         from .plugins.provider_adapter import PluginProviderAdapter
+        from .plugins.registry import get_plugin
         from .providers.types import GenerationRequest, GenerationType
-        
+
         try:
             # Get the plugin
             plugin = get_plugin(plugin_name)
@@ -4291,17 +4296,17 @@ async def detect_composition_patterns(
                     "success": False,
                     "message": f"Plugin not found or not initialized: {plugin_name}"
                 }
-            
+
             # Verify it's a provider plugin
             if plugin.metadata.type != PluginType.PROVIDER:
                 return {
                     "success": False,
                     "message": f"Plugin {plugin_name} is not a provider plugin"
                 }
-            
+
             # Create adapter
             adapter = PluginProviderAdapter(plugin)
-            
+
             # Create generation request
             request = GenerationRequest(
                 prompt=prompt,
@@ -4310,10 +4315,10 @@ async def detect_composition_patterns(
                 output_path=Path(output_path) if output_path else None,
                 parameters=parameters
             )
-            
+
             # Generate
             result = await adapter.generate(request)
-            
+
             if result.success:
                 return {
                     "success": True,
@@ -4330,11 +4335,11 @@ async def detect_composition_patterns(
                     "message": f"Generation failed: {result.error}",
                     "error": result.error
                 }
-                
+
         except Exception as e:
             logger.error(f"Plugin provider error: {e}")
             return {"success": False, "error": str(e), "message": "Failed to use plugin provider"}
-    
+
     @server.tool()
     async def apply_plugin_effect(
         plugin_name: str,
@@ -4354,9 +4359,9 @@ async def detect_composition_patterns(
         Effect plugins can provide filters, transformations, enhancements,
         and other post-processing capabilities.
         """
-        from .plugins.registry import get_plugin
         from .plugins.base import PluginType
-        
+        from .plugins.registry import get_plugin
+
         try:
             # Get the plugin
             plugin = get_plugin(plugin_name)
@@ -4365,14 +4370,14 @@ async def detect_composition_patterns(
                     "success": False,
                     "message": f"Plugin not found or not initialized: {plugin_name}"
                 }
-            
+
             # Verify it's an effect plugin
             if plugin.metadata.type != PluginType.EFFECT:
                 return {
                     "success": False,
                     "message": f"Plugin {plugin_name} is not an effect plugin"
                 }
-            
+
             # Set up paths
             input_file = Path(input_path).expanduser().resolve()
             if not input_file.exists():
@@ -4380,16 +4385,16 @@ async def detect_composition_patterns(
                     "success": False,
                     "message": f"Input file not found: {input_path}"
                 }
-            
+
             if output_path:
                 output_file = Path(output_path).expanduser().resolve()
             else:
                 # Auto-generate output path
                 output_file = input_file.parent / f"{input_file.stem}_{plugin_name}{input_file.suffix}"
-            
+
             # Apply effect
             result_path = await plugin.apply(input_file, output_file, parameters or {})
-            
+
             return {
                 "success": True,
                 "message": f"Applied {plugin_name} effect",
@@ -4400,11 +4405,11 @@ async def detect_composition_patterns(
                     "parameters": parameters
                 }
             }
-            
+
         except Exception as e:
             logger.error(f"Plugin effect error: {e}")
             return {"success": False, "error": str(e), "message": "Failed to apply plugin effect"}
-    
+
     @server.tool()
     async def create_plugin_template(
         plugin_type: str,
@@ -4426,7 +4431,7 @@ async def detect_composition_patterns(
         - Documentation
         """
         from .plugins.base import PluginType
-        
+
         try:
             # Validate plugin type
             try:
@@ -4436,29 +4441,29 @@ async def detect_composition_patterns(
                     "success": False,
                     "message": f"Invalid plugin type: {plugin_type}. Valid types: {[t.value for t in PluginType]}"
                 }
-            
+
             # Set output directory
             if output_dir:
                 output_path = Path(output_dir).expanduser().resolve()
             else:
                 output_path = Path.home() / ".alice" / "plugins"
-            
+
             output_path.mkdir(parents=True, exist_ok=True)
-            
+
             # Create plugin file
             plugin_file = output_path / f"{plugin_name}.py"
-            
+
             # Generate template based on type
             template = _generate_plugin_template(plugin_type_enum, plugin_name)
-            
+
             # Write template
             plugin_file.write_text(template)
-            
+
             # Create example config
             config_file = output_path / f"{plugin_name}_config.yaml"
             config_template = _generate_plugin_config_template(plugin_type_enum, plugin_name)
             config_file.write_text(config_template)
-            
+
             return {
                 "success": True,
                 "message": f"Created {plugin_type} plugin template",
@@ -4473,11 +4478,11 @@ async def detect_composition_patterns(
                     ]
                 }
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to create plugin template: {e}")
             return {"success": False, "error": str(e), "message": "Failed to create plugin template"}
-    
+
     @server.tool()
     async def start_timeline_preview(
         timeline_data: dict[str, Any],
@@ -4500,15 +4505,17 @@ async def detect_composition_patterns(
         
         Returns preview URL and session ID to open in browser.
         """
-        from .interface.timeline_preview import TimelinePreviewServer
-        import httpx
         import asyncio
         import threading
+
+        import httpx
         import uvicorn
-        
+
+        from .interface.timeline_preview import TimelinePreviewServer
+
         # Create server instance
         server_instance = TimelinePreviewServer()
-        
+
         # Start server in background thread
         def run_server():
             config = uvicorn.Config(
@@ -4518,22 +4525,22 @@ async def detect_composition_patterns(
                 log_level="info"
             )
             uvicorn.run(server_instance.app, host="0.0.0.0", port=port)
-        
+
         server_thread = threading.Thread(target=run_server, daemon=True)
         server_thread.start()
-        
+
         # Wait a moment for server to start
         await asyncio.sleep(1)
-        
+
         # Create preview session
         async with httpx.AsyncClient(base_url=f"http://localhost:{port}") as client:
             try:
                 response = await client.post("/session/create", json=timeline_data)
-                
+
                 if response.status_code == 200:
                     session_data = response.json()
                     session_id = session_data["session_id"]
-                    
+
                     return {
                         "status": "success",
                         "preview_url": f"http://localhost:{port}/?session={session_id}",
@@ -4541,7 +4548,7 @@ async def detect_composition_patterns(
                         "message": "Preview server started. Open the URL in your browser.",
                         "features": [
                             "Video playback with frame caching",
-                            "Drag-and-drop clip reordering", 
+                            "Drag-and-drop clip reordering",
                             "Keyboard shortcuts (Space to play/pause)",
                             "Export to EDL/XML/CapCut",
                             "Real-time WebSocket updates",
@@ -4556,7 +4563,7 @@ async def detect_composition_patterns(
             except Exception as e:
                 return {
                     "status": "error",
-                    "message": f"Failed to start preview server: {str(e)}"
+                    "message": f"Failed to start preview server: {e!s}"
                 }
 
 
@@ -4624,7 +4631,7 @@ class {plugin_name.title().replace("_", "")}Plugin(ProviderPlugin):
         """Estimate generation cost."""
         return 0.01
 '''
-    
+
     elif plugin_type == PluginType.EFFECT:
         return f'''"""Custom effect plugin for {plugin_name}."""
 
@@ -4685,7 +4692,7 @@ class {plugin_name.title().replace("_", "")}Plugin(EffectPlugin):
         """Return supported formats."""
         return [".jpg", ".jpeg", ".png", ".webp"]
 '''
-    
+
     else:
         # Generic template for other types
         return f'''"""Custom {plugin_type.value} plugin for {plugin_name}."""
@@ -4775,11 +4782,12 @@ async def start_mobile_server(
     generate_token: bool = True
 ) -> dict[str, Any]:
     """Start the mobile companion server for remote timeline control."""
-    from alicemultiverse.mobile.server import MobileServer
-    from alicemultiverse.mobile.token_manager import TokenManager
     import socket
     import threading
-    
+
+    from alicemultiverse.mobile.server import MobileServer
+    from alicemultiverse.mobile.token_manager import TokenManager
+
     # Get local IP
     def get_local_ip():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -4791,38 +4799,38 @@ async def start_mobile_server(
         finally:
             s.close()
         return ip
-    
+
     local_ip = get_local_ip()
-    
+
     # Generate token if requested
     token = None
     if generate_token:
         manager = TokenManager()
         token = manager.generate_token("mcp-session", expires_hours=24)
-    
+
     # Start server in background thread
     server = MobileServer(host=host, port=port)
-    
+
     def run_server():
         import asyncio
         loop = asyncio.new_event_loop()
         asyncio.set_event_loop(loop)
         server.run()
-    
+
     thread = threading.Thread(target=run_server, daemon=True)
     thread.start()
-    
+
     result = {
         "status": "started",
         "local_url": f"http://localhost:{port}",
         "mobile_url": f"http://{local_ip}:{port}",
         "local_ip": local_ip
     }
-    
+
     if token:
         result["access_token"] = token
         result["token_message"] = "Save this token - you'll need it to connect from your mobile device"
-    
+
     return result
 
 
@@ -4833,10 +4841,10 @@ async def generate_mobile_token(
 ) -> dict[str, Any]:
     """Generate an access token for mobile companion app."""
     from alicemultiverse.mobile.token_manager import TokenManager
-    
+
     manager = TokenManager()
     token = manager.generate_token(name, expires_hours)
-    
+
     return {
         "token": token,
         "name": name,
@@ -4849,10 +4857,10 @@ async def generate_mobile_token(
 async def list_mobile_tokens() -> dict[str, Any]:
     """List all active mobile access tokens."""
     from alicemultiverse.mobile.token_manager import TokenManager
-    
+
     manager = TokenManager()
     tokens = manager.list_tokens()
-    
+
     return {
         "tokens": tokens,
         "count": len(tokens)
@@ -4866,30 +4874,31 @@ async def add_timeline_to_mobile(
     clip_durations: list[float] | None = None
 ) -> dict[str, Any]:
     """Add a timeline to the mobile companion server."""
-    from alicemultiverse.interface.timeline_preview import Timeline, TimelineClip
-    from pathlib import Path
     import uuid
-    
+    from pathlib import Path
+
+    from alicemultiverse.interface.timeline_preview import Timeline, TimelineClip
+
     # Create timeline
     timeline = Timeline(name=timeline_name)
-    
+
     # Default duration if not provided
     if not clip_durations:
         clip_durations = [3.0] * len(clip_paths)
-    
+
     # Add clips
-    for i, (path, duration) in enumerate(zip(clip_paths, clip_durations)):
+    for i, (path, duration) in enumerate(zip(clip_paths, clip_durations, strict=False)):
         clip = TimelineClip(
             id=str(uuid.uuid4()),
             file_path=Path(path),
             duration=duration
         )
         timeline.add_clip(clip)
-    
+
     # Add to server if running
     # Note: In a real implementation, we'd need to track the server instance
     timeline_id = str(uuid.uuid4())
-    
+
     return {
         "timeline_id": timeline_id,
         "timeline_name": timeline_name,
@@ -4897,6 +4906,210 @@ async def add_timeline_to_mobile(
         "total_duration": timeline.duration,
         "message": "Timeline created. Start mobile server to make it available."
     }
+
+
+# Enhanced Video Generation Tools
+
+@server.tool()
+async def generate_video_runway(
+    prompt: str,
+    model: str = "gen3-alpha",
+    duration: int = 5,
+    camera_motion: str | None = None,
+    motion_amount: float | None = None,
+    seed: int | None = None,
+    output_path: str | None = None,
+    input_image: str | None = None
+) -> dict[str, Any]:
+    """Generate professional video using Runway Gen-3 Alpha."""
+    from alicemultiverse.interface.video_providers_mcp import (
+        generate_video_runway as _generate_video_runway,
+    )
+    return await _generate_video_runway(
+        prompt=prompt,
+        model=model,
+        duration=duration,
+        camera_motion=camera_motion,
+        motion_amount=motion_amount,
+        seed=seed,
+        output_path=output_path,
+        input_image=input_image
+    )
+
+
+@server.tool()
+async def generate_video_pika(
+    prompt: str,
+    model: str = "pika-2.1-hd",
+    duration: int = 3,
+    aspect_ratio: str = "16:9",
+    camera_control: dict[str, Any] | None = None,
+    ingredients: list[str] | None = None,
+    lip_sync_audio: str | None = None,
+    output_path: str | None = None,
+    input_image: str | None = None
+) -> dict[str, Any]:
+    """Generate HD video using Pika 2.1 with ingredient control."""
+    from alicemultiverse.interface.video_providers_mcp import (
+        generate_video_pika as _generate_video_pika,
+    )
+    return await _generate_video_pika(
+        prompt=prompt,
+        model=model,
+        duration=duration,
+        aspect_ratio=aspect_ratio,
+        camera_control=camera_control,
+        ingredients=ingredients,
+        lip_sync_audio=lip_sync_audio,
+        output_path=output_path,
+        input_image=input_image
+    )
+
+
+@server.tool()
+async def generate_video_luma(
+    prompt: str,
+    enhance_prompt: bool = True,
+    aspect_ratio: str = "16:9",
+    loop: bool = False,
+    keyframes: dict[str, Any] | None = None,
+    output_path: str | None = None,
+    start_image: str | None = None,
+    end_image: str | None = None
+) -> dict[str, Any]:
+    """Generate video using Luma Dream Machine with advanced controls."""
+    from alicemultiverse.interface.video_providers_mcp import (
+        generate_video_luma as _generate_video_luma,
+    )
+    return await _generate_video_luma(
+        prompt=prompt,
+        enhance_prompt=enhance_prompt,
+        aspect_ratio=aspect_ratio,
+        loop=loop,
+        keyframes=keyframes,
+        output_path=output_path,
+        start_image=start_image,
+        end_image=end_image
+    )
+
+
+@server.tool()
+async def generate_video_minimax(
+    prompt: str,
+    prompt_optimizer: bool = True,
+    duration: int = 6,
+    resolution: str = "1280x720",
+    camera_mode: str | None = None,
+    output_path: str | None = None,
+    input_image: str | None = None
+) -> dict[str, Any]:
+    """Generate video using MiniMax Hailuo with competitive quality."""
+    from alicemultiverse.interface.video_providers_mcp import (
+        generate_video_minimax as _generate_video_minimax,
+    )
+    return await _generate_video_minimax(
+        prompt=prompt,
+        prompt_optimizer=prompt_optimizer,
+        duration=duration,
+        resolution=resolution,
+        camera_mode=camera_mode,
+        output_path=output_path,
+        input_image=input_image
+    )
+
+
+@server.tool()
+async def generate_video_kling(
+    prompt: str,
+    model: str = "kling-v1.5",
+    duration: int = 5,
+    aspect_ratio: str = "16:9",
+    quality: str = "professional",
+    motion_strength: float = 0.5,
+    camera_movement: str | None = None,
+    output_path: str | None = None,
+    input_image: str | None = None
+) -> dict[str, Any]:
+    """Generate cinematic video using Kling AI with professional quality."""
+    from alicemultiverse.interface.video_providers_mcp import (
+        generate_video_kling as _generate_video_kling,
+    )
+    return await _generate_video_kling(
+        prompt=prompt,
+        model=model,
+        duration=duration,
+        aspect_ratio=aspect_ratio,
+        quality=quality,
+        motion_strength=motion_strength,
+        camera_movement=camera_movement,
+        output_path=output_path,
+        input_image=input_image
+    )
+
+
+@server.tool()
+async def generate_video_hedra(
+    prompt: str,
+    audio_input: str,
+    avatar_image: str | None = None,
+    voice_id: str | None = None,
+    aspect_ratio: str = "1:1",
+    output_path: str | None = None
+) -> dict[str, Any]:
+    """Generate AI avatar video using Hedra Character API."""
+    from alicemultiverse.interface.video_providers_mcp import (
+        generate_video_hedra as _generate_video_hedra,
+    )
+    return await _generate_video_hedra(
+        prompt=prompt,
+        audio_input=audio_input,
+        avatar_image=avatar_image,
+        voice_id=voice_id,
+        aspect_ratio=aspect_ratio,
+        output_path=output_path
+    )
+
+
+@server.tool()
+async def compare_video_providers(
+    prompt: str,
+    providers: list[str] | None = None,
+    output_dir: str | None = None,
+    compare_quality: bool = True,
+    compare_cost: bool = True,
+    compare_speed: bool = True
+) -> dict[str, Any]:
+    """Generate videos with multiple providers for comparison."""
+    from alicemultiverse.interface.video_providers_mcp import (
+        compare_video_providers as _compare_video_providers,
+    )
+    return await _compare_video_providers(
+        prompt=prompt,
+        providers=providers,
+        output_dir=output_dir,
+        compare_quality=compare_quality,
+        compare_cost=compare_cost,
+        compare_speed=compare_speed
+    )
+
+
+@server.tool()
+async def estimate_video_costs(
+    prompt: str,
+    providers: list[str] | None = None,
+    duration: int = 5,
+    include_details: bool = True
+) -> dict[str, Any]:
+    """Estimate costs for video generation across providers."""
+    from alicemultiverse.interface.video_providers_mcp import (
+        estimate_video_costs as _estimate_video_costs,
+    )
+    return await _estimate_video_costs(
+        prompt=prompt,
+        providers=providers,
+        duration=duration,
+        include_details=include_details
+    )
 
 
 def main():
@@ -4999,6 +5212,14 @@ def main():
     logger.info("  - generate_mobile_token: Create secure access token for mobile app")
     logger.info("  - list_mobile_tokens: View all active mobile access tokens")
     logger.info("  - add_timeline_to_mobile: Add timeline for mobile editing")
+    logger.info("  - generate_video_runway: Generate video with Runway Gen-3 Alpha")
+    logger.info("  - generate_video_pika: Generate HD video with Pika 2.1")
+    logger.info("  - generate_video_luma: Generate video with Luma Dream Machine")
+    logger.info("  - generate_video_minimax: Generate video with MiniMax Hailuo")
+    logger.info("  - generate_video_kling: Generate cinematic video with Kling AI")
+    logger.info("  - generate_video_hedra: Generate AI avatar video with Hedra")
+    logger.info("  - compare_video_providers: Compare video generation across providers")
+    logger.info("  - estimate_video_costs: Estimate costs for video generation")
 
     # Run the server using stdio transport
     asyncio.run(stdio.run(server))
