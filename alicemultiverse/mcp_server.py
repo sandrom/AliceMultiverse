@@ -38,6 +38,7 @@ from .interface.composition_mcp import (
     optimize_timeline,
     suggest_clip_order,
 )
+from .interface.deduplication_mcp import register_deduplication_tools
 from .interface.image_presentation import ImagePresentationAPI
 from .interface.image_presentation_mcp import register_image_presentation_tools
 from .interface.models import OrganizeRequest, SearchRequest, TagRequest
@@ -121,6 +122,7 @@ if MCP_AVAILABLE:
     register_image_presentation_tools(server, image_api)
     register_video_creation_tools(server, search_db)
     register_video_providers_tools(server)
+    register_deduplication_tools(server)
 
 
 @server.tool()
@@ -589,13 +591,13 @@ async def get_project_context(name: str) -> dict[str, Any]:
 
 
 @server.tool()
-async def find_duplicates(
-    check_similar: bool = False,
+async def find_duplicates_advanced(
+    check_similar: bool = True,
     similarity_threshold: float = 0.95,
     limit: int = 100
 ) -> dict[str, Any]:
     """
-    Find duplicate or near-duplicate assets in your collection.
+    Find duplicate or near-duplicate assets using advanced perceptual hashing.
     
     Parameters:
     - check_similar: If True, use perceptual hashing to find similar (not just identical) images
@@ -604,93 +606,12 @@ async def find_duplicates(
     
     Returns groups of duplicate/similar assets with their locations and sizes.
     """
-    try:
-        # Get all assets from the search cache
-        pass
-
-        # Query the DuckDB cache for all assets with hashes
-        conn = storage.get_connection()
-        cursor = conn.cursor()
-
-        if check_similar:
-            # Get assets with perceptual hashes
-            cursor.execute("""
-                SELECT content_hash, file_path, file_size, 
-                       perceptual_hash, difference_hash, average_hash
-                FROM assets 
-                WHERE perceptual_hash IS NOT NULL
-                ORDER BY file_path
-            """)
-        else:
-            # Get all assets for exact duplicate check
-            cursor.execute("""
-                SELECT content_hash, file_path, file_size
-                FROM assets
-                ORDER BY file_path
-            """)
-
-        rows = cursor.fetchall()
-
-        # Group by hash
-        if check_similar:
-            # TODO: Implement perceptual hash similarity comparison
-            # For now, we'll just return a message that this feature is coming
-            return {
-                "success": True,
-                "message": "Similar image detection coming soon",
-                "data": {
-                    "note": "Currently only exact duplicates are detected. Perceptual similarity search is in development."
-                }
-            }
-        else:
-            # Group by content hash for exact duplicates
-            hash_groups = {}
-            for row in rows:
-                content_hash, file_path, file_size = row
-                if content_hash not in hash_groups:
-                    hash_groups[content_hash] = []
-                hash_groups[content_hash].append({
-                    "path": file_path,
-                    "size": file_size
-                })
-
-            # Filter to only groups with duplicates
-            duplicate_groups = []
-            total_wasted_space = 0
-
-            for content_hash, files in hash_groups.items():
-                if len(files) > 1:
-                    # Calculate wasted space (all but one copy)
-                    wasted = sum(f["size"] for f in files[1:])
-                    total_wasted_space += wasted
-
-                    duplicate_groups.append({
-                        "hash": content_hash,
-                        "count": len(files),
-                        "files": files,
-                        "wasted_space": wasted
-                    })
-
-            # Sort by wasted space descending
-            duplicate_groups.sort(key=lambda x: x["wasted_space"], reverse=True)
-
-            # Limit results
-            duplicate_groups = duplicate_groups[:limit]
-
-            return {
-                "success": True,
-                "message": f"Found {len(duplicate_groups)} sets of duplicates",
-                "data": {
-                    "duplicate_groups": duplicate_groups,
-                    "total_duplicate_sets": len(hash_groups),
-                    "total_wasted_space": total_wasted_space,
-                    "total_wasted_space_mb": round(total_wasted_space / 1024 / 1024, 2)
-                }
-            }
-
-    except Exception as e:
-        logger.error(f"Find duplicates failed: {e}")
-        return {"success": False, "error": str(e), "message": "Failed to find duplicates"}
+    from alicemultiverse.interface.deduplication_mcp import find_duplicates_advanced as _find_duplicates
+    return await _find_duplicates(
+        exact_only=not check_similar,
+        similarity_threshold=similarity_threshold,
+        limit=limit
+    )
 
 
 @server.tool()
@@ -3823,352 +3744,6 @@ async def detect_composition_patterns(
     )
 
     @server.tool()
-    async def find_duplicates_advanced(
-        directory: str,
-        similarity_threshold: float = 0.9,
-        include_similar: bool = True,
-        recursive: bool = True,
-        extensions: list[str] | None = None
-    ) -> dict[str, Any]:
-        """
-        Find duplicate and similar images using perceptual hashing.
-        
-        Goes beyond exact duplicates to find visually similar images using:
-        - Multiple perceptual hash algorithms (average, perceptual, difference, wavelet)
-        - Color histogram analysis
-        - Visual feature extraction (edges, texture, brightness)
-        
-        Parameters:
-        - directory: Directory to scan
-        - similarity_threshold: Similarity score threshold (0.8-1.0)
-        - include_similar: Find similar images, not just exact duplicates
-        - recursive: Scan subdirectories
-        - extensions: Image extensions to scan (default: common formats)
-        
-        Returns duplicate groups with similarity scores and space savings.
-        """
-        from .deduplication import DuplicateFinder
-
-        try:
-            scan_dir = Path(directory).expanduser().resolve()
-            if not scan_dir.exists():
-                return {
-                    "success": False,
-                    "error": "Directory not found",
-                    "message": f"Directory does not exist: {directory}"
-                }
-
-            # Create finder
-            finder = DuplicateFinder(similarity_threshold=similarity_threshold)
-
-            # Scan directory
-            exact_count, similar_count = finder.scan_directory(
-                scan_dir,
-                recursive=recursive,
-                extensions=set(extensions) if extensions else None
-            )
-
-            # Get report
-            report = finder.get_duplicate_report()
-
-            # Add summary
-            report['summary'] = {
-                'exact_duplicates_found': exact_count,
-                'similar_images_found': similar_count if include_similar else 0,
-                'total_duplicates': exact_count + (similar_count if include_similar else 0),
-                'potential_space_savings_mb': report['potential_savings'] / 1_000_000
-            }
-
-            return {
-                "success": True,
-                "message": f"Found {exact_count} exact duplicates and {similar_count} similar images",
-                "data": report
-            }
-
-        except Exception as e:
-            logger.error(f"Duplicate detection failed: {e}")
-            return {"success": False, "error": str(e), "message": "Failed to find duplicates"}
-
-    @server.tool()
-    async def remove_duplicates(
-        duplicate_report: dict[str, Any],
-        strategy: str = "safe",
-        backup_dir: str | None = None,
-        dry_run: bool = True
-    ) -> dict[str, Any]:
-        """
-        Remove duplicate images based on scan results.
-        
-        Parameters:
-        - duplicate_report: Report from find_duplicates_advanced
-        - strategy: Removal strategy (safe=exact only, aggressive=include similar)
-        - backup_dir: Optional backup directory (moves instead of deleting)
-        - dry_run: If True, only preview what would be removed
-        
-        Returns removal statistics.
-        """
-        from .deduplication import DuplicateFinder
-
-        try:
-            # Recreate finder from report
-            finder = DuplicateFinder()
-
-            # Restore state from report
-            # This is a simplified version - in production, save/load full state
-            for group in duplicate_report.get('exact_duplicates', {}).get('groups', []):
-                master = Path(group['master'])
-                duplicates = [Path(p) for p in group['duplicates']]
-                file_hash = group.get('hash', 'unknown')
-                finder.exact_duplicates[file_hash] = [master] + duplicates
-
-            # Configure removal
-            remove_similar = strategy == "aggressive"
-            backup_path = Path(backup_dir) if backup_dir else None
-
-            # Remove duplicates
-            stats = finder.remove_duplicates(
-                dry_run=dry_run,
-                backup_dir=backup_path,
-                remove_similar=remove_similar
-            )
-
-            return {
-                "success": True,
-                "message": f"{'Would remove' if dry_run else 'Removed'} {stats['exact_removed']} duplicates",
-                "data": {
-                    "stats": stats,
-                    "space_freed_mb": stats['space_freed'] / 1_000_000,
-                    "dry_run": dry_run,
-                    "backup_location": str(backup_path) if backup_path else None
-                }
-            }
-
-        except Exception as e:
-            logger.error(f"Duplicate removal failed: {e}")
-            return {"success": False, "error": str(e), "message": "Failed to remove duplicates"}
-
-    @server.tool()
-    async def build_similarity_index(
-        directories: list[str],
-        output_path: str | None = None,
-        index_type: str = "IVF"
-    ) -> dict[str, Any]:
-        """
-        Build fast similarity search index for image collection.
-        
-        Creates a FAISS index for lightning-fast similarity searches across
-        thousands of images. Useful for finding similar shots, variations,
-        or inspiration from your collection.
-        
-        Parameters:
-        - directories: List of directories to index
-        - output_path: Where to save the index (default: ~/.alice/similarity_index)
-        - index_type: Index type (Flat=exact, IVF=fast, HNSW=balanced)
-        
-        Returns index statistics and save location.
-        """
-        from .deduplication import SimilarityIndex
-
-        try:
-            # Collect all images
-            image_paths = []
-            for directory in directories:
-                scan_dir = Path(directory).expanduser().resolve()
-                if scan_dir.exists():
-                    for ext in ['.jpg', '.jpeg', '.png', '.webp']:
-                        image_paths.extend(scan_dir.rglob(f"*{ext}"))
-                        image_paths.extend(scan_dir.rglob(f"*{ext.upper()}"))
-
-            if not image_paths:
-                return {
-                    "success": False,
-                    "message": "No images found in specified directories"
-                }
-
-            # Create index
-            index = SimilarityIndex(index_type=index_type)
-
-            # Build index
-            cache_dir = Path.home() / ".alice" / "cache" / "similarity"
-            indexed_count = index.build_index(image_paths, cache_dir=cache_dir)
-
-            # Save index
-            if output_path:
-                index_path = Path(output_path)
-            else:
-                index_path = Path.home() / ".alice" / "similarity_index"
-
-            index_path.parent.mkdir(parents=True, exist_ok=True)
-            index.save_index(index_path)
-
-            return {
-                "success": True,
-                "message": f"Built similarity index for {indexed_count} images",
-                "data": {
-                    "total_images": len(image_paths),
-                    "indexed_images": indexed_count,
-                    "index_type": index_type,
-                    "index_location": str(index_path),
-                    "cache_location": str(cache_dir)
-                }
-            }
-
-        except Exception as e:
-            logger.error(f"Index building failed: {e}")
-            return {"success": False, "error": str(e), "message": "Failed to build similarity index"}
-
-    @server.tool()
-    async def search_similar_advanced(
-        query_image: str,
-        index_path: str | None = None,
-        k: int = 20,
-        min_similarity: float = 0.7
-    ) -> dict[str, Any]:
-        """
-        Find visually similar images using similarity index.
-        
-        Ultra-fast similarity search across your entire collection using
-        the pre-built index. Great for finding variations, similar compositions,
-        or images with matching visual styles.
-        
-        Parameters:
-        - query_image: Path to query image
-        - index_path: Path to similarity index (uses default if not specified)
-        - k: Number of results to return
-        - min_similarity: Minimum similarity score (0-1)
-        
-        Returns similar images with similarity scores.
-        """
-        from .deduplication import SimilarityIndex
-
-        try:
-            query_path = Path(query_image).expanduser().resolve()
-            if not query_path.exists():
-                return {
-                    "success": False,
-                    "error": "Query image not found",
-                    "message": f"Image does not exist: {query_image}"
-                }
-
-            # Load index
-            if index_path:
-                idx_path = Path(index_path)
-            else:
-                idx_path = Path.home() / ".alice" / "similarity_index"
-
-            if not idx_path.with_suffix('.faiss').exists():
-                return {
-                    "success": False,
-                    "error": "Index not found",
-                    "message": "Please build similarity index first with build_similarity_index"
-                }
-
-            # Create and load index
-            index = SimilarityIndex()
-            index.load_index(idx_path)
-
-            # Search
-            results = index.search(query_path, k=k, include_self=False)
-
-            # Filter by similarity
-            filtered_results = [
-                {
-                    "path": str(r.path),
-                    "similarity": round(r.similarity, 3),
-                    "distance": round(r.distance, 3)
-                }
-                for r in results
-                if r.similarity >= min_similarity
-            ]
-
-            return {
-                "success": True,
-                "message": f"Found {len(filtered_results)} similar images",
-                "data": {
-                    "query_image": str(query_path),
-                    "results": filtered_results,
-                    "total_searched": index.index.ntotal if index.index else 0
-                }
-            }
-
-        except Exception as e:
-            logger.error(f"Similarity search failed: {e}")
-            return {"success": False, "error": str(e), "message": "Failed to search similar images"}
-
-    @server.tool()
-    async def find_image_clusters(
-        index_path: str | None = None,
-        min_cluster_size: int = 3,
-        max_distance: float = 0.5
-    ) -> dict[str, Any]:
-        """
-        Automatically find clusters of similar images.
-        
-        Discovers groups of visually similar images in your collection.
-        Useful for finding duplicate sessions, similar shots, or
-        organizing by visual style.
-        
-        Parameters:
-        - index_path: Path to similarity index
-        - min_cluster_size: Minimum images per cluster
-        - max_distance: Maximum distance within cluster (lower = more similar)
-        
-        Returns clusters of similar images.
-        """
-        from .deduplication import SimilarityIndex
-
-        try:
-            # Load index
-            if index_path:
-                idx_path = Path(index_path)
-            else:
-                idx_path = Path.home() / ".alice" / "similarity_index"
-
-            if not idx_path.with_suffix('.faiss').exists():
-                return {
-                    "success": False,
-                    "error": "Index not found",
-                    "message": "Please build similarity index first"
-                }
-
-            # Create and load index
-            index = SimilarityIndex()
-            index.load_index(idx_path)
-
-            # Find clusters
-            clusters = index.find_clusters(
-                min_cluster_size=min_cluster_size,
-                max_distance=max_distance
-            )
-
-            # Format results
-            formatted_clusters = []
-            for i, cluster in enumerate(clusters):
-                formatted_clusters.append({
-                    "cluster_id": i + 1,
-                    "size": len(cluster),
-                    "images": cluster[:20]  # Limit for response size
-                })
-
-            return {
-                "success": True,
-                "message": f"Found {len(clusters)} image clusters",
-                "data": {
-                    "clusters": formatted_clusters,
-                    "total_clusters": len(clusters),
-                    "total_images_clustered": sum(len(c) for c in clusters),
-                    "settings": {
-                        "min_cluster_size": min_cluster_size,
-                        "max_distance": max_distance
-                    }
-                }
-            }
-
-        except Exception as e:
-            logger.error(f"Cluster finding failed: {e}")
-            return {"success": False, "error": str(e), "message": "Failed to find clusters"}
-
-    @server.tool()
     async def list_plugins() -> dict[str, Any]:
         """
         List all available plugins.
@@ -5201,8 +4776,8 @@ def main():
     logger.info("  - find_duplicates_advanced: Find exact and similar images with perceptual hashing")
     logger.info("  - remove_duplicates: Remove duplicate images with backup option")
     logger.info("  - build_similarity_index: Build fast similarity search index")
-    logger.info("  - search_similar_advanced: Ultra-fast similarity search")
-    logger.info("  - find_image_clusters: Auto-discover clusters of similar images")
+    logger.info("  - find_similar_images: Find images similar to a given image")
+    logger.info("  - get_deduplication_report: Generate comprehensive deduplication analysis")
     logger.info("  - list_plugins: List all available plugins")
     logger.info("  - load_plugin: Load a plugin from file or module")
     logger.info("  - use_plugin_provider: Generate content with plugin provider")
