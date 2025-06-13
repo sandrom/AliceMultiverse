@@ -111,6 +111,13 @@ You're welcome to fork and adapt it for your needs, but be aware that I make cha
 - "Generate a deduplication report with recommendations"
 - "Build a similarity index for fast duplicate detection"
 
+**B-Roll Suggestions (NEW):**
+- "Suggest b-roll for my documentary timeline"
+- "Auto-insert b-roll to enhance visual interest"
+- "Find b-roll matching the mood of this scene"
+- "Generate a b-roll shot list for my project"
+- "Analyze which scenes need cutaway footage"
+
 ## 📦 Requirements
 
 ### System Dependencies
@@ -166,6 +173,7 @@ I work with multiple AI generation tools daily (Midjourney, DALL-E, Stable Diffu
 - **🎨 Style Analysis**: Understand and categorize your creative outputs
 - **🎬 Multi-Provider Video Generation**: Create videos with 7+ AI providers
 - **🔄 Advanced Deduplication**: Find and remove duplicates with perceptual hashing
+- **🎥 Intelligent B-Roll Suggestions**: Automatically suggest and place supplementary footage based on context and pacing
 
 ## 🚀 Getting Started
 
