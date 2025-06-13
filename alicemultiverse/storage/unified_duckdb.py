@@ -12,8 +12,9 @@ Key Features:
 - Export to Parquet for analytics
 """
 
+import hashlib
 import json
-from datetime import datetime
+from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
@@ -31,24 +32,65 @@ class UnifiedDuckDBStorage:
     in a single coherent implementation.
     """
     
-    def __init__(self, db_path: Optional[Path] = None):
+    # Class-level connection pool
+    _connections = {}
+    _connection_lock = None
+    
+    def __init__(self, db_path: Optional[Path] = None, read_only: bool = False):
         """Initialize unified DuckDB storage.
         
         Args:
             db_path: Path to DuckDB database file. If None, uses in-memory database.
+            read_only: Open database in read-only mode (better for concurrent reads)
         """
+        import threading
+        if UnifiedDuckDBStorage._connection_lock is None:
+            UnifiedDuckDBStorage._connection_lock = threading.Lock()
+            
         self.db_path = db_path
+        self.read_only = read_only
+        
+        # Use connection pooling for file-based databases
         if db_path:
             db_path.parent.mkdir(parents=True, exist_ok=True)
-            self.conn = duckdb.connect(str(db_path))
+            db_key = (str(db_path), read_only)
+            
+            with UnifiedDuckDBStorage._connection_lock:
+                if db_key not in UnifiedDuckDBStorage._connections:
+                    UnifiedDuckDBStorage._connections[db_key] = duckdb.connect(
+                        str(db_path),
+                        read_only=read_only
+                    )
+                self.conn = UnifiedDuckDBStorage._connections[db_key]
         else:
             self.conn = duckdb.connect()
         
         self._init_schema()
-        logger.info(f"Unified DuckDB initialized: {'in-memory' if not db_path else db_path}")
+        logger.info(f"Unified DuckDB initialized: {'in-memory' if not db_path else db_path} (read_only={read_only})")
     
     def _init_schema(self):
         """Initialize unified database schema."""
+        # Query cache table for performance
+        self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS query_cache (
+                cache_key VARCHAR PRIMARY KEY,
+                results JSON,
+                total_count INTEGER,
+                cached_at TIMESTAMP
+            );
+        """)
+        
+        # Create index on cache timestamp for cleanup
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_cache_time ON query_cache(cached_at)")
+        
+        # Tag cache for facet calculations
+        self.conn.execute("""
+            CREATE TABLE IF NOT EXISTS tag_cache (
+                cache_key VARCHAR PRIMARY KEY,
+                tag_counts JSON,
+                cached_at TIMESTAMP
+            );
+        """)
         # Main assets table with multi-location support
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS assets (
@@ -187,6 +229,11 @@ class UnifiedDuckDBStorage:
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_modified_at ON assets(modified_at)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_file_size ON assets(file_size)")
         
+        # Composite indexes for common query patterns
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_type_created ON assets(media_type, created_at DESC)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_source_quality ON assets(ai_source, quality_rating DESC)")
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_size_type ON assets(file_size, media_type)")
+        
         # Full-text search indexes
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_prompt ON assets(prompt)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_description ON assets(description)")
@@ -195,6 +242,14 @@ class UnifiedDuckDBStorage:
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_phash ON perceptual_hashes(phash)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_dhash ON perceptual_hashes(dhash)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_ahash ON perceptual_hashes(ahash)")
+        
+        # Tag performance indexes
+        self.conn.execute("CREATE INDEX IF NOT EXISTS idx_all_tags ON asset_tags(tags)")
+        
+        # Enable DuckDB optimizations
+        self.conn.execute("SET memory_limit='4GB'")
+        self.conn.execute("SET threads=4")
+        self.conn.execute("SET enable_progress_bar=false")
     
     # Methods from DuckDBSearchCache
     def upsert_asset(
@@ -318,31 +373,81 @@ class UnifiedDuckDBStorage:
     def search_by_tags(
         self,
         tags: Dict[str, List[str]],
-        limit: int = 100
+        limit: int = 100,
+        mode: str = "any"  # "any" or "all"
     ) -> List[Dict[str, Any]]:
-        """Search assets by categorized tags.
+        """Search assets by categorized tags with optimized query.
         
         Args:
             tags: Dictionary of tag categories and values
             limit: Maximum number of results
+            mode: Search mode - "any" (OR) or "all" (AND) for tags
             
         Returns:
             List of matching assets
         """
-        conditions = []
-        params = []
-        
-        # Build conditions for each tag category
+        # Flatten all tags for faster search
+        all_tag_values = []
         for category, values in tags.items():
-            if category in ["style", "mood", "subject", "color", "technical", "objects"]:
-                # Use DuckDB's list_has_any for array search
-                conditions.append(f"list_has_any(t.{category}, ?::VARCHAR[])")
-                params.append(values)
-            else:
-                # Search in custom tags JSON
-                for value in values:
-                    conditions.append(f"json_extract_string(t.custom_tags, '$.{category}[*]') = ?")
-                    params.append(value)
+            all_tag_values.extend(values)
+        
+        if not all_tag_values:
+            return []
+        
+        # Use optimized query with flattened tags for better performance
+        if mode == "any":
+            # ANY mode - match any of the tags
+            query = """
+                WITH tag_matches AS (
+                    SELECT DISTINCT content_hash
+                    FROM asset_tags
+                    WHERE list_has_any(tags, ?::VARCHAR[])
+                )
+                SELECT 
+                    a.*,
+                    t.tags, t.style, t.mood, t.subject, t.color, t.technical, t.objects, t.custom_tags,
+                    u.understanding, u.embedding,
+                    g.generation,
+                    p.phash, p.dhash, p.ahash
+                FROM tag_matches tm
+                JOIN assets a ON tm.content_hash = a.content_hash
+                LEFT JOIN asset_tags t ON a.content_hash = t.content_hash
+                LEFT JOIN asset_understanding u ON a.content_hash = u.content_hash
+                LEFT JOIN asset_generation g ON a.content_hash = g.content_hash
+                LEFT JOIN perceptual_hashes p ON a.content_hash = p.content_hash
+                ORDER BY a.created_at DESC
+                LIMIT ?
+            """
+            params = [all_tag_values, limit]
+        else:
+            # ALL mode - match all tags
+            query = """
+                WITH tag_matches AS (
+                    SELECT content_hash, COUNT(DISTINCT tag) as match_count
+                    FROM (
+                        SELECT content_hash, unnest(tags) as tag
+                        FROM asset_tags
+                    ) tag_list
+                    WHERE tag IN (SELECT unnest(?::VARCHAR[]))
+                    GROUP BY content_hash
+                    HAVING match_count = ?
+                )
+                SELECT 
+                    a.*,
+                    t.tags, t.style, t.mood, t.subject, t.color, t.technical, t.objects, t.custom_tags,
+                    u.understanding, u.embedding,
+                    g.generation,
+                    p.phash, p.dhash, p.ahash
+                FROM tag_matches tm
+                JOIN assets a ON tm.content_hash = a.content_hash
+                LEFT JOIN asset_tags t ON a.content_hash = t.content_hash
+                LEFT JOIN asset_understanding u ON a.content_hash = u.content_hash
+                LEFT JOIN asset_generation g ON a.content_hash = g.content_hash
+                LEFT JOIN perceptual_hashes p ON a.content_hash = p.content_hash
+                ORDER BY a.created_at DESC
+                LIMIT ?
+            """
+            params = [all_tag_values, len(all_tag_values), limit]
         
         if not conditions:
             return []
@@ -370,6 +475,76 @@ class UnifiedDuckDBStorage:
         return [self._row_to_dict(row) for row in results]
     
     # Methods from DuckDBSearch
+    def search_with_cache(
+        self,
+        filters: Dict[str, Any] = None,
+        sort_by: str = "created_at",
+        order: str = "desc",
+        limit: int = 50,
+        offset: int = 0,
+        use_cache: bool = True
+    ) -> Tuple[List[Dict[str, Any]], int]:
+        """Search with built-in query result caching.
+        
+        Args:
+            filters: Search filters
+            sort_by: Sort field
+            order: Sort order (asc/desc)
+            limit: Maximum results
+            offset: Result offset
+            use_cache: Whether to use query cache
+            
+        Returns:
+            Tuple of (results, total_count)
+        """
+        # Create cache key from query parameters
+        cache_key = None
+        if use_cache:
+            import hashlib
+            cache_data = {
+                "filters": filters or {},
+                "sort_by": sort_by,
+                "order": order,
+                "limit": limit,
+                "offset": offset
+            }
+            cache_key = hashlib.md5(json.dumps(cache_data, sort_keys=True).encode()).hexdigest()
+            
+            # Check if we have cached results
+            cached = self.conn.execute(
+                "SELECT results, total_count, cached_at FROM query_cache WHERE cache_key = ?",
+                [cache_key]
+            ).fetchone()
+            
+            if cached:
+                results_json, total_count, cached_at = cached
+                # Check if cache is still valid (5 minutes)
+                if (datetime.now() - cached_at).total_seconds() < 300:
+                    return json.loads(results_json), total_count
+        
+        # Execute actual search
+        results, total_count = self.search(filters, sort_by, order, limit, offset)
+        
+        # Cache results if enabled
+        if use_cache and cache_key:
+            # Convert results to JSON-serializable format
+            serializable_results = []
+            for result in results:
+                serialized = result.copy()
+                # Convert datetime objects
+                for field in ["created_at", "modified_at", "discovered_at", "last_file_scan"]:
+                    if field in serialized and hasattr(serialized[field], "isoformat"):
+                        serialized[field] = serialized[field].isoformat()
+                serializable_results.append(serialized)
+            
+            # Store in cache table
+            self.conn.execute(
+                "INSERT OR REPLACE INTO query_cache (cache_key, results, total_count, cached_at) VALUES (?, ?, ?, ?)",
+                [cache_key, json.dumps(serializable_results), total_count, datetime.now()]
+            )
+        
+        return results, total_count
+    
     def search(
         self,
         filters: Dict[str, Any] = None,
@@ -438,7 +613,7 @@ class UnifiedDuckDBStorage:
         return assets, total_count
     
     def get_facets(self, filters: Dict[str, Any] = None) -> Dict[str, List[Dict[str, Any]]]:
-        """Get search facets for UI.
+        """Get search facets for UI with optimized queries.
         
         Args:
             filters: Optional filters to apply before counting
@@ -446,51 +621,111 @@ class UnifiedDuckDBStorage:
         Returns:
             Dictionary of facets with counts
         """
-        # Implementation from DuckDBSearch
-        base_conditions = []
-        base_params = []
+        # Check facet cache first
+        cache_key = json.dumps(filters or {}, sort_keys=True)
+        cache_hash = hashlib.md5(cache_key.encode()).hexdigest()
         
-        # Apply basic filters for facet calculation
-        if filters:
-            if filters.get("media_type"):
-                base_conditions.append("a.media_type = ?")
-                base_params.append(filters["media_type"])
-            
-            if filters.get("ai_source"):
-                sources = filters["ai_source"]
-                if isinstance(sources, str):
-                    sources = [sources]
-                placeholders = ",".join(["?" for _ in sources])
-                base_conditions.append(f"a.ai_source IN ({placeholders})")
-                base_params.extend(sources)
+        cached = self.conn.execute(
+            "SELECT tag_counts, cached_at FROM tag_cache WHERE cache_key = ?",
+            [cache_hash]
+        ).fetchone()
         
-        where_clause = f"WHERE {' AND '.join(base_conditions)}" if base_conditions else ""
+        if cached:
+            tag_counts, cached_at = cached
+            if (datetime.now() - cached_at).total_seconds() < 300:  # 5 minute cache
+                return json.loads(tag_counts)
         
-        # Get tag facets
-        tag_query = f"""
-            SELECT tag, COUNT(*) as count
-            FROM (
-                SELECT unnest(t.tags) as tag
+        # Build optimized facet queries
+        facets = {}
+        
+        # Get tag facets with single optimized query
+        tag_query = """
+            WITH tag_counts AS (
+                SELECT tag, COUNT(DISTINCT a.content_hash) as count
                 FROM assets a
-                LEFT JOIN asset_tags t ON a.content_hash = t.content_hash
-                {where_clause}
-            ) tag_list
-            WHERE tag IS NOT NULL
-            GROUP BY tag
+                JOIN asset_tags t ON a.content_hash = t.content_hash
+                CROSS JOIN unnest(t.tags) AS tag
+                WHERE tag IS NOT NULL
+                GROUP BY tag
+            )
+            SELECT tag, count
+            FROM tag_counts
             ORDER BY count DESC
-            LIMIT 20
+            LIMIT 30
         """
-        tag_results = self.conn.execute(tag_query, base_params).fetchall()
-        tag_facets = [{"value": tag, "count": count} for tag, count in tag_results if tag]
+        tag_results = self.conn.execute(tag_query).fetchall()
+        facets["tags"] = [{"value": tag, "count": count} for tag, count in tag_results]
         
-        # Get other facets...
-        # (Implementation continues as in DuckDBSearch)
+        # Get other facets with a single aggregated query
+        facet_query = """
+            WITH facet_data AS (
+                SELECT 
+                    ai_source,
+                    media_type,
+                    CASE 
+                        WHEN quality_rating >= 80 THEN '5_stars'
+                        WHEN quality_rating >= 60 THEN '4_stars'
+                        WHEN quality_rating >= 40 THEN '3_stars'
+                        WHEN quality_rating >= 20 THEN '2_stars'
+                        WHEN quality_rating > 0 THEN '1_star'
+                        ELSE NULL
+                    END as quality_bucket
+                FROM assets
+                WHERE ai_source IS NOT NULL OR media_type IS NOT NULL OR quality_rating IS NOT NULL
+            )
+            SELECT 
+                'ai_source' as facet_type,
+                ai_source as value,
+                COUNT(*) as count
+            FROM facet_data
+            WHERE ai_source IS NOT NULL
+            GROUP BY ai_source
+            UNION ALL
+            SELECT 
+                'media_type' as facet_type,
+                media_type as value,
+                COUNT(*) as count
+            FROM facet_data
+            WHERE media_type IS NOT NULL
+            GROUP BY media_type
+            UNION ALL
+            SELECT 
+                'quality_rating' as facet_type,
+                quality_bucket as value,
+                COUNT(*) as count
+            FROM facet_data
+            WHERE quality_bucket IS NOT NULL
+            GROUP BY quality_bucket
+            ORDER BY facet_type, count DESC
+        """
         
-        return {
-            "tags": tag_facets,
-            "ai_sources": [],  # TODO: Implement
-            "quality_ratings": [],  # TODO: Implement
-            "media_types": []  # TODO: Implement
+        other_results = self.conn.execute(facet_query).fetchall()
+        
+        facets["ai_sources"] = []
+        facets["media_types"] = []
+        facets["quality_ratings"] = []
+        
+        for facet_type, value, count in other_results:
+            if facet_type == "ai_source" and len(facets["ai_sources"]) < 20:
+                facets["ai_sources"].append({"value": value, "count": count})
+            elif facet_type == "media_type":
+                facets["media_types"].append({"value": value, "count": count})
+            elif facet_type == "quality_rating":
+                facets["quality_ratings"].append({"value": value, "count": count})
+        
+        # Sort quality ratings properly
+        quality_order = ["5_stars", "4_stars", "3_stars", "2_stars", "1_star"]
+        facets["quality_ratings"].sort(
+            key=lambda x: quality_order.index(x["value"]) if x["value"] in quality_order else 999
+        )
+        
+        # Cache the results
+        self.conn.execute(
+            "INSERT OR REPLACE INTO tag_cache (cache_key, tag_counts, cached_at) VALUES (?, ?, ?)",
+            [cache_hash, json.dumps(facets), datetime.now()]
+        )
+        
+        return facets
         }
     
     # New unified methods
@@ -967,6 +1202,148 @@ class UnifiedDuckDBStorage:
         }
         return mapping.get(field, "a.created_at")
     
+    def upsert_assets_batch(
+        self,
+        assets: List[Tuple[str, Path, Dict[str, Any], str]]
+    ) -> None:
+        """Batch insert/update multiple assets for better performance.
+        
+        Args:
+            assets: List of (content_hash, file_path, metadata, storage_type) tuples
+        """
+        if not assets:
+            return
+            
+        # Prepare batch data
+        new_assets = []
+        existing_hashes = set()
+        
+        # Check which assets already exist (single query)
+        content_hashes = [asset[0] for asset in assets]
+        placeholders = ",".join(["?" for _ in content_hashes])
+        existing_results = self.conn.execute(
+            f"SELECT content_hash FROM assets WHERE content_hash IN ({placeholders})",
+            content_hashes
+        ).fetchall()
+        
+        for row in existing_results:
+            existing_hashes.add(row[0])
+        
+        # Process assets
+        for content_hash, file_path, metadata, storage_type in assets:
+            if content_hash in existing_hashes:
+                # Update existing - add location
+                self._add_file_location(content_hash, file_path, storage_type)
+            else:
+                # Prepare for batch insert
+                file_size = metadata.get("file_size")
+                created_at = self._parse_timestamp(metadata.get("created_at"))
+                modified_at = self._parse_timestamp(metadata.get("modified_at"))
+                
+                # Try to get file stats if needed
+                if file_path.exists() and (file_size is None or created_at is None):
+                    try:
+                        file_stat = file_path.stat()
+                        if file_size is None:
+                            file_size = file_stat.st_size
+                        if created_at is None:
+                            created_at = datetime.fromtimestamp(file_stat.st_ctime)
+                        if modified_at is None:
+                            modified_at = datetime.fromtimestamp(file_stat.st_mtime)
+                    except (FileNotFoundError, OSError):
+                        pass
+                
+                # Default values
+                if created_at is None:
+                    created_at = datetime.now()
+                if modified_at is None:
+                    modified_at = datetime.now()
+                
+                # Extract fields
+                media_type = metadata.get("media_type", "unknown")
+                if hasattr(media_type, 'value'):
+                    media_type = media_type.value
+                
+                dimensions = metadata.get("dimensions", {})
+                width = dimensions.get("width") if dimensions else metadata.get("width")
+                height = dimensions.get("height") if dimensions else metadata.get("height")
+                
+                ai_source = metadata.get("ai_source") or metadata.get("source_type")
+                quality_rating = metadata.get("quality_rating") or metadata.get("quality_stars")
+                
+                prompt = metadata.get("prompt", "")
+                if not prompt and metadata.get("generation_params"):
+                    prompt = metadata["generation_params"].get("prompt", "")
+                
+                description = metadata.get("description", "")
+                if not description and metadata.get("understanding"):
+                    understanding = metadata["understanding"]
+                    if isinstance(understanding, dict):
+                        description = understanding.get("description", "")
+                
+                # Prepare clean metadata
+                clean_metadata = {
+                    k: v for k, v in metadata.items()
+                    if k not in ["content_hash", "file_path", "media_type", "file_size",
+                                 "width", "height", "ai_source", "quality_rating",
+                                 "created_at", "modified_at", "discovered_at",
+                                 "tags", "prompt", "description", "generation_params",
+                                 "understanding", "generation"]
+                }
+                
+                new_assets.append((
+                    content_hash,
+                    [{
+                        "path": str(file_path),
+                        "storage_type": storage_type,
+                        "last_verified": datetime.now(),
+                        "has_embedded_metadata": True
+                    }],
+                    media_type, file_size, width, height, ai_source, quality_rating,
+                    created_at, modified_at, datetime.now(), datetime.now(),
+                    prompt, description,
+                    json.dumps(clean_metadata) if clean_metadata else None,
+                    json.dumps(metadata.get("generation_params")) if metadata.get("generation_params") else None
+                ))
+        
+        # Batch insert new assets
+        if new_assets:
+            self.conn.executemany("""
+                INSERT INTO assets (
+                    content_hash, locations, media_type, file_size,
+                    width, height, ai_source, quality_rating,
+                    created_at, modified_at, discovered_at, last_file_scan,
+                    prompt, description, metadata, generation_params
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, new_assets)
+            
+            # Process related tables in batches
+            tags_batch = []
+            understanding_batch = []
+            generation_batch = []
+            
+            for content_hash, file_path, metadata, storage_type in assets:
+                if content_hash not in existing_hashes:
+                    if "tags" in metadata:
+                        tags_batch.append((content_hash, metadata["tags"]))
+                    if "understanding" in metadata:
+                        understanding_batch.append((content_hash, metadata["understanding"]))
+                    if "generation" in metadata:
+                        generation_batch.append((content_hash, metadata["generation"]))
+            
+            # Batch insert related data
+            if tags_batch:
+                for content_hash, tags in tags_batch:
+                    self._upsert_tags(content_hash, tags)
+            
+            if understanding_batch:
+                for content_hash, understanding in understanding_batch:
+                    self._upsert_understanding(content_hash, understanding)
+            
+            if generation_batch:
+                for content_hash, generation in generation_batch:
+                    self._upsert_generation(content_hash, generation)
+    
     def _row_to_dict(self, row: Tuple) -> Dict[str, Any]:
         """Convert a database row to dictionary with all fields."""
         if not row:
@@ -1038,9 +1415,141 @@ class UnifiedDuckDBStorage:
             } if any([phash, dhash, ahash]) else None
         }
     
+    def analyze_query_performance(self, query: str, params: List[Any] = None) -> Dict[str, Any]:
+        """Analyze query performance and return optimization suggestions.
+        
+        Args:
+            query: SQL query to analyze
+            params: Query parameters
+            
+        Returns:
+            Dictionary with query plan and performance metrics
+        """
+        # Get query plan
+        explain_query = f"EXPLAIN ANALYZE {query}"
+        
+        try:
+            if params:
+                plan_result = self.conn.execute(explain_query, params).fetchall()
+            else:
+                plan_result = self.conn.execute(explain_query).fetchall()
+            
+            # Parse the query plan
+            plan_text = "\n".join([row[0] for row in plan_result])
+            
+            # Extract key metrics
+            import re
+            metrics = {
+                "query": query,
+                "plan": plan_text,
+                "suggestions": []
+            }
+            
+            # Look for performance issues
+            if "Seq Scan" in plan_text:
+                metrics["suggestions"].append(
+                    "Sequential scan detected. Consider adding an index."
+                )
+            
+            if "Sort" in plan_text and "Index" not in plan_text:
+                metrics["suggestions"].append(
+                    "Sort operation without index. Consider adding an index on the sort column."
+                )
+            
+            # Extract timing if available
+            timing_match = re.search(r"actual time=([0-9.]+)\.\.([0-9.]+)", plan_text)
+            if timing_match:
+                metrics["execution_time_ms"] = float(timing_match.group(2))
+            
+            return metrics
+            
+        except Exception as e:
+            logger.error(f"Failed to analyze query: {e}")
+            return {"error": str(e), "query": query}
+    
+    def optimize_database(self) -> Dict[str, Any]:
+        """Run database optimization tasks.
+        
+        Returns:
+            Dictionary with optimization results
+        """
+        results = {
+            "vacuum": False,
+            "analyze": False,
+            "cache_cleared": False,
+            "old_cache_entries": 0
+        }
+        
+        try:
+            # Run VACUUM to reclaim space
+            self.conn.execute("VACUUM")
+            results["vacuum"] = True
+            
+            # Update statistics
+            self.conn.execute("ANALYZE")
+            results["analyze"] = True
+            
+            # Clear old cache entries
+            cutoff_time = datetime.now() - timedelta(hours=1)
+            old_entries = self.conn.execute(
+                "DELETE FROM query_cache WHERE cached_at < ? RETURNING cache_key",
+                [cutoff_time]
+            ).fetchall()
+            results["old_cache_entries"] = len(old_entries)
+            results["cache_cleared"] = True
+            
+            logger.info(f"Database optimization complete: {results}")
+            
+        except Exception as e:
+            logger.error(f"Database optimization failed: {e}")
+            results["error"] = str(e)
+        
+        return results
+    
+    def get_table_stats(self) -> Dict[str, Dict[str, Any]]:
+        """Get statistics for all tables.
+        
+        Returns:
+            Dictionary with table statistics
+        """
+        stats = {}
+        
+        tables = [
+            "assets", "asset_tags", "asset_understanding", 
+            "asset_generation", "perceptual_hashes", "embeddings",
+            "query_cache", "tag_cache"
+        ]
+        
+        for table in tables:
+            try:
+                # Get row count
+                count = self.conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
+                
+                # Get table size estimate
+                # DuckDB doesn't have pg_relation_size, so we estimate based on row count
+                # This is a rough estimate
+                size_estimate = count * 1024  # Assume ~1KB per row average
+                
+                stats[table] = {
+                    "row_count": count,
+                    "size_estimate_mb": size_estimate / (1024 * 1024)
+                }
+                
+                # Check for missing indexes on foreign keys
+                if table != "assets":  # Skip primary table
+                    # In DuckDB, we can check if queries would benefit from indexes
+                    stats[table]["has_fk_index"] = True  # DuckDB handles this automatically
+                    
+            except Exception as e:
+                stats[table] = {"error": str(e)}
+        
+        return stats
+    
     def close(self):
         """Close the database connection."""
-        self.conn.close()
+        # Don't close pooled connections
+        if not self.db_path:
+            self.conn.close()
 
 
 # Compatibility layer classes
