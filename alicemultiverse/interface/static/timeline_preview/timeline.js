@@ -276,6 +276,9 @@ class TimelineManager {
         
         // Inspector
         document.getElementById('apply-changes').addEventListener('click', () => this.applyClipChanges());
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => this.handleKeyboardShortcuts(e));
     }
     
     startDrag(event, clipIndex) {
@@ -489,6 +492,254 @@ class TimelineManager {
         const status = document.getElementById('status');
         status.textContent = `Error: ${message}`;
         status.style.color = '#cc0000';
+    }
+    
+    handleKeyboardShortcuts(event) {
+        // Don't handle shortcuts when typing in input fields
+        if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+            return;
+        }
+        
+        // Check for modifier keys
+        const ctrl = event.ctrlKey || event.metaKey; // Cmd on Mac
+        const shift = event.shiftKey;
+        const alt = event.altKey;
+        
+        switch(event.key) {
+            // Timeline editing shortcuts
+            case 'Delete':
+            case 'Backspace':
+                if (this.selectedClip !== null) {
+                    event.preventDefault();
+                    this.deleteClip(this.selectedClip);
+                }
+                break;
+                
+            case 'd':
+                if (ctrl && this.selectedClip !== null) {
+                    event.preventDefault();
+                    this.duplicateClip(this.selectedClip);
+                }
+                break;
+                
+            // Undo/Redo
+            case 'z':
+                if (ctrl && !shift) {
+                    event.preventDefault();
+                    this.undo();
+                } else if (ctrl && shift) {
+                    event.preventDefault();
+                    this.redo();
+                }
+                break;
+                
+            case 'y':
+                if (ctrl) {
+                    event.preventDefault();
+                    this.redo();
+                }
+                break;
+                
+            // Selection
+            case 'a':
+                if (ctrl) {
+                    event.preventDefault();
+                    this.selectAllClips();
+                }
+                break;
+                
+            case 'Escape':
+                event.preventDefault();
+                this.deselectAllClips();
+                this.hideInspector();
+                this.hideExportDialog();
+                break;
+                
+            // Navigation
+            case 'ArrowUp':
+                if (this.selectedClip !== null && this.selectedClip > 0) {
+                    event.preventDefault();
+                    this.selectClip(this.selectedClip - 1);
+                }
+                break;
+                
+            case 'ArrowDown':
+                if (this.selectedClip !== null && this.selectedClip < this.timeline.clips.length - 1) {
+                    event.preventDefault();
+                    this.selectClip(this.selectedClip + 1);
+                }
+                break;
+                
+            // Move clips with shift+arrows
+            case 'ArrowLeft':
+                if (shift && this.selectedClip !== null && this.selectedClip > 0) {
+                    event.preventDefault();
+                    this.swapClips(this.selectedClip, this.selectedClip - 1);
+                    this.selectedClip--;
+                }
+                break;
+                
+            case 'ArrowRight':
+                if (shift && this.selectedClip !== null && this.selectedClip < this.timeline.clips.length - 1) {
+                    event.preventDefault();
+                    this.swapClips(this.selectedClip, this.selectedClip + 1);
+                    this.selectedClip++;
+                }
+                break;
+                
+            // Export shortcuts
+            case 'e':
+                if (ctrl) {
+                    event.preventDefault();
+                    this.showExportDialog();
+                }
+                break;
+                
+            case 's':
+                if (ctrl) {
+                    event.preventDefault();
+                    this.saveTimeline();
+                }
+                break;
+                
+            // Inspector
+            case 'i':
+                if (this.selectedClip !== null) {
+                    event.preventDefault();
+                    this.showInspector(this.selectedClip);
+                }
+                break;
+                
+            // Help
+            case '?':
+            case 'h':
+                if (shift || event.key === 'h') {
+                    event.preventDefault();
+                    this.showKeyboardHelp();
+                }
+                break;
+        }
+    }
+    
+    // Helper methods for keyboard shortcuts
+    selectAllClips() {
+        // Add selection UI state for all clips
+        const clips = document.querySelectorAll('.timeline-clip');
+        clips.forEach(clip => clip.classList.add('selected'));
+        this.showStatus('All clips selected');
+    }
+    
+    deselectAllClips() {
+        const clips = document.querySelectorAll('.timeline-clip');
+        clips.forEach(clip => clip.classList.remove('selected'));
+        this.selectedClip = null;
+        this.showStatus('Selection cleared');
+    }
+    
+    duplicateClip(index) {
+        if (index < 0 || index >= this.timeline.clips.length) return;
+        
+        const clip = this.timeline.clips[index];
+        const newClip = { ...clip };
+        
+        // Insert after current clip
+        this.timeline.clips.splice(index + 1, 0, newClip);
+        
+        // Send update
+        this.sendTimelineUpdate();
+        this.renderTimeline();
+        this.showStatus(`Duplicated clip ${index + 1}`);
+    }
+    
+    deleteClip(index) {
+        if (index < 0 || index >= this.timeline.clips.length) return;
+        
+        // Store for undo
+        const deletedClip = this.timeline.clips[index];
+        
+        // Remove clip
+        this.timeline.clips.splice(index, 1);
+        
+        // Update selection
+        if (this.selectedClip === index) {
+            this.selectedClip = null;
+        } else if (this.selectedClip > index) {
+            this.selectedClip--;
+        }
+        
+        // Send update
+        this.sendTimelineUpdate();
+        this.renderTimeline();
+        this.showStatus(`Deleted clip ${index + 1}`);
+    }
+    
+    swapClips(index1, index2) {
+        if (index1 < 0 || index1 >= this.timeline.clips.length ||
+            index2 < 0 || index2 >= this.timeline.clips.length) return;
+            
+        // Swap clips
+        [this.timeline.clips[index1], this.timeline.clips[index2]] = 
+        [this.timeline.clips[index2], this.timeline.clips[index1]];
+        
+        // Send update
+        this.sendTimelineUpdate();
+        this.renderTimeline();
+        this.showStatus(`Swapped clips ${index1 + 1} and ${index2 + 1}`);
+    }
+    
+    selectClip(index) {
+        if (index < 0 || index >= this.timeline.clips.length) return;
+        
+        // Deselect all
+        const clips = document.querySelectorAll('.timeline-clip');
+        clips.forEach(clip => clip.classList.remove('selected'));
+        
+        // Select new clip
+        this.selectedClip = index;
+        const clipElement = clips[index];
+        if (clipElement) {
+            clipElement.classList.add('selected');
+            clipElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+    
+    saveTimeline() {
+        // Send save request via WebSocket
+        this.ws.send(JSON.stringify({
+            type: 'save',
+            session_id: this.sessionId
+        }));
+        this.showStatus('Timeline saved');
+    }
+    
+    showKeyboardHelp() {
+        const helpText = `
+Keyboard Shortcuts:
+
+Timeline Editing:
+  Delete/Backspace - Delete selected clip
+  Ctrl+D - Duplicate selected clip
+  Ctrl+A - Select all clips
+  Escape - Clear selection
+  ↑/↓ - Navigate clips
+  Shift+←/→ - Move clip left/right
+
+Playback (in video preview):
+  Space - Play/Pause
+  ←/→ - Seek backward/forward
+  Home/End - Jump to start/end
+
+General:
+  Ctrl+Z - Undo
+  Ctrl+Shift+Z / Ctrl+Y - Redo
+  Ctrl+E - Export timeline
+  Ctrl+S - Save timeline
+  I - Show clip inspector
+  ? or H - Show this help
+
+Note: Use Cmd instead of Ctrl on Mac`;
+        
+        alert(helpText);
     }
 }
 

@@ -130,6 +130,40 @@ await update_preview_timeline(
 )
 ```
 
+### Keyboard Shortcuts
+
+The timeline preview interface supports the following keyboard shortcuts for efficient navigation and editing:
+
+**Playback Controls:**
+- `Space` - Play/Pause timeline
+- `←` (Left Arrow) - Step backward one frame
+- `→` (Right Arrow) - Step forward one frame
+- `Home` - Jump to beginning of timeline
+- `End` - Jump to end of timeline
+
+**Editing:**
+- `Ctrl+Z` / `Cmd+Z` - Undo last action
+- `Ctrl+Y` / `Cmd+Y` - Redo last undone action
+- `Delete` - Delete selected clip
+- `Ctrl+A` / `Cmd+A` - Select all clips
+
+**Navigation:**
+- `+` / `=` - Zoom in timeline
+- `-` - Zoom out timeline
+- `0` - Reset zoom to fit timeline
+- `Shift+Scroll` - Horizontal scroll through timeline
+- `Ctrl+Scroll` / `Cmd+Scroll` - Zoom in/out timeline
+
+**Export:**
+- `Ctrl+E` / `Cmd+E` - Open export dialog
+- `Ctrl+S` / `Cmd+S` - Quick export to JSON
+
+**View:**
+- `F` - Toggle fullscreen preview
+- `G` - Toggle grid overlay
+- `M` - Toggle marker visibility
+- `W` - Toggle waveform display (when audio track present)
+
 ## Exporting Your Timeline
 
 ### Export Formats
@@ -218,7 +252,6 @@ Planned features include:
 - Real-time video playback in preview
 - Visual transition effects
 - Beat grid overlay
-- Keyboard shortcuts
 - Auto-save functionality
 - Cloud preview sharing
 
