@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 import numpy as np
 
-from ..core.metadata_cache import MetadataCache
+from ..core.unified_cache import UnifiedCache
 from ..understanding.providers import get_vision_provider
 from ..workflows.models import Timeline, TimelineClip
 
@@ -105,7 +105,7 @@ class FlowAnalyzer:
     
     def __init__(
         self,
-        metadata_cache: Optional[MetadataCache] = None,
+        metadata_cache: Optional[UnifiedCache] = None,
         vision_provider: Optional[str] = None,
     ):
         """Initialize the flow analyzer.
@@ -114,7 +114,7 @@ class FlowAnalyzer:
             metadata_cache: Cache for clip metadata
             vision_provider: Vision provider for analysis
         """
-        self.metadata_cache = metadata_cache or MetadataCache()
+        self.metadata_cache = metadata_cache or UnifiedCache(Path.cwd())
         self.vision_provider = vision_provider
         
         # Analysis cache

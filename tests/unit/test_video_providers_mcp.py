@@ -164,22 +164,18 @@ async def test_compare_video_providers():
         
         mock_get.side_effect = get_provider_mock
         
-        # Also need to mock the Veo3 import
-        with patch("alicemultiverse.mcp_server.generate_veo3_video", 
-                   new=AsyncMock(return_value={"success": True, "cost": 0.04})):
-            
-            result = await compare_video_providers(
-                prompt="Test comparison",
-                providers=["runway", "pika"],
-                compare_cost=True,
-                compare_speed=True
-            )
-            
-            assert result["prompt"] == "Test comparison"
-            assert result["summary"]["total_providers"] == 2
-            assert result["summary"]["successful"] >= 0
-            assert "cost_analysis" in result
-            assert "speed_analysis" in result
+        result = await compare_video_providers(
+            prompt="Test comparison",
+            providers=["runway", "pika"],
+            compare_cost=True,
+            compare_speed=True
+        )
+        
+        assert result["prompt"] == "Test comparison"
+        assert result["summary"]["total_providers"] == 2
+        assert result["summary"]["successful"] >= 0
+        assert "cost_analysis" in result
+        assert "speed_analysis" in result
 
 
 @pytest.mark.asyncio
