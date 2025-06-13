@@ -6,13 +6,14 @@
 
 **New Features:**
 - **Enhanced Video Generation**: 7 providers integrated (Runway, Pika, Luma, MiniMax, Veo3, Kling, Hedra)
+- **Advanced Deduplication System**: Perceptual hashing, similarity detection, smart removal strategies
 - **Prompt Management System**: YAML-based tracking with DuckDB search, effectiveness metrics
 - **Advanced Transitions Suite**: 5 transition effects (morphing, color flow, match cuts, portals, rhythm)
 - **Visual Analysis Tools**: Complexity scoring, energy profiling, pacing suggestions
 - **Smart Content Variations**: Performance tracking, recommendations, analytics export
 - **Visual Composition Feedback**: Timeline flow analysis, optimization, pattern detection
 - **Export Enhancements**: Support for After Effects, Fusion, EDL annotations
-- **96 MCP Tools**: Complete creative control through AI assistant (up from 77)
+- **101 MCP Tools**: Complete creative control through AI assistant (up from 77, includes new deduplication tools)
 
 **Documentation:**
 - 10+ comprehensive user guides covering all new features
@@ -54,46 +55,62 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
   - MMAudio v2 (multimodal audio for videos)
 
 ### ✅ Recently Completed Features (January 2025)
-1. **Prompt Management System**: Track and optimize AI prompts ✅
+1. **Enhanced Video Generation**: 7 providers integrated ✅
+   - Runway Gen-3 Alpha for cinematic quality
+   - Pika 2.1 HD with ingredient control
+   - Luma Dream Machine for creative concepts
+   - MiniMax Hailuo for cost-effective generation
+   - Kling AI for professional motion
+   - Hedra for AI avatar videos
+   - Comparison tools and cost estimation
+   - 8 MCP tools for video generation
+2. **Advanced Deduplication System**: Perceptual duplicate detection ✅
+   - Exact and perceptual duplicate finding
+   - Smart removal strategies (keep organized, largest, newest)
+   - Similarity index for fast searches
+   - Hardlink support to save space
+   - Comprehensive deduplication reports
+   - 5 MCP tools for deduplication
+3. **Prompt Management System**: Track and optimize AI prompts ✅
    - YAML storage in projects with DuckDB search
    - Effectiveness tracking and template system
    - 7 MCP tools for prompt operations
    - Provider integration hooks
-2. **Advanced Transitions Suite**: Complete transition toolkit ✅
+4. **Advanced Transitions Suite**: Complete transition toolkit ✅
    - Subject morphing with keyframe generation
    - Color flow analysis and gradient transitions
    - Match cut detection with motion/shape matching
    - Portal effects for creative transitions
    - Visual rhythm engine with pacing analysis
    - Export to After Effects/Resolve/Premiere/Fusion
-3. **Web Timeline Preview Interface**: Interactive editing before export ✅
+5. **Web Timeline Preview Interface**: Interactive editing before export ✅
    - FastAPI server with WebSocket real-time updates
    - Drag-and-drop clip reordering
    - Timeline visualization with transitions
    - Undo/redo functionality
    - Export to EDL/XML/JSON formats
    - 4 MCP tools for preview control
-4. **Natural Language Timeline Editing**: Chat-based timeline modifications ✅
+6. **Natural Language Timeline Editing**: Chat-based timeline modifications ✅
    - 9 edit intent types (pace, sync, energy, transitions, etc.)
    - Intelligent section detection (intro, outro, chorus, etc.)
    - Confidence scoring and batch processing
    - AI-powered timeline suggestions
    - 4 MCP tools for NLP editing
-5. **Multi-Version Export**: Platform-specific adaptations ✅
+7. **Multi-Version Export**: Platform-specific adaptations ✅
    - 8 platform presets (Instagram, TikTok, YouTube, etc.)
    - Smart cropping with AI subject detection
    - Duration adaptation with music sync preservation
    - Platform-specific features (loops, trends, safe zones)
    - Batch export to all platforms
    - 4 MCP tools for multi-version operations
-6. **Performance Analytics**: Export tracking and improvements ✅
+8. **Performance Analytics**: Export tracking and improvements ✅
    - Session-based performance tracking
    - Workflow success metrics and durations
    - Export pattern analysis
    - AI-powered improvement suggestions
    - User behavior insights
    - 6 MCP tools for analytics
-7. **Documentation Suite**: All critical guides completed ✅
+9. **Documentation Suite**: All critical guides completed ✅
    - Video Export Complete Guide
    - Music Sync Tutorial
    - Style Clustering Guide
@@ -108,6 +125,8 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
    - Natural Language Timeline Editing Guide
    - Multi-Version Export Guide
    - Performance Analytics Guide
+   - Deduplication Guide
+   - Enhanced Video Providers Guide
 
 ### ✅ Previously Completed (December 2024)
 1. **Local Vision Models**: Ollama integration for free analysis ✅
@@ -243,7 +262,7 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
    - Transition analysis ✅
    - Export to EDL/XML/CapCut ✅
 
-## Complete MCP Tools Summary (96 Tools) ✅
+## Complete MCP Tools Summary (101 Tools) ✅
 
 ### Core Operations
 - `search_assets` - Natural language search with tags
@@ -360,6 +379,13 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 - `optimize_timeline` - Auto-optimization
 - `suggest_clip_order` - Ordering suggestions
 - `detect_composition_patterns` - Pattern detection
+
+### Deduplication & Similarity
+- `find_duplicates_advanced` - Find duplicates with perceptual hashing
+- `remove_duplicates` - Remove duplicates with various strategies
+- `build_similarity_index` - Build fast similarity search index
+- `find_similar_images` - Find perceptually similar images
+- `get_deduplication_report` - Generate comprehensive deduplication analysis
 
 ## Next Focus Areas
 
@@ -734,16 +760,18 @@ platforms:
 - ✅ Advanced Transitions Suite (5 effects)
 - ✅ Google Veo 3 Integration
 - ✅ Enhanced Video Generation (7 providers)
+- ✅ Advanced Deduplication System (perceptual hashing)
 - ✅ Smart Content Variations
 - ✅ Visual Composition Feedback
 - ✅ 10+ Comprehensive Documentation Guides
-- ✅ 96 MCP Tools (up from 77+)
+- ✅ 101 MCP Tools (up from 77+, includes new deduplication tools)
 - ✅ Full test coverage for new features
 
 **Ready for Production:**
 - Prompt tracking and optimization
 - Professional video transitions
 - Multi-provider video generation (Runway, Pika, Luma, MiniMax, Veo3, Kling, Hedra)
+- Advanced deduplication with perceptual hashing
 - Content variation tracking and analytics
 - Timeline flow and composition analysis
 - Complete creative workflow automation

@@ -135,6 +135,8 @@ The system processes AI-generated media through a pipeline:
 
 - **alice**: Main command with unified caching system (UnifiedCache class) for performance. Handles 15+ AI generation tools. Includes understanding system with --understand flag and watch mode (-w) for continuous monitoring.
 - **Understanding system**: Multi-provider image analysis that generates semantic tags for content discovery and organization.
+- **Video providers**: Support for 7 video generation services (Runway, Pika, Luma, MiniMax, Kling, Hedra, Veo3) with MCP integration.
+- **Deduplication**: Advanced duplicate detection using perceptual hashing (aHash, pHash, dHash, wHash) and FAISS similarity search.
 
 ### Understanding System Integration
 
@@ -266,6 +268,16 @@ alice keys setup
 This will store your API keys securely in macOS Keychain. For containerized environments, use environment variables:
 - `SIGHTENGINE_API_USER` and `SIGHTENGINE_API_SECRET`
 - `ANTHROPIC_API_KEY`
+- `OPENAI_API_KEY`
+- `GOOGLE_AI_API_KEY`
+
+For video generation providers:
+- `RUNWAY_API_KEY`
+- `PIKA_API_KEY`
+- `LUMA_API_KEY`
+- `MINIMAX_API_KEY`
+- `KLING_API_KEY`
+- `HEDRA_API_KEY`
 
 ## Storage System
 

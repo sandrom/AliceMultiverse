@@ -9,7 +9,7 @@ from pathlib import Path
 from typing import Dict, List, Optional, Any, Tuple
 from collections import defaultdict
 
-from ..core.config import Config
+from ..core.config import DictConfig as Config
 from ..core.structured_logging import get_logger
 
 logger = get_logger(__name__)

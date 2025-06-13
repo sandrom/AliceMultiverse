@@ -32,17 +32,21 @@ dependencies = [
     "duckdb>=0.10.0",
     "redis>=5.0.0",
     "click>=8.1.0",
+    "imagehash>=4.3.0",
+    "faiss-cpu>=1.7.0",
 ]
 
 [project.optional-dependencies]
 quality = ["image-quality>=1.2.7"]
 secure = ["keyring>=24.0.0", "python-dotenv>=1.0.0"]
 premium = ["anthropic>=0.18.0"]
+mcp = ["mcp>=1.0.0"]
 full = [
     "image-quality>=1.2.7",
     "keyring>=24.0.0",
     "python-dotenv>=1.0.0",
     "anthropic>=0.18.0",
+    "mcp>=1.0.0",
 ]
 dev = [
     "pytest>=7.0.0",

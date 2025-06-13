@@ -924,7 +924,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Handle MCP server subcommand
     if args.command == "mcp-server":
-        from .mcp_server import main as run_mcp_server
+        from ..mcp_server import main as run_mcp_server
 
         run_mcp_server()
         return 0

@@ -726,7 +726,6 @@ class UnifiedDuckDBStorage:
         )
         
         return facets
-        }
     
     # New unified methods
     def find_similar(

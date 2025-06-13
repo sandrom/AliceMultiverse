@@ -8,7 +8,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
-from ..core.file_operations import get_file_hash
+from ..core.file_operations import FileHandler
 from .perceptual_hasher import PerceptualHasher
 
 logger = logging.getLogger(__name__)
@@ -44,6 +44,7 @@ class DuplicateFinder:
         self.similarity_threshold = similarity_threshold
         self.exact_duplicates: Dict[str, List[Path]] = defaultdict(list)
         self.similar_groups: List[DuplicateGroup] = []
+        self.file_handler = FileHandler()
     
     def scan_directory(
         self, 
@@ -95,7 +96,7 @@ class DuplicateFinder:
         
         for img_path in image_files:
             try:
-                file_hash = get_file_hash(img_path)
+                file_hash = self.file_handler.get_file_hash(img_path)
                 hash_to_files[file_hash].append(img_path)
             except Exception as e:
                 logger.error(f"Error hashing {img_path}: {e}")

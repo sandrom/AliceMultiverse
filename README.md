@@ -28,9 +28,11 @@ You're welcome to fork and adapt it for your needs, but be aware that I make cha
 
 > **🚀 New in January 2025**: 
 > - Google Veo 3 video generation with native audio
+> - Enhanced video generation with 7 providers (Runway, Pika, Luma, MiniMax, Kling, Hedra)
+> - Advanced deduplication with perceptual hashing
 > - Advanced transition effects (morphing, portals, match cuts)
 > - Prompt management system with effectiveness tracking
-> - 60+ MCP tools for complete creative control
+> - 101 MCP tools for complete creative control
 
 ## 🤖 AI-First Usage (Recommended)
 
@@ -82,6 +84,10 @@ You're welcome to fork and adapt it for your needs, but be aware that I make cha
 
 **Video Creation (NEW):**
 - "Generate a video of ocean waves with sound using Veo 3"
+- "Create a cinematic video with Runway Gen-3 Alpha"
+- "Generate HD video with Pika using ingredient control"
+- "Create an AI avatar video with Hedra"
+- "Compare video generation across all providers"
 - "Create a music video from these images synced to this song"
 - "Find match cuts in this image sequence"
 - "Analyze the pacing for my video shots"
@@ -96,6 +102,13 @@ You're welcome to fork and adapt it for your needs, but be aware that I make cha
 - "Find portal shapes for transitions"
 - "Analyze color flow between these shots"
 - "Detect match cuts in my action sequence"
+
+**Deduplication & Organization (NEW):**
+- "Find duplicate images in my collection"
+- "Remove exact duplicates keeping the organized ones"
+- "Find images similar to this one using perceptual hashing"
+- "Generate a deduplication report with recommendations"
+- "Build a similarity index for fast duplicate detection"
 
 ## 📦 Requirements
 
@@ -150,6 +163,8 @@ I work with multiple AI generation tools daily (Midjourney, DALL-E, Stable Diffu
 - **🔍 Smart Search**: Find assets using natural descriptions
 - **🔄 Event Monitoring**: Real-time visibility into all operations
 - **🎨 Style Analysis**: Understand and categorize your creative outputs
+- **🎬 Multi-Provider Video Generation**: Create videos with 7+ AI providers
+- **🔄 Advanced Deduplication**: Find and remove duplicates with perceptual hashing
 
 ## 🚀 Getting Started
 
@@ -196,6 +211,13 @@ Supported providers:
 - **DeepSeek**: Most cost-effective (~$0.001/image)
 - **Anthropic Claude**: Best quality understanding
 - **OpenAI GPT-4**: Alternative vision analysis
+- **Google Veo 3**: State-of-the-art video with native audio
+- **Runway Gen-3 Alpha**: Professional cinematic quality
+- **Pika 2.1**: HD video with ingredient control
+- **Luma Dream Machine**: Strong prompt adherence
+- **MiniMax Hailuo**: Cost-effective video generation
+- **Kling AI**: Cinematic quality with natural motion
+- **Hedra**: AI avatar videos with lip sync
 
 ### 💰 Cost Management (New!)
 

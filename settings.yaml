@@ -205,6 +205,79 @@ providers:
     cleanup_interval: 3600  # Clean up old events every hour
     retention_days: 7       # Keep events for 7 days
 
+# Video Generation Configuration
+video_generation:
+  # Default provider for video generation
+  default_provider: luma  # Options: runway, pika, luma, minimax, kling, hedra, veo3
+  
+  # Default duration for videos (seconds)
+  default_duration: 5
+  
+  # Cost limit per video generation
+  cost_limit_per_video: 1.00
+  
+  # Preferred models for each provider
+  preferred_models:
+    runway: gen3-alpha-turbo  # Options: gen3-alpha, gen3-alpha-turbo
+    pika: pika-2.1           # Options: pika-2.1, pika-2.1-hd
+    luma: dream-machine      # Options: dream-machine, dream-machine-turbo
+    minimax: hailuo-video    # Options: hailuo-video, hailuo-video-pro
+    kling: kling-standard    # Options: kling-standard, kling-pro
+    hedra: hedra-character   # Options: hedra-character, hedra-audio
+    veo3: imagen-3           # Options: imagen-3, imagen-3-fast
+  
+  # Provider-specific settings
+  provider_settings:
+    runway:
+      max_duration: 16
+      default_style: cinematic
+    pika:
+      motion_strength: 0.7
+      default_aspect_ratio: "16:9"
+    luma:
+      default_fps: 24
+      loop_mode: false
+    minimax:
+      language: en  # Options: en, zh
+      sync_to_beat: false
+
+# Deduplication Configuration
+deduplication:
+  # Similarity threshold for finding duplicates (0.0-1.0)
+  # 1.0 = exact match only, 0.95 = very similar, 0.85 = somewhat similar
+  similarity_threshold: 0.95
+  
+  # Include video files in deduplication
+  include_videos: true
+  
+  # Create backup before removing duplicates
+  backup_before_remove: true
+  
+  # Preserve files with metadata when choosing which duplicate to keep
+  preserve_metadata: true
+  
+  # Hash algorithms to use (in order of preference)
+  hash_algorithms:
+    - phash  # Perceptual hash (default, good for general use)
+    - dhash  # Difference hash (fast, good for exact matches)
+    - whash  # Wavelet hash (good for scaled images)
+  
+  # FAISS index settings
+  index:
+    # Rebuild index if it's older than this many days
+    rebuild_after_days: 7
+    # Use GPU acceleration if available
+    use_gpu: false
+    # Maximum images to process in one batch
+    batch_size: 1000
+  
+  # Removal strategy when duplicates found
+  # Options: keep_organized, keep_largest, keep_newest, interactive
+  default_strategy: keep_organized
+  
+  # Where to store backup files (relative to project root)
+  backup_directory: duplicates-backup
+
 # Additional storage configuration (future expansion)
 # This section is reserved for advanced storage features like
 # multi-location storage, cloud integration, and registry tracking

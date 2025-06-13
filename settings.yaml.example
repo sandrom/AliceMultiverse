@@ -122,6 +122,36 @@ events:
     port: 6379
     db: 0
 
+# Video Generation (optional)
+video_generation:
+  # Default provider: runway, pika, luma, minimax, kling, hedra, veo3
+  default_provider: luma
+  
+  # Cost limit per video
+  cost_limit_per_video: 1.00
+  
+  # Preferred quality/speed trade-off
+  # fast: Use turbo models where available
+  # quality: Use highest quality models
+  preference: fast
+
+# Deduplication (optional)
+deduplication:
+  # How similar images need to be considered duplicates (0.0-1.0)
+  similarity_threshold: 0.95
+  
+  # Include videos in deduplication
+  include_videos: false
+  
+  # What to do with duplicates
+  # keep_organized: Keep files in organized folder
+  # keep_largest: Keep highest quality version
+  # keep_newest: Keep most recent file
+  strategy: keep_organized
+  
+  # Create backup before removing
+  backup_before_remove: true
+
 # Advanced options (usually not needed)
 # enhanced_metadata: false  # Enable enhanced metadata extraction
 # log_level: INFO          # Logging level: DEBUG, INFO, WARNING, ERROR
