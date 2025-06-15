@@ -357,7 +357,7 @@ class TimelinePreviewServer:
                 timeline_data = request.get("timeline", {})
                 format = request.get("format", "mp4")
                 resolution = request.get("resolution", [1280, 720])
-                include_audio = request.get("includeAudio", True)
+                request.get("includeAudio", True)
 
                 # Create temporary output file
                 import tempfile
@@ -377,7 +377,7 @@ class TimelinePreviewServer:
                 )
 
                 # Generate preview (simplified version - in production would use ffmpeg)
-                export_manager = VideoExportManager()
+                VideoExportManager()
 
                 # For now, return a placeholder response
                 # Full implementation would use ffmpeg to create actual preview

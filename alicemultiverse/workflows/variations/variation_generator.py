@@ -8,9 +8,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from ..analytics.performance_tracker import PerformanceTracker
-from ..memory.style_memory import PreferenceType, StyleMemory
-from ..providers.provider_types import GenerationRequest
+from ...analytics.performance_tracker import PerformanceTracker
+from ...memory.style_memory import PreferenceType, StyleMemory
+from ...providers.provider_types import GenerationRequest
 
 logger = logging.getLogger(__name__)
 

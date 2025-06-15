@@ -8,9 +8,9 @@ from typing import Any
 
 import numpy as np
 
-from ..core.unified_cache import UnifiedCache
-from ..understanding.providers import get_vision_provider
-from ..workflows.models import Timeline, TimelineClip
+from ...core.unified_cache import UnifiedCache
+# from ...understanding.providers import get_vision_provider  # TODO: Removed during refactoring
+from ..video_export import Timeline, TimelineClip
 
 logger = logging.getLogger(__name__)
 
@@ -238,9 +238,10 @@ class FlowAnalyzer:
                 energy_level = max(0, min(1, energy_level))
 
         # Use vision provider for deeper analysis if available
-        if self.vision_provider and clip.asset_path.suffix.lower() in [".jpg", ".png", ".webp"]:
+        # TODO: Re-enable when get_vision_provider is restored
+        if False and self.vision_provider and clip.asset_path.suffix.lower() in [".jpg", ".png", ".webp"]:
             try:
-                provider = get_vision_provider(self.vision_provider)
+                provider = None  # get_vision_provider(self.vision_provider)
 
                 # Analyze for motion and complexity
                 analysis_prompt = """Analyze this image and provide scores (0-1):

@@ -1,11 +1,10 @@
 """Optimized search handler for Alice interface."""
 
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
 
-from ..database.file_cache import FileCache
+from ..storage.file_cache import FileCache
 from ..storage.unified_duckdb import DuckDBSearch
 from .structured_models import (
     Asset,

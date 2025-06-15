@@ -18,11 +18,12 @@ from pathlib import Path
 from typing import Any
 from xml.dom import minidom
 
-from ..core.structured_logging import get_logger
+import logging
+
 from ..providers.provider_types import GenerationRequest, GenerationType
 from ..storage.unified_duckdb import DuckDBSearch
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class CameraMotion(Enum):
@@ -730,7 +731,7 @@ class DaVinciResolveTimeline:
         resources = ET.SubElement(fcpxml, "resources")
 
         # Add format resource
-        format_elem = ET.SubElement(
+        ET.SubElement(
             resources,
             "format",
             id="r1",
@@ -742,7 +743,7 @@ class DaVinciResolveTimeline:
 
         # Add asset resources for each clip
         for i, clip in enumerate(self.clips):
-            asset = ET.SubElement(
+            ET.SubElement(
                 resources,
                 "asset",
                 id=f"r{i+2}",
@@ -781,7 +782,7 @@ class DaVinciResolveTimeline:
             )
 
             # Add asset reference
-            asset_clip = ET.SubElement(
+            ET.SubElement(
                 clip_elem,
                 "asset-clip",
                 ref=f"r{i+2}",
@@ -802,7 +803,7 @@ class DaVinciResolveTimeline:
                 if abs(clip["start_time"] - trans["start_time"]) < 0.01:
                     # Add transition element
                     if trans["type"] == "fade":
-                        trans_elem = ET.SubElement(
+                        ET.SubElement(
                             spine,
                             "transition",
                             name="Fade to Black",
@@ -810,7 +811,7 @@ class DaVinciResolveTimeline:
                             duration=f"{trans['duration']}s"
                         )
                     elif trans["type"] == "dissolve":
-                        trans_elem = ET.SubElement(
+                        ET.SubElement(
                             spine,
                             "transition",
                             name="Cross Dissolve",

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
 
-from ..core.file_operations import FileHandler
+from ...core.file_operations import FileHandler
 from .perceptual_hasher import PerceptualHasher
 
 logger = logging.getLogger(__name__)

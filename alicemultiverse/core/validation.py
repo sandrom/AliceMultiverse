@@ -360,12 +360,10 @@ def validate_json_input(
         def wrapper(*args, **kwargs):
             # Find JSON data in arguments
             json_data = None
-            json_idx = None
 
             for i, arg in enumerate(args):
                 if isinstance(arg, dict):
                     json_data = arg
-                    json_idx = i
                     break
 
             # Check kwargs

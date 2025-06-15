@@ -243,7 +243,7 @@ class StoryArcTemplate(WorkflowTemplate):
 
     def design_narrative_transitions(self, context: WorkflowContext) -> dict[str, Any]:
         """Design transitions appropriate for narrative flow."""
-        params = context.get_step_params("design_transitions")
+        context.get_step_params("design_transitions")
         story_beats = context.get_result("map_story_beats")
 
         transitions = []
@@ -287,7 +287,7 @@ class StoryArcTemplate(WorkflowTemplate):
         """Apply pacing based on narrative needs."""
         params = context.get_step_params("apply_pacing")
         story_beats = context.get_result("map_story_beats")
-        transitions = context.get_result("design_transitions")
+        context.get_result("design_transitions")
 
         timeline = []
         current_time = 0.0

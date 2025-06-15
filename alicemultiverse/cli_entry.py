@@ -13,14 +13,14 @@ def main():
         import site
         site.main()
 
-        from alicemultiverse.interface.main_cli import main as cli_main
+        from alicemultiverse.cli import main as cli_main
     except ImportError as e:
         # If import fails, try adding the package root to Python path
         package_root = Path(__file__).parent.parent
         if package_root.exists() and (package_root / "alicemultiverse").exists():
             sys.path.insert(0, str(package_root))
             try:
-                from alicemultiverse.interface.main_cli import main as cli_main
+                from alicemultiverse.cli import main as cli_main
             except ImportError:
                 print(f"Failed to import alicemultiverse: {e}", file=sys.stderr)
                 print(f"Python path: {sys.path}", file=sys.stderr)

@@ -88,7 +88,7 @@ class ImprovementEngine:
         improvements = []
 
         # Get recent workflow stats
-        stats = self.performance.get_performance_stats(time_range=timedelta(days=30))
+        self.performance.get_performance_stats(time_range=timedelta(days=30))
 
         # Check for repetitive manual adjustments
         recent_workflows = [

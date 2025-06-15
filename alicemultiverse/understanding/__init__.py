@@ -4,17 +4,20 @@ from .advanced_tagger import AdvancedTagger, ProjectTagVocabulary, TagVocabulary
 from .analyzer import ImageAnalyzer
 from .batch_analyzer import BatchAnalysisRequest, BatchAnalyzer, BatchProgress
 from .custom_instructions import CustomInstructionManager, InstructionTemplate, ProjectInstructions
-from .pipeline_stages import (
-    AdvancedBatchUnderstandingStage,
-    ImageUnderstandingStage,
-    MultiProviderUnderstandingStage,
-)
-from .provider_optimizer import BudgetManager, ProviderMetrics, ProviderOptimizer
+# Pipeline stages have been removed - use simple_analysis functions instead
+# Provider optimizer removed - simple cost tracking in results is sufficient
 from .providers import (
     AnthropicImageAnalyzer,
     DeepSeekImageAnalyzer,
     GoogleAIImageAnalyzer,
     OpenAIImageAnalyzer,
+)
+# Simple functions for direct use
+from .simple_analysis import (
+    analyze_image,
+    analyze_images_batch,
+    estimate_analysis_cost,
+    should_analyze_image,
 )
 
 __all__ = [
@@ -42,13 +45,11 @@ __all__ = [
     "BatchAnalysisRequest",
     "BatchProgress",
 
-    # Provider optimization
-    "ProviderOptimizer",
-    "BudgetManager",
-    "ProviderMetrics",
 
-    # Pipeline stages
-    "ImageUnderstandingStage",
-    "MultiProviderUnderstandingStage",
-    "AdvancedBatchUnderstandingStage",
+    
+    # Simple functions
+    "analyze_image",
+    "analyze_images_batch",
+    "estimate_analysis_cost",
+    "should_analyze_image",
 ]

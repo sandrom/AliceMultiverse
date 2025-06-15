@@ -11,7 +11,8 @@ import aiohttp
 
 from ..core.config import settings
 from ..core.file_operations import save_text_file
-from .provider import AuthenticationError, GenerationError, Provider, RateLimitError
+from .base_provider import BaseProvider
+from .provider import AuthenticationError, GenerationError, RateLimitError
 from .provider_types import (
     GenerationRequest,
     GenerationResult,
@@ -23,7 +24,7 @@ from .provider_types import (
 logger = logging.getLogger(__name__)
 
 
-class AnthropicProvider(Provider):
+class AnthropicProvider(BaseProvider):
     """Provider for Anthropic API integration (Claude vision and analysis)."""
 
     BASE_URL = "https://api.anthropic.com/v1"
@@ -46,24 +47,16 @@ class AnthropicProvider(Provider):
         "claude-3-5-sonnet-20241022": {"input": 3.0, "output": 15.0},
     }
 
-    def __init__(self, api_key: str | None = None, event_bus: Any | None = None):
+    def __init__(self, api_key: str | None = None, event_bus: Any | None = None, **kwargs):
         """Initialize Anthropic provider.
         
         Args:
             api_key: Anthropic API key (or set ANTHROPIC_API_KEY env var)
             event_bus: Deprecated parameter, kept for compatibility
+            **kwargs: Additional arguments for BaseProvider
         """
-        api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
-        if not api_key:
-            raise ValueError("Anthropic API key is required")
+        super().__init__("anthropic", api_key, **kwargs)
 
-        super().__init__(api_key)
-        self._session = None
-
-    @property
-    def name(self) -> str:
-        """Provider name."""
-        return "anthropic"
 
     @property
     def capabilities(self) -> ProviderCapabilities:
@@ -74,8 +67,6 @@ class AnthropicProvider(Provider):
             features=[
                 "vision",
                 "image_analysis",
-                "quality_assessment",
-                "defect_detection",
                 "long_context",
             ],
             rate_limits={
@@ -88,21 +79,18 @@ class AnthropicProvider(Provider):
             }
         )
 
-    async def _get_session(self) -> aiohttp.ClientSession:
-        """Get or create aiohttp session."""
-        if not self._session:
-            headers = {
-                "x-api-key": self.api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            }
-            self._session = aiohttp.ClientSession(headers=headers)
-        return self._session
+    def _get_headers(self) -> dict[str, str]:
+        """Get provider-specific headers."""
+        return {
+            "x-api-key": self._get_api_key('ANTHROPIC_API_KEY'),
+            "anthropic-version": "2023-06-01",
+            "content-type": "application/json",
+        }
 
     async def check_status(self) -> ProviderStatus:
         """Check Anthropic API status."""
         try:
-            session = await self._get_session()
+            session = await self._ensure_session()
             # Anthropic doesn't have a status endpoint, so we'll do a minimal request
             test_request = {
                 "model": "claude-3-haiku-20240307",
@@ -111,13 +99,8 @@ class AnthropicProvider(Provider):
             }
 
             async with session.post(f"{self.BASE_URL}/messages", json=test_request) as response:
-                if response.status == 200:
-                    self._status = ProviderStatus.AVAILABLE
-                elif response.status == 401:
-                    self._status = ProviderStatus.UNAVAILABLE
-                    logger.error("Anthropic authentication failed")
-                else:
-                    self._status = ProviderStatus.DEGRADED
+                await self._handle_response_errors(response, "Status check")
+                self._status = ProviderStatus.AVAILABLE
 
         except Exception as e:
             logger.error(f"Failed to check Anthropic status: {e}")
@@ -186,13 +169,7 @@ class AnthropicProvider(Provider):
         session = await self._get_session()
 
         async with session.post(f"{self.BASE_URL}/messages", json=params) as response:
-            if response.status == 429:
-                raise RateLimitError("Anthropic rate limit exceeded")
-            elif response.status == 401:
-                raise AuthenticationError("anthropic", "Invalid Anthropic API key")
-            elif response.status != 200:
-                error_data = await response.json()
-                raise GenerationError(f"Anthropic API error: {error_data.get('error', {}).get('message', 'Unknown error')}")
+            await self._handle_response_errors(response, "Image analysis")
 
             data = await response.json()
 
@@ -250,13 +227,7 @@ class AnthropicProvider(Provider):
         session = await self._get_session()
 
         async with session.post(f"{self.BASE_URL}/messages", json=params) as response:
-            if response.status == 429:
-                raise RateLimitError("Anthropic rate limit exceeded")
-            elif response.status == 401:
-                raise AuthenticationError("anthropic", "Invalid Anthropic API key")
-            elif response.status != 200:
-                error_data = await response.json()
-                raise GenerationError(f"Anthropic API error: {error_data.get('error', {}).get('message', 'Unknown error')}")
+            await self._handle_response_errors(response, "Image analysis")
 
             data = await response.json()
 
@@ -322,8 +293,3 @@ class AnthropicProvider(Provider):
             if config["type"] == generation_type
         ]
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Clean up resources."""
-        if self._session:
-            await self._session.close()
-            self._session = None

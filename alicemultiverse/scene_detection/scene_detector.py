@@ -437,16 +437,6 @@ class SceneDetector:
             Image.fromarray(rgb_frame)
 
             # Create prompt for scene analysis
-            prompt = """Analyze this video frame and provide:
-1. Scene type (establishing, closeup, medium, wide, action, dialogue, etc.)
-2. Main subject or focus
-3. Location/setting
-4. Mood/atmosphere
-5. Camera angle and movement
-6. Brief description
-7. Relevant tags
-
-Return as JSON with keys: scene_type, subject, location, mood, camera, description, tags"""
 
             # Get analysis from provider
             # This would need to be implemented based on provider interface

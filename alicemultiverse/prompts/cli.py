@@ -271,7 +271,7 @@ def use(prompt_id: str, provider: str, success: bool, **kwargs):
             return
         prompt_id = matches[0].id
 
-    usage = service.record_usage(
+    service.record_usage(
         prompt_id=prompt_id,
         provider=ProviderType(provider),
         success=success,

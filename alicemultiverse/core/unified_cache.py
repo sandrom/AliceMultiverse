@@ -7,9 +7,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from ..metadata.embedder import MetadataEmbedder
-from ..metadata.extractor import MetadataExtractor
-from ..metadata.models import AssetMetadata
+from ..assets.metadata.embedder import MetadataEmbedder
+from ..assets.metadata.extractor import MetadataExtractor
+from ..assets.metadata.models import AssetMetadata
 from .types import AnalysisResult
 
 logger = logging.getLogger(__name__)

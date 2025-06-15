@@ -3,14 +3,14 @@
 from pathlib import Path
 from typing import Any
 
-from ..composition import (
+from ..workflows.composition import (
     CompositionAnalyzer,
     FlowAnalyzer,
     OptimizationStrategy,
     TimelineOptimizer,
 )
 from ..storage.unified_duckdb import DuckDBSearch
-from ..workflows.models import Timeline, TimelineClip
+from ..workflows.video_export import Timeline, TimelineClip
 
 
 async def analyze_timeline_flow(
@@ -285,7 +285,7 @@ async def suggest_clip_order(
     Returns:
         Suggested clip order with reasoning
     """
-    flow_analyzer = FlowAnalyzer()
+    FlowAnalyzer()
     comp_analyzer = CompositionAnalyzer()
 
     # Analyze all clips

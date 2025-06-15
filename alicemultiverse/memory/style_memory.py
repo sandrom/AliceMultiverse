@@ -496,7 +496,7 @@ class StyleMemory:
         self.all_preferences.clear()
 
         for pref_type_str, prefs_data in profile_data["preferences_by_type"].items():
-            pref_type = PreferenceType(pref_type_str)
+            PreferenceType(pref_type_str)
 
             for pref_data in prefs_data:
                 pref = StylePreference.from_dict(pref_data)

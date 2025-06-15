@@ -61,17 +61,19 @@ class AssetProcessorClient:
             return await response.json()
 
     async def assess_quality(
-        self, file_path: Path, content_hash: str, pipeline_mode: str = "basic"
+        self, file_path: Path, content_hash: str, provider: str | None = None
     ) -> dict[str, Any]:
         """Assess quality of a media file.
+        
+        DEPRECATED: Quality assessment replaced with understanding system.
 
         Args:
             file_path: Path to the file
             content_hash: Content hash for caching
-            pipeline_mode: Pipeline mode (basic, standard, premium)
+            provider: Understanding provider to use
 
         Returns:
-            Quality assessment results
+            Quality assessment results (empty for compatibility)
         """
         if not self.session:
             self.session = aiohttp.ClientSession()
@@ -80,7 +82,7 @@ class AssetProcessorClient:
         data = {
             "file_path": str(file_path),
             "content_hash": content_hash,
-            "pipeline_mode": pipeline_mode,
+            "provider": provider,
         }
 
         async with self.session.post(url, json=data) as response:
@@ -121,13 +123,13 @@ class AssetProcessorClient:
             return await response.json()
 
     async def process_batch(
-        self, file_paths: list[Path], pipeline_mode: str = "basic"
+        self, file_paths: list[Path], understanding: bool = True
     ) -> dict[str, Any]:
         """Process multiple files in batch.
 
         Args:
             file_paths: List of file paths
-            pipeline_mode: Pipeline mode for quality assessment
+            understanding: Enable AI-powered understanding
 
         Returns:
             Batch processing results
@@ -136,7 +138,7 @@ class AssetProcessorClient:
             self.session = aiohttp.ClientSession()
 
         url = f"{self.base_url}/process/batch"
-        data = {"file_paths": [str(p) for p in file_paths], "pipeline_mode": pipeline_mode}
+        data = {"file_paths": [str(p) for p in file_paths], "understanding": understanding}
 
         async with self.session.post(url, json=data) as response:
             response.raise_for_status()

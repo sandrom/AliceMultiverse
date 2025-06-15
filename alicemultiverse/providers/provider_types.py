@@ -31,11 +31,9 @@ class GenerationRequest:
     model: str | None = None
     parameters: dict[str, Any] | None = None
     reference_assets: list[str] | None = None  # Asset IDs or URLs for reference images
-    reference_weights: list[float] | None = None  # Weights for multi-reference models
     output_format: str | None = None  # png, jpg, mp4, etc.
     output_path: Path | None = None  # Where to save the result
     metadata: dict[str, Any] | None = None  # Additional metadata to embed
-    project_id: str | None = None  # For future project management
     budget_limit: float | None = None  # Max cost for this generation
 
 
@@ -43,7 +41,6 @@ class GenerationRequest:
 class GenerationResult:
     """Result of a generation operation."""
     success: bool
-    asset_id: str | None = None
     file_path: Path | None = None
     generation_time: float | None = None  # Seconds
     cost: float | None = None  # USD
@@ -68,9 +65,7 @@ class ProviderCapabilities:
     formats: list[str] | None = None
     features: list[str] | None = None  # ["style_reference", "controlnet", etc.]
     rate_limits: dict[str, Any] | None = None
-    pricing: dict[str, float] | None = None  # Cost per generation
-    supports_streaming: bool = False  # For real-time generation
-    supports_batch: bool = False  # For batch generation
+    pricing: dict[str, Any] | None = None  # Cost per generation or model
 
 
 @dataclass
@@ -79,5 +74,3 @@ class CostEstimate:
     provider: str
     model: str
     estimated_cost: float
-    confidence: float = 1.0  # 0-1, how confident we are in the estimate
-    breakdown: dict[str, float] | None = None  # Cost breakdown by component

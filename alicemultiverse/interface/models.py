@@ -59,8 +59,8 @@ class OrganizeRequest(TypedDict):
 
     source_path: str | None  # If not specified, uses default inbox
     enhanced_metadata: bool | None
-    quality_assessment: bool | None
-    pipeline: str | None
+    quality_assessment: bool | None  # Deprecated - use understanding instead
+    understanding: bool | None  # Enable AI-powered image understanding
     watch_mode: bool | None
 
 

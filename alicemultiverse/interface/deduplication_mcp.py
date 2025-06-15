@@ -5,8 +5,8 @@ from pathlib import Path
 from typing import Any
 
 from ..core.structured_logging import get_logger
-from ..deduplication.duplicate_finder import DuplicateFinder
-from ..deduplication.similarity_index import SimilarityIndex
+from ..assets.deduplication.duplicate_finder import DuplicateFinder
+from ..assets.deduplication.similarity_index import SimilarityIndex
 
 logger = get_logger(__name__)
 
@@ -327,12 +327,12 @@ async def find_similar_images(
                 }
 
         # Fallback to direct search
-        from ..deduplication.perceptual_hasher import PerceptualHasher
+        from ..assets.deduplication.perceptual_hasher import PerceptualHasher
         hasher = PerceptualHasher()
 
         # Get query image hashes
-        query_hashes = await hasher.compute_all_hashes(query_path)
-        query_features = hasher.extract_visual_features(query_path)
+        await hasher.compute_all_hashes(query_path)
+        hasher.extract_visual_features(query_path)
 
         # Search through all images
         from ..core.config import load_config

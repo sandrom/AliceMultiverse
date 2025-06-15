@@ -4,6 +4,7 @@ This module provides storage abstractions that support the file-first,
 metadata-embedded architecture of AliceMultiverse.
 """
 
+from .file_cache import FileCache
 from .file_scanner import FileScanner
 from .location_registry import (
     LocationStatus,
@@ -18,6 +19,7 @@ from .unified_duckdb import DuckDBSearch, DuckDBSearchCache, UnifiedDuckDBStorag
 __all__ = [
     "DuckDBSearch",
     "DuckDBSearchCache",
+    "FileCache",
     "FileScanner",
     "LocationStatus",
     "MetadataExtractor",

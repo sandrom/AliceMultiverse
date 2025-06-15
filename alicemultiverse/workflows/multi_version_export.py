@@ -9,10 +9,10 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-from ..core.structured_logging import get_logger
+import logging
 from ..workflows.video_export import Timeline, TimelineClip
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 class Platform(Enum):

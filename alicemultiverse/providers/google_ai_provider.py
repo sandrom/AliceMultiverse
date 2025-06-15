@@ -14,7 +14,8 @@ from typing import Any
 
 import aiohttp
 
-from .provider import GenerationError, Provider
+from .base_provider import BaseProvider
+from .provider import GenerationError
 from .provider_types import (
     GenerationRequest,
     GenerationResult,
@@ -32,7 +33,7 @@ class GoogleAIBackend(Enum):
     VERTEX = "vertex"  # Vertex AI (requires GCP project)
 
 
-class GoogleAIProvider(Provider):
+class GoogleAIProvider(BaseProvider):
     """Google AI provider implementation for Imagen and Veo."""
 
     # Model mapping
@@ -71,7 +72,7 @@ class GoogleAIProvider(Provider):
     }
 
     def __init__(self, api_key: str = None, backend: GoogleAIBackend = GoogleAIBackend.GEMINI,
-                 project_id: str = None, location: str = "us-central1"):
+                 project_id: str = None, location: str = "us-central1", **kwargs):
         """Initialize Google AI provider.
         
         Args:
@@ -79,17 +80,11 @@ class GoogleAIProvider(Provider):
             backend: Which backend to use (GEMINI or VERTEX)
             project_id: GCP project ID (required for Vertex)
             location: GCP location (for Vertex, default: us-central1)
+            **kwargs: Additional arguments for BaseProvider
         """
-        self.api_key = api_key or os.getenv("GOOGLE_AI_API_KEY") or os.getenv("GEMINI_API_KEY")
         self.backend = backend
         self.project_id = project_id or os.getenv("GOOGLE_CLOUD_PROJECT")
         self.location = location
-
-        if not self.api_key:
-            raise ValueError(
-                "Google AI requires an API key. "
-                "Set GOOGLE_AI_API_KEY or GEMINI_API_KEY environment variable."
-            )
 
         if backend == GoogleAIBackend.VERTEX and not self.project_id:
             raise ValueError(
@@ -97,17 +92,12 @@ class GoogleAIProvider(Provider):
                 "Set GOOGLE_CLOUD_PROJECT environment variable."
             )
 
-        # Store for parent class
-        super().__init__(api_key=self.api_key)
+        # Initialize base class
+        super().__init__("google_ai", api_key, **kwargs)
 
-        self._session: aiohttp.ClientSession | None = None
         self.access_token = None  # For Vertex AI
         self.token_expires_at = None
 
-    @property
-    def name(self) -> str:
-        """Get provider name."""
-        return "google_ai"
 
     @property
     def capabilities(self) -> ProviderCapabilities:
@@ -136,18 +126,12 @@ class GoogleAIProvider(Provider):
 
     async def initialize(self):
         """Initialize the provider."""
-        if not self._session:
-            self._session = aiohttp.ClientSession()
+        await self._ensure_session()
 
         # Authenticate if using Vertex AI
         if self.backend == GoogleAIBackend.VERTEX:
             await self._authenticate_vertex()
 
-    async def cleanup(self):
-        """Clean up resources."""
-        if self._session:
-            await self._session.close()
-            self._session = None
 
     async def _authenticate_vertex(self):
         """Authenticate with Vertex AI using service account."""
@@ -331,8 +315,7 @@ class GoogleAIProvider(Provider):
 
     async def _poll_long_running_operation(self, operation_name: str) -> dict[str, Any]:
         """Poll a long-running operation until completion."""
-        if not self._session:
-            await self.initialize()
+        session = await self._ensure_session()
 
         headers = self._get_headers()
 
@@ -341,10 +324,8 @@ class GoogleAIProvider(Provider):
         for attempt in range(max_attempts):
             url = f"{self._get_base_url()}/v1/{operation_name}"
 
-            async with self._session.get(url, headers=headers) as resp:
-                if resp.status != 200:
-                    error_text = await resp.text()
-                    raise GenerationError(f"Operation status check failed: {error_text}")
+            async with session.get(url, headers=headers) as resp:
+                await self._handle_response_errors(resp, "Operation status check")
 
                 data = await resp.json()
 
@@ -363,7 +344,7 @@ class GoogleAIProvider(Provider):
         if self.backend == GoogleAIBackend.GEMINI:
             return {
                 "Content-Type": "application/json",
-                "x-goog-api-key": self.api_key,
+                "x-goog-api-key": self._get_api_key('GOOGLE_AI_API_KEY'),
             }
         else:
             # Vertex AI
@@ -374,8 +355,7 @@ class GoogleAIProvider(Provider):
 
     async def _generate(self, request: GenerationRequest) -> GenerationResult:
         """Perform the actual generation using Google AI."""
-        if not self._session:
-            await self.initialize()
+        session = await self._ensure_session()
 
         try:
             # Determine model and endpoint
@@ -394,10 +374,12 @@ class GoogleAIProvider(Provider):
             headers = self._get_headers()
             url = f"{self._get_base_url()}{endpoint}"
 
-            async with self._session.post(url, headers=headers, json=body) as resp:
-                if resp.status not in [200, 202]:
-                    error_text = await resp.text()
-                    raise GenerationError(f"Generation failed: {error_text}")
+            async with session.post(url, headers=headers, json=body) as resp:
+                if resp.status == 202:
+                    # This is OK - long-running operation
+                    pass
+                else:
+                    await self._handle_response_errors(resp, "Generation")
 
                 data = await resp.json()
 
@@ -519,7 +501,7 @@ class GoogleAIProvider(Provider):
                 # Vertex AI health check
                 url = f"{self._get_base_url()}/v1/projects/{self.project_id}/locations/{self.location}/models"
 
-            async with self._session.get(url, headers=headers) as resp:
+            async with session.get(url, headers=headers) as resp:
                 if resp.status == 200:
                     self._status = ProviderStatus.AVAILABLE
                     return ProviderStatus.AVAILABLE

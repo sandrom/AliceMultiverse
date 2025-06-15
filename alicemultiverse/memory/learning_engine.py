@@ -243,7 +243,7 @@ class StyleLearningEngine:
             preference_ids: Preferences used
             successful: Whether outcome was successful
         """
-        pattern_key = ",".join(sorted(preference_ids))
+        ",".join(sorted(preference_ids))
 
         # Find matching patterns
         for pattern in self.patterns.values():

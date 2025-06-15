@@ -242,9 +242,10 @@ class AliceStructuredInterface:
             if request.get("destination_path"):
                 self.config.paths.organized = request["destination_path"]
             if request.get("quality_assessment") is not None:
-                self.config.processing.quality = request["quality_assessment"]
-            if request.get("pipeline"):
-                self.config.pipeline.mode = request["pipeline"]
+                # Quality assessment deprecated - ignored
+                pass
+            if request.get("understanding") is not None:
+                self.config.processing.understanding = request["understanding"]
             if request.get("watch_mode") is not None:
                 self.config.processing.watch = request["watch_mode"]
             if request.get("move_files") is not None:

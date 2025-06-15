@@ -180,7 +180,6 @@ class FileCache:
         Returns:
             Number of keys deleted
         """
-        pattern = f"{self.prefix}:{namespace}:*"
         count = 0
 
         try:

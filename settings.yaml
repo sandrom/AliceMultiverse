@@ -49,38 +49,28 @@ processing:
   # Dry run mode - preview without making changes
   dry_run: false
 
-# Quality assessment has been replaced with image understanding
-# See pipeline section for configuration
-
-pipeline:
-  # Default pipeline mode (basic, standard, premium, custom)
-  # basic: DeepSeek only (most cost-effective)
-  # standard: DeepSeek + Google 
-  # premium: All providers for comprehensive analysis
-  mode: basic
-
-  # Custom pipeline stages (when mode is custom)
-  stages: []
-
-  # Cost limits for total analysis (USD)
+# Understanding settings (pipeline has been removed - use simple functions)
+understanding:
+  # Enable AI-powered image understanding
+  enabled: true
+  
+  # Which tags to extract
+  extract_tags: true
+  generate_prompt: true
+  
+  # Custom instructions for all analyses
+  custom_instructions: null
+  
+  # Provider selection (null = cheapest available)
+  preferred_provider: null
+  
+  # Cost limits for analysis (USD)
   cost_limits:
     total: 10.0  # Stop processing when this limit is reached
     per_image: 0.01  # Maximum cost per image
-
+  
   # Detailed analysis (more thorough but costs more)
   detailed: false
-
-  # Understanding settings
-  understanding:
-    # Which tags to extract
-    extract_tags: true
-    generate_prompt: true
-    
-    # Custom instructions for all analyses
-    custom_instructions: null
-    
-    # Provider selection (null = cheapest available)
-    preferred_provider: null
 
 # Output structure settings
 output:

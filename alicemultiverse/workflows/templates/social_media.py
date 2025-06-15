@@ -310,7 +310,7 @@ class SocialMediaTemplate(WorkflowTemplate):
     def apply_platform_styling(self, context: WorkflowContext) -> dict[str, Any]:
         """Apply platform-specific styling."""
         params = context.get_step_params("apply_styling")
-        features = context.get_result("add_engagement")
+        context.get_result("add_engagement")
         platform = params["platform"]
 
         styling = {

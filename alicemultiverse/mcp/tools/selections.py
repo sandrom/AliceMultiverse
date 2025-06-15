@@ -6,7 +6,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from mcp import Server
+from mcp.server import Server
 
 from ...selections.models import SelectionCreate
 from ...selections.service import SelectionService

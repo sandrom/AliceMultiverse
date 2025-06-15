@@ -3,7 +3,7 @@
 import logging
 from typing import Any
 
-from mcp import Server
+from mcp.server import Server
 
 from ...projects.service import ProjectService
 from ..base import (

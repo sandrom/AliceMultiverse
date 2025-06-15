@@ -8,7 +8,7 @@ from omegaconf import DictConfig
 
 from ..core.unified_cache import UnifiedCache as EnhancedMetadataCache
 from ..core.types import AnalysisResult, MediaType, OrganizeResult
-from ..metadata.models import AssetMetadata, AssetRole
+from ..assets.metadata.models import AssetMetadata, AssetRole
 from .media_organizer import MediaOrganizer
 
 logger = logging.getLogger(__name__)
@@ -63,7 +63,7 @@ class EnhancedMediaOrganizer(MediaOrganizer):
 
     def _update_search_engine(self):
         """Update search engine with current metadata."""
-        metadata_store = self.metadata_cache.get_all_metadata()
+        self.metadata_cache.get_all_metadata()
         # Always create search engine, even with empty metadata
         # Search engine removed - use DuckDBSearch instead
 
@@ -230,7 +230,7 @@ class EnhancedMediaOrganizer(MediaOrganizer):
             logger.warning("No search engine available")
             return []
 
-        from ..metadata.models import SearchQuery
+        from ..assets.metadata.models import SearchQuery
 
         query = SearchQuery(**kwargs)
         return self.search_engine.search_assets(query)

@@ -10,7 +10,7 @@ from typing import Any
 
 import aiohttp
 
-from ..core.exceptions import (
+from .provider import (
     AuthenticationError,
     BudgetExceededError,
     GenerationError,

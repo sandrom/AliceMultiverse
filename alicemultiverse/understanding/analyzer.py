@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 from typing import Any
 
-from ..core.cost_tracker import CostCategory, get_cost_tracker
+# Complex cost tracking removed - simple cost tracking in results is sufficient
 from .base import ImageAnalysisResult
 from .ollama_provider import OllamaImageAnalyzer
 from .providers import (
@@ -168,19 +168,7 @@ class ImageAnalyzer:
                 f"(cost: ${result.cost:.4f}, tokens: {result.tokens_used})"
             )
 
-            # Record actual cost
-            cost_tracker = get_cost_tracker()
-            cost_tracker.record_cost(
-                provider=analyzer.name,
-                operation="image_analysis",
-                cost=result.cost,
-                category=CostCategory.UNDERSTANDING,
-                details={
-                    "detailed": detailed,
-                    "tokens_used": result.tokens_used,
-                    "image_path": str(image_path)
-                }
-            )
+            # Cost is already tracked in the result object
 
             return result
 
@@ -281,13 +269,28 @@ class ImageAnalyzer:
         if not providers:
             providers = list(self.analyzers.keys())
 
-        cost_tracker = get_cost_tracker()
-        return cost_tracker.estimate_batch_cost(
-            file_count=image_count,
-            providers=providers,
-            operation="image_analysis",
-            detailed=detailed
-        )
+        # Simple cost estimation
+        estimates = {}
+        for provider_name in providers:
+            if provider_name in self.analyzers:
+                analyzer = self.analyzers[provider_name]
+                cost_per_image = analyzer.estimate_cost(detailed)
+                estimates[provider_name] = {
+                    "per_image": cost_per_image,
+                    "total": cost_per_image * image_count
+                }
+        
+        # Find cheapest provider
+        if estimates:
+            cheapest = min(estimates.items(), key=lambda x: x[1]["total"])
+            return {
+                "estimates": estimates,
+                "cheapest_provider": cheapest[0],
+                "cheapest_total": cheapest[1]["total"],
+                "image_count": image_count
+            }
+        
+        return {"error": "No providers available", "image_count": image_count}
 
     def _get_cheapest_analyzer(self, detailed: bool = False):
         """Get the cheapest available analyzer."""

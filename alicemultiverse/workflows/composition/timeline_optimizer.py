@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from ..workflows.models import Timeline, TimelineClip
+from ..video_export import Timeline, TimelineClip
 from .composition_analyzer import CompositionAnalyzer
 from .flow_analyzer import FlowAnalyzer, FlowSuggestion, SuggestionType
 
@@ -425,7 +425,7 @@ class TimelineOptimizer:
 
         # Distribute duration change across adjustable clips
         total_adjustable_duration = sum(clip.duration for _, clip in adjustable_clips)
-        target_adjustable_duration = total_adjustable_duration * scale_factor
+        total_adjustable_duration * scale_factor
 
         # Apply proportional scaling
         current_time = 0

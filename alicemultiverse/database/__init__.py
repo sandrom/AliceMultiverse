@@ -1,10 +1,11 @@
-"""Database module for AliceMultiverse - Simple file-based cache for personal use."""
+"""Database module - DEPRECATED: Use storage module instead."""
 
 import logging
 
-from .file_cache import FileCache
+from ..storage.file_cache import FileCache
 
 logger = logging.getLogger(__name__)
-logger.info("Using file-based cache")
+logger.warning("database module is deprecated - use storage module instead")
 
+# Keep for backward compatibility
 __all__ = ["FileCache"]

@@ -24,15 +24,7 @@ from .organization_helpers import (
 
 logger = get_logger(__name__)
 
-# Import pipeline function - doing it here to avoid circular imports
-def _get_create_pipeline_stages():
-    """Get create_pipeline_stages function dynamically to avoid circular import."""
-    try:
-        from ..pipeline.pipeline_organizer import create_pipeline_stages
-        return create_pipeline_stages
-    except ImportError:
-        logger.warning("Pipeline functionality not available")
-        return lambda config: None
+# Pipeline functionality has been removed - use SimpleMediaOrganizer for direct function calls
 
 
 class MediaOrganizer:
@@ -87,15 +79,8 @@ class MediaOrganizer:
         # Quality assessment has been replaced with image understanding
         self.quality_enabled = False
 
-        # Initialize pipeline stages if configured
-        create_pipeline_stages = _get_create_pipeline_stages()
-        self.pipeline_stages = create_pipeline_stages(config)
-        self.pipeline_enabled = bool(self.pipeline_stages)
-
-        # Cost tracking for pipeline
-        pipeline_config = getattr(config, "pipeline", {})
-        self.pipeline_cost_limit = getattr(pipeline_config, "cost_limit", None)
-        self.pipeline_cost_total = 0.0
+        # Pipeline functionality has been removed
+        # Use SimpleMediaOrganizer for direct function calls with understanding
 
         # Watch mode settings
         self.watch_mode = config.processing.watch
@@ -386,7 +371,7 @@ class MediaOrganizer:
             "file_number": file_number,
             "quality_stars": None,
             "brisque_score": None,
-            "pipeline_result": metadata.get("pipeline_stages"),
+            "pipeline_result": None,  # Pipeline has been removed
             "content_hash": content_hash,  # Include content hash
         }
 
@@ -595,46 +580,6 @@ class MediaOrganizer:
                 f"Removed {duplicates_removed} duplicate files, saved {space_saved / 1024 / 1024:.1f} MB"
             )
 
-    def _run_pipeline_stages(self, media_path: Path, metadata: dict) -> dict:
-        """Run pipeline stages on an image.
-
-        Args:
-            media_path: Path to the image
-            metadata: Current metadata dictionary
-
-        Returns:
-            Updated metadata dictionary
-        """
-        for stage in self.pipeline_stages:
-            try:
-                # Check if we should run this stage
-                min_stars = getattr(stage, "min_stars", 0)
-                current_stars = metadata.get("quality_stars", 0)
-
-                if current_stars >= min_stars:
-                    # Check cost limit if applicable
-                    stage_cost = getattr(stage, "cost", 0.0)
-                    if (
-                        self.pipeline_cost_limit
-                        and self.pipeline_cost_total + stage_cost > self.pipeline_cost_limit
-                    ):
-                        logger.warning(f"Skipping {stage.stage_name} - would exceed cost limit")
-                        continue
-
-                    # Run the stage
-                    logger.debug(f"Running {stage.stage_name} on {media_path.name}")
-                    metadata = stage(media_path, metadata)
-
-                    # Update cost tracking
-                    self.pipeline_cost_total += stage_cost
-
-            except Exception as e:
-                logger.error(
-                    f"Error in pipeline stage {getattr(stage, 'stage_name', 'unknown')}: {e}"
-                )
-                # Continue with next stage even if one fails
-
-        return metadata
 
     def _build_destination_path(
         self,
@@ -1064,23 +1009,23 @@ class MediaOrganizer:
 
     def _show_cost_warning(self) -> None:
         """Show cost warning when understanding is enabled."""
-        from ..core.cost_tracker import get_cost_tracker
-
         # Count media files
         media_files = self._find_media_files()
         if not media_files:
             return
 
-        # Get cost tracker
-        cost_tracker = get_cost_tracker()
-
-        # Estimate costs for understanding
+        # Simple cost estimates per image
         provider = self.metadata_cache.understanding_provider or "anthropic"
-        estimate = cost_tracker.estimate_batch_cost(
-            file_count=len(media_files),
-            providers=[provider],
-            operation="image_analysis"
-        )
+        cost_estimates = {
+            "openai": 0.01,
+            "anthropic": 0.004,  # Claude Haiku
+            "google": 0.002,
+            "deepseek": 0.0003,
+            "ollama": 0.0,  # Free local
+        }
+        
+        cost_per_image = cost_estimates.get(provider, 0.01)
+        total_cost = cost_per_image * len(media_files)
 
         # Show warning
         print("\n" + "="*70)
@@ -1088,26 +1033,18 @@ class MediaOrganizer:
         print("="*70)
         print(f"\nProvider: {provider}")
         print(f"Images to analyze: {len(media_files)}")
-        print(f"Estimated cost: {estimate['total_cost']['formatted']}")
+        print(f"Cost per image: ${cost_per_image:.4f}")
+        print(f"Estimated total: ${total_cost:.2f}")
 
         # Show cheaper alternatives if available
-        if estimate['breakdown'][provider]['per_item'] > 0.001:
+        if cost_per_image > 0.001:
             print("\n💡 Cheaper alternatives:")
             if provider != "deepseek":
-                print("  • DeepSeek: ~$0.0002 per image")
+                print("  • DeepSeek: ~$0.0003 per image")
             if provider != "google":
-                print("  • Google AI: FREE (50 images/day)")
-
-        # Check budget warnings
-        if estimate['budget_warnings']:
-            print("\n⚠️  BUDGET WARNINGS:")
-            for warning in estimate['budget_warnings']:
-                print(f"  • {warning}")
-
-        # Show current spending
-        spending = cost_tracker.get_spending_summary()
-        if spending['daily']['total'] > 0:
-            print(f"\n📊 Today's spending: ${spending['daily']['total']:.2f}")
+                print("  • Google AI: ~$0.002 per image")
+            if provider != "ollama":
+                print("  • Ollama: FREE (local models)")
 
         if not self.config.processing.dry_run:
             print("\n🔍 This is a preview. Add --dry-run to see what would happen without cost.")

@@ -300,7 +300,7 @@ class ShotListGenerator:
                 return shot_list
 
             # Get overall project suggestions
-            project_context = {
+            {
                 "style": self.style,
                 "scene_count": len(scenes),
                 "total_duration": shot_list.total_duration,

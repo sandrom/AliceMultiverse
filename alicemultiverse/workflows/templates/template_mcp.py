@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from ...core.structured_logging import get_logger
+import logging
 from ..base import WorkflowContext
 from ..executor import WorkflowExecutor
 from .social_media import (
@@ -13,7 +13,7 @@ from .social_media import (
 )
 from .story_arc import DocumentaryStoryTemplate, StoryArcTemplate
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 async def create_story_arc_video(

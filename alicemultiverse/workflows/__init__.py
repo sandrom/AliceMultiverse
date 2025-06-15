@@ -24,6 +24,9 @@ from .video_creation import (
     VideoStoryboard,
 )
 
+# Re-export submodules for backward compatibility
+from . import composition, transitions, variations
+
 __all__ = [
     # Base classes
     "WorkflowTemplate",
@@ -40,4 +43,8 @@ __all__ = [
     "ShotDescription",
     "CameraMotion",
     "TransitionType",
+    # Submodules
+    "composition",
+    "transitions",
+    "variations",
 ]

@@ -14,9 +14,9 @@ import cv2
 import numpy as np
 
 # ImagePath type removed - using str instead
-from ..core.logging import get_logger
+import logging
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @dataclass

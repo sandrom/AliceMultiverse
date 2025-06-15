@@ -14,8 +14,8 @@ from typing import Any
 import cv2
 import numpy as np
 
-from ..metadata.models import AssetMetadata
-from ..understanding.analyzer import ImageAnalyzer
+from ...assets.metadata.models import AssetMetadata
+from ...understanding.analyzer import ImageAnalyzer
 from .models import TransitionSuggestion, TransitionType
 
 logger = logging.getLogger(__name__)

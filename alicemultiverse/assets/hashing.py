@@ -7,8 +7,8 @@ from pathlib import Path
 import numpy as np
 from PIL import Image
 
-from ..metadata.embedder import MetadataEmbedder
-from ..metadata.extractor import MetadataExtractor
+from ..assets.metadata.embedder import MetadataEmbedder
+from ..assets.metadata.extractor import MetadataExtractor
 
 logger = logging.getLogger(__name__)
 

@@ -9,8 +9,8 @@ from typing import Any
 
 import aiohttp
 
-from ..core.file_operations import download_file
-from .provider import AuthenticationError, GenerationError, Provider, RateLimitError
+from .base_provider import BaseProvider
+from .provider import AuthenticationError, GenerationError, RateLimitError
 from .provider_types import (
     GenerationRequest,
     GenerationResult,
@@ -22,7 +22,7 @@ from .provider_types import (
 logger = logging.getLogger(__name__)
 
 
-class OpenAIProvider(Provider):
+class OpenAIProvider(BaseProvider):
     """Provider for OpenAI API integration (DALL-E, GPT-4 Vision)."""
 
     BASE_URL = "https://api.openai.com/v1"
@@ -83,17 +83,8 @@ class OpenAIProvider(Provider):
             api_key: OpenAI API key (or from OPENAI_API_KEY env var)
             **kwargs: Additional arguments for BaseProvider
         """
-        api_key = api_key or os.getenv("OPENAI_API_KEY")
-        if not api_key:
-            raise ValueError("OpenAI API key is required")
+        super().__init__("openai", api_key, **kwargs)
 
-        super().__init__(api_key=api_key, **kwargs)
-        self._session: aiohttp.ClientSession | None = None
-
-    @property
-    def name(self) -> str:
-        """Provider name."""
-        return "openai"
 
     @property
     def capabilities(self) -> ProviderCapabilities:
@@ -121,28 +112,20 @@ class OpenAIProvider(Provider):
             }
         )
 
-    async def _get_session(self) -> aiohttp.ClientSession:
-        """Get or create aiohttp session."""
-        if not self._session:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            }
-            self._session = aiohttp.ClientSession(headers=headers)
-        return self._session
+    def _get_headers(self) -> dict[str, str]:
+        """Get provider-specific headers."""
+        return {
+            "Authorization": f"Bearer {self._get_api_key('OPENAI_API_KEY')}",
+            "Content-Type": "application/json",
+        }
 
     async def check_status(self) -> ProviderStatus:
         """Check OpenAI API status."""
         try:
-            session = await self._get_session()
+            session = await self._ensure_session()
             async with session.get(f"{self.BASE_URL}/models") as response:
-                if response.status == 200:
-                    self._status = ProviderStatus.AVAILABLE
-                elif response.status == 401:
-                    self._status = ProviderStatus.UNAVAILABLE
-                    logger.error("OpenAI authentication failed")
-                else:
-                    self._status = ProviderStatus.DEGRADED
+                await self._handle_response_errors(response, "Status check")
+                self._status = ProviderStatus.AVAILABLE
 
         except Exception as e:
             logger.error(f"Failed to check OpenAI status: {e}")
@@ -179,17 +162,11 @@ class OpenAIProvider(Provider):
         params = self._build_dalle_params(request, model)
 
         # Call API
-        session = await self._get_session()
+        session = await self._ensure_session()
         endpoint = self.MODELS[model]["endpoint"]
 
         async with session.post(f"{self.BASE_URL}{endpoint}", json=params) as response:
-            if response.status == 429:
-                raise RateLimitError("OpenAI rate limit exceeded")
-            elif response.status == 401:
-                raise AuthenticationError("Invalid OpenAI API key")
-            elif response.status != 200:
-                error_data = await response.json()
-                raise GenerationError(f"OpenAI API error: {error_data.get('error', {}).get('message', 'Unknown error')}")
+            await self._handle_response_errors(response, "Image generation")
 
             data = await response.json()
 
@@ -253,13 +230,11 @@ class OpenAIProvider(Provider):
         }
 
         # Call API
-        session = await self._get_session()
+        session = await self._ensure_session()
         endpoint = self.MODELS[model]["endpoint"]
 
         async with session.post(f"{self.BASE_URL}{endpoint}", json=params) as response:
-            if response.status != 200:
-                error_data = await response.json()
-                raise GenerationError(f"OpenAI API error: {error_data.get('error', {}).get('message', 'Unknown error')}")
+            await self._handle_response_errors(response, "Image analysis")
 
             data = await response.json()
 
@@ -344,13 +319,8 @@ class OpenAIProvider(Provider):
             filename = f"dalle_{timestamp}.png"
             output_path = Path.cwd() / "generated" / filename
 
-        # Ensure directory exists
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-
-        # Download
-        await download_file(url, output_path)
-
-        return output_path
+        # Use base class download method
+        return await self._download_result(url, output_path.parent, output_path.name)
 
     async def _save_base64_image(self, request: GenerationRequest, b64_data: str) -> Path:
         """Save base64 image data."""
@@ -395,12 +365,3 @@ class OpenAIProvider(Provider):
                 models.append(name)
         return models
 
-    async def __aenter__(self):
-        """Async context manager entry."""
-        return self
-
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
-        """Async context manager exit."""
-        if self._session:
-            await self._session.close()
-            self._session = None

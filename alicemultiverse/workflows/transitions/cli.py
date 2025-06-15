@@ -8,7 +8,7 @@ from pathlib import Path
 
 import click
 
-from ..core.logging import setup_logging
+import logging
 from .color_flow import ColorFlowAnalyzer, analyze_sequence, export_analysis_for_editor
 from .match_cuts import export_match_cuts, find_match_cuts
 from .morphing import MorphingTransitionMatcher, SubjectMorpher

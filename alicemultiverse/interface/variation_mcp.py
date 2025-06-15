@@ -7,9 +7,10 @@ from ..analytics.performance_tracker import PerformanceTracker
 from ..memory.style_memory import StyleMemory
 # Provider functionality not yet implemented
 # from ..providers import get_provider
-from ..variations import (
+from ..workflows.variations import (
     ContentBase,
     VariationGenerator,
+    VariationResult,
     VariationStrategy,
     VariationTracker,
     VariationType,
@@ -306,7 +307,6 @@ async def analyze_variation_success(
     generator = VariationGenerator()
 
     # Create variation result
-    from ..variations.variation_generator import VariationResult
     result = VariationResult(
         variation_id=variation_id,
         base_content_id=base_content_id,

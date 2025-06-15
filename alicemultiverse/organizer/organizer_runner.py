@@ -18,8 +18,8 @@ logger = logging.getLogger(__name__)
 
 def run_organizer(
     config: DictConfig,
-    pipeline: str | None = None,
-    stages: str | None = None,
+    pipeline: str | None = None,  # Deprecated - kept for compatibility
+    stages: str | None = None,  # Deprecated
     cost_limit: float | None = None,
     sightengine_key: str | None = None,
     claude_key: str | None = None,
@@ -28,9 +28,9 @@ def run_organizer(
 
     Args:
         config: Configuration object
-        pipeline: Pipeline mode (basic, standard, premium, custom)
-        stages: Custom pipeline stages (comma-separated)
-        cost_limit: Maximum cost limit for pipeline processing
+        pipeline: DEPRECATED - use understanding in config instead
+        stages: DEPRECATED - pipeline stages no longer used
+        cost_limit: Maximum cost limit for understanding
         sightengine_key: SightEngine API credentials (format: 'user,secret')
         claude_key: Anthropic/Claude API key
 
@@ -38,13 +38,13 @@ def run_organizer(
         True if successful, False otherwise
     """
     try:
-        # Update config with pipeline settings if provided
-        if pipeline:
-            config.processing.pipeline = pipeline
+        # Update config with understanding settings if provided
         if cost_limit is not None:
-            if not hasattr(config, "pipeline"):
-                config.pipeline = {}
-            config.pipeline.cost_limit = cost_limit
+            if not hasattr(config, "understanding"):
+                config.understanding = {}
+            if not hasattr(config.understanding, "cost_limits"):
+                config.understanding.cost_limits = {}
+            config.understanding.cost_limits.total = cost_limit
 
         # Set API keys in config if provided
         if sightengine_key:
@@ -60,8 +60,7 @@ def run_organizer(
             logger.info("Using enhanced metadata organizer")
         else:
             organizer = MediaOrganizer(config)
-            if pipeline:
-                logger.info(f"Using pipeline mode: {pipeline}")
+            # Pipeline has been removed
 
         return organizer.organize()
 

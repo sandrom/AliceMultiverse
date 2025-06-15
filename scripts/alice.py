@@ -11,7 +11,7 @@ from pathlib import Path
 # Add parent directory to path for direct script execution
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from alicemultiverse.interface.main_cli import main
+from alicemultiverse.interface.simple_cli import main
 
 if __name__ == "__main__":
     sys.exit(main())

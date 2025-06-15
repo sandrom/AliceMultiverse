@@ -7,7 +7,7 @@ from typing import Any
 
 from ..core.ai_errors import AIFriendlyError
 from ..core.config import load_config
-from ..metadata.models import AssetRole
+from ..assets.metadata.models import AssetRole
 from ..organizer.enhanced_organizer import EnhancedMediaOrganizer
 from ..projects import ProjectService
 from .models import (
@@ -308,9 +308,10 @@ class AliceInterface:
             if request.get("source_path"):
                 self.config.paths.inbox = request["source_path"]
             if request.get("quality_assessment"):
-                self.config.processing.quality = True
-            if request.get("pipeline"):
-                self.config.pipeline.mode = request["pipeline"]
+                # Quality assessment deprecated - ignored
+                pass
+            if request.get("understanding"):
+                self.config.processing.understanding = True
             if request.get("watch_mode"):
                 self.config.processing.watch = True
 
@@ -572,13 +573,16 @@ class AliceInterface:
 
     def assess_quality(self, asset_ids: list[str], pipeline: str = "standard") -> AliceResponse:
         """Run quality assessment on specific assets.
+        
+        DEPRECATED: Quality assessment has been replaced with the understanding system.
+        Use analyze_assets() instead for AI-powered image analysis.
 
         Args:
             asset_ids: List of asset IDs to assess
-            pipeline: Assessment pipeline ("basic", "standard", "premium")
+            pipeline: Assessment pipeline (ignored - for compatibility only)
 
         Returns:
-            Quality scores and identified issues for each asset
+            Empty quality scores for compatibility
         """
         try:
             if self.initialization_error:
@@ -693,7 +697,7 @@ class AliceInterface:
                 file_path = metadata.get("file_path", "")
 
                 # Create or update asset in database
-                asset = self.asset_repo.create_or_update_asset(
+                self.asset_repo.create_or_update_asset(
                     content_hash=content_hash,
                     file_path=file_path,
                     media_type=media_type,

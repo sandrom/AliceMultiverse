@@ -667,7 +667,7 @@ class StyleAnalyzer:
         """Guess time of day from image characteristics."""
         # Analyze color channels
         r_mean = np.mean(image[:, :, 0])
-        g_mean = np.mean(image[:, :, 1])
+        np.mean(image[:, :, 1])
         b_mean = np.mean(image[:, :, 2])
         brightness = np.mean(l_channel)
 

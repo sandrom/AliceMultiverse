@@ -141,7 +141,7 @@ class DaVinciResolveExporter:
             resources = ET.SubElement(root, "resources")
 
             # Create format resource
-            format_elem = ET.SubElement(
+            ET.SubElement(
                 resources, "format",
                 id="r1",
                 name=f"{timeline.resolution[0]}x{timeline.resolution[1]}",
@@ -190,7 +190,7 @@ class DaVinciResolveExporter:
 
                 # Add transitions
                 if clip.transition_in:
-                    trans = ET.SubElement(
+                    ET.SubElement(
                         clip_elem, "transition",
                         name=clip.transition_in,
                         duration=f"{clip.transition_in_duration}s"
@@ -206,7 +206,7 @@ class DaVinciResolveExporter:
 
             # Add timeline markers
             for marker in timeline.markers:
-                marker_elem = ET.SubElement(
+                ET.SubElement(
                     sequence, "marker",
                     start=f"{marker['time']}s",
                     value=marker.get('name', 'Marker'),

@@ -19,7 +19,7 @@ from ..assets.perceptual_hashing import (
     calculate_perceptual_hash,
     hamming_distance,
 )
-from ..core.cost_tracker import get_cost_tracker
+# Cost tracker removed - simple cost tracking in results
 from .analyzer import ImageAnalyzer
 from .base import ImageAnalysisResult
 from .batch_analyzer import BatchAnalysisRequest
@@ -71,7 +71,7 @@ class OptimizedBatchAnalyzer:
         self.similarity_threshold = similarity_threshold
         self.min_group_size = min_group_size
         self.use_progressive_providers = use_progressive_providers
-        self.cost_tracker = get_cost_tracker()
+        # Cost tracking is done in individual results
 
     async def analyze_batch_optimized(
         self,

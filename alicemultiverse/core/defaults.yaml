@@ -186,7 +186,8 @@ quality:
       2_star: 80
 
 # Pipeline Configuration
-pipeline:
+# Processing Defaults (pipeline system has been removed)
+processing_limits:
   max_cost_per_item: 1.0
   default_timeout: 300
   max_retries: 3

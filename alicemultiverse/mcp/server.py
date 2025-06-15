@@ -3,15 +3,12 @@
 import asyncio
 import logging
 
-from mcp import Resource, Server
+from mcp import Resource
+from mcp.server import Server
 from mcp.server.models import InitializationOptions
 from mcp.server.stdio import stdio_server
 
-from .tools import (
-    register_cost_tools,
-    register_project_tools,
-    register_selection_tools,
-)
+from .tools import register_all_tools
 
 logger = logging.getLogger(__name__)
 
@@ -30,19 +27,7 @@ def create_server(name: str = "alice-mcp") -> Server:
 
     # Register all tool groups
     logger.info("Registering MCP tools...")
-
-    # Register smaller tool groups first (already refactored)
-    register_cost_tools(server)
-    register_project_tools(server)
-    register_selection_tools(server)
-
-    # TODO: Register remaining tool groups as they are refactored
-    # register_core_tools(server)
-    # register_analysis_tools(server)
-    # register_tag_tools(server)
-    # register_style_tools(server)
-    # register_music_video_tools(server)
-    # register_local_model_tools(server)
+    register_all_tools(server)
 
     logger.info(f"Registered {len(server._tools)} tools")
 

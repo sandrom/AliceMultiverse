@@ -44,24 +44,8 @@ For normal usage, use Alice through an AI assistant instead.
     # Subparsers for commands
     subparsers = parser.add_subparsers(dest="command", help="Commands")
 
-    # Cost subcommand for cost tracking
-    cost_parser = subparsers.add_parser("cost", help="Cost tracking and budget management")
-    cost_subparsers = cost_parser.add_subparsers(dest="cost_command", help="Cost management commands")
-
-    # Cost - report
-    cost_report = cost_subparsers.add_parser("report", help="Show cost report")
-    cost_report.add_argument("--days", type=int, default=30, help="Number of days to include")
-
-    # Cost - set-budget
-    cost_budget = cost_subparsers.add_parser("set-budget", help="Set spending budget")
-    cost_budget.add_argument("--daily", type=float, help="Daily budget limit (USD)")
-    cost_budget.add_argument("--monthly", type=float, help="Monthly budget limit (USD)")
-    cost_budget.add_argument("--alert", type=float, default=0.8, help="Alert threshold (0-1)")
-
-    # Cost - providers
-    cost_providers = cost_subparsers.add_parser("providers", help="Compare provider costs")
-    cost_providers.add_argument("--category", choices=["understanding", "generation", "enhancement", "audio"],
-                               help="Filter by category")
+    # Cost tracking removed - costs are tracked in individual results
+    # Use MCP estimate_cost tool for simple cost estimates
 
     # Keys subcommand
     keys_parser = subparsers.add_parser("keys", help="Manage API keys")
@@ -660,30 +644,11 @@ For normal usage, use Alice through an AI assistant instead.
         help="Enable enhanced metadata extraction for AI navigation (experimental)",
     )
 
-    # Pipeline options
+    # Understanding options (pipeline has been removed)
     parser.add_argument(
-        "--pipeline",
-        choices=[
-            # Named presets
-            "basic",
-            "standard",
-            "premium",
-            # Explicit combinations
-            "brisque",
-            "brisque-sightengine",
-            "brisque-claude",
-            "brisque-sightengine-claude",
-            "full",
-            # Custom
-            "custom",
-        ],
-        help="Quality pipeline - 4 main options: "
-        "brisque (free), brisque-sightengine ($0.001/image), "
-        "brisque-claude (~$0.002/image), brisque-sightengine-claude (~$0.003/image). "
-        "Aliases: basic=brisque, standard=brisque-sightengine, premium/full=all-3",
+        "--providers",
+        help="Understanding providers to use (comma-separated: openai,anthropic,google,deepseek,all)"
     )
-
-    parser.add_argument("--stages", help="Custom pipeline stages (comma-separated)")
 
     parser.add_argument(
         "--cost-limit", type=float, help="Maximum cost limit for API calls (in USD)"
@@ -782,13 +747,11 @@ def apply_cli_args_to_config(config: DictConfig, args: argparse.Namespace) -> No
     if hasattr(args, "enhanced_metadata") and args.enhanced_metadata:
         config.enhanced_metadata = True
 
-    # Pipeline options
-    if hasattr(args, "pipeline") and args.pipeline:
-        config.pipeline.mode = args.pipeline
-    if hasattr(args, "stages") and args.stages:
-        config.pipeline.stages = [s.strip() for s in args.stages.split(",")]
+    # Understanding options
+    if hasattr(args, "providers") and args.providers:
+        config.understanding.preferred_provider = args.providers
     if hasattr(args, "cost_limit") and args.cost_limit:
-        config.pipeline.cost_limits.total = args.cost_limit
+        config.understanding.cost_limits.total = args.cost_limit
 
 
 def check_dependencies() -> bool:
@@ -838,47 +801,7 @@ def main(argv: list[str] | None = None) -> int:
         from ..core.first_run import run_setup_command
         return run_setup_command()
 
-    # Handle cost subcommand
-    if args.command == "cost":
-        from ..core.cost_tracker import CostCategory, get_cost_tracker
-
-        cost_tracker = get_cost_tracker()
-
-        if args.cost_command == "report":
-            report = cost_tracker.format_cost_report()
-            print(report)
-            return 0
-
-        elif args.cost_command == "set-budget":
-            if args.daily:
-                cost_tracker.set_budget("daily", args.daily, args.alert)
-                print(f"✅ Set daily budget: ${args.daily:.2f}")
-            if args.monthly:
-                cost_tracker.set_budget("monthly", args.monthly, args.alert)
-                print(f"✅ Set monthly budget: ${args.monthly:.2f}")
-            if not args.daily and not args.monthly:
-                print("❌ Please specify --daily and/or --monthly budget")
-                return 1
-            return 0
-
-        elif args.cost_command == "providers":
-            category = CostCategory[args.category.upper()] if args.category else None
-            comparison = cost_tracker.get_provider_comparison(category)
-
-            print("\n📊 Provider Cost Comparison")
-            print("=" * 60)
-            for provider in comparison:
-                print(f"\n{provider['provider']}:")
-                print(f"  Category: {provider['category']}")
-                print(f"  Total spent: ${provider['total_spent']:.2f}")
-                print(f"  Requests: {provider['request_count']}")
-                if provider['request_count'] > 0:
-                    print(f"  Average cost: ${provider['average_cost']:.4f}")
-                print(f"  Pricing: {provider['pricing_model']}")
-                if 'typical_cost' in provider:
-                    print(f"  Typical cost: ${provider['typical_cost']:.4f}")
-                print(f"  Free tier: {provider['free_tier']}")
-            return 0
+    # Cost command removed - use MCP tools for cost estimates
 
     # Handle keys subcommand
     if args.command == "keys":
@@ -1104,7 +1027,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Handle transitions subcommand
     if args.command == "transitions":
-        from ..transitions.cli import transitions as transitions_cli
+        from ..workflows.transitions.cli import transitions as transitions_cli
 
         # Build command line args for click
         click_args = [args.transitions_command]
@@ -1169,7 +1092,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Handle dedup subcommand
     if args.command == "dedup":
-        from ..deduplication.cli import dedup_cli
+        from ..assets.deduplication.cli import dedup_cli
 
         # Build command line args for click
         click_args = [args.dedup_command]
@@ -1438,13 +1361,12 @@ def main(argv: list[str] | None = None) -> int:
         # This is imported here to avoid circular imports and speed up CLI
         from ..organizer import run_organizer
 
-        pipeline = getattr(args, "pipeline", None)
-        stages = getattr(args, "stages", None)
+        # Pipeline has been removed
         cost_limit = getattr(args, "cost_limit", None)
         sightengine_key = getattr(args, "sightengine_key", None)
         claude_key = getattr(args, "claude_key", None)
 
-        result = run_organizer(config, pipeline, stages, cost_limit, sightengine_key, claude_key)
+        result = run_organizer(config, None, None, cost_limit, sightengine_key, claude_key)
 
         return 0 if result else 1
 

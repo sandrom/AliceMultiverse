@@ -30,7 +30,7 @@ class ProcessingConfig:
     watch: bool = False
     watch_interval: int = 5
     dry_run: bool = False
-    pipeline: str | None = None
+    # Pipeline has been removed - use understanding directly
     # API keys (can be set via CLI)
     sightengine_user: str | None = None
     sightengine_secret: str | None = None

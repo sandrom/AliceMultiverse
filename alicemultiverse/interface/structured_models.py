@@ -121,8 +121,8 @@ class OrganizeRequest(TypedDict, total=False):
     """Request to organize media files."""
     source_path: str | None
     destination_path: str | None
-    quality_assessment: bool | None
-    pipeline: str | None
+    quality_assessment: bool | None  # Deprecated
+    understanding: bool | None  # Enable AI understanding
     watch_mode: bool | None
     move_files: bool | None
     custom_rules: dict[str, Any] | None

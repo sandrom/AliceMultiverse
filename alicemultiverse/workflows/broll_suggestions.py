@@ -3,13 +3,12 @@
 from dataclasses import dataclass
 from typing import Any
 
-from ..core.structured_logging import get_logger
-from ..deduplication.similarity_index import SimilarityIndex
-from ..storage.unified_duckdb import DuckDBSearch
+import logging
+from ..assets.deduplication.similarity_index import SimilarityIndex
 from ..scene_detection.scene_detector import SceneDetector
 from ..storage.unified_duckdb import UnifiedDuckDBStorage
 
-logger = get_logger(__name__)
+logger = logging.getLogger(__name__)
 
 
 @dataclass

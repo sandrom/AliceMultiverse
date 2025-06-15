@@ -266,7 +266,7 @@ class ColorFlowAnalyzer:
         # Determine transition type based on lighting
         if lighting1.type == 'directional' and lighting2.type == 'directional':
             # Use diagonal transition aligned with average lighting direction
-            avg_direction = (
+            (
                 (lighting1.direction[0] + lighting2.direction[0]) / 2,
                 (lighting1.direction[1] + lighting2.direction[1]) / 2
             )

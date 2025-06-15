@@ -9,7 +9,7 @@ from typing import Any
 from PIL import Image
 from PIL.ExifTags import TAGS
 
-from ..core.types import AnalysisResult, MediaType
+from ...core.types import AnalysisResult, MediaType
 from .models import MOOD_VOCABULARY, STYLE_VOCABULARY, AssetMetadata, AssetRole
 
 logger = logging.getLogger(__name__)
