@@ -1,14 +1,18 @@
 """Enhanced media organizer with rich metadata support."""
 
+import asyncio
+import contextlib
 import logging
 from datetime import datetime
 from pathlib import Path
 
 from omegaconf import DictConfig
 
-from ..core.unified_cache import UnifiedCache as EnhancedMetadataCache
-from ..core.types import AnalysisResult, MediaType, OrganizeResult
+from ..assets.metadata.embedder import MetadataEmbedder
 from ..assets.metadata.models import AssetMetadata, AssetRole
+from ..core.types import AnalysisResult, MediaType, OrganizeResult
+from ..core.unified_cache import UnifiedCache as EnhancedMetadataCache
+from ..understanding.simple_analysis import analyze_image, should_analyze_image
 from .media_organizer import MediaOrganizer
 
 logger = logging.getLogger(__name__)
@@ -24,6 +28,18 @@ class EnhancedMediaOrganizer(MediaOrganizer):
             config: Configuration object
         """
         super().__init__(config)
+
+        # Extract understanding config for direct function calls
+        self.understanding_enabled = getattr(config.processing, "understanding", False)
+        self.understanding_provider = None
+        self.understanding_detailed = False
+
+        if self.understanding_enabled:
+            # Try to get understanding config from pipeline
+            if hasattr(config, "pipeline") and hasattr(config.pipeline, "understanding"):
+                understanding_config = config.pipeline.understanding
+                self.understanding_provider = getattr(understanding_config, "preferred_provider", None)
+                self.understanding_detailed = getattr(understanding_config, "detailed", False)
 
         # Replace standard cache with enhanced cache
         project_id = self._get_project_id(config)
@@ -42,15 +58,12 @@ class EnhancedMediaOrganizer(MediaOrganizer):
             understanding_provider=understanding_provider
         )
 
-        # Initialize persistent metadata manager if configured
-        self.persistent_metadata = None
+        # Initialize metadata embedder if configured
+        self.metadata_embedder = None
         self.embed_metadata = getattr(config, "embed_metadata", True)  # Default to embedding
         if self.embed_metadata:
-            cache_dir = Path(
-                getattr(config.paths, "cache_dir", Path.home() / ".alicemultiverse" / "cache")
-            )
-            self.persistent_metadata = PersistentMetadataManager(cache_dir, {})
-            logger.info("Persistent metadata embedding enabled")
+            self.metadata_embedder = MetadataEmbedder()
+            logger.info("Metadata embedding enabled")
 
         # Create search engine
         self.search_engine = None
@@ -66,6 +79,77 @@ class EnhancedMediaOrganizer(MediaOrganizer):
         self.metadata_cache.get_all_metadata()
         # Always create search engine, even with empty metadata
         # Search engine removed - use DuckDBSearch instead
+
+    def _analyze_media(self, media_path: Path, project_folder: str) -> dict:
+        """Analyze media file to extract metadata with AI understanding.
+        
+        This overrides the parent method to add direct AI understanding
+        without using the pipeline system.
+        
+        Args:
+            media_path: Path to media file
+            project_folder: Project folder name
+            
+        Returns:
+            Analysis result as dictionary
+        """
+        # Call parent to get basic analysis
+        analysis = super()._analyze_media(media_path, project_folder)
+
+        # Skip if not an image or understanding is disabled
+        if not self.understanding_enabled or analysis["media_type"] != MediaType.IMAGE:
+            return analysis
+
+        # Check if we should analyze
+        metadata = {
+            "media_type": analysis["media_type"],
+            "understanding_provider": analysis.get("understanding_provider"),
+        }
+
+        if not should_analyze_image(metadata):
+            return analysis
+
+        try:
+            # Run async analysis in sync context
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+            understanding_result = loop.run_until_complete(
+                analyze_image(
+                    media_path,
+                    provider=self.understanding_provider,
+                    detailed=self.understanding_detailed,
+                    extract_tags=True,
+                    generate_prompt=True,
+                )
+            )
+
+            # Merge understanding results into analysis
+            if understanding_result:
+                # Store understanding data in the analysis
+                analysis["understanding"] = understanding_result
+
+                # Also merge top-level fields for compatibility
+                for key in ["tags", "description", "positive_prompt", "negative_prompt",
+                           "understanding_provider", "understanding_model", "understanding_cost"]:
+                    if key in understanding_result:
+                        analysis[key] = understanding_result[key]
+
+                provider = understanding_result.get('understanding_provider')
+                cost = understanding_result.get('understanding_cost', 0)
+                logger.info(
+                    f"Analyzed {media_path.name} with {provider} (${cost:.4f})"
+                )
+
+        except Exception as e:
+            logger.error(f"Image understanding failed for {media_path.name}: {e}")
+
+        finally:
+            # Clean up event loop
+            with contextlib.suppress(Exception):
+                loop.close()
+
+        return analysis
 
     def _process_file(self, media_path: Path) -> OrganizeResult:
         """Process a single media file with enhanced metadata.
@@ -112,7 +196,7 @@ class EnhancedMediaOrganizer(MediaOrganizer):
                 )
 
                 # Save to persistent storage if enabled
-                if self.persistent_metadata and result.get("destination"):
+                if self.metadata_embedder and result.get("destination"):
                     output_path = Path(result["destination"])
                     if output_path.exists():
                         # Prepare metadata for embedding
@@ -165,7 +249,7 @@ class EnhancedMediaOrganizer(MediaOrganizer):
                             )
 
                         # Save to image
-                        success = self.persistent_metadata.save_metadata(
+                        success = self.metadata_embedder.embed_metadata(
                             output_path, embed_metadata
                         )
                         if success:

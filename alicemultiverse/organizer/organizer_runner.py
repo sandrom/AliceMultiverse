@@ -11,7 +11,6 @@ import logging
 from omegaconf import DictConfig
 
 from .enhanced_organizer import EnhancedMediaOrganizer
-from .media_organizer import MediaOrganizer
 
 logger = logging.getLogger(__name__)
 
@@ -54,13 +53,12 @@ def run_organizer(
         if claude_key:
             config.processing.claude_api_key = claude_key
 
-        # Create organizer - use enhanced if requested
+        # Always use EnhancedMediaOrganizer (includes all functionality)
+        organizer = EnhancedMediaOrganizer(config)
         if config.get("enhanced_metadata", False):
-            organizer = EnhancedMediaOrganizer(config)
-            logger.info("Using enhanced metadata organizer")
-        else:
-            organizer = MediaOrganizer(config)
-            # Pipeline has been removed
+            logger.info("Enhanced metadata features enabled")
+        
+        # Note: Pipeline has been removed - use understanding flag instead
 
         return organizer.organize()
 
