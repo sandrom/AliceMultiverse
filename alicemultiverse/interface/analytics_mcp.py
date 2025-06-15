@@ -1,27 +1,20 @@
 """MCP tools for performance analytics and improvements."""
 
-import asyncio
-import uuid
-from datetime import datetime, timedelta
-from pathlib import Path
-from typing import Dict, Any, List, Optional
+from datetime import datetime
+from datetime import timedelta
+from typing import Any
 
-from ..analytics import (
-    PerformanceTracker,
-    ExportAnalytics,
-    ExportMetrics,
-    ImprovementEngine
-)
+from ..analytics import ExportAnalytics, ExportMetrics, ImprovementEngine, PerformanceTracker
 from ..analytics.export_analytics import ExportFormat
 from ..core.structured_logging import get_logger
 
 logger = get_logger(__name__)
 
 # Global instances
-_performance_tracker: Optional[PerformanceTracker] = None
-_export_analytics: Optional[ExportAnalytics] = None
-_improvement_engine: Optional[ImprovementEngine] = None
-_active_session_id: Optional[str] = None
+_performance_tracker: PerformanceTracker | None = None
+_export_analytics: ExportAnalytics | None = None
+_improvement_engine: ImprovementEngine | None = None
+_active_session_id: str | None = None
 
 
 def get_performance_tracker() -> PerformanceTracker:
@@ -51,7 +44,7 @@ def get_improvement_engine() -> ImprovementEngine:
     return _improvement_engine
 
 
-async def start_analytics_session() -> Dict[str, Any]:
+async def start_analytics_session() -> dict[str, Any]:
     """Start a new analytics session.
     
     Begins tracking performance metrics for the current session.
@@ -60,24 +53,25 @@ async def start_analytics_session() -> Dict[str, Any]:
         Session information
     """
     global _active_session_id
-    
+
     try:
         tracker = get_performance_tracker()
-        
+
         # Generate session ID
-        session_id = str(uuid.uuid4())
+        # Use timestamp-based session ID for easy sorting/identification
+        session_id = datetime.now().strftime("%Y%m%d_%H%M%S_%f")[:20]
         _active_session_id = session_id
-        
+
         # Start session
         session = tracker.start_session(session_id)
-        
+
         return {
             "success": True,
             "session_id": session_id,
             "started_at": session.start_time.isoformat(),
             "message": "Analytics session started. All workflows will be tracked."
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to start analytics session: {e}")
         return {
@@ -86,7 +80,7 @@ async def start_analytics_session() -> Dict[str, Any]:
         }
 
 
-async def end_analytics_session() -> Dict[str, Any]:
+async def end_analytics_session() -> dict[str, Any]:
     """End the current analytics session.
     
     Stops tracking and provides session summary.
@@ -95,28 +89,28 @@ async def end_analytics_session() -> Dict[str, Any]:
         Session summary and metrics
     """
     global _active_session_id
-    
+
     try:
         tracker = get_performance_tracker()
-        
+
         if not _active_session_id:
             return {
                 "success": False,
                 "error": "No active session"
             }
-        
+
         # End session
         session = tracker.end_session()
         _active_session_id = None
-        
+
         if not session:
             return {
                 "success": False,
                 "error": "Failed to end session"
             }
-        
+
         duration = (session.end_time - session.start_time).total_seconds()
-        
+
         return {
             "success": True,
             "session_id": session.session_id,
@@ -138,7 +132,7 @@ async def end_analytics_session() -> Dict[str, Any]:
                 ))
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to end analytics session: {e}")
         return {
@@ -150,8 +144,8 @@ async def end_analytics_session() -> Dict[str, Any]:
 async def track_workflow_event(
     workflow_id: str,
     event_type: str,
-    data: Dict[str, Any]
-) -> Dict[str, Any]:
+    data: dict[str, Any]
+) -> dict[str, Any]:
     """Track a workflow event.
     
     Records performance data for workflow analysis.
@@ -166,63 +160,63 @@ async def track_workflow_event(
     """
     try:
         tracker = get_performance_tracker()
-        
+
         if event_type == "start":
             workflow_type = data.get("workflow_type", "unknown")
             metadata = data.get("metadata", {})
-            
+
             metrics = tracker.start_workflow(
                 workflow_id=workflow_id,
                 workflow_type=workflow_type,
                 metadata=metadata
             )
-            
+
             return {
                 "success": True,
                 "workflow_id": workflow_id,
                 "status": "tracking_started"
             }
-            
+
         elif event_type == "update":
             metrics = tracker.update_workflow(workflow_id, data)
-            
+
             if not metrics:
                 return {
                     "success": False,
                     "error": "Workflow not found"
                 }
-            
+
             return {
                 "success": True,
                 "workflow_id": workflow_id,
                 "status": "updated"
             }
-            
+
         elif event_type in ["complete", "fail"]:
             status = "completed" if event_type == "complete" else "failed"
             metrics = tracker.end_workflow(workflow_id, status)
-            
+
             if not metrics:
                 return {
                     "success": False,
                     "error": "Workflow not found"
                 }
-            
+
             summary = tracker.get_workflow_summary(workflow_id)
-            
+
             return {
                 "success": True,
                 "workflow_id": workflow_id,
                 "status": status,
                 "summary": summary
             }
-            
+
         else:
             return {
                 "success": False,
                 "error": f"Unknown event type: {event_type}"
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to track workflow event: {e}")
         return {
@@ -235,9 +229,9 @@ async def track_export_event(
     export_id: str,
     timeline_id: str,
     format: str,
-    platform: Optional[str] = None,
-    metrics: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    platform: str | None = None,
+    metrics: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Track an export operation.
     
     Records detailed export metrics for analysis.
@@ -254,7 +248,7 @@ async def track_export_event(
     """
     try:
         analytics = get_export_analytics()
-        
+
         # Create export metrics
         export_metrics = ExportMetrics(
             export_id=export_id,
@@ -262,21 +256,21 @@ async def track_export_event(
             format=ExportFormat(format.lower()),
             platform=platform
         )
-        
+
         # Update with provided metrics
         if metrics:
             for key, value in metrics.items():
                 if hasattr(export_metrics, key):
                     setattr(export_metrics, key, value)
-        
+
         # Track export
         analytics.track_export(export_metrics)
-        
+
         # Also track in workflow if active
         if _active_session_id:
             tracker = get_performance_tracker()
             active_workflows = list(tracker.active_workflows.keys())
-            
+
             if active_workflows:
                 # Track in most recent workflow
                 workflow_id = active_workflows[-1]
@@ -287,13 +281,13 @@ async def track_export_event(
                     duration=export_metrics.duration_seconds or 0,
                     metadata={"export_id": export_id}
                 )
-        
+
         return {
             "success": True,
             "export_id": export_id,
             "tracked": True
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to track export event: {e}")
         return {
@@ -303,9 +297,9 @@ async def track_export_event(
 
 
 async def get_performance_insights(
-    time_range_days: Optional[int] = 30,
-    workflow_type: Optional[str] = None
-) -> Dict[str, Any]:
+    time_range_days: int | None = 30,
+    workflow_type: str | None = None
+) -> dict[str, Any]:
     """Get performance insights and statistics.
     
     Analyzes workflow performance over time.
@@ -319,17 +313,17 @@ async def get_performance_insights(
     """
     try:
         tracker = get_performance_tracker()
-        
+
         # Get performance stats
         time_range = timedelta(days=time_range_days) if time_range_days else None
         stats = tracker.get_performance_stats(
             time_range=time_range,
             workflow_type=workflow_type
         )
-        
+
         # Get improvement opportunities
         opportunities = tracker.get_improvement_opportunities()
-        
+
         # Format response
         return {
             "success": True,
@@ -353,7 +347,7 @@ async def get_performance_insights(
                 for opp in opportunities
             ]
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get performance insights: {e}")
         return {
@@ -363,10 +357,10 @@ async def get_performance_insights(
 
 
 async def get_export_analytics(
-    format: Optional[str] = None,
-    platform: Optional[str] = None,
-    time_range_days: Optional[int] = 30
-) -> Dict[str, Any]:
+    format: str | None = None,
+    platform: str | None = None,
+    time_range_days: int | None = 30
+) -> dict[str, Any]:
     """Get export analytics and patterns.
     
     Analyzes export usage and success patterns.
@@ -381,16 +375,16 @@ async def get_export_analytics(
     """
     try:
         analytics = get_export_analytics()
-        
+
         # Get format statistics
         export_format = ExportFormat(format.lower()) if format else None
         time_range = timedelta(days=time_range_days) if time_range_days else None
-        
+
         format_stats = analytics.get_format_statistics(
             format=export_format,
             time_range=time_range
         )
-        
+
         # Get platform performance if specified
         platform_stats = None
         if platform:
@@ -398,13 +392,13 @@ async def get_export_analytics(
                 platform=platform,
                 time_range=time_range
             )
-        
+
         # Get workflow insights
         workflow_insights = analytics.get_workflow_insights()
-        
+
         # Get quality trends
         quality_trends = analytics.get_quality_trends(time_range=time_range)
-        
+
         return {
             "success": True,
             "filters": {
@@ -421,14 +415,14 @@ async def get_export_analytics(
             },
             "quality_trends": {
                 "user_satisfaction": quality_trends["user_satisfaction"],
-                "recent_resolutions": list(quality_trends["resolution_trends"].items())[-5:] 
+                "recent_resolutions": list(quality_trends["resolution_trends"].items())[-5:]
                     if quality_trends["resolution_trends"] else [],
                 "complexity_trend": "increasing" if len(quality_trends["complexity_trends"]) > 1
-                    and list(quality_trends["complexity_trends"].values())[-1] > 
+                    and list(quality_trends["complexity_trends"].values())[-1] >
                     list(quality_trends["complexity_trends"].values())[0] else "stable"
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get export analytics: {e}")
         return {
@@ -439,7 +433,7 @@ async def get_export_analytics(
 
 async def get_improvement_suggestions(
     max_suggestions: int = 10
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Get improvement suggestions based on analytics.
     
     Analyzes usage patterns and suggests optimizations.
@@ -452,13 +446,13 @@ async def get_improvement_suggestions(
     """
     try:
         engine = get_improvement_engine()
-        
+
         # Get all improvements
         improvements = engine.analyze_all()
-        
+
         # Limit to max suggestions
         improvements = improvements[:max_suggestions]
-        
+
         # Format response
         suggestions = []
         for imp in improvements:
@@ -474,11 +468,11 @@ async def get_improvement_suggestions(
                 "expected_improvement": imp.expected_improvement,
                 "automation_possible": imp.automation_possible
             })
-        
+
         # Get export-specific suggestions
         export_analytics = get_export_analytics()
         export_suggestions = export_analytics.suggest_improvements()
-        
+
         # Merge suggestions
         for exp_sug in export_suggestions[:3]:  # Add top 3 export suggestions
             suggestions.append({
@@ -493,7 +487,7 @@ async def get_improvement_suggestions(
                 "expected_improvement": {},
                 "automation_possible": True
             })
-        
+
         return {
             "success": True,
             "total_suggestions": len(suggestions),
@@ -505,7 +499,7 @@ async def get_improvement_suggestions(
                 "efficiency": len([s for s in suggestions if s["category"] == "efficiency"])
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get improvement suggestions: {e}")
         return {
@@ -516,8 +510,8 @@ async def get_improvement_suggestions(
 
 async def apply_improvement(
     improvement_id: str,
-    parameters: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    parameters: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Apply an improvement suggestion.
     
     Implements the suggested improvement automatically where possible.
@@ -532,7 +526,7 @@ async def apply_improvement(
     try:
         # This would implement actual improvements
         # For now, we'll return a placeholder
-        
+
         return {
             "success": True,
             "improvement_id": improvement_id,
@@ -540,7 +534,7 @@ async def apply_improvement(
             "message": "Review the suggested actions and implement manually",
             "documentation_url": f"/docs/improvements/{improvement_id}"
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to apply improvement: {e}")
         return {
@@ -552,8 +546,8 @@ async def apply_improvement(
 # Helper function for tracking user actions
 async def track_user_action(
     action: str,
-    metadata: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    metadata: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Track a user action for analytics.
     
     Records user interactions for behavior analysis.
@@ -567,29 +561,29 @@ async def track_user_action(
     """
     try:
         tracker = get_performance_tracker()
-        
+
         # Find active workflow
         if not tracker.active_workflows:
             return {
                 "success": False,
                 "error": "No active workflow to track action"
             }
-        
+
         # Track in most recent workflow
         workflow_id = list(tracker.active_workflows.keys())[-1]
-        
+
         tracker.track_user_action(
             workflow_id=workflow_id,
             action=action,
             metadata=metadata
         )
-        
+
         return {
             "success": True,
             "action": action,
             "tracked_in": workflow_id
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to track user action: {e}")
         return {

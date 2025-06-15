@@ -6,10 +6,10 @@ semantic similarity, and usage patterns.
 
 import json
 import logging
-from collections import defaultdict, Counter
+from collections import Counter, defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Set, Optional, Tuple
+
 import numpy as np
 from sklearn.cluster import DBSCAN
 
@@ -21,22 +21,22 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TagCluster:
     """A cluster of related tags."""
-    
+
     id: str
     name: str
-    tags: Set[str] = field(default_factory=set)
-    centroid_tag: Optional[str] = None  # Most representative tag
+    tags: set[str] = field(default_factory=set)
+    centroid_tag: str | None = None  # Most representative tag
     confidence: float = 1.0
-    category: Optional[str] = None
-    
+    category: str | None = None
+
     def add_tag(self, tag: str):
         """Add a tag to the cluster."""
         self.tags.add(tag)
-    
+
     def remove_tag(self, tag: str):
         """Remove a tag from the cluster."""
         self.tags.discard(tag)
-    
+
     @property
     def size(self) -> int:
         """Number of tags in cluster."""
@@ -45,27 +45,27 @@ class TagCluster:
 
 class TagClusteringSystem:
     """Intelligent tag clustering based on usage patterns and semantics."""
-    
-    def __init__(self, hierarchy: Optional[TagHierarchy] = None):
+
+    def __init__(self, hierarchy: TagHierarchy | None = None):
         """Initialize clustering system.
         
         Args:
             hierarchy: Optional tag hierarchy for semantic information
         """
         self.hierarchy = hierarchy or TagHierarchy()
-        self.clusters: Dict[str, TagCluster] = {}
-        self.tag_to_cluster: Dict[str, str] = {}
-        self.co_occurrence: Dict[Tuple[str, str], int] = defaultdict(int)
+        self.clusters: dict[str, TagCluster] = {}
+        self.tag_to_cluster: dict[str, str] = {}
+        self.co_occurrence: dict[tuple[str, str], int] = defaultdict(int)
         self.tag_frequency: Counter = Counter()
-        
+
         # Predefined conceptual clusters
         self._initialize_concept_clusters()
-    
+
     def _initialize_concept_clusters(self):
         """Initialize with predefined conceptual clusters."""
         concepts = {
             "lighting_conditions": {
-                "tags": {"sunset", "sunrise", "golden_hour", "blue_hour", 
+                "tags": {"sunset", "sunrise", "golden_hour", "blue_hour",
                         "daylight", "night", "overcast", "backlit"},
                 "category": "technical"
             },
@@ -100,7 +100,7 @@ class TagClusteringSystem:
                 "category": "technical"
             }
         }
-        
+
         for cluster_id, data in concepts.items():
             cluster = TagCluster(
                 id=cluster_id,
@@ -109,12 +109,12 @@ class TagClusteringSystem:
                 category=data["category"]
             )
             self.clusters[cluster_id] = cluster
-            
+
             # Update tag-to-cluster mapping
             for tag in data["tags"]:
                 self.tag_to_cluster[tag] = cluster_id
-    
-    def update_co_occurrence(self, tag_sets: List[Set[str]]):
+
+    def update_co_occurrence(self, tag_sets: list[set[str]]):
         """Update co-occurrence matrix from tag sets.
         
         Args:
@@ -123,14 +123,14 @@ class TagClusteringSystem:
         for tags in tag_sets:
             # Update frequency
             self.tag_frequency.update(tags)
-            
+
             # Update co-occurrence
             tag_list = sorted(tags)  # Consistent ordering
             for i, tag1 in enumerate(tag_list):
                 for tag2 in tag_list[i+1:]:
                     key = (tag1, tag2) if tag1 < tag2 else (tag2, tag1)
                     self.co_occurrence[key] += 1
-    
+
     def compute_tag_similarity(self, tag1: str, tag2: str) -> float:
         """Compute similarity between two tags.
         
@@ -144,30 +144,28 @@ class TagClusteringSystem:
         # Normalize tags
         tag1 = self.hierarchy.normalize_tag(tag1)
         tag2 = self.hierarchy.normalize_tag(tag2)
-        
+
         if tag1 == tag2:
             return 1.0
-        
+
         similarity = 0.0
-        
+
         # Co-occurrence similarity
         key = (tag1, tag2) if tag1 < tag2 else (tag2, tag1)
         if key in self.co_occurrence:
             freq1 = self.tag_frequency.get(tag1, 1)
             freq2 = self.tag_frequency.get(tag2, 1)
             co_freq = self.co_occurrence[key]
-            
+
             # Jaccard similarity
             similarity += 0.4 * (co_freq / (freq1 + freq2 - co_freq))
-        
+
         # Hierarchical similarity
         if self.hierarchy:
             # Check if one is ancestor of other
-            if tag2 in self.hierarchy.get_ancestors(tag1):
+            if tag2 in self.hierarchy.get_ancestors(tag1) or tag1 in self.hierarchy.get_ancestors(tag2):
                 similarity += 0.3
-            elif tag1 in self.hierarchy.get_ancestors(tag2):
-                similarity += 0.3
-            
+
             # Check if they share ancestors
             ancestors1 = set(self.hierarchy.get_ancestors(tag1))
             ancestors2 = set(self.hierarchy.get_ancestors(tag2))
@@ -175,16 +173,16 @@ class TagClusteringSystem:
                 shared = len(ancestors1 & ancestors2)
                 total = len(ancestors1 | ancestors2)
                 similarity += 0.2 * (shared / total)
-            
+
             # Check if they're related
             related1 = self.hierarchy.get_related(tag1)
             if tag2 in related1:
                 similarity += 0.1 * related1[tag2]
-        
+
         return min(similarity, 1.0)
-    
-    def cluster_tags_by_similarity(self, tags: List[str], 
-                                  min_similarity: float = 0.5) -> List[TagCluster]:
+
+    def cluster_tags_by_similarity(self, tags: list[str],
+                                  min_similarity: float = 0.5) -> list[TagCluster]:
         """Cluster tags based on similarity.
         
         Args:
@@ -196,36 +194,36 @@ class TagClusteringSystem:
         """
         if not tags:
             return []
-        
+
         # Compute similarity matrix
         n_tags = len(tags)
         similarity_matrix = np.zeros((n_tags, n_tags))
-        
+
         for i in range(n_tags):
             for j in range(i, n_tags):
                 sim = self.compute_tag_similarity(tags[i], tags[j])
                 similarity_matrix[i, j] = sim
                 similarity_matrix[j, i] = sim
-        
+
         # Convert to distance matrix
         distance_matrix = 1 - similarity_matrix
-        
+
         # Cluster using DBSCAN
         clustering = DBSCAN(
             eps=1-min_similarity,
             min_samples=2,
             metric='precomputed'
         ).fit(distance_matrix)
-        
+
         # Create clusters
         clusters = []
         for cluster_id in set(clustering.labels_):
             if cluster_id == -1:  # Noise points
                 continue
-            
+
             cluster_indices = np.where(clustering.labels_ == cluster_id)[0]
             cluster_tags = {tags[i] for i in cluster_indices}
-            
+
             # Find centroid tag (most connected)
             centroid_idx = cluster_indices[0]
             max_sim = 0
@@ -234,7 +232,7 @@ class TagClusteringSystem:
                 if total_sim > max_sim:
                     max_sim = total_sim
                     centroid_idx = idx
-            
+
             cluster = TagCluster(
                 id=f"auto_{cluster_id}",
                 name=f"Cluster {cluster_id}",
@@ -248,10 +246,10 @@ class TagClusteringSystem:
                 ]))
             )
             clusters.append(cluster)
-        
+
         return clusters
-    
-    def suggest_cluster_names(self, cluster: TagCluster) -> List[str]:
+
+    def suggest_cluster_names(self, cluster: TagCluster) -> list[str]:
         """Suggest names for a tag cluster.
         
         Args:
@@ -261,41 +259,41 @@ class TagClusteringSystem:
             List of suggested names
         """
         suggestions = []
-        
+
         # Use hierarchy to find common ancestors
         if self.hierarchy:
             common_ancestors = self.hierarchy.find_common_ancestors(list(cluster.tags))
             for ancestor, count in common_ancestors[:3]:
                 if count >= len(cluster.tags) * 0.5:
                     suggestions.append(ancestor.replace("_", " ").title())
-        
+
         # Use centroid tag
         if cluster.centroid_tag:
             suggestions.append(f"{cluster.centroid_tag.replace('_', ' ').title()} Group")
-        
+
         # Find common substrings
         if len(cluster.tags) > 2:
             common = self._find_common_substring(list(cluster.tags))
             if common and len(common) > 3:
                 suggestions.append(common.title())
-        
+
         return suggestions
-    
-    def _find_common_substring(self, strings: List[str]) -> str:
+
+    def _find_common_substring(self, strings: list[str]) -> str:
         """Find longest common substring in a list of strings."""
         if not strings:
             return ""
-        
+
         shortest = min(strings, key=len)
         for length in range(len(shortest), 0, -1):
             for start in range(len(shortest) - length + 1):
                 substr = shortest[start:start + length]
                 if all(substr in s for s in strings):
                     return substr
-        
+
         return ""
-    
-    def merge_clusters(self, cluster_ids: List[str], new_name: str) -> TagCluster:
+
+    def merge_clusters(self, cluster_ids: list[str], new_name: str) -> TagCluster:
         """Merge multiple clusters into one.
         
         Args:
@@ -307,17 +305,17 @@ class TagClusteringSystem:
         """
         merged_tags = set()
         categories = []
-        
+
         for cluster_id in cluster_ids:
             if cluster_id in self.clusters:
                 cluster = self.clusters[cluster_id]
                 merged_tags.update(cluster.tags)
                 if cluster.category:
                     categories.append(cluster.category)
-                
+
                 # Remove old cluster
                 del self.clusters[cluster_id]
-        
+
         # Create new cluster
         new_id = f"merged_{len(self.clusters)}"
         merged_cluster = TagCluster(
@@ -326,16 +324,16 @@ class TagClusteringSystem:
             tags=merged_tags,
             category=Counter(categories).most_common(1)[0][0] if categories else None
         )
-        
+
         self.clusters[new_id] = merged_cluster
-        
+
         # Update tag mappings
         for tag in merged_tags:
             self.tag_to_cluster[tag] = new_id
-        
+
         return merged_cluster
-    
-    def auto_cluster_new_tags(self, new_tags: Set[str]) -> Dict[str, str]:
+
+    def auto_cluster_new_tags(self, new_tags: set[str]) -> dict[str, str]:
         """Automatically assign new tags to existing clusters.
         
         Args:
@@ -345,11 +343,11 @@ class TagClusteringSystem:
             Mapping of tag to cluster ID
         """
         assignments = {}
-        
+
         for tag in new_tags:
             best_cluster = None
             best_score = 0.0
-            
+
             # Check similarity to existing clusters
             for cluster_id, cluster in self.clusters.items():
                 # Average similarity to cluster members
@@ -358,26 +356,26 @@ class TagClusteringSystem:
                     for cluster_tag in cluster.tags
                 ]
                 avg_similarity = np.mean(similarities) if similarities else 0
-                
+
                 if avg_similarity > best_score and avg_similarity > 0.5:
                     best_score = avg_similarity
                     best_cluster = cluster_id
-            
+
             if best_cluster:
                 assignments[tag] = best_cluster
                 self.clusters[best_cluster].add_tag(tag)
                 self.tag_to_cluster[tag] = best_cluster
-        
+
         return assignments
-    
-    def get_cluster_statistics(self) -> Dict[str, Dict]:
+
+    def get_cluster_statistics(self) -> dict[str, dict]:
         """Get statistics about current clusters.
         
         Returns:
             Dictionary of cluster statistics
         """
         stats = {}
-        
+
         for cluster_id, cluster in self.clusters.items():
             stats[cluster_id] = {
                 "name": cluster.name,
@@ -387,9 +385,9 @@ class TagClusteringSystem:
                 "category": cluster.category,
                 "confidence": cluster.confidence
             }
-        
+
         return stats
-    
+
     def export_clusters(self, path: Path):
         """Export clusters to JSON file.
         
@@ -410,23 +408,23 @@ class TagClusteringSystem:
             "tag_to_cluster": self.tag_to_cluster,
             "statistics": self.get_cluster_statistics()
         }
-        
+
         with open(path, 'w') as f:
             json.dump(data, f, indent=2)
-    
+
     def import_clusters(self, path: Path):
         """Import clusters from JSON file.
         
         Args:
             path: Input file path
         """
-        with open(path, 'r') as f:
+        with open(path) as f:
             data = json.load(f)
-        
+
         # Clear existing
         self.clusters.clear()
         self.tag_to_cluster.clear()
-        
+
         # Import clusters
         for cluster_id, cluster_data in data.get("clusters", {}).items():
             cluster = TagCluster(
@@ -438,6 +436,6 @@ class TagClusteringSystem:
                 category=cluster_data.get("category")
             )
             self.clusters[cluster_id] = cluster
-        
+
         # Import mappings
         self.tag_to_cluster = data.get("tag_to_cluster", {})

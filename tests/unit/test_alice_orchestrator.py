@@ -1,6 +1,6 @@
 """Tests for Alice orchestrator."""
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -65,7 +65,7 @@ class TestAliceOrchestrator:
         last_month = orchestrator._parse_temporal_reference("last month")
         assert last_month is not None
         # Check it's approximately 30 days ago
-        diff = now - last_month  
+        diff = now - last_month
         assert 29.99 < diff.total_seconds() / 86400 < 30.01
 
         # X days ago

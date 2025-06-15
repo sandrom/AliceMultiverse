@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import List, Optional, Dict, Any
 from enum import Enum
+from typing import Any
 
 
 class PromptCategory(Enum):
@@ -44,12 +44,12 @@ class PromptUsage:
     provider: ProviderType
     timestamp: datetime
     success: bool
-    output_path: Optional[str] = None
-    cost: Optional[float] = None
-    duration_seconds: Optional[float] = None
-    notes: Optional[str] = None
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    output_path: str | None = None
+    cost: float | None = None
+    duration_seconds: float | None = None
+    notes: str | None = None
+    parameters: dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass
@@ -60,10 +60,10 @@ class PromptVariation:
     variation_text: str
     differences: str  # What changed from parent
     purpose: str  # Why this variation exists
-    effectiveness_rating: Optional[float] = None  # 0-10
+    effectiveness_rating: float | None = None  # 0-10
     use_count: int = 0
     created_at: datetime = field(default_factory=datetime.now)
-    tags: List[str] = field(default_factory=list)
+    tags: list[str] = field(default_factory=list)
 
 
 @dataclass
@@ -72,42 +72,42 @@ class Prompt:
     id: str
     text: str
     category: PromptCategory
-    providers: List[ProviderType]  # Which providers this works well with
-    
+    providers: list[ProviderType]  # Which providers this works well with
+
     # Organization
-    tags: List[str] = field(default_factory=list)
-    project: Optional[str] = None
-    style: Optional[str] = None  # e.g., "cyberpunk", "minimalist"
-    
+    tags: list[str] = field(default_factory=list)
+    project: str | None = None
+    style: str | None = None  # e.g., "cyberpunk", "minimalist"
+
     # Effectiveness tracking
-    effectiveness_rating: Optional[float] = None  # 0-10 overall rating
+    effectiveness_rating: float | None = None  # 0-10 overall rating
     use_count: int = 0
     success_count: int = 0
-    
+
     # Metadata
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    
+
     # Descriptive fields
-    description: Optional[str] = None  # What this prompt is good for
-    notes: Optional[str] = None  # Additional notes, tips, warnings
-    
+    description: str | None = None  # What this prompt is good for
+    notes: str | None = None  # Additional notes, tips, warnings
+
     # Context
-    context: Dict[str, Any] = field(default_factory=dict)  # e.g., {"aspect_ratio": "16:9", "model": "v6"}
-    
+    context: dict[str, Any] = field(default_factory=dict)  # e.g., {"aspect_ratio": "16:9", "model": "v6"}
+
     # Related prompts
-    parent_id: Optional[str] = None  # If this is derived from another prompt
-    related_ids: List[str] = field(default_factory=list)  # Similar or complementary prompts
-    
+    parent_id: str | None = None  # If this is derived from another prompt
+    related_ids: list[str] = field(default_factory=list)  # Similar or complementary prompts
+
     # Search helpers
-    keywords: List[str] = field(default_factory=list)  # Additional search terms
-    
+    keywords: list[str] = field(default_factory=list)  # Additional search terms
+
     def success_rate(self) -> float:
         """Calculate success rate."""
         if self.use_count == 0:
             return 0.0
         return self.success_count / self.use_count
-    
+
     def add_usage(self, usage: PromptUsage) -> None:
         """Update stats based on usage."""
         self.use_count += 1
@@ -119,15 +119,15 @@ class Prompt:
 @dataclass
 class PromptSearchCriteria:
     """Criteria for searching prompts."""
-    query: Optional[str] = None  # Text search in prompt, description, notes
-    category: Optional[PromptCategory] = None
-    providers: Optional[List[ProviderType]] = None
-    tags: Optional[List[str]] = None
-    project: Optional[str] = None
-    style: Optional[str] = None
-    min_effectiveness: Optional[float] = None
-    min_success_rate: Optional[float] = None
-    created_after: Optional[datetime] = None
-    created_before: Optional[datetime] = None
-    has_variations: Optional[bool] = None
-    keywords: Optional[List[str]] = None
+    query: str | None = None  # Text search in prompt, description, notes
+    category: PromptCategory | None = None
+    providers: list[ProviderType] | None = None
+    tags: list[str] | None = None
+    project: str | None = None
+    style: str | None = None
+    min_effectiveness: float | None = None
+    min_success_rate: float | None = None
+    created_after: datetime | None = None
+    created_before: datetime | None = None
+    has_variations: bool | None = None
+    keywords: list[str] | None = None

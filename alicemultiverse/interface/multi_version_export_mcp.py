@@ -1,23 +1,17 @@
 """MCP tools for multi-version export functionality."""
 
-import asyncio
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from ..workflows.multi_version_export import (
-    MultiVersionExporter,
-    Platform,
-    PLATFORM_SPECS,
-    ExportVersion
-)
-from ..workflows.video_export import Timeline, TimelineClip, DaVinciResolveExporter
+from ..workflows.multi_version_export import PLATFORM_SPECS, MultiVersionExporter, Platform
+from ..workflows.video_export import DaVinciResolveExporter, Timeline, TimelineClip
 
 logger = logging.getLogger(__name__)
 
 # Global exporter instance
-_exporter: Optional[MultiVersionExporter] = None
+_exporter: MultiVersionExporter | None = None
 
 
 def get_exporter() -> MultiVersionExporter:
@@ -29,11 +23,11 @@ def get_exporter() -> MultiVersionExporter:
 
 
 async def create_platform_versions(
-    timeline_data: Dict[str, Any],
-    platforms: List[str],
+    timeline_data: dict[str, Any],
+    platforms: list[str],
     smart_crop: bool = True,
     maintain_sync: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Create platform-specific versions of a timeline.
     
@@ -48,10 +42,10 @@ async def create_platform_versions(
     """
     try:
         exporter = get_exporter()
-        
+
         # Convert timeline data to Timeline object
         from pathlib import Path
-        
+
         clips = []
         for clip_data in timeline_data.get("clips", []):
             clip = TimelineClip(
@@ -67,7 +61,7 @@ async def create_platform_versions(
                 metadata=clip_data.get("metadata", {})
             )
             clips.append(clip)
-        
+
         timeline = Timeline(
             name=timeline_data.get("name", "Timeline"),
             duration=timeline_data.get("duration", 0),
@@ -78,7 +72,7 @@ async def create_platform_versions(
             audio_tracks=timeline_data.get("audio_tracks", []),
             metadata=timeline_data.get("metadata", {})
         )
-        
+
         # Convert platform strings to enums
         platform_enums = []
         for platform_str in platforms:
@@ -87,13 +81,13 @@ async def create_platform_versions(
                 platform_enums.append(platform_enum)
             except ValueError:
                 logger.warning(f"Unknown platform: {platform_str}")
-        
+
         if not platform_enums:
             return {
                 "success": False,
                 "error": "No valid platforms specified"
             }
-        
+
         # Create versions
         versions = exporter.create_platform_versions(
             timeline=timeline,
@@ -101,7 +95,7 @@ async def create_platform_versions(
             smart_crop=smart_crop,
             maintain_sync=maintain_sync
         )
-        
+
         # Convert to response format
         result = {
             "success": True,
@@ -112,10 +106,10 @@ async def create_platform_versions(
                 "adaptations_applied": []
             }
         }
-        
+
         for platform, version in versions.items():
             spec = version.spec
-            
+
             # Convert timeline back to dict
             timeline_dict = {
                 "name": version.timeline.name,
@@ -136,7 +130,7 @@ async def create_platform_versions(
                 "markers": version.timeline.markers,
                 "metadata": version.timeline.metadata
             }
-            
+
             # Add crop regions if any
             crop_regions = {}
             for clip_id, crop in version.crop_regions.items():
@@ -147,7 +141,7 @@ async def create_platform_versions(
                     "height": crop.height,
                     "focus_point": crop.focus_point
                 }
-            
+
             result["versions"][platform.value] = {
                 "platform_name": spec.name,
                 "timeline": timeline_dict,
@@ -159,7 +153,7 @@ async def create_platform_versions(
                     "features": spec.features
                 }
             }
-            
+
             # Track adaptations
             if abs(version.timeline.duration - timeline.duration) > 0.1:
                 result["summary"]["adaptations_applied"].append(
@@ -169,9 +163,9 @@ async def create_platform_versions(
                 result["summary"]["adaptations_applied"].append(
                     f"{platform.value}: Aspect ratio cropped"
                 )
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Failed to create platform versions: {e}")
         return {
@@ -181,8 +175,8 @@ async def create_platform_versions(
 
 
 async def get_platform_recommendations(
-    timeline_data: Dict[str, Any]
-) -> Dict[str, Any]:
+    timeline_data: dict[str, Any]
+) -> dict[str, Any]:
     """
     Get recommendations for each platform based on timeline analysis.
     
@@ -194,10 +188,10 @@ async def get_platform_recommendations(
     """
     try:
         exporter = get_exporter()
-        
+
         # Convert to Timeline object (similar to above)
         from pathlib import Path
-        
+
         clips = []
         for clip_data in timeline_data.get("clips", []):
             clip = TimelineClip(
@@ -207,7 +201,7 @@ async def get_platform_recommendations(
                 metadata=clip_data.get("metadata", {})
             )
             clips.append(clip)
-        
+
         timeline = Timeline(
             name=timeline_data.get("name", "Timeline"),
             duration=timeline_data.get("duration", 0),
@@ -215,10 +209,10 @@ async def get_platform_recommendations(
             clips=clips,
             markers=timeline_data.get("markers", [])
         )
-        
+
         # Get recommendations
         recommendations = exporter.get_platform_recommendations(timeline)
-        
+
         # Format response
         result = {
             "success": True,
@@ -230,7 +224,7 @@ async def get_platform_recommendations(
             },
             "recommendations": {}
         }
-        
+
         for platform, rec in recommendations.items():
             result["recommendations"][platform.value] = {
                 "platform_name": PLATFORM_SPECS[platform].name,
@@ -243,13 +237,13 @@ async def get_platform_recommendations(
                     "preferred_duration": f"{PLATFORM_SPECS[platform].preferred_duration}s"
                 }
             }
-        
+
         # Add best platforms
         suitable_platforms = [
             p for p, r in result["recommendations"].items()
             if r["suitable"]
         ]
-        
+
         result["summary"] = {
             "best_platforms": suitable_platforms[:3],
             "requires_major_changes": [
@@ -257,9 +251,9 @@ async def get_platform_recommendations(
                 if not r["suitable"]
             ]
         }
-        
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Failed to get platform recommendations: {e}")
         return {
@@ -270,10 +264,10 @@ async def get_platform_recommendations(
 
 async def export_platform_version(
     platform: str,
-    timeline_data: Dict[str, Any],
-    output_dir: Optional[str] = None,
+    timeline_data: dict[str, Any],
+    output_dir: str | None = None,
     format: str = "json"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Export a single platform version with proper naming.
     
@@ -293,30 +287,31 @@ async def export_platform_version(
         else:
             output_path = Path.cwd() / "exports"
             output_path.mkdir(exist_ok=True)
-        
+
         # Generate filename
         timeline_name = timeline_data.get("name", "timeline").replace(" ", "_")
         timestamp = timeline_data.get("metadata", {}).get("export_timestamp", "")
         filename = f"{timeline_name}_{platform}_{timestamp}"
-        
+
         if format == "json":
             # Export timeline data
             file_path = output_path / f"{filename}.json"
             with open(file_path, 'w') as f:
                 json.dump(timeline_data, f, indent=2)
-            
+
             return {
                 "success": True,
                 "format": "json",
                 "file_path": str(file_path),
                 "platform": platform
             }
-            
+
         elif format == "edl":
             # Convert to Timeline object and export EDL
-            from ..workflows.video_export import Timeline, TimelineClip
             from pathlib import Path
-            
+
+            from ..workflows.video_export import Timeline, TimelineClip
+
             clips = []
             for clip_data in timeline_data.get("clips", []):
                 clips.append(TimelineClip(
@@ -324,30 +319,30 @@ async def export_platform_version(
                     start_time=clip_data["start_time"],
                     duration=clip_data["duration"]
                 ))
-            
+
             timeline = Timeline(
                 name=timeline_data.get("name", "Timeline"),
                 duration=timeline_data.get("duration", 0),
                 clips=clips
             )
-            
+
             file_path = output_path / f"{filename}.edl"
             exporter = DaVinciResolveExporter()
             success = exporter.export_edl(timeline, file_path)
-            
+
             return {
                 "success": success,
                 "format": "edl",
                 "file_path": str(file_path),
                 "platform": platform
             }
-        
+
         else:
             return {
                 "success": False,
                 "error": f"Unsupported format: {format}"
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to export platform version: {e}")
         return {
@@ -357,12 +352,12 @@ async def export_platform_version(
 
 
 async def batch_export_all_platforms(
-    timeline_data: Dict[str, Any],
-    platforms: List[str],
-    output_dir: Optional[str] = None,
+    timeline_data: dict[str, Any],
+    platforms: list[str],
+    output_dir: str | None = None,
     format: str = "json",
     create_master: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Create and export all platform versions in one operation.
     
@@ -381,7 +376,7 @@ async def batch_export_all_platforms(
         import datetime
         timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M%S")
         timeline_data.setdefault("metadata", {})["export_timestamp"] = timestamp
-        
+
         # Create platform versions
         versions_result = await create_platform_versions(
             timeline_data=timeline_data,
@@ -389,13 +384,13 @@ async def batch_export_all_platforms(
             smart_crop=True,
             maintain_sync=True
         )
-        
+
         if not versions_result["success"]:
             return versions_result
-        
+
         # Export each version
         export_results = {}
-        
+
         # Export master if requested
         if create_master:
             master_result = await export_platform_version(
@@ -405,7 +400,7 @@ async def batch_export_all_platforms(
                 format=format
             )
             export_results["master"] = master_result
-        
+
         # Export platform versions
         for platform, version_data in versions_result["versions"].items():
             export_result = await export_platform_version(
@@ -415,12 +410,12 @@ async def batch_export_all_platforms(
                 format=format
             )
             export_results[platform] = export_result
-        
+
         # Summary
         successful_exports = sum(
             1 for r in export_results.values() if r.get("success", False)
         )
-        
+
         return {
             "success": successful_exports > 0,
             "exports": export_results,
@@ -432,7 +427,7 @@ async def batch_export_all_platforms(
                 "timestamp": timestamp
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to batch export platforms: {e}")
         return {
@@ -441,10 +436,10 @@ async def batch_export_all_platforms(
         }
 
 
-def get_available_platforms() -> Dict[str, Any]:
+def get_available_platforms() -> dict[str, Any]:
     """Get list of available platforms with their specifications."""
     platforms = {}
-    
+
     for platform in Platform:
         spec = PLATFORM_SPECS[platform]
         platforms[platform.value] = {
@@ -459,7 +454,7 @@ def get_available_platforms() -> Dict[str, Any]:
             "features": spec.features,
             "file_size_limit_mb": spec.file_size_limit_mb
         }
-    
+
     return {
         "success": True,
         "platforms": platforms,

@@ -1,12 +1,12 @@
 """Analytics module for tracking performance and providing insights."""
 
-from .performance_tracker import PerformanceTracker
 from .export_analytics import ExportAnalytics, ExportMetrics
 from .improvement_engine import ImprovementEngine
+from .performance_tracker import PerformanceTracker
 
 __all__ = [
-    'PerformanceTracker',
-    'ExportAnalytics', 
+    'ExportAnalytics',
     'ExportMetrics',
-    'ImprovementEngine'
+    'ImprovementEngine',
+    'PerformanceTracker'
 ]

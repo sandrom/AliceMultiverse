@@ -70,13 +70,13 @@ class AliceStructuredInterface:
         self.config.enhanced_metadata = True  # Always use enhanced metadata
         self.organizer = None
         self._ensure_organizer()
-        
+
         # Initialize rate limiter
         self.rate_limiter = RateLimiter()
-        
+
         # Initialize optimized search handler with config
         self.search_handler = OptimizedSearchHandler(config=self.config)
-        
+
         # Initialize project and selection services
         self.project_service = ProjectService(config=self.config)
         self.selection_service = SelectionService(project_service=self.project_service)
@@ -153,13 +153,13 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "search")
-            
+
             # Validate request
             request = validate_search_request(request)
-            
+
             # Use optimized search handler
             response_data = self.search_handler.search_assets(request)
-            
+
             return AliceResponse(
                 success=True,
                 message=f"Found {response_data['total_count']} assets",
@@ -232,10 +232,10 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "organize")
-            
+
             # Validate request
             request = validate_organize_request(request)
-            
+
             # Update config based on request
             if request.get("source_path"):
                 self.config.paths.inbox = request["source_path"]
@@ -299,10 +299,10 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "update_tags")
-            
+
             # Validate request
             request = validate_tag_update_request(request)
-            
+
             self._ensure_organizer()
 
             success_count = 0
@@ -310,17 +310,17 @@ class AliceStructuredInterface:
             for asset_id in request["asset_ids"]:
                 # Asset ID should be content_hash for now
                 content_hash = asset_id
-                
+
                 # Get current asset metadata
                 search_request = SearchRequest(
                     filters={"content_hash": content_hash},
                     limit=1
                 )
                 search_response = self.search_handler.search(search_request)
-                
+
                 if not search_response.assets:
                     continue
-                    
+
                 asset = search_response.assets[0]
                 current_tags = set(asset.tags)
 
@@ -354,7 +354,7 @@ class AliceStructuredInterface:
                     "modified_at": asset.modified_at,
                     "discovered_at": asset.discovered_at,
                 }
-                
+
                 # Re-index in search DB (will update existing entry)
                 self.search_handler.search_db.index_asset(metadata)
                 success_count += 1
@@ -396,10 +396,10 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "group_assets")
-            
+
             # Validate request
             request = validate_grouping_request(request)
-            
+
             self._ensure_organizer()
 
             success = self.organizer.group_assets(
@@ -453,10 +453,10 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "manage_project")
-            
+
             # Validate request
             request = validate_project_request(request)
-            
+
             # Placeholder for future project management
             return AliceResponse(
                 success=False,
@@ -464,7 +464,7 @@ class AliceStructuredInterface:
                 data=None,
                 error="This feature will be implemented with the project management system"
             )
-            
+
         except ValidationError as e:
             logger.error(f"Validation error: {e}")
             return AliceResponse(
@@ -487,10 +487,10 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "execute_workflow")
-            
+
             # Validate request
             request = validate_workflow_request(request)
-            
+
             # Placeholder for future workflow engine
             return AliceResponse(
                 success=False,
@@ -498,7 +498,7 @@ class AliceStructuredInterface:
                 data=None,
                 error="This feature will be implemented with the workflow engine"
             )
-            
+
         except ValidationError as e:
             logger.error(f"Validation error: {e}")
             return AliceResponse(
@@ -521,10 +521,10 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "generate_content")
-            
+
             # Validate request
             request = validate_generation_request(request)
-            
+
             # Placeholder for future generation capabilities
             return AliceResponse(
                 success=False,
@@ -532,7 +532,7 @@ class AliceStructuredInterface:
                 data=None,
                 error="This feature will be implemented when generation services are integrated"
             )
-            
+
         except ValidationError as e:
             logger.error(f"Validation error: {e}")
             return AliceResponse(
@@ -555,32 +555,32 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "soft_delete")
-            
+
             # Validate request
             request = validate_soft_delete_request(request)
-            
+
             # Import soft delete manager
             from ..organizer.soft_delete import SoftDeleteManager
-            
+
             # Get sorted-out path from config or use default
             sorted_out_path = "sorted-out"
             if hasattr(self.config, 'storage') and hasattr(self.config.storage, 'sorted_out_path'):
                 sorted_out_path = self.config.storage.sorted_out_path
-            
+
             soft_delete_manager = SoftDeleteManager(sorted_out_path)
-            
+
             self._ensure_organizer()
-            
+
             success_count = 0
             failed_count = 0
             moved_files = []
             failed_files = []
-            
+
             for asset_id in request["asset_ids"]:
                 # Asset ID should be content_hash for now
                 # TODO: Add proper asset ID support in search index
                 content_hash = asset_id
-                
+
                 # Search for asset by content hash
                 # Access search_db through the search handler
                 search_request = SearchRequest(
@@ -593,16 +593,16 @@ class AliceStructuredInterface:
                     failed_files.append(asset_id)
                     failed_count += 1
                     continue
-                
+
                 asset = search_results[0]
                 file_path = Path(asset.file_path)
-                
+
                 # Check if file exists
                 if not file_path.exists():
                     failed_files.append(asset_id)
                     failed_count += 1
                     continue
-                
+
                 # Convert Asset object to dict for soft delete
                 asset_data = {
                     "content_hash": asset.content_hash,
@@ -612,7 +612,7 @@ class AliceStructuredInterface:
                     "tags": asset.tags,
                     "quality_rating": asset.quality_rating,
                 }
-                
+
                 # Soft delete the file
                 new_path = soft_delete_manager.soft_delete(
                     file_path=file_path,
@@ -620,7 +620,7 @@ class AliceStructuredInterface:
                     reason=request.get("reason"),
                     metadata=asset_data
                 )
-                
+
                 if new_path:
                     moved_files.append(str(new_path))
                     success_count += 1
@@ -628,7 +628,7 @@ class AliceStructuredInterface:
                 else:
                     failed_files.append(asset_id)
                     failed_count += 1
-            
+
             return AliceResponse(
                 success=success_count > 0,
                 message=f"Soft deleted {success_count}/{len(request['asset_ids'])} assets",
@@ -641,7 +641,7 @@ class AliceStructuredInterface:
                 },
                 error=None
             )
-            
+
         except ValidationError as e:
             logger.error(f"Validation error: {e}")
             return AliceResponse(
@@ -672,18 +672,18 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "get_asset")
-            
+
             # Asset ID should be content_hash for now
             # TODO: Add proper asset ID support in search index
             content_hash = asset_id
-            
+
             # Search for asset by content hash
             search_request = SearchRequest(
                 filters={"content_hash": content_hash},
                 limit=1
             )
             search_response = self.search_handler.search(search_request)
-            
+
             if not search_response.assets:
                 return AliceResponse(
                     success=False,
@@ -724,10 +724,10 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "set_asset_role")
-            
+
             # Validate role
             role = validate_asset_role(role)
-            
+
             # TODO: Implement asset role setting in search index
             # For now, asset roles are not supported in the new architecture
             success = False
@@ -773,10 +773,10 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "create_selection")
-            
+
             # Validate request
             request = validate_selection_create_request(request)
-            
+
             # Create selection
             selection = self.selection_service.create_selection(
                 project_id=request["project_id"],
@@ -788,7 +788,7 @@ class AliceStructuredInterface:
                 tags=request.get("tags"),
                 metadata=request.get("metadata"),
             )
-            
+
             if selection:
                 return AliceResponse(
                     success=True,
@@ -809,7 +809,7 @@ class AliceStructuredInterface:
                     data=None,
                     error="Project not found or creation failed"
                 )
-                
+
         except ValidationError as e:
             logger.error(f"Validation error: {e}")
             return AliceResponse(
@@ -840,14 +840,14 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "update_selection")
-            
+
             # Validate request
             request = validate_selection_update_request(request)
-            
+
             # Get project ID from selection
             selection = None
             project_id = None
-            
+
             # First, find the selection to get project ID
             for project in self.project_service.list_projects():
                 test_selection = self.selection_service.get_selection(
@@ -857,7 +857,7 @@ class AliceStructuredInterface:
                     selection = test_selection
                     project_id = project["id"]
                     break
-            
+
             if not selection:
                 return AliceResponse(
                     success=False,
@@ -865,10 +865,10 @@ class AliceStructuredInterface:
                     data=None,
                     error=f"Selection '{request['selection_id']}' not found"
                 )
-            
+
             # Process updates
             updated = False
-            
+
             # Add items
             if request.get("add_items"):
                 result = self.selection_service.add_items_to_selection(
@@ -880,7 +880,7 @@ class AliceStructuredInterface:
                 if result:
                     selection = result
                     updated = True
-            
+
             # Remove items
             if request.get("remove_items"):
                 result = self.selection_service.remove_items_from_selection(
@@ -892,7 +892,7 @@ class AliceStructuredInterface:
                 if result:
                     selection = result
                     updated = True
-            
+
             # Update status
             if request.get("update_status"):
                 result = self.selection_service.update_selection_status(
@@ -904,7 +904,7 @@ class AliceStructuredInterface:
                 if result:
                     selection = result
                     updated = True
-            
+
             if updated and selection:
                 return AliceResponse(
                     success=True,
@@ -925,7 +925,7 @@ class AliceStructuredInterface:
                     data=None,
                     error="No valid update operations provided"
                 )
-                
+
         except ValidationError as e:
             logger.error(f"Validation error: {e}")
             return AliceResponse(
@@ -956,24 +956,24 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "search_selections")
-            
+
             # Validate request
             request = validate_selection_search_request(request)
-            
+
             # Search selections
             selections = self.selection_service.list_selections(
                 project_id=request["project_id"],
                 status=request.get("status"),
                 purpose=request.get("purpose")
             )
-            
+
             # Filter by containing asset if requested
             if request.get("containing_asset"):
                 selections = [
                     s for s in selections
                     if request["containing_asset"] in s.get_asset_hashes()
                 ]
-            
+
             # Format response
             selection_data = []
             for selection in selections:
@@ -991,7 +991,7 @@ class AliceStructuredInterface:
                     "updated_at": selection.updated_at.isoformat(),
                     "tags": selection.tags,
                 })
-            
+
             return AliceResponse(
                 success=True,
                 message=f"Found {len(selection_data)} selections",
@@ -1001,7 +1001,7 @@ class AliceStructuredInterface:
                 },
                 error=None
             )
-                
+
         except ValidationError as e:
             logger.error(f"Validation error: {e}")
             return AliceResponse(
@@ -1032,14 +1032,14 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "export_selection")
-            
+
             # Validate request
             request = validate_selection_export_request(request)
-            
+
             # Find the selection to get project ID
             selection = None
             project_id = None
-            
+
             for project in self.project_service.list_projects():
                 test_selection = self.selection_service.get_selection(
                     project["id"], request["selection_id"]
@@ -1048,7 +1048,7 @@ class AliceStructuredInterface:
                     selection = test_selection
                     project_id = project["id"]
                     break
-            
+
             if not selection:
                 return AliceResponse(
                     success=False,
@@ -1056,7 +1056,7 @@ class AliceStructuredInterface:
                     data=None,
                     error=f"Selection '{request['selection_id']}' not found"
                 )
-            
+
             # Export selection
             success = self.selection_service.export_selection(
                 project_id=project_id,
@@ -1064,7 +1064,7 @@ class AliceStructuredInterface:
                 export_path=Path(request["export_path"]),
                 export_settings=request.get("export_settings")
             )
-            
+
             if success:
                 return AliceResponse(
                     success=True,
@@ -1084,7 +1084,7 @@ class AliceStructuredInterface:
                     data=None,
                     error="Failed to export selection"
                 )
-                
+
         except ValidationError as e:
             logger.error(f"Validation error: {e}")
             return AliceResponse(
@@ -1116,10 +1116,10 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "get_selection")
-            
+
             # Get selection
             selection = self.selection_service.get_selection(project_id, selection_id)
-            
+
             if not selection:
                 return AliceResponse(
                     success=False,
@@ -1127,10 +1127,10 @@ class AliceStructuredInterface:
                     data=None,
                     error=f"Selection '{selection_id}' not found in project '{project_id}'"
                 )
-            
+
             # Get statistics
             stats = self.selection_service.get_selection_statistics(project_id, selection_id)
-            
+
             # Format selection data
             selection_data = {
                 "selection_id": selection.id,
@@ -1165,14 +1165,14 @@ class AliceStructuredInterface:
                 "sequence": selection.sequence,
                 "export_history": selection.export_history,
             }
-            
+
             return AliceResponse(
                 success=True,
                 message=f"Retrieved selection '{selection.name}'",
                 data=selection_data,
                 error=None
             )
-                
+
         except Exception as e:
             logger.error(f"Get selection failed: {e}", exc_info=True)
             return AliceResponse(
@@ -1181,10 +1181,10 @@ class AliceStructuredInterface:
                 data=None,
                 error=str(e)
             )
-    
+
     def find_similar_to_selection(
-        self, 
-        project_id: str, 
+        self,
+        project_id: str,
         selection_id: str,
         threshold: int = 10,
         limit: int = 50,
@@ -1209,7 +1209,7 @@ class AliceStructuredInterface:
         try:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "find_similar")
-            
+
             # Find similar images
             similar_images = self.selection_service.find_similar_to_selection(
                 project_id=project_id,
@@ -1218,7 +1218,7 @@ class AliceStructuredInterface:
                 limit=limit,
                 exclude_existing=exclude_existing
             )
-            
+
             if not similar_images:
                 return AliceResponse(
                     success=True,
@@ -1234,7 +1234,7 @@ class AliceStructuredInterface:
                     },
                     error=None
                 )
-            
+
             # Format results
             results = []
             for img in similar_images:
@@ -1255,7 +1255,7 @@ class AliceStructuredInterface:
                     }
                 }
                 results.append(result)
-            
+
             return AliceResponse(
                 success=True,
                 message=f"Found {len(results)} similar images",
@@ -1270,7 +1270,7 @@ class AliceStructuredInterface:
                 },
                 error=None
             )
-            
+
         except Exception as e:
             logger.error(f"Find similar to selection failed: {e}", exc_info=True)
             return AliceResponse(

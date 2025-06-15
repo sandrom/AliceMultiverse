@@ -2,14 +2,14 @@
 CLI commands for scene detection and shot list generation.
 """
 
-import click
 import json
 from pathlib import Path
-from typing import Optional
 
+import click
+
+from ..core.logging import setup_logging
 from .scene_detector import SceneDetector
 from .shot_list_generator import ShotListGenerator
-from ..core.logging import setup_logging
 
 
 @click.group()
@@ -28,11 +28,11 @@ def scenes():
 @click.option('--verbose', '-v', is_flag=True, help='Verbose output')
 def detect(
     input_path: str,
-    output: Optional[str],
+    output: str | None,
     threshold: float,
     min_duration: float,
     use_ai: bool,
-    ai_provider: Optional[str],
+    ai_provider: str | None,
     group_similar: bool,
     verbose: bool
 ):
@@ -44,7 +44,7 @@ def detect(
         alice scenes detect ./images/ --group-similar
     """
     setup_logging(debug=verbose)
-    
+
     input_path = Path(input_path)
     detector = SceneDetector(
         threshold=threshold,
@@ -52,13 +52,13 @@ def detect(
         use_ai=use_ai,
         ai_provider=ai_provider
     )
-    
+
     # Check if input is video or directory
     if input_path.is_file():
         # Video file
         click.echo(f"Detecting scenes in video: {input_path}")
         scenes = detector.detect_video_scenes(input_path)
-        
+
     elif input_path.is_dir():
         # Image directory
         image_extensions = {'.jpg', '.jpeg', '.png', '.webp'}
@@ -66,21 +66,21 @@ def detect(
             f for f in input_path.iterdir()
             if f.suffix.lower() in image_extensions
         ])
-        
+
         if not images:
             click.echo("No images found in directory", err=True)
             return
-            
+
         click.echo(f"Detecting scenes in {len(images)} images...")
         scenes = detector.detect_image_sequence_scenes(images, group_similar)
-        
+
     else:
         click.echo("Input must be a video file or directory", err=True)
         return
-        
+
     # Display results
     click.echo(f"\nDetected {len(scenes)} scenes:")
-    
+
     for scene in scenes:
         if scene.duration > 0:
             click.echo(
@@ -92,7 +92,7 @@ def detect(
                 f"\n{scene.scene_id}: {scene.scene_type.value} "
                 f"({len(scene.images)} images)"
             )
-            
+
         if scene.ai_description:
             click.echo(f"  Description: {scene.ai_description}")
         if scene.dominant_subject:
@@ -101,12 +101,12 @@ def detect(
             click.echo(f"  Mood: {scene.mood}")
         if scene.ai_tags:
             click.echo(f"  Tags: {', '.join(scene.ai_tags[:5])}")
-            
+
     # Save results
     if output:
         detector.export_scenes(scenes, output)
         click.echo(f"\nSaved scene data to: {output}")
-        
+
 
 @scenes.command()
 @click.argument('scenes_file', type=click.Path(exists=True))
@@ -127,8 +127,8 @@ def shotlist(
     style: str,
     shot_duration: tuple,
     use_ai: bool,
-    ai_provider: Optional[str],
-    target_duration: Optional[float],
+    ai_provider: str | None,
+    target_duration: float | None,
     verbose: bool
 ):
     """
@@ -138,14 +138,14 @@ def shotlist(
         alice scenes shotlist scenes.json -o shotlist.md --format markdown
     """
     setup_logging(debug=verbose)
-    
+
     # Load scenes
     with open(scenes_file) as f:
         data = json.load(f)
-        
+
     # Reconstruct scene objects
-    from .models import Scene, SceneType, DetectionMethod
-    
+    from .models import DetectionMethod, Scene, SceneType
+
     scenes = []
     for scene_data in data['scenes']:
         scene = Scene(
@@ -161,44 +161,44 @@ def shotlist(
             confidence=scene_data.get('confidence', 1.0),
             detection_method=DetectionMethod.CONTENT
         )
-        
+
         if scene_data.get('frames'):
             scene.start_frame = scene_data['frames'][0]
             scene.end_frame = scene_data['frames'][1]
-            
+
         if scene_data.get('images'):
             scene.images = [Path(p) for p in scene_data['images']]
-            
+
         scenes.append(scene)
-        
+
     # Generate shot list
     click.echo(f"Generating {style} shot list for {len(scenes)} scenes...")
-    
+
     generator = ShotListGenerator(
         style=style,
         shot_duration_range=shot_duration,
         use_ai_suggestions=use_ai,
         ai_provider=ai_provider
     )
-    
+
     shot_list = generator.generate_shot_list(
         scenes,
         project_name=project_name,
         target_duration=target_duration
     )
-    
+
     # Display summary
-    click.echo(f"\nGenerated shot list:")
+    click.echo("\nGenerated shot list:")
     click.echo(f"  Project: {shot_list.project_name}")
     click.echo(f"  Total duration: {shot_list.total_duration:.1f}s")
     click.echo(f"  Scenes: {shot_list.scene_count}")
     click.echo(f"  Shots: {shot_list.shot_count}")
     click.echo(f"  Average shot: {shot_list.average_shot_duration:.1f}s")
-    
+
     # Export
     generator.export_shot_list(shot_list, Path(output), format)
     click.echo(f"\nExported to: {output}")
-    
+
 
 @scenes.command()
 @click.argument('video', type=click.Path(exists=True))
@@ -208,9 +208,9 @@ def shotlist(
 @click.option('--verbose', '-v', is_flag=True, help='Verbose output')
 def extract(
     video: str,
-    output: Optional[str],
+    output: str | None,
     format: str,
-    scenes_file: Optional[str],
+    scenes_file: str | None,
     verbose: bool
 ):
     """
@@ -220,13 +220,13 @@ def extract(
         alice scenes extract video.mp4 -o ./shots/
     """
     setup_logging(debug=verbose)
-    
+
     import cv2
-    
+
     video_path = Path(video)
     output_dir = Path(output) if output else video_path.parent / f"{video_path.stem}_shots"
     output_dir.mkdir(exist_ok=True)
-    
+
     # Load or detect scenes
     if scenes_file:
         with open(scenes_file) as f:
@@ -243,34 +243,34 @@ def extract(
             }
             for s in scenes
         ]
-        
+
     # Extract frames
     cap = cv2.VideoCapture(str(video_path))
-    
+
     try:
         click.echo(f"Extracting frames to {output_dir}...")
-        
+
         for scene_data in scenes_data:
             scene_id = scene_data['id']
-            
-            if 'frames' in scene_data and scene_data['frames']:
+
+            if scene_data.get('frames'):
                 # Get middle frame
                 start_frame = scene_data['frames'][0]
                 end_frame = scene_data['frames'][1]
                 middle_frame = (start_frame + end_frame) // 2
-                
+
                 # Extract frame
                 cap.set(cv2.CAP_PROP_POS_FRAMES, middle_frame)
                 ret, frame = cap.read()
-                
+
                 if ret:
                     output_path = output_dir / f"{scene_id}.{format}"
                     cv2.imwrite(str(output_path), frame)
                     click.echo(f"  Extracted {scene_id}")
-                    
+
     finally:
         cap.release()
-        
+
     click.echo(f"\nExtracted {len(scenes_data)} frames")
 
 

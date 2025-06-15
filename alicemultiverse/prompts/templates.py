@@ -1,10 +1,11 @@
 """Template system for creating and managing prompt templates."""
 
 import re
-from typing import Dict, Any, List, Optional
-from pathlib import Path
-import yaml
 from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
+
+import yaml
 
 from ..core.logging import get_logger
 from .models import Prompt, PromptCategory, ProviderType
@@ -15,19 +16,19 @@ logger = get_logger(__name__)
 @dataclass
 class PromptTemplate:
     """A reusable prompt template with variable substitution."""
-    
+
     name: str
     template_text: str
     category: PromptCategory
-    providers: List[ProviderType]
-    variables: Dict[str, str]  # variable_name -> description
-    default_values: Optional[Dict[str, str]] = None
-    tags: Optional[List[str]] = None
-    style: Optional[str] = None
-    context: Optional[Dict[str, Any]] = None
-    examples: Optional[List[Dict[str, Any]]] = None
-    notes: Optional[str] = None
-    
+    providers: list[ProviderType]
+    variables: dict[str, str]  # variable_name -> description
+    default_values: dict[str, str] | None = None
+    tags: list[str] | None = None
+    style: str | None = None
+    context: dict[str, Any] | None = None
+    examples: list[dict[str, Any]] | None = None
+    notes: str | None = None
+
     def render(self, **kwargs) -> str:
         """Render the template with provided variables.
         
@@ -38,29 +39,29 @@ class PromptTemplate:
             Rendered prompt text
         """
         text = self.template_text
-        
+
         # Apply default values for missing variables
         if self.default_values:
             for var, default in self.default_values.items():
                 if var not in kwargs:
                     kwargs[var] = default
-        
+
         # Check for missing required variables
         missing = []
         for var in self.variables:
             if var not in kwargs and (not self.default_values or var not in self.default_values):
                 missing.append(var)
-        
+
         if missing:
             raise ValueError(f"Missing required variables: {', '.join(missing)}")
-        
+
         # Substitute variables
         for var, value in kwargs.items():
             pattern = f"{{{var}}}"
             text = text.replace(pattern, str(value))
-        
+
         return text
-    
+
     def to_prompt(self, **kwargs) -> Prompt:
         """Create a Prompt instance from this template.
         
@@ -71,20 +72,20 @@ class PromptTemplate:
             Prompt instance
         """
         import uuid
-        
+
         # Extract non-variable kwargs
         prompt_kwargs = {}
         variable_kwargs = {}
-        
+
         for key, value in kwargs.items():
             if key in self.variables:
                 variable_kwargs[key] = value
             else:
                 prompt_kwargs[key] = value
-        
+
         # Render the text
         text = self.render(**variable_kwargs)
-        
+
         # Create prompt
         return Prompt(
             id=prompt_kwargs.get("id", str(uuid.uuid4())),
@@ -99,22 +100,22 @@ class PromptTemplate:
                 "template_variables": variable_kwargs
             },
             notes=prompt_kwargs.get("notes", self.notes),
-            **{k: v for k, v in prompt_kwargs.items() 
+            **{k: v for k, v in prompt_kwargs.items()
                if k not in ["id", "tags", "style", "notes"]}
         )
 
 
 class TemplateManager:
     """Manages prompt templates."""
-    
-    def __init__(self, templates_dir: Optional[Path] = None):
+
+    def __init__(self, templates_dir: Path | None = None):
         if templates_dir is None:
             templates_dir = Path.home() / ".alice" / "templates"
         self.templates_dir = Path(templates_dir)
         self.templates_dir.mkdir(parents=True, exist_ok=True)
-        self._templates: Dict[str, PromptTemplate] = {}
+        self._templates: dict[str, PromptTemplate] = {}
         self._load_builtin_templates()
-    
+
     def _load_builtin_templates(self):
         """Load built-in templates."""
         # Character Portrait Template
@@ -143,7 +144,7 @@ class TemplateManager:
                 "result": "Portrait of cyberpunk hacker with focused expression, neon noir art style, neon lighting"
             }]
         )
-        
+
         # Landscape Template
         self._templates["landscape"] = PromptTemplate(
             name="landscape",
@@ -159,7 +160,7 @@ class TemplateManager:
             },
             tags=["landscape", "nature", "scenery", "template"]
         )
-        
+
         # Product Shot Template
         self._templates["product_shot"] = PromptTemplate(
             name="product_shot",
@@ -182,7 +183,7 @@ class TemplateManager:
             style="commercial",
             tags=["product", "photography", "commercial", "template"]
         )
-        
+
         # Video Generation Template
         self._templates["video_scene"] = PromptTemplate(
             name="video_scene",
@@ -202,40 +203,40 @@ class TemplateManager:
             },
             tags=["video", "animation", "motion", "template"]
         )
-    
-    def get_template(self, name: str) -> Optional[PromptTemplate]:
+
+    def get_template(self, name: str) -> PromptTemplate | None:
         """Get a template by name."""
         # Check loaded templates first
         if name in self._templates:
             return self._templates[name]
-        
+
         # Try loading from file
         template_file = self.templates_dir / f"{name}.yaml"
         if template_file.exists():
             return self.load_template(template_file)
-        
+
         return None
-    
-    def list_templates(self) -> List[str]:
+
+    def list_templates(self) -> list[str]:
         """List all available template names."""
         # Built-in templates
         templates = list(self._templates.keys())
-        
+
         # File-based templates
         for file in self.templates_dir.glob("*.yaml"):
             name = file.stem
             if name not in templates:
                 templates.append(name)
-        
+
         return sorted(templates)
-    
+
     def save_template(self, template: PromptTemplate, overwrite: bool = False) -> Path:
         """Save a template to file."""
         file_path = self.templates_dir / f"{template.name}.yaml"
-        
+
         if file_path.exists() and not overwrite:
             raise ValueError(f"Template '{template.name}' already exists")
-        
+
         data = {
             "name": template.name,
             "template": template.template_text,
@@ -249,28 +250,28 @@ class TemplateManager:
             "examples": template.examples,
             "notes": template.notes
         }
-        
+
         # Remove None values
         data = {k: v for k, v in data.items() if v is not None}
-        
+
         with open(file_path, 'w') as f:
             yaml.dump(data, f, default_flow_style=False, sort_keys=False)
-        
+
         # Cache it
         self._templates[template.name] = template
-        
+
         logger.info(f"Saved template '{template.name}' to {file_path}")
         return file_path
-    
+
     def load_template(self, file_path: Path) -> PromptTemplate:
         """Load a template from file."""
         with open(file_path) as f:
             data = yaml.safe_load(f)
-        
+
         # Convert string values to enums
         category = PromptCategory(data["category"])
         providers = [ProviderType(p) for p in data["providers"]]
-        
+
         template = PromptTemplate(
             name=data["name"],
             template_text=data["template"],
@@ -284,14 +285,14 @@ class TemplateManager:
             examples=data.get("examples"),
             notes=data.get("notes")
         )
-        
+
         # Cache it
         self._templates[template.name] = template
-        
+
         return template
-    
+
     def create_from_prompt(self, prompt: Prompt, template_name: str,
-                          variables: Optional[List[str]] = None) -> PromptTemplate:
+                          variables: list[str] | None = None) -> PromptTemplate:
         """Create a template from an existing prompt.
         
         Args:
@@ -303,7 +304,7 @@ class TemplateManager:
             Created template
         """
         text = prompt.text
-        
+
         if variables is None:
             # Try to auto-detect variables (words in curly braces)
             variables = re.findall(r'\{(\w+)\}', text)
@@ -311,10 +312,10 @@ class TemplateManager:
                 # Create generic variables
                 variables = ["subject", "style", "mood"]
                 text = f"{{{variables[0]}}} in {{{variables[1]}}} style with {{{variables[2]}}} mood"
-        
+
         # Create variable descriptions
         variable_desc = {var: f"Description for {var}" for var in variables}
-        
+
         template = PromptTemplate(
             name=template_name,
             template_text=text,
@@ -326,15 +327,15 @@ class TemplateManager:
             context=prompt.context,
             notes=f"Template created from prompt: {prompt.id}"
         )
-        
+
         return template
-    
-    def render_all_examples(self, template_name: str) -> List[str]:
+
+    def render_all_examples(self, template_name: str) -> list[str]:
         """Render all examples for a template."""
         template = self.get_template(template_name)
         if not template or not template.examples:
             return []
-        
+
         results = []
         for example in template.examples:
             if "variables" in example:
@@ -343,11 +344,11 @@ class TemplateManager:
                     results.append(rendered)
                 except Exception as e:
                     logger.warning(f"Failed to render example: {e}")
-        
+
         return results
 
 
-def create_template_from_variations(prompts: List[Prompt], 
+def create_template_from_variations(prompts: list[Prompt],
                                   template_name: str) -> PromptTemplate:
     """Create a template by analyzing prompt variations.
     
@@ -363,18 +364,18 @@ def create_template_from_variations(prompts: List[Prompt],
     """
     if not prompts:
         raise ValueError("No prompts provided")
-    
+
     # Find common tokens
     tokenized = [p.text.split() for p in prompts]
     common_tokens = set(tokenized[0])
-    
+
     for tokens in tokenized[1:]:
         common_tokens &= set(tokens)
-    
+
     # TODO: Implement more sophisticated pattern detection
     # For now, create a simple template
     base_prompt = prompts[0]
-    
+
     template = PromptTemplate(
         name=template_name,
         template_text="{subject} with {variation}",
@@ -387,5 +388,5 @@ def create_template_from_variations(prompts: List[Prompt],
         tags=list(set(tag for prompt in prompts for tag in prompt.tags)),
         notes=f"Template created from {len(prompts)} prompt variations"
     )
-    
+
     return template

@@ -1,34 +1,29 @@
 """MCP tools for video creation workflow."""
 
-from typing import Dict, Any, List, Optional
 from pathlib import Path
+from typing import Any
 
 from mcp.server import Server
 
-from alicemultiverse.workflows.video_creation import (
-    VideoCreationWorkflow,
-    VideoStoryboard
-)
-from alicemultiverse.storage.duckdb_search import DuckDBSearch
 from alicemultiverse.core.structured_logging import get_logger
-from .timeline_preview_mcp import (
-    preview_timeline,
-    update_preview_timeline,
-    export_preview_timeline,
-    get_preview_status
+from alicemultiverse.storage.unified_duckdb import DuckDBSearch
+from alicemultiverse.workflows.video_creation import VideoCreationWorkflow, VideoStoryboard
+
+from .multi_version_export_mcp import (
+    batch_export_all_platforms,
+    create_platform_versions,
+    get_available_platforms,
+    get_platform_recommendations,
 )
 from .timeline_nlp_mcp import (
+    batch_timeline_edits,
+    get_command_examples,
     process_timeline_command,
     suggest_timeline_edits,
-    batch_timeline_edits,
-    get_command_examples
 )
-from .multi_version_export_mcp import (
-    create_platform_versions,
-    get_platform_recommendations,
-    export_platform_version,
-    batch_export_all_platforms,
-    get_available_platforms
+from .timeline_preview_mcp import (
+    get_preview_status,
+    preview_timeline,
 )
 
 logger = get_logger(__name__)
@@ -41,14 +36,14 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         server: MCP server instance
         search_db: DuckDB search instance for asset lookup
     """
-    
+
     # Create workflow instance
     workflow = VideoCreationWorkflow(search_db)
-    
+
     @server.tool()
     async def analyze_for_video(
         image_hash: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Analyze a single image for video generation potential.
         
         Args:
@@ -59,7 +54,7 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         """
         try:
             analysis = await workflow.analyze_image_for_video(image_hash)
-            
+
             # Format for readable output
             return {
                 "success": True,
@@ -74,22 +69,22 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                     "complexity": "high" if len(analysis["tags"]) > 15 else "medium"
                 }
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to analyze image: {e}")
             return {
                 "success": False,
                 "error": str(e)
             }
-    
+
     @server.tool()
     async def generate_video_storyboard(
-        image_hashes: List[str],
+        image_hashes: list[str],
         style: str = "cinematic",
         target_duration: int = 30,
-        project_name: Optional[str] = None,
+        project_name: str | None = None,
         save_to_file: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Generate a complete video storyboard from selected images.
         
         Args:
@@ -110,11 +105,11 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                 target_duration=target_duration,
                 enhance_with_ai=False  # Can be made configurable
             )
-            
+
             # Override project name if provided
             if project_name:
                 storyboard.project_name = project_name
-            
+
             # Save if requested
             output_path = None
             if save_to_file:
@@ -123,7 +118,7 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                 output_dir.mkdir(exist_ok=True)
                 output_path = output_dir / f"{storyboard.project_name}.json"
                 storyboard.save(output_path)
-            
+
             # Format response
             response = {
                 "success": True,
@@ -133,7 +128,7 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                 "style": style,
                 "shots": []
             }
-            
+
             # Add shot summaries
             for i, shot in enumerate(storyboard.shots):
                 response["shots"].append({
@@ -143,32 +138,32 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                     "camera_motion": shot.camera_motion.value,
                     "prompt_preview": shot.prompt[:80] + "..." if len(shot.prompt) > 80 else shot.prompt
                 })
-            
+
             if output_path:
                 response["saved_to"] = str(output_path)
-            
+
             # Add usage instructions
             response["next_steps"] = [
                 "Use 'create_kling_prompts' to generate video requests",
                 "Or use 'prepare_flux_keyframes' for enhanced keyframes",
                 "Review and edit the storyboard file if needed"
             ]
-            
+
             return response
-            
+
         except Exception as e:
             logger.error(f"Failed to generate storyboard: {e}")
             return {
                 "success": False,
                 "error": str(e)
             }
-    
+
     @server.tool()
     async def create_kling_prompts(
         storyboard_file: str,
         model: str = "kling-v2.1-pro-text",
         output_format: str = "list"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create Kling-ready prompts from a storyboard.
         
         Args:
@@ -187,12 +182,12 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                 storyboard_path = Path.cwd() / "storyboards" / storyboard_file
                 if not storyboard_path.exists():
                     raise FileNotFoundError(f"Storyboard not found: {storyboard_file}")
-            
+
             storyboard = VideoStoryboard.load(storyboard_path)
-            
+
             # Create Kling requests
             requests = workflow.create_kling_requests(storyboard, model)
-            
+
             # Format response based on output format
             if output_format == "script":
                 # Create a script format
@@ -202,8 +197,8 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                     f"# Model: {model}",
                     ""
                 ]
-                
-                for i, (shot, request) in enumerate(zip(storyboard.shots, requests)):
+
+                for i, (shot, request) in enumerate(zip(storyboard.shots, requests, strict=False)):
                     lines.extend([
                         f"## Shot {i+1}",
                         f"Prompt: {request.prompt}",
@@ -211,18 +206,18 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                         f"Camera: {request.parameters['camera_motion']}",
                         ""
                     ])
-                
+
                 return {
                     "success": True,
                     "format": "script",
                     "content": "\n".join(lines),
                     "shot_count": len(requests)
                 }
-                
+
             elif output_format == "detailed":
                 # Detailed format with all parameters
                 shots_data = []
-                for i, (shot, request) in enumerate(zip(storyboard.shots, requests)):
+                for i, (shot, request) in enumerate(zip(storyboard.shots, requests, strict=False)):
                     shots_data.append({
                         "shot_number": i + 1,
                         "prompt": request.prompt,
@@ -234,7 +229,7 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                             "out": shot.transition_out.value
                         }
                     })
-                
+
                 return {
                     "success": True,
                     "format": "detailed",
@@ -242,7 +237,7 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                     "total_duration": storyboard.total_duration,
                     "shots": shots_data
                 }
-                
+
             else:  # list format
                 # Simple list of prompts
                 prompts = []
@@ -253,7 +248,7 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                         "duration": request.parameters["duration"],
                         "camera": request.parameters["camera_motion"]
                     })
-                
+
                 return {
                     "success": True,
                     "format": "list",
@@ -261,20 +256,20 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                     "model": model,
                     "estimated_cost": len(prompts) * 0.35  # Rough estimate
                 }
-                
+
         except Exception as e:
             logger.error(f"Failed to create Kling prompts: {e}")
             return {
                 "success": False,
                 "error": str(e)
             }
-    
+
     @server.tool()
     async def prepare_flux_keyframes(
         storyboard_file: str,
-        modifications: Optional[Dict[str, str]] = None,
-        shots_to_process: Optional[List[int]] = None
-    ) -> Dict[str, Any]:
+        modifications: dict[str, str] | None = None,
+        shots_to_process: list[int] | None = None
+    ) -> dict[str, Any]:
         """Prepare enhanced keyframes using Flux Kontext.
         
         Args:
@@ -292,9 +287,9 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                 storyboard_path = Path.cwd() / "storyboards" / storyboard_file
                 if not storyboard_path.exists():
                     raise FileNotFoundError(f"Storyboard not found: {storyboard_file}")
-            
+
             storyboard = VideoStoryboard.load(storyboard_path)
-            
+
             # Convert shot numbers to indices if provided
             if modifications:
                 # Convert 1-indexed shot numbers to 0-indexed
@@ -303,13 +298,13 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                     idx = str(int(shot_num) - 1)
                     mod_dict[idx] = mod
                 modifications = mod_dict
-            
+
             # Prepare keyframes
             flux_requests = await workflow.prepare_keyframes_with_flux(
-                storyboard, 
+                storyboard,
                 modifications
             )
-            
+
             # Filter shots if specified
             if shots_to_process:
                 filtered = {}
@@ -318,24 +313,24 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                     if idx in flux_requests:
                         filtered[idx] = flux_requests[idx]
                 flux_requests = filtered
-            
+
             # Format response
             response = {
                 "success": True,
                 "project": storyboard.project_name,
                 "keyframe_sets": {}
             }
-            
+
             for shot_idx, requests in flux_requests.items():
                 shot_num = int(shot_idx) + 1
                 shot = storyboard.shots[int(shot_idx)]
-                
+
                 keyframe_data = {
                     "shot_number": shot_num,
                     "original_prompt": shot.prompt,
                     "keyframes": []
                 }
-                
+
                 for i, req in enumerate(requests):
                     keyframe_data["keyframes"].append({
                         "type": "base" if i == 0 else ("transition" if "Blend" in req.prompt else "modified"),
@@ -343,28 +338,28 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                         "model": req.model,
                         "reference_count": len(req.reference_assets) if req.reference_assets else 0
                     })
-                
+
                 response["keyframe_sets"][f"shot_{shot_num}"] = keyframe_data
-            
+
             response["total_keyframes"] = sum(
                 len(kf["keyframes"]) for kf in response["keyframe_sets"].values()
             )
             response["estimated_cost"] = response["total_keyframes"] * 0.07  # Flux cost estimate
-            
+
             return response
-            
+
         except Exception as e:
             logger.error(f"Failed to prepare Flux keyframes: {e}")
             return {
                 "success": False,
                 "error": str(e)
             }
-    
+
     @server.tool()
     async def create_transition_guide(
         storyboard_file: str,
-        output_file: Optional[str] = None
-    ) -> Dict[str, Any]:
+        output_file: str | None = None
+    ) -> dict[str, Any]:
         """Create a transition guide for video editing.
         
         Args:
@@ -381,19 +376,19 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                 storyboard_path = Path.cwd() / "storyboards" / storyboard_file
                 if not storyboard_path.exists():
                     raise FileNotFoundError(f"Storyboard not found: {storyboard_file}")
-            
+
             storyboard = VideoStoryboard.load(storyboard_path)
-            
+
             # Create guide
             guide = workflow.create_transition_guide(storyboard)
-            
+
             # Save if requested
             if output_file:
                 output_path = Path(output_file)
                 output_path.parent.mkdir(parents=True, exist_ok=True)
                 with open(output_path, 'w') as f:
                     f.write(guide)
-                
+
                 return {
                     "success": True,
                     "saved_to": str(output_path),
@@ -406,21 +401,21 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
                     "shot_count": len(storyboard.shots),
                     "total_duration": storyboard.total_duration
                 }
-                
+
         except Exception as e:
             logger.error(f"Failed to create transition guide: {e}")
             return {
                 "success": False,
                 "error": str(e)
             }
-    
+
     # Timeline Preview Tools
-    
+
     @server.tool()
     async def preview_video_timeline(
-        timeline_data: Dict[str, Any],
+        timeline_data: dict[str, Any],
         auto_open: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Open an interactive web preview of a video timeline.
         
         Allows drag-and-drop reordering, trimming, and transition editing
@@ -434,13 +429,13 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             Preview URL and session ID
         """
         return await preview_timeline(timeline_data, auto_open=auto_open)
-    
+
     @server.tool()
     async def update_preview_timeline(
         session_id: str,
         operation: str,
-        clips: List[Dict[str, Any]]
-    ) -> Dict[str, Any]:
+        clips: list[dict[str, Any]]
+    ) -> dict[str, Any]:
         """Update a timeline in the preview interface.
         
         Operations:
@@ -457,13 +452,13 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             Updated timeline data
         """
         return await update_preview_timeline(session_id, operation, clips)
-    
+
     @server.tool()
     async def export_preview_timeline(
         session_id: str,
         format: str = "json",
-        output_path: Optional[str] = None
-    ) -> Dict[str, Any]:
+        output_path: str | None = None
+    ) -> dict[str, Any]:
         """Export a timeline from the preview interface.
         
         Formats:
@@ -481,24 +476,24 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         """
         output = Path(output_path) if output_path else None
         return await export_preview_timeline(session_id, format, output)
-    
+
     @server.tool()
-    async def get_timeline_preview_status() -> Dict[str, Any]:
+    async def get_timeline_preview_status() -> dict[str, Any]:
         """Check if timeline preview server is running.
         
         Returns:
             Server status and URL
         """
         return await get_preview_status()
-    
+
     # Natural Language Timeline Editing Tools
-    
+
     @server.tool()
     async def edit_timeline_naturally(
         command: str,
-        timeline_data: Dict[str, Any],
-        session_id: Optional[str] = None
-    ) -> Dict[str, Any]:
+        timeline_data: dict[str, Any],
+        session_id: str | None = None
+    ) -> dict[str, Any]:
         """Edit timeline using natural language commands.
         
         Examples:
@@ -521,11 +516,11 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             timeline_data=timeline_data,
             session_id=session_id
         )
-    
+
     @server.tool()
     async def suggest_timeline_improvements(
-        timeline_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        timeline_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Get AI-powered suggestions for timeline improvements.
         
         Analyzes your timeline and suggests edits like:
@@ -541,13 +536,13 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             Suggested commands and timeline analysis
         """
         return await suggest_timeline_edits(timeline_data)
-    
+
     @server.tool()
     async def apply_timeline_commands(
-        commands: List[str],
-        timeline_data: Dict[str, Any],
-        session_id: Optional[str] = None
-    ) -> Dict[str, Any]:
+        commands: list[str],
+        timeline_data: dict[str, Any],
+        session_id: str | None = None
+    ) -> dict[str, Any]:
         """Apply multiple natural language edits in sequence.
         
         Useful for complex edits like:
@@ -566,11 +561,11 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             timeline_data=timeline_data,
             session_id=session_id
         )
-    
+
     @server.tool()
     async def get_timeline_edit_examples(
-        category: Optional[str] = None
-    ) -> Dict[str, Any]:
+        category: str | None = None
+    ) -> dict[str, Any]:
         """Get examples of natural language timeline commands.
         
         Categories:
@@ -593,16 +588,16 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             "examples": examples,
             "tip": "Combine commands for complex edits!"
         }
-    
+
     # Multi-Platform Export Tools
-    
+
     @server.tool()
     async def export_for_platforms(
-        timeline_data: Dict[str, Any],
-        platforms: List[str],
+        timeline_data: dict[str, Any],
+        platforms: list[str],
         smart_crop: bool = True,
         maintain_sync: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Create platform-specific versions of your timeline.
         
         Automatically adapts for:
@@ -629,11 +624,11 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             smart_crop=smart_crop,
             maintain_sync=maintain_sync
         )
-    
+
     @server.tool()
     async def check_platform_compatibility(
-        timeline_data: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        timeline_data: dict[str, Any]
+    ) -> dict[str, Any]:
         """Check which platforms your timeline is suitable for.
         
         Analyzes:
@@ -648,15 +643,15 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             Platform recommendations and required adjustments
         """
         return await get_platform_recommendations(timeline_data)
-    
+
     @server.tool()
     async def export_all_platforms(
-        timeline_data: Dict[str, Any],
-        platforms: List[str],
-        output_dir: Optional[str] = None,
+        timeline_data: dict[str, Any],
+        platforms: list[str],
+        output_dir: str | None = None,
         format: str = "json",
         create_master: bool = True
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Export timeline for multiple platforms in one go.
         
         Creates properly named files for each platform with
@@ -679,9 +674,9 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
             format=format,
             create_master=create_master
         )
-    
+
     @server.tool()
-    async def get_platform_specs() -> Dict[str, Any]:
+    async def get_platform_specs() -> dict[str, Any]:
         """Get specifications for all supported platforms.
         
         Returns details on:

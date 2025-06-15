@@ -214,7 +214,7 @@ async def download_file(url: str, destination: Path, session: Optional['aiohttp.
     """
     if not AIOHTTP_AVAILABLE:
         raise FileOperationError("aiohttp is required for downloading files. Install with: pip install aiohttp")
-    
+
     if session is None:
         async with aiohttp.ClientSession() as session:
             await _download_with_session(url, destination, session)
@@ -227,17 +227,17 @@ async def _download_with_session(url: str, destination: Path, session: 'aiohttp.
     try:
         async with session.get(url) as response:
             response.raise_for_status()
-            
+
             # Ensure directory exists
             destination.parent.mkdir(parents=True, exist_ok=True)
-            
+
             # Download in chunks
             with open(destination, 'wb') as f:
                 async for chunk in response.content.iter_chunked(8192):
                     f.write(chunk)
-                    
+
         logger.info(f"Downloaded {url} to {destination}")
-        
+
     except Exception as e:
         logger.error(f"Failed to download {url}: {e}")
         if destination.exists():
@@ -259,13 +259,13 @@ async def save_text_file(path: Path, content: str, encoding: str = 'utf-8') -> N
     try:
         # Ensure directory exists
         path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Write file
         with open(path, 'w', encoding=encoding) as f:
             f.write(content)
-            
+
         logger.info(f"Saved text file to {path}")
-        
+
     except Exception as e:
         logger.error(f"Failed to save text file {path}: {e}")
         raise FileOperationError(f"Save failed: {e}")

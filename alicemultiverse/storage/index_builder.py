@@ -4,22 +4,22 @@ import hashlib
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import List, Optional, Dict, Any
+from typing import Any
 
 from tqdm import tqdm
 
 from ..core.constants import IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
 from ..core.structured_logging import get_logger
-from .metadata_extractor import MetadataExtractor
 from .duckdb_search import DuckDBSearch
+from .metadata_extractor import MetadataExtractor
 
 logger = get_logger(__name__)
 
 
 class SearchIndexBuilder:
     """Builds search index from file metadata."""
-    
-    def __init__(self, db_path: Optional[str] = None):
+
+    def __init__(self, db_path: str | None = None):
         """Initialize index builder.
         
         Args:
@@ -27,8 +27,8 @@ class SearchIndexBuilder:
         """
         self.search_db = DuckDBSearch(db_path)
         self.extractor = MetadataExtractor()
-    
-    def rebuild_from_paths(self, paths: List[str], show_progress: bool = True) -> int:
+
+    def rebuild_from_paths(self, paths: list[str], show_progress: bool = True) -> int:
         """Rebuild search index from files in given paths.
         
         Args:
@@ -41,15 +41,15 @@ class SearchIndexBuilder:
         # First collect all media files
         media_files = []
         extensions = IMAGE_EXTENSIONS | VIDEO_EXTENSIONS
-        
+
         logger.info(f"Scanning {len(paths)} paths for media files...")
-        
+
         for path_str in paths:
             path = Path(path_str)
             if not path.exists():
                 logger.warning(f"Path does not exist: {path}")
                 continue
-            
+
             if path.is_file() and path.suffix.lower() in extensions:
                 # Check if file is in sorted-out folder
                 if not any(part in ['sorted-out', 'sorted_out'] for part in path.parts):
@@ -59,25 +59,25 @@ class SearchIndexBuilder:
                     # Find all files but filter out sorted-out folders
                     all_files = path.rglob(f"*{ext}")
                     filtered_files = [
-                        f for f in all_files 
+                        f for f in all_files
                         if not any(part in ['sorted-out', 'sorted_out'] for part in f.parts)
                     ]
                     media_files.extend(filtered_files)
-        
+
         logger.info(f"Found {len(media_files)} media files to index")
-        
+
         # Clear existing index
         logger.info("Clearing existing search index...")
         self.search_db.clear_index()
-        
+
         # Index each file
         indexed_count = 0
-        
+
         if show_progress:
             file_iterator = tqdm(media_files, desc="Indexing files")
         else:
             file_iterator = media_files
-        
+
         for file_path in file_iterator:
             try:
                 # Extract metadata
@@ -85,30 +85,30 @@ class SearchIndexBuilder:
                 if metadata:
                     # Add to search index
                     self.search_db.index_asset(metadata)
-                    
+
                     # Calculate and index perceptual hashes for images
                     if metadata.get("media_type") == "image":
                         self._index_perceptual_hashes(file_path, metadata.get("content_hash"))
-                    
+
                     indexed_count += 1
-                    
+
                     if show_progress and indexed_count % 100 == 0:
                         logger.debug(f"Indexed {indexed_count} files...")
-                        
+
             except Exception as e:
                 logger.error(f"Failed to index {file_path}: {e}")
-        
+
         logger.info(f"Successfully indexed {indexed_count} of {len(media_files)} files")
-        
+
         # Get index statistics
         stats = self.search_db.get_statistics()
         logger.info(
             f"Index statistics: {stats.get('total_assets', 0)} assets, "
             f"{stats.get('unique_tags', 0)} unique tags"
         )
-        
+
         return indexed_count
-    
+
     def _index_perceptual_hashes(self, file_path: Path, content_hash: str) -> None:
         """Calculate and index perceptual hashes for an image.
         
@@ -118,16 +118,16 @@ class SearchIndexBuilder:
         """
         try:
             from ..assets.perceptual_hashing import (
-                calculate_perceptual_hash,
+                calculate_average_hash,
                 calculate_difference_hash,
-                calculate_average_hash
+                calculate_perceptual_hash,
             )
-            
+
             # Calculate different hash types
             phash = calculate_perceptual_hash(file_path)
             dhash = calculate_difference_hash(file_path)
             ahash = calculate_average_hash(file_path)
-            
+
             # Store in database
             if any([phash, dhash, ahash]):
                 self.search_db.index_perceptual_hashes(
@@ -137,10 +137,10 @@ class SearchIndexBuilder:
                     ahash=ahash
                 )
                 logger.debug(f"Indexed perceptual hashes for {file_path.name}")
-                
+
         except Exception as e:
             logger.warning(f"Failed to calculate perceptual hashes for {file_path}: {e}")
-    
+
     def update_from_path(self, path: str) -> int:
         """Update index with new or modified files from a path.
         
@@ -154,10 +154,10 @@ class SearchIndexBuilder:
         if not path_obj.exists():
             logger.warning(f"Path does not exist: {path}")
             return 0
-        
+
         updated_count = 0
         extensions = IMAGE_EXTENSIONS | VIDEO_EXTENSIONS
-        
+
         # Find media files
         media_files = []
         if path_obj.is_file() and path_obj.suffix.lower() in extensions:
@@ -165,7 +165,7 @@ class SearchIndexBuilder:
         elif path_obj.is_dir():
             for ext in extensions:
                 media_files.extend(path_obj.rglob(f"*{ext}"))
-        
+
         for file_path in media_files:
             try:
                 # Extract metadata
@@ -175,18 +175,18 @@ class SearchIndexBuilder:
                     content_hash = metadata.get("content_hash")
                     if content_hash:
                         existing, _ = self.search_db.search({"content_hash": content_hash})
-                        
+
                         # Update if modified or new
                         if not existing or existing[0]["modified_at"] < metadata.get("modified_at", ""):
                             self.search_db.index_asset(metadata)
                             updated_count += 1
-                            
+
             except Exception as e:
                 logger.error(f"Failed to update {file_path}: {e}")
-        
+
         logger.info(f"Updated {updated_count} files in index")
         return updated_count
-    
+
     def verify_index(self) -> dict:
         """Verify index integrity and find missing files.
         
@@ -194,35 +194,35 @@ class SearchIndexBuilder:
             Dict with verification results
         """
         logger.info("Verifying search index...")
-        
+
         # Get all indexed assets
         all_assets, total = self.search_db.search({}, limit=10000)
-        
+
         missing_files = []
         valid_files = 0
-        
+
         for asset in all_assets:
             file_path = Path(asset.get("file_path", ""))
             if file_path.exists():
                 valid_files += 1
             else:
                 missing_files.append(str(file_path))
-        
+
         results = {
             "total_indexed": total,
             "valid_files": valid_files,
             "missing_files": len(missing_files),
             "missing_file_paths": missing_files[:100],  # Limit to first 100
         }
-        
+
         logger.info(
             f"Index verification: {valid_files}/{total} files exist, "
             f"{len(missing_files)} missing"
         )
-        
+
         return results
-    
-    def _extract_full_metadata(self, file_path: Path) -> Dict[str, Any]:
+
+    def _extract_full_metadata(self, file_path: Path) -> dict[str, Any]:
         """Extract full metadata including content hash and required fields.
         
         Args:
@@ -233,7 +233,7 @@ class SearchIndexBuilder:
         """
         # Calculate content hash first
         content_hash = self._calculate_content_hash(file_path)
-        
+
         # Check for cached metadata
         cached_metadata = self._load_cached_metadata(file_path, content_hash)
         if cached_metadata:
@@ -242,7 +242,7 @@ class SearchIndexBuilder:
             metadata["content_hash"] = content_hash
             metadata["file_path"] = str(file_path)
             metadata["file_size"] = file_path.stat().st_size
-            
+
             # Update timestamps from file
             stat = file_path.stat()
             metadata["created_at"] = datetime.fromtimestamp(stat.st_ctime)
@@ -251,18 +251,18 @@ class SearchIndexBuilder:
         else:
             # Fallback to embedded metadata extraction
             metadata = self.extractor.extract_metadata(file_path)
-            
+
             # Add required fields
             metadata["content_hash"] = content_hash
             metadata["file_path"] = str(file_path)
             metadata["file_size"] = file_path.stat().st_size
-            
+
             # Add timestamps
             stat = file_path.stat()
             metadata["created_at"] = datetime.fromtimestamp(stat.st_ctime)
             metadata["modified_at"] = datetime.fromtimestamp(stat.st_mtime)
             metadata["discovered_at"] = datetime.now()
-            
+
             # Ensure media type is set
             if "media_type" not in metadata:
                 suffix = file_path.suffix.lower()
@@ -272,7 +272,7 @@ class SearchIndexBuilder:
                     metadata["media_type"] = "video"
                 else:
                     metadata["media_type"] = "unknown"
-            
+
             # Extract AI source from filename patterns
             filename = file_path.name.lower()
             if "midjourney" in filename or "miasmah" in filename:
@@ -285,7 +285,7 @@ class SearchIndexBuilder:
                 metadata["ai_source"] = "leonardo"
             elif "firefly" in filename:
                 metadata["ai_source"] = "firefly"
-            
+
             # Extract prompt from filename if available
             if "prompt" not in metadata and "_" in filename:
                 # Many AI tools put prompt in filename
@@ -295,10 +295,10 @@ class SearchIndexBuilder:
                     potential_prompt = "_".join(parts[1:-1])
                     if len(potential_prompt) > 10:  # Reasonable prompt length
                         metadata["prompt"] = potential_prompt.replace("_", " ")
-        
+
         return metadata
-    
-    def _load_cached_metadata(self, file_path: Path, content_hash: str) -> Optional[Dict[str, Any]]:
+
+    def _load_cached_metadata(self, file_path: Path, content_hash: str) -> dict[str, Any] | None:
         """Load metadata from cache if available.
         
         Args:
@@ -310,7 +310,7 @@ class SearchIndexBuilder:
         """
         # Look for .metadata folder in parent directories
         current_dir = file_path.parent
-        
+
         # First check immediate parent, then walk up to find .metadata
         while current_dir != current_dir.parent:  # Stop at root
             metadata_dir = current_dir / ".metadata"
@@ -318,35 +318,35 @@ class SearchIndexBuilder:
                 # Build cache file path
                 hash_prefix = content_hash[:2]
                 cache_file = metadata_dir / hash_prefix / f"{content_hash}.json"
-                
+
                 if cache_file.exists():
                     try:
-                        with open(cache_file, 'r') as f:
+                        with open(cache_file) as f:
                             cached_data = json.load(f)
                             logger.debug(f"Loaded cached metadata for {file_path.name} from {cache_file}")
                             return cached_data
                     except Exception as e:
                         logger.warning(f"Failed to load cached metadata from {cache_file}: {e}")
-                
+
                 # If not found in the expected location, check if it's an older flat structure
                 old_cache_file = metadata_dir / f"{content_hash}.json"
                 if old_cache_file.exists():
                     try:
-                        with open(old_cache_file, 'r') as f:
+                        with open(old_cache_file) as f:
                             cached_data = json.load(f)
                             logger.debug(f"Loaded cached metadata for {file_path.name} from old location")
                             return cached_data
                     except Exception as e:
                         logger.warning(f"Failed to load cached metadata from old location: {e}")
-                        
+
                 # Only check the first .metadata directory found
                 break
-                
+
             current_dir = current_dir.parent
-            
+
         return None
-    
-    def _extract_indexable_data(self, cached_data: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _extract_indexable_data(self, cached_data: dict[str, Any]) -> dict[str, Any]:
         """Extract indexable fields from cached metadata.
         
         Args:
@@ -356,24 +356,24 @@ class SearchIndexBuilder:
             Metadata dict with indexable fields
         """
         metadata = {}
-        
+
         # Direct fields from cache structure
         for field in ["content_hash", "file_size", "last_modified"]:
             if field in cached_data:
                 metadata[field] = cached_data[field]
-        
+
         # Extract from analysis section
         if "analysis" in cached_data:
             analysis = cached_data["analysis"]
-            
+
             # Media type and AI source
             metadata["media_type"] = analysis.get("media_type", "unknown")
             # Handle MediaType enum values
             if hasattr(metadata["media_type"], "value"):
                 metadata["media_type"] = metadata["media_type"].value
-                
+
             metadata["ai_source"] = analysis.get("source_type")
-            
+
             # Understanding data (tags)
             if "understanding" in analysis:
                 understanding = analysis["understanding"]
@@ -387,11 +387,11 @@ class SearchIndexBuilder:
                             if isinstance(tag_list, list):
                                 all_tags.extend(tag_list)
                         metadata["tags"] = list(set(all_tags))  # Deduplicate
-                    
+
                     # Extract prompt if available
                     if "positive_prompt" in understanding:
                         metadata["prompt"] = understanding["positive_prompt"]
-                    
+
                     # Extract description
                     if "description" in understanding:
                         metadata["description"] = understanding["description"]
@@ -403,13 +403,13 @@ class SearchIndexBuilder:
                             tags.extend(provider_data["tags"])
                     if tags:
                         metadata["tags"] = list(set(tags))  # Deduplicate
-            
+
             # Quality information (legacy - now using understanding system)
             if "quality_stars" in analysis:
                 metadata["quality_rating"] = analysis["quality_stars"]
             if "final_combined_score" in analysis:
                 metadata["quality_score"] = analysis["final_combined_score"]
-        
+
         # Extract prompt from original path or filename
         original_path = cached_data.get("original_path", cached_data.get("file_name", ""))
         if original_path:
@@ -420,9 +420,9 @@ class SearchIndexBuilder:
                     potential_prompt = "_".join(parts[1:-1])
                     if len(potential_prompt) > 10:
                         metadata["prompt"] = potential_prompt.replace("_", " ")
-        
+
         return metadata
-    
+
     def _calculate_content_hash(self, file_path: Path) -> str:
         """Calculate SHA256 hash of file content.
         

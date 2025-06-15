@@ -4,13 +4,13 @@ import asyncio
 import logging
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ..core.types import MediaType
 from ..pipeline.stages import PipelineStage
 from .advanced_tagger import AdvancedTagger
 from .analyzer import ImageAnalyzer
-from .batch_analyzer import BatchAnalyzer, BatchAnalysisRequest
+from .batch_analyzer import BatchAnalysisRequest, BatchAnalyzer
 from .custom_instructions import CustomInstructionManager
 from .provider_optimizer import ProviderOptimizer
 
@@ -19,22 +19,22 @@ logger = logging.getLogger(__name__)
 
 class ImageUnderstandingStage(PipelineStage):
     """Advanced pipeline stage for AI-powered image understanding and tagging."""
-    
+
     def __init__(
         self,
-        provider: Optional[str] = None,
+        provider: str | None = None,
         detailed: bool = False,
         generate_prompt: bool = True,
         extract_tags: bool = True,
-        custom_instructions: Optional[str] = None,
+        custom_instructions: str | None = None,
         min_confidence: float = 0.0,
         # Advanced features
         use_hierarchical_tags: bool = True,
         use_custom_vocabulary: bool = True,
         use_provider_optimization: bool = False,
-        budget_limit: Optional[float] = None,
-        project_id: Optional[str] = None,
-        repository: Optional[Any] = None,  # Deprecated - kept for compatibility
+        budget_limit: float | None = None,
+        project_id: str | None = None,
+        repository: Any | None = None,  # Deprecated - kept for compatibility
     ):
         """Initialize advanced image understanding stage.
         
@@ -64,43 +64,43 @@ class ImageUnderstandingStage(PipelineStage):
         self.budget_limit = budget_limit
         self.project_id = project_id
         self.repository = repository
-        
+
         # Initialize core analyzer
         self.analyzer = ImageAnalyzer()
-        
+
         # Initialize advanced components
         self.advanced_tagger = None
         self.instruction_manager = None
         self.provider_optimizer = None
-        
+
         if self.repository and (use_hierarchical_tags or use_custom_vocabulary):
             self.advanced_tagger = AdvancedTagger(self.repository)
-        
+
         if project_id or custom_instructions:
             self.instruction_manager = CustomInstructionManager()
-        
+
         if use_provider_optimization:
             self.provider_optimizer = ProviderOptimizer(self.analyzer)
             if budget_limit:
                 self.provider_optimizer.set_budget(budget_limit)
-        
+
         # Check if we have any providers
         if not self.analyzer.get_available_providers():
             logger.warning("No image understanding providers available. Please set API keys.")
             self.analyzer = None
-    
+
     def name(self) -> str:
         """Return stage name."""
         if self.provider:
             return f"understanding_{self.provider}"
         return "understanding"
-    
-    def process(self, image_path: Path, metadata: Dict[str, Any]) -> Dict[str, Any]:
+
+    def process(self, image_path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
         """Process image through advanced understanding/analysis."""
         if not self.analyzer:
             logger.warning("No image analyzer available, skipping understanding")
             return metadata
-        
+
         try:
             # Build custom instructions if needed
             instructions = self.custom_instructions
@@ -111,11 +111,11 @@ class ImageUnderstandingStage(PipelineStage):
                 )
                 if project_instructions:
                     instructions = project_instructions
-            
+
             # Run async analysis
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            
+
             # Use provider optimization if enabled
             if self.provider_optimizer:
                 result = loop.run_until_complete(
@@ -139,48 +139,48 @@ class ImageUnderstandingStage(PipelineStage):
                         custom_instructions=instructions
                     )
                 )
-            
+
             if not result:
                 logger.warning(f"No analysis result for {image_path.name}")
                 return metadata
-            
+
             # Apply advanced tagging if enabled
             if self.advanced_tagger and result.tags:
                 # Add specialized categories
                 self.advanced_tagger.add_specialized_categories(result, image_path)
-                
+
                 # Expand with hierarchical tags
                 if self.use_hierarchical_tags:
                     expanded_tags = self.advanced_tagger.expand_tags(result, self.project_id)
                     result.tags = expanded_tags
-                
+
                 # Apply custom vocabulary
                 if self.use_custom_vocabulary and self.project_id:
                     self.advanced_tagger.apply_custom_vocabulary(result, self.project_id)
-                
+
                 # Save tags to database if we have content hash
                 content_hash = metadata.get("content_hash")
                 if content_hash and self.repository:
                     self.advanced_tagger.save_tags_to_database(
                         content_hash, result.tags, source="ai"
                     )
-            
+
             # Store analysis results
             metadata["image_description"] = result.description
             if result.detailed_description:
                 metadata["detailed_description"] = result.detailed_description
-            
+
             # Store generated prompts
             if result.generated_prompt:
                 metadata["generated_prompt"] = result.generated_prompt
             if result.negative_prompt:
                 metadata["generated_negative_prompt"] = result.negative_prompt
-            
+
             # Process and store enhanced tags
             if result.tags:
                 # Merge with existing tags if any
                 existing_tags = metadata.get("tags", {})
-                
+
                 # Convert to our tag format
                 for category, tag_list in result.tags.items():
                     if category not in existing_tags:
@@ -189,23 +189,23 @@ class ImageUnderstandingStage(PipelineStage):
                     for tag in tag_list:
                         if tag not in existing_tags[category]:
                             existing_tags[category].append(tag)
-                
+
                 metadata["tags"] = existing_tags
-                
+
                 # Store enhanced tag list
                 metadata["all_tags"] = result.get_all_tags()
                 metadata["tag_categories"] = list(result.tags.keys())
                 metadata["hierarchical_tags"] = self.use_hierarchical_tags
-            
+
             # Store technical details if available
             if result.technical_details:
                 metadata["technical_analysis"] = result.technical_details
-            
+
             # Store provider info
             metadata["understanding_provider"] = result.provider
             metadata["understanding_model"] = result.model
             metadata["understanding_cost"] = result.cost
-            
+
             # Store advanced features info
             metadata["advanced_understanding"] = {
                 "hierarchical_tags": self.use_hierarchical_tags,
@@ -214,11 +214,11 @@ class ImageUnderstandingStage(PipelineStage):
                 "project_id": self.project_id,
                 "custom_instructions": bool(instructions != self.custom_instructions)
             }
-            
+
             # Store in pipeline stages format
             if "pipeline_stages" not in metadata:
                 metadata["pipeline_stages"] = {}
-            
+
             metadata["pipeline_stages"][self.name()] = {
                 "provider": result.provider,
                 "model": result.model,
@@ -231,38 +231,38 @@ class ImageUnderstandingStage(PipelineStage):
                 "advanced_features": metadata["advanced_understanding"],
                 "timestamp": time.time(),
             }
-            
+
             logger.info(
                 f"Advanced understanding of {image_path.name} with {result.provider} "
                 f"(${result.cost:.4f}, {len(result.get_all_tags())} tags, "
                 f"{len(result.tags) if result.tags else 0} categories)"
             )
-            
+
         except Exception as e:
             logger.error(f"Advanced image understanding failed for {image_path.name}: {e}")
-            
+
         return metadata
-    
-    def should_process(self, metadata: Dict[str, Any]) -> bool:
+
+    def should_process(self, metadata: dict[str, Any]) -> bool:
         """Check if this stage should process the image."""
         # Only process images
         if metadata.get("media_type") != MediaType.IMAGE:
             return False
-        
+
         # Skip if already processed by same provider
         if "pipeline_stages" in metadata:
             stage_name = self.name()
             if stage_name in metadata["pipeline_stages"]:
                 logger.debug(f"Already processed by {stage_name}")
                 return False
-        
+
         return True
-    
+
     def get_cost(self) -> float:
         """Get estimated cost per image."""
         if not self.analyzer:
             return 0.0
-        
+
         # Get cost for selected or cheapest provider
         if self.provider and self.provider in self.analyzer.analyzers:
             return self.analyzer.analyzers[self.provider].estimate_cost(self.detailed)
@@ -274,10 +274,10 @@ class ImageUnderstandingStage(PipelineStage):
 
 class MultiProviderUnderstandingStage(PipelineStage):
     """Pipeline stage that uses multiple providers for comprehensive analysis."""
-    
+
     def __init__(
         self,
-        providers: List[str],
+        providers: list[str],
         merge_tags: bool = True,
         merge_prompts: bool = False,
         detailed: bool = False,
@@ -294,33 +294,33 @@ class MultiProviderUnderstandingStage(PipelineStage):
         self.merge_tags = merge_tags
         self.merge_prompts = merge_prompts
         self.detailed = detailed
-        
+
         # Initialize analyzer
         self.analyzer = ImageAnalyzer()
-        
+
         # Filter to available providers
         available = self.analyzer.get_available_providers()
         self.providers = [p for p in providers if p in available]
-        
+
         if not self.providers:
             logger.warning(f"No requested providers available. Requested: {providers}")
             self.analyzer = None
-    
+
     def name(self) -> str:
         """Return stage name."""
         return f"understanding_multi_{'_'.join(self.providers)}"
-    
-    def process(self, image_path: Path, metadata: Dict[str, Any]) -> Dict[str, Any]:
+
+    def process(self, image_path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
         """Process image through multiple providers."""
         if not self.analyzer or not self.providers:
             logger.warning("No providers available for multi-provider understanding")
             return metadata
-        
+
         try:
             # Run async analyzer in sync context
             loop = asyncio.new_event_loop()
             asyncio.set_event_loop(loop)
-            
+
             # Analyze with all providers
             results = loop.run_until_complete(
                 self.analyzer.compare_providers(
@@ -331,48 +331,48 @@ class MultiProviderUnderstandingStage(PipelineStage):
                     detailed=self.detailed
                 )
             )
-            
+
             # Process results
             all_tags = {}
             all_prompts = []
             all_descriptions = []
             total_cost = 0.0
-            
+
             for provider, result in results.items():
                 # Collect descriptions
                 all_descriptions.append(f"[{provider}] {result.description}")
-                
+
                 # Merge tags
                 if self.merge_tags and result.tags:
                     for category, tag_list in result.tags.items():
                         if category not in all_tags:
                             all_tags[category] = []
                         all_tags[category].extend(tag_list)
-                
+
                 # Collect prompts
                 if result.generated_prompt:
                     all_prompts.append(f"[{provider}] {result.generated_prompt}")
-                
+
                 total_cost += result.cost
-            
+
             # Store merged results
             metadata["image_descriptions"] = all_descriptions
             metadata["image_description"] = all_descriptions[0] if all_descriptions else ""
-            
+
             # Deduplicate and store tags
             if all_tags:
                 # Remove duplicates from each category
                 for category in all_tags:
                     all_tags[category] = list(set(all_tags[category]))
-                
+
                 metadata["tags"] = all_tags
-                
+
                 # Flat list
                 flat_tags = []
                 for tags in all_tags.values():
                     flat_tags.extend(tags)
                 metadata["all_tags"] = list(set(flat_tags))
-            
+
             # Store prompts
             if all_prompts:
                 if self.merge_prompts:
@@ -381,49 +381,49 @@ class MultiProviderUnderstandingStage(PipelineStage):
                 else:
                     metadata["generated_prompts"] = all_prompts
                     metadata["generated_prompt"] = all_prompts[0]
-            
+
             # Store analysis metadata
             metadata["understanding_providers"] = list(results.keys())
             metadata["understanding_total_cost"] = total_cost
-            
+
             # Pipeline stages format
             if "pipeline_stages" not in metadata:
                 metadata["pipeline_stages"] = {}
-            
+
             metadata["pipeline_stages"][self.name()] = {
                 "providers": list(results.keys()),
                 "total_cost": total_cost,
                 "tag_count": len(metadata.get("all_tags", [])),
                 "timestamp": time.time(),
             }
-            
+
             logger.info(
                 f"Multi-provider analysis of {image_path.name} complete "
                 f"({len(results)} providers, ${total_cost:.4f} total)"
             )
-            
+
         except Exception as e:
             logger.error(f"Multi-provider understanding failed: {e}")
-            
+
         return metadata
-    
-    def should_process(self, metadata: Dict[str, Any]) -> bool:
+
+    def should_process(self, metadata: dict[str, Any]) -> bool:
         """Check if this stage should process the image."""
         return metadata.get("media_type") == MediaType.IMAGE
-    
+
     def get_cost(self) -> float:
         """Get total estimated cost."""
         if not self.analyzer:
             return 0.0
-        
+
         total = 0.0
         for provider in self.providers:
             if provider in self.analyzer.analyzers:
                 total += self.analyzer.analyzers[provider].estimate_cost(self.detailed)
-        
+
         return total
-    
-    def _merge_prompts(self, prompts: List[str]) -> str:
+
+    def _merge_prompts(self, prompts: list[str]) -> str:
         """Intelligently merge multiple prompts."""
         # Simple implementation - can be enhanced
         # Remove provider tags
@@ -432,24 +432,24 @@ class MultiProviderUnderstandingStage(PipelineStage):
             if "]" in prompt:
                 prompt = prompt.split("]", 1)[1].strip()
             clean_prompts.append(prompt)
-        
+
         # For now, just take the longest one
         return max(clean_prompts, key=len)
 
 
 class AdvancedBatchUnderstandingStage(PipelineStage):
     """Advanced batch processing stage for efficient multi-image analysis."""
-    
+
     def __init__(
         self,
-        provider: Optional[str] = None,
+        provider: str | None = None,
         detailed: bool = False,
         generate_prompt: bool = True,
         extract_tags: bool = True,
         max_concurrent: int = 5,
-        budget_limit: Optional[float] = None,
-        project_id: Optional[str] = None,
-        repository: Optional[Any] = None,  # Deprecated - kept for compatibility
+        budget_limit: float | None = None,
+        project_id: str | None = None,
+        repository: Any | None = None,  # Deprecated - kept for compatibility
         use_optimization: bool = True,
         checkpoint_interval: int = 10,
     ):
@@ -477,25 +477,25 @@ class AdvancedBatchUnderstandingStage(PipelineStage):
         self.repository = repository
         self.use_optimization = use_optimization
         self.checkpoint_interval = checkpoint_interval
-        
+
         # Initialize components
         self.analyzer = ImageAnalyzer()
         self.batch_analyzer = BatchAnalyzer(self.analyzer, self.repository)
         self.advanced_tagger = None
         self.instruction_manager = None
-        
+
         if self.repository:
             self.advanced_tagger = AdvancedTagger(self.repository)
-        
+
         if project_id:
             self.instruction_manager = CustomInstructionManager()
-    
+
     def name(self) -> str:
         """Return stage name."""
         return "advanced_batch_understanding"
-    
-    async def process_batch(self, image_paths: List[Path], 
-                          metadata_list: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
+
+    async def process_batch(self, image_paths: list[Path],
+                          metadata_list: list[dict[str, Any]]) -> list[dict[str, Any]]:
         """Process a batch of images efficiently.
         
         Args:
@@ -507,7 +507,7 @@ class AdvancedBatchUnderstandingStage(PipelineStage):
         """
         if not self.analyzer or not image_paths:
             return metadata_list
-        
+
         try:
             # Build custom instructions if needed
             instructions = None
@@ -516,7 +516,7 @@ class AdvancedBatchUnderstandingStage(PipelineStage):
                     self.project_id,
                     category="general"
                 )
-            
+
             # Create batch request
             request = BatchAnalysisRequest(
                 image_paths=image_paths,
@@ -532,49 +532,49 @@ class AdvancedBatchUnderstandingStage(PipelineStage):
                 skip_existing=True,
                 show_progress=True
             )
-            
+
             # Estimate cost first
             estimated_cost, cost_details = await self.batch_analyzer.estimate_cost(request)
             logger.info(f"Batch analysis estimated cost: ${estimated_cost:.2f}")
-            
+
             if self.budget_limit and estimated_cost > self.budget_limit:
                 logger.warning(f"Estimated cost exceeds budget limit: ${estimated_cost:.2f} > ${self.budget_limit:.2f}")
                 return metadata_list
-            
+
             # Process batch
             results = await self.batch_analyzer.analyze_batch(request)
-            
+
             # Update metadata with results
             result_dict = {str(path): result for path, result in results if result}
-            
-            for i, (image_path, metadata) in enumerate(zip(image_paths, metadata_list)):
+
+            for i, (image_path, metadata) in enumerate(zip(image_paths, metadata_list, strict=False)):
                 result = result_dict.get(str(image_path))
                 if not result:
                     continue
-                
+
                 # Apply advanced tagging
                 if self.advanced_tagger and result.tags:
                     # Add specialized categories
                     self.advanced_tagger.add_specialized_categories(result, image_path)
-                    
+
                     # Expand with hierarchical tags
                     expanded_tags = self.advanced_tagger.expand_tags(result, self.project_id)
                     result.tags = expanded_tags
-                    
+
                     # Apply custom vocabulary
                     if self.project_id:
                         self.advanced_tagger.apply_custom_vocabulary(result, self.project_id)
-                
+
                 # Update metadata
                 metadata["image_description"] = result.description
                 if result.detailed_description:
                     metadata["detailed_description"] = result.detailed_description
-                
+
                 if result.generated_prompt:
                     metadata["generated_prompt"] = result.generated_prompt
                 if result.negative_prompt:
                     metadata["generated_negative_prompt"] = result.negative_prompt
-                
+
                 if result.tags:
                     existing_tags = metadata.get("tags", {})
                     for category, tag_list in result.tags.items():
@@ -583,16 +583,16 @@ class AdvancedBatchUnderstandingStage(PipelineStage):
                         for tag in tag_list:
                             if tag not in existing_tags[category]:
                                 existing_tags[category].append(tag)
-                    
+
                     metadata["tags"] = existing_tags
                     metadata["all_tags"] = result.get_all_tags()
                     metadata["tag_categories"] = list(result.tags.keys())
-                
+
                 # Store provider info
                 metadata["understanding_provider"] = result.provider
                 metadata["understanding_model"] = result.model
                 metadata["understanding_cost"] = result.cost
-                
+
                 # Store batch processing info
                 metadata["batch_processing"] = {
                     "batch_size": len(image_paths),
@@ -601,11 +601,11 @@ class AdvancedBatchUnderstandingStage(PipelineStage):
                     "provider_optimization": self.use_optimization,
                     "concurrent_limit": self.max_concurrent
                 }
-                
+
                 # Pipeline stages format
                 if "pipeline_stages" not in metadata:
                     metadata["pipeline_stages"] = {}
-                
+
                 metadata["pipeline_stages"][self.name()] = {
                     "provider": result.provider,
                     "model": result.model,
@@ -617,16 +617,16 @@ class AdvancedBatchUnderstandingStage(PipelineStage):
                     "batch_info": metadata["batch_processing"],
                     "timestamp": time.time(),
                 }
-            
+
             total_cost = sum(r.cost for _, r in results if r)
             logger.info(f"Batch understanding complete: {len(results)} images, ${total_cost:.2f} total cost")
-            
+
         except Exception as e:
             logger.error(f"Advanced batch understanding failed: {e}")
-        
+
         return metadata_list
-    
-    def process(self, image_path: Path, metadata: Dict[str, Any]) -> Dict[str, Any]:
+
+    def process(self, image_path: Path, metadata: dict[str, Any]) -> dict[str, Any]:
         """Single image processing (for compatibility)."""
         # For single images, use regular understanding stage
         stage = ImageUnderstandingStage(
@@ -642,16 +642,16 @@ class AdvancedBatchUnderstandingStage(PipelineStage):
             budget_limit=self.budget_limit
         )
         return stage.process(image_path, metadata)
-    
-    def should_process(self, metadata: Dict[str, Any]) -> bool:
+
+    def should_process(self, metadata: dict[str, Any]) -> bool:
         """Check if this stage should process the image."""
         return metadata.get("media_type") == MediaType.IMAGE
-    
+
     def get_cost(self) -> float:
         """Get estimated cost per image."""
         if not self.analyzer:
             return 0.0
-        
+
         # Get cost for selected or cheapest provider
         if self.provider and self.provider in self.analyzer.analyzers:
             return self.analyzer.analyzers[self.provider].estimate_cost(self.detailed)

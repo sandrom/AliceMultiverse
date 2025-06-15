@@ -10,7 +10,6 @@ import re
 from pathlib import Path
 from typing import Any
 
-
 # Quality assessment functions have been removed.
 # Use image understanding for content analysis instead.
 

@@ -1,6 +1,7 @@
 """Helper to create test images."""
 
 from pathlib import Path
+
 from PIL import Image
 
 

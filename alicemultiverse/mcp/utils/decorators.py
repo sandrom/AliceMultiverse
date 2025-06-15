@@ -1,7 +1,8 @@
 """Common decorators for MCP tools."""
 
+from collections.abc import Callable
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, TypeVar
+from typing import Any, TypeVar
 
 from ..base import ServiceError, ValidationError, create_tool_response, services
 
@@ -25,22 +26,22 @@ def require_service(service_name: str) -> Callable[[ToolFunc], ToolFunc]:
                 service = services.get(service_name)
                 if service is None:
                     raise ServiceError(f"{service_name} service not available")
-                
+
                 # Call original function
                 return await func(*args, **kwargs)
-                
+
             except ServiceError as e:
                 return create_tool_response(
                     success=False,
                     error=str(e),
                     message=f"Required service '{service_name}' is not available"
                 )
-        
+
         return wrapper
     return decorator
 
 
-def validate_params(**validators: Dict[str, Callable[[Any], Any]]) -> Callable[[ToolFunc], ToolFunc]:
+def validate_params(**validators: dict[str, Callable[[Any], Any]]) -> Callable[[ToolFunc], ToolFunc]:
     """Decorator to validate tool parameters.
     
     Args:
@@ -62,7 +63,7 @@ def validate_params(**validators: Dict[str, Callable[[Any], Any]]) -> Callable[[
         async def wrapper(**kwargs):
             # Validate each parameter
             validated_params = {}
-            
+
             for param_name, validator in validators.items():
                 if param_name in kwargs:
                     try:
@@ -74,12 +75,12 @@ def validate_params(**validators: Dict[str, Callable[[Any], Any]]) -> Callable[[
                 else:
                     # Pass through if not in kwargs (might be optional)
                     pass
-            
+
             # Merge validated params back
             kwargs.update(validated_params)
-            
+
             # Call original function
             return await func(**kwargs)
-        
+
         return wrapper
     return decorator

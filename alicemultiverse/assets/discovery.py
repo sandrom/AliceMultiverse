@@ -4,8 +4,8 @@ import logging
 from pathlib import Path
 
 # from sqlalchemy.orm import Session
-
 from ..core.constants import IMAGE_EXTENSIONS, VIDEO_EXTENSIONS
+
 # from ..database import Asset, AssetPath, get_session
 from .hashing import calculate_content_hash, get_or_calculate_content_hash
 
@@ -61,7 +61,7 @@ class AssetDiscovery:
                             return file_path
                     except Exception as e:
                         logger.debug(f"Error checking {file_path}: {e}")
-        
+
         return None
 
     def track_asset(
@@ -93,7 +93,7 @@ class AssetDiscovery:
 
         logger.info(f"Tracked asset: {content_hash} at {file_path}")
         logger.debug("Database tracking skipped - PostgreSQL removed")
-        
+
         return content_hash
 
     def update_asset_location(self, content_hash: str, new_path: Path) -> bool:

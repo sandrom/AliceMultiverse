@@ -4,9 +4,8 @@ Workflow for applying artistic styles to images or creating style variations.
 """
 
 import logging
-from typing import List
 
-from alicemultiverse.workflows.base import WorkflowTemplate, WorkflowStep, WorkflowContext
+from alicemultiverse.workflows.base import WorkflowContext, WorkflowStep, WorkflowTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -29,12 +28,12 @@ class StyleTransferWorkflow(WorkflowTemplate):
         preserve_content: How much to preserve original content (0-1, default: 0.5)
         enhance_results: Whether to enhance final images (default: True)
     """
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define the style transfer workflow steps."""
         steps = []
         params = context.initial_params
-        
+
         # Step 1: Input image handling
         if not params.get("input_image"):
             # Generate an image if none provided
@@ -50,13 +49,13 @@ class StyleTransferWorkflow(WorkflowTemplate):
                 },
                 cost_limit=params.get("base_cost_limit", 0.05)
             ))
-        
+
         # Step 2: Style transfer variations
         style_provider = params.get("style_provider", "firefly")
         num_variations = params.get("num_variations", 3)
         style_strength = params.get("style_strength", 0.7)
         preserve_content = params.get("preserve_content", 0.5)
-        
+
         # Different style approaches for each variation
         style_approaches = [
             {
@@ -70,7 +69,7 @@ class StyleTransferWorkflow(WorkflowTemplate):
                 "preserve": preserve_content * 0.7,
             },
             {
-                "name": "subtle", 
+                "name": "subtle",
                 "strength": style_strength * 0.6,
                 "preserve": min(1.0, preserve_content * 1.3),
             },
@@ -85,10 +84,10 @@ class StyleTransferWorkflow(WorkflowTemplate):
                 "preserve": preserve_content * 1.1,
             },
         ]
-        
+
         for i in range(min(num_variations, len(style_approaches))):
             approach = style_approaches[i]
-            
+
             if style_provider == "firefly":
                 # Adobe Firefly style transfer
                 steps.append(WorkflowStep(
@@ -124,13 +123,13 @@ class StyleTransferWorkflow(WorkflowTemplate):
                     condition="previous.success" if not params.get("input_image") else None,
                     cost_limit=params.get("style_cost_limit", 0.05)
                 ))
-        
+
         # Step 3: Enhancement (if enabled)
         if params.get("enhance_results", True):
             # Enhance each style variation
             for i in range(min(num_variations, len(style_approaches))):
                 approach = style_approaches[i]
-                
+
                 steps.append(WorkflowStep(
                     name=f"enhance_{approach['name']}",
                     provider=params.get("enhance_provider", "magnific"),
@@ -145,7 +144,7 @@ class StyleTransferWorkflow(WorkflowTemplate):
                     condition=f"style_transfer_{approach['name']}.success",
                     cost_limit=params.get("enhance_cost_limit", 0.10)
                 ))
-        
+
         # Step 4: Create comparison grid
         steps.append(WorkflowStep(
             name="create_comparison",
@@ -160,7 +159,7 @@ class StyleTransferWorkflow(WorkflowTemplate):
             condition="previous.success",
             cost_limit=0.0
         ))
-        
+
         # Step 5: Final output
         steps.append(WorkflowStep(
             name="final_output",
@@ -173,13 +172,13 @@ class StyleTransferWorkflow(WorkflowTemplate):
             condition="previous.success",
             cost_limit=0.0
         ))
-        
+
         return steps
-    
+
     def _build_style_prompt(self, params: dict, approach: dict) -> str:
         """Build a style transfer prompt."""
         base_prompt = params.get("style_reference", "artistic style")
-        
+
         # Add approach-specific modifiers
         if approach["name"] == "bold":
             modifiers = "bold, vibrant, high contrast"
@@ -189,58 +188,58 @@ class StyleTransferWorkflow(WorkflowTemplate):
             modifiers = "experimental, unique, creative interpretation"
         else:
             modifiers = "balanced, harmonious"
-        
+
         # Combine with original prompt if provided
         if context_prompt := params.get("prompt"):
             return f"{context_prompt}, in the style of {base_prompt}, {modifiers}"
         else:
             return f"Image in the style of {base_prompt}, {modifiers}"
-    
-    def validate(self, context: WorkflowContext) -> List[str]:
+
+    def validate(self, context: WorkflowContext) -> list[str]:
         """Validate the workflow can execute."""
         errors = super().validate(context)
         params = context.initial_params
-        
+
         # Check if we have input or will generate
         if not params.get("input_image") and not context.initial_prompt:
             errors.append("Either input_image or initial_prompt is required")
-        
+
         # Check style reference
         if not params.get("style_reference"):
             errors.append("style_reference is required (path or description)")
-        
+
         # Check num_variations
         num_variations = params.get("num_variations", 3)
         if num_variations < 1 or num_variations > 5:
             errors.append(f"num_variations {num_variations} should be between 1 and 5")
-        
+
         # Check strength values
         style_strength = params.get("style_strength", 0.7)
         if style_strength < 0 or style_strength > 1:
             errors.append(f"style_strength {style_strength} should be between 0 and 1")
-        
+
         return errors
-    
+
     def estimate_cost(self, context: WorkflowContext) -> float:
         """Estimate total workflow cost."""
         params = context.initial_params
         total = 0.0
-        
+
         # Base image generation (if needed)
         if not params.get("input_image"):
             total += 0.03
-        
+
         # Style transfer variations
         num_variations = params.get("num_variations", 3)
         if params.get("style_provider") == "firefly":
             total += 0.06 * num_variations  # Firefly style transfer
         else:
             total += 0.03 * num_variations  # Generic img2img
-        
+
         # Enhancement
         if params.get("enhance_results", True):
             total += 0.08 * num_variations  # Enhancement cost
-        
+
         return total
 
 
@@ -249,11 +248,11 @@ class ArtisticStyleWorkflow(StyleTransferWorkflow):
     
     Focuses on painting and artistic styles.
     """
-    
+
     def __init__(self):
         super().__init__(name="ArtisticStyle")
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define artistic style steps."""
         # Set artistic defaults
         params = context.initial_params
@@ -263,7 +262,7 @@ class ArtisticStyleWorkflow(StyleTransferWorkflow):
         params.setdefault("preserve_content", 0.4)
         params.setdefault("enhance_results", True)
         params.setdefault("enhance_hdr", 0.6)  # More HDR for artistic look
-        
+
         return super().define_steps(context)
 
 
@@ -272,11 +271,11 @@ class PhotoStyleWorkflow(StyleTransferWorkflow):
     
     Maintains photorealism while applying style.
     """
-    
+
     def __init__(self):
         super().__init__(name="PhotoStyle")
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define photo style steps."""
         # Set photographic defaults
         params = context.initial_params
@@ -287,5 +286,5 @@ class PhotoStyleWorkflow(StyleTransferWorkflow):
         params.setdefault("preserve_content", 0.7)  # Preserve more
         params.setdefault("enhance_results", True)
         params.setdefault("enhance_scale", 2)  # Higher quality
-        
+
         return super().define_steps(context)

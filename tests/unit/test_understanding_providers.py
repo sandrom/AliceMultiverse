@@ -1,20 +1,17 @@
 """Unit tests for understanding system providers."""
 
-import asyncio
-import json
-import os
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch, Mock
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
 from PIL import Image
 
+from alicemultiverse.understanding.base import ImageAnalysisResult
 from alicemultiverse.understanding.providers import (
     AnthropicImageAnalyzer,
-    OpenAIImageAnalyzer,
+    DeepSeekImageAnalyzer,
     GoogleAIImageAnalyzer,
-    DeepSeekImageAnalyzer
+    OpenAIImageAnalyzer,
 )
-from alicemultiverse.understanding.base import ImageAnalysisResult
 
 
 @pytest.fixture
@@ -37,45 +34,45 @@ def mock_env_vars(monkeypatch):
 
 class TestAnthropicImageAnalyzer:
     """Test Anthropic Claude image analyzer."""
-    
+
     def test_initialization_with_api_key(self):
         """Test initialization with explicit API key."""
         analyzer = AnthropicImageAnalyzer(api_key="test-key")
         assert analyzer.api_key == "test-key"
         assert analyzer.model == "claude-3-5-sonnet-20241022"
         assert analyzer.name == "anthropic"
-    
+
     def test_initialization_from_env(self, mock_env_vars):
         """Test initialization from environment variable."""
         analyzer = AnthropicImageAnalyzer()
         assert analyzer.api_key == "test-anthropic-key"
-    
+
     def test_initialization_without_key(self):
         """Test initialization fails without API key."""
         with pytest.raises(ValueError, match="Anthropic API key required"):
             AnthropicImageAnalyzer()
-    
+
     def test_model_selection(self):
         """Test different model selection."""
         analyzer = AnthropicImageAnalyzer(api_key="test", model="claude-3-haiku-20240307")
         assert analyzer.model == "claude-3-haiku-20240307"
-    
+
     def test_cost_estimation(self):
         """Test cost estimation for different models."""
         analyzer = AnthropicImageAnalyzer(api_key="test", model="claude-3-haiku-20240307")
         cost = analyzer.estimate_cost(detailed=False)
         assert cost > 0
         assert cost < 0.01  # Haiku is cheap
-        
+
         analyzer_opus = AnthropicImageAnalyzer(api_key="test", model="claude-3-opus-20240229")
         cost_opus = analyzer_opus.estimate_cost(detailed=True)
         assert cost_opus > cost  # Opus is more expensive
-    
+
     @pytest.mark.asyncio
     async def test_analyze_image_success(self, sample_image_path):
         """Test successful image analysis."""
         analyzer = AnthropicImageAnalyzer(api_key="test-key")
-        
+
         # Mock the HTTP session
         mock_response = {
             "content": [{
@@ -91,11 +88,11 @@ NEGATIVE: realistic, detailed, complex"""
                 "output_tokens": 50
             }
         }
-        
+
         with patch('aiohttp.ClientSession') as mock_session_class:
             mock_session = AsyncMock()
             mock_session_class.return_value.__aenter__.return_value = mock_session
-            
+
             mock_resp = AsyncMock()
             mock_resp.status = 200
             mock_resp.json = AsyncMock(return_value=mock_response)
@@ -104,25 +101,25 @@ NEGATIVE: realistic, detailed, complex"""
             mock_post_cm.__aenter__ = AsyncMock(return_value=mock_resp)
             mock_post_cm.__aexit__ = AsyncMock(return_value=None)
             mock_session.post = Mock(return_value=mock_post_cm)
-            
+
             result = await analyzer.analyze(sample_image_path)
-            
+
             assert isinstance(result, ImageAnalysisResult)
             assert result.description == "A blue square image"
             assert result.tags["style"] == ["minimalist", "geometric"]
             assert result.provider == "anthropic"
             assert result.model == "claude-3-5-sonnet-20241022"
             assert result.tokens_used == 150
-    
+
     @pytest.mark.asyncio
     async def test_analyze_image_api_error(self, sample_image_path):
         """Test handling of API errors."""
         analyzer = AnthropicImageAnalyzer(api_key="test-key")
-        
+
         with patch('aiohttp.ClientSession') as mock_session_class:
             mock_session = AsyncMock()
             mock_session_class.return_value.__aenter__.return_value = mock_session
-            
+
             mock_resp = AsyncMock()
             mock_resp.status = 429  # Rate limit
             mock_resp.text = AsyncMock(return_value="Rate limit exceeded")
@@ -131,10 +128,10 @@ NEGATIVE: realistic, detailed, complex"""
             mock_post_cm.__aenter__ = AsyncMock(return_value=mock_resp)
             mock_post_cm.__aexit__ = AsyncMock(return_value=None)
             mock_session.post = Mock(return_value=mock_post_cm)
-            
+
             with pytest.raises(Exception, match="Anthropic API error: 429"):
                 await analyzer.analyze(sample_image_path)
-    
+
     def test_supports_batch(self):
         """Test batch support flag."""
         analyzer = AnthropicImageAnalyzer(api_key="test")
@@ -143,40 +140,40 @@ NEGATIVE: realistic, detailed, complex"""
 
 class TestOpenAIImageAnalyzer:
     """Test OpenAI GPT-4 Vision image analyzer."""
-    
+
     def test_initialization_with_api_key(self):
         """Test initialization with explicit API key."""
         analyzer = OpenAIImageAnalyzer(api_key="test-key")
         assert analyzer.api_key == "test-key"
         assert analyzer.model == "gpt-4o-mini"
         assert analyzer.name == "openai"
-    
+
     def test_initialization_from_env(self, mock_env_vars):
         """Test initialization from environment variable."""
         analyzer = OpenAIImageAnalyzer()
         assert analyzer.api_key == "test-openai-key"
-    
+
     def test_initialization_without_key(self):
         """Test initialization fails without API key."""
         with pytest.raises(ValueError, match="OpenAI API key required"):
             OpenAIImageAnalyzer()
-    
+
     def test_cost_estimation(self):
         """Test cost estimation for different models."""
         analyzer = OpenAIImageAnalyzer(api_key="test", model="gpt-4o-mini")
         cost = analyzer.estimate_cost(detailed=False)
         assert cost > 0
         assert cost < 0.01
-        
+
         analyzer_4o = OpenAIImageAnalyzer(api_key="test", model="gpt-4o")
         cost_4o = analyzer_4o.estimate_cost(detailed=True)
         assert cost_4o > cost  # gpt-4o is more expensive
-    
+
     @pytest.mark.asyncio
     async def test_analyze_image_success(self, sample_image_path):
         """Test successful image analysis."""
         analyzer = OpenAIImageAnalyzer(api_key="test-key")
-        
+
         mock_response = {
             "choices": [{
                 "message": {
@@ -194,11 +191,11 @@ NEGATIVE: complex, detailed"""
                 "total_tokens": 120
             }
         }
-        
+
         with patch('aiohttp.ClientSession') as mock_session_class:
             mock_session = AsyncMock()
             mock_session_class.return_value.__aenter__.return_value = mock_session
-            
+
             mock_resp = AsyncMock()
             mock_resp.status = 200
             mock_resp.json = AsyncMock(return_value=mock_response)
@@ -207,9 +204,9 @@ NEGATIVE: complex, detailed"""
             mock_post_cm.__aenter__ = AsyncMock(return_value=mock_resp)
             mock_post_cm.__aexit__ = AsyncMock(return_value=None)
             mock_session.post = Mock(return_value=mock_post_cm)
-            
+
             result = await analyzer.analyze(sample_image_path)
-            
+
             assert isinstance(result, ImageAnalysisResult)
             assert result.description == "A blue colored square"
             assert result.tags["color"] == ["blue"]
@@ -220,36 +217,36 @@ NEGATIVE: complex, detailed"""
 
 class TestGoogleAIImageAnalyzer:
     """Test Google AI (Gemini) image analyzer."""
-    
+
     def test_initialization_with_api_key(self):
         """Test initialization with explicit API key."""
         analyzer = GoogleAIImageAnalyzer(api_key="test-key")
         assert analyzer.api_key == "test-key"
         assert analyzer.model == "gemini-1.5-flash"
         assert analyzer.name == "google"
-    
+
     def test_initialization_from_env(self, mock_env_vars):
         """Test initialization from environment variable."""
         analyzer = GoogleAIImageAnalyzer()
         assert analyzer.api_key == "test-google-key"
-    
+
     def test_initialization_without_key(self):
         """Test initialization fails without API key."""
         with pytest.raises(ValueError, match="Google AI API key required"):
             GoogleAIImageAnalyzer()
-    
+
     def test_cost_estimation(self):
         """Test cost estimation."""
         analyzer = GoogleAIImageAnalyzer(api_key="test")
         cost = analyzer.estimate_cost(detailed=False)
         assert cost > 0  # Google AI has costs after free tier
         assert cost < 0.001  # But still very cheap
-    
+
     @pytest.mark.asyncio
     async def test_analyze_image_success(self, sample_image_path):
         """Test successful image analysis."""
         analyzer = GoogleAIImageAnalyzer(api_key="test-key")
-        
+
         mock_response = {
             "candidates": [{
                 "content": {
@@ -269,11 +266,11 @@ NEGATIVE: textured, complex"""
                 "totalTokenCount": 80
             }
         }
-        
+
         with patch('aiohttp.ClientSession') as mock_session_class:
             mock_session = AsyncMock()
             mock_session_class.return_value.__aenter__.return_value = mock_session
-            
+
             mock_resp = AsyncMock()
             mock_resp.status = 200
             mock_resp.json = AsyncMock(return_value=mock_response)
@@ -282,9 +279,9 @@ NEGATIVE: textured, complex"""
             mock_post_cm.__aenter__ = AsyncMock(return_value=mock_resp)
             mock_post_cm.__aexit__ = AsyncMock(return_value=None)
             mock_session.post = Mock(return_value=mock_post_cm)
-            
+
             result = await analyzer.analyze(sample_image_path)
-            
+
             assert isinstance(result, ImageAnalysisResult)
             assert result.description == "A solid blue square image"
             assert result.tags["visual"] == ["blue", "square", "solid"]
@@ -295,36 +292,36 @@ NEGATIVE: textured, complex"""
 
 class TestDeepSeekImageAnalyzer:
     """Test DeepSeek image analyzer."""
-    
+
     def test_initialization_with_api_key(self):
         """Test initialization with explicit API key."""
         analyzer = DeepSeekImageAnalyzer(api_key="test-key")
         assert analyzer.api_key == "test-key"
         assert analyzer.model == "deepseek-reasoner"
         assert analyzer.name == "deepseek"
-    
+
     def test_initialization_from_env(self, mock_env_vars):
         """Test initialization from environment variable."""
         analyzer = DeepSeekImageAnalyzer()
         assert analyzer.api_key == "test-deepseek-key"
-    
+
     def test_initialization_without_key(self):
         """Test initialization fails without API key."""
         with pytest.raises(ValueError, match="DeepSeek API key required"):
             DeepSeekImageAnalyzer()
-    
+
     def test_cost_estimation(self):
         """Test cost estimation."""
         analyzer = DeepSeekImageAnalyzer(api_key="test")
         cost = analyzer.estimate_cost(detailed=False)
         assert cost > 0
         assert cost < 0.01  # DeepSeek is cheap but slightly above 0.001
-    
+
     @pytest.mark.asyncio
     async def test_analyze_image_success(self, sample_image_path):
         """Test successful image analysis."""
         analyzer = DeepSeekImageAnalyzer(api_key="test-key")
-        
+
         mock_response = {
             "choices": [{
                 "message": {
@@ -342,11 +339,11 @@ NEGATIVE: none"""
                 "total_tokens": 80
             }
         }
-        
+
         with patch('aiohttp.ClientSession') as mock_session_class:
             mock_session = AsyncMock()
             mock_session_class.return_value.__aenter__.return_value = mock_session
-            
+
             mock_resp = AsyncMock()
             mock_resp.status = 200
             mock_resp.json = AsyncMock(return_value=mock_response)
@@ -355,9 +352,9 @@ NEGATIVE: none"""
             mock_post_cm.__aenter__ = AsyncMock(return_value=mock_resp)
             mock_post_cm.__aexit__ = AsyncMock(return_value=None)
             mock_session.post = Mock(return_value=mock_post_cm)
-            
+
             result = await analyzer.analyze(sample_image_path)
-            
+
             assert isinstance(result, ImageAnalysisResult)
             assert result.description == "Blue square test image"
             assert result.provider == "deepseek"
@@ -366,7 +363,7 @@ NEGATIVE: none"""
 
 class TestProviderComparison:
     """Test comparing multiple providers."""
-    
+
     @pytest.mark.asyncio
     async def test_consistent_tag_format(self, sample_image_path, mock_env_vars):
         """Test that all providers return consistent tag format."""
@@ -376,7 +373,7 @@ class TestProviderComparison:
             GoogleAIImageAnalyzer(),
             DeepSeekImageAnalyzer()
         ]
-        
+
         for provider in providers:
             # Mock a simple response
             mock_response = ImageAnalysisResult(
@@ -385,20 +382,20 @@ class TestProviderComparison:
                 provider=provider.name,
                 model=provider.model
             )
-            
+
             with patch.object(provider, 'analyze', return_value=mock_response):
                 result = await provider.analyze(sample_image_path)
-                
+
                 # Check consistent structure
                 assert isinstance(result.tags, dict)
                 assert all(isinstance(v, list) for v in result.tags.values())
                 assert result.provider == provider.name
                 assert result.model == provider.model
-    
+
     def test_cost_comparison(self, mock_env_vars):
         """Test cost comparison across providers."""
         costs = {}
-        
+
         # Get costs for each provider
         costs['anthropic_haiku'] = AnthropicImageAnalyzer(model="claude-3-haiku-20240307").estimate_cost()
         costs['anthropic_sonnet'] = AnthropicImageAnalyzer(model="claude-3-5-sonnet-20241022").estimate_cost()
@@ -406,7 +403,7 @@ class TestProviderComparison:
         costs['openai_4o'] = OpenAIImageAnalyzer(model="gpt-4o").estimate_cost()
         costs['google'] = GoogleAIImageAnalyzer().estimate_cost()
         costs['deepseek'] = DeepSeekImageAnalyzer().estimate_cost()
-        
+
         # Verify cost ordering (from cheapest to most expensive)
         assert costs['google'] > 0  # Has costs after free tier
         assert costs['google'] < costs['deepseek']  # But still cheaper than DeepSeek

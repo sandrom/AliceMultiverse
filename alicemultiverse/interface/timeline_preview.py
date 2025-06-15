@@ -12,11 +12,10 @@ before exporting to editing software. Features include:
 import copy
 import json
 import logging
-import uuid
-from dataclasses import asdict, dataclass
+import hashlib
+from dataclasses import asdict
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional
 
 from fastapi import FastAPI, HTTPException, WebSocket
 from fastapi.middleware.cors import CORSMiddleware
@@ -38,22 +37,25 @@ class TimelinePreviewRequest(BaseModel):
 class TimelineUpdateRequest(BaseModel):
     """Request to update timeline."""
     timeline_id: str
-    clips: List[dict]  # List of clip updates
+    clips: list[dict]  # List of clip updates
     operation: str  # reorder, trim, add_transition, etc.
 
 
 class PreviewSession:
     """Manages a timeline preview session."""
-    
+
     def __init__(self, timeline: Timeline):
-        self.id = str(uuid.uuid4())
+        # Generate ID from timeline content hash + timestamp
+        timeline_str = json.dumps(asdict(timeline), sort_keys=True)
+        id_source = f"{timeline_str}:{datetime.now().isoformat()}"
+        self.id = hashlib.sha256(id_source.encode()).hexdigest()[:16]
         self.timeline = timeline
         self.created_at = datetime.now()
         self.last_modified = datetime.now()
         self.version = 1
-        self.undo_stack: List[Timeline] = []
-        self.redo_stack: List[Timeline] = []
-    
+        self.undo_stack: list[Timeline] = []
+        self.redo_stack: list[Timeline] = []
+
     def update_timeline(self, new_timeline: Timeline):
         """Update timeline with undo support."""
         self.undo_stack.append(self.timeline)
@@ -61,7 +63,7 @@ class PreviewSession:
         self.last_modified = datetime.now()
         self.version += 1
         self.redo_stack.clear()
-    
+
     def undo(self) -> bool:
         """Undo last change."""
         if self.undo_stack:
@@ -70,7 +72,7 @@ class PreviewSession:
             self.last_modified = datetime.now()
             return True
         return False
-    
+
     def redo(self) -> bool:
         """Redo last undone change."""
         if self.redo_stack:
@@ -83,12 +85,12 @@ class PreviewSession:
 
 class TimelinePreviewServer:
     """Web server for timeline preview interface."""
-    
-    def __init__(self, static_dir: Optional[Path] = None):
+
+    def __init__(self, static_dir: Path | None = None):
         self.app = FastAPI(title="Alice Timeline Preview")
-        self.sessions: Dict[str, PreviewSession] = {}
+        self.sessions: dict[str, PreviewSession] = {}
         self.static_dir = static_dir or Path(__file__).parent / "static" / "timeline_preview"
-        
+
         # Setup CORS
         self.app.add_middleware(
             CORSMiddleware,
@@ -97,20 +99,20 @@ class TimelinePreviewServer:
             allow_methods=["*"],
             allow_headers=["*"],
         )
-        
+
         # Setup routes
         self._setup_routes()
-        
+
         # Mount static files
         if self.static_dir.exists():
             self.app.mount("/static", StaticFiles(directory=str(self.static_dir)), name="static")
-        
+
         # Set media directory for serving video/image files
         self.media_dir = Path.home() / "Documents" / "AliceMultiverse"
-    
+
     def _setup_routes(self):
         """Setup API routes."""
-        
+
         @self.app.get("/", response_class=HTMLResponse)
         async def index():
             """Serve the timeline preview interface."""
@@ -119,33 +121,33 @@ class TimelinePreviewServer:
                 return index_path.read_text()
             else:
                 return self._generate_default_html()
-        
+
         @self.app.get("/api/timeline/{session_id}")
         async def get_timeline(session_id: str):
             """Get timeline data for a session."""
             session = self.sessions.get(session_id)
             if not session:
                 raise HTTPException(status_code=404, detail="Session not found")
-            
+
             return {
                 "timeline": self._timeline_to_dict(session.timeline),
                 "version": session.version
             }
-        
+
         @self.app.get("/media/{file_path:path}")
         async def serve_media(file_path: str):
             """Serve media files (videos/images) from the media directory."""
             try:
                 media_path = self.media_dir / file_path
-                
+
                 # Security check - ensure path doesn't escape media directory
                 media_path = media_path.resolve()
                 if not str(media_path).startswith(str(self.media_dir)):
                     raise HTTPException(status_code=403, detail="Access denied")
-                
+
                 if not media_path.exists():
                     raise HTTPException(status_code=404, detail="File not found")
-                
+
                 # Determine content type
                 content_type = "application/octet-stream"
                 suffix = media_path.suffix.lower()
@@ -159,7 +161,7 @@ class TimelinePreviewServer:
                     content_type = "image/webp"
                 elif suffix in [".webm"]:
                     content_type = "video/webm"
-                
+
                 return FileResponse(
                     media_path,
                     media_type=content_type,
@@ -171,7 +173,7 @@ class TimelinePreviewServer:
             except Exception as e:
                 logger.error(f"Error serving media: {e}")
                 raise HTTPException(status_code=500, detail="Internal server error")
-        
+
         @self.app.post("/session/create")
         async def create_session(timeline_data: dict):
             """Create a new preview session from timeline data."""
@@ -188,10 +190,10 @@ class TimelinePreviewServer:
                     markers=timeline_data.get("markers", []),
                     metadata=timeline_data.get("metadata", {})
                 )
-                
+
                 session = PreviewSession(timeline)
                 self.sessions[session.id] = session
-                
+
                 return {
                     "session_id": session.id,
                     "timeline": self._timeline_to_dict(timeline)
@@ -199,14 +201,14 @@ class TimelinePreviewServer:
             except Exception as e:
                 logger.error(f"Failed to create session: {e}")
                 raise HTTPException(status_code=400, detail=str(e))
-        
+
         @self.app.get("/session/{session_id}")
         async def get_session(session_id: str):
             """Get session details."""
             session = self.sessions.get(session_id)
             if not session:
                 raise HTTPException(status_code=404, detail="Session not found")
-            
+
             return {
                 "session_id": session.id,
                 "timeline": self._timeline_to_dict(session.timeline),
@@ -216,14 +218,14 @@ class TimelinePreviewServer:
                 "can_undo": len(session.undo_stack) > 0,
                 "can_redo": len(session.redo_stack) > 0
             }
-        
+
         @self.app.post("/session/{session_id}/update")
         async def update_timeline(session_id: str, request: TimelineUpdateRequest):
             """Update timeline in session."""
             session = self.sessions.get(session_id)
             if not session:
                 raise HTTPException(status_code=404, detail="Session not found")
-            
+
             try:
                 # Apply the requested operation
                 new_timeline = self._apply_timeline_operation(
@@ -231,9 +233,9 @@ class TimelinePreviewServer:
                     request.operation,
                     request.clips
                 )
-                
+
                 session.update_timeline(new_timeline)
-                
+
                 return {
                     "success": True,
                     "timeline": self._timeline_to_dict(session.timeline),
@@ -242,14 +244,14 @@ class TimelinePreviewServer:
             except Exception as e:
                 logger.error(f"Failed to update timeline: {e}")
                 raise HTTPException(status_code=400, detail=str(e))
-        
+
         @self.app.post("/session/{session_id}/undo")
         async def undo(session_id: str):
             """Undo last change."""
             session = self.sessions.get(session_id)
             if not session:
                 raise HTTPException(status_code=404, detail="Session not found")
-            
+
             if session.undo():
                 return {
                     "success": True,
@@ -258,14 +260,14 @@ class TimelinePreviewServer:
                 }
             else:
                 return {"success": False, "message": "Nothing to undo"}
-        
+
         @self.app.post("/session/{session_id}/redo")
         async def redo(session_id: str):
             """Redo last undone change."""
             session = self.sessions.get(session_id)
             if not session:
                 raise HTTPException(status_code=404, detail="Session not found")
-            
+
             if session.redo():
                 return {
                     "success": True,
@@ -274,14 +276,14 @@ class TimelinePreviewServer:
                 }
             else:
                 return {"success": False, "message": "Nothing to redo"}
-        
+
         @self.app.post("/session/{session_id}/export")
         async def export_timeline(session_id: str, format: str = "json"):
             """Export timeline in requested format."""
             session = self.sessions.get(session_id)
             if not session:
                 raise HTTPException(status_code=404, detail="Session not found")
-            
+
             if format == "json":
                 return self._timeline_to_dict(session.timeline)
             elif format == "edl":
@@ -292,27 +294,27 @@ class TimelinePreviewServer:
                 return {"format": "xml", "content": "XML export not yet implemented"}
             else:
                 raise HTTPException(status_code=400, detail=f"Unknown format: {format}")
-        
+
         @self.app.websocket("/ws/{session_id}")
         async def websocket_endpoint(websocket: WebSocket, session_id: str):
             """WebSocket for real-time updates."""
             await websocket.accept()
-            
+
             session = self.sessions.get(session_id)
             if not session:
                 await websocket.close(code=1008, reason="Session not found")
                 return
-            
+
             try:
                 while True:
                     # Receive message from client
                     data = await websocket.receive_text()
                     message = json.loads(data)
-                    
+
                     # Handle different message types
                     if message["type"] == "ping":
                         await websocket.send_json({"type": "pong"})
-                    
+
                     elif message["type"] == "update_timeline":
                         # Update timeline based on client changes
                         updates = message.get("updates", {})
@@ -322,32 +324,32 @@ class TimelinePreviewServer:
                             new_timeline.clips = [TimelineClip(**clip) for clip in updates["clips"]]
                             new_timeline.duration = max((c.start_time + c.duration) for c in new_timeline.clips) if new_timeline.clips else 0
                             session.update_timeline(new_timeline)
-                            
+
                             # Send update confirmation
                             await websocket.send_json({
                                 "type": "timeline_update",
                                 "timeline": self._timeline_to_dict(session.timeline)
                             })
-                    
+
                     elif message["type"] == "undo":
                         if session.undo():
                             await websocket.send_json({
                                 "type": "timeline_update",
                                 "timeline": self._timeline_to_dict(session.timeline)
                             })
-                    
+
                     elif message["type"] == "redo":
                         if session.redo():
                             await websocket.send_json({
                                 "type": "timeline_update",
                                 "timeline": self._timeline_to_dict(session.timeline)
                             })
-                    
+
             except Exception as e:
                 logger.error(f"WebSocket error: {e}")
             finally:
                 await websocket.close()
-        
+
         @self.app.post("/api/preview/generate")
         async def generate_preview(request: dict):
             """Generate a preview video file from timeline."""
@@ -356,15 +358,15 @@ class TimelinePreviewServer:
                 format = request.get("format", "mp4")
                 resolution = request.get("resolution", [1280, 720])
                 include_audio = request.get("includeAudio", True)
-                
+
                 # Create temporary output file
                 import tempfile
                 temp_dir = Path(tempfile.mkdtemp())
                 output_path = temp_dir / f"preview.{format}"
-                
+
                 # Import video export functionality
                 from ..workflows.video_export import VideoExportManager
-                
+
                 # Convert timeline data to Timeline object
                 timeline = Timeline(
                     name=timeline_data.get("name", "Preview"),
@@ -373,24 +375,29 @@ class TimelinePreviewServer:
                     resolution=tuple(resolution),
                     clips=[TimelineClip(**clip) for clip in timeline_data.get("clips", [])]
                 )
-                
+
                 # Generate preview (simplified version - in production would use ffmpeg)
                 export_manager = VideoExportManager()
-                
+
                 # For now, return a placeholder response
                 # Full implementation would use ffmpeg to create actual preview
-                preview_url = f"/preview/{session_id}/{output_path.name}"
-                
+                # Generate a unique preview ID
+                import hashlib
+                # Generate preview ID from timeline + timestamp
+                preview_source = f"{timeline.id}:{datetime.now().isoformat()}"
+                preview_id = hashlib.sha256(preview_source.encode()).hexdigest()[:16]
+                preview_url = f"/preview/{preview_id}/{output_path.name}"
+
                 return {
                     "preview_url": preview_url,
                     "duration": timeline.duration,
                     "format": format
                 }
-                
+
             except Exception as e:
                 logger.error(f"Preview generation failed: {e}")
                 raise HTTPException(status_code=500, detail=str(e))
-        
+
         @self.app.get("/asset/{asset_path:path}")
         async def get_asset(asset_path: str):
             """Serve asset files (images/videos)."""
@@ -399,7 +406,7 @@ class TimelinePreviewServer:
                 return FileResponse(asset_file)
             else:
                 raise HTTPException(status_code=404, detail="Asset not found")
-    
+
     def _timeline_to_dict(self, timeline: Timeline) -> dict:
         """Convert Timeline object to dictionary."""
         result = asdict(timeline)
@@ -408,18 +415,18 @@ class TimelinePreviewServer:
             if "asset_path" in clip:
                 clip["asset_path"] = str(clip["asset_path"])
         return result
-    
-    def _apply_timeline_operation(self, timeline: Timeline, operation: str, clip_updates: List[dict]) -> Timeline:
+
+    def _apply_timeline_operation(self, timeline: Timeline, operation: str, clip_updates: list[dict]) -> Timeline:
         """Apply an operation to the timeline."""
         # Create a copy of the timeline
         import copy
         new_timeline = copy.deepcopy(timeline)
-        
+
         if operation == "reorder":
             # Reorder clips based on new positions
             clip_map = {i: clip for i, clip in enumerate(new_timeline.clips)}
             new_clips = []
-            
+
             for update in clip_updates:
                 old_index = update.get("old_index")
                 new_index = update.get("new_index")
@@ -432,9 +439,9 @@ class TimelinePreviewServer:
                     else:
                         clip.start_time = 0
                     new_clips.insert(new_index, clip)
-            
+
             new_timeline.clips = new_clips
-            
+
         elif operation == "trim":
             # Trim clip durations
             for update in clip_updates:
@@ -447,7 +454,7 @@ class TimelinePreviewServer:
                         clip.out_point = update["out_point"]
                     if "duration" in update:
                         clip.duration = update["duration"]
-        
+
         elif operation == "add_transition":
             # Add transitions between clips
             for update in clip_updates:
@@ -460,13 +467,13 @@ class TimelinePreviewServer:
                     if "transition_out" in update:
                         clip.transition_out = update["transition_out"]
                         clip.transition_out_duration = update.get("transition_out_duration", 1.0)
-        
+
         # Recalculate timeline duration
         if new_timeline.clips:
             new_timeline.duration = max(clip.end_time for clip in new_timeline.clips)
-        
+
         return new_timeline
-    
+
     def _generate_default_html(self) -> str:
         """Generate default HTML for timeline preview."""
         return """
@@ -834,14 +841,14 @@ class TimelinePreviewServer:
 </body>
 </html>
         """
-    
+
     def run(self, host: str = "0.0.0.0", port: int = 8001):
         """Run the preview server."""
         import uvicorn
         uvicorn.run(self.app, host=host, port=port)
 
 
-def create_preview_server(static_dir: Optional[Path] = None) -> TimelinePreviewServer:
+def create_preview_server(static_dir: Path | None = None) -> TimelinePreviewServer:
     """Create a timeline preview server instance."""
     return TimelinePreviewServer(static_dir)
 

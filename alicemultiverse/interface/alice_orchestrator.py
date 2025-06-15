@@ -6,7 +6,7 @@ language into technical operations while maintaining context across sessions.
 """
 
 from dataclasses import dataclass, field
-from datetime import UTC,  datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any
 
@@ -332,7 +332,7 @@ class AliceOrchestrator:
         if any(keyword in request_lower for keyword in memory_keywords):
             return CreativeIntent.REMEMBER
         # Also check for specific patterns like "what have I searched"
-        if ("what" in request_lower and "have" in request_lower and 
+        if ("what" in request_lower and "have" in request_lower and
             any(word in request_lower for word in ["searched", "created", "made", "looked"])):
             return CreativeIntent.REMEMBER
 

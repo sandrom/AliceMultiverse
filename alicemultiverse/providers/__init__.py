@@ -1,35 +1,28 @@
 """Provider interfaces for AI generation services."""
 
 # Import from types module
-from .types import (
+# Implementations
+from .anthropic_provider import AnthropicProvider
+from .google_ai_provider import GoogleAIProvider
+from .openai_provider import OpenAIProvider
+
+# Import from provider module
+from .provider import (
+    AuthenticationError,
+    BudgetExceededError,
+    GenerationError,
+    Provider,
+    ProviderError,
+    RateLimitError,
+)
+# Registry removed - use direct imports instead
+from .provider_types import (
+    CostEstimate,
     GenerationRequest,
     GenerationResult,
     GenerationType,
     ProviderCapabilities,
     ProviderStatus,
-    CostEstimate,
-)
-
-# Import from provider module
-from .provider import (
-    Provider,
-    ProviderError,
-    RateLimitError,
-    AuthenticationError,
-    GenerationError,
-    BudgetExceededError,
-)
-
-# Implementations
-from .anthropic_provider import AnthropicProvider
-from .fal_provider import FalProvider
-from .openai_provider import OpenAIProvider
-from .elevenlabs_provider import ElevenLabsProvider
-from .registry import (
-    ProviderRegistry, 
-    get_provider, 
-    get_provider_async,
-    get_registry,
 )
 
 __all__ = [
@@ -43,18 +36,13 @@ __all__ = [
     # Errors
     "ProviderError",
     "RateLimitError",
-    "AuthenticationError", 
+    "AuthenticationError",
     "GenerationError",
     "BudgetExceededError",
     # Types
     "CostEstimate",
     # Implementations
     "AnthropicProvider",
-    "FalProvider",
+    "GoogleAIProvider",
     "OpenAIProvider",
-    "ElevenLabsProvider",
-    "ProviderRegistry",
-    "get_provider",
-    "get_provider_async",
-    "get_registry",
 ]

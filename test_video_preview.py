@@ -2,12 +2,12 @@
 """Test script for video playback in web preview interface."""
 
 import asyncio
-import json
 import logging
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 import uvicorn
+
 from alicemultiverse.interface.timeline_preview import TimelinePreviewServer
 from alicemultiverse.workflows.video_export import Timeline, TimelineClip
 
@@ -19,7 +19,7 @@ async def test_video_preview():
     """Test the video preview functionality."""
     # Create server instance
     server = TimelinePreviewServer()
-    
+
     # Create test timeline with sample video clips
     test_clips = [
         TimelineClip(
@@ -44,7 +44,7 @@ async def test_video_preview():
             transition_out_duration=0.5
         )
     ]
-    
+
     test_timeline = Timeline(
         name="Test Video Timeline",
         duration=16.0,
@@ -63,7 +63,7 @@ async def test_video_preview():
         ],
         metadata={"created": datetime.now().isoformat()}
     )
-    
+
     # Create session
     async with httpx.AsyncClient(base_url="http://localhost:8001") as client:
         # Create session
@@ -87,12 +87,12 @@ async def test_video_preview():
             "markers": test_timeline.markers,
             "metadata": test_timeline.metadata
         })
-        
+
         if response.status_code == 200:
             session_data = response.json()
             session_id = session_data["session_id"]
             logger.info(f"Created session: {session_id}")
-            
+
             # Print URL for browser access
             print(f"\nOpen your browser to: http://localhost:8001/?session={session_id}")
             print("Features to test:")
@@ -111,12 +111,12 @@ async def create_test_videos():
     """Create simple test videos using ffmpeg."""
     test_dir = Path("test_videos")
     test_dir.mkdir(exist_ok=True)
-    
+
     # Create 3 test videos with different colors
     colors = ["red", "green", "blue"]
     durations = [5, 7, 4]
-    
-    for i, (color, duration) in enumerate(zip(colors, durations)):
+
+    for i, (color, duration) in enumerate(zip(colors, durations, strict=False)):
         output_path = test_dir / f"clip{i+1}.mp4"
         if not output_path.exists():
             cmd = [
@@ -129,7 +129,7 @@ async def create_test_videos():
                 str(output_path),
                 "-y"
             ]
-            
+
             import subprocess
             logger.info(f"Creating test video: {output_path}")
             subprocess.run(cmd, check=True)
@@ -139,17 +139,17 @@ async def main():
     """Main test function."""
     # Create test videos if needed
     await create_test_videos()
-    
+
     # Import httpx here to avoid top-level import
     global httpx
     import httpx
-    
+
     # Start the server
     server = TimelinePreviewServer()
-    
+
     # Run test in background
     asyncio.create_task(test_video_preview())
-    
+
     # Start server
     config = uvicorn.Config(
         app=server.app,

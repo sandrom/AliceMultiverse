@@ -11,7 +11,7 @@ from omegaconf import DictConfig
 from PIL import Image
 from tqdm import tqdm
 
-from ..core.cache_migration import MetadataCacheAdapter as MetadataCache
+from ..core.unified_cache import UnifiedCache as MetadataCache
 from ..core.constants import OUTPUT_DATE_FORMAT, SEQUENCE_FORMAT
 from ..core.file_operations import FileHandler
 from ..core.logging import get_logger
@@ -51,34 +51,34 @@ class MediaOrganizer:
 
         # Initialize components
         self.file_handler = FileHandler(dry_run=getattr(config.processing, "dry_run", False))
-        
+
         # Initialize DuckDB search for auto-indexing
         self.search_db = None
         if getattr(config.processing, "understanding", False):
             try:
-                from ..storage.duckdb_search import DuckDBSearch
+                from ..storage.unified_duckdb import DuckDBSearch
                 self.search_db = DuckDBSearch()
                 logger.info("Auto-indexing to DuckDB enabled during organization")
             except Exception as e:
                 logger.warning(f"Failed to initialize DuckDB for auto-indexing: {e}")
-        
+
         # Check if understanding is enabled
         enable_understanding = getattr(config.processing, "understanding", False)
         understanding_provider = None
-        
+
         # Understanding config is in pipeline.extra_fields
         if enable_understanding and hasattr(config, "pipeline"):
             if hasattr(config.pipeline, "extra_fields") and "understanding" in config.pipeline.extra_fields:
                 understanding_config = config.pipeline.extra_fields["understanding"]
                 understanding_provider = understanding_config.get("preferred_provider")
-                
+
             # If no preferred provider, use anthropic since we have the key
             if understanding_provider is None:
                 understanding_provider = "anthropic"
                 logger.info("Using anthropic provider for understanding (API key configured)")
-        
+
         self.metadata_cache = MetadataCache(
-            self.source_dir, 
+            self.source_dir,
             force_reindex=config.processing.force_reindex,
             enable_understanding=enable_understanding,
             understanding_provider=understanding_provider
@@ -114,7 +114,7 @@ class MediaOrganizer:
 
         # File extensions
         self.image_extensions = set(config.file_types.image_extensions)
-        
+
         # Initialize search index if available
         self.search_db = None
         if hasattr(config, 'storage') and hasattr(config.storage, 'search_db'):
@@ -135,7 +135,7 @@ class MediaOrganizer:
             # Show cost warnings if understanding is enabled
             if self.metadata_cache.enable_understanding:
                 self._show_cost_warning()
-            
+
             if self.watch_mode:
                 return self._watch_and_organize()
             else:
@@ -239,7 +239,7 @@ class MediaOrganizer:
     def _find_media_files(self) -> list[Path]:
         """Find all media files in source directory."""
         media_files = []
-        
+
         # Folders to exclude from scanning
         exclude_folders = {'sorted-out', 'sorted_out', '.metadata', '.alice'}
         excluded_count = 0
@@ -266,7 +266,7 @@ class MediaOrganizer:
                         if parent.name.lower() in exclude_folders:
                             should_exclude = True
                             break
-                    
+
                     if not should_exclude:
                         media_files.append(file_path)
                     else:
@@ -364,7 +364,7 @@ class MediaOrganizer:
 
         # Calculate content hash
         content_hash = self.metadata_cache.get_content_hash(media_path)
-        
+
         # Build metadata dict for pipeline stages
         metadata = {
             "source_type": source_type,
@@ -389,7 +389,7 @@ class MediaOrganizer:
             "pipeline_result": metadata.get("pipeline_stages"),
             "content_hash": content_hash,  # Include content hash
         }
-        
+
         return analysis
 
     def _detect_ai_source(self, media_path: Path, media_type: MediaType) -> str:
@@ -779,7 +779,7 @@ class MediaOrganizer:
             # Include content hash from cache
             if "content_hash" in cached_metadata:
                 analysis["content_hash"] = cached_metadata["content_hash"]
-            
+
             # Include understanding data if available (v4.0 cache format)
             if "understanding" in analysis:
                 # Understanding data is already in analysis
@@ -819,7 +819,7 @@ class MediaOrganizer:
             # Cache the results - this should trigger understanding if enabled
             self.metadata_cache.set_metadata(media_path, analysis, analysis_time)
             self.metadata_cache.update_stats(False)
-            
+
             # Log if understanding was supposed to run
             if self.metadata_cache.enable_understanding:
                 logger.debug(f"Understanding enabled with provider: {self.metadata_cache.understanding_provider}")
@@ -939,7 +939,7 @@ class MediaOrganizer:
             self.file_handler.copy_file(media_path, dest_path)
         else:
             self.file_handler.move_file(media_path, dest_path)
-        
+
         # Update search index with new file location
         logger.debug(f"About to update search index for {dest_path.name}")
         self._update_search_index(dest_path, analysis)
@@ -959,7 +959,7 @@ class MediaOrganizer:
             error=None,
         )
 
-    
+
     def _update_search_index(self, file_path: Path, analysis: dict) -> None:
         """Update search index with newly organized file.
         
@@ -970,7 +970,7 @@ class MediaOrganizer:
         if not self.search_db or self.config.processing.dry_run:
             logger.warning(f"Skipping search index update: search_db={bool(self.search_db)}, dry_run={self.config.processing.dry_run}")
             return
-            
+
         logger.info(f"_update_search_index called for {file_path.name}")
         try:
             # Build metadata for indexing
@@ -988,7 +988,7 @@ class MediaOrganizer:
                 "modified_at": datetime.fromtimestamp(file_path.stat().st_mtime),
                 "discovered_at": datetime.now(),
             }
-            
+
             # Extract tags from understanding data if available
             if "understanding" in analysis:
                 understanding = analysis["understanding"]
@@ -999,7 +999,7 @@ class MediaOrganizer:
                         metadata["description"] = understanding["description"]
                     if "positive_prompt" in understanding:
                         metadata["prompt"] = understanding["positive_prompt"]
-            
+
             # Extract prompt from filename if not in analysis
             if not metadata["prompt"] and "_" in file_path.name:
                 parts = file_path.name.split("_")
@@ -1007,24 +1007,24 @@ class MediaOrganizer:
                     potential_prompt = "_".join(parts[1:-1])
                     if len(potential_prompt) > 10:
                         metadata["prompt"] = potential_prompt.replace("_", " ")
-            
+
             # Index the asset
             self.search_db.index_asset(metadata)
             logger.info(f"Indexed asset in search: {file_path.name}")
-            
+
             # Calculate and index perceptual hashes for images
             media_type = metadata.get("media_type")
             logger.debug(f"Media type for perceptual hashing: {media_type} (type: {type(media_type)})")
-            if (media_type == MediaType.IMAGE or 
-                media_type == "image" or 
+            if (media_type == MediaType.IMAGE or
+                media_type == "image" or
                 (hasattr(media_type, 'value') and media_type.value == "image") or
                 str(media_type) == "MediaType.IMAGE"):
                 logger.debug(f"Calculating perceptual hashes for {file_path.name}")
                 self._index_perceptual_hashes(file_path, metadata.get("content_hash"))
-            
+
         except Exception as e:
             logger.error(f"Failed to update search index for {file_path}: {e}", exc_info=True)
-    
+
     def _index_perceptual_hashes(self, file_path: Path, content_hash: str) -> None:
         """Calculate and index perceptual hashes for an image.
         
@@ -1034,19 +1034,19 @@ class MediaOrganizer:
         """
         if not self.search_db or not content_hash:
             return
-            
+
         try:
             from ..assets.perceptual_hashing import (
-                calculate_perceptual_hash,
+                calculate_average_hash,
                 calculate_difference_hash,
-                calculate_average_hash
+                calculate_perceptual_hash,
             )
-            
+
             # Calculate different hash types
             phash = calculate_perceptual_hash(file_path)
-            dhash = calculate_difference_hash(file_path) 
+            dhash = calculate_difference_hash(file_path)
             ahash = calculate_average_hash(file_path)
-            
+
             # Store in database
             if any([phash, dhash, ahash]):
                 self.search_db.index_perceptual_hashes(
@@ -1056,24 +1056,24 @@ class MediaOrganizer:
                     ahash=ahash
                 )
                 logger.info(f"Indexed perceptual hashes for {file_path.name}: phash={phash}, dhash={dhash}, ahash={ahash}")
-                
+
         except ImportError:
             logger.debug("Perceptual hashing not available")
         except Exception as e:
             logger.warning(f"Failed to calculate perceptual hashes: {e}")
-    
+
     def _show_cost_warning(self) -> None:
         """Show cost warning when understanding is enabled."""
         from ..core.cost_tracker import get_cost_tracker
-        
+
         # Count media files
         media_files = self._find_media_files()
         if not media_files:
             return
-            
+
         # Get cost tracker
         cost_tracker = get_cost_tracker()
-        
+
         # Estimate costs for understanding
         provider = self.metadata_cache.understanding_provider or "anthropic"
         estimate = cost_tracker.estimate_batch_cost(
@@ -1081,7 +1081,7 @@ class MediaOrganizer:
             providers=[provider],
             operation="image_analysis"
         )
-        
+
         # Show warning
         print("\n" + "="*70)
         print("💸 COST ESTIMATE FOR AI UNDERSTANDING")
@@ -1089,7 +1089,7 @@ class MediaOrganizer:
         print(f"\nProvider: {provider}")
         print(f"Images to analyze: {len(media_files)}")
         print(f"Estimated cost: {estimate['total_cost']['formatted']}")
-        
+
         # Show cheaper alternatives if available
         if estimate['breakdown'][provider]['per_item'] > 0.001:
             print("\n💡 Cheaper alternatives:")
@@ -1097,18 +1097,18 @@ class MediaOrganizer:
                 print("  • DeepSeek: ~$0.0002 per image")
             if provider != "google":
                 print("  • Google AI: FREE (50 images/day)")
-        
+
         # Check budget warnings
         if estimate['budget_warnings']:
             print("\n⚠️  BUDGET WARNINGS:")
             for warning in estimate['budget_warnings']:
                 print(f"  • {warning}")
-        
+
         # Show current spending
         spending = cost_tracker.get_spending_summary()
         if spending['daily']['total'] > 0:
             print(f"\n📊 Today's spending: ${spending['daily']['total']:.2f}")
-        
+
         if not self.config.processing.dry_run:
             print("\n🔍 This is a preview. Add --dry-run to see what would happen without cost.")
             response = input("\nProceed with analysis? (y/N): ").strip().lower()
@@ -1117,5 +1117,5 @@ class MediaOrganizer:
                 raise KeyboardInterrupt("User cancelled due to cost")
         else:
             print("\n✅ DRY RUN - No actual API calls will be made")
-        
+
         print("="*70 + "\n")

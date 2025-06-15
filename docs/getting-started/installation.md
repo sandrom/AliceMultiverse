@@ -73,9 +73,9 @@ pip install --upgrade pip
 pip install -e .
 
 # Or install with optional features
-pip install -e ".[quality]"     # With quality assessment
-pip install -e ".[full]"        # All features
-pip install -e ".[dev]"         # Development dependencies
+pip install -e ".[understanding]"  # With AI understanding system
+pip install -e ".[full]"           # All features
+pip install -e ".[dev]"            # Development dependencies
 ```
 
 ### Method 2: Using pip (Coming Soon)
@@ -164,38 +164,34 @@ sudo apt install -y \
 Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 ```
 
-## Quality Assessment Setup
+## Understanding System Setup
 
-### BRISQUE Installation
+### AI Provider Installation
 
-AliceMultiverse supports multiple BRISQUE implementations:
+AliceMultiverse uses AI providers for semantic understanding of images:
 
-#### Option 1: image-quality (Recommended)
+#### Core Providers
 ```bash
-pip install image-quality
+# Install AI provider SDKs
+pip install openai          # OpenAI Vision
+pip install anthropic       # Claude Vision
+pip install google-generativeai  # Google AI
 ```
 
-#### Option 2: pybrisque
-```bash
-pip install pybrisque
-```
-
-#### Option 3: OpenCV (Advanced)
-```bash
-pip install opencv-contrib-python
-```
-
-### Verify BRISQUE Installation
+### Verify Understanding System
 
 ```python
-# Test BRISQUE availability
-from alicemultiverse.quality.brisque import is_available
+# Test understanding availability
+from alicemultiverse.understanding import UnderstandingManager
 
-if is_available():
-    print("✓ BRISQUE is available")
+manager = UnderstandingManager()
+if manager.available_providers:
+    print(f"✓ Understanding available: {manager.available_providers}")
 else:
-    print("✗ BRISQUE not found")
+    print("✗ No AI providers configured")
 ```
+
+**Note**: The quality assessment system has been replaced with the AI understanding system which provides semantic tagging instead of quality ratings.
 
 ## API Services Setup
 

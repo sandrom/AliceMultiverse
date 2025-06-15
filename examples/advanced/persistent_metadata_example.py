@@ -10,8 +10,10 @@ from pathlib import Path
 
 from PIL import Image
 
+from alicemultiverse.core.cache_migration import (
+    PersistentMetadataManagerAdapter as PersistentMetadataManager,
+)
 from alicemultiverse.metadata.embedder import MetadataEmbedder
-from alicemultiverse.core.cache_migration import PersistentMetadataManagerAdapter as PersistentMetadataManager
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

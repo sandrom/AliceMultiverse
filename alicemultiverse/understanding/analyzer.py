@@ -3,24 +3,24 @@
 import asyncio
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Union
+from typing import Any
 
-from ..core.cost_tracker import get_cost_tracker, CostCategory
+from ..core.cost_tracker import CostCategory, get_cost_tracker
 from .base import ImageAnalysisResult
+from .ollama_provider import OllamaImageAnalyzer
 from .providers import (
     AnthropicImageAnalyzer,
-    OpenAIImageAnalyzer,
-    GoogleAIImageAnalyzer,
     DeepSeekImageAnalyzer,
+    GoogleAIImageAnalyzer,
+    OpenAIImageAnalyzer,
 )
-from .ollama_provider import OllamaImageAnalyzer
 
 logger = logging.getLogger(__name__)
 
 
 class ImageAnalyzer:
     """Unified image analyzer supporting multiple providers."""
-    
+
     PROVIDERS = {
         "anthropic": AnthropicImageAnalyzer,
         "openai": OpenAIImageAnalyzer,
@@ -28,38 +28,39 @@ class ImageAnalyzer:
         "deepseek": DeepSeekImageAnalyzer,
         "ollama": OllamaImageAnalyzer,
     }
-    
+
     def __init__(self):
         """Initialize the analyzer."""
         self.analyzers = {}
         self._initialize_available_analyzers()
-    
+
     def _initialize_available_analyzers(self):
         """Initialize analyzers for which we have API keys."""
         import os
+
         from ..core.keys.manager import APIKeyManager
-        
+
         # Initialize key manager
         key_manager = APIKeyManager()
-        
+
         # Try to load API keys from keychain/config and set in environment
         anthropic_key = key_manager.get_api_key("anthropic_api_key")
         if anthropic_key:
             os.environ["ANTHROPIC_API_KEY"] = anthropic_key
-            
+
         openai_key = key_manager.get_api_key("openai")
         if openai_key:
             os.environ["OPENAI_API_KEY"] = openai_key
-            
+
         google_key = key_manager.get_api_key("google")
         if google_key:
             os.environ["GOOGLE_AI_API_KEY"] = google_key
             os.environ["GEMINI_API_KEY"] = google_key
-            
+
         deepseek_key = key_manager.get_api_key("deepseek")
         if deepseek_key:
             os.environ["DEEPSEEK_API_KEY"] = deepseek_key
-            
+
         # Check for API keys and initialize available analyzers
         if os.getenv("ANTHROPIC_API_KEY"):
             try:
@@ -67,36 +68,36 @@ class ImageAnalyzer:
                 logger.info("Initialized Anthropic image analyzer")
             except Exception as e:
                 logger.warning(f"Failed to initialize Anthropic analyzer: {e}")
-        
+
         if os.getenv("OPENAI_API_KEY"):
             try:
                 self.analyzers["openai"] = OpenAIImageAnalyzer()
                 logger.info("Initialized OpenAI image analyzer")
             except Exception as e:
                 logger.warning(f"Failed to initialize OpenAI analyzer: {e}")
-        
+
         if os.getenv("GOOGLE_AI_API_KEY") or os.getenv("GEMINI_API_KEY"):
             try:
                 self.analyzers["google"] = GoogleAIImageAnalyzer()
                 logger.info("Initialized Google AI image analyzer")
             except Exception as e:
                 logger.warning(f"Failed to initialize Google AI analyzer: {e}")
-        
+
         if os.getenv("DEEPSEEK_API_KEY"):
             try:
                 self.analyzers["deepseek"] = DeepSeekImageAnalyzer()
                 logger.info("Initialized DeepSeek image analyzer")
             except Exception as e:
                 logger.warning(f"Failed to initialize DeepSeek analyzer: {e}")
-        
+
         # Always try to initialize Ollama (no API key needed)
         try:
             self.analyzers["ollama"] = OllamaImageAnalyzer()
             logger.info("Initialized Ollama local image analyzer")
         except Exception as e:
             logger.debug(f"Ollama not available: {e}")
-    
-    def add_analyzer(self, name: str, api_key: str, model: Optional[str] = None):
+
+    def add_analyzer(self, name: str, api_key: str, model: str | None = None):
         """Add a specific analyzer.
         
         Args:
@@ -106,23 +107,23 @@ class ImageAnalyzer:
         """
         if name not in self.PROVIDERS:
             raise ValueError(f"Unknown provider: {name}")
-        
+
         analyzer_class = self.PROVIDERS[name]
         self.analyzers[name] = analyzer_class(api_key=api_key, model=model)
         logger.info(f"Added {name} analyzer")
-    
-    def get_available_providers(self) -> List[str]:
+
+    def get_available_providers(self) -> list[str]:
         """Get list of available providers."""
         return list(self.analyzers.keys())
-    
+
     async def analyze(
         self,
-        image_path: Union[Path, str],
-        provider: Optional[str] = None,
+        image_path: Path | str,
+        provider: str | None = None,
         generate_prompt: bool = True,
         extract_tags: bool = True,
         detailed: bool = False,
-        custom_instructions: Optional[str] = None
+        custom_instructions: str | None = None
     ) -> ImageAnalysisResult:
         """Analyze an image using specified or cheapest provider.
         
@@ -140,7 +141,7 @@ class ImageAnalyzer:
         image_path = Path(image_path)
         if not image_path.exists():
             raise FileNotFoundError(f"Image not found: {image_path}")
-        
+
         # Select provider
         if provider:
             if provider not in self.analyzers:
@@ -151,7 +152,7 @@ class ImageAnalyzer:
             analyzer = self._get_cheapest_analyzer(detailed)
             if not analyzer:
                 raise RuntimeError("No image analyzers available. Please set API keys.")
-        
+
         # Analyze
         try:
             result = await analyzer.analyze(
@@ -161,12 +162,12 @@ class ImageAnalyzer:
                 detailed=detailed,
                 custom_instructions=custom_instructions
             )
-            
+
             logger.info(
                 f"Analyzed {image_path.name} with {analyzer.name} "
                 f"(cost: ${result.cost:.4f}, tokens: {result.tokens_used})"
             )
-            
+
             # Record actual cost
             cost_tracker = get_cost_tracker()
             cost_tracker.record_cost(
@@ -180,23 +181,23 @@ class ImageAnalyzer:
                     "image_path": str(image_path)
                 }
             )
-            
+
             return result
-            
+
         except Exception as e:
             logger.error(f"Failed to analyze {image_path.name} with {analyzer.name}: {e}")
             raise
-    
+
     async def analyze_batch(
         self,
-        image_paths: List[Union[Path, str]],
-        provider: Optional[str] = None,
+        image_paths: list[Path | str],
+        provider: str | None = None,
         generate_prompt: bool = True,
         extract_tags: bool = True,
         detailed: bool = False,
-        custom_instructions: Optional[str] = None,
+        custom_instructions: str | None = None,
         max_concurrent: int = 5
-    ) -> List[ImageAnalysisResult]:
+    ) -> list[ImageAnalysisResult]:
         """Analyze multiple images concurrently.
         
         Args:
@@ -212,7 +213,7 @@ class ImageAnalyzer:
             List of ImageAnalysisResult objects
         """
         semaphore = asyncio.Semaphore(max_concurrent)
-        
+
         async def analyze_with_semaphore(path):
             async with semaphore:
                 try:
@@ -227,19 +228,19 @@ class ImageAnalyzer:
                 except Exception as e:
                     logger.error(f"Failed to analyze {path}: {e}")
                     return None
-        
+
         tasks = [analyze_with_semaphore(path) for path in image_paths]
         results = await asyncio.gather(*tasks)
-        
+
         # Filter out failed analyses
         return [r for r in results if r is not None]
-    
+
     async def compare_providers(
         self,
-        image_path: Union[Path, str],
-        providers: Optional[List[str]] = None,
+        image_path: Path | str,
+        providers: list[str] | None = None,
         **kwargs
-    ) -> Dict[str, ImageAnalysisResult]:
+    ) -> dict[str, ImageAnalysisResult]:
         """Compare analysis results from multiple providers.
         
         Args:
@@ -254,19 +255,19 @@ class ImageAnalyzer:
             providers = self.get_available_providers()
         else:
             providers = [p for p in providers if p in self.analyzers]
-        
+
         results = {}
-        
+
         for provider in providers:
             try:
                 result = await self.analyze(image_path, provider=provider, **kwargs)
                 results[provider] = result
             except Exception as e:
                 logger.error(f"Failed to analyze with {provider}: {e}")
-        
+
         return results
-    
-    async def estimate_batch_cost(self, image_count: int, providers: Optional[List[str]] = None, detailed: bool = False) -> Dict[str, Any]:
+
+    async def estimate_batch_cost(self, image_count: int, providers: list[str] | None = None, detailed: bool = False) -> dict[str, Any]:
         """Estimate cost for analyzing a batch of images.
         
         Args:
@@ -279,7 +280,7 @@ class ImageAnalyzer:
         """
         if not providers:
             providers = list(self.analyzers.keys())
-        
+
         cost_tracker = get_cost_tracker()
         return cost_tracker.estimate_batch_cost(
             file_count=image_count,
@@ -287,21 +288,21 @@ class ImageAnalyzer:
             operation="image_analysis",
             detailed=detailed
         )
-    
+
     def _get_cheapest_analyzer(self, detailed: bool = False):
         """Get the cheapest available analyzer."""
         if not self.analyzers:
             return None
-        
+
         # Sort by estimated cost
         analyzers_by_cost = sorted(
             self.analyzers.items(),
             key=lambda x: x[1].estimate_cost(detailed)
         )
-        
+
         return analyzers_by_cost[0][1] if analyzers_by_cost else None
-    
-    def estimate_costs(self, detailed: bool = False) -> Dict[str, float]:
+
+    def estimate_costs(self, detailed: bool = False) -> dict[str, float]:
         """Get cost estimates for all available providers.
         
         Args:
@@ -314,13 +315,13 @@ class ImageAnalyzer:
         for name, analyzer in self.analyzers.items():
             costs[name] = analyzer.estimate_cost(detailed)
         return costs
-    
+
     async def find_best_provider_for_budget(
         self,
         budget: float,
         num_images: int,
         detailed: bool = False
-    ) -> Optional[str]:
+    ) -> str | None:
         """Find the best provider that fits within budget.
         
         Args:
@@ -332,14 +333,14 @@ class ImageAnalyzer:
             Best provider name or None if budget too low
         """
         cost_per_image = budget / num_images
-        
+
         # Get providers sorted by quality (assumed order)
         provider_order = ["anthropic", "openai", "google", "deepseek", "ollama"]
-        
+
         for provider in provider_order:
             if provider in self.analyzers:
                 estimated_cost = self.analyzers[provider].estimate_cost(detailed)
                 if estimated_cost <= cost_per_image:
                     return provider
-        
+
         return None

@@ -1,18 +1,13 @@
 """Test AI-friendly error handling throughout the system."""
 
+from unittest.mock import patch
+
 import pytest
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 from alicemultiverse.interface import AliceInterface
 from alicemultiverse.interface.models import (
-    SearchRequest,
     OrganizeRequest,
-    TagRequest,
-)
-from alicemultiverse.core.exceptions import (
-    AliceMultiverseError,
-    ConfigurationError,
+    SearchRequest,
 )
 
 
@@ -36,9 +31,9 @@ paths:
         request = OrganizeRequest(
             source_path="/this/path/does/not/exist"
         )
-        
+
         response = alice.organize_media(request)
-        
+
         assert not response["success"]
         assert response["error"] is not None
         # Error should be clear for AI to explain
@@ -50,10 +45,10 @@ paths:
         request = SearchRequest(
             min_quality_stars=10  # Invalid - should be 1-5
         )
-        
+
         # This should handle gracefully
         response = alice.search_assets(request)
-        
+
         # Even with invalid input, should not crash
         assert isinstance(response["success"], bool)
         if not response["success"]:
@@ -65,9 +60,9 @@ paths:
         request = OrganizeRequest(
             understanding_enabled=True
         )
-        
+
         response = alice.organize_media(request)
-        
+
         # Should still work but maybe skip understanding
         assert isinstance(response["success"], bool)
         if response["message"]:
@@ -79,10 +74,10 @@ paths:
         # Mock API failure
         with patch.object(alice.organizer, '_process_file') as mock_process:
             mock_process.side_effect = Exception("API rate limit exceeded")
-            
+
             request = OrganizeRequest()
             response = alice.organize_media(request)
-            
+
             # Should handle API errors gracefully
             assert isinstance(response["success"], bool)
             if not response["success"] and response["error"]:
@@ -99,9 +94,9 @@ paths:
             min_quality_stars=5,
             source_types=["unknown-source"]
         )
-        
+
         response = alice.search_assets(request)
-        
+
         assert response["success"]  # Search should succeed even with no results
         assert len(response["data"]) == 0
         # Message should be helpful
@@ -113,17 +108,17 @@ paths:
         read_only_dir = tmp_path / "readonly"
         read_only_dir.mkdir()
         read_only_dir.chmod(0o444)
-        
+
         request = OrganizeRequest(
             source_path=str(tmp_path),
             # This would fail if it tries to write to read_only_dir
         )
-        
+
         response = alice.organize_media(request)
-        
+
         # Should handle permission errors gracefully
         assert isinstance(response["success"], bool)
-        
+
         # Clean up
         read_only_dir.chmod(0o755)
 
@@ -133,9 +128,9 @@ paths:
         with patch.object(alice.organizer.metadata_cache, 'get_all_metadata') as mock_get_all:
             # Simulate large cache by returning many items
             mock_get_all.return_value = {f"hash_{i}": {} for i in range(1000000)}
-            
+
             response = alice.get_stats()
-            
+
             # Should handle large data gracefully
             assert isinstance(response["success"], bool)
             if response["success"]:
@@ -146,10 +141,10 @@ paths:
         # Mock file being accessed by another process
         with patch.object(alice.organizer, '_process_file') as mock_process:
             mock_process.side_effect = OSError("Resource temporarily unavailable")
-            
+
             request = OrganizeRequest()
             response = alice.organize_media(request)
-            
+
             assert isinstance(response["success"], bool)
             if not response["success"] and response["error"]:
                 # Error should mention temporary issue
@@ -167,14 +162,14 @@ class TestErrorMessageQuality:
             "ValueError: invalid literal for int() with base 10",
             "AttributeError: 'NoneType' object has no attribute 'split'"
         ]
-        
+
         good_messages = [
             "File not found: The specified file does not exist",
             "Missing configuration: The required setting 'missing_key' is not configured",
             "Invalid number: Expected a number but received text",
             "Processing error: Unable to process empty data"
         ]
-        
+
         # Good messages should be clear
         for msg in good_messages:
             assert ":" in msg  # Has clear separation
@@ -193,7 +188,7 @@ class TestErrorMessageQuality:
                 "Use broader search terms"
             ]
         }
-        
+
         assert "suggestions" in error_response
         assert len(error_response["suggestions"]) > 0
         assert all(isinstance(s, str) for s in error_response["suggestions"])
@@ -211,7 +206,7 @@ class TestErrorMessageQuality:
                 "matches_found": 0
             }
         }
-        
+
         assert "context" in error_with_context
         assert "search_terms" in error_with_context["context"]
         assert isinstance(error_with_context["context"]["assets_checked"], int)

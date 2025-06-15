@@ -80,7 +80,7 @@ class MetadataEmbedder:
             # Ensure we have a Path object
             if not isinstance(image_path, Path):
                 image_path = Path(image_path)
-                
+
             suffix = image_path.suffix.lower()
 
             if suffix == ".png":
@@ -116,7 +116,7 @@ class MetadataEmbedder:
             # Ensure we have a Path object
             if not isinstance(image_path, Path):
                 image_path = Path(image_path)
-                
+
             suffix = image_path.suffix.lower()
 
             if suffix == ".png":
@@ -185,7 +185,7 @@ class MetadataEmbedder:
                 "version": METADATA_VERSION,
                 "timestamp": datetime.now(UTC).isoformat(),
             }
-            
+
             # Copy all top-level fields that match our schema
             for key in ["content_hash", "media_type", "metadata_version"]:
                 if key in metadata:
@@ -194,11 +194,11 @@ class MetadataEmbedder:
             # Store tags (new format)
             if "tags" in metadata and isinstance(metadata["tags"], dict):
                 alice_data["tags"] = metadata["tags"]
-            
+
             # Store understanding (new format)
             if "understanding" in metadata and isinstance(metadata["understanding"], dict):
                 alice_data["understanding"] = metadata["understanding"]
-            
+
             # Store generation info (new format)
             if "generation" in metadata and isinstance(metadata["generation"], dict):
                 alice_data["generation"] = metadata["generation"]
@@ -332,7 +332,7 @@ class MetadataEmbedder:
                 "version": METADATA_VERSION,
                 "timestamp": datetime.now(UTC).isoformat(),
             }
-            
+
             # Copy all relevant fields
             for key in ["content_hash", "media_type", "tags", "understanding", "generation"]:
                 if key in metadata:
@@ -378,7 +378,7 @@ class MetadataEmbedder:
                         alice_data = json.loads(desc)
                         if "version" in alice_data:
                             # Extract all fields from alice_data
-                            for key in ["content_hash", "media_type", "tags", 
+                            for key in ["content_hash", "media_type", "tags",
                                        "understanding", "generation"]:
                                 if key in alice_data:
                                     metadata[key] = alice_data[key]
@@ -453,7 +453,7 @@ class MetadataEmbedder:
                     "namespace": ALICE_NAMESPACE,
                     "timestamp": datetime.now(UTC).isoformat(),
                 }
-                
+
                 # Copy all relevant fields
                 for key in ["content_hash", "media_type", "tags", "understanding", "generation"]:
                     if key in metadata:
@@ -510,14 +510,14 @@ class MetadataEmbedder:
                             alice_data = json.loads(img.info["comment"])
                             if "version" in alice_data and "namespace" in alice_data:
                                 # This is our metadata
-                                for key in ["content_hash", "media_type", "tags", 
+                                for key in ["content_hash", "media_type", "tags",
                                            "understanding", "generation"]:
                                     if key in alice_data:
                                         metadata[key] = alice_data[key]
                         except json.JSONDecodeError:
                             # Not our JSON, treat as regular comment
                             metadata["comment"] = img.info["comment"]
-                    
+
                     # Other direct metadata fields
                     for key in ["prompt", "workflow", "parameters"]:
                         if key in img.info:

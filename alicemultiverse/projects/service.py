@@ -1,11 +1,12 @@
 """Project service for managing projects and budget tracking."""
 
-import uuid
-from typing import Any, Optional
+import hashlib
+from datetime import datetime
+from typing import Any
 
-
-from alicemultiverse.events import publish_event_sync
 from alicemultiverse.core.config import load_config
+from alicemultiverse.events import publish_event_sync
+
 from .file_service import FileProjectService
 
 
@@ -14,8 +15,8 @@ class ProjectService:
     
     Uses file-based storage when database is not available.
     """
-    
-    def __init__(self, db_session: Optional[Any] = None, event_bus: Optional[Any] = None, config=None):
+
+    def __init__(self, db_session: Any | None = None, event_bus: Any | None = None, config=None):
         """Initialize project service.
         
         Args:
@@ -24,26 +25,26 @@ class ProjectService:
             config: Optional configuration object
         """
         self.db = None
-        
+
         # Load config if not provided
         if not config:
             config = load_config()
-        
+
         # Get storage paths from config
         storage_paths = None
         if hasattr(config, 'storage') and hasattr(config.storage, 'project_paths'):
             storage_paths = list(config.storage.project_paths)
-        
+
         # Always use file-based service
         self._file_service = FileProjectService(storage_paths)
-    
+
     def _publish_event(self, event_type: str, **data) -> None:
         """Publish event using Redis Streams."""
         publish_event_sync(event_type, data)
-    
+
     def create_project(
-        self, 
-        name: str, 
+        self,
+        name: str,
         description: str | None = None,
         budget_total: float | None = None,
         creative_context: dict[str, Any] | None = None,
@@ -64,20 +65,21 @@ class ProjectService:
                 creative_context=creative_context,
                 settings=settings
             )
-        
+
         # Database implementation would go here
         # For now, just publish event
         self._publish_event(
             "project.created",
             source="project_service",
-            project_id=str(uuid.uuid4()),
+            # Use name-based project ID for easier identification
+            project_id=hashlib.sha256(f"{name}:{datetime.now().isoformat()}".encode()).hexdigest()[:16],
             project_name=name,
             description=description,
             initial_context=creative_context or {}
         )
-        
+
         return None
-    
+
     def get_project(self, project_id: str) -> dict | None:
         """Get project by ID.
         
@@ -88,9 +90,9 @@ class ProjectService:
         """
         if self._file_service:
             return self._file_service.get_project(project_id)
-        
+
         return None
-    
+
     def list_projects(self, status: str | None = None) -> list:
         """List all projects, optionally filtered by status.
         
@@ -101,12 +103,12 @@ class ProjectService:
         """
         if self._file_service:
             return self._file_service.list_projects(status)
-        
+
         return []
-    
+
     def update_project_context(
-        self, 
-        project_id: str, 
+        self,
+        project_id: str,
         creative_context: dict[str, Any]
     ) -> dict | None:
         """Update project creative context.
@@ -118,7 +120,7 @@ class ProjectService:
         """
         if self._file_service:
             return self._file_service.update_project_context(project_id, creative_context)
-        
+
         # Publish event even though we can't update database
         self._publish_event(
             "project.context.updated",
@@ -126,9 +128,9 @@ class ProjectService:
             project_id=project_id,
             context_update=creative_context
         )
-        
+
         return None
-    
+
     def update_project_status(
         self,
         project_id: str,
@@ -143,7 +145,7 @@ class ProjectService:
         """
         if self._file_service:
             return self._file_service.update_project_status(project_id, status)
-        
+
         # Publish event even though we can't update database
         self._publish_event(
             "project.status.changed",
@@ -152,9 +154,9 @@ class ProjectService:
             old_status="unknown",
             new_status=status
         )
-        
+
         return None
-    
+
     def record_generation(
         self,
         project_id: str,
@@ -177,7 +179,7 @@ class ProjectService:
                 result_metadata=result_metadata,
                 file_path=file_path
             )
-        
+
         # Publish event for generation
         self._publish_event(
             "generation.completed",
@@ -189,7 +191,7 @@ class ProjectService:
             result_metadata=result_metadata or {},
             file_path=file_path
         )
-        
+
         # Publish budget warning event (can't check actual budget)
         self._publish_event(
             "project.budget.warning",
@@ -197,7 +199,7 @@ class ProjectService:
             project_id=project_id,
             message="Budget tracking unavailable without database"
         )
-    
+
     def get_project_budget_status(self, project_id: str) -> dict[str, Any] | None:
         """Get project budget status.
         
@@ -208,9 +210,9 @@ class ProjectService:
         """
         if self._file_service:
             return self._file_service.get_project_budget_status(project_id)
-        
+
         return None
-    
+
     def get_project_cost_breakdown(self, project_id: str) -> dict[str, float]:
         """Get cost breakdown by provider.
         
@@ -221,9 +223,9 @@ class ProjectService:
         """
         if self._file_service:
             return self._file_service.get_project_cost_breakdown(project_id)
-        
+
         return {}
-    
+
     def find_project_from_path(self, current_path: str | None = None) -> dict | None:
         """Find project based on current directory.
         
@@ -234,11 +236,11 @@ class ProjectService:
         """
         if self._file_service:
             return self._file_service.find_project_from_path(current_path)
-        
+
         return None
-    
+
     def get_or_create_project_from_path(
-        self, 
+        self,
         path: str | None = None,
         create_if_missing: bool = True
     ) -> dict | None:
@@ -251,5 +253,5 @@ class ProjectService:
         """
         if self._file_service:
             return self._file_service.get_or_create_project_from_path(path, create_if_missing)
-        
+
         return None

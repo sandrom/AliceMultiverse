@@ -1,17 +1,16 @@
 """Unified cache implementation that consolidates all caching functionality."""
 
+import hashlib
 import json
 import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-import hashlib
 
 from ..metadata.embedder import MetadataEmbedder
 from ..metadata.extractor import MetadataExtractor
 from ..metadata.models import AssetMetadata
 from .types import AnalysisResult
-from ..database.file_cache import FileCache
 
 logger = logging.getLogger(__name__)
 
@@ -55,22 +54,22 @@ class UnifiedCache:
         self.cache_dir = source_root / ".metadata"
         if not force_reindex:
             self.cache_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # Initialize cache stats
         self.cache_hits = 0
         self.cache_misses = 0
         self.analysis_time_saved = 0.0
-        
+
         # Create wrapper object for compatibility
         self.cache = self  # Self-reference for compatibility
         self.embedder = MetadataEmbedder()
         self.extractor = MetadataExtractor()
-        
+
         # Understanding system
         self.enable_understanding = enable_understanding
         self.understanding_analyzer = None
         self.understanding_provider = understanding_provider
-        
+
         # Lazy load understanding to avoid circular imports
         if enable_understanding:
             self._init_understanding()
@@ -167,7 +166,7 @@ class UnifiedCache:
                     analysis_time += understanding_result.cost * 10  # Rough estimate: $0.01 = 0.1s
             finally:
                 loop.close()
-        
+
         # First embed in image if supported (this modifies the file)
         if media_path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
             # The embedder expects the metadata directly, not wrapped
@@ -254,9 +253,9 @@ class UnifiedCache:
             logger.warning(f"Failed to initialize understanding system: {e}")
             self.enable_understanding = False
             self.understanding_analyzer = None
-    
+
     # ===== Understanding Interface =====
-    
+
     async def analyze_with_understanding(self, media_path: Path) -> Any:
         """Run AI understanding analysis on media file.
         
@@ -268,7 +267,7 @@ class UnifiedCache:
         """
         if not self.enable_understanding or not self.understanding_analyzer:
             return None
-            
+
         try:
             result = await self.understanding_analyzer.analyze(
                 media_path,
@@ -281,10 +280,10 @@ class UnifiedCache:
         except Exception as e:
             logger.error(f"Understanding analysis failed for {media_path}: {e}")
             return None
-    
+
     def _merge_understanding_into_analysis(
-        self, 
-        analysis: AnalysisResult, 
+        self,
+        analysis: AnalysisResult,
         understanding: Any
     ) -> AnalysisResult:
         """Merge understanding results into analysis.
@@ -301,7 +300,7 @@ class UnifiedCache:
             analysis = analysis._asdict()
         else:
             analysis = dict(analysis)
-            
+
         # Add understanding data
         analysis["understanding"] = {
             "description": understanding.description,
@@ -314,10 +313,10 @@ class UnifiedCache:
             "cost": understanding.cost,
             "timestamp": datetime.now().isoformat()  # Use current time since results don't have timestamp
         }
-        
+
         # Update cache version
         analysis["version"] = self.cache_version
-        
+
         return analysis
 
     # ===== Quality Scoring Interface =====
@@ -440,7 +439,7 @@ class UnifiedCache:
             "project_id": self.project_id
         }
         return stats
-    
+
     def get_content_hash(self, file_path: Path) -> str:
         """Get content hash for a file.
         
@@ -467,7 +466,7 @@ class UnifiedCache:
         # Get cache file path
         content_hash = self.get_content_hash(media_path)
         cache_file = self.cache_dir / f"{content_hash}.json"
-        
+
         # Create cache metadata
         metadata = {
             "version": "1.0",
@@ -480,12 +479,12 @@ class UnifiedCache:
             "analysis_time": analysis_time,
             "cached_at": datetime.now().isoformat()
         }
-        
+
         # Save to cache file
         cache_file.parent.mkdir(parents=True, exist_ok=True)
         with open(cache_file, 'w') as f:
             json.dump(metadata, f, indent=2, default=str)
-    
+
     # ===== Private Methods =====
 
     def _load_metadata_index(self) -> None:
@@ -500,7 +499,7 @@ class UnifiedCache:
         for cache_file in cache_dir.rglob("*.json"):
             try:
                 # Load directly from JSON file
-                with open(cache_file, "r") as f:
+                with open(cache_file) as f:
                     metadata = json.load(f)
 
                 if metadata and "enhanced_metadata" in metadata:
@@ -520,7 +519,7 @@ def get_file_hash(file_path: Path) -> str:
     """Get SHA256 hash of a file (backward compatible)."""
     # Avoid creating a new cache instance - use direct hashing
     import hashlib
-    
+
     hasher = hashlib.sha256()
     with open(file_path, "rb") as f:
         for chunk in iter(lambda: f.read(8192), b""):

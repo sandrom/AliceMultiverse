@@ -2,19 +2,17 @@
 
 import logging
 from datetime import datetime, timedelta
-from typing import Any, Dict, Optional
+from typing import Any
 
 from mcp import Server
 
-from ...core.cost_tracker import CostTracker, get_cost_tracker
+from ...core.cost_tracker import get_cost_tracker
 from ..base import (
     ValidationError,
     create_tool_response,
     handle_errors,
-    services,
     validate_positive_int,
 )
-from ..utils.decorators import require_service, validate_params
 
 logger = logging.getLogger(__name__)
 
@@ -25,15 +23,15 @@ def register_cost_tools(server: Server) -> None:
     Args:
         server: MCP server instance
     """
-    
+
     @server.tool()
     @handle_errors
     async def estimate_cost(
         operation: str,
-        provider: Optional[str] = None,
-        model: Optional[str] = None,
+        provider: str | None = None,
+        model: str | None = None,
         count: int = 1,
-        parameters: Optional[Dict[str, Any]] = None
+        parameters: dict[str, Any] | None = None
     ) -> Any:
         """Estimate cost for an operation.
         
@@ -49,10 +47,10 @@ def register_cost_tools(server: Server) -> None:
         """
         # Validate inputs
         count = validate_positive_int(count, "count")
-        
+
         # Get cost tracker
         tracker = get_cost_tracker()
-        
+
         # Estimate based on operation type
         if operation == "analyze":
             # Image analysis cost
@@ -60,7 +58,7 @@ def register_cost_tools(server: Server) -> None:
                 # Estimate for cheapest provider
                 provider = "anthropic"  # Claude Haiku is typically cheapest
                 model = "claude-3-haiku"
-            
+
             # Base cost per image
             base_costs = {
                 "openai": 0.01,
@@ -68,16 +66,16 @@ def register_cost_tools(server: Server) -> None:
                 "google": 0.002,
                 "ollama": 0.0,  # Free local models
             }
-            
+
             cost_per_item = base_costs.get(provider, 0.01)
             total_cost = cost_per_item * count
-            
+
         elif operation == "generate":
             # Generation cost
             if not provider:
                 provider = "openai"
                 model = "dall-e-3"
-            
+
             # Rough estimates
             if provider == "openai" and model == "dall-e-3":
                 cost_per_item = 0.04  # Standard quality
@@ -85,12 +83,12 @@ def register_cost_tools(server: Server) -> None:
                     cost_per_item = 0.08
             else:
                 cost_per_item = 0.02  # Default estimate
-            
+
             total_cost = cost_per_item * count
-            
+
         else:
             raise ValidationError(f"Unknown operation: {operation}")
-        
+
         return create_tool_response(
             success=True,
             data={
@@ -103,7 +101,7 @@ def register_cost_tools(server: Server) -> None:
                 "currency": "USD"
             }
         )
-    
+
     @server.tool()
     @handle_errors
     async def get_spending_report(
@@ -123,25 +121,25 @@ def register_cost_tools(server: Server) -> None:
         days = validate_positive_int(days, "days")
         if group_by not in ["provider", "model", "operation", "date"]:
             raise ValidationError(
-                f"group_by must be one of: provider, model, operation, date"
+                "group_by must be one of: provider, model, operation, date"
             )
-        
+
         # Get cost tracker
         tracker = get_cost_tracker()
-        
+
         # Calculate date range
         end_date = datetime.now()
         start_date = end_date - timedelta(days=days)
-        
+
         # Get spending data
         total_spent = tracker.get_total_cost(start_date, end_date)
         breakdown = tracker.get_cost_breakdown(
             start_date, end_date, group_by=group_by
         )
-        
+
         # Get current budget info
         budget_info = tracker.get_budget_status()
-        
+
         # Format report
         report = {
             "period": {
@@ -159,29 +157,29 @@ def register_cost_tools(server: Server) -> None:
             },
             "currency": "USD"
         }
-        
+
         # Add warnings if approaching limits
         warnings = []
         if budget_info.get("daily_limit"):
             daily_percent = (budget_info["daily_used"] / budget_info["daily_limit"]) * 100
             if daily_percent > 80:
                 warnings.append(f"Daily spending at {daily_percent:.0f}% of limit")
-        
+
         if budget_info.get("monthly_limit"):
             monthly_percent = (budget_info["monthly_used"] / budget_info["monthly_limit"]) * 100
             if monthly_percent > 80:
                 warnings.append(f"Monthly spending at {monthly_percent:.0f}% of limit")
-        
+
         if warnings:
             report["warnings"] = warnings
-        
+
         return create_tool_response(success=True, data=report)
-    
+
     @server.tool()
     @handle_errors
     async def set_budget(
-        daily_limit: Optional[float] = None,
-        monthly_limit: Optional[float] = None
+        daily_limit: float | None = None,
+        monthly_limit: float | None = None
     ) -> Any:
         """Set spending budget limits.
         
@@ -197,22 +195,22 @@ def register_cost_tools(server: Server) -> None:
             raise ValidationError("daily_limit must be positive")
         if monthly_limit is not None and monthly_limit <= 0:
             raise ValidationError("monthly_limit must be positive")
-        
+
         if daily_limit is None and monthly_limit is None:
             raise ValidationError("At least one limit must be specified")
-        
+
         # Get cost tracker
         tracker = get_cost_tracker()
-        
+
         # Update limits
         if daily_limit is not None:
             tracker.set_daily_limit(daily_limit)
         if monthly_limit is not None:
             tracker.set_monthly_limit(monthly_limit)
-        
+
         # Get updated status
         status = tracker.get_budget_status()
-        
+
         return create_tool_response(
             success=True,
             data={

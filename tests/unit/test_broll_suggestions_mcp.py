@@ -1,16 +1,16 @@
 """Test b-roll suggestions MCP integration."""
 
+from unittest.mock import AsyncMock, Mock, patch
+
 import pytest
-from unittest.mock import Mock, AsyncMock, patch
-from pathlib import Path
 
 from alicemultiverse.interface.broll_suggestions_mcp import (
-    suggest_broll_for_timeline,
-    auto_insert_broll,
     analyze_scene_for_broll,
+    auto_insert_broll,
     find_broll_by_criteria,
     generate_broll_shot_list,
-    register_broll_tools
+    register_broll_tools,
+    suggest_broll_for_timeline,
 )
 
 
@@ -26,13 +26,13 @@ async def test_suggest_broll_for_timeline():
                 "duration": 10
             },
             {
-                "asset_path": "/path/to/main2.mp4", 
+                "asset_path": "/path/to/main2.mp4",
                 "start_time": 10,
                 "duration": 15
             }
         ]
     }
-    
+
     with patch("alicemultiverse.interface.broll_suggestions_mcp.BRollSuggestionEngine") as mock_engine_class:
         mock_engine = Mock()
         mock_suggestions = {
@@ -49,12 +49,12 @@ async def test_suggest_broll_for_timeline():
         }
         mock_engine.suggest_broll_for_timeline = AsyncMock(return_value=mock_suggestions)
         mock_engine_class.return_value = mock_engine
-        
+
         result = await suggest_broll_for_timeline(
             timeline_data=timeline_data,
             max_suggestions_per_scene=5
         )
-        
+
         assert "suggestions" in result
         assert "0" in result["suggestions"]
         assert result["clips_analyzed"] == 2
@@ -74,7 +74,7 @@ async def test_auto_insert_broll():
             }
         ]
     }
-    
+
     enhanced_timeline = {
         "duration": 30,
         "clips": [
@@ -97,17 +97,17 @@ async def test_auto_insert_broll():
         ],
         "broll_percentage": 0.067
     }
-    
+
     with patch("alicemultiverse.interface.broll_suggestions_mcp.BRollWorkflow") as mock_workflow_class:
         mock_workflow = Mock()
         mock_workflow.enhance_timeline_with_broll = AsyncMock(return_value=enhanced_timeline)
         mock_workflow_class.return_value = mock_workflow
-        
+
         result = await auto_insert_broll(
             timeline_data=timeline_data,
             max_broll_percentage=0.3
         )
-        
+
         assert "timeline" in result
         assert "statistics" in result
         assert result["statistics"]["broll_clips_added"] == 2
@@ -128,13 +128,13 @@ async def test_analyze_scene_for_broll():
         mock_engine._analyze_clip_scene = AsyncMock(return_value=mock_scene_info)
         mock_engine._assess_energy_level = Mock(return_value="medium")
         mock_engine_class.return_value = mock_engine
-        
+
         result = await analyze_scene_for_broll(
             asset_path="/path/to/scene.mp4",
             start_time=10.0,
             duration=8.0
         )
-        
+
         assert result["needs_broll"] is True
         assert result["scene_type"] == "dialogue"
         assert result["energy_level"] == "medium"
@@ -165,19 +165,19 @@ async def test_find_broll_by_criteria():
             "scene_type": "medium"
         }
     ]
-    
+
     with patch("alicemultiverse.interface.broll_suggestions_mcp.UnifiedDuckDBStorage") as mock_db_class:
         mock_db = Mock()
         mock_db.search_assets = Mock(return_value=mock_results)
         mock_db_class.return_value = mock_db
-        
+
         result = await find_broll_by_criteria(
             subject="nature",
             mood="peaceful",
             location="outdoor",
             limit=10
         )
-        
+
         assert result["count"] == 2
         assert result["criteria"]["subject"] == "nature"
         assert result["criteria"]["mood"] == "peaceful"
@@ -203,7 +203,7 @@ async def test_generate_broll_shot_list():
             }
         ]
     }
-    
+
     with patch("alicemultiverse.interface.broll_suggestions_mcp.BRollSuggestionEngine") as mock_engine_class:
         mock_engine = Mock()
         mock_suggestions = {
@@ -232,13 +232,13 @@ async def test_generate_broll_shot_list():
         }
         mock_engine.suggest_broll_for_timeline = AsyncMock(return_value=mock_suggestions)
         mock_engine_class.return_value = mock_engine
-        
+
         result = await generate_broll_shot_list(
             timeline_data=timeline_data,
             style="documentary",
             include_descriptions=True
         )
-        
+
         assert result["project_style"] == "documentary"
         assert result["timeline_duration"] == 120
         assert len(result["shots"]) == 2
@@ -252,9 +252,9 @@ def test_register_broll_tools():
     """Test tool registration function."""
     mock_server = Mock()
     mock_server.tool = Mock(return_value=lambda f: f)
-    
+
     # Should not raise any exceptions
     register_broll_tools(mock_server)
-    
+
     # Verify all tools were registered
     assert mock_server.tool.call_count == 5  # 5 b-roll tools

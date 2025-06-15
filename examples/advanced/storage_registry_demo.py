@@ -37,13 +37,13 @@ def calculate_file_hash(file_path: Path) -> str:
 def main():
     """Run the storage registry demo."""
     print("=== Storage Location Registry Demo ===\n")
-    
+
     # Create registry (in-memory for demo)
     registry = StorageRegistry()
-    
+
     # 1. Set up storage locations
     print("1. Setting up storage locations...")
-    
+
     # Hot storage for recent, high-quality files
     hot_storage = StorageLocation(
         location_id=uuid4(),
@@ -61,7 +61,7 @@ def main():
         ],
         status=LocationStatus.ACTIVE
     )
-    
+
     # Standard storage for medium-term files
     standard_storage = StorageLocation(
         location_id=uuid4(),
@@ -78,7 +78,7 @@ def main():
         ],
         status=LocationStatus.ACTIVE
     )
-    
+
     # Cloud archive for old or low-quality files
     archive_storage = StorageLocation(
         location_id=uuid4(),
@@ -99,7 +99,7 @@ def main():
             "lifecycle_rules": {"transition_days": 30}
         }
     )
-    
+
     # Backup storage (accepts everything)
     backup_storage = StorageLocation(
         location_id=uuid4(),
@@ -115,14 +115,14 @@ def main():
             "storage_class": "NEARLINE"
         }
     )
-    
+
     # Register all locations
     for location in [hot_storage, standard_storage, archive_storage, backup_storage]:
         registry.register_location(location)
         print(f"  ✓ Registered: {location.name} (priority: {location.priority})")
-    
+
     print("\n2. Simulating file processing...")
-    
+
     # Simulate different types of files
     test_files = [
         {
@@ -174,7 +174,7 @@ def main():
             }
         }
     ]
-    
+
     # Process each file
     for file_info in test_files:
         print(f"\n  Processing: {file_info['name']}")
@@ -182,15 +182,15 @@ def main():
         print(f"    Quality: {file_info['metadata']['quality_stars']} stars")
         print(f"    Type: {file_info['metadata']['file_type']}")
         print(f"    Size: {file_info['metadata']['file_size'] / 1_000_000:.1f} MB")
-        
+
         # Determine best location
         location = registry.get_location_for_file(
             file_info["hash"],
             file_info["metadata"]
         )
-        
+
         print(f"    → Best location: {location.name}")
-        
+
         # Track the file
         file_path = f"{location.path}/{file_info['name']}"
         registry.track_file(
@@ -200,11 +200,11 @@ def main():
             file_size=file_info["metadata"]["file_size"],
             metadata_embedded=True
         )
-        
+
         print(f"    ✓ Tracked at: {file_path}")
-    
+
     print("\n3. Querying file locations...")
-    
+
     # Query specific files
     for file_info in test_files[:2]:  # Just first two
         print(f"\n  Locations for {file_info['name']}:")
@@ -213,13 +213,13 @@ def main():
             print(f"    - {loc['location_name']}: {loc['file_path']}")
             print(f"      Last verified: {loc['last_verified']}")
             print(f"      Metadata embedded: {loc['metadata_embedded']}")
-    
+
     print("\n4. Simulating file duplication for backup...")
-    
+
     # Duplicate hero shot to backup
     hero_file = test_files[0]
     print(f"\n  Backing up {hero_file['name']} to GCS...")
-    
+
     registry.track_file(
         content_hash=hero_file["hash"],
         location_id=backup_storage.location_id,
@@ -227,48 +227,48 @@ def main():
         file_size=hero_file["metadata"]["file_size"],
         metadata_embedded=True
     )
-    
+
     # Now check locations again
     locations = registry.get_file_locations(hero_file["hash"])
     print(f"  File now exists in {len(locations)} locations:")
     for loc in locations:
         print(f"    - {loc['location_name']}")
-    
+
     print("\n5. Storage statistics...")
-    
+
     stats = registry.get_statistics()
     print(f"\n  Total storage locations: {stats['total_locations']}")
-    print(f"  Locations by type:")
+    print("  Locations by type:")
     for storage_type, count in stats['by_type'].items():
         print(f"    - {storage_type}: {count}")
-    
+
     print(f"\n  Total unique files: {stats['total_unique_files']}")
     print(f"  Total file instances: {stats['total_file_instances']}")
     print(f"  Files with multiple copies: {stats['files_with_multiple_copies']}")
-    
-    print(f"\n  Storage usage by location:")
+
+    print("\n  Storage usage by location:")
     for loc_stat in stats['by_location']:
         size_mb = loc_stat['total_size_bytes'] / 1_000_000
         print(f"    - {loc_stat['name']}: {loc_stat['file_count']} files, {size_mb:.1f} MB")
-    
+
     print("\n6. Simulating location scan...")
-    
+
     # Scan hot storage
     print(f"\n  Scanning {hot_storage.name}...")
     scan_results = registry.scan_location(hot_storage.location_id)
     print(f"  Scan completed at: {scan_results['scan_time']}")
     print(f"  Files discovered: {scan_results['files_discovered']} (placeholder)")
-    
+
     # Check that last_scan was updated
     updated_location = registry.get_location_by_id(hot_storage.location_id)
     print(f"  Location last_scan updated: {updated_location.last_scan is not None}")
-    
+
     print("\n7. Testing sync operations...")
-    
+
     # Mark old file for sync from standard to archive
     old_file = test_files[2]  # old_archive.jpg
     print(f"\n  Marking {old_file['name']} for archive sync...")
-    
+
     # First track it in standard storage
     registry.track_file(
         content_hash=old_file["hash"],
@@ -276,7 +276,7 @@ def main():
         file_path=f"{standard_storage.path}/{old_file['name']}",
         file_size=old_file["metadata"]["file_size"]
     )
-    
+
     # Mark for sync to archive
     registry.mark_file_for_sync(
         content_hash=old_file["hash"],
@@ -284,15 +284,15 @@ def main():
         target_location_id=archive_storage.location_id,
         action="upload"
     )
-    
+
     # Check pending syncs
     pending = registry.get_pending_syncs()
     print(f"  Pending sync operations: {len(pending)}")
     for sync in pending:
         print(f"    - {sync['content_hash'][:12]}... from {sync['location_name']}: {sync['sync_status']}")
-    
+
     print("\n8. Advanced rule examples...")
-    
+
     # Create a specialized location for AI-generated content
     ai_storage = StorageLocation(
         location_id=uuid4(),
@@ -310,9 +310,9 @@ def main():
         ],
         status=LocationStatus.ACTIVE
     )
-    
+
     registry.register_location(ai_storage)
-    
+
     # Test with AI-generated file
     ai_file = {
         "name": "sd_artwork.png",
@@ -325,10 +325,10 @@ def main():
             "tags": ["ai-generated", "stable-diffusion", "artwork"]
         }
     }
-    
+
     location = registry.get_location_for_file(ai_file["hash"], ai_file["metadata"])
     print(f"\n  AI-generated file would go to: {location.name}")
-    
+
     # Close registry
     registry.close()
     print("\n✓ Demo completed!")

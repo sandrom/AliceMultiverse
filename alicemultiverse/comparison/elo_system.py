@@ -1,18 +1,18 @@
 """Elo rating system implementation for model comparison."""
 
 import random
-import duckdb
+import uuid
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
-import uuid
 
-from .models import Asset, Comparison, ModelRating, ComparisonStrength
+import duckdb
+
+from .models import Asset, Comparison, ComparisonStrength, ModelRating
 
 
 class EloRating:
     """Implements the Elo rating algorithm."""
-    
+
     # K-factor determines how much ratings change per comparison
     # Higher K = more volatile ratings
     K_FACTORS = {
@@ -21,19 +21,19 @@ class EloRating:
         ComparisonStrength.STRONG: 64,
         ComparisonStrength.DECISIVE: 128,
     }
-    
+
     @staticmethod
     def expected_score(rating_a: float, rating_b: float) -> float:
         """Calculate expected score for player A against player B."""
         return 1 / (1 + 10 ** ((rating_b - rating_a) / 400))
-    
+
     @staticmethod
     def update_ratings(
         rating_a: float,
         rating_b: float,
         winner: str,
         strength: ComparisonStrength = ComparisonStrength.CLEAR
-    ) -> Tuple[float, float]:
+    ) -> tuple[float, float]:
         """
         Update Elo ratings based on comparison result.
         
@@ -48,7 +48,7 @@ class EloRating:
         """
         expected_a = EloRating.expected_score(rating_a, rating_b)
         expected_b = 1 - expected_a
-        
+
         # Actual scores
         if winner == "a":
             actual_a = 1.0
@@ -59,28 +59,28 @@ class EloRating:
         else:  # tie
             actual_a = 0.5
             actual_b = 0.5
-        
+
         # K-factor based on strength
         k = EloRating.K_FACTORS[strength]
-        
+
         # Update ratings
         new_rating_a = rating_a + k * (actual_a - expected_a)
         new_rating_b = rating_b + k * (actual_b - expected_b)
-        
+
         return new_rating_a, new_rating_b
 
 
 class ComparisonManager:
     """Manages comparisons and ratings using DuckDB."""
-    
+
     DEFAULT_RATING = 1500.0
-    
-    def __init__(self, db_path: Optional[Path] = None):
+
+    def __init__(self, db_path: Path | None = None):
         """Initialize the comparison manager."""
         self.db_path = db_path or Path.home() / ".alice" / "comparisons.db"
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
         self._init_db()
-    
+
     def _init_db(self):
         """Initialize database schema."""
         with duckdb.connect(str(self.db_path)) as conn:
@@ -99,7 +99,7 @@ class ComparisonManager:
                     timestamp TIMESTAMP NOT NULL
                 )
             """)
-            
+
             # Model ratings table
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS model_ratings (
@@ -111,7 +111,7 @@ class ComparisonManager:
                     tie_count INTEGER NOT NULL DEFAULT 0
                 )
             """)
-            
+
             # Assets table for tracking available assets
             conn.execute("""
                 CREATE TABLE IF NOT EXISTS assets (
@@ -121,7 +121,7 @@ class ComparisonManager:
                     metadata JSON
                 )
             """)
-    
+
     def add_asset(self, asset: Asset) -> None:
         """Add an asset to the pool."""
         with duckdb.connect(str(self.db_path)) as conn:
@@ -129,24 +129,24 @@ class ComparisonManager:
                 INSERT OR REPLACE INTO assets (id, path, model, metadata)
                 VALUES (?, ?, ?, ?)
             """, [asset.id, asset.path, asset.model, asset.metadata])
-            
+
             # Ensure model has a rating entry
             conn.execute("""
                 INSERT OR IGNORE INTO model_ratings (model)
                 VALUES (?)
             """, [asset.model])
-    
-    def get_next_comparison(self) -> Optional[Comparison]:
+
+    def get_next_comparison(self) -> Comparison | None:
         """Get the next pair of assets to compare."""
         with duckdb.connect(str(self.db_path)) as conn:
             # Get all assets
             assets_result = conn.execute("""
                 SELECT id, path, model, metadata FROM assets
             """).fetchall()
-            
+
             if len(assets_result) < 2:
                 return None
-            
+
             # Convert to Asset objects
             assets = []
             for row in assets_result:
@@ -156,28 +156,28 @@ class ComparisonManager:
                     model=row[2],
                     metadata=row[3]
                 ))
-            
+
             # Prioritize comparisons between models with similar ratings
             # but also ensure variety
             ratings = self.get_ratings()
             model_ratings = {r.model: r.rating for r in ratings}
-            
+
             # Group assets by model
             model_assets = {}
             for asset in assets:
                 if asset.model not in model_assets:
                     model_assets[asset.model] = []
                 model_assets[asset.model].append(asset)
-            
+
             # Select two different models
             models = list(model_assets.keys())
             if len(models) < 2:
                 return None
-            
+
             # Weight selection by rating proximity (closer ratings = higher probability)
             model_a = random.choice(models)
             rating_a = model_ratings.get(model_a, self.DEFAULT_RATING)
-            
+
             # Calculate weights based on rating difference
             weights = []
             other_models = [m for m in models if m != model_a]
@@ -187,30 +187,30 @@ class ComparisonManager:
                 diff = abs(rating_a - rating_b)
                 weight = 1 / (1 + diff / 100)  # Scale difference
                 weights.append(weight)
-            
+
             # Normalize weights
             total_weight = sum(weights)
             weights = [w / total_weight for w in weights]
-            
+
             # Select second model
             model_b = random.choices(other_models, weights=weights)[0]
-            
+
             # Select random assets from each model
             asset_a = random.choice(model_assets[model_a])
             asset_b = random.choice(model_assets[model_b])
-            
+
             return Comparison(
                 id=str(uuid.uuid4()),
                 asset_a=asset_a,
                 asset_b=asset_b,
                 timestamp=datetime.now()
             )
-    
+
     def record_comparison(self, comparison: Comparison) -> None:
         """Record a comparison result and update ratings."""
         if not comparison.winner or not comparison.strength:
             raise ValueError("Comparison must have winner and strength")
-        
+
         with duckdb.connect(str(self.db_path)) as conn:
             # Record the comparison
             conn.execute("""
@@ -231,26 +231,26 @@ class ComparisonManager:
                 comparison.strength.value,
                 comparison.timestamp or datetime.now()
             ])
-            
+
             # Get current ratings
             model_a = comparison.asset_a.model
             model_b = comparison.asset_b.model
-            
+
             rating_a_result = conn.execute(
                 "SELECT rating FROM model_ratings WHERE model = ?", [model_a]
             ).fetchone()
             rating_a = rating_a_result[0] if rating_a_result else self.DEFAULT_RATING
-            
+
             rating_b_result = conn.execute(
                 "SELECT rating FROM model_ratings WHERE model = ?", [model_b]
             ).fetchone()
             rating_b = rating_b_result[0] if rating_b_result else self.DEFAULT_RATING
-            
+
             # Update ratings
             new_rating_a, new_rating_b = EloRating.update_ratings(
                 rating_a, rating_b, comparison.winner, comparison.strength
             )
-            
+
             # Update model A stats
             if comparison.winner == "a":
                 conn.execute("""
@@ -279,7 +279,7 @@ class ComparisonManager:
                         comparison_count = comparison_count + 1,
                         tie_count = tie_count + 1
                 """, [model_a, new_rating_a, new_rating_a])
-            
+
             # Update model B stats
             if comparison.winner == "b":
                 conn.execute("""
@@ -308,8 +308,8 @@ class ComparisonManager:
                         comparison_count = comparison_count + 1,
                         tie_count = tie_count + 1
                 """, [model_b, new_rating_b, new_rating_b])
-    
-    def get_ratings(self) -> List[ModelRating]:
+
+    def get_ratings(self) -> list[ModelRating]:
         """Get current ratings for all models."""
         with duckdb.connect(str(self.db_path)) as conn:
             result = conn.execute("""
@@ -317,7 +317,7 @@ class ComparisonManager:
                 FROM model_ratings
                 ORDER BY rating DESC
             """).fetchall()
-            
+
             return [
                 ModelRating(
                     model=row[0],
@@ -329,8 +329,8 @@ class ComparisonManager:
                 )
                 for row in result
             ]
-    
-    def get_comparison_history(self, limit: int = 100) -> List[Dict]:
+
+    def get_comparison_history(self, limit: int = 100) -> list[dict]:
         """Get recent comparison history."""
         with duckdb.connect(str(self.db_path)) as conn:
             result = conn.execute("""
@@ -341,7 +341,7 @@ class ComparisonManager:
                 ORDER BY timestamp DESC
                 LIMIT ?
             """, [limit]).fetchall()
-            
+
             return [
                 {
                     "id": row[0],

@@ -3,7 +3,6 @@
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-
 from typing import Any, Literal, TypedDict
 
 
@@ -118,26 +117,26 @@ class PresentableImage:
     path: str
     thumbnail_url: str  # Base64 or file:// URL
     display_url: str    # Full resolution for detail view
-    
+
     # Key metadata for display
     tags: list[str]
     source: str  # midjourney, dalle, etc.
     created_date: datetime
-    
+
     # Understanding data
     description: str  # AI-generated description
     mood: list[str]
     style: list[str]
     colors: list[str]
-    
+
     # Selection history
     previously_selected: bool = False
     selection_reason: str | None = None
-    
+
     # Technical info
     dimensions: tuple[int, int] = (0, 0)
     file_size: int = 0
-    
+
     def to_display_dict(self) -> dict[str, Any]:
         """Convert to dictionary for chat display"""
         return {
@@ -165,7 +164,7 @@ class ImageSearchResult:
     has_more: bool
     query_interpretation: str  # How we understood the query
     suggestions: list[str]  # Suggested refinements
-    
+
     def to_chat_response(self) -> dict[str, Any]:
         """Format for chat UI display"""
         return {
@@ -186,7 +185,7 @@ class SelectionFeedback:
     reason: str | None = None
     session_id: str | None = None
     timestamp: datetime | None = None
-    
+
     def __post_init__(self):
         if self.timestamp is None:
             self.timestamp = datetime.now()

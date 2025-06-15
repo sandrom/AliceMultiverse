@@ -1,16 +1,16 @@
 """Tests for deduplication MCP tools."""
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
 from pathlib import Path
-import json
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from alicemultiverse.interface.deduplication_mcp import (
-    find_duplicates_advanced,
-    remove_duplicates,
     build_similarity_index,
+    find_duplicates_advanced,
     find_similar_images,
-    get_deduplication_report
+    get_deduplication_report,
+    remove_duplicates,
 )
 
 
@@ -23,18 +23,18 @@ async def test_find_duplicates_advanced_exact_only():
             {"path": "/path/to/dup2.jpg", "size": 1024000, "similarity": 1.0}
         ]
     }
-    
+
     with patch("alicemultiverse.interface.deduplication_mcp.DuplicateFinder") as mock_finder_class:
         mock_finder = Mock()
         mock_finder_class.return_value = mock_finder
         mock_finder.find_exact_duplicates = AsyncMock(return_value=mock_duplicates)
-        
+
         result = await find_duplicates_advanced(
             paths=["/test/path"],
             exact_only=True,
             limit=10
         )
-        
+
         assert result["success"] is True
         assert len(result["data"]["duplicate_groups"]) == 1
         assert result["data"]["summary"]["total_duplicates"] == 2
@@ -50,22 +50,22 @@ async def test_find_duplicates_advanced_perceptual():
             {"path": "/path/to/similar2.jpg", "size": 1048576, "similarity": 0.88}
         ]
     }
-    
+
     with patch("alicemultiverse.interface.deduplication_mcp.DuplicateFinder") as mock_finder_class:
         mock_finder = Mock()
         mock_finder_class.return_value = mock_finder
         mock_finder.find_similar_images = AsyncMock(return_value=mock_duplicates)
-        
+
         with patch("pathlib.Path.stat") as mock_stat:
             mock_stat.return_value = Mock(st_size=1024000)
-            
+
             result = await find_duplicates_advanced(
                 paths=["/test/path"],
                 exact_only=False,
                 similarity_threshold=0.85,
                 limit=10
             )
-        
+
         assert result["success"] is True
         assert result["data"]["summary"]["search_type"] == "perceptual"
         assert result["data"]["summary"]["similarity_threshold"] == 0.85
@@ -85,20 +85,20 @@ async def test_remove_duplicates_dry_run():
             ]
         }
     ]
-    
+
     with patch("alicemultiverse.interface.deduplication_mcp.DuplicateFinder") as mock_finder_class:
         mock_finder = Mock()
         mock_finder_class.return_value = mock_finder
         mock_finder.remove_duplicates = AsyncMock(
             return_value=(["/path/to/dup1.jpg", "/path/to/dup2.jpg"], 2048000)
         )
-        
+
         result = await remove_duplicates(
             duplicate_groups=duplicate_groups,
             strategy="keep_organized",
             dry_run=True
         )
-        
+
         assert result["success"] is True
         assert "Would remove" in result["message"]
         assert result["data"]["dry_run"] is True
@@ -115,7 +115,7 @@ async def test_remove_duplicates_with_hardlinks():
         mock_finder.remove_duplicates = AsyncMock(
             return_value=([], 0)  # No actual removal with hardlinks
         )
-        
+
         # Find duplicates first
         with patch("alicemultiverse.interface.deduplication_mcp.find_duplicates_advanced") as mock_find:
             mock_find.return_value = {
@@ -129,13 +129,13 @@ async def test_remove_duplicates_with_hardlinks():
                     ]
                 }
             }
-            
+
             result = await remove_duplicates(
                 strategy="keep_largest",
                 use_hardlinks=True,
                 dry_run=False
             )
-        
+
         assert result["success"] is True
         assert result["data"]["strategy"] == "keep_largest"
         mock_finder.remove_duplicates.assert_called_once()
@@ -151,20 +151,20 @@ async def test_build_similarity_index():
         mock_index.index_path = Path("/test/index.faiss")
         mock_index.index = Mock(ntotal=100)
         mock_index.add_image = AsyncMock()
-        
+
         with patch("pathlib.Path.rglob") as mock_rglob:
             mock_rglob.return_value = [
                 Path("/test/img1.jpg"),
                 Path("/test/img2.jpg"),
                 Path("/test/img3.png")
             ]
-            
+
             result = await build_similarity_index(
                 paths=["/test/path"],
                 index_type="flat",
                 force_rebuild=False
             )
-        
+
         assert result["success"] is True
         assert result["data"]["index_type"] == "flat"
         assert result["data"]["total_files"] == 3
@@ -181,12 +181,12 @@ async def test_build_similarity_index_exists():
         mock_index_class.return_value = mock_index
         mock_index.index_exists.return_value = True
         mock_index.index_path = Path("/test/index.faiss")
-        
+
         result = await build_similarity_index(
             paths=["/test/path"],
             force_rebuild=False
         )
-        
+
         assert result["success"] is True
         assert result["data"]["status"] == "exists"
         assert "force_rebuild=True" in result["data"]["recommendation"]
@@ -200,23 +200,23 @@ async def test_find_similar_images_with_index():
         {"path": Path("/test/similar2.jpg"), "similarity": 0.89, "distance": 0.11},
         {"path": Path("/test/similar3.jpg"), "similarity": 0.75, "distance": 0.25}
     ]
-    
+
     with patch("alicemultiverse.interface.deduplication_mcp.SimilarityIndex") as mock_index_class:
         mock_index = Mock()
         mock_index_class.return_value = mock_index
         mock_index.index_exists.return_value = True
         mock_index.find_similar = AsyncMock(return_value=similar_results)
-        
+
         with patch("pathlib.Path.exists") as mock_exists:
             mock_exists.return_value = True
-            
+
             result = await find_similar_images(
                 image_path="/test/query.jpg",
                 count=10,
                 similarity_threshold=0.8,
                 use_index=True
             )
-        
+
         assert result["success"] is True
         assert len(result["data"]["similar_images"]) == 2  # Only those above threshold
         assert result["data"]["similar_images"][0]["similarity"] == 0.95
@@ -230,30 +230,30 @@ async def test_find_similar_images_direct_search():
         mock_index = Mock()
         mock_index_class.return_value = mock_index
         mock_index.index_exists.return_value = False
-        
+
         with patch("alicemultiverse.interface.deduplication_mcp.PerceptualHasher") as mock_hasher_class:
             mock_hasher = Mock()
             mock_hasher_class.return_value = mock_hasher
             mock_hasher.compute_all_hashes = AsyncMock()
             mock_hasher.compute_similarity = AsyncMock(side_effect=[0.92, 0.78, 0.85])
-            
+
             with patch("pathlib.Path.exists") as mock_exists:
                 mock_exists.return_value = True
-                
+
                 with patch("pathlib.Path.rglob") as mock_rglob:
                     mock_rglob.return_value = [
                         Path("/test/img1.jpg"),
                         Path("/test/img2.jpg"),
                         Path("/test/img3.jpg")
                     ]
-                    
+
                     result = await find_similar_images(
                         image_path="/test/query.jpg",
                         count=2,
                         similarity_threshold=0.8,
                         use_index=False
                     )
-        
+
         assert result["success"] is True
         assert len(result["data"]["similar_images"]) == 2
         assert result["data"]["similar_images"][0]["similarity"] == 0.92
@@ -273,7 +273,7 @@ async def test_get_deduplication_report():
             "duplicate_groups": [{"master": "/test/exact.jpg", "wasted_space": 1024000}]
         }
     }
-    
+
     similar_result = {
         "data": {
             "summary": {
@@ -291,18 +291,18 @@ async def test_get_deduplication_report():
             ]
         }
     }
-    
+
     with patch("alicemultiverse.interface.deduplication_mcp.find_duplicates_advanced") as mock_find:
         mock_find.side_effect = [
             {"success": True, **exact_result},
             {"success": True, **similar_result}
         ]
-        
+
         result = await get_deduplication_report(
             paths=["/test/path"],
             include_recommendations=True
         )
-        
+
         assert result["success"] is True
         assert result["data"]["exact_duplicates"]["total_groups"] == 5
         assert result["data"]["similar_images"]["total_groups"] == 3
@@ -325,13 +325,13 @@ async def test_get_deduplication_report_with_export():
                 "duplicate_groups": []
             }
         }
-        
+
         with patch("builtins.open", create=True) as mock_open:
             with patch("pathlib.Path.mkdir") as mock_mkdir:
                 result = await get_deduplication_report(
                     export_path="/test/report.json"
                 )
-                
+
                 assert result["success"] is True
                 assert result["data"]["export_path"] == "/test/report.json"
                 mock_mkdir.assert_called_once()
@@ -343,8 +343,8 @@ async def test_error_handling():
     """Test error handling in deduplication tools."""
     with patch("alicemultiverse.interface.deduplication_mcp.DuplicateFinder") as mock_finder_class:
         mock_finder_class.side_effect = Exception("Test error")
-        
+
         result = await find_duplicates_advanced()
-        
+
         assert result["success"] is False
         assert "Test error" in result["error"]

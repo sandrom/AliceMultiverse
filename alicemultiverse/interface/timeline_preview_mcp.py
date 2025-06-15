@@ -4,29 +4,29 @@ import asyncio
 import logging
 import webbrowser
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from ..workflows.video_export import Timeline, TimelineClip
-from .timeline_preview import TimelinePreviewServer, PreviewSession
+from .timeline_preview import TimelinePreviewServer
 
 logger = logging.getLogger(__name__)
 
 # Global server instance
-_preview_server: Optional[TimelinePreviewServer] = None
-_server_task: Optional[asyncio.Task] = None
+_preview_server: TimelinePreviewServer | None = None
+_server_task: asyncio.Task | None = None
 
 
 async def start_preview_server(port: int = 8001) -> bool:
     """Start the timeline preview server if not already running."""
     global _preview_server, _server_task
-    
+
     if _preview_server is not None:
         logger.info("Preview server already running")
         return True
-    
+
     try:
         _preview_server = TimelinePreviewServer()
-        
+
         # Start server in background
         import uvicorn
         config = uvicorn.Config(
@@ -36,16 +36,16 @@ async def start_preview_server(port: int = 8001) -> bool:
             log_level="info"
         )
         server = uvicorn.Server(config)
-        
+
         # Run server in background task
         _server_task = asyncio.create_task(server.serve())
-        
+
         # Give server time to start
         await asyncio.sleep(1)
-        
+
         logger.info(f"Timeline preview server started on port {port}")
         return True
-        
+
     except Exception as e:
         logger.error(f"Failed to start preview server: {e}")
         _preview_server = None
@@ -54,10 +54,10 @@ async def start_preview_server(port: int = 8001) -> bool:
 
 
 async def preview_timeline(
-    timeline_data: Dict[str, Any],
+    timeline_data: dict[str, Any],
     auto_open: bool = True,
     port: int = 8001
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Open a timeline in the web preview interface.
     
@@ -75,7 +75,7 @@ async def preview_timeline(
             "success": False,
             "error": "Failed to start preview server"
         }
-    
+
     try:
         # Create preview session
         import httpx
@@ -85,17 +85,17 @@ async def preview_timeline(
                 json=timeline_data,
                 timeout=10.0
             )
-            
+
             if response.status_code == 200:
                 result = response.json()
                 session_id = result["session_id"]
                 preview_url = f"http://127.0.0.1:{port}/?session={session_id}"
-                
+
                 # Open browser if requested
                 if auto_open:
                     webbrowser.open(preview_url)
                     logger.info(f"Opened preview in browser: {preview_url}")
-                
+
                 return {
                     "success": True,
                     "session_id": session_id,
@@ -107,7 +107,7 @@ async def preview_timeline(
                     "success": False,
                     "error": f"Failed to create session: {response.text}"
                 }
-                
+
     except Exception as e:
         logger.error(f"Error creating preview session: {e}")
         return {
@@ -119,9 +119,9 @@ async def preview_timeline(
 async def update_preview_timeline(
     session_id: str,
     operation: str,
-    clips: List[Dict[str, Any]],
+    clips: list[dict[str, Any]],
     port: int = 8001
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Update a timeline in the preview interface.
     
@@ -146,7 +146,7 @@ async def update_preview_timeline(
                 },
                 timeout=10.0
             )
-            
+
             if response.status_code == 200:
                 return response.json()
             else:
@@ -154,7 +154,7 @@ async def update_preview_timeline(
                     "success": False,
                     "error": f"Failed to update timeline: {response.text}"
                 }
-                
+
     except Exception as e:
         logger.error(f"Error updating timeline: {e}")
         return {
@@ -166,9 +166,9 @@ async def update_preview_timeline(
 async def export_preview_timeline(
     session_id: str,
     format: str = "json",
-    output_path: Optional[Path] = None,
+    output_path: Path | None = None,
     port: int = 8001
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Export a timeline from the preview interface.
     
@@ -189,15 +189,15 @@ async def export_preview_timeline(
                 params={"format": format},
                 timeout=10.0
             )
-            
+
             if response.status_code == 200:
                 result = response.json()
-                
+
                 # Save to file if path provided
                 if output_path:
                     output_path = Path(output_path)
                     output_path.parent.mkdir(parents=True, exist_ok=True)
-                    
+
                     if format == "json":
                         import json
                         with open(output_path, 'w') as f:
@@ -206,9 +206,9 @@ async def export_preview_timeline(
                         # For EDL/XML, save the content string
                         with open(output_path, 'w') as f:
                             f.write(result.get("content", ""))
-                    
+
                     logger.info(f"Exported timeline to {output_path}")
-                    
+
                     return {
                         "success": True,
                         "format": format,
@@ -227,7 +227,7 @@ async def export_preview_timeline(
                     "success": False,
                     "error": f"Failed to export timeline: {response.text}"
                 }
-                
+
     except Exception as e:
         logger.error(f"Error exporting timeline: {e}")
         return {
@@ -236,7 +236,7 @@ async def export_preview_timeline(
         }
 
 
-async def get_preview_status(port: int = 8001) -> Dict[str, Any]:
+async def get_preview_status(port: int = 8001) -> dict[str, Any]:
     """
     Check if preview server is running and get status.
     
@@ -247,13 +247,13 @@ async def get_preview_status(port: int = 8001) -> Dict[str, Any]:
         Server status information
     """
     global _preview_server
-    
+
     if _preview_server is None:
         return {
             "running": False,
             "message": "Preview server not started"
         }
-    
+
     try:
         import httpx
         async with httpx.AsyncClient() as client:
@@ -261,7 +261,7 @@ async def get_preview_status(port: int = 8001) -> Dict[str, Any]:
                 f"http://127.0.0.1:{port}/",
                 timeout=2.0
             )
-            
+
             if response.status_code == 200:
                 return {
                     "running": True,
@@ -275,18 +275,18 @@ async def get_preview_status(port: int = 8001) -> Dict[str, Any]:
                     "running": False,
                     "message": "Server not responding properly"
                 }
-                
+
     except Exception as e:
         return {
             "running": False,
-            "message": f"Cannot connect to server: {str(e)}"
+            "message": f"Cannot connect to server: {e!s}"
         }
 
 
 async def stop_preview_server() -> bool:
     """Stop the timeline preview server."""
     global _preview_server, _server_task
-    
+
     if _server_task:
         _server_task.cancel()
         try:
@@ -294,7 +294,7 @@ async def stop_preview_server() -> bool:
         except asyncio.CancelledError:
             pass
         _server_task = None
-    
+
     _preview_server = None
     logger.info("Timeline preview server stopped")
     return True
@@ -323,7 +323,7 @@ async def create_test_timeline() -> Timeline:
             metadata={"title": "Clip 3"}
         ),
     ]
-    
+
     return Timeline(
         name="Test Timeline",
         duration=7.5,
@@ -359,11 +359,11 @@ if __name__ == "__main__":
             ],
             "markers": timeline.markers
         }
-        
+
         # Preview timeline
         result = await preview_timeline(timeline_dict)
         print(f"Preview result: {result}")
-        
+
         # Keep server running
         if result["success"]:
             print(f"Preview server running at: {result['preview_url']}")
@@ -372,5 +372,5 @@ if __name__ == "__main__":
                 await asyncio.Event().wait()
             except KeyboardInterrupt:
                 await stop_preview_server()
-    
+
     asyncio.run(test())

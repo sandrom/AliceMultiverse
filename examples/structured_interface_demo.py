@@ -1,15 +1,14 @@
 """Demo of the Alice Structured Interface without requiring actual media files."""
 
 import logging
+
 from alicemultiverse.interface import (
-    AliceStructuredInterface,
-    SearchRequest,
-    SearchFilters,
-    MediaType,
-    SortField,
     DateRange,
+    MediaType,
+    SearchFilters,
+    SearchRequest,
+    SortField,
     TagUpdateRequest,
-    AssetRole,
 )
 
 # Setup logging
@@ -22,12 +21,12 @@ def main():
     logger.info("Alice Structured Interface Demo")
     logger.info("==============================")
     logger.info("")
-    
+
     # Note: In a real scenario, you'd have the interface connected to actual media
     logger.info("This demo shows how to use the structured API.")
     logger.info("All queries use typed parameters - no natural language!")
     logger.info("")
-    
+
     # Example 1: Basic search by media type and tags
     logger.info("1. Search for cyberpunk portraits:")
     search_request = SearchRequest(
@@ -42,7 +41,7 @@ def main():
     )
     logger.info(f"   Request: {search_request}")
     logger.info("")
-    
+
     # Example 2: Complex multi-filter search
     logger.info("2. Complex search with multiple filters:")
     complex_request = SearchRequest(
@@ -63,7 +62,7 @@ def main():
     )
     logger.info(f"   Request: {complex_request}")
     logger.info("")
-    
+
     # Example 3: Search by file attributes
     logger.info("3. Search for specific files:")
     file_search = SearchRequest(
@@ -76,24 +75,24 @@ def main():
     )
     logger.info(f"   Request: {file_search}")
     logger.info("")
-    
+
     # Example 4: Tag operations
     logger.info("4. Tag update operations:")
-    
+
     # Add tags
     add_tags_request = TagUpdateRequest(
         asset_ids=["asset_001", "asset_002"],
         add_tags=["approved", "hero-shot", "campaign-2024"]
     )
     logger.info(f"   Add tags: {add_tags_request}")
-    
+
     # Remove tags
     remove_tags_request = TagUpdateRequest(
         asset_ids=["asset_003"],
         remove_tags=["wip", "draft"]
     )
     logger.info(f"   Remove tags: {remove_tags_request}")
-    
+
     # Replace all tags
     set_tags_request = TagUpdateRequest(
         asset_ids=["asset_004"],
@@ -101,7 +100,7 @@ def main():
     )
     logger.info(f"   Set tags: {set_tags_request}")
     logger.info("")
-    
+
     # Example 5: Future tag:value pairs (not yet implemented)
     logger.info("5. Future: Tag:value pair searches")
     logger.info("   Soon you'll be able to search like this:")
@@ -114,7 +113,7 @@ def main():
     logger.info("       }")
     logger.info("   }")
     logger.info("")
-    
+
     # Key benefits
     logger.info("Key Benefits of Structured API:")
     logger.info("- Type safety with enums and typed dictionaries")
@@ -123,7 +122,7 @@ def main():
     logger.info("- Predictable, testable behavior")
     logger.info("- Natural language stays at AI layer")
     logger.info("")
-    
+
     # API comparison
     logger.info("API Comparison:")
     logger.info("")
@@ -140,7 +139,7 @@ def main():
     logger.info('       )')
     logger.info('   ))')
     logger.info("")
-    
+
     # Integration note
     logger.info("Integration with AI Assistants:")
     logger.info("- Claude/ChatGPT parse user's natural language")
@@ -148,7 +147,7 @@ def main():
     logger.info("- Alice processes structured queries efficiently")
     logger.info("- Results returned in consistent format")
     logger.info("")
-    
+
     logger.info("Demo complete! 🎉")
 
 

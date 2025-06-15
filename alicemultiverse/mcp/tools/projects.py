@@ -1,9 +1,7 @@
 """Project management MCP tools."""
 
 import logging
-from datetime import datetime
-from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from mcp import Server
 
@@ -26,19 +24,19 @@ def register_project_tools(server: Server) -> None:
     Args:
         server: MCP server instance
     """
-    
+
     # Register project service loader
     services.register("projects", lambda: ProjectService())
-    
+
     @server.tool()
     @handle_errors
     @require_service("projects")
     async def create_project(
         name: str,
-        description: Optional[str] = None,
-        path: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None
+        description: str | None = None,
+        path: str | None = None,
+        tags: list[str] | None = None,
+        metadata: dict[str, Any] | None = None
     ) -> Any:
         """Create a new project.
         
@@ -55,17 +53,17 @@ def register_project_tools(server: Server) -> None:
         # Validate inputs
         if not name or not name.strip():
             raise ValidationError("Project name is required")
-        
+
         # Validate path if provided
         project_path = None
         if path:
             project_path = validate_path(path, must_exist=False)
             # Create directory if it doesn't exist
             project_path.mkdir(parents=True, exist_ok=True)
-        
+
         # Get project service
         project_service = services.get("projects")
-        
+
         # Create project
         project = project_service.create_project(
             name=name.strip(),
@@ -74,7 +72,7 @@ def register_project_tools(server: Server) -> None:
             tags=tags or [],
             metadata=metadata or {}
         )
-        
+
         return create_tool_response(
             success=True,
             data={
@@ -88,7 +86,7 @@ def register_project_tools(server: Server) -> None:
             },
             message=f"Created project '{name}'"
         )
-    
+
     @server.tool()
     @handle_errors
     @require_service("projects")
@@ -107,10 +105,10 @@ def register_project_tools(server: Server) -> None:
         """
         # Get project service
         project_service = services.get("projects")
-        
+
         # Get projects
         projects = project_service.list_projects(active_only=active_only)
-        
+
         # Format project data
         project_list = []
         for project in projects:
@@ -124,7 +122,7 @@ def register_project_tools(server: Server) -> None:
                 "created_at": project.created_at.isoformat(),
                 "updated_at": project.updated_at.isoformat()
             }
-            
+
             # Add stats if requested
             if with_stats:
                 stats = project_service.get_project_stats(project.id)
@@ -134,9 +132,9 @@ def register_project_tools(server: Server) -> None:
                     "last_activity": stats.get("last_activity"),
                     "tags_used": stats.get("unique_tags", 0)
                 }
-            
+
             project_list.append(project_data)
-        
+
         return create_tool_response(
             success=True,
             data={
@@ -144,13 +142,13 @@ def register_project_tools(server: Server) -> None:
                 "count": len(project_list)
             }
         )
-    
+
     @server.tool()
     @handle_errors
     @require_service("projects")
     async def get_project_context(
-        project_id: Optional[str] = None,
-        project_name: Optional[str] = None
+        project_id: str | None = None,
+        project_name: str | None = None
     ) -> Any:
         """Get context for a specific project.
         
@@ -164,10 +162,10 @@ def register_project_tools(server: Server) -> None:
         # Validate inputs
         if not project_id and not project_name:
             raise ValidationError("Either project_id or project_name is required")
-        
+
         # Get project service
         project_service = services.get("projects")
-        
+
         # Find project
         if project_id:
             project = project_service.get_project(project_id)
@@ -178,16 +176,16 @@ def register_project_tools(server: Server) -> None:
             if not matching:
                 raise ValidationError(f"Project '{project_name}' not found")
             project = matching[0]
-        
+
         if not project:
             raise ValidationError("Project not found")
-        
+
         # Get project context
         context = project_service.get_project_context(project.id)
-        
+
         # Get recent assets
         recent_assets = project_service.get_recent_assets(project.id, limit=10)
-        
+
         return create_tool_response(
             success=True,
             data={
@@ -213,7 +211,7 @@ def register_project_tools(server: Server) -> None:
                 "stats": project_service.get_project_stats(project.id)
             }
         )
-    
+
     @server.tool()
     @handle_errors
     @require_service("projects")
@@ -236,12 +234,12 @@ def register_project_tools(server: Server) -> None:
         """
         # Get project service
         project_service = services.get("projects")
-        
+
         # Verify project exists
         project = project_service.get_project(project_id)
         if not project:
             raise ValidationError(f"Project '{project_id}' not found")
-        
+
         # Update context
         updated_context = project_service.update_project_context(
             project_id=project_id,
@@ -249,7 +247,7 @@ def register_project_tools(server: Server) -> None:
             value=context_value,
             merge=merge
         )
-        
+
         return create_tool_response(
             success=True,
             data={

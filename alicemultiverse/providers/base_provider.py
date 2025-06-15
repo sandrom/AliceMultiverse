@@ -3,9 +3,10 @@
 import asyncio
 import os
 import time
-from abc import ABC, abstractmethod
+from abc import abstractmethod
+from collections.abc import Awaitable, Callable
 from pathlib import Path
-from typing import Any, Awaitable, Callable, Dict, List, Optional, Tuple
+from typing import Any
 
 import aiohttp
 
@@ -16,7 +17,7 @@ from ..core.exceptions import (
     RateLimitError,
 )
 from .provider import Provider
-from .types import GenerationRequest, GenerationResponse, GenerationType
+from .provider_types import GenerationRequest, GenerationType
 
 
 class BaseProvider(Provider):
@@ -25,12 +26,12 @@ class BaseProvider(Provider):
     This class extends the abstract Provider class with common patterns
     found across all provider implementations.
     """
-    
+
     def __init__(
         self,
         name: str,
-        api_key: Optional[str] = None,
-        config: Optional[Dict[str, Any]] = None
+        api_key: str | None = None,
+        config: dict[str, Any] | None = None
     ):
         """Initialize base provider.
         
@@ -40,10 +41,10 @@ class BaseProvider(Provider):
             config: Optional configuration dictionary
         """
         super().__init__(name, api_key, config)
-        self._session: Optional[aiohttp.ClientSession] = None
-    
+        self._session: aiohttp.ClientSession | None = None
+
     # ===== API Key Management =====
-    
+
     def _get_api_key(self, env_var_name: str) -> str:
         """Get API key from init parameter or environment variable.
         
@@ -58,7 +59,7 @@ class BaseProvider(Provider):
         """
         if self.api_key:
             return self.api_key
-        
+
         api_key = os.getenv(env_var_name)
         if not api_key:
             raise ValueError(
@@ -66,10 +67,10 @@ class BaseProvider(Provider):
                 f"Set {env_var_name} environment variable or pass api_key parameter."
             )
         return api_key
-    
+
     # ===== Session Management =====
-    
-    async def _create_session(self, headers: Optional[Dict[str, str]] = None) -> aiohttp.ClientSession:
+
+    async def _create_session(self, headers: dict[str, str] | None = None) -> aiohttp.ClientSession:
         """Create an aiohttp session with common headers.
         
         Args:
@@ -85,7 +86,7 @@ class BaseProvider(Provider):
         if headers:
             default_headers.update(headers)
         return aiohttp.ClientSession(headers=default_headers)
-    
+
     async def _ensure_session(self) -> aiohttp.ClientSession:
         """Ensure session exists, create if needed.
         
@@ -95,18 +96,18 @@ class BaseProvider(Provider):
         if not self._session:
             self._session = await self._create_session(self._get_headers())
         return self._session
-    
+
     @abstractmethod
-    def _get_headers(self) -> Dict[str, str]:
+    def _get_headers(self) -> dict[str, str]:
         """Get provider-specific headers.
         
         Returns:
             Dictionary of headers including authentication
         """
         pass
-    
+
     # ===== HTTP Error Handling =====
-    
+
     async def _handle_response_errors(
         self,
         response: aiohttp.ClientResponse,
@@ -123,14 +124,14 @@ class BaseProvider(Provider):
         """
         if response.status == 200:
             return
-        
+
         try:
             error_text = await response.text()
         except Exception:
             error_text = f"Status {response.status}"
-        
+
         error_prefix = f"{context}: " if context else ""
-        
+
         if response.status == 401:
             raise AuthenticationError(self.name, f"{error_prefix}Authentication failed: {error_text}")
         elif response.status == 429:
@@ -142,10 +143,10 @@ class BaseProvider(Provider):
             raise GenerationError(f"{error_prefix}Server error ({response.status}): {error_text}")
         elif response.status >= 400:
             raise GenerationError(f"{error_prefix}Client error ({response.status}): {error_text}")
-    
+
     # ===== Parameter Handling =====
-    
-    def _extract_common_params(self, parameters: Optional[Dict[str, Any]]) -> Dict[str, Any]:
+
+    def _extract_common_params(self, parameters: dict[str, Any] | None) -> dict[str, Any]:
         """Extract common parameters that most providers use.
         
         Args:
@@ -156,9 +157,9 @@ class BaseProvider(Provider):
         """
         if not parameters:
             return {}
-        
+
         common = {}
-        
+
         # Common image parameters
         image_params = [
             'width', 'height', 'seed', 'num_images', 'negative_prompt',
@@ -167,7 +168,7 @@ class BaseProvider(Provider):
         for key in image_params:
             if key in parameters:
                 common[key] = parameters[key]
-        
+
         # Common video parameters
         video_params = [
             'duration', 'fps', 'aspect_ratio', 'motion_strength',
@@ -176,7 +177,7 @@ class BaseProvider(Provider):
         for key in video_params:
             if key in parameters:
                 common[key] = parameters[key]
-        
+
         # Common audio parameters
         audio_params = [
             'voice', 'language', 'speed', 'pitch', 'emotion',
@@ -185,16 +186,16 @@ class BaseProvider(Provider):
         for key in audio_params:
             if key in parameters:
                 common[key] = parameters[key]
-        
+
         return common
-    
+
     # ===== File Operations =====
-    
+
     async def _download_result(
         self,
         url: str,
         output_dir: Path,
-        filename: Optional[str] = None
+        filename: str | None = None
     ) -> Path:
         """Download generated content from URL.
         
@@ -208,15 +209,15 @@ class BaseProvider(Provider):
         """
         from ..core.file_operations import download_file
         return await download_file(url, output_dir, filename)
-    
+
     # ===== Polling Helpers =====
-    
+
     async def _poll_for_completion(
-        self, 
-        check_func: Callable[[], Awaitable[Tuple[bool, Any]]], 
+        self,
+        check_func: Callable[[], Awaitable[tuple[bool, Any]]],
         poll_interval: float = 5.0,
         max_wait: float = 300.0,
-        progress_callback: Optional[Callable[[float], None]] = None
+        progress_callback: Callable[[float], None] | None = None
     ) -> Any:
         """Poll for async job completion.
         
@@ -233,25 +234,25 @@ class BaseProvider(Provider):
             GenerationError: If max wait time exceeded
         """
         start_time = time.time()
-        
+
         while time.time() - start_time < max_wait:
             is_complete, result = await check_func()
-            
+
             if is_complete:
                 return result
-                
+
             if progress_callback:
                 elapsed = time.time() - start_time
                 progress = min(elapsed / max_wait, 0.95)  # Cap at 95%
                 progress_callback(progress)
-                
+
             await asyncio.sleep(poll_interval)
-        
+
         raise GenerationError(f"Generation timed out after {max_wait} seconds")
-    
+
     # ===== Model Validation =====
-    
-    def _validate_model(self, model: Optional[str], generation_type: GenerationType) -> str:
+
+    def _validate_model(self, model: str | None, generation_type: GenerationType) -> str:
         """Validate and resolve model name.
         
         Args:
@@ -266,7 +267,7 @@ class BaseProvider(Provider):
         """
         if not model:
             return self.get_default_model(generation_type)
-        
+
         # Check if model is supported
         if model not in self.capabilities.models:
             # Try case-insensitive match
@@ -274,26 +275,26 @@ class BaseProvider(Provider):
             for supported in self.capabilities.models:
                 if supported.lower() == model_lower:
                     return supported
-            
+
             # Try removing provider prefix if present
             if model.startswith(f"{self.name.lower()}/"):
                 base_model = model[len(self.name) + 1:]
                 return self._validate_model(base_model, generation_type)
-            
+
             # No match found
             raise ValueError(
                 f"Model '{model}' not supported by {self.name}. "
                 f"Available models: {', '.join(self.capabilities.models)}"
             )
-        
+
         return model
-    
+
     # ===== Model Alias Resolution =====
-    
+
     def _resolve_model_alias(
         self,
         model: str,
-        aliases: Dict[str, str]
+        aliases: dict[str, str]
     ) -> str:
         """Resolve model name using alias dictionary.
         
@@ -307,24 +308,24 @@ class BaseProvider(Provider):
         # Direct match
         if model in aliases:
             return aliases[model]
-        
+
         # Case-insensitive match
         model_lower = model.lower()
         for alias, actual in aliases.items():
             if alias.lower() == model_lower:
                 return actual
-        
+
         # Return original if no alias found
         return model
-    
+
     # ===== Cost Calculation Helpers =====
-    
+
     def _calculate_cost_with_modifiers(
         self,
         base_cost: float,
-        width: Optional[int] = None,
-        height: Optional[int] = None,
-        duration: Optional[float] = None,
+        width: int | None = None,
+        height: int | None = None,
+        duration: float | None = None,
         resolution_multiplier: float = 1.0,
         duration_multiplier: float = 1.0
     ) -> float:
@@ -342,40 +343,40 @@ class BaseProvider(Provider):
             Total cost
         """
         cost = base_cost
-        
+
         # Apply resolution modifier
         if width and height:
             megapixels = (width * height) / 1_000_000
             if megapixels > 1.0:  # Only apply for > 1MP
                 cost *= (1 + (megapixels - 1) * resolution_multiplier)
-        
+
         # Apply duration modifier
         if duration and duration > 1.0:
             cost *= (1 + (duration - 1) * duration_multiplier)
-        
+
         return cost
-    
+
     # ===== Context Manager =====
-    
+
     async def __aenter__(self):
         """Enter async context."""
         await self._ensure_session()
         return self
-    
+
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Exit async context and cleanup."""
         if self._session:
             await self._session.close()
             self._session = None
-    
+
     # ===== Request Building Helpers =====
-    
+
     def _build_base_request(
         self,
         request: GenerationRequest,
         endpoint: str,
         method: str = "POST"
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Build base request configuration.
         
         Args:
@@ -394,10 +395,10 @@ class BaseProvider(Provider):
                 **self._extract_common_params(request.parameters)
             }
         }
-    
+
     # ===== Response Parsing Helpers =====
-    
-    def _parse_error_response(self, response_data: Dict[str, Any]) -> str:
+
+    def _parse_error_response(self, response_data: dict[str, Any]) -> str:
         """Parse error message from response data.
         
         Args:
@@ -408,7 +409,7 @@ class BaseProvider(Provider):
         """
         # Common error field names
         error_fields = ['error', 'message', 'detail', 'error_message', 'errors']
-        
+
         for field in error_fields:
             if field in response_data:
                 error_value = response_data[field]
@@ -420,11 +421,11 @@ class BaseProvider(Provider):
                 elif isinstance(error_value, list) and error_value:
                     # List of errors
                     return str(error_value[0])
-        
+
         return "Unknown error"
-    
+
     # ===== Retry Logic =====
-    
+
     async def _retry_with_backoff(
         self,
         func: Callable[[], Awaitable[Any]],
@@ -449,27 +450,27 @@ class BaseProvider(Provider):
             Last exception if all retries fail
         """
         last_exception = None
-        
+
         for attempt in range(max_retries + 1):
             try:
                 return await func()
             except (RateLimitError, aiohttp.ClientError) as e:
                 last_exception = e
-                
+
                 if attempt >= max_retries:
                     break
-                
+
                 # Calculate delay with exponential backoff
                 delay = min(
                     base_delay * (exponential_base ** attempt),
                     max_delay
                 )
-                
+
                 self.logger.warning(
                     f"{self.name} request failed (attempt {attempt + 1}/{max_retries + 1}): {e}. "
                     f"Retrying in {delay:.1f}s..."
                 )
-                
+
                 await asyncio.sleep(delay)
-        
+
         raise last_exception or GenerationError("All retry attempts failed")

@@ -75,24 +75,24 @@ organized/
             └── my-project-00001.mp4
 ```
 
-### 3. Add Quality Assessment
+### 3. Add AI Understanding
 
 ```bash
-alice --quality
+alice --understand
 ```
 
-This creates star-rating folders based on BRISQUE scores:
+This analyzes images and adds semantic tags for search:
 
 ```
 organized/
 └── 2024-03-15/
     └── my-project/
         └── midjourney/
-            ├── 5-star/
-            │   └── my-project-00001.png
-            └── 4-star/
-                └── my-project-00002.png
+            ├── my-project-00001.png  # Tagged: "portrait, cyberpunk, neon"
+            └── my-project-00002.png  # Tagged: "landscape, minimalist, blue"
 ```
+
+Tags are embedded in image metadata and enable semantic search like "find all cyberpunk portraits".
 
 ## Common Workflows
 
@@ -127,22 +127,24 @@ Bypass cache and re-analyze all files:
 alice --force-reindex
 ```
 
-### Pipeline Processing
+### Understanding Providers
 
-Use advanced quality assessment with external APIs:
+Choose AI providers for semantic understanding:
 
 ```bash
-# BRISQUE only (free, local)
-alice --pipeline brisque
+# Single provider
+alice --understand --providers openai      # ~$0.001/image
+alice --understand --providers anthropic   # ~$0.002/image
+alice --understand --providers google      # Free tier available
 
-# BRISQUE + SightEngine (~$0.001/image)
-alice --pipeline brisque-sightengine
+# Multiple providers for comprehensive analysis
+alice --understand --providers "openai,anthropic"
 
-# BRISQUE + Claude (~$0.002/image)
-alice --pipeline brisque-claude
+# Cost-effective option
+alice --understand --providers deepseek    # ~$0.0002/image
 
-# Full pipeline (~$0.003/image)
-alice --pipeline brisque-sightengine-claude
+# With cost limit
+alice --understand --cost-limit 10.0
 ```
 
 ## Understanding the Output

@@ -1,17 +1,16 @@
 """Prometheus metrics server for AliceMultiverse."""
 
 import asyncio
-from typing import Optional
 
+import uvicorn
 from fastapi import FastAPI, Response
 from fastapi.responses import PlainTextResponse
-import uvicorn
 
-from .metrics import get_metrics, get_metrics_content_type
-from .structured_logging import get_logger
 # from ..database.config import get_pool_monitor
 # from ..database.pool_manager import get_pool_diagnostics
 from ..providers.health_monitor import health_monitor
+from .metrics import get_metrics, get_metrics_content_type
+from .structured_logging import get_logger
 
 logger = get_logger(__name__)
 
@@ -24,10 +23,10 @@ async def metrics_endpoint():
     """Prometheus metrics endpoint."""
     # Update dynamic metrics before serving
     await update_dynamic_metrics()
-    
+
     # Get metrics data
     metrics_data = get_metrics()
-    
+
     return Response(
         content=metrics_data,
         media_type=get_metrics_content_type()
@@ -45,12 +44,10 @@ async def health_endpoint():
 
 async def update_dynamic_metrics():
     """Update metrics that need to be fetched dynamically."""
-    from ..core.metrics import (
-        update_provider_health_metrics
-    )
-    
+    from ..core.metrics import update_provider_health_metrics
+
     logger.debug("Database pool metrics not available")
-    
+
     # Update provider health metrics
     try:
         for provider_name, breaker in health_monitor.circuit_breakers.items():
@@ -70,7 +67,7 @@ async def update_dynamic_metrics():
 
 class MetricsServer:
     """Manages the Prometheus metrics server."""
-    
+
     def __init__(self, host: str = "0.0.0.0", port: int = 9090):
         """Initialize metrics server.
         
@@ -80,8 +77,8 @@ class MetricsServer:
         """
         self.host = host
         self.port = port
-        self._server_task: Optional[asyncio.Task] = None
-    
+        self._server_task: asyncio.Task | None = None
+
     async def start(self):
         """Start the metrics server."""
         logger.info(
@@ -90,10 +87,10 @@ class MetricsServer:
             port=self.port,
             url=f"http://{self.host}:{self.port}/metrics"
         )
-        
+
         # Start periodic metric updates
         asyncio.create_task(self._update_metrics_loop())
-        
+
         # Run the server
         config = uvicorn.Config(
             app,
@@ -104,7 +101,7 @@ class MetricsServer:
         )
         server = uvicorn.Server(config)
         self._server_task = asyncio.create_task(server.serve())
-    
+
     async def stop(self):
         """Stop the metrics server."""
         if self._server_task:
@@ -114,7 +111,7 @@ class MetricsServer:
             except asyncio.CancelledError:
                 pass
         logger.info("Metrics server stopped")
-    
+
     async def _update_metrics_loop(self):
         """Periodically update dynamic metrics."""
         while True:
@@ -141,18 +138,18 @@ def run_metrics_server(host: str = "0.0.0.0", port: int = 9090):
         port: Port to listen on
     """
     import asyncio
-    
+
     async def main():
         server = MetricsServer(host, port)
         await server.start()
-        
+
         # Keep running until interrupted
         try:
             await asyncio.Event().wait()
         except KeyboardInterrupt:
             logger.info("Shutting down metrics server")
             await server.stop()
-    
+
     asyncio.run(main())
 
 

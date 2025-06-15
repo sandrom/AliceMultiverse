@@ -1,7 +1,7 @@
 """Integration tests for full workflow scenarios."""
 
 import subprocess
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -90,7 +90,7 @@ class TestFullWorkflow:
         inbox = temp_dir / "inbox"
         organized = temp_dir / "organized"
 
-        # Test basic pipeline without mocking 
+        # Test basic pipeline without mocking
         result = main(
             [
                 "--inbox",

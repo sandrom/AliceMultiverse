@@ -4,9 +4,8 @@ Common workflow: Generate Video → Add Audio → Enhance
 """
 
 import logging
-from typing import List
 
-from alicemultiverse.workflows.base import WorkflowTemplate, WorkflowStep, WorkflowContext
+from alicemultiverse.workflows.base import WorkflowContext, WorkflowStep, WorkflowTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -29,17 +28,17 @@ class VideoProductionWorkflow(WorkflowTemplate):
         enhance_video: Whether to enhance video quality (default: False)
         add_captions: Whether to add captions (default: False)
     """
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define the video production workflow steps."""
         steps = []
         params = context.initial_params
-        
+
         # Step 1: Video generation
         video_provider = params.get("video_provider", "veo")
         video_model = params.get("video_model")
         video_duration = params.get("video_duration", 8)
-        
+
         steps.append(WorkflowStep(
             name="generate_video",
             provider=video_provider,
@@ -54,11 +53,11 @@ class VideoProductionWorkflow(WorkflowTemplate):
             },
             cost_limit=params.get("video_cost_limit", 0.50)
         ))
-        
+
         # Step 2: Audio generation (if enabled)
         if params.get("add_audio", True):
             audio_provider = params.get("audio_provider", "mmaudio")
-            
+
             steps.append(WorkflowStep(
                 name="generate_audio",
                 provider=audio_provider,
@@ -73,7 +72,7 @@ class VideoProductionWorkflow(WorkflowTemplate):
                 condition="previous.success",
                 cost_limit=params.get("audio_cost_limit", 0.10)
             ))
-            
+
             # Step 2b: Merge audio with video
             steps.append(WorkflowStep(
                 name="merge_audio_video",
@@ -87,11 +86,11 @@ class VideoProductionWorkflow(WorkflowTemplate):
                 condition="generate_audio.success",
                 cost_limit=0.0
             ))
-        
+
         # Step 3: Video enhancement (if enabled)
         if params.get("enhance_video", False):
             enhance_provider = params.get("enhance_provider", "topaz")
-            
+
             steps.append(WorkflowStep(
                 name="enhance_video",
                 provider=enhance_provider,
@@ -106,11 +105,11 @@ class VideoProductionWorkflow(WorkflowTemplate):
                 condition="previous.success",
                 cost_limit=params.get("enhance_cost_limit", 0.20)
             ))
-        
+
         # Step 4: Add captions (if enabled)
         if params.get("add_captions", False):
             caption_provider = params.get("caption_provider", "whisper")
-            
+
             steps.append(WorkflowStep(
                 name="generate_captions",
                 provider=caption_provider,
@@ -123,7 +122,7 @@ class VideoProductionWorkflow(WorkflowTemplate):
                 condition="previous.success",
                 cost_limit=params.get("caption_cost_limit", 0.05)
             ))
-            
+
             steps.append(WorkflowStep(
                 name="burn_captions",
                 provider="local",
@@ -138,7 +137,7 @@ class VideoProductionWorkflow(WorkflowTemplate):
                 condition="generate_captions.success",
                 cost_limit=0.0
             ))
-        
+
         # Step 5: Final output
         steps.append(WorkflowStep(
             name="final_output",
@@ -152,43 +151,41 @@ class VideoProductionWorkflow(WorkflowTemplate):
             condition="previous.success",
             cost_limit=0.0
         ))
-        
+
         return steps
-    
+
     def _get_previous_video_step(self, params: dict) -> str:
         """Determine the previous video step based on workflow configuration."""
-        if params.get("add_captions", False) and params.get("enhance_video", False):
-            return "enhance_video"
-        elif params.get("enhance_video", False):
+        if (params.get("add_captions", False) and params.get("enhance_video", False)) or params.get("enhance_video", False):
             return "enhance_video"
         elif params.get("add_audio", True):
             return "merge_audio_video"
         else:
             return "generate_video"
-    
-    def validate(self, context: WorkflowContext) -> List[str]:
+
+    def validate(self, context: WorkflowContext) -> list[str]:
         """Validate the workflow can execute."""
         errors = super().validate(context)
         params = context.initial_params
-        
+
         # Check video duration
         duration = params.get("video_duration", 8)
         if duration < 1 or duration > 60:
             errors.append(f"Video duration {duration}s should be between 1 and 60 seconds")
-        
+
         # Check resolution
         valid_resolutions = ["480p", "720p", "1080p", "4k"]
         resolution = params.get("resolution", "1080p")
         if resolution not in valid_resolutions:
             errors.append(f"Resolution {resolution} not valid. Choose from: {valid_resolutions}")
-        
+
         return errors
-    
+
     def estimate_cost(self, context: WorkflowContext) -> float:
         """Estimate total workflow cost."""
         params = context.initial_params
         total = 0.0
-        
+
         # Video generation (most expensive)
         duration = params.get("video_duration", 8)
         if params.get("video_provider") == "veo":
@@ -197,19 +194,19 @@ class VideoProductionWorkflow(WorkflowTemplate):
             total += 0.15 + (duration * 0.01)
         else:
             total += 0.20  # Conservative estimate
-        
+
         # Audio generation
         if params.get("add_audio", True):
             total += 0.05  # mmaudio is relatively cheap
-        
+
         # Enhancement
         if params.get("enhance_video", False):
             total += 0.10 + (duration * 0.01)  # Processing cost
-        
+
         # Captions
         if params.get("add_captions", False):
             total += 0.02  # Transcription cost
-        
+
         return total
 
 
@@ -218,11 +215,11 @@ class QuickVideoWorkflow(VideoProductionWorkflow):
     
     Uses faster settings and skips enhancement.
     """
-    
+
     def __init__(self):
         super().__init__(name="QuickVideo")
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define quick video steps."""
         # Override defaults for speed
         params = context.initial_params
@@ -232,7 +229,7 @@ class QuickVideoWorkflow(VideoProductionWorkflow):
         params.setdefault("enhance_video", False)
         params.setdefault("add_captions", False)
         params.setdefault("optimize_for_web", True)
-        
+
         return super().define_steps(context)
 
 
@@ -241,11 +238,11 @@ class CinematicVideoWorkflow(VideoProductionWorkflow):
     
     Uses best settings and full enhancement pipeline.
     """
-    
+
     def __init__(self):
         super().__init__(name="CinematicVideo")
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define cinematic video steps."""
         # Override defaults for quality
         params = context.initial_params
@@ -259,10 +256,10 @@ class CinematicVideoWorkflow(VideoProductionWorkflow):
         params.setdefault("enhance_video", True)
         params.setdefault("enhancement_type", "cinematic")
         params.setdefault("add_captions", False)  # Clean look
-        
+
         # Add color grading step
         steps = super().define_steps(context)
-        
+
         # Insert color grading before final output
         color_step = WorkflowStep(
             name="color_grade",
@@ -275,8 +272,8 @@ class CinematicVideoWorkflow(VideoProductionWorkflow):
             },
             condition="enhance_video.success"
         )
-        
+
         # Insert before final output
         steps.insert(-1, color_step)
-        
+
         return steps

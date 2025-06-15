@@ -111,8 +111,8 @@ For normal usage, use Alice through an AI assistant instead.
         help="Run first-time setup wizard"
     )
     setup_parser.add_argument(
-        "--reconfigure", 
-        action="store_true", 
+        "--reconfigure",
+        action="store_true",
         help="Reconfigure even if already set up"
     )
 
@@ -170,26 +170,26 @@ For normal usage, use Alice through an AI assistant instead.
     plugins_subparsers = plugins_parser.add_subparsers(
         dest="plugins_command", help="Plugin management commands"
     )
-    
+
     # Plugins - list
     plugins_list = plugins_subparsers.add_parser("list", help="List available plugins")
     plugins_list.add_argument(
-        "-t", "--type", 
+        "-t", "--type",
         choices=["all", "provider", "effect", "analyzer", "workflow"],
         default="all",
         help="Filter by plugin type"
     )
     plugins_list.add_argument("-v", "--verbose", action="store_true", help="Show detailed info")
-    
+
     # Plugins - info
     plugins_info = plugins_subparsers.add_parser("info", help="Show plugin details")
     plugins_info.add_argument("plugin_name", help="Plugin name")
-    
+
     # Plugins - load
     plugins_load = plugins_subparsers.add_parser("load", help="Load a plugin")
     plugins_load.add_argument("plugin_path", help="Plugin file or module path")
     plugins_load.add_argument("-c", "--config", help="Configuration file path")
-    
+
     # Plugins - create
     plugins_create = plugins_subparsers.add_parser("create", help="Create plugin template")
     plugins_create.add_argument(
@@ -199,7 +199,7 @@ For normal usage, use Alice through an AI assistant instead.
     )
     plugins_create.add_argument("plugin_name", help="Plugin name")
     plugins_create.add_argument("-o", "--output", help="Output directory")
-    
+
     # Plugins - config
     plugins_config = plugins_subparsers.add_parser("config", help="Show plugin config")
     plugins_config.add_argument("plugin_name", help="Plugin name")
@@ -209,53 +209,53 @@ For normal usage, use Alice through an AI assistant instead.
         default="yaml",
         help="Output format"
     )
-    
+
     # Plugins - set-config
     plugins_set_config = plugins_subparsers.add_parser("set-config", help="Set plugin config")
     plugins_set_config.add_argument("plugin_name", help="Plugin name")
     plugins_set_config.add_argument("config_path", help="Configuration file path")
-    
+
     # Plugins - apply-effect
     plugins_apply = plugins_subparsers.add_parser("apply-effect", help="Apply effect plugin")
     plugins_apply.add_argument("plugin_name", help="Effect plugin name")
     plugins_apply.add_argument("image_paths", nargs="+", help="Images to process")
     plugins_apply.add_argument("-o", "--output", required=True, help="Output directory")
     plugins_apply.add_argument("-p", "--params", help="Parameters as JSON")
-    
+
     # Mobile companion subcommand
     mobile_parser = subparsers.add_parser("mobile", help="Mobile companion app")
     mobile_subparsers = mobile_parser.add_subparsers(
         dest="mobile_command", help="Mobile companion commands"
     )
-    
+
     # Mobile - server
     mobile_server = mobile_subparsers.add_parser("server", help="Start mobile server")
     mobile_server.add_argument("--host", default="0.0.0.0", help="Host to bind to")
     mobile_server.add_argument("--port", type=int, default=8080, help="Port to listen on")
     mobile_server.add_argument("--media-dir", help="Media directory path")
-    
+
     # Mobile - token (with sub-subcommands)
     mobile_token = mobile_subparsers.add_parser("token", help="Manage access tokens")
     mobile_token_subs = mobile_token.add_subparsers(
         dest="token_action", help="Token actions"
     )
-    
+
     # Token - generate
     token_generate = mobile_token_subs.add_parser("generate", help="Generate new token")
     token_generate.add_argument("--name", default="default", help="Token name")
     token_generate.add_argument("--expires", type=int, default=24, help="Hours until expiration")
     token_generate.add_argument("--qr", action="store_true", help="Generate QR code")
-    
+
     # Token - list
     mobile_token_subs.add_parser("list", help="List all tokens")
-    
+
     # Token - revoke
     token_revoke = mobile_token_subs.add_parser("revoke", help="Revoke a token")
     token_revoke.add_argument("token_prefix", help="Token prefix (first 8 chars)")
-    
+
     # Token - cleanup
     mobile_token_subs.add_parser("cleanup", help="Remove expired tokens")
-    
+
     # Mobile - test
     mobile_test = mobile_subparsers.add_parser("test", help="Test connectivity")
     mobile_test.add_argument("--demo", action="store_true", help="Load demo timeline")
@@ -422,7 +422,7 @@ For normal usage, use Alice through an AI assistant instead.
     dedup_subparsers = dedup_parser.add_subparsers(
         dest="dedup_command", help="Deduplication commands"
     )
-    
+
     # Dedup - find
     dedup_find = dedup_subparsers.add_parser("find", help="Find duplicate and similar images")
     dedup_find.add_argument("directory", help="Directory to scan")
@@ -430,27 +430,27 @@ For normal usage, use Alice through an AI assistant instead.
     dedup_find.add_argument("-r/-R", "--recursive/--no-recursive", default=True, help="Scan subdirectories")
     dedup_find.add_argument("-s/-e", "--include-similar/--exact-only", default=True, help="Include similar images")
     dedup_find.add_argument("-o", "--output", help="Save report to JSON file")
-    
+
     # Dedup - remove
     dedup_remove = dedup_subparsers.add_parser("remove", help="Remove duplicate images")
     dedup_remove.add_argument("report", help="JSON report from find command")
     dedup_remove.add_argument("-s", "--strategy", choices=["safe", "aggressive"], default="safe", help="Removal strategy")
     dedup_remove.add_argument("-b", "--backup", help="Backup directory")
     dedup_remove.add_argument("-n/-x", "--dry-run/--execute", default=True, help="Dry run or execute")
-    
+
     # Dedup - index
     dedup_index = dedup_subparsers.add_parser("index", help="Build similarity search index")
     dedup_index.add_argument("directories", nargs="+", help="Directories to index")
     dedup_index.add_argument("-o", "--output", help="Index save path")
     dedup_index.add_argument("-t", "--type", choices=["Flat", "IVF", "HNSW"], default="IVF", help="Index type")
-    
+
     # Dedup - search
     dedup_search = dedup_subparsers.add_parser("search", help="Search for similar images")
     dedup_search.add_argument("image", help="Query image")
     dedup_search.add_argument("-i", "--index", help="Index path")
     dedup_search.add_argument("-k", "--count", type=int, default=10, help="Number of results")
     dedup_search.add_argument("-t", "--threshold", type=float, default=0.7, help="Minimum similarity")
-    
+
     # Prompts subcommand for prompt management
     prompts_parser = subparsers.add_parser("prompts", help="Manage AI prompts and their effectiveness")
     prompts_subparsers = prompts_parser.add_subparsers(
@@ -466,7 +466,7 @@ For normal usage, use Alice through an AI assistant instead.
                                     "analysis", "other"],
                             help="Prompt category")
     prompts_add.add_argument("-p", "--providers", required=True, nargs="+",
-                            choices=["midjourney", "dalle", "stable_diffusion", "flux", 
+                            choices=["midjourney", "dalle", "stable_diffusion", "flux",
                                     "ideogram", "leonardo", "firefly", "kling", "runway",
                                     "anthropic", "openai", "google", "elevenlabs", "other"],
                             help="Providers this prompt works with")
@@ -481,12 +481,12 @@ For normal usage, use Alice through an AI assistant instead.
     prompts_search = prompts_subparsers.add_parser("search", help="Search for prompts")
     prompts_search.add_argument("-q", "--query", help="Search in prompt text, description, and notes")
     prompts_search.add_argument("-c", "--category",
-                               choices=["image_generation", "video_generation", "music_generation", 
-                                       "text_generation", "style_transfer", "enhancement", 
+                               choices=["image_generation", "video_generation", "music_generation",
+                                       "text_generation", "style_transfer", "enhancement",
                                        "analysis", "other"],
                                help="Filter by category")
     prompts_search.add_argument("-p", "--provider",
-                               choices=["midjourney", "dalle", "stable_diffusion", "flux", 
+                               choices=["midjourney", "dalle", "stable_diffusion", "flux",
                                        "ideogram", "leonardo", "firefly", "kling", "runway",
                                        "anthropic", "openai", "google", "elevenlabs", "other"],
                                help="Filter by provider")
@@ -507,7 +507,7 @@ For normal usage, use Alice through an AI assistant instead.
     prompts_use = prompts_subparsers.add_parser("use", help="Record usage of a prompt")
     prompts_use.add_argument("prompt_id", help="Prompt ID (supports partial matching)")
     prompts_use.add_argument("-p", "--provider", required=True,
-                            choices=["midjourney", "dalle", "stable_diffusion", "flux", 
+                            choices=["midjourney", "dalle", "stable_diffusion", "flux",
                                     "ideogram", "leonardo", "firefly", "kling", "runway",
                                     "anthropic", "openai", "google", "elevenlabs", "other"],
                             help="Provider used")
@@ -529,12 +529,12 @@ For normal usage, use Alice through an AI assistant instead.
     # Prompts - effective
     prompts_effective = prompts_subparsers.add_parser("effective", help="Show most effective prompts")
     prompts_effective.add_argument("-c", "--category",
-                                  choices=["image_generation", "video_generation", "music_generation", 
-                                          "text_generation", "style_transfer", "enhancement", 
+                                  choices=["image_generation", "video_generation", "music_generation",
+                                          "text_generation", "style_transfer", "enhancement",
                                           "analysis", "other"],
                                   help="Filter by category")
     prompts_effective.add_argument("-p", "--provider",
-                                  choices=["midjourney", "dalle", "stable_diffusion", "flux", 
+                                  choices=["midjourney", "dalle", "stable_diffusion", "flux",
                                           "ideogram", "leonardo", "firefly", "kling", "runway",
                                           "anthropic", "openai", "google", "elevenlabs", "other"],
                                   help="Filter by provider")
@@ -550,8 +550,8 @@ For normal usage, use Alice through an AI assistant instead.
     prompts_export = prompts_subparsers.add_parser("export", help="Export prompts to JSON")
     prompts_export.add_argument("output_file", help="Output JSON file")
     prompts_export.add_argument("-c", "--category",
-                               choices=["image_generation", "video_generation", "music_generation", 
-                                       "text_generation", "style_transfer", "enhancement", 
+                               choices=["image_generation", "video_generation", "music_generation",
+                                       "text_generation", "style_transfer", "enhancement",
                                        "analysis", "other"],
                                help="Export only this category")
 
@@ -840,7 +840,7 @@ def main(argv: list[str] | None = None) -> int:
 
     # Handle cost subcommand
     if args.command == "cost":
-        from ..core.cost_tracker import get_cost_tracker, CostCategory
+        from ..core.cost_tracker import CostCategory, get_cost_tracker
 
         cost_tracker = get_cost_tracker()
 
@@ -936,13 +936,15 @@ def main(argv: list[str] | None = None) -> int:
         run_metrics_server(host=args.host, port=args.port)
         return 0
 
-    # Handle plugins subcommand
+    # Handle plugins subcommand - REMOVED
     if args.command == "plugins":
-        from ..plugins.cli import plugins as plugins_cli
-        
+        logger.error("Plugin functionality has been removed to simplify the codebase.")
+        return 1
+        # from ..plugins.cli import plugins as plugins_cli
+
         # Build click args from argparse args
         click_args = [args.plugins_command]
-        
+
         if args.plugins_command == "list":
             if args.type != "all":
                 click_args.extend(["--type", args.type])
@@ -969,46 +971,21 @@ def main(argv: list[str] | None = None) -> int:
             click_args.extend(["--output", args.output])
             if hasattr(args, "params") and args.params:
                 click_args.extend(["--params", args.params])
-        
+
         # Run the click command
         plugins_cli(click_args, standalone_mode=False)
         return 0
 
-    # Handle mobile subcommand
+    # Handle mobile subcommand - REMOVED
     if args.command == "mobile":
-        from ..mobile.cli import mobile as mobile_cli
-        
-        # Build click args
-        click_args = []
-        
-        if args.mobile_command == "server":
-            click_args = ["server", "--host", args.host, "--port", str(args.port)]
-            if hasattr(args, "media_dir") and args.media_dir:
-                click_args.extend(["--media-dir", args.media_dir])
-                
-        elif args.mobile_command == "token":
-            click_args = ["token", args.token_action]
-            
-            if args.token_action == "generate":
-                click_args.extend(["--name", args.name, "--expires", str(args.expires)])
-                if args.qr:
-                    click_args.append("--qr")
-            elif args.token_action == "revoke":
-                click_args.append(args.token_prefix)
-                
-        elif args.mobile_command == "test":
-            click_args = ["test"]
-            if args.demo:
-                click_args.append("--demo")
-        
-        # Run the click command
-        mobile_cli(click_args, standalone_mode=False)
-        return 0
+        logger.error("Mobile functionality has been removed. Use Alice through AI assistants instead.")
+        return 1
 
     # Handle comparison subcommand
     if args.command == "comparison":
         if args.comparison_command == "server":
             import os
+
             from ..comparison.web_server import run_server
 
             if args.populate_test_data:
@@ -1052,7 +1029,7 @@ def main(argv: list[str] | None = None) -> int:
         if args.index_command == "rebuild":
             print(f"Rebuilding search index from {len(args.paths)} paths...")
             count = builder.rebuild_from_paths(
-                args.paths, 
+                args.paths,
                 show_progress=not args.no_progress
             )
             print(f"\nSuccessfully indexed {count} assets")
@@ -1193,10 +1170,10 @@ def main(argv: list[str] | None = None) -> int:
     # Handle dedup subcommand
     if args.command == "dedup":
         from ..deduplication.cli import dedup_cli
-        
+
         # Build command line args for click
         click_args = [args.dedup_command]
-        
+
         if args.dedup_command == "find":
             click_args.append(args.directory)
             click_args.extend(["-t", str(args.threshold)])
@@ -1206,7 +1183,7 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.append("-e")
             if hasattr(args, "output") and args.output:
                 click_args.extend(["-o", args.output])
-                
+
         elif args.dedup_command == "remove":
             click_args.append(args.report)
             click_args.extend(["-s", args.strategy])
@@ -1214,20 +1191,20 @@ def main(argv: list[str] | None = None) -> int:
                 click_args.extend(["-b", args.backup])
             if not args.dry_run:
                 click_args.append("-x")
-                
+
         elif args.dedup_command == "index":
             click_args.extend(args.directories)
             if hasattr(args, "output") and args.output:
                 click_args.extend(["-o", args.output])
             click_args.extend(["-t", args.type])
-            
+
         elif args.dedup_command == "search":
             click_args.append(args.image)
             if hasattr(args, "index") and args.index:
                 click_args.extend(["-i", args.index])
             click_args.extend(["-k", str(args.count)])
             click_args.extend(["-t", str(args.threshold)])
-        
+
         dedup_cli(click_args)
         return 0
 
@@ -1394,9 +1371,9 @@ def main(argv: list[str] | None = None) -> int:
     check_deps = hasattr(args, "check_deps") and args.check_deps
 
     # Skip warning for allowed commands or debug flags
-    if (args.command not in allowed_commands and 
-        not force_cli and 
-        not debug_mode and 
+    if (args.command not in allowed_commands and
+        not force_cli and
+        not debug_mode and
         not check_deps and
         args.command is not None):
 
@@ -1476,19 +1453,19 @@ def main(argv: list[str] | None = None) -> int:
         return 130
 
     except ConfigurationError as e:
-        from ..core.error_handling import wrap_error, format_error_for_user
+        from ..core.error_handling import format_error_for_user, wrap_error
         wrapped = wrap_error(e, "configuration")
         print(format_error_for_user(wrapped, include_traceback=args.debug if 'args' in locals() else False))
         return 1
 
     except AliceMultiverseError as e:
-        from ..core.error_handling import wrap_error, format_error_for_user
+        from ..core.error_handling import format_error_for_user, wrap_error
         wrapped = wrap_error(e, "processing")
         print(format_error_for_user(wrapped, include_traceback=args.debug if 'args' in locals() else False))
         return 1
 
     except Exception as e:
-        from ..core.error_handling import wrap_error, format_error_for_user
+        from ..core.error_handling import format_error_for_user, wrap_error
         wrapped = wrap_error(e, "unexpected error")
         print(format_error_for_user(wrapped, include_traceback=args.debug if 'args' in locals() else False))
         return 2

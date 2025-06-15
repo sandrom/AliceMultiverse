@@ -1,13 +1,12 @@
 """Real-time preference tracking during workflows."""
 
-import time
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Dict, List, Optional, Any, Tuple
 from enum import Enum
+from typing import Any
 
-from .style_memory import StyleMemory, PreferenceType
 from ..core.structured_logging import get_logger
+from .style_memory import PreferenceType, StyleMemory
 
 logger = get_logger(__name__)
 
@@ -27,24 +26,24 @@ class WorkflowContext:
     """Context for a workflow being tracked."""
     workflow_id: str
     workflow_type: WorkflowType
-    project: Optional[str] = None
+    project: str | None = None
     started_at: datetime = field(default_factory=datetime.now)
-    
+
     # Tracking data
-    choices: List[Dict[str, Any]] = field(default_factory=list)
-    outcomes: List[Dict[str, Any]] = field(default_factory=list)
-    duration: Optional[float] = None
-    successful: Optional[bool] = None
-    
+    choices: list[dict[str, Any]] = field(default_factory=list)
+    outcomes: list[dict[str, Any]] = field(default_factory=list)
+    duration: float | None = None
+    successful: bool | None = None
+
     # User feedback
-    quality_score: Optional[float] = None
-    user_rating: Optional[int] = None
-    notes: Optional[str] = None
+    quality_score: float | None = None
+    user_rating: int | None = None
+    notes: str | None = None
 
 
 class PreferenceTracker:
     """Tracks preferences during workflows in real-time."""
-    
+
     def __init__(self, style_memory: StyleMemory):
         """Initialize tracker with style memory.
         
@@ -52,14 +51,14 @@ class PreferenceTracker:
             style_memory: StyleMemory instance for persistence
         """
         self.style_memory = style_memory
-        self.active_workflows: Dict[str, WorkflowContext] = {}
-        self.completed_workflows: List[WorkflowContext] = []
-        
+        self.active_workflows: dict[str, WorkflowContext] = {}
+        self.completed_workflows: list[WorkflowContext] = []
+
     def start_workflow(
         self,
         workflow_id: str,
         workflow_type: WorkflowType,
-        project: Optional[str] = None
+        project: str | None = None
     ) -> WorkflowContext:
         """Start tracking a new workflow.
         
@@ -76,18 +75,18 @@ class PreferenceTracker:
             workflow_type=workflow_type,
             project=project
         )
-        
+
         self.active_workflows[workflow_id] = context
         logger.info(f"Started tracking workflow {workflow_id} ({workflow_type.value})")
-        
+
         return context
-    
+
     def track_choice(
         self,
         workflow_id: str,
         choice_type: str,
         value: Any,
-        metadata: Optional[Dict[str, Any]] = None
+        metadata: dict[str, Any] | None = None
     ):
         """Track a choice made during workflow.
         
@@ -100,18 +99,18 @@ class PreferenceTracker:
         if workflow_id not in self.active_workflows:
             logger.warning(f"Workflow {workflow_id} not active")
             return
-            
+
         context = self.active_workflows[workflow_id]
-        
+
         choice = {
             "timestamp": datetime.now(),
             "type": choice_type,
             "value": value,
             "metadata": metadata or {}
         }
-        
+
         context.choices.append(choice)
-        
+
         # Map to preference type if possible
         pref_type = self._map_to_preference_type(choice_type)
         if pref_type:
@@ -121,13 +120,13 @@ class PreferenceTracker:
                 context=metadata,
                 project=context.project
             )
-    
+
     def track_outcome(
         self,
         workflow_id: str,
         outcome_type: str,
         successful: bool,
-        details: Optional[Dict[str, Any]] = None
+        details: dict[str, Any] | None = None
     ):
         """Track an outcome during workflow.
         
@@ -140,24 +139,24 @@ class PreferenceTracker:
         if workflow_id not in self.active_workflows:
             logger.warning(f"Workflow {workflow_id} not active")
             return
-            
+
         context = self.active_workflows[workflow_id]
-        
+
         outcome = {
             "timestamp": datetime.now(),
             "type": outcome_type,
             "successful": successful,
             "details": details or {}
         }
-        
+
         context.outcomes.append(outcome)
-    
+
     def track_adjustment(
         self,
         workflow_id: str,
         original_value: Any,
         adjusted_value: Any,
-        reason: Optional[str] = None
+        reason: str | None = None
     ):
         """Track manual adjustments to generated content.
         
@@ -170,7 +169,7 @@ class PreferenceTracker:
         if workflow_id not in self.active_workflows:
             logger.warning(f"Workflow {workflow_id} not active")
             return
-            
+
         # Track as both a choice and outcome
         self.track_choice(
             workflow_id,
@@ -181,7 +180,7 @@ class PreferenceTracker:
                 "reason": reason
             }
         )
-        
+
         self.track_outcome(
             workflow_id,
             "adjustment_needed",
@@ -191,12 +190,12 @@ class PreferenceTracker:
                 "adjusted": adjusted_value
             }
         )
-    
+
     def track_iteration(
         self,
         workflow_id: str,
         iteration_number: int,
-        changes: List[str],
+        changes: list[str],
         improved: bool = True
     ):
         """Track iterations and refinements.
@@ -216,15 +215,15 @@ class PreferenceTracker:
                 "changes": changes
             }
         )
-    
+
     def end_workflow(
         self,
         workflow_id: str,
         successful: bool,
-        quality_score: Optional[float] = None,
-        user_rating: Optional[int] = None,
-        notes: Optional[str] = None
-    ) -> Optional[WorkflowContext]:
+        quality_score: float | None = None,
+        user_rating: int | None = None,
+        notes: str | None = None
+    ) -> WorkflowContext | None:
         """End workflow tracking and analyze results.
         
         Args:
@@ -240,30 +239,30 @@ class PreferenceTracker:
         if workflow_id not in self.active_workflows:
             logger.warning(f"Workflow {workflow_id} not active")
             return None
-            
+
         context = self.active_workflows.pop(workflow_id)
-        
+
         # Calculate duration
         context.duration = (datetime.now() - context.started_at).total_seconds()
         context.successful = successful
         context.quality_score = quality_score
         context.user_rating = user_rating
         context.notes = notes
-        
+
         # Store in completed list
         self.completed_workflows.append(context)
-        
+
         # Update style memory with results
         self._update_style_memory(context)
-        
+
         logger.info(
             f"Ended workflow {workflow_id}: "
             f"success={successful}, duration={context.duration:.1f}s"
         )
-        
+
         return context
-    
-    def get_workflow_summary(self, workflow_id: str) -> Optional[Dict[str, Any]]:
+
+    def get_workflow_summary(self, workflow_id: str) -> dict[str, Any] | None:
         """Get summary of a workflow (active or completed).
         
         Args:
@@ -281,10 +280,10 @@ class PreferenceTracker:
                 (w for w in self.completed_workflows if w.workflow_id == workflow_id),
                 None
             )
-            
+
         if not context:
             return None
-            
+
         return {
             "workflow_id": context.workflow_id,
             "workflow_type": context.workflow_type.value,
@@ -298,8 +297,8 @@ class PreferenceTracker:
             "user_rating": context.user_rating,
             "notes": context.notes
         }
-    
-    def get_active_workflows(self) -> List[Dict[str, Any]]:
+
+    def get_active_workflows(self) -> list[dict[str, Any]]:
         """Get all active workflows.
         
         Returns:
@@ -309,12 +308,12 @@ class PreferenceTracker:
             self.get_workflow_summary(wid)
             for wid in self.active_workflows
         ]
-    
+
     def analyze_workflow_patterns(
         self,
-        workflow_type: Optional[WorkflowType] = None,
+        workflow_type: WorkflowType | None = None,
         limit: int = 100
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Analyze patterns across completed workflows.
         
         Args:
@@ -331,36 +330,36 @@ class PreferenceTracker:
                 w for w in workflows
                 if w.workflow_type == workflow_type
             ]
-        
+
         # Take most recent
         workflows = workflows[-limit:]
-        
+
         if not workflows:
             return {"message": "No workflows to analyze"}
-        
+
         # Analyze patterns
         total = len(workflows)
         successful = sum(1 for w in workflows if w.successful)
-        
+
         # Average metrics
         avg_duration = sum(w.duration or 0 for w in workflows) / total
         avg_choices = sum(len(w.choices) for w in workflows) / total
         avg_outcomes = sum(len(w.outcomes) for w in workflows) / total
-        
+
         # Quality metrics
         quality_scores = [w.quality_score for w in workflows if w.quality_score]
         avg_quality = sum(quality_scores) / len(quality_scores) if quality_scores else None
-        
+
         ratings = [w.user_rating for w in workflows if w.user_rating]
         avg_rating = sum(ratings) / len(ratings) if ratings else None
-        
+
         # Common choices
         choice_types = {}
         for w in workflows:
             for choice in w.choices:
                 ctype = choice["type"]
                 choice_types[ctype] = choice_types.get(ctype, 0) + 1
-        
+
         # Common adjustments
         adjustments = 0
         for w in workflows:
@@ -368,7 +367,7 @@ class PreferenceTracker:
                 1 for choice in w.choices
                 if choice["type"] == "manual_adjustment"
             )
-        
+
         return {
             "total_workflows": total,
             "success_rate": successful / total,
@@ -384,15 +383,15 @@ class PreferenceTracker:
             )[:5],
             "adjustment_rate": adjustments / total if total > 0 else 0
         }
-    
-    def get_improvement_areas(self) -> List[Dict[str, Any]]:
+
+    def get_improvement_areas(self) -> list[dict[str, Any]]:
         """Identify areas for improvement based on patterns.
         
         Returns:
             List of improvement suggestions
         """
         improvements = []
-        
+
         # Analyze adjustment patterns
         adjustments = {}
         for w in self.completed_workflows[-100:]:
@@ -401,7 +400,7 @@ class PreferenceTracker:
                     original = str(choice["metadata"].get("original", ""))
                     if original:
                         adjustments[original] = adjustments.get(original, 0) + 1
-        
+
         # Frequent adjustments suggest poor defaults
         for original, count in sorted(adjustments.items(), key=lambda x: x[1], reverse=True)[:5]:
             if count > 3:
@@ -411,11 +410,11 @@ class PreferenceTracker:
                     "count": count,
                     "suggestion": "Consider changing default or learning from adjustments"
                 })
-        
+
         # Analyze failed workflows
         recent = self.completed_workflows[-50:]
         failed = [w for w in recent if not w.successful]
-        
+
         if len(failed) / len(recent) > 0.2:  # >20% failure rate
             # Find common failure patterns
             failure_types = {}
@@ -424,7 +423,7 @@ class PreferenceTracker:
                     if not outcome["successful"]:
                         otype = outcome["type"]
                         failure_types[otype] = failure_types.get(otype, 0) + 1
-            
+
             for ftype, count in sorted(failure_types.items(), key=lambda x: x[1], reverse=True)[:3]:
                 improvements.append({
                     "area": "error_reduction",
@@ -432,7 +431,7 @@ class PreferenceTracker:
                     "count": count,
                     "suggestion": "Investigate root cause and add validation"
                 })
-        
+
         # Analyze iteration patterns
         high_iteration_workflows = []
         for w in recent:
@@ -442,7 +441,7 @@ class PreferenceTracker:
             )
             if iterations > 3:
                 high_iteration_workflows.append((w, iterations))
-        
+
         if len(high_iteration_workflows) > len(recent) * 0.3:  # >30% need many iterations
             improvements.append({
                 "area": "first_attempt_quality",
@@ -450,10 +449,10 @@ class PreferenceTracker:
                 "count": len(high_iteration_workflows),
                 "suggestion": "Improve initial generation quality or suggestions"
             })
-        
+
         return improvements
-    
-    def _map_to_preference_type(self, choice_type: str) -> Optional[PreferenceType]:
+
+    def _map_to_preference_type(self, choice_type: str) -> PreferenceType | None:
         """Map choice type string to PreferenceType enum.
         
         Args:
@@ -481,19 +480,19 @@ class PreferenceTracker:
             "effect": PreferenceType.EFFECT,
             "filter": PreferenceType.EFFECT
         }
-        
+
         # Direct match
         if choice_type in mapping:
             return mapping[choice_type]
-            
+
         # Partial match
         choice_lower = choice_type.lower()
         for key, pref_type in mapping.items():
             if key in choice_lower:
                 return pref_type
-                
+
         return None
-    
+
     def _update_style_memory(self, context: WorkflowContext):
         """Update style memory based on workflow results.
         
@@ -502,13 +501,13 @@ class PreferenceTracker:
         """
         # Get all preference IDs used
         preference_ids = []
-        
+
         for choice in context.choices:
             pref_type = self._map_to_preference_type(choice["type"])
             if pref_type:
                 pref_id = f"{pref_type.value}:{choice['value']}"
                 preference_ids.append(pref_id)
-        
+
         if preference_ids:
             # Track workflow result
             self.style_memory.track_workflow_result(

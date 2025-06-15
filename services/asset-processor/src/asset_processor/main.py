@@ -25,6 +25,7 @@ from .models import (
     QualityAssessResponse,
 )
 from .organizer import AssetOrganizer
+
 # Quality assessment has been moved to understanding system
 
 # Configure logging

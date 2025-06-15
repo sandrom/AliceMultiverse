@@ -4,9 +4,8 @@ Common workflow: Generate → Upscale → Variations
 """
 
 import logging
-from typing import List
 
-from alicemultiverse.workflows.base import WorkflowTemplate, WorkflowStep, WorkflowContext
+from alicemultiverse.workflows.base import WorkflowContext, WorkflowStep, WorkflowTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -28,16 +27,16 @@ class ImageEnhancementWorkflow(WorkflowTemplate):
         variation_count: Number of variations to generate (default: 3)
         variation_provider: Provider for variations (default: same as initial)
     """
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define the enhancement workflow steps."""
         steps = []
         params = context.initial_params
-        
+
         # Step 1: Initial generation
         initial_provider = params.get("initial_provider", "leonardo")
         initial_model = params.get("initial_model", "phoenix")
-        
+
         steps.append(WorkflowStep(
             name="initial_generation",
             provider=initial_provider,
@@ -53,11 +52,11 @@ class ImageEnhancementWorkflow(WorkflowTemplate):
             },
             cost_limit=params.get("initial_cost_limit", 0.10)
         ))
-        
+
         # Step 2: Upscaling
         upscale_provider = params.get("upscale_provider", "magnific")
         upscale_scale = params.get("upscale_scale", 2)
-        
+
         steps.append(WorkflowStep(
             name="upscale",
             provider=upscale_provider,
@@ -73,12 +72,12 @@ class ImageEnhancementWorkflow(WorkflowTemplate):
             condition="previous.success",
             cost_limit=params.get("upscale_cost_limit", 0.20)
         ))
-        
+
         # Step 3: Optional variations
         if params.get("generate_variations", False):
             variation_count = params.get("variation_count", 3)
             variation_provider = params.get("variation_provider", initial_provider)
-            
+
             for i in range(variation_count):
                 steps.append(WorkflowStep(
                     name=f"variation_{i+1}",
@@ -96,7 +95,7 @@ class ImageEnhancementWorkflow(WorkflowTemplate):
                     condition="upscale.success",
                     cost_limit=params.get("variation_cost_limit", 0.05)
                 ))
-        
+
         # Step 4: Final output (marks files as final)
         steps.append(WorkflowStep(
             name="final_output",
@@ -109,32 +108,32 @@ class ImageEnhancementWorkflow(WorkflowTemplate):
             condition="previous.success",
             cost_limit=0.0  # No cost for local operations
         ))
-        
+
         return steps
-    
-    def validate(self, context: WorkflowContext) -> List[str]:
+
+    def validate(self, context: WorkflowContext) -> list[str]:
         """Validate the workflow can execute."""
         errors = super().validate(context)
         params = context.initial_params
-        
+
         # Check upscale scale is reasonable
         upscale_scale = params.get("upscale_scale", 2)
         if upscale_scale < 1 or upscale_scale > 4:
             errors.append(f"Upscale scale {upscale_scale} should be between 1 and 4")
-        
+
         # Check variation count is reasonable
         if params.get("generate_variations", False):
             variation_count = params.get("variation_count", 3)
             if variation_count < 1 or variation_count > 10:
                 errors.append(f"Variation count {variation_count} should be between 1 and 10")
-        
+
         return errors
-    
+
     def estimate_cost(self, context: WorkflowContext) -> float:
         """Estimate total workflow cost."""
         params = context.initial_params
         total = 0.0
-        
+
         # Initial generation
         if params.get("initial_provider") == "leonardo":
             total += 0.02  # ~$0.02 for Phoenix
@@ -142,7 +141,7 @@ class ImageEnhancementWorkflow(WorkflowTemplate):
             total += 0.04  # Adobe Firefly is slightly more
         else:
             total += 0.03  # Average estimate
-        
+
         # Upscaling (typically more expensive)
         upscale_scale = params.get("upscale_scale", 2)
         if params.get("upscale_provider") == "magnific":
@@ -150,12 +149,12 @@ class ImageEnhancementWorkflow(WorkflowTemplate):
             total += 0.05 * (upscale_scale / 2)  # Base $0.05 for 2x
         else:
             total += 0.04
-        
+
         # Variations
         if params.get("generate_variations", False):
             variation_count = params.get("variation_count", 3)
             total += 0.02 * variation_count  # Similar to initial generation
-        
+
         return total
 
 
@@ -164,11 +163,11 @@ class QuickEnhanceWorkflow(ImageEnhancementWorkflow):
     
     Uses faster models and skips variations by default.
     """
-    
+
     def __init__(self):
         super().__init__(name="QuickEnhance")
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define quick enhancement steps."""
         # Override defaults for speed
         params = context.initial_params
@@ -177,7 +176,7 @@ class QuickEnhanceWorkflow(ImageEnhancementWorkflow):
         params.setdefault("upscale_scale", 2)
         params.setdefault("generate_variations", False)
         params.setdefault("upscale_creativity", 0.2)  # Less creative for speed
-        
+
         return super().define_steps(context)
 
 
@@ -186,11 +185,11 @@ class PremiumEnhanceWorkflow(ImageEnhancementWorkflow):
     
     Uses best models and includes variations.
     """
-    
+
     def __init__(self):
         super().__init__(name="PremiumEnhance")
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define premium enhancement steps."""
         # Override defaults for quality
         params = context.initial_params
@@ -202,10 +201,10 @@ class PremiumEnhanceWorkflow(ImageEnhancementWorkflow):
         params.setdefault("variation_count", 5)
         params.setdefault("upscale_creativity", 0.4)
         params.setdefault("upscale_hdr", 0.7)  # More HDR
-        
+
         # Add extra quality step
         steps = super().define_steps(context)
-        
+
         # Insert quality assessment after upscaling
         quality_step = WorkflowStep(
             name="quality_check",
@@ -218,12 +217,12 @@ class PremiumEnhanceWorkflow(ImageEnhancementWorkflow):
             },
             condition="upscale.success"
         )
-        
+
         # Insert before variations
         insert_index = next(
             (i for i, s in enumerate(steps) if s.name.startswith("variation")),
             len(steps) - 1
         )
         steps.insert(insert_index, quality_step)
-        
+
         return steps

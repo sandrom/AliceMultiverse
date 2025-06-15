@@ -1,43 +1,39 @@
 """Built-in workflow templates for common AI pipelines."""
 
 from .image_enhancement import ImageEnhancementWorkflow
-from .video_pipeline import VideoProductionWorkflow
-from .style_transfer import StyleTransferWorkflow
-from .music_video import (
-    MusicVideoTemplate,
-    QuickMusicVideoTemplate,
-    CinematicMusicVideoTemplate
+from .music_video import CinematicMusicVideoTemplate, MusicVideoTemplate, QuickMusicVideoTemplate
+from .social_media import (
+    InstagramReelTemplate,
+    LinkedInVideoTemplate,
+    PlatformSpec,
+    SocialMediaTemplate,
+    SocialPlatform,
+    TikTokTemplate,
 )
 from .story_arc import (
-    StoryArcTemplate,
     DocumentaryStoryTemplate,
     EmotionalJourneyTemplate,
-    StoryStructure
+    StoryArcTemplate,
+    StoryStructure,
 )
-from .social_media import (
-    SocialMediaTemplate,
-    InstagramReelTemplate,
-    TikTokTemplate,
-    LinkedInVideoTemplate,
-    SocialPlatform,
-    PlatformSpec
-)
+from .style_transfer import StyleTransferWorkflow
+from .video_pipeline import VideoProductionWorkflow
 
 __all__ = [
-    "ImageEnhancementWorkflow",
-    "VideoProductionWorkflow", 
-    "StyleTransferWorkflow",
-    "MusicVideoTemplate",
-    "QuickMusicVideoTemplate",
     "CinematicMusicVideoTemplate",
-    "StoryArcTemplate",
     "DocumentaryStoryTemplate",
     "EmotionalJourneyTemplate",
-    "StoryStructure",
-    "SocialMediaTemplate",
+    "ImageEnhancementWorkflow",
     "InstagramReelTemplate",
-    "TikTokTemplate",
     "LinkedInVideoTemplate",
-    "SocialPlatform",
+    "MusicVideoTemplate",
     "PlatformSpec",
+    "QuickMusicVideoTemplate",
+    "SocialMediaTemplate",
+    "SocialPlatform",
+    "StoryArcTemplate",
+    "StoryStructure",
+    "StyleTransferWorkflow",
+    "TikTokTemplate",
+    "VideoProductionWorkflow",
 ]

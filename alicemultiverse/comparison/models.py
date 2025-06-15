@@ -2,8 +2,8 @@
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import Optional, Literal
 from enum import Enum
+from typing import Literal
 
 
 class ComparisonStrength(str, Enum):
@@ -20,7 +20,7 @@ class Asset:
     id: str
     path: str
     model: str
-    metadata: Optional[dict] = None
+    metadata: dict | None = None
 
 
 @dataclass
@@ -28,10 +28,10 @@ class Comparison:
     """Represents a comparison between two assets."""
     asset_a: Asset
     asset_b: Asset
-    id: Optional[str] = None
-    winner: Optional[Literal["a", "b", "tie"]] = None
-    strength: Optional[ComparisonStrength] = None
-    timestamp: Optional[datetime] = None
+    id: str | None = None
+    winner: Literal["a", "b", "tie"] | None = None
+    strength: ComparisonStrength | None = None
+    timestamp: datetime | None = None
 
 
 @dataclass
@@ -43,7 +43,7 @@ class ModelRating:
     win_count: int
     loss_count: int
     tie_count: int
-    
+
     @property
     def win_rate(self) -> float:
         """Calculate win rate."""

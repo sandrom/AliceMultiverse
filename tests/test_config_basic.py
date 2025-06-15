@@ -2,8 +2,6 @@
 
 from pathlib import Path
 
-import pytest
-
 from alicemultiverse.core.config import get_default_config, load_config
 
 
@@ -24,7 +22,7 @@ class TestConfig:
         """Test loading with non-existent config file returns defaults."""
         # Now returns defaults with a warning instead of raising
         config = load_config(Path("/nonexistent/config.yaml"))
-        
+
         # Should get default config
         assert config.paths.inbox == "inbox"
         assert config.paths.organized == "organized"

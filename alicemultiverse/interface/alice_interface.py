@@ -20,6 +20,7 @@ from .models import (
     TagRequest,
 )
 
+
 # Since AliceResponse is a TypedDict, we need to create dicts not instances
 def AliceResponse(success: bool, message: str, data: Any = None, error: str = None) -> dict:
     """Create an AliceResponse dict."""
@@ -50,14 +51,14 @@ class AliceInterface:
         self.config.enhanced_metadata = True  # Always use enhanced metadata
         self.organizer = None
         self.initialization_error = None
-        
+
         try:
             self._ensure_organizer()
         except Exception as e:
             # Store error for later - allow interface to be created
             self.initialization_error = e
             logger.warning(f"Failed to initialize organizer: {e}")
-        
+
         self.asset_repo = None
         self.project_repo = None
         # Initialize project service with config
@@ -224,7 +225,7 @@ class AliceInterface:
                     structured_tags["mood"] = request.get("mood_tags", [])
                 if request.get("subject_tags"):
                     structured_tags["subject"] = request.get("subject_tags", [])
-                
+
                 db_results = self._search_database(
                     tags=structured_tags if structured_tags else None,
                     tag_mode=request.get("tag_mode", "any"),
@@ -233,7 +234,7 @@ class AliceInterface:
                     roles=request.get("roles"),
                     limit=request.get("limit", 20)
                 )
-                
+
                 # Fallback to organizer search if available
                 if not db_results and self.organizer.search_engine:
                     results = self.organizer.search_assets(**query_params)
@@ -254,7 +255,7 @@ class AliceInterface:
             logger.error(f"Search failed: {e}")
             friendly = AIFriendlyError.make_friendly(e, {"operation": "search", "request": request})
             return AliceResponse(
-                success=False, 
+                success=False,
                 message=friendly["error"],
                 data={"suggestions": friendly["suggestions"]},
                 error=friendly["technical_details"]
@@ -302,7 +303,7 @@ class AliceInterface:
             # Check for initialization error
             if self.initialization_error:
                 raise self.initialization_error
-                
+
             # Update config based on request
             if request.get("source_path"):
                 self.config.paths.inbox = request["source_path"]
@@ -321,7 +322,7 @@ class AliceInterface:
 
             # Get summary
             summary = self.organizer.get_organization_summary()
-            
+
             # Persist to database
             if success:
                 self._persist_organized_assets()
@@ -364,7 +365,7 @@ class AliceInterface:
 
             success_count = 0
             tags = request["tags"]
-            
+
             # If we have the asset repository, use it for structured tags
             if self.asset_repo and isinstance(tags, dict):
                 # New structured format
@@ -388,7 +389,7 @@ class AliceInterface:
                 # Legacy format or no database
                 tag_type = request.get("tag_type", "custom")
                 tag_list = tags if isinstance(tags, list) else []
-                
+
                 for asset_id in request["asset_ids"]:
                     if self.organizer.tag_asset(asset_id, tag_list, tag_type):
                         success_count += 1
@@ -679,18 +680,18 @@ class AliceInterface:
             return AliceResponse(
                 success=False, message="Failed to get statistics", data=None, error=str(e)
             )
-    
+
     def _persist_organized_assets(self) -> None:
         """Persist organized assets to database."""
         try:
             # Get all metadata from the cache
             all_metadata = self.organizer.metadata_cache._unified.metadata_index
-            
+
             for content_hash, metadata in all_metadata.items():
                 # Determine media type
                 media_type = metadata.get("media_type", "image")
                 file_path = metadata.get("file_path", "")
-                
+
                 # Create or update asset in database
                 asset = self.asset_repo.create_or_update_asset(
                     content_hash=content_hash,
@@ -699,28 +700,28 @@ class AliceInterface:
                     metadata=metadata,
                     project_id=metadata.get("project")
                 )
-                
+
                 # Add tags if present
                 if metadata.get("style_tags"):
                     for tag in metadata["style_tags"]:
                         self.asset_repo.add_tag(content_hash, "style", tag, source="auto")
-                        
+
                 if metadata.get("mood_tags"):
                     for tag in metadata["mood_tags"]:
                         self.asset_repo.add_tag(content_hash, "mood", tag, source="auto")
-                        
+
                 if metadata.get("subject_tags"):
                     for tag in metadata["subject_tags"]:
                         self.asset_repo.add_tag(content_hash, "subject", tag, source="auto")
-                        
+
                 logger.debug(f"Persisted asset to database: {content_hash}")
-                
+
             logger.info(f"Persisted {len(all_metadata)} assets to database")
-            
+
         except Exception as e:
             logger.error(f"Failed to persist assets to database: {e}")
             # Don't fail the operation if database persistence fails
-    
+
     def _search_database(
         self,
         tags: list[str] | dict[str, list[str]] | None = None,
@@ -753,7 +754,7 @@ class AliceInterface:
                 role=roles[0] if roles else None,
                 limit=limit
             )
-            
+
             # Convert to metadata format
             results = []
             for asset in assets:
@@ -768,15 +769,15 @@ class AliceInterface:
                     "media_type": asset.media_type,
                 })
                 results.append(metadata)
-                
+
             return results
-            
+
         except Exception as e:
             logger.error(f"Database search failed: {e}")
             return []
-    
+
     # Project Management Methods
-    
+
     def create_project(
         self,
         name: str,
@@ -802,7 +803,7 @@ class AliceInterface:
                 budget_total=budget,
                 creative_context=creative_context
             )
-            
+
             return AliceResponse(
                 success=True,
                 message=f"Created project '{name}'",
@@ -814,7 +815,7 @@ class AliceInterface:
                 },
                 error=None
             )
-            
+
         except Exception as e:
             logger.error(f"Project creation failed: {e}")
             friendly = AIFriendlyError.make_friendly(e, {"operation": "create_project", "name": name})
@@ -824,7 +825,7 @@ class AliceInterface:
                 data={"suggestions": friendly["suggestions"]},
                 error=friendly["technical_details"]
             )
-    
+
     def update_project_context(
         self,
         project_id: str,
@@ -844,7 +845,7 @@ class AliceInterface:
                 project_id=project_id,
                 creative_context=creative_context
             )
-            
+
             if not project:
                 return AliceResponse(
                     success=False,
@@ -852,7 +853,7 @@ class AliceInterface:
                     data=None,
                     error="Project not found"
                 )
-            
+
             return AliceResponse(
                 success=True,
                 message="Updated project context",
@@ -862,7 +863,7 @@ class AliceInterface:
                 },
                 error=None
             )
-            
+
         except Exception as e:
             logger.error(f"Project update failed: {e}")
             return AliceResponse(
@@ -871,7 +872,7 @@ class AliceInterface:
                 data=None,
                 error=str(e)
             )
-    
+
     def get_project_budget_status(self, project_id: str) -> AliceResponse:
         """Get project budget status and cost breakdown.
         
@@ -883,7 +884,7 @@ class AliceInterface:
         """
         try:
             stats = self.project_service.get_project_stats(project_id)
-            
+
             if not stats:
                 return AliceResponse(
                     success=False,
@@ -891,14 +892,14 @@ class AliceInterface:
                     data=None,
                     error="Project not found"
                 )
-            
+
             return AliceResponse(
                 success=True,
                 message="Retrieved project budget status",
                 data=stats,
                 error=None
             )
-            
+
         except Exception as e:
             logger.error(f"Failed to get project stats: {e}")
             return AliceResponse(
@@ -907,7 +908,7 @@ class AliceInterface:
                 data=None,
                 error=str(e)
             )
-    
+
     def list_projects(self, status: str | None = None) -> AliceResponse:
         """List all projects, optionally filtered by status.
         
@@ -919,7 +920,7 @@ class AliceInterface:
         """
         try:
             projects = self.project_service.list_projects(status=status)
-            
+
             project_list = []
             for project in projects:
                 project_list.append({
@@ -931,14 +932,14 @@ class AliceInterface:
                     "budget_spent": project.budget_spent,
                     "created_at": project.created_at.isoformat() if project.created_at else None
                 })
-            
+
             return AliceResponse(
                 success=True,
                 message=f"Found {len(projects)} projects",
                 data={"projects": project_list},
                 error=None
             )
-            
+
         except Exception as e:
             logger.error(f"Failed to list projects: {e}")
             return AliceResponse(
@@ -947,7 +948,7 @@ class AliceInterface:
                 data=None,
                 error=str(e)
             )
-    
+
     def track_generation_cost(
         self,
         project_id: str,
@@ -982,10 +983,10 @@ class AliceInterface:
                 prompt=prompt,
                 result_assets=result_assets
             )
-            
+
             # Get updated project stats
             stats = self.project_service.get_project_stats(project_id)
-            
+
             return AliceResponse(
                 success=True,
                 message="Tracked generation cost",
@@ -997,7 +998,7 @@ class AliceInterface:
                 },
                 error=None
             )
-            
+
         except ValueError as e:
             # Project not found
             return AliceResponse(
@@ -1014,7 +1015,7 @@ class AliceInterface:
                 data=None,
                 error=str(e)
             )
-    
+
     def health_check(self) -> AliceResponse:
         """Check system health including database connectivity.
         
@@ -1025,17 +1026,17 @@ class AliceInterface:
             "status": "healthy",
             "components": {}
         }
-        
+
         # Check database
         try:
             from alicemultiverse.database.config import get_pool_stats
-            
+
             with self.project_service.db.begin():
                 self.project_service.db.execute("SELECT 1")
-            
+
             # Get pool statistics
             pool_stats = get_pool_stats()
-            
+
             health["components"]["database"] = {
                 "status": "healthy",
                 "type": "postgresql",
@@ -1048,7 +1049,7 @@ class AliceInterface:
                 "status": "unhealthy",
                 "error": str(e)
             }
-        
+
         # Check Redis event bus
         try:
             # Simple check if event bus is available
@@ -1061,13 +1062,13 @@ class AliceInterface:
                 "status": "unhealthy",
                 "error": str(e)
             }
-        
+
         # Check file system access
         try:
             from pathlib import Path
             inbox = Path(self.config.paths.inbox)
             organized = Path(self.config.paths.organized)
-            
+
             health["components"]["filesystem"] = {
                 "status": "healthy",
                 "inbox_exists": inbox.exists(),
@@ -1079,7 +1080,7 @@ class AliceInterface:
                 "status": "unhealthy",
                 "error": str(e)
             }
-        
+
         return AliceResponse(
             success=health["status"] == "healthy",
             message=f"System is {health['status']}",

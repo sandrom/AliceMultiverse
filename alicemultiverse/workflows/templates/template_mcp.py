@@ -1,28 +1,31 @@
 """MCP tools for workflow templates."""
 
-import json
-from typing import Dict, List, Optional, Any
-from pathlib import Path
+from typing import Any
 
-from ..executor import WorkflowExecutor
-from ..base import WorkflowContext
-from .story_arc import StoryArcTemplate, DocumentaryStoryTemplate, EmotionalJourneyTemplate
-from .social_media import SocialMediaTemplate, InstagramReelTemplate, TikTokTemplate, LinkedInVideoTemplate
 from ...core.structured_logging import get_logger
+from ..base import WorkflowContext
+from ..executor import WorkflowExecutor
+from .social_media import (
+    InstagramReelTemplate,
+    LinkedInVideoTemplate,
+    SocialMediaTemplate,
+    TikTokTemplate,
+)
+from .story_arc import DocumentaryStoryTemplate, StoryArcTemplate
 
 logger = get_logger(__name__)
 
 
 async def create_story_arc_video(
-    images: List[str],
+    images: list[str],
     structure: str = "three_act",
     duration: float = 60.0,
-    narrative_tags: Optional[Dict[str, List[str]]] = None,
+    narrative_tags: dict[str, list[str]] | None = None,
     emotion_curve: str = "standard",
-    music_file: Optional[str] = None,
+    music_file: str | None = None,
     voiceover_markers: bool = False,
-    export_formats: Optional[List[str]] = None
-) -> Dict[str, Any]:
+    export_formats: list[str] | None = None
+) -> dict[str, Any]:
     """Create a narrative-driven video using story arc template.
     
     Args:
@@ -41,7 +44,7 @@ async def create_story_arc_video(
     try:
         # Create template
         template = StoryArcTemplate()
-        
+
         # Prepare parameters
         params = {
             "images": images,
@@ -51,24 +54,24 @@ async def create_story_arc_video(
             "emotion_curve": emotion_curve,
             "export_formats": export_formats or ["edl", "xml"]
         }
-        
+
         if music_file:
             params["music_file"] = music_file
-        
+
         if voiceover_markers:
             params["voiceover_markers"] = True
-        
+
         # Create context and executor
         context = WorkflowContext(
             workflow_id=f"story_arc_{structure}",
             initial_params=params
         )
-        
+
         executor = WorkflowExecutor()
-        
+
         # Execute workflow
         result = await executor.execute_workflow(template, context)
-        
+
         # Extract key results
         if result.success:
             timeline = result.results.get("generate_timeline", {})
@@ -86,20 +89,20 @@ async def create_story_arc_video(
                 "error": result.error or "Workflow failed",
                 "failed_step": result.failed_step
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to create story arc video: {e}")
         return {"success": False, "error": str(e)}
 
 
 async def create_documentary_video(
-    images: List[str],
+    images: list[str],
     duration: float = 120.0,
-    narrative_tags: Optional[Dict[str, List[str]]] = None,
-    music_file: Optional[str] = None,
+    narrative_tags: dict[str, list[str]] | None = None,
+    music_file: str | None = None,
     voiceover_markers: bool = True,
-    export_formats: Optional[List[str]] = None
-) -> Dict[str, Any]:
+    export_formats: list[str] | None = None
+) -> dict[str, Any]:
     """Create a documentary-style video.
     
     Args:
@@ -115,7 +118,7 @@ async def create_documentary_video(
     """
     try:
         template = DocumentaryStoryTemplate()
-        
+
         params = {
             "images": images,
             "structure": "three_act",  # Documentary uses simplified structure
@@ -125,18 +128,18 @@ async def create_documentary_video(
             "voiceover_markers": voiceover_markers,
             "export_formats": export_formats or ["edl", "xml"]
         }
-        
+
         if music_file:
             params["music_file"] = music_file
-        
+
         context = WorkflowContext(
             workflow_id="documentary",
             initial_params=params
         )
-        
+
         executor = WorkflowExecutor()
         result = await executor.execute_workflow(template, context)
-        
+
         if result.success:
             timeline = result.results.get("generate_timeline", {})
             return {
@@ -150,7 +153,7 @@ async def create_documentary_video(
                 "success": False,
                 "error": result.error or "Workflow failed"
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to create documentary video: {e}")
         return {"success": False, "error": str(e)}
@@ -158,14 +161,14 @@ async def create_documentary_video(
 
 async def create_social_media_video(
     platform: str,
-    images: List[str],
-    music_file: Optional[str] = None,
-    caption: Optional[str] = None,
-    hashtags: Optional[List[str]] = None,
+    images: list[str],
+    music_file: str | None = None,
+    caption: str | None = None,
+    hashtags: list[str] | None = None,
     style: str = "trending",
-    duration: Optional[float] = None,
+    duration: float | None = None,
     auto_optimize: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create a social media optimized video.
     
     Args:
@@ -191,34 +194,34 @@ async def create_social_media_video(
             template = LinkedInVideoTemplate()
         else:
             template = SocialMediaTemplate()
-        
+
         params = {
             "platform": platform,
             "images": images,
             "style": style,
             "auto_optimize": auto_optimize
         }
-        
+
         if music_file:
             params["music_file"] = music_file
-        
+
         if caption:
             params["caption"] = caption
-            
+
         if hashtags:
             params["hashtags"] = hashtags
-            
+
         if duration:
             params["duration"] = duration
-        
+
         context = WorkflowContext(
             workflow_id=f"social_{platform}",
             initial_params=params
         )
-        
+
         executor = WorkflowExecutor()
         result = await executor.execute_workflow(template, context)
-        
+
         if result.success:
             export = result.results.get("export_platform", {})
             return {
@@ -233,20 +236,20 @@ async def create_social_media_video(
                 "success": False,
                 "error": result.error or "Workflow failed"
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to create social media video: {e}")
         return {"success": False, "error": str(e)}
 
 
 async def create_instagram_reel(
-    images: List[str],
+    images: list[str],
     music_file: str,
-    caption: Optional[str] = None,
-    hashtags: Optional[List[str]] = None,
-    effects: Optional[List[str]] = None,
+    caption: str | None = None,
+    hashtags: list[str] | None = None,
+    effects: list[str] | None = None,
     duration: float = 15.0
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create an Instagram Reel with optimizations.
     
     Args:
@@ -265,7 +268,7 @@ async def create_instagram_reel(
         "stickers": [],
         "duration": min(duration, 90)  # Max 90 seconds
     }
-    
+
     return await create_social_media_video(
         platform="instagram_reel",
         images=images,
@@ -278,14 +281,14 @@ async def create_instagram_reel(
 
 
 async def create_tiktok_video(
-    images: List[str],
-    music_file: Optional[str] = None,
-    caption: Optional[str] = None,
-    hashtags: Optional[List[str]] = None,
-    challenges: Optional[List[str]] = None,
+    images: list[str],
+    music_file: str | None = None,
+    caption: str | None = None,
+    hashtags: list[str] | None = None,
+    challenges: list[str] | None = None,
     duet_ready: bool = False,
     duration: float = 30.0
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Create a TikTok video with trend integration.
     
     Args:
@@ -305,7 +308,7 @@ async def create_tiktok_video(
         "duet_ready": duet_ready,
         "duration": min(duration, 180)  # Max 3 minutes
     }
-    
+
     return await create_social_media_video(
         platform="tiktok",
         images=images,
@@ -318,8 +321,8 @@ async def create_tiktok_video(
 
 
 async def get_platform_specifications(
-    platform: Optional[str] = None
-) -> Dict[str, Any]:
+    platform: str | None = None
+) -> dict[str, Any]:
     """Get specifications for social media platforms.
     
     Args:
@@ -329,12 +332,12 @@ async def get_platform_specifications(
         Platform specifications
     """
     from .social_media import PLATFORM_SPECS, SocialPlatform
-    
+
     if platform:
         try:
             platform_enum = SocialPlatform(platform)
             spec = PLATFORM_SPECS.get(platform_enum)
-            
+
             if spec:
                 return {
                     "platform": platform,
@@ -352,7 +355,7 @@ async def get_platform_specifications(
                 }
             else:
                 return {"error": f"No specifications for {platform}"}
-                
+
         except ValueError:
             return {"error": f"Unknown platform: {platform}"}
     else:
@@ -365,14 +368,14 @@ async def get_platform_specifications(
                 "optimal_duration": spec.optimal_duration,
                 "features": spec.features
             }
-        
+
         return {"platforms": all_specs}
 
 
 async def suggest_story_structure(
-    images: List[str],
-    theme: Optional[str] = None
-) -> Dict[str, Any]:
+    images: list[str],
+    theme: str | None = None
+) -> dict[str, Any]:
     """Suggest appropriate story structure based on content.
     
     Args:
@@ -383,9 +386,9 @@ async def suggest_story_structure(
         Structure suggestions with reasoning
     """
     suggestions = []
-    
+
     image_count = len(images)
-    
+
     # Three act for most narratives
     if image_count >= 6:
         suggestions.append({
@@ -393,7 +396,7 @@ async def suggest_story_structure(
             "reason": "Classic structure works well for most stories",
             "image_distribution": "25% setup, 50% confrontation, 25% resolution"
         })
-    
+
     # Five act for complex narratives
     if image_count >= 15:
         suggestions.append({
@@ -401,7 +404,7 @@ async def suggest_story_structure(
             "reason": "Complex narrative with multiple turning points",
             "image_distribution": "More nuanced pacing with climax emphasis"
         })
-    
+
     # Hero's journey for adventure themes
     if theme and "adventure" in theme.lower():
         suggestions.append({
@@ -409,7 +412,7 @@ async def suggest_story_structure(
             "reason": "Perfect for adventure and transformation stories",
             "image_distribution": "50% dedicated to trials and challenges"
         })
-    
+
     # Circular for reflective pieces
     if theme and any(word in theme.lower() for word in ["reflect", "journey", "growth"]):
         suggestions.append({
@@ -417,7 +420,7 @@ async def suggest_story_structure(
             "reason": "Shows transformation by returning to beginning",
             "image_distribution": "Balanced with transformation emphasis"
         })
-    
+
     return {
         "suggestions": suggestions,
         "image_count": image_count,

@@ -9,8 +9,8 @@ import json
 import logging
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
 from threading import Lock
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -21,10 +21,10 @@ class FileCache:
     Provides the same interface as RedisCache but uses local files.
     Perfect for personal use and development environments.
     """
-    
+
     def __init__(
         self,
-        cache_dir: Optional[str] = None,
+        cache_dir: str | None = None,
         prefix: str = "alice",
         ttl: int = 3600,
         **kwargs  # Accept and ignore Redis-specific parameters
@@ -40,22 +40,22 @@ class FileCache:
         self.prefix = prefix
         self.ttl = ttl
         self._lock = Lock()
-        
+
         # Set up cache directory
         if cache_dir:
             self.cache_dir = Path(cache_dir)
         else:
             self.cache_dir = Path.home() / ".alice" / "cache"
-            
+
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        
+
         logger.info(f"File cache initialized at {self.cache_dir}")
-    
+
     @property
     def is_available(self) -> bool:
         """Check if cache is available (always True for file cache)."""
         return True
-    
+
     def _make_key(self, namespace: str, key: str) -> str:
         """Create a namespaced key.
         
@@ -67,20 +67,20 @@ class FileCache:
             Full cache key
         """
         return f"{self.prefix}:{namespace}:{key}"
-    
+
     def _get_cache_path(self, full_key: str) -> Path:
         """Get file path for a cache key."""
         # Use hash to avoid filesystem issues with special characters
         key_hash = hashlib.md5(full_key.encode()).hexdigest()
         return self.cache_dir / f"{key_hash}.json"
-    
+
     def _is_expired(self, cache_data: dict) -> bool:
         """Check if cache entry is expired."""
         if "expires_at" not in cache_data:
             return False
         return time.time() > cache_data["expires_at"]
-    
-    def get(self, namespace: str, key: str) -> Optional[Any]:
+
+    def get(self, namespace: str, key: str) -> Any | None:
         """Get value from cache.
         
         Args:
@@ -92,32 +92,32 @@ class FileCache:
         """
         full_key = self._make_key(namespace, key)
         cache_path = self._get_cache_path(full_key)
-        
+
         try:
             if not cache_path.exists():
                 return None
-                
+
             with self._lock:
-                with open(cache_path, "r") as f:
+                with open(cache_path) as f:
                     cache_data = json.load(f)
-                    
+
             if self._is_expired(cache_data):
                 # Clean up expired entry
                 cache_path.unlink(missing_ok=True)
                 return None
-                
+
             return cache_data.get("value")
-            
+
         except Exception as e:
             logger.error(f"Cache get error: {e}")
             return None
-    
+
     def set(
         self,
         namespace: str,
         key: str,
         value: Any,
-        ttl: Optional[int] = None
+        ttl: int | None = None
     ) -> bool:
         """Set value in cache.
         
@@ -132,7 +132,7 @@ class FileCache:
         """
         full_key = self._make_key(namespace, key)
         cache_path = self._get_cache_path(full_key)
-        
+
         try:
             cache_data = {
                 "key": full_key,
@@ -140,17 +140,17 @@ class FileCache:
                 "created_at": time.time(),
                 "expires_at": time.time() + (ttl or self.ttl)
             }
-            
+
             with self._lock:
                 with open(cache_path, "w") as f:
                     json.dump(cache_data, f, ensure_ascii=False, indent=2)
-                    
+
             return True
-            
+
         except Exception as e:
             logger.error(f"Cache set error: {e}")
             return False
-    
+
     def delete(self, namespace: str, key: str) -> bool:
         """Delete value from cache.
         
@@ -163,14 +163,14 @@ class FileCache:
         """
         full_key = self._make_key(namespace, key)
         cache_path = self._get_cache_path(full_key)
-        
+
         try:
             cache_path.unlink(missing_ok=True)
             return True
         except Exception as e:
             logger.error(f"Cache delete error: {e}")
             return False
-    
+
     def clear_namespace(self, namespace: str) -> int:
         """Clear all keys in a namespace.
         
@@ -182,26 +182,26 @@ class FileCache:
         """
         pattern = f"{self.prefix}:{namespace}:*"
         count = 0
-        
+
         try:
             # Since we hash keys, we need to check each file
             for cache_file in self.cache_dir.glob("*.json"):
                 try:
-                    with open(cache_file, "r") as f:
+                    with open(cache_file) as f:
                         data = json.load(f)
-                        
+
                     if data.get("key", "").startswith(f"{self.prefix}:{namespace}:"):
                         cache_file.unlink()
                         count += 1
-                        
+
                 except Exception:
                     continue
-                    
+
         except Exception as e:
             logger.error(f"Clear namespace error: {e}")
-            
+
         return count
-    
+
     def _hash_dict(self, data: dict) -> str:
         """Create hash from dictionary for cache keys.
         
@@ -214,10 +214,10 @@ class FileCache:
         # Sort keys for consistent hashing
         sorted_data = json.dumps(data, sort_keys=True)
         return hashlib.md5(sorted_data.encode()).hexdigest()
-    
+
     # Specialized methods for search results
-    
-    def get_search_results(self, query_hash: str) -> Optional[dict]:
+
+    def get_search_results(self, query_hash: str) -> dict | None:
         """Get cached search results.
         
         Args:
@@ -227,12 +227,12 @@ class FileCache:
             Cached results or None
         """
         return self.get("search", query_hash)
-    
+
     def set_search_results(
         self,
         query_hash: str,
         results: dict,
-        ttl: Optional[int] = None
+        ttl: int | None = None
     ) -> bool:
         """Cache search results.
         
@@ -245,10 +245,10 @@ class FileCache:
             True if successful
         """
         return self.set("search", query_hash, results, ttl)
-    
+
     # Specialized methods for embeddings
-    
-    def get_embedding(self, content_hash: str) -> Optional[List[float]]:
+
+    def get_embedding(self, content_hash: str) -> list[float] | None:
         """Get cached embedding.
         
         Args:
@@ -258,12 +258,12 @@ class FileCache:
             Embedding vector or None
         """
         return self.get("embedding", content_hash)
-    
+
     def set_embedding(
         self,
         content_hash: str,
-        embedding: List[float],
-        ttl: Optional[int] = None
+        embedding: list[float],
+        ttl: int | None = None
     ) -> bool:
         """Cache embedding.
         
@@ -276,11 +276,11 @@ class FileCache:
             True if successful
         """
         return self.set("embedding", content_hash, embedding, ttl)
-    
+
     def get_embeddings_batch(
         self,
-        content_hashes: List[str]
-    ) -> Dict[str, List[float]]:
+        content_hashes: list[str]
+    ) -> dict[str, list[float]]:
         """Get multiple embeddings.
         
         Args:
@@ -295,11 +295,11 @@ class FileCache:
             if embedding:
                 results[hash_val] = embedding
         return results
-    
+
     def set_embeddings_batch(
         self,
-        embeddings: Dict[str, List[float]],
-        ttl: Optional[int] = None
+        embeddings: dict[str, list[float]],
+        ttl: int | None = None
     ) -> int:
         """Set multiple embeddings.
         
@@ -315,9 +315,9 @@ class FileCache:
             if self.set_embedding(hash_val, embedding, ttl):
                 count += 1
         return count
-    
+
     # Cleanup methods
-    
+
     def cleanup_expired(self) -> int:
         """Remove expired cache entries.
         
@@ -325,23 +325,23 @@ class FileCache:
             Number of entries removed
         """
         count = 0
-        
+
         try:
             for cache_file in self.cache_dir.glob("*.json"):
                 try:
-                    with open(cache_file, "r") as f:
+                    with open(cache_file) as f:
                         data = json.load(f)
-                        
+
                     if self._is_expired(data):
                         cache_file.unlink()
                         count += 1
-                        
+
                 except Exception:
                     continue
-                    
+
         except Exception as e:
             logger.error(f"Cleanup error: {e}")
-            
+
         return count
 
 

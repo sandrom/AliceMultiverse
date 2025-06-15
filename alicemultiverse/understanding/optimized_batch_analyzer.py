@@ -11,19 +11,18 @@ import logging
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Dict, List, Optional, Tuple
 
 from tqdm import tqdm
 
 from ..assets.perceptual_hashing import (
-    calculate_perceptual_hash,
     calculate_difference_hash,
-    hamming_distance
+    calculate_perceptual_hash,
+    hamming_distance,
 )
 from ..core.cost_tracker import get_cost_tracker
 from .analyzer import ImageAnalyzer
-from .batch_analyzer import BatchAnalysisRequest
 from .base import ImageAnalysisResult
+from .batch_analyzer import BatchAnalysisRequest
 
 logger = logging.getLogger(__name__)
 
@@ -32,10 +31,10 @@ logger = logging.getLogger(__name__)
 class ImageGroup:
     """Group of similar images."""
     representative: Path
-    members: List[Path] = field(default_factory=list)
-    representative_hash: Optional[str] = None
-    analysis_result: Optional[ImageAnalysisResult] = None
-    confidence_scores: Dict[Path, float] = field(default_factory=dict)
+    members: list[Path] = field(default_factory=list)
+    representative_hash: str | None = None
+    analysis_result: ImageAnalysisResult | None = None
+    confidence_scores: dict[Path, float] = field(default_factory=dict)
 
 
 @dataclass
@@ -52,7 +51,7 @@ class OptimizationStats:
 
 class OptimizedBatchAnalyzer:
     """Batch analyzer with similarity detection and cost optimization."""
-    
+
     def __init__(
         self,
         analyzer: ImageAnalyzer,
@@ -73,11 +72,11 @@ class OptimizedBatchAnalyzer:
         self.min_group_size = min_group_size
         self.use_progressive_providers = use_progressive_providers
         self.cost_tracker = get_cost_tracker()
-        
+
     async def analyze_batch_optimized(
         self,
         request: BatchAnalysisRequest
-    ) -> Tuple[List[Tuple[Path, Optional[ImageAnalysisResult]]], OptimizationStats]:
+    ) -> tuple[list[tuple[Path, ImageAnalysisResult | None]], OptimizationStats]:
         """Analyze batch with optimization.
         
         Returns:
@@ -86,21 +85,21 @@ class OptimizedBatchAnalyzer:
         # Get images to process
         images = await self._get_images_to_process(request)
         logger.info(f"Starting optimized batch analysis for {len(images)} images")
-        
+
         # Initialize stats
         stats = OptimizationStats(total_images=len(images))
-        
+
         # Group similar images
         groups = await self._group_similar_images(images, request.show_progress)
         stats.unique_groups = len(groups)
         logger.info(f"Grouped {len(images)} images into {len(groups)} similarity groups")
-        
+
         # Analyze representatives
         results = []
-        
+
         if request.show_progress:
             pbar = tqdm(total=len(groups), desc="Analyzing image groups")
-        
+
         for group in groups:
             # Analyze representative
             if len(group.members) >= self.min_group_size:
@@ -109,12 +108,12 @@ class OptimizedBatchAnalyzer:
                     group.representative,
                     request
                 )
-                
+
                 if result:
                     group.analysis_result = result
                     stats.images_analyzed += 1
                     stats.total_cost += result.cost
-                    
+
                     # Apply to all members
                     for member in group.members:
                         confidence = group.confidence_scores.get(member, 1.0)
@@ -122,7 +121,7 @@ class OptimizedBatchAnalyzer:
                             result, member, confidence
                         )
                         results.append((member, member_result))
-                        
+
                         if member != group.representative:
                             stats.images_reused += 1
                             stats.api_calls_saved += 1
@@ -142,7 +141,7 @@ class OptimizedBatchAnalyzer:
                     if result:
                         stats.images_analyzed += 1
                         stats.total_cost += result.cost
-            
+
             if request.show_progress:
                 pbar.update(1)
                 pbar.set_postfix({
@@ -150,31 +149,31 @@ class OptimizedBatchAnalyzer:
                     "reused": stats.images_reused,
                     "saved": f"${stats.cost_saved:.2f}"
                 })
-        
+
         if request.show_progress:
             pbar.close()
-        
+
         # Log optimization summary
         logger.info(f"Optimization complete: {stats.images_analyzed} analyzed, "
                    f"{stats.images_reused} reused, ${stats.cost_saved:.2f} saved")
-        
+
         return results, stats
-    
+
     async def _group_similar_images(
         self,
-        images: List[Path],
+        images: list[Path],
         show_progress: bool = False
-    ) -> List[ImageGroup]:
+    ) -> list[ImageGroup]:
         """Group similar images using perceptual hashing."""
         groups = []
         processed = set()
-        
+
         # Calculate hashes for all images
         image_hashes = {}
-        
+
         if show_progress:
             pbar = tqdm(total=len(images), desc="Computing image hashes")
-        
+
         for img_path in images:
             phash = calculate_perceptual_hash(img_path)
             dhash = calculate_difference_hash(img_path)
@@ -182,15 +181,15 @@ class OptimizedBatchAnalyzer:
                 image_hashes[img_path] = (phash, dhash)
             if show_progress:
                 pbar.update(1)
-        
+
         if show_progress:
             pbar.close()
-        
+
         # Group by similarity
         for img_path, (phash, dhash) in image_hashes.items():
             if img_path in processed:
                 continue
-                
+
             # Create new group
             group = ImageGroup(
                 representative=img_path,
@@ -199,24 +198,24 @@ class OptimizedBatchAnalyzer:
             )
             group.confidence_scores[img_path] = 1.0  # Representative has full confidence
             processed.add(img_path)
-            
+
             # Find similar images
             for other_path, (other_phash, other_dhash) in image_hashes.items():
                 if other_path in processed:
                     continue
-                    
+
                 # Calculate similarity
                 similarity = self._calculate_similarity(
                     phash, dhash, other_phash, other_dhash
                 )
-                
+
                 if similarity >= self.similarity_threshold:
                     group.members.append(other_path)
                     group.confidence_scores[other_path] = similarity
                     processed.add(other_path)
-            
+
             groups.append(group)
-        
+
         # Add any images that couldn't be hashed as single-member groups
         for img_path in images:
             if img_path not in processed:
@@ -224,9 +223,9 @@ class OptimizedBatchAnalyzer:
                     representative=img_path,
                     members=[img_path]
                 ))
-        
+
         return groups
-    
+
     def _calculate_similarity(
         self,
         phash1: str,
@@ -240,23 +239,23 @@ class OptimizedBatchAnalyzer:
         phash2_bin = bin(int(phash2, 16))[2:].zfill(64)
         dhash1_bin = bin(int(dhash1, 16))[2:].zfill(64)
         dhash2_bin = bin(int(dhash2, 16))[2:].zfill(64)
-        
+
         # Calculate Hamming distances
         phash_distance = hamming_distance(phash1_bin, phash2_bin)
         dhash_distance = hamming_distance(dhash1_bin, dhash2_bin)
-        
+
         # Convert to similarity (0-1)
         phash_similarity = 1 - (phash_distance / 64)
         dhash_similarity = 1 - (dhash_distance / 64)
-        
+
         # Weighted average (perceptual hash is more important)
         return 0.7 * phash_similarity + 0.3 * dhash_similarity
-    
+
     async def _analyze_with_progressive_providers(
         self,
         image_path: Path,
         request: BatchAnalysisRequest
-    ) -> Optional[ImageAnalysisResult]:
+    ) -> ImageAnalysisResult | None:
         """Analyze image with progressive provider strategy."""
         if not self.use_progressive_providers or request.provider:
             # Use standard analysis
@@ -268,25 +267,25 @@ class OptimizedBatchAnalyzer:
                 detailed=request.detailed,
                 custom_instructions=request.custom_instructions
             )
-        
+
         # Progressive strategy: cheap → expensive
         provider_tiers = [
             ["google-ai"],  # Free tier
             ["deepseek"],   # Very cheap
             ["anthropic", "openai"]  # Premium
         ]
-        
+
         last_result = None
-        
+
         for tier in provider_tiers:
             available_providers = [
-                p for p in tier 
+                p for p in tier
                 if p in self.analyzer.get_available_providers()
             ]
-            
+
             if not available_providers:
                 continue
-            
+
             # Try providers in this tier
             for provider in available_providers:
                 try:
@@ -298,20 +297,20 @@ class OptimizedBatchAnalyzer:
                         detailed=request.detailed,
                         custom_instructions=request.custom_instructions
                     )
-                    
+
                     # Check if result is good enough
                     if self._is_result_sufficient(result, tier == provider_tiers[-1]):
                         return result
-                    
+
                     last_result = result
-                    
+
                 except Exception as e:
                     logger.debug(f"Provider {provider} failed: {e}")
                     continue
-        
+
         # Return best result we got
         return last_result
-    
+
     def _is_result_sufficient(
         self,
         result: ImageAnalysisResult,
@@ -320,14 +319,14 @@ class OptimizedBatchAnalyzer:
         """Check if analysis result is sufficient."""
         if is_final_tier:
             return True  # Accept any result from premium tier
-        
+
         # Check quality indicators
         if not result.tags or len(result.tags) < 5:
             return False  # Too few tags
-        
+
         if result.description and len(result.description) < 50:
             return False  # Description too short
-        
+
         # Check for specific tag categories
         tag_categories = defaultdict(int)
         for tag in result.tags:
@@ -337,10 +336,10 @@ class OptimizedBatchAnalyzer:
                 tag_categories["style"] += 1
             elif any(obj in tag.lower() for obj in ["person", "object", "thing"]):
                 tag_categories["object"] += 1
-        
+
         # Need at least 2 categories
         return len(tag_categories) >= 2
-    
+
     def _apply_result_to_similar(
         self,
         original_result: ImageAnalysisResult,
@@ -360,7 +359,7 @@ class OptimizedBatchAnalyzer:
             raw_response=original_result.raw_response,
             confidence_score=original_result.confidence_score * confidence if original_result.confidence_score else confidence
         )
-    
+
     def _estimate_cost_saved(self, request: BatchAnalysisRequest) -> float:
         """Estimate cost saved by reusing analysis."""
         # Get typical cost for the selected or cheapest provider
@@ -368,16 +367,16 @@ class OptimizedBatchAnalyzer:
             providers = [request.provider]
         else:
             providers = self.analyzer.get_available_providers()
-        
+
         costs = []
         for provider in providers:
             if provider in self.analyzer.analyzers:
                 cost = self.analyzer.analyzers[provider].estimate_cost(request.detailed)
                 costs.append(cost)
-        
+
         return min(costs) if costs else 0.0
-    
-    async def _get_images_to_process(self, request: BatchAnalysisRequest) -> List[Path]:
+
+    async def _get_images_to_process(self, request: BatchAnalysisRequest) -> list[Path]:
         """Get list of images to process based on request."""
         # Reuse the existing method from batch analyzer
         from .batch_analyzer import BatchAnalyzer

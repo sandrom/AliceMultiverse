@@ -10,17 +10,17 @@ This module helps create engaging video content by:
 """
 
 import json
-from datetime import datetime
-from pathlib import Path
-from typing import List, Dict, Any, Optional, Tuple
-from dataclasses import dataclass, field
-from enum import Enum
 import xml.etree.ElementTree as ET
+from dataclasses import dataclass, field
+from datetime import datetime
+from enum import Enum
+from pathlib import Path
+from typing import Any
 from xml.dom import minidom
 
 from ..core.structured_logging import get_logger
-from ..storage.duckdb_search import DuckDBSearch
-from ..providers.types import GenerationRequest, GenerationType
+from ..providers.provider_types import GenerationRequest, GenerationType
+from ..storage.unified_duckdb import DuckDBSearch
 
 logger = get_logger(__name__)
 
@@ -60,10 +60,10 @@ class ShotDescription:
     duration: int  # seconds
     transition_in: TransitionType
     transition_out: TransitionType
-    motion_keywords: List[str] = field(default_factory=list)
-    style_notes: List[str] = field(default_factory=list)
-    
-    def to_dict(self) -> Dict[str, Any]:
+    motion_keywords: list[str] = field(default_factory=list)
+    style_notes: list[str] = field(default_factory=list)
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "image_hash": self.image_hash,
@@ -81,12 +81,12 @@ class ShotDescription:
 class VideoStoryboard:
     """Complete storyboard for a video project."""
     project_name: str
-    shots: List[ShotDescription]
+    shots: list[ShotDescription]
     total_duration: int
-    style_guide: Dict[str, Any]
+    style_guide: dict[str, Any]
     created_at: datetime = field(default_factory=datetime.now)
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for serialization."""
         return {
             "project_name": self.project_name,
@@ -95,19 +95,19 @@ class VideoStoryboard:
             "style_guide": self.style_guide,
             "created_at": self.created_at.isoformat()
         }
-    
+
     def save(self, output_path: Path) -> None:
         """Save storyboard to JSON file."""
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, 'w') as f:
             json.dump(self.to_dict(), f, indent=2)
-    
+
     @classmethod
     def load(cls, file_path: Path) -> "VideoStoryboard":
         """Load storyboard from JSON file."""
-        with open(file_path, 'r') as f:
+        with open(file_path) as f:
             data = json.load(f)
-        
+
         # Convert back to objects
         shots = []
         for shot_data in data["shots"]:
@@ -122,7 +122,7 @@ class VideoStoryboard:
                 style_notes=shot_data.get("style_notes", [])
             )
             shots.append(shot)
-        
+
         return cls(
             project_name=data["project_name"],
             shots=shots,
@@ -134,7 +134,7 @@ class VideoStoryboard:
 
 class VideoCreationWorkflow:
     """Workflow for creating videos from selected images."""
-    
+
     # Prompt templates for different video styles
     STYLE_TEMPLATES = {
         "cinematic": {
@@ -168,7 +168,7 @@ class VideoCreationWorkflow:
             "duration": 4
         }
     }
-    
+
     # Motion keywords that suggest camera movements
     MOTION_INDICATORS = {
         CameraMotion.ZOOM_IN: ["close-up", "detail", "intimate", "focus", "reveal"],
@@ -183,8 +183,8 @@ class VideoCreationWorkflow:
         CameraMotion.ORBIT_RIGHT: ["circle", "rotate", "around right"],
         CameraMotion.STATIC: ["still", "fixed", "stationary", "stable"]
     }
-    
-    def __init__(self, search_db: DuckDBSearch, understanding_provider: Optional[Any] = None):
+
+    def __init__(self, search_db: DuckDBSearch, understanding_provider: Any | None = None):
         """Initialize video creation workflow.
         
         Args:
@@ -193,8 +193,8 @@ class VideoCreationWorkflow:
         """
         self.search_db = search_db
         self.understanding_provider = understanding_provider
-    
-    async def analyze_image_for_video(self, image_hash: str) -> Dict[str, Any]:
+
+    async def analyze_image_for_video(self, image_hash: str) -> dict[str, Any]:
         """Analyze a single image to extract video-relevant information.
         
         Args:
@@ -207,19 +207,19 @@ class VideoCreationWorkflow:
         results, _ = self.search_db.search({"content_hash": image_hash}, limit=1)
         if not results:
             raise ValueError(f"Image not found: {image_hash}")
-        
+
         metadata = results[0]
         tags = metadata.get("tags", [])
-        
+
         # Analyze composition for camera motion
         composition_hints = self._analyze_composition(tags)
-        
+
         # Determine suggested camera motion
         suggested_motion = self._suggest_camera_motion(tags, composition_hints)
-        
+
         # Extract motion keywords
         motion_keywords = self._extract_motion_keywords(tags)
-        
+
         return {
             "image_hash": image_hash,
             "file_path": metadata.get("file_path"),
@@ -229,8 +229,8 @@ class VideoCreationWorkflow:
             "motion_keywords": motion_keywords,
             "original_prompt": metadata.get("prompt", "")
         }
-    
-    def _analyze_composition(self, tags: List[str]) -> Dict[str, Any]:
+
+    def _analyze_composition(self, tags: list[str]) -> dict[str, Any]:
         """Analyze image composition from tags."""
         composition = {
             "has_character": any(tag in ["portrait", "person", "character", "face"] for tag in tags),
@@ -241,14 +241,14 @@ class VideoCreationWorkflow:
             "depth": "deep" if any(tag in ["perspective", "depth", "layers"] for tag in tags) else "shallow"
         }
         return composition
-    
-    def _suggest_camera_motion(self, tags: List[str], composition: Dict[str, Any]) -> CameraMotion:
+
+    def _suggest_camera_motion(self, tags: list[str], composition: dict[str, Any]) -> CameraMotion:
         """Suggest camera motion based on image analysis."""
         # Check for explicit motion indicators in tags
         for motion, keywords in self.MOTION_INDICATORS.items():
             if any(keyword in tag.lower() for tag in tags for keyword in keywords):
                 return motion
-        
+
         # Rule-based suggestions
         if composition["has_character"] and not composition["is_landscape"]:
             return CameraMotion.ZOOM_IN  # Focus on character
@@ -262,8 +262,8 @@ class VideoCreationWorkflow:
             return CameraMotion.PAN_RIGHT  # Follow action
         else:
             return CameraMotion.STATIC  # Default to static
-    
-    def _extract_motion_keywords(self, tags: List[str]) -> List[str]:
+
+    def _extract_motion_keywords(self, tags: list[str]) -> list[str]:
         """Extract keywords that suggest motion or dynamism."""
         motion_words = [
             "flying", "running", "flowing", "spinning", "floating",
@@ -271,12 +271,12 @@ class VideoCreationWorkflow:
             "wind", "wave", "storm", "fire", "explosion",
             "speed", "velocity", "energy", "dynamic", "kinetic"
         ]
-        
+
         return [tag for tag in tags if any(word in tag.lower() for word in motion_words)]
-    
+
     async def generate_video_prompts(
         self,
-        image_hashes: List[str],
+        image_hashes: list[str],
         style: str = "cinematic",
         target_duration: int = 30,
         enhance_with_ai: bool = False
@@ -294,35 +294,35 @@ class VideoCreationWorkflow:
         """
         if style not in self.STYLE_TEMPLATES:
             style = "cinematic"
-        
+
         style_template = self.STYLE_TEMPLATES[style]
         shots = []
-        
+
         # Calculate duration per shot
         shot_duration = min(
             style_template["duration"],
             max(3, target_duration // len(image_hashes))
         )
-        
+
         for i, image_hash in enumerate(image_hashes):
             # Analyze image
             analysis = await self.analyze_image_for_video(image_hash)
-            
+
             # Generate base prompt
             prompt = self._generate_shot_prompt(analysis, style_template)
-            
+
             # Enhance with AI if requested
             if enhance_with_ai and self.understanding_provider:
                 prompt = await self._enhance_prompt_with_ai(
-                    prompt, 
+                    prompt,
                     analysis,
                     style_template
                 )
-            
+
             # Determine transitions
             transition_in = TransitionType.FADE if i == 0 else TransitionType.CUT
             transition_out = TransitionType.FADE if i == len(image_hashes) - 1 else TransitionType.CUT
-            
+
             # Create shot description
             shot = ShotDescription(
                 image_hash=image_hash,
@@ -334,9 +334,9 @@ class VideoCreationWorkflow:
                 motion_keywords=analysis["motion_keywords"],
                 style_notes=style_template["camera_hints"]
             )
-            
+
             shots.append(shot)
-        
+
         # Create storyboard
         storyboard = VideoStoryboard(
             project_name=f"{style}_video_{datetime.now().strftime('%Y%m%d_%H%M%S')}",
@@ -348,52 +348,52 @@ class VideoCreationWorkflow:
                 "image_count": len(image_hashes)
             }
         )
-        
+
         return storyboard
-    
-    def _generate_shot_prompt(self, analysis: Dict[str, Any], style_template: Dict[str, Any]) -> str:
+
+    def _generate_shot_prompt(self, analysis: dict[str, Any], style_template: dict[str, Any]) -> str:
         """Generate a video prompt for a single shot."""
         # Start with style prefix
         prompt_parts = [style_template["prefix"]]
-        
+
         # Add descriptive elements from tags
         key_tags = analysis["tags"][:5]  # Use top 5 tags
         if key_tags:
             prompt_parts.append(", ".join(key_tags))
-        
+
         # Add composition hints
         comp = analysis["composition"]
         if comp["has_character"]:
             prompt_parts.append("with character in focus")
         elif comp["is_landscape"]:
             prompt_parts.append("sweeping landscape view")
-        
+
         # Add motion description
         motion = analysis["suggested_motion"]
         if motion != CameraMotion.STATIC:
             motion_desc = motion.value.replace("_", " ")
             prompt_parts.append(f"camera {motion_desc}")
-        
+
         # Add style-specific camera hints
         if style_template["camera_hints"]:
             prompt_parts.append(style_template["camera_hints"][0])
-        
+
         # Add motion keywords if present
         if analysis["motion_keywords"]:
             prompt_parts.append(f"featuring {', '.join(analysis['motion_keywords'][:2])}")
-        
+
         return ", ".join(prompt_parts)
-    
+
     async def _enhance_prompt_with_ai(
         self,
         base_prompt: str,
-        analysis: Dict[str, Any],
-        style_template: Dict[str, Any]
+        analysis: dict[str, Any],
+        style_template: dict[str, Any]
     ) -> str:
         """Use AI to enhance the video prompt."""
         if not self.understanding_provider:
             return base_prompt
-        
+
         # Create enhancement prompt
         enhancement_prompt = f"""
         Enhance this video generation prompt for Kling AI:
@@ -405,7 +405,7 @@ class VideoCreationWorkflow:
         Make it more cinematic and specific for video generation.
         Keep it under 100 words. Focus on movement and atmosphere.
         """
-        
+
         try:
             # Use understanding provider to enhance
             # This is a simplified version - you might want to add proper API integration
@@ -417,13 +417,13 @@ class VideoCreationWorkflow:
         except Exception as e:
             logger.warning(f"Failed to enhance prompt with AI: {e}")
             return base_prompt
-    
+
     def create_kling_requests(
         self,
         storyboard: VideoStoryboard,
         model: str = "kling-v2.1-pro-text",
-        output_dir: Optional[Path] = None
-    ) -> List[GenerationRequest]:
+        output_dir: Path | None = None
+    ) -> list[GenerationRequest]:
         """Create Kling generation requests from storyboard.
         
         Args:
@@ -435,30 +435,30 @@ class VideoCreationWorkflow:
             List of generation requests ready for Kling
         """
         requests = []
-        
+
         for i, shot in enumerate(storyboard.shots):
             # Determine if this is image-to-video
             is_image_based = "image" in model
-            
+
             # Create output path
             if output_dir:
                 output_path = output_dir / f"shot_{i+1:02d}_{shot.image_hash[:8]}.mp4"
             else:
                 output_path = None
-            
+
             # Build parameters
             parameters = {
                 "duration": shot.duration,
                 "camera_motion": shot.camera_motion.value,
                 "aspect_ratio": "16:9",  # Could be customized
             }
-            
+
             # Add mode for pro/master models
             if "pro" in model:
                 parameters["mode"] = "professional"
             elif "master" in model:
                 parameters["mode"] = "master"
-            
+
             # Create request
             request = GenerationRequest(
                 prompt=shot.prompt,
@@ -468,11 +468,11 @@ class VideoCreationWorkflow:
                 parameters=parameters,
                 output_path=output_path
             )
-            
+
             requests.append(request)
-        
+
         return requests
-    
+
     def create_transition_guide(self, storyboard: VideoStoryboard) -> str:
         """Create a text guide for video editing with transitions.
         
@@ -490,7 +490,7 @@ class VideoCreationWorkflow:
             "## Shot List with Transitions:",
             ""
         ]
-        
+
         for i, shot in enumerate(storyboard.shots):
             lines.extend([
                 f"### Shot {i+1}",
@@ -501,7 +501,7 @@ class VideoCreationWorkflow:
                 f"- Prompt: {shot.prompt}",
                 ""
             ])
-        
+
         lines.extend([
             "## Editing Notes:",
             "- Use 0.5s overlap for dissolve transitions",
@@ -509,14 +509,14 @@ class VideoCreationWorkflow:
             "- Adjust timing based on music/rhythm if applicable",
             ""
         ])
-        
+
         return "\n".join(lines)
-    
+
     async def prepare_keyframes_with_flux(
         self,
         storyboard: VideoStoryboard,
-        modifications: Optional[Dict[str, str]] = None
-    ) -> Dict[str, List[GenerationRequest]]:
+        modifications: dict[str, str] | None = None
+    ) -> dict[str, list[GenerationRequest]]:
         """Prepare keyframes using Flux Kontext for smoother video generation.
         
         Args:
@@ -527,10 +527,10 @@ class VideoCreationWorkflow:
             Dictionary mapping shot indices to Flux generation requests
         """
         flux_requests = {}
-        
+
         for i, shot in enumerate(storyboard.shots):
             requests = []
-            
+
             # Base keyframe (original image)
             base_request = GenerationRequest(
                 prompt=f"Prepare for video: {shot.prompt}",
@@ -543,7 +543,7 @@ class VideoCreationWorkflow:
                 }
             )
             requests.append(base_request)
-            
+
             # If modifications requested for this shot
             if modifications and str(i) in modifications:
                 mod_request = GenerationRequest(
@@ -557,7 +557,7 @@ class VideoCreationWorkflow:
                     }
                 )
                 requests.append(mod_request)
-            
+
             # Create transition frames if needed
             if i < len(storyboard.shots) - 1:
                 next_shot = storyboard.shots[i + 1]
@@ -575,18 +575,18 @@ class VideoCreationWorkflow:
                         }
                     )
                     requests.append(transition_request)
-            
+
             flux_requests[str(i)] = requests
-        
+
         return flux_requests
-    
+
     def export_to_davinci_resolve(
         self,
         storyboard: VideoStoryboard,
-        video_files: Dict[int, Path],
-        project_name: Optional[str] = None,
+        video_files: dict[int, Path],
+        project_name: str | None = None,
         frame_rate: float = 30.0,
-        resolution: Tuple[int, int] = (1920, 1080)
+        resolution: tuple[int, int] = (1920, 1080)
     ) -> Path:
         """Export storyboard and videos to DaVinci Resolve timeline format.
         
@@ -601,23 +601,23 @@ class VideoCreationWorkflow:
             Path to the exported .fcpxml file
         """
         project_name = project_name or storyboard.project_name
-        
+
         # Create timeline XML
         timeline = DaVinciResolveTimeline(
             project_name=project_name,
             frame_rate=frame_rate,
             resolution=resolution
         )
-        
+
         # Add shots to timeline
         current_time = 0
         for i, shot in enumerate(storyboard.shots):
             if i not in video_files:
                 logger.warning(f"No video file for shot {i+1}, skipping")
                 continue
-                
+
             video_path = video_files[i]
-            
+
             # Add clip to timeline
             timeline.add_clip(
                 file_path=video_path,
@@ -626,7 +626,7 @@ class VideoCreationWorkflow:
                 shot_name=f"Shot_{i+1:02d}",
                 notes=shot.prompt
             )
-            
+
             # Add transitions
             if i > 0 and shot.transition_in != TransitionType.CUT:
                 timeline.add_transition(
@@ -634,24 +634,24 @@ class VideoCreationWorkflow:
                     start_time=current_time,
                     duration=0.5  # Default 0.5s transition
                 )
-            
+
             current_time += shot.duration
-        
+
         # Export timeline
         output_path = Path(f"{project_name}_timeline.fcpxml")
         timeline.export(output_path)
-        
+
         return output_path
 
 
 class DaVinciResolveTimeline:
     """Helper class to create DaVinci Resolve compatible timeline files."""
-    
+
     def __init__(
         self,
         project_name: str,
         frame_rate: float = 30.0,
-        resolution: Tuple[int, int] = (1920, 1080)
+        resolution: tuple[int, int] = (1920, 1080)
     ):
         """Initialize timeline.
         
@@ -665,17 +665,17 @@ class DaVinciResolveTimeline:
         self.resolution = resolution
         self.clips = []
         self.transitions = []
-        
+
         # Frame duration in seconds
         self.frame_duration = 1.0 / frame_rate
-    
+
     def add_clip(
         self,
         file_path: Path,
         start_time: float,
         duration: float,
         shot_name: str,
-        notes: Optional[str] = None
+        notes: str | None = None
     ):
         """Add a clip to the timeline.
         
@@ -695,7 +695,7 @@ class DaVinciResolveTimeline:
             "start_frame": int(start_time * self.frame_rate),
             "duration_frames": int(duration * self.frame_rate)
         })
-    
+
     def add_transition(
         self,
         transition_type: TransitionType,
@@ -716,7 +716,7 @@ class DaVinciResolveTimeline:
             "start_frame": int(start_time * self.frame_rate),
             "duration_frames": int(duration * self.frame_rate)
         })
-    
+
     def export(self, output_path: Path) -> None:
         """Export timeline to FCPXML format.
         
@@ -725,10 +725,10 @@ class DaVinciResolveTimeline:
         """
         # Create root element
         fcpxml = ET.Element("fcpxml", version="1.8")
-        
+
         # Add resources
         resources = ET.SubElement(fcpxml, "resources")
-        
+
         # Add format resource
         format_elem = ET.SubElement(
             resources,
@@ -739,7 +739,7 @@ class DaVinciResolveTimeline:
             width=str(self.resolution[0]),
             height=str(self.resolution[1])
         )
-        
+
         # Add asset resources for each clip
         for i, clip in enumerate(self.clips):
             asset = ET.SubElement(
@@ -753,10 +753,10 @@ class DaVinciResolveTimeline:
                 hasVideo="1",
                 hasAudio="1"
             )
-        
+
         # Create project
         project = ET.SubElement(fcpxml, "project", name=self.project_name)
-        
+
         # Create sequence
         sequence = ET.SubElement(
             project,
@@ -764,10 +764,10 @@ class DaVinciResolveTimeline:
             duration=f"{sum(c['duration'] for c in self.clips)}s",
             format="r1"
         )
-        
+
         # Create spine (main timeline)
         spine = ET.SubElement(sequence, "spine")
-        
+
         # Add clips to spine
         for i, clip in enumerate(self.clips):
             # Add clip
@@ -779,7 +779,7 @@ class DaVinciResolveTimeline:
                 duration=f"{clip['duration']}s",
                 format="r1"
             )
-            
+
             # Add asset reference
             asset_clip = ET.SubElement(
                 clip_elem,
@@ -789,12 +789,12 @@ class DaVinciResolveTimeline:
                 duration=f"{clip['duration']}s",
                 format="r1"
             )
-            
+
             # Add notes if present
             if clip["notes"]:
                 note = ET.SubElement(clip_elem, "note")
                 note.text = clip["notes"]
-        
+
         # Add transitions
         for trans in self.transitions:
             # Find the clip at this time
@@ -818,13 +818,13 @@ class DaVinciResolveTimeline:
                             duration=f"{trans['duration']}s"
                         )
                     break
-        
+
         # Pretty print the XML
         xml_str = minidom.parseString(ET.tostring(fcpxml)).toprettyxml(indent="  ")
-        
+
         # Save to file
         output_path.parent.mkdir(parents=True, exist_ok=True)
         with open(output_path, 'w') as f:
             f.write(xml_str)
-        
+
         logger.info(f"Exported DaVinci Resolve timeline to: {output_path}")

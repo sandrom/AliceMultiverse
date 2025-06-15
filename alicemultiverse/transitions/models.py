@@ -3,7 +3,6 @@ Data models for transition analysis.
 """
 
 from dataclasses import dataclass
-from typing import List, Optional, Tuple, Dict
 from enum import Enum
 
 
@@ -17,7 +16,7 @@ class TransitionType(str, Enum):
     MORPH = "morph"
     GLITCH = "glitch"
     MOMENTUM = "momentum_preserve"
-    
+
 
 class MotionDirection(str, Enum):
     """Primary motion directions in a scene."""
@@ -37,21 +36,21 @@ class MotionVector:
     """Represents motion characteristics of an image/scene."""
     direction: MotionDirection
     speed: float  # 0.0 (static) to 1.0 (fast motion)
-    focal_point: Tuple[float, float]  # Normalized coordinates (0-1)
-    motion_lines: List[Tuple[Tuple[float, float], Tuple[float, float]]]  # Start/end points
+    focal_point: tuple[float, float]  # Normalized coordinates (0-1)
+    motion_lines: list[tuple[tuple[float, float], tuple[float, float]]]  # Start/end points
     confidence: float  # 0.0 to 1.0
-    
-    
+
+
 @dataclass
 class CompositionAnalysis:
     """Visual composition analysis of an image."""
-    rule_of_thirds_points: List[Tuple[float, float]]  # Key subject positions
-    leading_lines: List[Tuple[Tuple[float, float], Tuple[float, float]]]
-    visual_weight_center: Tuple[float, float]  # Center of visual mass
-    empty_space_regions: List[Tuple[float, float, float, float]]  # x, y, w, h
-    dominant_colors: List[Tuple[str, float]]  # Color hex and percentage
-    brightness_map: Dict[str, float]  # quadrant -> brightness (0-1)
-    
+    rule_of_thirds_points: list[tuple[float, float]]  # Key subject positions
+    leading_lines: list[tuple[tuple[float, float], tuple[float, float]]]
+    visual_weight_center: tuple[float, float]  # Center of visual mass
+    empty_space_regions: list[tuple[float, float, float, float]]  # x, y, w, h
+    dominant_colors: list[tuple[str, float]]  # Color hex and percentage
+    brightness_map: dict[str, float]  # quadrant -> brightness (0-1)
+
 
 @dataclass
 class SceneCompatibility:
@@ -62,8 +61,8 @@ class SceneCompatibility:
     composition_match: float  # Visual balance compatibility
     suggested_transition: TransitionType
     transition_duration: float  # Suggested duration in seconds
-    notes: List[str]  # Specific recommendations
-    
+    notes: list[str]  # Specific recommendations
+
 
 @dataclass
 class TransitionSuggestion:
@@ -72,17 +71,17 @@ class TransitionSuggestion:
     target_image: str
     transition_type: TransitionType
     duration: float  # seconds
-    timing: Optional[str] = None  # e.g., "on_beat", "between_beats"
-    effects: Optional[Dict[str, any]] = None  # Additional effect parameters
-    compatibility: Optional[SceneCompatibility] = None
+    timing: str | None = None  # e.g., "on_beat", "between_beats"
+    effects: dict[str, any] | None = None  # Additional effect parameters
+    compatibility: SceneCompatibility | None = None
     confidence: float = 0.0
-    
+
 
 @dataclass
 class TransitionRule:
     """Rule for automatic transition selection."""
     name: str
-    condition: Dict[str, any]  # Conditions to match
+    condition: dict[str, any]  # Conditions to match
     transition_type: TransitionType
     duration_multiplier: float = 1.0
     priority: int = 0  # Higher priority rules override lower ones

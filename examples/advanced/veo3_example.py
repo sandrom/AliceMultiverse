@@ -19,10 +19,10 @@ from alicemultiverse.providers.types import GenerationRequest, GenerationType
 
 async def generate_veo3_video():
     """Generate a video using Google Veo 3 on fal.ai."""
-    
+
     # Initialize provider
     provider = FalProvider()
-    
+
     # Example 1: Basic text-to-video
     print("Generating basic video with Veo 3...")
     request = GenerationRequest(
@@ -36,15 +36,15 @@ async def generate_veo3_video():
             "enable_audio": False,  # Set to True for audio (costs more)
         }
     )
-    
+
     result = await provider.generate(request)
-    
+
     if result.success:
         print(f"✓ Video generated: {result.file_path}")
         print(f"  Cost: ${result.cost:.2f}")
     else:
         print(f"✗ Generation failed: {result.error}")
-    
+
     # Example 2: Video with native audio
     print("\nGenerating video with audio...")
     request_audio = GenerationRequest(
@@ -58,15 +58,15 @@ async def generate_veo3_video():
             "enable_audio": True,  # Enable native audio generation
         }
     )
-    
+
     result_audio = await provider.generate(request_audio)
-    
+
     if result_audio.success:
         print(f"✓ Video with audio generated: {result_audio.file_path}")
         print(f"  Cost: ${result_audio.cost:.2f} (higher due to audio)")
     else:
         print(f"✗ Generation failed: {result_audio.error}")
-    
+
     # Example 3: Speech and lip sync
     print("\nGenerating video with speech...")
     request_speech = GenerationRequest(
@@ -80,32 +80,32 @@ async def generate_veo3_video():
             "enable_audio": True,  # Required for speech
         }
     )
-    
+
     result_speech = await provider.generate(request_speech)
-    
+
     if result_speech.success:
         print(f"✓ Video with speech generated: {result_speech.file_path}")
         print(f"  Cost: ${result_speech.cost:.2f}")
     else:
         print(f"✗ Generation failed: {result_speech.error}")
-    
+
     await provider.cleanup()
-    
+
 
 async def compare_veo3_styles():
     """Compare different styles with Veo 3."""
-    
+
     provider = FalProvider()
-    
+
     styles = [
         "cinematic drone shot",
         "handheld documentary style",
         "smooth steadicam movement",
         "static tripod shot",
     ]
-    
+
     base_prompt = "A mountain lake at sunset with mist rising from the water"
-    
+
     for style in styles:
         print(f"\nGenerating {style}...")
         request = GenerationRequest(
@@ -119,29 +119,29 @@ async def compare_veo3_styles():
                 "enable_audio": False,
             }
         )
-        
+
         result = await provider.generate(request)
-        
+
         if result.success:
             print(f"✓ {style}: {result.file_path}")
         else:
             print(f"✗ {style} failed: {result.error}")
-    
+
     await provider.cleanup()
 
 
 async def veo3_physics_demo():
     """Demonstrate Veo 3's improved physics understanding."""
-    
+
     provider = FalProvider()
-    
+
     physics_prompts = [
         "Water pouring into a glass, creating ripples and bubbles",
         "A feather floating down in slow motion, twisting in the air",
         "Dominos falling in a perfect cascade, shot from above",
         "Smoke rising from a candle, swirling in the breeze",
     ]
-    
+
     for prompt in physics_prompts:
         print(f"\nGenerating physics demo: {prompt[:50]}...")
         request = GenerationRequest(
@@ -155,14 +155,14 @@ async def veo3_physics_demo():
                 "enable_audio": True,  # Include realistic sound effects
             }
         )
-        
+
         result = await provider.generate(request)
-        
+
         if result.success:
             print(f"✓ Generated: {result.file_path}")
         else:
             print(f"✗ Failed: {result.error}")
-    
+
     await provider.cleanup()
 
 
@@ -172,7 +172,7 @@ if __name__ == "__main__":
         print("Please set FAL_KEY environment variable")
         print("Get your API key from: https://fal.ai/dashboard/keys")
         exit(1)
-    
+
     print("Google Veo 3 Examples")
     print("=" * 50)
     print("\nVeo 3 Features:")
@@ -185,10 +185,10 @@ if __name__ == "__main__":
     print("- Without audio: $0.50/second ($2.50 for 5s)")
     print("- With audio: $0.75/second ($3.75 for 5s)")
     print("=" * 50)
-    
+
     # Run examples
     asyncio.run(generate_veo3_video())
-    
+
     # Uncomment to run additional demos:
     # asyncio.run(compare_veo3_styles())
     # asyncio.run(veo3_physics_demo())

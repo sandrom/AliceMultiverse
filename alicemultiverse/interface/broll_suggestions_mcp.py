@@ -1,21 +1,20 @@
 """MCP tools for automatic b-roll suggestions."""
 
-from typing import Dict, List, Optional, Any
+from typing import Any
 
-from ..workflows.broll_suggestions import BRollSuggestionEngine, BRollWorkflow
-from ..storage.unified_duckdb import UnifiedDuckDBStorage
-from ..deduplication.similarity_index import SimilarityIndex
 from ..core.structured_logging import get_logger
+from ..storage.unified_duckdb import UnifiedDuckDBStorage
+from ..workflows.broll_suggestions import BRollSuggestionEngine, BRollWorkflow
 
 logger = get_logger(__name__)
 
 
 async def suggest_broll_for_timeline(
-    timeline_data: Dict[str, Any],
-    project_context: Optional[Dict[str, Any]] = None,
+    timeline_data: dict[str, Any],
+    project_context: dict[str, Any] | None = None,
     max_suggestions_per_scene: int = 5,
-    db_path: Optional[str] = None
-) -> Dict[str, Any]:
+    db_path: str | None = None
+) -> dict[str, Any]:
     """
     Suggest relevant b-roll footage for a video timeline.
     
@@ -38,14 +37,14 @@ async def suggest_broll_for_timeline(
     try:
         # Initialize engine
         engine = BRollSuggestionEngine(db_path=db_path)
-        
+
         # Get suggestions
         suggestions = await engine.suggest_broll_for_timeline(
             timeline_data,
             project_context,
             max_suggestions_per_scene
         )
-        
+
         # Format response
         result = {
             "timeline_duration": timeline_data.get("duration", 0),
@@ -53,7 +52,7 @@ async def suggest_broll_for_timeline(
             "scenes_needing_broll": len(suggestions),
             "suggestions": {}
         }
-        
+
         # Convert suggestions to simple format
         for clip_idx, broll_list in suggestions.items():
             result["suggestions"][clip_idx] = [
@@ -67,9 +66,9 @@ async def suggest_broll_for_timeline(
                 }
                 for s in broll_list
             ]
-            
+
         return result
-        
+
     except Exception as e:
         logger.error(f"Error suggesting b-roll: {e}")
         return {
@@ -79,11 +78,11 @@ async def suggest_broll_for_timeline(
 
 
 async def auto_insert_broll(
-    timeline_data: Dict[str, Any],
+    timeline_data: dict[str, Any],
     max_broll_percentage: float = 0.3,
-    prefer_types: Optional[List[str]] = None,
-    db_path: Optional[str] = None
-) -> Dict[str, Any]:
+    prefer_types: list[str] | None = None,
+    db_path: str | None = None
+) -> dict[str, Any]:
     """
     Automatically insert b-roll clips into a timeline.
     
@@ -105,19 +104,19 @@ async def auto_insert_broll(
     try:
         # Initialize workflow
         workflow = BRollWorkflow()
-        
+
         # Enhance timeline
         enhanced = await workflow.enhance_timeline_with_broll(
             timeline_data,
             auto_insert=True,
             max_broll_percentage=max_broll_percentage
         )
-        
+
         # Calculate statistics
         original_clips = len(timeline_data.get("clips", []))
         enhanced_clips = len(enhanced.get("clips", []))
         broll_added = enhanced_clips - original_clips
-        
+
         return {
             "timeline": enhanced,
             "statistics": {
@@ -128,7 +127,7 @@ async def auto_insert_broll(
                 "total_duration": enhanced.get("duration", 0)
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Error auto-inserting b-roll: {e}")
         return {
@@ -141,9 +140,9 @@ async def analyze_scene_for_broll(
     asset_path: str,
     start_time: float,
     duration: float,
-    scene_metadata: Optional[Dict[str, Any]] = None,
-    db_path: Optional[str] = None
-) -> Dict[str, Any]:
+    scene_metadata: dict[str, Any] | None = None,
+    db_path: str | None = None
+) -> dict[str, Any]:
     """
     Analyze a single scene to determine b-roll needs.
     
@@ -164,21 +163,21 @@ async def analyze_scene_for_broll(
     """
     try:
         engine = BRollSuggestionEngine(db_path=db_path)
-        
+
         # Create temporary clip for analysis
         clip = {
             "asset_path": asset_path,
             "start_time": start_time,
             "duration": duration
         }
-        
+
         # Analyze scene
         scene_info = await engine._analyze_clip_scene(clip)
-        
+
         # Assess needs
         energy = engine._assess_energy_level(scene_info)
         needs_broll = duration > 5.0 or 'dialogue' in scene_info.get('tags', [])
-        
+
         analysis = {
             "scene_type": scene_info.get('type', 'unknown'),
             "energy_level": energy,
@@ -187,7 +186,7 @@ async def analyze_scene_for_broll(
             "needs_broll": needs_broll,
             "reasoning": []
         }
-        
+
         # Add reasoning
         if duration > 5.0:
             analysis["reasoning"].append("Long duration benefits from visual variety")
@@ -195,7 +194,7 @@ async def analyze_scene_for_broll(
             analysis["reasoning"].append("Dialogue scenes benefit from cutaways")
         if scene_info.get('type') in ['establishing', 'wide']:
             analysis["reasoning"].append("Wide shots can use detail inserts")
-            
+
         # Suggest b-roll types
         analysis["suggested_broll_types"] = []
         if analysis["subject"]:
@@ -203,9 +202,9 @@ async def analyze_scene_for_broll(
         if analysis["mood"]:
             analysis["suggested_broll_types"].append("mood")
         analysis["suggested_broll_types"].append("visual")
-        
+
         return analysis
-        
+
     except Exception as e:
         logger.error(f"Error analyzing scene: {e}")
         return {
@@ -215,14 +214,14 @@ async def analyze_scene_for_broll(
 
 
 async def find_broll_by_criteria(
-    subject: Optional[str] = None,
-    mood: Optional[str] = None,
-    energy_level: Optional[str] = None,
-    location: Optional[str] = None,
-    exclude_paths: Optional[List[str]] = None,
+    subject: str | None = None,
+    mood: str | None = None,
+    energy_level: str | None = None,
+    location: str | None = None,
+    exclude_paths: list[str] | None = None,
     limit: int = 20,
-    db_path: Optional[str] = None
-) -> Dict[str, Any]:
+    db_path: str | None = None
+) -> dict[str, Any]:
     """
     Find b-roll footage matching specific criteria.
     
@@ -246,7 +245,7 @@ async def find_broll_by_criteria(
     """
     try:
         db = UnifiedDuckDBStorage(db_path) if db_path else UnifiedDuckDBStorage()
-        
+
         # Build search tags
         tags = []
         if subject:
@@ -257,20 +256,20 @@ async def find_broll_by_criteria(
             tags.append(f"{energy_level}_energy")
         if location:
             tags.append(location)
-            
+
         # Add b-roll indicator
         tags.append("b-roll")
-        
+
         # Search
         results = db.search_assets(
             tags=tags,
             limit=limit * 2  # Get extra to filter
         )
-        
+
         # Filter exclusions
         if exclude_paths:
             results = [r for r in results if r['file_path'] not in exclude_paths]
-            
+
         # Format results
         formatted = []
         for result in results[:limit]:
@@ -285,7 +284,7 @@ async def find_broll_by_criteria(
                     "scene_type": result.get('scene_type')
                 }
             })
-            
+
         return {
             "count": len(formatted),
             "criteria": {
@@ -296,7 +295,7 @@ async def find_broll_by_criteria(
             },
             "results": formatted
         }
-        
+
     except Exception as e:
         logger.error(f"Error finding b-roll: {e}")
         return {
@@ -306,11 +305,11 @@ async def find_broll_by_criteria(
 
 
 async def generate_broll_shot_list(
-    timeline_data: Dict[str, Any],
+    timeline_data: dict[str, Any],
     style: str = "documentary",
     include_descriptions: bool = True,
-    db_path: Optional[str] = None
-) -> Dict[str, Any]:
+    db_path: str | None = None
+) -> dict[str, Any]:
     """
     Generate a b-roll shot list for a project.
     
@@ -330,20 +329,20 @@ async def generate_broll_shot_list(
     """
     try:
         engine = BRollSuggestionEngine(db_path=db_path)
-        
+
         # Get suggestions
         suggestions = await engine.suggest_broll_for_timeline(
             timeline_data,
             project_context={"style": style}
         )
-        
+
         # Create shot list
         shot_list = {
             "project_style": style,
             "timeline_duration": timeline_data.get("duration", 0),
             "shots": []
         }
-        
+
         # Style-specific guidelines
         style_guidelines = {
             "documentary": {
@@ -362,13 +361,13 @@ async def generate_broll_shot_list(
                 "average_duration": 0.5
             }
         }
-        
+
         guidelines = style_guidelines.get(style, style_guidelines["documentary"])
-        
+
         # Generate shot list entries
         for clip_idx, broll_suggestions in suggestions.items():
             clip = timeline_data["clips"][int(clip_idx)]
-            
+
             for idx, suggestion in enumerate(broll_suggestions[:3]):  # Top 3
                 shot = {
                     "shot_number": f"B{int(clip_idx)+1}.{idx+1}",
@@ -377,30 +376,30 @@ async def generate_broll_shot_list(
                     "type": suggestion.suggestion_type,
                     "placement": suggestion.placement_hint
                 }
-                
+
                 if include_descriptions:
                     shot["description"] = _generate_shot_description(
                         suggestion,
                         clip,
                         style
                     )
-                    
+
                 shot["source"] = {
                     "asset_path": suggestion.asset_path,
                     "tags": suggestion.tags
                 }
-                
+
                 shot_list["shots"].append(shot)
-                
+
         # Add summary
         shot_list["summary"] = {
             "total_shots": len(shot_list["shots"]),
             "estimated_broll_duration": sum(s["suggested_duration"] for s in shot_list["shots"]),
             "guidelines": guidelines
         }
-        
+
         return shot_list
-        
+
     except Exception as e:
         logger.error(f"Error generating shot list: {e}")
         return {
@@ -414,18 +413,18 @@ def _generate_shot_description(suggestion, main_clip, style):
     descriptions = {
         "contextual": f"Insert shot of {', '.join(suggestion.tags[:3])} to provide context",
         "mood": f"Atmospheric shot conveying {suggestion.reasoning}",
-        "visual": f"Visually matching cutaway with similar composition",
-        "transition": f"Transitional element to bridge scenes"
+        "visual": "Visually matching cutaway with similar composition",
+        "transition": "Transitional element to bridge scenes"
     }
-    
+
     base = descriptions.get(suggestion.suggestion_type, "B-roll insert")
-    
+
     # Add style-specific notes
     if style == "documentary":
         base += " - hold for viewer comprehension"
     elif style == "music_video":
         base += " - quick cut on beat"
-        
+
     return base
 
 
@@ -445,10 +444,10 @@ def register_broll_tools(server) -> None:
 
 # Export all MCP tools
 __all__ = [
-    'suggest_broll_for_timeline',
-    'auto_insert_broll',
     'analyze_scene_for_broll',
+    'auto_insert_broll',
     'find_broll_by_criteria',
     'generate_broll_shot_list',
-    'register_broll_tools'
+    'register_broll_tools',
+    'suggest_broll_for_timeline'
 ]

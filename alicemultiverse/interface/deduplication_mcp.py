@@ -1,28 +1,25 @@
 """MCP tools for advanced deduplication with perceptual hashing."""
 
-import logging
-from pathlib import Path
-from typing import Any, Dict, List, Optional
-import asyncio
 import json
+from pathlib import Path
+from typing import Any
 
+from ..core.structured_logging import get_logger
 from ..deduplication.duplicate_finder import DuplicateFinder
 from ..deduplication.similarity_index import SimilarityIndex
-from ..storage.duckdb_search import DuckDBSearch
-from ..core.structured_logging import get_logger
 
 logger = get_logger(__name__)
 
 
 async def find_duplicates_advanced(
-    paths: List[str] | None = None,
+    paths: list[str] | None = None,
     exact_only: bool = False,
     similarity_threshold: float = 0.9,
     include_videos: bool = True,
     min_file_size: int = 0,
     recursive: bool = True,
     limit: int = 100
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Find duplicate and similar images using advanced perceptual hashing.
     
     Args:
@@ -40,13 +37,13 @@ async def find_duplicates_advanced(
     try:
         # Use DuplicateFinder for the heavy lifting
         finder = DuplicateFinder()
-        
+
         # Get paths from config if not provided
         if not paths:
             from ..core.config import load_config
             config = load_config()
             paths = [str(config.paths.organized)]
-        
+
         # Find duplicates
         if exact_only:
             duplicates = await finder.find_exact_duplicates(
@@ -62,18 +59,18 @@ async def find_duplicates_advanced(
                 recursive=recursive,
                 min_size=min_file_size
             )
-        
+
         # Format results
         duplicate_groups = []
         total_duplicates = 0
         total_wasted_space = 0
-        
+
         for master, dupes in list(duplicates.items())[:limit]:
             group_size = sum(d["size"] for d in dupes) + Path(master).stat().st_size
             wasted_space = sum(d["size"] for d in dupes)
             total_wasted_space += wasted_space
             total_duplicates += len(dupes)
-            
+
             duplicate_groups.append({
                 "master": str(master),
                 "master_size": Path(master).stat().st_size,
@@ -89,7 +86,7 @@ async def find_duplicates_advanced(
                 "wasted_space": wasted_space,
                 "recommendation": _get_dedup_recommendation(master, dupes)
             })
-        
+
         return {
             "success": True,
             "message": f"Found {len(duplicate_groups)} duplicate groups",
@@ -105,7 +102,7 @@ async def find_duplicates_advanced(
                 }
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to find duplicates: {e}")
         return {
@@ -116,12 +113,12 @@ async def find_duplicates_advanced(
 
 
 async def remove_duplicates(
-    duplicate_groups: List[Dict[str, Any]] | None = None,
+    duplicate_groups: list[dict[str, Any]] | None = None,
     strategy: str = "keep_organized",
     backup: bool = True,
     dry_run: bool = True,
     use_hardlinks: bool = False
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Remove duplicate files with various strategies.
     
     Args:
@@ -136,14 +133,14 @@ async def remove_duplicates(
     """
     try:
         finder = DuplicateFinder()
-        
+
         # If no groups provided, find them first
         if not duplicate_groups:
             result = await find_duplicates_advanced(exact_only=False)
             if not result["success"]:
                 return result
             duplicate_groups = result["data"]["duplicate_groups"]
-        
+
         # Convert to format expected by DuplicateFinder
         duplicates_dict = {}
         for group in duplicate_groups:
@@ -157,7 +154,7 @@ async def remove_duplicates(
                 for d in group["duplicates"]
             ]
             duplicates_dict[master] = dupes
-        
+
         # Remove duplicates
         removed, saved_space = await finder.remove_duplicates(
             duplicates_dict,
@@ -166,7 +163,7 @@ async def remove_duplicates(
             dry_run=dry_run,
             use_hardlinks=use_hardlinks
         )
-        
+
         return {
             "success": True,
             "message": f"{'Would remove' if dry_run else 'Removed'} {len(removed)} duplicate files",
@@ -179,7 +176,7 @@ async def remove_duplicates(
                 "backup_created": backup and not dry_run
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to remove duplicates: {e}")
         return {
@@ -190,11 +187,11 @@ async def remove_duplicates(
 
 
 async def build_similarity_index(
-    paths: List[str] | None = None,
+    paths: list[str] | None = None,
     index_type: str = "flat",
     force_rebuild: bool = False,
     include_videos: bool = False
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Build a similarity search index for fast duplicate/similar image detection.
     
     Args:
@@ -209,13 +206,13 @@ async def build_similarity_index(
     try:
         # Initialize similarity index
         index = SimilarityIndex(index_type=index_type)
-        
+
         # Get paths from config if not provided
         if not paths:
             from ..core.config import load_config
             config = load_config()
             paths = [str(config.paths.organized)]
-        
+
         # Check if index exists and force_rebuild not set
         if index.index_exists() and not force_rebuild:
             return {
@@ -228,7 +225,7 @@ async def build_similarity_index(
                     "recommendation": "Use force_rebuild=True to rebuild"
                 }
             }
-        
+
         # Build index
         image_paths = []
         for path in paths:
@@ -237,22 +234,22 @@ async def build_similarity_index(
                 patterns = ["*.jpg", "*.jpeg", "*.png", "*.webp", "*.heic", "*.heif"]
                 if include_videos:
                     patterns.extend(["*.mp4", "*.mov", "*.avi"])
-                
+
                 for pattern in patterns:
                     image_paths.extend(p.rglob(pattern))
-        
+
         logger.info(f"Building similarity index for {len(image_paths)} files")
-        
+
         # Add images to index
         for img_path in image_paths:
             try:
                 await index.add_image(img_path)
             except Exception as e:
                 logger.warning(f"Failed to index {img_path}: {e}")
-        
+
         # Save index
         index.save_index()
-        
+
         return {
             "success": True,
             "message": f"Built similarity index for {len(image_paths)} files",
@@ -264,7 +261,7 @@ async def build_similarity_index(
                 "status": "built"
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to build similarity index: {e}")
         return {
@@ -279,7 +276,7 @@ async def find_similar_images(
     count: int = 10,
     similarity_threshold: float = 0.8,
     use_index: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Find images similar to a given image using perceptual hashing.
     
     Args:
@@ -299,14 +296,14 @@ async def find_similar_images(
                 "error": "Image not found",
                 "message": f"Image not found: {image_path}"
             }
-        
+
         if use_index:
             # Try to use similarity index
             index = SimilarityIndex()
             if index.index_exists():
                 index.load_index()
                 similar = await index.find_similar(query_path, k=count)
-                
+
                 # Filter by threshold
                 filtered = [
                     {
@@ -317,7 +314,7 @@ async def find_similar_images(
                     for s in similar
                     if s["similarity"] >= similarity_threshold
                 ]
-                
+
                 return {
                     "success": True,
                     "message": f"Found {len(filtered)} similar images",
@@ -328,25 +325,25 @@ async def find_similar_images(
                         "threshold": similarity_threshold
                     }
                 }
-        
+
         # Fallback to direct search
         from ..deduplication.perceptual_hasher import PerceptualHasher
         hasher = PerceptualHasher()
-        
+
         # Get query image hashes
         query_hashes = await hasher.compute_all_hashes(query_path)
         query_features = hasher.extract_visual_features(query_path)
-        
+
         # Search through all images
         from ..core.config import load_config
         config = load_config()
         search_path = Path(config.paths.organized)
-        
+
         results = []
         for img_path in search_path.rglob("*.jpg"):
             if img_path == query_path:
                 continue
-                
+
             try:
                 # Compute similarity
                 similarity = await hasher.compute_similarity(query_path, img_path)
@@ -357,10 +354,10 @@ async def find_similar_images(
                     })
             except Exception as e:
                 logger.debug(f"Failed to compare with {img_path}: {e}")
-        
+
         # Sort by similarity
         results.sort(key=lambda x: x["similarity"], reverse=True)
-        
+
         return {
             "success": True,
             "message": f"Found {len(results[:count])} similar images",
@@ -371,7 +368,7 @@ async def find_similar_images(
                 "threshold": similarity_threshold
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to find similar images: {e}")
         return {
@@ -382,10 +379,10 @@ async def find_similar_images(
 
 
 async def get_deduplication_report(
-    paths: List[str] | None = None,
+    paths: list[str] | None = None,
     include_recommendations: bool = True,
     export_path: str | None = None
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Generate a comprehensive deduplication report.
     
     Args:
@@ -403,14 +400,14 @@ async def get_deduplication_report(
             exact_only=True,
             limit=1000
         )
-        
+
         similar_result = await find_duplicates_advanced(
             paths=paths,
             exact_only=False,
             similarity_threshold=0.95,
             limit=1000
         )
-        
+
         # Build report
         report = {
             "exact_duplicates": {
@@ -429,35 +426,35 @@ async def get_deduplication_report(
                 similar_result["data"]["summary"]["total_wasted_space_mb"]
             )
         }
-        
+
         if include_recommendations:
             report["recommendations"] = _get_deduplication_recommendations(
                 exact_result["data"]["duplicate_groups"],
                 similar_result["data"]["duplicate_groups"]
             )
-        
+
         # Export if requested
         if export_path:
             export_file = Path(export_path)
             export_file.parent.mkdir(parents=True, exist_ok=True)
-            
+
             full_report = {
                 "summary": report,
                 "exact_duplicates": exact_result["data"]["duplicate_groups"][:50],
                 "similar_images": similar_result["data"]["duplicate_groups"][:50]
             }
-            
+
             with open(export_file, 'w') as f:
                 json.dump(full_report, f, indent=2)
-            
+
             report["export_path"] = str(export_file)
-        
+
         return {
             "success": True,
             "message": "Deduplication report generated",
             "data": report
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to generate deduplication report: {e}")
         return {
@@ -467,11 +464,11 @@ async def get_deduplication_report(
         }
 
 
-def _get_dedup_recommendation(master: str, duplicates: List[Dict[str, Any]]) -> str:
+def _get_dedup_recommendation(master: str, duplicates: list[dict[str, Any]]) -> str:
     """Get deduplication recommendation for a group."""
     if all(d.get("similarity", 1.0) == 1.0 for d in duplicates):
         return "Safe to remove - exact duplicates"
-    
+
     avg_similarity = sum(d.get("similarity", 1.0) for d in duplicates) / len(duplicates)
     if avg_similarity > 0.98:
         return "Likely safe to remove - nearly identical"
@@ -482,9 +479,9 @@ def _get_dedup_recommendation(master: str, duplicates: List[Dict[str, Any]]) -> 
 
 
 def _get_deduplication_recommendations(
-    exact_groups: List[Dict[str, Any]],
-    similar_groups: List[Dict[str, Any]]
-) -> Dict[str, Any]:
+    exact_groups: list[dict[str, Any]],
+    similar_groups: list[dict[str, Any]]
+) -> dict[str, Any]:
     """Generate deduplication recommendations."""
     return {
         "immediate_action": {
@@ -515,7 +512,7 @@ def register_deduplication_tools(server) -> None:
     Args:
         server: MCP server instance
     """
-    
+
     # Register each deduplication function as a tool
     server.tool()(find_duplicates_advanced)
     server.tool()(remove_duplicates)

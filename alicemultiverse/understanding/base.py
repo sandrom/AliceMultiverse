@@ -2,9 +2,9 @@
 
 import logging
 from abc import ABC, abstractmethod
-from pathlib import Path
-from typing import Any, Dict, List, Optional
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 @dataclass
 class ImageAnalysisResult:
     """Result from image analysis."""
-    
+
     # Core description
     description: str
-    detailed_description: Optional[str] = None
-    
+    detailed_description: str | None = None
+
     # Extracted tags with semantic meaning
-    tags: Dict[str, List[str]] = field(default_factory=dict)
+    tags: dict[str, list[str]] = field(default_factory=dict)
     # Example tags structure:
     # {
     #     "style": ["photorealistic", "cinematic", "moody"],
@@ -44,46 +44,46 @@ class ImageAnalysisResult:
     #     "time_period": ["contemporary", "2020s"],
     #     "genre": ["fashion", "portrait", "editorial"]
     # }
-    
+
     # Prompt generation (reverse engineering)
-    generated_prompt: Optional[str] = None
-    negative_prompt: Optional[str] = None
-    
+    generated_prompt: str | None = None
+    negative_prompt: str | None = None
+
     # Technical details
-    detected_objects: List[Dict[str, Any]] = field(default_factory=list)
-    dominant_colors: List[str] = field(default_factory=list)
-    
+    detected_objects: list[dict[str, Any]] = field(default_factory=list)
+    dominant_colors: list[str] = field(default_factory=list)
+
     # Quality/technical assessment (different from subjective quality)
-    technical_details: Dict[str, Any] = field(default_factory=dict)
+    technical_details: dict[str, Any] = field(default_factory=dict)
     # Example: {"resolution": "high", "sharpness": "good", "noise": "low"}
-    
+
     # Provider-specific raw response
-    raw_response: Optional[Dict[str, Any]] = None
-    
+    raw_response: dict[str, Any] | None = None
+
     # Cost tracking
     cost: float = 0.0
-    tokens_used: Optional[int] = None
-    
+    tokens_used: int | None = None
+
     # Provider info
-    provider: Optional[str] = None
-    model: Optional[str] = None
-    
-    def get_all_tags(self) -> List[str]:
+    provider: str | None = None
+    model: str | None = None
+
+    def get_all_tags(self) -> list[str]:
         """Get all tags as a flat list."""
         all_tags = []
         for tag_list in self.tags.values():
             all_tags.extend(tag_list)
         return list(set(all_tags))  # Remove duplicates
-    
-    def get_tags_by_category(self, category: str) -> List[str]:
+
+    def get_tags_by_category(self, category: str) -> list[str]:
         """Get tags for a specific category."""
         return self.tags.get(category, [])
 
 
 class ImageAnalyzer(ABC):
     """Abstract base class for image analyzers."""
-    
-    def __init__(self, api_key: str, model: Optional[str] = None):
+
+    def __init__(self, api_key: str, model: str | None = None):
         """Initialize analyzer.
         
         Args:
@@ -92,15 +92,15 @@ class ImageAnalyzer(ABC):
         """
         self.api_key = api_key
         self.model = model
-    
+
     @abstractmethod
     async def analyze(
-        self, 
+        self,
         image_path: Path,
         generate_prompt: bool = True,
         extract_tags: bool = True,
         detailed: bool = False,
-        custom_instructions: Optional[str] = None
+        custom_instructions: str | None = None
     ) -> ImageAnalysisResult:
         """Analyze an image.
         
@@ -114,7 +114,7 @@ class ImageAnalyzer(ABC):
         Returns:
             ImageAnalysisResult with extracted information
         """
-    
+
     @abstractmethod
     def estimate_cost(self, detailed: bool = False) -> float:
         """Estimate cost per image analysis.
@@ -125,18 +125,18 @@ class ImageAnalyzer(ABC):
         Returns:
             Estimated cost in USD
         """
-    
+
     @property
     @abstractmethod
     def name(self) -> str:
         """Provider name."""
-    
+
     @property
     @abstractmethod
     def supports_batch(self) -> bool:
         """Whether this analyzer supports batch processing."""
-    
-    def _extract_tags_from_text(self, text: str) -> Dict[str, List[str]]:
+
+    def _extract_tags_from_text(self, text: str) -> dict[str, list[str]]:
         """Extract tags from descriptive text.
         
         This is a helper method that can be overridden by specific providers.
@@ -150,18 +150,18 @@ class ImageAnalyzer(ABC):
             "technical": [],
             "setting": [],
         }
-        
+
         # Simple keyword matching - providers should use AI for better extraction
         style_keywords = ["photorealistic", "artistic", "abstract", "minimalist", "cinematic"]
         mood_keywords = ["happy", "sad", "dramatic", "peaceful", "energetic", "mysterious"]
-        
+
         text_lower = text.lower()
         for keyword in style_keywords:
             if keyword in text_lower:
                 tags["style"].append(keyword)
-                
+
         for keyword in mood_keywords:
             if keyword in text_lower:
                 tags["mood"].append(keyword)
-        
+
         return tags

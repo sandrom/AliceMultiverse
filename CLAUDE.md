@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-AliceMultiverse is an AI-native service that operates exclusively through AI assistants. The CLI has been deprecated and is maintained only for debugging purposes. The system excels at detecting, organizing, and assessing AI-generated content, serving as an intelligent orchestrator between AI assistants (Claude, ChatGPT) and creative tools/APIs.
+AliceMultiverse is an AI-native service that operates exclusively through AI assistants. The CLI has been deprecated and is maintained only for debugging purposes. The system excels at detecting, organizing, and understanding AI-generated content, serving as an intelligent orchestrator between AI assistants (Claude, ChatGPT) and creative tools/APIs.
 
 **Current Status**: AI-native service (CLI deprecated for normal use)
 **Current Focus**: Media organization through AI assistant conversations
@@ -134,6 +134,7 @@ The system processes AI-generated media through a pipeline:
 ### Key Modules
 
 - **alice**: Main command with unified caching system (UnifiedCache class) for performance. Handles 15+ AI generation tools. Includes understanding system with --understand flag and watch mode (-w) for continuous monitoring.
+- **Cache Migration**: The system uses MetadataCacheAdapter for backward compatibility while transitioning to the new UnifiedCache system.
 - **Understanding system**: Multi-provider image analysis that generates semantic tags for content discovery and organization.
 - **Video providers**: Support for 7 video generation services (Runway, Pika, Luma, MiniMax, Kling, Hedra, Veo3) with MCP integration.
 - **Deduplication**: Advanced duplicate detection using perceptual hashing (aHash, pHash, dHash, wHash) and FAISS similarity search.
@@ -249,7 +250,7 @@ Tags are embedded directly in files using standard formats:
 
 - **AI-Native Service**: Migration complete - use through AI assistants only
 - API keys are managed securely - use `alice keys setup` for configuration
-- The metadata cache in alice significantly improves performance for large collections
+- The unified cache system in alice significantly improves performance for large collections
 - Video metadata extraction requires ffprobe (installed with ffmpeg)
 - **Event-driven architecture** - All new features should publish/subscribe to events
 - **Keep documentation updated** - README.md, ROADMAP.md, and architecture docs
@@ -279,6 +280,13 @@ For video generation providers:
 - `KLING_API_KEY`
 - `HEDRA_API_KEY`
 
+## Recent Updates (June 2025)
+
+- **Cache Migration Fix**: Fixed inheritance issues in EnhancedMetadataCacheAdapter to properly support the understanding system
+- **Import Cleanup**: Resolved import issues with alice_events module (test_monorepo.py contains outdated imports)
+- **Exception Handling**: Replaced all bare except statements with specific exception types
+- **Code Quality**: Automated cleanup with ruff fixed 19,000+ style issues
+
 ## Storage System
 
 AliceMultiverse uses a file-first approach with DuckDB for search:
@@ -302,7 +310,7 @@ storage:
     - ~/Projects/AI
 ```
 
-See README_STORAGE.md for details on the content-addressed storage system and file-based architecture.
+See docs/architecture/storage/file-based-storage.md for details on the content-addressed storage system and file-based architecture.
 
 ## Event System
 

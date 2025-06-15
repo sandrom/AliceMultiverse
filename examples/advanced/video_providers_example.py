@@ -10,11 +10,11 @@ from alicemultiverse.providers.types import GenerationRequest
 
 async def main():
     """Demonstrate new video provider capabilities."""
-    
+
     # Example 1: Runway Gen-3 Alpha - High quality video
     print("1. Runway Gen-3 Alpha - Professional quality video")
     runway = get_provider("runway")
-    
+
     request = GenerationRequest(
         prompt="A serene Japanese garden with cherry blossoms falling in slow motion, cinematic lighting",
         model="gen3-alpha",
@@ -25,14 +25,14 @@ async def main():
             "style": "cinematic",
         }
     )
-    
+
     result = await runway.generate(request)
     print(f"Generated: {result.output_path} (cost: ${result.cost:.2f})")
-    
+
     # Example 2: Pika Labs - Ingredient control
     print("\n2. Pika Labs - Fine-grained ingredient control")
     pika = get_provider("pika")
-    
+
     request = GenerationRequest(
         prompt="A fantasy scene with magical elements",
         model="pika-2.1-hd",
@@ -48,14 +48,14 @@ async def main():
             "motion_strength": 0.7,
         }
     )
-    
+
     result = await pika.generate(request)
     print(f"Generated: {result.output_path} (cost: ${result.cost:.2f})")
-    
+
     # Example 3: Luma Dream Machine - Perfect loops
     print("\n3. Luma Dream Machine - Creating perfect loops")
     luma = get_provider("luma")
-    
+
     request = GenerationRequest(
         prompt="Abstract flowing liquid metal, seamless loop",
         model="luma-loop",
@@ -66,13 +66,13 @@ async def main():
             "camera_motion": "orbit_left",
         }
     )
-    
+
     result = await luma.generate(request)
     print(f"Generated: {result.output_path} (cost: ${result.cost:.2f})")
-    
+
     # Example 4: Luma Keyframe Control
     print("\n4. Luma Dream Machine - Multi-keyframe animation")
-    
+
     request = GenerationRequest(
         prompt="Transformation sequence",
         model="luma-keyframes",
@@ -87,14 +87,14 @@ async def main():
             ]
         }
     )
-    
+
     result = await luma.generate(request)
     print(f"Generated: {result.output_path} (cost: ${result.cost:.2f})")
-    
+
     # Example 5: MiniMax Hailuo - Music video generation
     print("\n5. MiniMax Hailuo - Music-driven video")
     minimax = get_provider("minimax")
-    
+
     request = GenerationRequest(
         prompt="Dynamic abstract visuals synced to music",
         model="hailuo-music-video",
@@ -105,14 +105,14 @@ async def main():
             "motion_intensity": 0.9,
         }
     )
-    
+
     # Note: This would fail without a valid music URL
     # result = await minimax.generate(request)
     print("Music video generation requires a valid music URL")
-    
+
     # Example 6: MiniMax Style Transfer
     print("\n6. MiniMax Hailuo - Style transfer video")
-    
+
     request = GenerationRequest(
         prompt="A bustling city street",
         model="hailuo-style-transfer",
@@ -123,18 +123,18 @@ async def main():
             "language": "en",
         }
     )
-    
+
     # Note: This would fail without a valid style reference
     # result = await minimax.generate(request)
     print("Style transfer requires a valid style reference URL")
-    
+
     # Example 7: Cost comparison across providers
     print("\n\n=== Cost Comparison for 5-second video ===")
     test_request = GenerationRequest(
         prompt="A beautiful sunset over the ocean",
         parameters={"duration": 5}
     )
-    
+
     providers = {
         "Runway Gen-3 Alpha": ("runway", "gen3-alpha"),
         "Runway Gen-3 Turbo": ("runway", "gen3-alpha-turbo"),
@@ -145,17 +145,17 @@ async def main():
         "MiniMax Hailuo": ("minimax", "hailuo-video"),
         "MiniMax Pro": ("minimax", "hailuo-video-pro"),
     }
-    
+
     for name, (provider_name, model) in providers.items():
         provider = get_provider(provider_name)
         test_request.model = model
         cost = provider.estimate_cost(test_request)
         print(f"{name:<25} ${cost:.2f}")
-    
+
     # Example 8: Batch generation for A/B testing
     print("\n\n=== A/B Testing Different Providers ===")
     prompt = "A futuristic cityscape at night with flying cars"
-    
+
     tasks = []
     providers_to_test = [
         ("runway", "gen3-alpha-turbo", "outputs/ab_runway.mp4"),
@@ -163,7 +163,7 @@ async def main():
         ("luma", "dream-machine-turbo", "outputs/ab_luma.mp4"),
         ("minimax", "hailuo-video", "outputs/ab_minimax.mp4"),
     ]
-    
+
     for provider_name, model, output in providers_to_test:
         provider = get_provider(provider_name)
         request = GenerationRequest(
@@ -173,7 +173,7 @@ async def main():
             parameters={"seed": 42}  # Same seed for consistency
         )
         # tasks.append(provider.generate(request))
-    
+
     # results = await asyncio.gather(*tasks, return_exceptions=True)
     print("A/B testing would generate videos from all providers")
 
@@ -187,5 +187,5 @@ if __name__ == "__main__":
     print("  export LUMA_API_KEY='your-key'")
     print("  export MINIMAX_API_KEY='your-key'")
     print("\nRunning examples (some will be skipped)...\n")
-    
+
     asyncio.run(main())

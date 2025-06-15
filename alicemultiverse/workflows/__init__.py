@@ -8,41 +8,32 @@ This module provides workflow templates for chaining AI operations like:
 """
 
 from .base import (
-    WorkflowTemplate,
-    WorkflowStep,
     WorkflowContext,
     WorkflowResult,
     WorkflowStatus,
+    WorkflowStep,
+    WorkflowTemplate,
 )
 from .executor import WorkflowExecutor
-from .registry import (
-    WorkflowRegistry,
-    get_workflow,
-    list_workflows,
-    register_workflow,
-)
+# Registry removed - import workflows directly instead
 from .video_creation import (
+    CameraMotion,
+    ShotDescription,
+    TransitionType,
     VideoCreationWorkflow,
     VideoStoryboard,
-    ShotDescription,
-    CameraMotion,
-    TransitionType,
 )
 
 __all__ = [
     # Base classes
     "WorkflowTemplate",
-    "WorkflowStep", 
+    "WorkflowStep",
     "WorkflowContext",
     "WorkflowResult",
     "WorkflowStatus",
     # Executor
     "WorkflowExecutor",
-    # Registry
-    "WorkflowRegistry",
-    "get_workflow",
-    "list_workflows",
-    "register_workflow",
+    # Registry removed - use direct imports
     # Video creation
     "VideoCreationWorkflow",
     "VideoStoryboard",

@@ -1,14 +1,15 @@
 """AI-friendly error handling utilities."""
 
 import logging
-from typing import Any, Callable, Dict, List, Optional
+from collections.abc import Callable
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
 
 class AIFriendlyError:
     """Converts technical errors into AI-friendly messages."""
-    
+
     # Map of technical error patterns to friendly messages
     ERROR_MAPPINGS = {
         # File system errors
@@ -44,7 +45,7 @@ class AIFriendlyError:
                 "Use the --force flag to overwrite"
             ]
         },
-        
+
         # API errors
         "rate limit": {
             "message": "API rate limit reached - too many requests",
@@ -70,7 +71,7 @@ class AIFriendlyError:
                 "Try again in a few moments"
             ]
         },
-        
+
         # Media processing errors
         "not a valid image": {
             "message": "This file isn't a valid image format",
@@ -88,7 +89,7 @@ class AIFriendlyError:
                 "Use a file repair tool if available"
             ]
         },
-        
+
         # Configuration errors
         "configuration": {
             "message": "There's an issue with the configuration",
@@ -107,9 +108,9 @@ class AIFriendlyError:
             ]
         }
     }
-    
+
     @classmethod
-    def make_friendly(cls, error: Exception, context: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def make_friendly(cls, error: Exception, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Convert an exception to an AI-friendly error response.
         
         Args:
@@ -121,37 +122,37 @@ class AIFriendlyError:
         """
         error_str = str(error).lower()
         error_type = type(error).__name__
-        
+
         # Find matching error pattern
         friendly_info = None
         for pattern, info in cls.ERROR_MAPPINGS.items():
             if pattern.lower() in error_str:
                 friendly_info = info
                 break
-        
+
         # Default friendly message if no pattern matches
         if not friendly_info:
             friendly_info = {
                 "message": cls._default_message(error_type, error_str),
                 "suggestions": cls._default_suggestions(error_type)
             }
-        
+
         # Build response
         response = {
             "error": friendly_info["message"],
-            "technical_details": f"{error_type}: {str(error)}",
+            "technical_details": f"{error_type}: {error!s}",
             "suggestions": friendly_info["suggestions"]
         }
-        
+
         # Add context if provided
         if context:
             response["context"] = context
-            
+
         # Log the technical error for debugging
-        logger.debug(f"Technical error: {error_type}: {str(error)}")
-        
+        logger.debug(f"Technical error: {error_type}: {error!s}")
+
         return response
-    
+
     @staticmethod
     def _default_message(error_type: str, error_str: str) -> str:
         """Generate a default friendly message."""
@@ -163,9 +164,9 @@ class AIFriendlyError:
             return "Not enough disk space available"
         else:
             return "An unexpected error occurred while processing your request"
-    
+
     @staticmethod
-    def _default_suggestions(error_type: str) -> List[str]:
+    def _default_suggestions(error_type: str) -> list[str]:
         """Generate default suggestions based on error type."""
         if "Timeout" in error_type:
             return [
@@ -192,7 +193,7 @@ def wrap_error_response(func: Callable[..., Any]) -> Callable[..., Any]:
     
     Use this on interface methods to ensure all errors are AI-friendly.
     """
-    def wrapper(*args: Any, **kwargs: Any) -> Dict[str, Any]:
+    def wrapper(*args: Any, **kwargs: Any) -> dict[str, Any]:
         try:
             return func(*args, **kwargs)
         except Exception as e:
@@ -202,10 +203,10 @@ def wrap_error_response(func: Callable[..., Any]) -> Callable[..., Any]:
                 "args_count": len(args),
                 "kwargs_keys": list(kwargs.keys()) if kwargs else []
             }
-            
+
             # Create friendly error
             friendly_error = AIFriendlyError.make_friendly(e, context)
-            
+
             # Return in expected format
             return {
                 "success": False,
@@ -214,5 +215,5 @@ def wrap_error_response(func: Callable[..., Any]) -> Callable[..., Any]:
                 "error": friendly_error["technical_details"],
                 "suggestions": friendly_error.get("suggestions", [])
             }
-    
+
     return wrapper

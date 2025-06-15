@@ -9,8 +9,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-from uuid import UUID, uuid4
+from typing import Any
+import hashlib
 
 import duckdb
 
@@ -21,12 +21,12 @@ logger = get_logger(__name__)
 
 class StorageType(Enum):
     """Type of storage location."""
-    
+
     LOCAL = "local"
     S3 = "s3"
     GCS = "gcs"
     NETWORK = "network"
-    
+
     @classmethod
     def from_string(cls, value: str) -> "StorageType":
         """Create StorageType from string."""
@@ -38,11 +38,11 @@ class StorageType(Enum):
 
 class LocationStatus(Enum):
     """Status of a storage location."""
-    
+
     ACTIVE = "active"
     ARCHIVED = "archived"
     OFFLINE = "offline"
-    
+
     @classmethod
     def from_string(cls, value: str) -> "LocationStatus":
         """Create LocationStatus from string."""
@@ -55,28 +55,28 @@ class LocationStatus(Enum):
 @dataclass
 class StorageRule:
     """Rule for determining where files should be stored."""
-    
+
     # File age rules (in days)
-    max_age_days: Optional[int] = None
-    min_age_days: Optional[int] = None
-    
+    max_age_days: int | None = None
+    min_age_days: int | None = None
+
     # File type rules (mime types or extensions)
-    include_types: List[str] = field(default_factory=list)
-    exclude_types: List[str] = field(default_factory=list)
-    
+    include_types: list[str] = field(default_factory=list)
+    exclude_types: list[str] = field(default_factory=list)
+
     # Size rules (in bytes)
-    max_size_bytes: Optional[int] = None
-    min_size_bytes: Optional[int] = None
-    
+    max_size_bytes: int | None = None
+    min_size_bytes: int | None = None
+
     # Tag rules
-    require_tags: List[str] = field(default_factory=list)
-    exclude_tags: List[str] = field(default_factory=list)
-    
+    require_tags: list[str] = field(default_factory=list)
+    exclude_tags: list[str] = field(default_factory=list)
+
     # Quality rules
-    min_quality_stars: Optional[int] = None
-    max_quality_stars: Optional[int] = None
-    
-    def to_dict(self) -> Dict[str, Any]:
+    min_quality_stars: int | None = None
+    max_quality_stars: int | None = None
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for JSON storage."""
         return {
             "max_age_days": self.max_age_days,
@@ -90,9 +90,9 @@ class StorageRule:
             "min_quality_stars": self.min_quality_stars,
             "max_quality_stars": self.max_quality_stars
         }
-    
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "StorageRule":
+    def from_dict(cls, data: dict[str, Any]) -> "StorageRule":
         """Create from dictionary."""
         return cls(
             max_age_days=data.get("max_age_days"),
@@ -111,20 +111,20 @@ class StorageRule:
 @dataclass
 class StorageLocation:
     """A storage location for media files."""
-    
-    location_id: UUID
+
+    location_id: str  # Hash of path + type for stable ID
     name: str
     type: StorageType
     path: str  # Local path or bucket name
     priority: int  # Higher priority = preferred for new files
-    rules: List[StorageRule] = field(default_factory=list)
-    last_scan: Optional[datetime] = None
+    rules: list[StorageRule] = field(default_factory=list)
+    last_scan: datetime | None = None
     status: LocationStatus = LocationStatus.ACTIVE
-    
+
     # Additional config for cloud storage
-    config: Dict[str, Any] = field(default_factory=dict)
-    
-    def to_dict(self) -> Dict[str, Any]:
+    config: dict[str, Any] = field(default_factory=dict)
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary for storage."""
         return {
             "location_id": str(self.location_id),
@@ -137,12 +137,12 @@ class StorageLocation:
             "status": self.status.value,
             "config": self.config
         }
-    
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "StorageLocation":
+    def from_dict(cls, data: dict[str, Any]) -> "StorageLocation":
         """Create from dictionary."""
         return cls(
-            location_id=UUID(data["location_id"]),
+            location_id=str(data["location_id"]),
             name=data["name"],
             type=StorageType.from_string(data["type"]),
             path=data["path"],
@@ -156,7 +156,7 @@ class StorageLocation:
 
 class StorageRegistry:
     """Registry for managing storage locations and tracking files across them."""
-    
+
     def __init__(self, db_path: Path = None):
         """Initialize storage registry.
         
@@ -168,15 +168,15 @@ class StorageRegistry:
             self.conn = duckdb.connect(str(db_path))
         else:
             self.conn = duckdb.connect()
-        
+
         self._init_schema()
-    
+
     def _init_schema(self):
         """Initialize database schema."""
         # Storage locations table
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS storage_locations (
-                location_id UUID PRIMARY KEY,
+                location_id str PRIMARY KEY,
                 name VARCHAR NOT NULL UNIQUE,
                 type VARCHAR NOT NULL,
                 path VARCHAR NOT NULL,
@@ -189,12 +189,12 @@ class StorageRegistry:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         """)
-        
+
         # File locations table - tracks where each file exists
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS file_locations (
                 content_hash VARCHAR NOT NULL,
-                location_id UUID NOT NULL,
+                location_id str NOT NULL,
                 file_path VARCHAR NOT NULL,
                 file_size BIGINT,
                 last_verified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -205,12 +205,12 @@ class StorageRegistry:
                 FOREIGN KEY (location_id) REFERENCES storage_locations(location_id)
             );
         """)
-        
+
         # Storage rules evaluation cache
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS rule_evaluations (
                 content_hash VARCHAR NOT NULL,
-                location_id UUID NOT NULL,
+                location_id str NOT NULL,
                 evaluated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 matches BOOLEAN NOT NULL,
                 rule_details JSON,
@@ -218,13 +218,13 @@ class StorageRegistry:
                 FOREIGN KEY (location_id) REFERENCES storage_locations(location_id)
             );
         """)
-        
+
         # Create indexes
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_locations_priority ON storage_locations(priority DESC)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_locations_status ON storage_locations(status)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_file_locations_hash ON file_locations(content_hash)")
         self.conn.execute("CREATE INDEX IF NOT EXISTS idx_file_locations_sync ON file_locations(sync_status)")
-    
+
     def register_location(self, location: StorageLocation) -> StorageLocation:
         """Register a new storage location.
         
@@ -235,8 +235,10 @@ class StorageRegistry:
             The registered location with generated ID if needed
         """
         if not location.location_id:
-            location.location_id = uuid4()
-        
+            # Generate ID from path + type for stable identification
+            id_source = f"{location.path}:{location.type.value}"
+            location.location_id = hashlib.sha256(id_source.encode()).hexdigest()[:16]
+
         self.conn.execute("""
             INSERT INTO storage_locations (
                 location_id, name, type, path, priority, rules, 
@@ -254,10 +256,10 @@ class StorageRegistry:
             json.dumps(location.config),
             datetime.now()
         ])
-        
+
         logger.info(f"Registered storage location: {location.name} ({location.type.value})")
         return location
-    
+
     def update_location(self, location: StorageLocation) -> None:
         """Update an existing storage location.
         
@@ -282,10 +284,10 @@ class StorageRegistry:
             datetime.now(),
             str(location.location_id)
         ])
-        
+
         logger.info(f"Updated storage location: {location.name}")
-    
-    def update_scan_time(self, location_id: UUID) -> None:
+
+    def update_scan_time(self, location_id: str) -> None:
         """Update only the last scan time for a location.
         
         Args:
@@ -296,12 +298,12 @@ class StorageRegistry:
             SET last_scan = ?, updated_at = ?
             WHERE location_id = ?
         """, [datetime.now(), datetime.now(), str(location_id)])
-    
+
     def get_locations(
-        self, 
-        status: Optional[LocationStatus] = None,
-        type: Optional[StorageType] = None
-    ) -> List[StorageLocation]:
+        self,
+        status: LocationStatus | None = None,
+        type: StorageType | None = None
+    ) -> list[StorageLocation]:
         """Get all storage locations, optionally filtered.
         
         Args:
@@ -313,23 +315,23 @@ class StorageRegistry:
         """
         query = "SELECT * FROM storage_locations WHERE 1=1"
         params = []
-        
+
         if status:
             query += " AND status = ?"
             params.append(status.value)
-        
+
         if type:
             query += " AND type = ?"
             params.append(type.value)
-        
+
         query += " ORDER BY priority DESC, name"
-        
+
         results = self.conn.execute(query, params).fetchall()
-        
+
         locations = []
         for row in results:
             locations.append(StorageLocation(
-                location_id=row[0] if isinstance(row[0], UUID) else UUID(row[0]),
+                location_id=row[0] if isinstance(row[0], str) else str(row[0]),
                 name=row[1],
                 type=StorageType.from_string(row[2]),
                 path=row[3],
@@ -339,14 +341,14 @@ class StorageRegistry:
                 status=LocationStatus.from_string(row[7]),
                 config=json.loads(row[8] or "{}")
             ))
-        
+
         return locations
-    
-    def get_location_by_id(self, location_id: UUID) -> Optional[StorageLocation]:
+
+    def get_location_by_id(self, location_id: str) -> StorageLocation | None:
         """Get a specific storage location by ID.
         
         Args:
-            location_id: UUID of the location
+            location_id: str of the location
             
         Returns:
             Storage location or None if not found
@@ -355,12 +357,12 @@ class StorageRegistry:
             "SELECT * FROM storage_locations WHERE location_id = ?",
             [str(location_id)]
         ).fetchone()
-        
+
         if not result:
             return None
-        
+
         return StorageLocation(
-            location_id=result[0] if isinstance(result[0], UUID) else UUID(result[0]),
+            location_id=result[0] if isinstance(result[0], str) else str(result[0]),
             name=result[1],
             type=StorageType.from_string(result[2]),
             path=result[3],
@@ -370,12 +372,12 @@ class StorageRegistry:
             status=LocationStatus.from_string(result[7]),
             config=json.loads(result[8] or "{}")
         )
-    
+
     def get_location_for_file(
         self,
         content_hash: str,
-        file_metadata: Dict[str, Any]
-    ) -> Optional[StorageLocation]:
+        file_metadata: dict[str, Any]
+    ) -> StorageLocation | None:
         """Determine the best storage location for a file based on rules.
         
         Args:
@@ -387,20 +389,20 @@ class StorageRegistry:
         """
         # Get all active locations sorted by priority
         locations = self.get_locations(status=LocationStatus.ACTIVE)
-        
+
         for location in locations:
             if self._evaluate_rules(location, file_metadata):
                 # Cache the evaluation result
                 self._cache_rule_evaluation(content_hash, location.location_id, True, file_metadata)
                 return location
-        
+
         # If no location matches rules, return highest priority active location
         if locations:
             return locations[0]
-        
+
         return None
-    
-    def _evaluate_rules(self, location: StorageLocation, metadata: Dict[str, Any]) -> bool:
+
+    def _evaluate_rules(self, location: StorageLocation, metadata: dict[str, Any]) -> bool:
         """Evaluate if a file matches location rules.
         
         Args:
@@ -412,69 +414,69 @@ class StorageRegistry:
         """
         if not location.rules:
             return True  # No rules means accept all
-        
+
         for rule in location.rules:
             # Check age rules
             if rule.max_age_days is not None:
                 file_age_days = metadata.get("age_days", 0)
                 if file_age_days > rule.max_age_days:
                     return False
-            
+
             if rule.min_age_days is not None:
                 file_age_days = metadata.get("age_days", 0)
                 if file_age_days < rule.min_age_days:
                     return False
-            
+
             # Check type rules
             file_type = metadata.get("file_type", "").lower()
             if rule.include_types and file_type not in [t.lower() for t in rule.include_types]:
                 return False
-            
+
             if rule.exclude_types and file_type in [t.lower() for t in rule.exclude_types]:
                 return False
-            
+
             # Check size rules
             if rule.max_size_bytes is not None:
                 file_size = metadata.get("file_size", 0)
                 if file_size > rule.max_size_bytes:
                     return False
-            
+
             if rule.min_size_bytes is not None:
                 file_size = metadata.get("file_size", 0)
                 if file_size < rule.min_size_bytes:
                     return False
-            
+
             # Check tag rules
             file_tags = set(metadata.get("tags", []))
             if rule.require_tags:
                 required = set(rule.require_tags)
                 if not required.issubset(file_tags):
                     return False
-            
+
             if rule.exclude_tags:
                 excluded = set(rule.exclude_tags)
                 if excluded.intersection(file_tags):
                     return False
-            
+
             # Check quality rules
             if rule.min_quality_stars is not None:
                 quality = metadata.get("quality_stars", 0)
                 if quality < rule.min_quality_stars:
                     return False
-            
+
             if rule.max_quality_stars is not None:
                 quality = metadata.get("quality_stars", 0)
                 if quality > rule.max_quality_stars:
                     return False
-        
+
         return True
-    
+
     def _cache_rule_evaluation(
         self,
         content_hash: str,
-        location_id: UUID,
+        location_id: str,
         matches: bool,
-        metadata: Dict[str, Any]
+        metadata: dict[str, Any]
     ) -> None:
         """Cache the result of rule evaluation."""
         # Convert datetime objects to ISO format for JSON serialization
@@ -484,7 +486,7 @@ class StorageRegistry:
                 clean_metadata[k] = v.isoformat()
             else:
                 clean_metadata[k] = v
-        
+
         self.conn.execute("""
             INSERT INTO rule_evaluations (content_hash, location_id, evaluated_at, matches, rule_details)
             VALUES (?, ?, ?, ?, ?)
@@ -494,13 +496,13 @@ class StorageRegistry:
                 matches = EXCLUDED.matches,
                 rule_details = EXCLUDED.rule_details
         """, [content_hash, str(location_id), datetime.now(), matches, json.dumps(clean_metadata), datetime.now()])
-    
+
     def track_file(
         self,
         content_hash: str,
-        location_id: UUID,
+        location_id: str,
         file_path: str,
-        file_size: Optional[int] = None,
+        file_size: int | None = None,
         metadata_embedded: bool = False
     ) -> None:
         """Track a file in a specific location.
@@ -526,8 +528,8 @@ class StorageRegistry:
                 sync_status = 'synced',
                 error_message = NULL
         """, [content_hash, str(location_id), file_path, file_size, metadata_embedded, datetime.now(), datetime.now()])
-    
-    def get_file_locations(self, content_hash: str) -> List[Dict[str, Any]]:
+
+    def get_file_locations(self, content_hash: str) -> list[dict[str, Any]]:
         """Get all locations where a file exists.
         
         Args:
@@ -554,7 +556,7 @@ class StorageRegistry:
             WHERE fl.content_hash = ?
             ORDER BY sl.priority DESC
         """, [content_hash]).fetchall()
-        
+
         locations = []
         for row in results:
             locations.append({
@@ -570,10 +572,10 @@ class StorageRegistry:
                 "location_path": row[9],
                 "location_status": row[10]
             })
-        
+
         return locations
-    
-    def remove_file_from_location(self, content_hash: str, location_id: UUID) -> None:
+
+    def remove_file_from_location(self, content_hash: str, location_id: str) -> None:
         """Remove a file from a specific location.
         
         Args:
@@ -584,14 +586,14 @@ class StorageRegistry:
             DELETE FROM file_locations 
             WHERE content_hash = ? AND location_id = ?
         """, [content_hash, str(location_id)])
-        
+
         # Also remove rule evaluation cache
         self.conn.execute("""
             DELETE FROM rule_evaluations 
             WHERE content_hash = ? AND location_id = ?
         """, [content_hash, str(location_id)])
-    
-    def scan_location(self, location_id: UUID) -> Dict[str, Any]:
+
+    def scan_location(self, location_id: str) -> dict[str, Any]:
         """Scan a storage location to discover files.
         
         This is a placeholder for the actual implementation which would
@@ -606,22 +608,22 @@ class StorageRegistry:
         location = self.get_location_by_id(location_id)
         if not location:
             raise ValueError(f"Location {location_id} not found")
-        
+
         # Update last scan time
         self.conn.execute(
             "UPDATE storage_locations SET last_scan = ? WHERE location_id = ?",
             [datetime.now(), str(location_id)]
         )
-        
+
         # TODO: Implement actual scanning based on storage type
         # This would involve:
         # 1. Listing files in the location
         # 2. Computing content hashes
         # 3. Tracking discovered files
         # 4. Identifying missing/deleted files
-        
+
         logger.info(f"Scanned location {location.name} (placeholder implementation)")
-        
+
         return {
             "location_id": str(location_id),
             "location_name": location.name,
@@ -630,12 +632,12 @@ class StorageRegistry:
             "files_updated": 0,     # Placeholder
             "files_removed": 0      # Placeholder
         }
-    
+
     def mark_file_for_sync(
         self,
         content_hash: str,
-        source_location_id: UUID,
-        target_location_id: UUID,
+        source_location_id: str,
+        target_location_id: str,
         action: str = "upload"
     ) -> None:
         """Mark a file for synchronization between locations.
@@ -652,7 +654,7 @@ class StorageRegistry:
             SET sync_status = ?
             WHERE content_hash = ? AND location_id = ?
         """, [f"pending_{action}", content_hash, str(source_location_id)])
-        
+
         # Create placeholder in target if uploading
         if action == "upload":
             self.conn.execute("""
@@ -661,8 +663,8 @@ class StorageRegistry:
                 ) VALUES (?, ?, '', 'pending_upload')
                 ON CONFLICT (content_hash, location_id) DO NOTHING
             """, [content_hash, str(target_location_id)])
-    
-    def get_pending_syncs(self) -> List[Dict[str, Any]]:
+
+    def get_pending_syncs(self) -> list[dict[str, Any]]:
         """Get all files pending synchronization.
         
         Returns:
@@ -681,7 +683,7 @@ class StorageRegistry:
             WHERE fl.sync_status != 'synced'
             ORDER BY fl.last_verified
         """).fetchall()
-        
+
         syncs = []
         for row in results:
             syncs.append({
@@ -692,22 +694,22 @@ class StorageRegistry:
                 "location_name": row[4],
                 "location_type": row[5]
             })
-        
+
         return syncs
-    
-    def get_statistics(self) -> Dict[str, Any]:
+
+    def get_statistics(self) -> dict[str, Any]:
         """Get registry statistics.
         
         Returns:
             Dictionary with various statistics
         """
         stats = {}
-        
+
         # Total locations
         stats["total_locations"] = self.conn.execute(
             "SELECT COUNT(*) FROM storage_locations"
         ).fetchone()[0]
-        
+
         # Locations by type
         type_stats = self.conn.execute("""
             SELECT type, COUNT(*) as count
@@ -715,7 +717,7 @@ class StorageRegistry:
             GROUP BY type
         """).fetchall()
         stats["by_type"] = {t: count for t, count in type_stats}
-        
+
         # Locations by status
         status_stats = self.conn.execute("""
             SELECT status, COUNT(*) as count
@@ -723,17 +725,17 @@ class StorageRegistry:
             GROUP BY status
         """).fetchall()
         stats["by_status"] = {s: count for s, count in status_stats}
-        
+
         # Total unique files
         stats["total_unique_files"] = self.conn.execute(
             "SELECT COUNT(DISTINCT content_hash) FROM file_locations"
         ).fetchone()[0]
-        
+
         # Total file instances
         stats["total_file_instances"] = self.conn.execute(
             "SELECT COUNT(*) FROM file_locations"
         ).fetchone()[0]
-        
+
         # Files by location
         location_stats = self.conn.execute("""
             SELECT 
@@ -746,7 +748,7 @@ class StorageRegistry:
             GROUP BY sl.name
             ORDER BY priority DESC
         """).fetchall()
-        
+
         stats["by_location"] = []
         for name, count, size, priority in location_stats:
             stats["by_location"].append({
@@ -754,12 +756,12 @@ class StorageRegistry:
                 "file_count": count,
                 "total_size_bytes": size or 0
             })
-        
+
         # Pending syncs
         stats["pending_syncs"] = self.conn.execute(
             "SELECT COUNT(*) FROM file_locations WHERE sync_status != 'synced'"
         ).fetchone()[0]
-        
+
         # Files with multiple copies
         stats["files_with_multiple_copies"] = self.conn.execute("""
             SELECT COUNT(*) FROM (
@@ -769,22 +771,22 @@ class StorageRegistry:
                 HAVING COUNT(*) > 1
             )
         """).fetchone()[0]
-        
+
         return stats
-    
+
     def close(self):
         """Close the database connection."""
         self.conn.close()
-    
+
     def cleanup_for_tests(self):
         """Clean up all data for tests. WARNING: This deletes all data!"""
         # Disable foreign key constraints temporarily
         self.conn.execute("SET foreign_keys=false")
-        
+
         # Delete in reverse order of dependencies
         self.conn.execute("DELETE FROM rule_evaluations")
         self.conn.execute("DELETE FROM file_locations")
         self.conn.execute("DELETE FROM storage_locations")
-        
+
         # Re-enable foreign key constraints
         self.conn.execute("SET foreign_keys=true")

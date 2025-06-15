@@ -1,12 +1,12 @@
 """Smart content variation generation system."""
 
-from .variation_generator import VariationGenerator, VariationType, VariationStrategy
-from .variation_tracker import VariationTracker, VariationMetrics
+from .variation_generator import VariationGenerator, VariationStrategy, VariationType
+from .variation_tracker import VariationMetrics, VariationTracker
 
 __all__ = [
     "VariationGenerator",
-    "VariationType", 
+    "VariationMetrics",
     "VariationStrategy",
     "VariationTracker",
-    "VariationMetrics",
+    "VariationType",
 ]

@@ -3,25 +3,26 @@
 import logging
 import sys
 import time
-import uuid
+import time
 from contextvars import ContextVar
 from datetime import datetime
 from functools import wraps
-from typing import Any, Dict, Optional
+from typing import Any
 
 import structlog
 from structlog.processors import CallsiteParameter
 
 # Context variable for correlation ID
-correlation_id_var: ContextVar[Optional[str]] = ContextVar('correlation_id', default=None)
-request_id_var: ContextVar[Optional[str]] = ContextVar('request_id', default=None)
+correlation_id_var: ContextVar[str | None] = ContextVar('correlation_id', default=None)
+request_id_var: ContextVar[str | None] = ContextVar('request_id', default=None)
 
 
 def get_correlation_id() -> str:
     """Get current correlation ID or generate a new one."""
     correlation_id = correlation_id_var.get()
     if not correlation_id:
-        correlation_id = str(uuid.uuid4())
+        # Use timestamp-based correlation ID for easier log correlation
+        correlation_id = f"{int(time.time() * 1000000)}"
         correlation_id_var.set(correlation_id)
     return correlation_id
 
@@ -31,7 +32,7 @@ def set_correlation_id(correlation_id: str):
     correlation_id_var.set(correlation_id)
 
 
-def get_request_id() -> Optional[str]:
+def get_request_id() -> str | None:
     """Get current request ID."""
     return request_id_var.get()
 
@@ -43,52 +44,52 @@ def set_request_id(request_id: str):
 
 class StructuredLogger:
     """Structured logger with correlation ID support."""
-    
+
     def __init__(self, name: str):
         self.logger = structlog.get_logger(name)
         self.name = name
-    
-    def _add_context(self, event_dict: Dict[str, Any]) -> Dict[str, Any]:
+
+    def _add_context(self, event_dict: dict[str, Any]) -> dict[str, Any]:
         """Add context information to log event."""
         # Add correlation and request IDs
         event_dict['correlation_id'] = get_correlation_id()
         request_id = get_request_id()
         if request_id:
             event_dict['request_id'] = request_id
-        
+
         # Add service metadata
         event_dict['service'] = 'alicemultiverse'
         event_dict['logger'] = self.name
-        
+
         return event_dict
-    
+
     def bind(self, **kwargs) -> 'StructuredLogger':
         """Bind additional context to logger."""
         self.logger = self.logger.bind(**kwargs)
         return self
-    
+
     def info(self, msg: str, **kwargs):
         """Log info message."""
         event_dict = self._add_context(kwargs)
         self.logger.info(msg, **event_dict)
-    
+
     def warning(self, msg: str, **kwargs):
         """Log warning message."""
         event_dict = self._add_context(kwargs)
         self.logger.warning(msg, **event_dict)
-    
+
     def error(self, msg: str, exc_info: bool = False, **kwargs):
         """Log error message."""
         event_dict = self._add_context(kwargs)
         if exc_info:
             event_dict['exc_info'] = True
         self.logger.error(msg, **event_dict)
-    
+
     def debug(self, msg: str, **kwargs):
         """Log debug message."""
         event_dict = self._add_context(kwargs)
         self.logger.debug(msg, **event_dict)
-    
+
     def critical(self, msg: str, **kwargs):
         """Log critical message."""
         event_dict = self._add_context(kwargs)
@@ -101,26 +102,26 @@ def get_logger(name: str) -> StructuredLogger:
 
 
 # Custom processors for structlog
-def add_timestamp(_, __, event_dict: Dict[str, Any]) -> Dict[str, Any]:
+def add_timestamp(_, __, event_dict: dict[str, Any]) -> dict[str, Any]:
     """Add ISO timestamp to log event."""
     event_dict['timestamp'] = datetime.utcnow().isoformat() + 'Z'
     return event_dict
 
 
-def add_log_level(_, method_name: str, event_dict: Dict[str, Any]) -> Dict[str, Any]:
+def add_log_level(_, method_name: str, event_dict: dict[str, Any]) -> dict[str, Any]:
     """Add log level to event dict."""
     event_dict['level'] = method_name.upper()
     return event_dict
 
 
-def censor_sensitive_data(_, __, event_dict: Dict[str, Any]) -> Dict[str, Any]:
+def censor_sensitive_data(_, __, event_dict: dict[str, Any]) -> dict[str, Any]:
     """Censor sensitive data in logs."""
     sensitive_keys = {
         'password', 'api_key', 'secret', 'token', 'authorization',
         'credit_card', 'ssn', 'private_key'
     }
-    
-    def censor_dict(d: Dict[str, Any]) -> Dict[str, Any]:
+
+    def censor_dict(d: dict[str, Any]) -> dict[str, Any]:
         censored = {}
         for key, value in d.items():
             if any(sensitive in key.lower() for sensitive in sensitive_keys):
@@ -130,7 +131,7 @@ def censor_sensitive_data(_, __, event_dict: Dict[str, Any]) -> Dict[str, Any]:
             else:
                 censored[key] = value
         return censored
-    
+
     return censor_dict(event_dict)
 
 
@@ -154,7 +155,7 @@ def setup_structured_logging(
         structlog.stdlib.add_logger_name,
         censor_sensitive_data,
     ]
-    
+
     if include_caller_info:
         processors.extend([
             structlog.processors.CallsiteParameterAdder(
@@ -165,18 +166,18 @@ def setup_structured_logging(
                 ]
             ),
         ])
-    
+
     processors.extend([
         structlog.processors.StackInfoRenderer(),
         structlog.processors.format_exc_info,
     ])
-    
+
     # Configure output format
     if json_logs:
         processors.append(structlog.processors.JSONRenderer())
     else:
         processors.append(structlog.dev.ConsoleRenderer(colors=True))
-    
+
     # Configure structlog
     structlog.configure(
         processors=processors,
@@ -184,19 +185,19 @@ def setup_structured_logging(
         logger_factory=structlog.stdlib.LoggerFactory(),
         cache_logger_on_first_use=True,
     )
-    
+
     # Configure standard logging
     logging.basicConfig(
         format="%(message)s",
         stream=sys.stdout,
         level=getattr(logging, log_level.upper()),
     )
-    
+
     # Redirect standard logging to structlog
     logging.getLogger().handlers = [
         logging.StreamHandler(sys.stdout)
     ]
-    
+
     # Log initialization
     logger = get_logger(__name__)
     logger.info(
@@ -215,7 +216,7 @@ def trace_operation(operation_name: str):
         async def async_wrapper(*args, **kwargs):
             logger = get_logger(func.__module__)
             start_time = time.time()
-            
+
             logger.info(
                 f"Starting {operation_name}",
                 operation=operation_name,
@@ -223,11 +224,11 @@ def trace_operation(operation_name: str):
                 args_count=len(args),
                 kwargs_keys=list(kwargs.keys())
             )
-            
+
             try:
                 result = await func(*args, **kwargs)
                 duration = time.time() - start_time
-                
+
                 logger.info(
                     f"Completed {operation_name}",
                     operation=operation_name,
@@ -235,12 +236,12 @@ def trace_operation(operation_name: str):
                     duration_seconds=duration,
                     success=True
                 )
-                
+
                 return result
-                
+
             except Exception as e:
                 duration = time.time() - start_time
-                
+
                 logger.error(
                     f"Failed {operation_name}",
                     operation=operation_name,
@@ -252,12 +253,12 @@ def trace_operation(operation_name: str):
                     exc_info=True
                 )
                 raise
-        
+
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
             logger = get_logger(func.__module__)
             start_time = time.time()
-            
+
             logger.info(
                 f"Starting {operation_name}",
                 operation=operation_name,
@@ -265,11 +266,11 @@ def trace_operation(operation_name: str):
                 args_count=len(args),
                 kwargs_keys=list(kwargs.keys())
             )
-            
+
             try:
                 result = func(*args, **kwargs)
                 duration = time.time() - start_time
-                
+
                 logger.info(
                     f"Completed {operation_name}",
                     operation=operation_name,
@@ -277,12 +278,12 @@ def trace_operation(operation_name: str):
                     duration_seconds=duration,
                     success=True
                 )
-                
+
                 return result
-                
+
             except Exception as e:
                 duration = time.time() - start_time
-                
+
                 logger.error(
                     f"Failed {operation_name}",
                     operation=operation_name,
@@ -294,14 +295,14 @@ def trace_operation(operation_name: str):
                     exc_info=True
                 )
                 raise
-        
+
         # Return appropriate wrapper based on function type
         import asyncio
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
             return sync_wrapper
-    
+
     return decorator
 
 
@@ -312,7 +313,7 @@ def log_api_call(provider: str, model: str, operation: str):
         async def async_wrapper(*args, **kwargs):
             logger = get_logger(func.__module__)
             correlation_id = get_correlation_id()
-            
+
             logger.info(
                 "API call started",
                 provider=provider,
@@ -320,18 +321,18 @@ def log_api_call(provider: str, model: str, operation: str):
                 operation=operation,
                 correlation_id=correlation_id
             )
-            
+
             start_time = time.time()
-            
+
             try:
                 result = await func(*args, **kwargs)
                 duration = time.time() - start_time
-                
+
                 # Extract cost if available
                 cost = None
                 if hasattr(result, 'cost'):
                     cost = result.cost
-                
+
                 logger.info(
                     "API call completed",
                     provider=provider,
@@ -342,12 +343,12 @@ def log_api_call(provider: str, model: str, operation: str):
                     correlation_id=correlation_id,
                     success=True
                 )
-                
+
                 return result
-                
+
             except Exception as e:
                 duration = time.time() - start_time
-                
+
                 logger.error(
                     "API call failed",
                     provider=provider,
@@ -361,33 +362,33 @@ def log_api_call(provider: str, model: str, operation: str):
                     exc_info=True
                 )
                 raise
-        
+
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
             # Similar implementation for sync functions
             return func(*args, **kwargs)
-        
+
         import asyncio
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
             return sync_wrapper
-    
+
     return decorator
 
 
 # Context managers for correlation IDs
 class CorrelationContext:
     """Context manager for correlation ID."""
-    
-    def __init__(self, correlation_id: Optional[str] = None):
-        self.correlation_id = correlation_id or str(uuid.uuid4())
+
+    def __init__(self, correlation_id: str | None = None):
+        self.correlation_id = correlation_id or f"{int(time.time() * 1000000)}"
         self.token = None
-    
+
     def __enter__(self):
         self.token = correlation_id_var.set(self.correlation_id)
         return self.correlation_id
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.token:
             correlation_id_var.reset(self.token)
@@ -395,15 +396,15 @@ class CorrelationContext:
 
 class RequestContext:
     """Context manager for request ID."""
-    
+
     def __init__(self, request_id: str):
         self.request_id = request_id
         self.token = None
-    
+
     def __enter__(self):
         self.token = request_id_var.set(self.request_id)
         return self.request_id
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         if self.token:
             request_id_var.reset(self.token)

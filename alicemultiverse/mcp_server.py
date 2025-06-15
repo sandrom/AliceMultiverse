@@ -8,6 +8,8 @@ It does NOT expose direct file access or underlying APIs - only Alice's function
 
 import asyncio
 import logging
+from datetime import datetime
+from pathlib import Path
 from typing import Any
 
 try:
@@ -30,6 +32,9 @@ from .interface.analytics_mcp import start_analytics_session as analytics_start_
 from .interface.analytics_mcp import track_export_event as analytics_track_export
 from .interface.analytics_mcp import track_user_action as analytics_track_action
 from .interface.analytics_mcp import track_workflow_event as analytics_track_workflow
+
+# B-roll suggestions imports
+from .interface.broll_suggestions_mcp import register_broll_tools
 from .interface.composition_mcp import (
     analyze_image_composition,
     analyze_timeline_compositions,
@@ -56,9 +61,6 @@ from .interface.video_creation_mcp import register_video_creation_tools
 
 # Enhanced Video Generation imports
 from .interface.video_providers_mcp import register_video_providers_tools
-
-# B-roll suggestions imports
-from .interface.broll_suggestions_mcp import register_broll_tools
 from .memory.style_memory_mcp import analyze_style_patterns as memory_analyze_patterns
 from .memory.style_memory_mcp import end_style_workflow as memory_end_workflow
 from .memory.style_memory_mcp import export_style_profile as memory_export_profile
@@ -610,7 +612,9 @@ async def find_duplicates_advanced(
     
     Returns groups of duplicate/similar assets with their locations and sizes.
     """
-    from alicemultiverse.interface.deduplication_mcp import find_duplicates_advanced as _find_duplicates
+    from alicemultiverse.interface.deduplication_mcp import (
+        find_duplicates_advanced as _find_duplicates,
+    )
     return await _find_duplicates(
         exact_only=not check_similar,
         similarity_threshold=similarity_threshold,
@@ -2589,7 +2593,7 @@ async def generate_veo3_video(
         from pathlib import Path
 
         from .providers.fal_provider import FalProvider
-        from .providers.types import GenerationRequest, GenerationType
+        # from .providers.types import GenerationRequest, GenerationType
 
         # Validate parameters
         if duration < 5 or duration > 8:
@@ -3760,7 +3764,12 @@ async def detect_composition_patterns(
         Plugins extend Alice's functionality with custom providers, effects,
         analyzers, exporters, and workflows.
         """
-        from .plugins.registry import get_registry
+        return {
+            "success": False,
+            "error": "Plugin functionality has been removed to simplify the codebase.",
+            "plugins": []
+        }
+        # from .plugins.registry import get_registry
 
         try:
             registry = get_registry()
@@ -3865,7 +3874,7 @@ async def detect_composition_patterns(
         from .plugins.base import PluginType
         from .plugins.provider_adapter import PluginProviderAdapter
         from .plugins.registry import get_plugin
-        from .providers.types import GenerationRequest, GenerationType
+        # from .providers.types import GenerationRequest, GenerationType
 
         try:
             # Get the plugin
@@ -4154,7 +4163,7 @@ def _generate_plugin_template(plugin_type: PluginType, plugin_name: str) -> str:
 import logging
 from typing import Any, Dict, List
 
-from alicemultiverse.plugins.base import ProviderPlugin, PluginMetadata, PluginType
+# from alicemultiverse.plugins.base import ProviderPlugin, PluginMetadata, PluginType  # Plugins removed
 
 logger = logging.getLogger(__name__)
 
@@ -4218,7 +4227,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List
 
-from alicemultiverse.plugins.base import EffectPlugin, PluginMetadata, PluginType
+# from alicemultiverse.plugins.base import EffectPlugin, PluginMetadata, PluginType  # Plugins removed
 
 logger = logging.getLogger(__name__)
 
@@ -4279,7 +4288,7 @@ class {plugin_name.title().replace("_", "")}Plugin(EffectPlugin):
 import logging
 from typing import Any, Dict
 
-from alicemultiverse.plugins.base import Plugin, PluginMetadata, PluginType
+# from alicemultiverse.plugins.base import Plugin, PluginMetadata, PluginType  # Plugins removed
 
 logger = logging.getLogger(__name__)
 
@@ -4361,11 +4370,16 @@ async def start_mobile_server(
     generate_token: bool = True
 ) -> dict[str, Any]:
     """Start the mobile companion server for remote timeline control."""
+    return {
+        "success": False,
+        "error": "Mobile functionality has been removed. Use Alice through AI assistants instead."
+    }
     import socket
     import threading
 
-    from alicemultiverse.mobile.server import MobileServer
-    from alicemultiverse.mobile.token_manager import TokenManager
+    # Mobile imports removed - functionality deprecated
+    # from alicemultiverse.mobile.server import MobileServer
+    # from alicemultiverse.mobile.token_manager import TokenManager
 
     # Get local IP
     def get_local_ip():
@@ -4373,7 +4387,7 @@ async def start_mobile_server(
         try:
             s.connect(("8.8.8.8", 80))
             ip = s.getsockname()[0]
-        except:
+        except (OSError, ConnectionError):
             ip = "localhost"
         finally:
             s.close()
@@ -4419,7 +4433,7 @@ async def generate_mobile_token(
     expires_hours: int = 24
 ) -> dict[str, Any]:
     """Generate an access token for mobile companion app."""
-    from alicemultiverse.mobile.token_manager import TokenManager
+    # from alicemultiverse.mobile.token_manager import TokenManager
 
     manager = TokenManager()
     token = manager.generate_token(name, expires_hours)
@@ -4435,7 +4449,7 @@ async def generate_mobile_token(
 @server.tool()
 async def list_mobile_tokens() -> dict[str, Any]:
     """List all active mobile access tokens."""
-    from alicemultiverse.mobile.token_manager import TokenManager
+    # from alicemultiverse.mobile.token_manager import TokenManager
 
     manager = TokenManager()
     tokens = manager.list_tokens()

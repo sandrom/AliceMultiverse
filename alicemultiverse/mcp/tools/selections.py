@@ -4,12 +4,12 @@ import json
 import logging
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from mcp import Server
 
+from ...selections.models import SelectionCreate
 from ...selections.service import SelectionService
-from ...selections.models import Selection, SelectionCreate
 from ..base import (
     ValidationError,
     create_tool_response,
@@ -18,7 +18,6 @@ from ..base import (
     validate_path,
 )
 from ..utils.decorators import require_service
-from ..utils.formatters import format_file_list
 
 logger = logging.getLogger(__name__)
 
@@ -29,19 +28,19 @@ def register_selection_tools(server: Server) -> None:
     Args:
         server: MCP server instance
     """
-    
+
     # Register selection service loader
     services.register("selections", lambda: SelectionService())
-    
+
     @server.tool()
     @handle_errors
     @require_service("selections")
     async def quick_mark(
-        paths: List[str],
-        name: Optional[str] = None,
-        tags: Optional[List[str]] = None,
-        notes: Optional[str] = None,
-        rating: Optional[int] = None
+        paths: list[str],
+        name: str | None = None,
+        tags: list[str] | None = None,
+        notes: str | None = None,
+        rating: int | None = None
     ) -> Any:
         """Quickly mark files for later reference.
         
@@ -58,7 +57,7 @@ def register_selection_tools(server: Server) -> None:
         # Validate inputs
         if not paths:
             raise ValidationError("At least one path is required")
-        
+
         # Validate paths
         valid_paths = []
         for path_str in paths:
@@ -67,22 +66,22 @@ def register_selection_tools(server: Server) -> None:
                 valid_paths.append(str(path))
             except ValidationError as e:
                 logger.warning(f"Skipping invalid path: {e}")
-        
+
         if not valid_paths:
             raise ValidationError("No valid paths provided")
-        
+
         # Validate rating if provided
         if rating is not None:
             if not 1 <= rating <= 5:
                 raise ValidationError("Rating must be between 1 and 5")
-        
+
         # Generate name if not provided
         if not name:
             name = f"Quick Mark {datetime.now().strftime('%Y-%m-%d %H:%M')}"
-        
+
         # Get selection service
         selection_service = services.get("selections")
-        
+
         # Create selection
         selection_data = SelectionCreate(
             name=name,
@@ -91,9 +90,9 @@ def register_selection_tools(server: Server) -> None:
             notes=notes,
             metadata={"rating": rating} if rating else {}
         )
-        
+
         selection = selection_service.create_selection(selection_data)
-        
+
         return create_tool_response(
             success=True,
             data={
@@ -105,12 +104,12 @@ def register_selection_tools(server: Server) -> None:
             },
             message=f"Marked {len(valid_paths)} files as '{name}'"
         )
-    
+
     @server.tool()
     @handle_errors
     @require_service("selections")
     async def list_quick_marks(
-        tags: Optional[List[str]] = None,
+        tags: list[str] | None = None,
         limit: int = 20,
         include_paths: bool = False
     ) -> Any:
@@ -127,16 +126,16 @@ def register_selection_tools(server: Server) -> None:
         # Validate limit
         if limit <= 0:
             raise ValidationError("Limit must be positive")
-        
+
         # Get selection service
         selection_service = services.get("selections")
-        
+
         # Get selections
         selections = selection_service.list_selections(
             tags=tags,
             limit=limit
         )
-        
+
         # Format selections
         selection_list = []
         for selection in selections:
@@ -149,12 +148,12 @@ def register_selection_tools(server: Server) -> None:
                 "created_at": selection.created_at.isoformat(),
                 "metadata": selection.metadata
             }
-            
+
             if include_paths:
                 data["paths"] = selection.paths
-            
+
             selection_list.append(data)
-        
+
         return create_tool_response(
             success=True,
             data={
@@ -163,13 +162,13 @@ def register_selection_tools(server: Server) -> None:
                 "total_files": sum(s["file_count"] for s in selection_list)
             }
         )
-    
+
     @server.tool()
     @handle_errors
     @require_service("selections")
     async def export_quick_marks(
-        selection_id: Optional[str] = None,
-        output_path: Optional[str] = None,
+        selection_id: str | None = None,
+        output_path: str | None = None,
         format: str = "json"
     ) -> Any:
         """Export quick marks/selections to a file.
@@ -185,10 +184,10 @@ def register_selection_tools(server: Server) -> None:
         # Validate format
         if format not in ["json", "txt", "csv"]:
             raise ValidationError("Format must be one of: json, txt, csv")
-        
+
         # Get selection service
         selection_service = services.get("selections")
-        
+
         # Get selections to export
         if selection_id:
             selection = selection_service.get_selection(selection_id)
@@ -197,17 +196,17 @@ def register_selection_tools(server: Server) -> None:
             selections = [selection]
         else:
             selections = selection_service.list_selections()
-        
+
         if not selections:
             raise ValidationError("No selections to export")
-        
+
         # Determine output path
         if output_path:
             output_file = validate_path(output_path, must_exist=False)
         else:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             output_file = Path(f"selections_export_{timestamp}.{format}")
-        
+
         # Export based on format
         if format == "json":
             export_data = []
@@ -221,10 +220,10 @@ def register_selection_tools(server: Server) -> None:
                     "metadata": sel.metadata,
                     "created_at": sel.created_at.isoformat()
                 })
-            
+
             with open(output_file, 'w') as f:
                 json.dump(export_data, f, indent=2)
-        
+
         elif format == "txt":
             lines = []
             for sel in selections:
@@ -238,17 +237,17 @@ def register_selection_tools(server: Server) -> None:
                 for path in sel.paths:
                     lines.append(f"  - {path}")
                 lines.append("")  # Empty line between selections
-            
+
             with open(output_file, 'w') as f:
                 f.write("\n".join(lines))
-        
+
         elif format == "csv":
             import csv
-            
+
             with open(output_file, 'w', newline='') as f:
                 writer = csv.writer(f)
                 writer.writerow(["Selection", "File", "Tags", "Notes", "Created"])
-                
+
                 for sel in selections:
                     tags_str = ", ".join(sel.tags) if sel.tags else ""
                     for path in sel.paths:
@@ -259,10 +258,10 @@ def register_selection_tools(server: Server) -> None:
                             sel.notes or "",
                             sel.created_at.isoformat()
                         ])
-        
+
         # Get file size
         file_size = output_file.stat().st_size
-        
+
         return create_tool_response(
             success=True,
             data={

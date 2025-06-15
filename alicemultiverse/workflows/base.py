@@ -6,9 +6,9 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from alicemultiverse.providers.types import GenerationResult
+from alicemultiverse.providers.provider_types import GenerationResult
 
 logger = logging.getLogger(__name__)
 
@@ -49,18 +49,18 @@ class WorkflowStep:
     name: str
     provider: str
     operation: str = "generate"
-    parameters: Dict[str, Any] = field(default_factory=dict)
-    condition: Optional[str] = None  # Simple condition like "previous.success"
+    parameters: dict[str, Any] = field(default_factory=dict)
+    condition: str | None = None  # Simple condition like "previous.success"
     retry_count: int = 3
     timeout: float = 300.0  # 5 minutes default
-    cost_limit: Optional[float] = None
-    
+    cost_limit: float | None = None
+
     # Runtime fields
     status: StepStatus = StepStatus.PENDING
-    result: Optional[GenerationResult] = None
-    error: Optional[str] = None
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
+    result: GenerationResult | None = None
+    error: str | None = None
+    start_time: datetime | None = None
+    end_time: datetime | None = None
     cost: float = 0.0
 
 
@@ -72,23 +72,23 @@ class WorkflowContext:
     """
     # Input data
     initial_prompt: str
-    initial_params: Dict[str, Any] = field(default_factory=dict)
-    
+    initial_params: dict[str, Any] = field(default_factory=dict)
+
     # Step results
-    steps: Dict[str, WorkflowStep] = field(default_factory=dict)
-    results: Dict[str, GenerationResult] = field(default_factory=dict)
-    
+    steps: dict[str, WorkflowStep] = field(default_factory=dict)
+    results: dict[str, GenerationResult] = field(default_factory=dict)
+
     # File management
-    files: Dict[str, Path] = field(default_factory=dict)
-    temp_files: List[Path] = field(default_factory=list)
-    
+    files: dict[str, Path] = field(default_factory=dict)
+    temp_files: list[Path] = field(default_factory=list)
+
     # Metadata
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     total_cost: float = 0.0
-    start_time: Optional[datetime] = None
-    end_time: Optional[datetime] = None
-    
-    def get_previous_result(self, step_name: Optional[str] = None) -> Optional[GenerationResult]:
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+
+    def get_previous_result(self, step_name: str | None = None) -> GenerationResult | None:
         """Get result from a previous step."""
         if not step_name:
             # Get the last completed step
@@ -97,19 +97,19 @@ class WorkflowContext:
                     return self.results[name]
             return None
         return self.results.get(step_name)
-    
-    def get_file(self, key: str) -> Optional[Path]:
+
+    def get_file(self, key: str) -> Path | None:
         """Get a file path by key."""
         return self.files.get(key)
-    
+
     def set_file(self, key: str, path: Path):
         """Store a file path with a key."""
         self.files[key] = path
-    
+
     def add_temp_file(self, path: Path):
         """Add a temporary file for cleanup."""
         self.temp_files.append(path)
-    
+
     def evaluate_condition(self, condition: str) -> bool:
         """Evaluate a simple condition.
         
@@ -120,16 +120,16 @@ class WorkflowContext:
         """
         if not condition:
             return True
-            
+
         if condition == "previous.success":
             prev = self.get_previous_result()
             return prev is not None and prev.success
-            
+
         if ".success" in condition:
             step_name = condition.replace(".success", "")
             step = self.steps.get(step_name)
             return step is not None and step.status == StepStatus.COMPLETED
-            
+
         if "cost" in condition:
             # Simple cost comparison
             try:
@@ -141,7 +141,7 @@ class WorkflowContext:
                     return self.total_cost > threshold
             except (ValueError, IndexError):
                 logger.warning(f"Invalid cost condition: {condition}")
-                
+
         return True
 
 
@@ -155,9 +155,9 @@ class WorkflowResult:
     execution_time: float
     completed_steps: int
     total_steps: int
-    final_outputs: List[Path] = field(default_factory=list)
-    errors: List[str] = field(default_factory=list)
-    
+    final_outputs: list[Path] = field(default_factory=list)
+    errors: list[str] = field(default_factory=list)
+
     @property
     def success(self) -> bool:
         """Check if workflow completed successfully."""
@@ -172,18 +172,18 @@ class WorkflowTemplate(ABC):
     - VideoProductionWorkflow
     - StyleTransferWorkflow
     """
-    
-    def __init__(self, name: Optional[str] = None):
+
+    def __init__(self, name: str | None = None):
         """Initialize workflow template.
         
         Args:
             name: Workflow name (defaults to class name)
         """
         self.name = name or self.__class__.__name__
-        self._steps: List[WorkflowStep] = []
-    
+        self._steps: list[WorkflowStep] = []
+
     @abstractmethod
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define the workflow steps.
         
         Args:
@@ -192,8 +192,8 @@ class WorkflowTemplate(ABC):
         Returns:
             List of workflow steps to execute
         """
-    
-    def validate(self, context: WorkflowContext) -> List[str]:
+
+    def validate(self, context: WorkflowContext) -> list[str]:
         """Validate the workflow can execute.
         
         Args:
@@ -203,14 +203,14 @@ class WorkflowTemplate(ABC):
             List of validation errors (empty if valid)
         """
         errors = []
-        
+
         # Check required parameters
         if not context.initial_prompt:
             errors.append("Initial prompt is required")
-            
+
         # Subclasses can add more validation
         return errors
-    
+
     def estimate_cost(self, context: WorkflowContext) -> float:
         """Estimate total workflow cost.
         
@@ -223,7 +223,7 @@ class WorkflowTemplate(ABC):
         # This is a simple estimate - executor will refine it
         steps = self.define_steps(context)
         total = 0.0
-        
+
         for step in steps:
             # Basic estimation - providers will give more accurate costs
             if step.provider in ["leonardo", "firefly", "ideogram"]:
@@ -232,20 +232,20 @@ class WorkflowTemplate(ABC):
                 total += 0.05  # Upscaling typically costs more
             elif step.provider in ["google", "veo"]:
                 total += 0.10  # Video generation costs more
-                
+
         return total
-    
+
     def get_description(self) -> str:
         """Get workflow description."""
         return self.__doc__ or f"{self.name} workflow"
-    
-    def get_required_providers(self) -> List[str]:
+
+    def get_required_providers(self) -> list[str]:
         """Get list of required providers."""
         # Extract from a sample run
         context = WorkflowContext(initial_prompt="test")
         steps = self.define_steps(context)
         return list(set(step.provider for step in steps))
-    
+
     def cleanup(self, context: WorkflowContext):
         """Clean up temporary files.
         

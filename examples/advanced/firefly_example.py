@@ -2,10 +2,11 @@
 """Example usage of Adobe Firefly provider for various image generation tasks."""
 
 import asyncio
+import io
 import os
 from pathlib import Path
+
 from PIL import Image
-import io
 
 from alicemultiverse.providers import get_provider
 from alicemultiverse.providers.base import GenerationRequest
@@ -14,9 +15,9 @@ from alicemultiverse.providers.base import GenerationRequest
 async def text_to_image_example():
     """Generate images from text prompts."""
     print("\n=== Text to Image Example ===")
-    
+
     provider = get_provider("firefly")
-    
+
     # Basic generation
     request = GenerationRequest(
         prompt="A serene Japanese garden with cherry blossoms and a koi pond",
@@ -29,15 +30,15 @@ async def text_to_image_example():
             "content_class": "art",
         }
     )
-    
+
     print(f"Generating: {request.prompt}")
     result = await provider.generate(request)
-    
+
     # Save the image
     if result.images:
         image = Image.open(io.BytesIO(result.images[0]))
         image.save("firefly_garden.png")
-        print(f"Saved: firefly_garden.png")
+        print("Saved: firefly_garden.png")
         print(f"Cost: ${result.cost:.4f}")
         print(f"Metadata: {result.metadata}")
 
@@ -45,18 +46,18 @@ async def text_to_image_example():
 async def style_transfer_example():
     """Apply artistic styles from reference images."""
     print("\n=== Style Transfer Example ===")
-    
+
     provider = get_provider("firefly")
-    
+
     # Load a style reference image
     style_path = Path("style_reference.jpg")
     if not style_path.exists():
         print("Please provide a style_reference.jpg file")
         return
-        
+
     with open(style_path, "rb") as f:
         style_data = f.read()
-    
+
     request = GenerationRequest(
         prompt="A bustling city street at night",
         model="firefly-v3",
@@ -67,10 +68,10 @@ async def style_transfer_example():
             "style_strength": 80,  # Strong style influence
         }
     )
-    
+
     print("Generating with style transfer...")
     result = await provider.generate(request)
-    
+
     if result.images:
         image = Image.open(io.BytesIO(result.images[0]))
         image.save("firefly_styled_city.png")
@@ -80,22 +81,22 @@ async def style_transfer_example():
 async def generative_fill_example():
     """Use generative fill to modify parts of an image."""
     print("\n=== Generative Fill Example ===")
-    
+
     provider = get_provider("firefly")
-    
+
     # Load input image and mask
     input_path = Path("input_image.jpg")
     mask_path = Path("mask.png")
-    
+
     if not input_path.exists() or not mask_path.exists():
         print("Please provide input_image.jpg and mask.png files")
         return
-        
+
     with open(input_path, "rb") as f:
         image_data = f.read()
     with open(mask_path, "rb") as f:
         mask_data = f.read()
-    
+
     request = GenerationRequest(
         prompt="A vintage red convertible car",
         model="firefly-fill",
@@ -104,10 +105,10 @@ async def generative_fill_example():
         image=image_data,
         mask=mask_data,
     )
-    
+
     print("Performing generative fill...")
     result = await provider.generate(request)
-    
+
     if result.images:
         image = Image.open(io.BytesIO(result.images[0]))
         image.save("firefly_filled.png")
@@ -117,22 +118,22 @@ async def generative_fill_example():
 async def expand_image_example():
     """Expand an image beyond its original boundaries."""
     print("\n=== Generative Expand Example ===")
-    
+
     provider = get_provider("firefly")
-    
+
     # Load input image
     input_path = Path("input_image.jpg")
     if not input_path.exists():
         print("Please provide an input_image.jpg file")
         return
-        
+
     with open(input_path, "rb") as f:
         image_data = f.read()
-    
+
     # Load and check original dimensions
     original = Image.open(input_path)
     print(f"Original size: {original.size}")
-    
+
     request = GenerationRequest(
         model="firefly-expand",
         width=original.width + 512,   # Add 512px width
@@ -149,10 +150,10 @@ async def expand_image_example():
             }
         }
     )
-    
+
     print("Expanding image...")
     result = await provider.generate(request)
-    
+
     if result.images:
         image = Image.open(io.BytesIO(result.images[0]))
         image.save("firefly_expanded.png")
@@ -162,12 +163,12 @@ async def expand_image_example():
 async def batch_generation_example():
     """Generate multiple variations with different styles."""
     print("\n=== Batch Generation Example ===")
-    
+
     provider = get_provider("firefly")
-    
+
     styles = ["cyberpunk", "watercolor", "oil_paint", "anime"]
     prompt = "A majestic mountain landscape at sunrise"
-    
+
     for style in styles:
         request = GenerationRequest(
             prompt=prompt,
@@ -180,24 +181,24 @@ async def batch_generation_example():
                 "content_class": "art",
             }
         )
-        
+
         print(f"Generating {style} style...")
         result = await provider.generate(request)
-        
+
         if result.images:
             image = Image.open(io.BytesIO(result.images[0]))
             image.save(f"firefly_{style}_landscape.png")
             print(f"Saved: firefly_{style}_landscape.png")
-    
+
     print("Batch generation complete!")
 
 
 async def cost_estimation_example():
     """Demonstrate cost estimation before generation."""
     print("\n=== Cost Estimation Example ===")
-    
+
     provider = get_provider("firefly")
-    
+
     # Different request configurations
     requests = [
         GenerationRequest(
@@ -230,13 +231,13 @@ async def cost_estimation_example():
             image=b"dummy_data",  # Just for estimation
         ),
     ]
-    
+
     total_cost = 0
     for i, request in enumerate(requests, 1):
         cost = provider.estimate_cost(request)
         total_cost += cost
         print(f"Request {i}: ${cost:.4f} - {request.prompt}")
-    
+
     print(f"\nTotal estimated cost: ${total_cost:.4f}")
 
 
@@ -247,18 +248,18 @@ async def main():
         print("Please set ADOBE_CLIENT_ID and ADOBE_CLIENT_SECRET environment variables")
         print("Or provide them as 'client_id:client_secret' when getting the provider")
         return
-    
+
     try:
         # Run examples
         await text_to_image_example()
         await cost_estimation_example()
-        
+
         # These require additional files
         # await style_transfer_example()
         # await generative_fill_example()
         # await expand_image_example()
         # await batch_generation_example()
-        
+
     except Exception as e:
         print(f"Error: {e}")
 

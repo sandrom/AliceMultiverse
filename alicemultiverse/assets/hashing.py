@@ -81,10 +81,10 @@ def hash_video_content(file_path: Path) -> str:
     try:
         # Import here to avoid circular dependencies
         from .video_hashing import hash_video_keyframes
-        
+
         # Use keyframe hashing for content identification
         return hash_video_keyframes(file_path, max_frames=10)
-        
+
     except ImportError as e:
         logger.error(f"Failed to import video hashing module: {e}")
         # Fall back to file hashing

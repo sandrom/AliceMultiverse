@@ -5,7 +5,7 @@ import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import duckdb
 
@@ -15,43 +15,43 @@ logger = logging.getLogger(__name__)
 @dataclass
 class InstructionTemplate:
     """Template for custom analysis instructions."""
-    
+
     id: str
     name: str
     description: str
     instructions: str
-    variables: Dict[str, str] = field(default_factory=dict)  # Variable name -> description
-    examples: List[Dict[str, Any]] = field(default_factory=list)
+    variables: dict[str, str] = field(default_factory=dict)  # Variable name -> description
+    examples: list[dict[str, Any]] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    
+
     def render(self, **kwargs) -> str:
         """Render the instruction template with variables."""
         rendered = self.instructions
-        
+
         # Replace variables
         for var_name, var_value in kwargs.items():
             placeholder = f"{{{var_name}}}"
             if placeholder in rendered:
                 rendered = rendered.replace(placeholder, str(var_value))
-        
+
         # Check for missing variables
         import re
         remaining_vars = re.findall(r'\{(\w+)\}', rendered)
         if remaining_vars:
             logger.warning(f"Missing variables in template {self.name}: {remaining_vars}")
-        
+
         return rendered
 
 
 @dataclass
 class ProjectInstructions:
     """Project-specific analysis instructions."""
-    
+
     project_id: str
-    instructions: Dict[str, str] = field(default_factory=dict)  # category -> instruction
-    templates: List[str] = field(default_factory=list)  # Template IDs
-    variables: Dict[str, Any] = field(default_factory=dict)  # Project-level variables
+    instructions: dict[str, str] = field(default_factory=dict)  # category -> instruction
+    templates: list[str] = field(default_factory=list)  # Template IDs
+    variables: dict[str, Any] = field(default_factory=dict)  # Project-level variables
     active: bool = True
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
@@ -59,8 +59,8 @@ class ProjectInstructions:
 
 class CustomInstructionManager:
     """Manages custom instructions for image analysis."""
-    
-    def __init__(self, db_path: Optional[Path] = None):
+
+    def __init__(self, db_path: Path | None = None):
         """Initialize the instruction manager.
         
         Args:
@@ -70,7 +70,7 @@ class CustomInstructionManager:
         self.conn = duckdb.connect(str(self.db_path))
         self._initialize_database()
         self._load_default_templates()
-    
+
     def _initialize_database(self):
         """Create database tables for instructions."""
         # Templates table
@@ -86,7 +86,7 @@ class CustomInstructionManager:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        
+
         # Project instructions table
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS project_instructions (
@@ -99,12 +99,12 @@ class CustomInstructionManager:
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        
+
         # Instruction history table (for tracking changes)
         self.conn.execute("""
             CREATE SEQUENCE IF NOT EXISTS instruction_history_seq;
         """)
-        
+
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS instruction_history (
                 id INTEGER PRIMARY KEY DEFAULT nextval('instruction_history_seq'),
@@ -116,9 +116,9 @@ class CustomInstructionManager:
                 changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             )
         """)
-        
+
         logger.info("Initialized custom instruction database")
-    
+
     def _load_default_templates(self):
         """Load default instruction templates."""
         default_templates = [
@@ -158,7 +158,7 @@ class CustomInstructionManager:
                     "output": "Added emphasis on retro fashion elements, period-appropriate styling"
                 }]
             ),
-            
+
             InstructionTemplate(
                 id="product_photography",
                 name="Product Photography Analysis",
@@ -196,7 +196,7 @@ Platform: {target_platform}""",
                     "target_platform": "Where the image will be used (e-commerce, social media, print)"
                 }
             ),
-            
+
             InstructionTemplate(
                 id="artistic_style",
                 name="Artistic Style Analysis",
@@ -230,7 +230,7 @@ Specific style focus: {style_focus}""",
                     "style_focus": "Particular artistic style or movement to emphasize"
                 }
             ),
-            
+
             InstructionTemplate(
                 id="content_moderation",
                 name="Content Moderation Analysis",
@@ -266,7 +266,7 @@ Audience: {target_audience}""",
                     "target_audience": "Intended audience (general, youth, professional)"
                 }
             ),
-            
+
             InstructionTemplate(
                 id="character_consistency",
                 name="Character Consistency Check",
@@ -303,11 +303,11 @@ Reference notes: {reference_notes}""",
                 }
             )
         ]
-        
+
         # Insert default templates if they don't exist
         for template in default_templates:
             self._save_template(template, update_if_exists=False)
-    
+
     def _save_template(self, template: InstructionTemplate, update_if_exists: bool = True):
         """Save a template to the database."""
         try:
@@ -331,7 +331,7 @@ Reference notes: {reference_notes}""",
                     "SELECT id FROM instruction_templates WHERE id = ?",
                     [template.id]
                 ).fetchone()
-                
+
                 if not existing:
                     self.conn.execute("""
                         INSERT INTO instruction_templates 
@@ -347,19 +347,19 @@ Reference notes: {reference_notes}""",
                     ])
         except Exception as e:
             logger.error(f"Failed to save template {template.id}: {e}")
-    
+
     def create_template(self, template: InstructionTemplate) -> None:
         """Create a new instruction template."""
         self._save_template(template, update_if_exists=False)
         logger.info(f"Created instruction template: {template.name}")
-    
-    def get_template(self, template_id: str) -> Optional[InstructionTemplate]:
+
+    def get_template(self, template_id: str) -> InstructionTemplate | None:
         """Get a template by ID."""
         result = self.conn.execute(
             "SELECT * FROM instruction_templates WHERE id = ?",
             [template_id]
         ).fetchone()
-        
+
         if result:
             return InstructionTemplate(
                 id=result[0],
@@ -372,13 +372,13 @@ Reference notes: {reference_notes}""",
                 updated_at=result[7]
             )
         return None
-    
-    def list_templates(self) -> List[InstructionTemplate]:
+
+    def list_templates(self) -> list[InstructionTemplate]:
         """List all available templates."""
         results = self.conn.execute(
             "SELECT * FROM instruction_templates ORDER BY name"
         ).fetchall()
-        
+
         templates = []
         for result in results:
             templates.append(InstructionTemplate(
@@ -391,12 +391,12 @@ Reference notes: {reference_notes}""",
                 created_at=result[6],
                 updated_at=result[7]
             ))
-        
+
         return templates
-    
-    def set_project_instructions(self, project_id: str, instructions: Dict[str, str],
-                               templates: Optional[List[str]] = None,
-                               variables: Optional[Dict[str, Any]] = None) -> None:
+
+    def set_project_instructions(self, project_id: str, instructions: dict[str, str],
+                               templates: list[str] | None = None,
+                               variables: dict[str, Any] | None = None) -> None:
         """Set custom instructions for a project.
         
         Args:
@@ -407,7 +407,7 @@ Reference notes: {reference_notes}""",
         """
         # Record history
         old_value = self.get_project_instructions(project_id)
-        
+
         # Save new instructions
         self.conn.execute("""
             INSERT OR REPLACE INTO project_instructions 
@@ -420,7 +420,7 @@ Reference notes: {reference_notes}""",
             json.dumps(variables or {}),
             datetime.now()
         ])
-        
+
         # Record in history
         self.conn.execute("""
             INSERT INTO instruction_history 
@@ -436,16 +436,16 @@ Reference notes: {reference_notes}""",
                 'variables': variables or {}
             })
         ])
-        
+
         logger.info(f"Updated instructions for project {project_id}")
-    
-    def get_project_instructions(self, project_id: str) -> Optional[ProjectInstructions]:
+
+    def get_project_instructions(self, project_id: str) -> ProjectInstructions | None:
         """Get custom instructions for a project."""
         result = self.conn.execute(
             "SELECT * FROM project_instructions WHERE project_id = ? AND active = TRUE",
             [project_id]
         ).fetchone()
-        
+
         if result:
             return ProjectInstructions(
                 project_id=result[0],
@@ -457,9 +457,9 @@ Reference notes: {reference_notes}""",
                 updated_at=result[6]
             )
         return None
-    
+
     def build_analysis_instructions(self, project_id: str, category: str = "general",
-                                  template_vars: Optional[Dict[str, Any]] = None) -> str:
+                                  template_vars: dict[str, Any] | None = None) -> str:
         """Build complete analysis instructions for a project.
         
         Args:
@@ -471,39 +471,39 @@ Reference notes: {reference_notes}""",
             Complete instruction text
         """
         instructions = []
-        
+
         # Get project instructions
         project_inst = self.get_project_instructions(project_id)
-        
+
         if project_inst:
             # Add category-specific instructions
             if category in project_inst.instructions:
                 instructions.append(project_inst.instructions[category])
             elif "general" in project_inst.instructions:
                 instructions.append(project_inst.instructions["general"])
-            
+
             # Merge variables
             all_vars = {}
             all_vars.update(project_inst.variables)
             if template_vars:
                 all_vars.update(template_vars)
-            
+
             # Apply templates
             for template_id in project_inst.templates:
                 template = self.get_template(template_id)
                 if template:
                     rendered = template.render(**all_vars)
                     instructions.append(f"\n{template.name}:\n{rendered}")
-        
+
         # Default instruction if none found
         if not instructions:
             instructions.append(
                 "Analyze this image comprehensively, including subject matter, "
                 "style, mood, technical quality, and any notable features."
             )
-        
+
         return "\n\n".join(instructions)
-    
+
     def close(self):
         """Close the database connection."""
         self.conn.close()

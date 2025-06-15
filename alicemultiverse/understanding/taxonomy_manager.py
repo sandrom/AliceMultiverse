@@ -6,14 +6,14 @@ tag collections, and import/export of custom tag schemes.
 
 import json
 import logging
-from dataclasses import dataclass, field, asdict
+from collections import Counter
+from dataclasses import asdict, dataclass, field
 from datetime import datetime
 from pathlib import Path
-from typing import Dict, List, Set, Optional, Any
-from collections import Counter
+from typing import Any
 
+from .tag_clustering import TagCluster, TagClusteringSystem
 from .tag_hierarchy import TagHierarchy
-from .tag_clustering import TagClusteringSystem, TagCluster
 
 logger = logging.getLogger(__name__)
 
@@ -21,26 +21,26 @@ logger = logging.getLogger(__name__)
 @dataclass
 class TagCollection:
     """A collection of tags for a specific purpose."""
-    
+
     id: str
     name: str
     description: str
-    tags: Set[str] = field(default_factory=set)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: set[str] = field(default_factory=set)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
     updated_at: datetime = field(default_factory=datetime.now)
-    
-    def add_tags(self, tags: List[str]):
+
+    def add_tags(self, tags: list[str]):
         """Add tags to collection."""
         self.tags.update(tags)
         self.updated_at = datetime.now()
-    
-    def remove_tags(self, tags: List[str]):
+
+    def remove_tags(self, tags: list[str]):
         """Remove tags from collection."""
         self.tags.difference_update(tags)
         self.updated_at = datetime.now()
-    
-    def to_dict(self) -> Dict:
+
+    def to_dict(self) -> dict:
         """Convert to dictionary for serialization."""
         return {
             "id": self.id,
@@ -51,9 +51,9 @@ class TagCollection:
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat()
         }
-    
+
     @classmethod
-    def from_dict(cls, data: Dict) -> 'TagCollection':
+    def from_dict(cls, data: dict) -> 'TagCollection':
         """Create from dictionary."""
         return cls(
             id=data["id"],
@@ -69,26 +69,26 @@ class TagCollection:
 @dataclass
 class MoodBoard:
     """A mood board combining tags, colors, and style references."""
-    
+
     id: str
     name: str
     description: str
-    tags: Set[str] = field(default_factory=set)
-    colors: List[str] = field(default_factory=list)  # Hex colors
-    reference_images: List[str] = field(default_factory=list)  # Image paths
+    tags: set[str] = field(default_factory=set)
+    colors: list[str] = field(default_factory=list)  # Hex colors
+    reference_images: list[str] = field(default_factory=list)  # Image paths
     style_notes: str = ""
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
     created_at: datetime = field(default_factory=datetime.now)
-    
-    def to_dict(self) -> Dict:
+
+    def to_dict(self) -> dict:
         """Convert to dictionary."""
         return asdict(self)
 
 
 class TaxonomyManager:
     """Manages custom taxonomies and tag organizations."""
-    
-    def __init__(self, base_dir: Optional[Path] = None):
+
+    def __init__(self, base_dir: Path | None = None):
         """Initialize taxonomy manager.
         
         Args:
@@ -96,43 +96,43 @@ class TaxonomyManager:
         """
         self.base_dir = base_dir or Path.home() / ".alice" / "taxonomies"
         self.base_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.hierarchy = TagHierarchy()
         self.clustering = TagClusteringSystem(self.hierarchy)
-        
+
         # Collections
-        self.project_tags: Dict[str, TagCollection] = {}
-        self.mood_boards: Dict[str, MoodBoard] = {}
-        self.tag_schemes: Dict[str, Dict] = {}
-        
+        self.project_tags: dict[str, TagCollection] = {}
+        self.mood_boards: dict[str, MoodBoard] = {}
+        self.tag_schemes: dict[str, dict] = {}
+
         self._load_saved_taxonomies()
-    
+
     def _load_saved_taxonomies(self):
         """Load saved taxonomies from disk."""
         # Load project tags
         project_file = self.base_dir / "project_tags.json"
         if project_file.exists():
-            with open(project_file, 'r') as f:
+            with open(project_file) as f:
                 data = json.load(f)
                 for proj_id, proj_data in data.items():
                     self.project_tags[proj_id] = TagCollection.from_dict(proj_data)
-        
+
         # Load mood boards
         mood_file = self.base_dir / "mood_boards.json"
         if mood_file.exists():
-            with open(mood_file, 'r') as f:
+            with open(mood_file) as f:
                 data = json.load(f)
                 for board_id, board_data in data.items():
                     self.mood_boards[board_id] = MoodBoard(**board_data)
-        
+
         # Load custom schemes
         schemes_dir = self.base_dir / "schemes"
         if schemes_dir.exists():
             for scheme_file in schemes_dir.glob("*.json"):
                 scheme_name = scheme_file.stem
-                with open(scheme_file, 'r') as f:
+                with open(scheme_file) as f:
                     self.tag_schemes[scheme_name] = json.load(f)
-    
+
     def save_taxonomies(self):
         """Save all taxonomies to disk."""
         # Save project tags
@@ -142,7 +142,7 @@ class TaxonomyManager:
         }
         with open(self.base_dir / "project_tags.json", 'w') as f:
             json.dump(project_data, f, indent=2)
-        
+
         # Save mood boards
         mood_data = {
             board_id: board.to_dict()
@@ -150,17 +150,17 @@ class TaxonomyManager:
         }
         with open(self.base_dir / "mood_boards.json", 'w') as f:
             json.dump(mood_data, f, indent=2, default=str)
-        
+
         # Save schemes
         schemes_dir = self.base_dir / "schemes"
         schemes_dir.mkdir(exist_ok=True)
         for scheme_name, scheme_data in self.tag_schemes.items():
             with open(schemes_dir / f"{scheme_name}.json", 'w') as f:
                 json.dump(scheme_data, f, indent=2)
-    
+
     # Project-specific tag management
-    
-    def create_project_tags(self, project_id: str, name: str, 
+
+    def create_project_tags(self, project_id: str, name: str,
                           description: str = "") -> TagCollection:
         """Create a new project tag collection.
         
@@ -180,8 +180,8 @@ class TaxonomyManager:
         self.project_tags[project_id] = collection
         self.save_taxonomies()
         return collection
-    
-    def add_project_tags(self, project_id: str, tags: List[str]):
+
+    def add_project_tags(self, project_id: str, tags: list[str]):
         """Add tags to a project.
         
         Args:
@@ -190,11 +190,11 @@ class TaxonomyManager:
         """
         if project_id not in self.project_tags:
             self.create_project_tags(project_id, project_id)
-        
+
         self.project_tags[project_id].add_tags(tags)
         self.save_taxonomies()
-    
-    def get_project_tags(self, project_id: str) -> Set[str]:
+
+    def get_project_tags(self, project_id: str) -> set[str]:
         """Get tags for a project.
         
         Args:
@@ -206,9 +206,9 @@ class TaxonomyManager:
         if project_id in self.project_tags:
             return self.project_tags[project_id].tags
         return set()
-    
-    def suggest_project_tags(self, project_id: str, 
-                           existing_tags: List[str]) -> List[str]:
+
+    def suggest_project_tags(self, project_id: str,
+                           existing_tags: list[str]) -> list[str]:
         """Suggest additional tags for a project based on existing ones.
         
         Args:
@@ -219,49 +219,49 @@ class TaxonomyManager:
             List of suggested tags
         """
         suggestions = []
-        
+
         # Get related tags from hierarchy
         expanded = self.hierarchy.expand_tags(existing_tags, include_related=True)
         current = set(existing_tags)
-        
+
         # Suggest parent tags
         parent_suggestions = self.hierarchy.suggest_parent_tags(existing_tags)
         suggestions.extend(parent_suggestions)
-        
+
         # Suggest from related tags
         for tag in expanded - current:
             if tag not in suggestions:
                 suggestions.append(tag)
-        
+
         # Suggest from similar projects
         similar_tags = self._find_similar_project_tags(project_id, existing_tags)
         for tag in similar_tags:
             if tag not in current and tag not in suggestions:
                 suggestions.append(tag)
-        
+
         return suggestions[:10]  # Top 10 suggestions
-    
-    def _find_similar_project_tags(self, current_project: str, 
-                                  current_tags: List[str]) -> List[str]:
+
+    def _find_similar_project_tags(self, current_project: str,
+                                  current_tags: list[str]) -> list[str]:
         """Find tags from similar projects."""
         similar_tags = Counter()
         current_set = set(current_tags)
-        
+
         for proj_id, collection in self.project_tags.items():
             if proj_id == current_project:
                 continue
-            
+
             # Calculate similarity
             overlap = len(current_set & collection.tags)
             if overlap >= len(current_set) * 0.3:  # 30% overlap
                 # Add tags from similar project
                 for tag in collection.tags - current_set:
                     similar_tags[tag] += overlap
-        
+
         return [tag for tag, _ in similar_tags.most_common(10)]
-    
+
     # Mood board management
-    
+
     def create_mood_board(self, name: str, description: str = "") -> MoodBoard:
         """Create a new mood board.
         
@@ -281,10 +281,10 @@ class TaxonomyManager:
         self.mood_boards[board_id] = board
         self.save_taxonomies()
         return board
-    
-    def add_to_mood_board(self, board_id: str, tags: List[str] = None,
-                         colors: List[str] = None, 
-                         reference_images: List[str] = None):
+
+    def add_to_mood_board(self, board_id: str, tags: list[str] = None,
+                         colors: list[str] = None,
+                         reference_images: list[str] = None):
         """Add elements to a mood board.
         
         Args:
@@ -295,19 +295,19 @@ class TaxonomyManager:
         """
         if board_id not in self.mood_boards:
             return
-        
+
         board = self.mood_boards[board_id]
-        
+
         if tags:
             board.tags.update(tags)
         if colors:
             board.colors.extend(colors)
         if reference_images:
             board.reference_images.extend(reference_images)
-        
+
         self.save_taxonomies()
-    
-    def analyze_mood_board(self, board_id: str) -> Dict[str, Any]:
+
+    def analyze_mood_board(self, board_id: str) -> dict[str, Any]:
         """Analyze a mood board for patterns and suggestions.
         
         Args:
@@ -318,20 +318,20 @@ class TaxonomyManager:
         """
         if board_id not in self.mood_boards:
             return {}
-        
+
         board = self.mood_boards[board_id]
-        
+
         # Analyze tags
         tag_categories = self.hierarchy.group_by_category(list(board.tags))
         tag_clusters = self.clustering.cluster_tags_by_similarity(list(board.tags))
-        
+
         # Find dominant themes
         dominant_categories = sorted(
             tag_categories.items(),
             key=lambda x: len(x[1]),
             reverse=True
         )[:3]
-        
+
         # Suggest additional tags
         suggested_tags = []
         for tag in board.tags:
@@ -339,7 +339,7 @@ class TaxonomyManager:
             for rel_tag, score in related.items():
                 if rel_tag not in board.tags and score >= 0.7:
                     suggested_tags.append(rel_tag)
-        
+
         return {
             "tag_count": len(board.tags),
             "color_count": len(board.colors),
@@ -356,28 +356,28 @@ class TaxonomyManager:
             "suggested_tags": suggested_tags[:10],
             "coherence_score": self._calculate_coherence(board.tags)
         }
-    
-    def _calculate_coherence(self, tags: Set[str]) -> float:
+
+    def _calculate_coherence(self, tags: set[str]) -> float:
         """Calculate coherence score for a set of tags."""
         if len(tags) < 2:
             return 1.0
-        
+
         # Average pairwise similarity
         tag_list = list(tags)
         total_sim = 0
         count = 0
-        
+
         for i in range(len(tag_list)):
             for j in range(i + 1, len(tag_list)):
                 sim = self.clustering.compute_tag_similarity(tag_list[i], tag_list[j])
                 total_sim += sim
                 count += 1
-        
+
         return total_sim / count if count > 0 else 0.0
-    
+
     # Custom taxonomy schemes
-    
-    def create_taxonomy_scheme(self, name: str, description: str = "") -> Dict:
+
+    def create_taxonomy_scheme(self, name: str, description: str = "") -> dict:
         """Create a custom taxonomy scheme.
         
         Args:
@@ -398,7 +398,7 @@ class TaxonomyManager:
         self.tag_schemes[name] = scheme
         self.save_taxonomies()
         return scheme
-    
+
     def export_taxonomy_scheme(self, scheme_name: str, output_path: Path):
         """Export a taxonomy scheme.
         
@@ -408,9 +408,9 @@ class TaxonomyManager:
         """
         if scheme_name not in self.tag_schemes:
             return
-        
+
         scheme = self.tag_schemes[scheme_name].copy()
-        
+
         # Add current hierarchy
         scheme["hierarchies"] = {
             name: {
@@ -420,7 +420,7 @@ class TaxonomyManager:
             }
             for name, node in self.hierarchy.nodes.items()
         }
-        
+
         # Add current clusters
         scheme["clusters"] = {
             cluster_id: {
@@ -430,10 +430,10 @@ class TaxonomyManager:
             }
             for cluster_id, cluster in self.clustering.clusters.items()
         }
-        
+
         with open(output_path, 'w') as f:
             json.dump(scheme, f, indent=2)
-    
+
     def import_taxonomy_scheme(self, input_path: Path, merge: bool = False):
         """Import a taxonomy scheme.
         
@@ -441,16 +441,16 @@ class TaxonomyManager:
             input_path: Input file path
             merge: Whether to merge with existing or replace
         """
-        with open(input_path, 'r') as f:
+        with open(input_path) as f:
             scheme = json.load(f)
-        
+
         scheme_name = scheme.get("name", input_path.stem)
-        
+
         if not merge:
             # Clear existing
             self.hierarchy = TagHierarchy()
             self.clustering = TagClusteringSystem(self.hierarchy)
-        
+
         # Import hierarchies
         for tag, node_data in scheme.get("hierarchies", {}).items():
             self.hierarchy.add_tag(
@@ -458,7 +458,7 @@ class TaxonomyManager:
                 parent=node_data.get("parent"),
                 category=node_data.get("category")
             )
-        
+
         # Import clusters
         for cluster_id, cluster_data in scheme.get("clusters", {}).items():
             cluster = TagCluster(
@@ -468,16 +468,16 @@ class TaxonomyManager:
                 category=cluster_data.get("category")
             )
             self.clustering.clusters[cluster_id] = cluster
-            
+
             # Update mappings
             for tag in cluster.tags:
                 self.clustering.tag_to_cluster[tag] = cluster_id
-        
+
         # Save scheme
         self.tag_schemes[scheme_name] = scheme
         self.save_taxonomies()
-    
-    def get_taxonomy_summary(self) -> Dict[str, Any]:
+
+    def get_taxonomy_summary(self) -> dict[str, Any]:
         """Get summary of current taxonomy state.
         
         Returns:

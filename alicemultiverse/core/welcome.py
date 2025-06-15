@@ -29,11 +29,11 @@ def check_setup_status() -> tuple[bool, str]:
     """
     issues = []
     warnings = []
-    
+
     # Check config
     if not Path("settings.yaml").exists():
         issues.append("No configuration file found")
-    
+
     # Check API keys
     key_manager = APIKeyManager()
     has_key = False
@@ -41,10 +41,10 @@ def check_setup_status() -> tuple[bool, str]:
         if key_manager.get_api_key(provider):
             has_key = True
             break
-    
+
     if not has_key:
         warnings.append("No AI provider API keys configured (AI features disabled)")
-    
+
     # Check directories
     if Path("settings.yaml").exists():
         try:
@@ -52,14 +52,14 @@ def check_setup_status() -> tuple[bool, str]:
             config = load_config()
             inbox = Path(config.paths.inbox)
             organized = Path(config.paths.organized)
-            
+
             if not inbox.exists():
                 warnings.append(f"Inbox directory doesn't exist: {inbox}")
             if not organized.exists():
                 warnings.append(f"Organized directory doesn't exist: {organized}")
-        except:
+        except Exception:
             issues.append("Configuration file is invalid")
-    
+
     # Determine status
     if issues:
         return False, "Setup incomplete"
@@ -72,7 +72,7 @@ def check_setup_status() -> tuple[bool, str]:
 def show_quick_start() -> None:
     """Show quick start guide for new users."""
     is_setup, status = check_setup_status()
-    
+
     if not is_setup:
         print("""
 ❌ Setup Required
@@ -104,7 +104,7 @@ Debug Mode (for testing):
 • alice --debug --dry-run    - Preview what would happen
 • alice --debug --understand - Run with AI analysis
 """)
-        
+
         # Show warnings if any
         _, status_msg = check_setup_status()
         if "warnings" in status_msg:
@@ -122,9 +122,9 @@ def show_first_run_prompt() -> bool:
         True if user wants to run setup, False to skip
     """
     show_welcome_message()
-    
+
     is_setup, status = check_setup_status()
-    
+
     if not is_setup:
         print("⚡ First-time setup required!\n")
         response = input("Would you like to run the setup wizard now? (Y/n): ").strip().lower()

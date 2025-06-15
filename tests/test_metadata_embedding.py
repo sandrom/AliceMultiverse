@@ -6,8 +6,10 @@ from pathlib import Path
 import pytest
 from PIL import Image
 
+from alicemultiverse.core.cache_migration import (
+    PersistentMetadataManagerAdapter as PersistentMetadataManager,
+)
 from alicemultiverse.metadata.embedder import MetadataEmbedder
-from alicemultiverse.core.cache_migration import PersistentMetadataManagerAdapter as PersistentMetadataManager
 
 
 class TestMetadataEmbedder:
@@ -165,7 +167,7 @@ class TestPersistentMetadataManager:
         img = Image.new("RGB", (100, 100))
         img.save(img_path)
 
-        # Save metadata  
+        # Save metadata
         metadata = {"brisque_score": 22.5, "style_tags": ["test"], "project_id": "test_001"}
 
         success = manager.save_metadata(img_path, metadata)
@@ -191,7 +193,7 @@ class TestPersistentMetadataManager:
         # Create new manager with different thresholds in a different cache dir
         cache_dir2 = tmp_path / "cache2"
         cache_dir2.mkdir()
-        
+
         stricter_thresholds = {
             "5_star": {"min": 0, "max": 20},
             "4_star": {"min": 20, "max": 35},
@@ -201,7 +203,7 @@ class TestPersistentMetadataManager:
         }
 
         strict_manager = PersistentMetadataManager(cache_dir2, stricter_thresholds)
-        
+
         # Save the same metadata to new manager
         success2 = strict_manager.save_metadata(img_path, metadata)
         assert success2

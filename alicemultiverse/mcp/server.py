@@ -2,8 +2,6 @@
 
 import asyncio
 import logging
-from pathlib import Path
-from typing import Optional
 
 from mcp import Resource, Server
 from mcp.server.models import InitializationOptions
@@ -29,15 +27,15 @@ def create_server(name: str = "alice-mcp") -> Server:
     """
     # Create server
     server = Server(name)
-    
+
     # Register all tool groups
     logger.info("Registering MCP tools...")
-    
+
     # Register smaller tool groups first (already refactored)
     register_cost_tools(server)
     register_project_tools(server)
     register_selection_tools(server)
-    
+
     # TODO: Register remaining tool groups as they are refactored
     # register_core_tools(server)
     # register_analysis_tools(server)
@@ -45,9 +43,9 @@ def create_server(name: str = "alice-mcp") -> Server:
     # register_style_tools(server)
     # register_music_video_tools(server)
     # register_local_model_tools(server)
-    
+
     logger.info(f"Registered {len(server._tools)} tools")
-    
+
     # Set up initialization handler
     @server.list_resources()
     async def handle_list_resources() -> list[Resource]:
@@ -59,7 +57,7 @@ def create_server(name: str = "alice-mcp") -> Server:
                 description="Access to Alice project management"
             ),
             Resource(
-                uri="alice://selections", 
+                uri="alice://selections",
                 name="Quick Selections",
                 description="Access to quick marks and selections"
             ),
@@ -69,12 +67,12 @@ def create_server(name: str = "alice-mcp") -> Server:
                 description="API cost tracking and budgets"
             )
         ]
-    
+
     return server
 
 
 async def run_server(
-    server: Optional[Server] = None,
+    server: Server | None = None,
     transport: str = "stdio"
 ) -> None:
     """Run the MCP server.
@@ -85,15 +83,15 @@ async def run_server(
     """
     if server is None:
         server = create_server()
-    
+
     # Configure logging
     logging.basicConfig(
         level=logging.INFO,
         format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
     )
-    
+
     logger.info("Starting AliceMultiverse MCP server...")
-    
+
     if transport == "stdio":
         # Run with stdio transport
         async with stdio_server() as (read_stream, write_stream):
@@ -101,7 +99,7 @@ async def run_server(
                 server_name="alice-mcp",
                 server_version="2.0.0"
             )
-            
+
             await server.run(
                 read_stream,
                 write_stream,

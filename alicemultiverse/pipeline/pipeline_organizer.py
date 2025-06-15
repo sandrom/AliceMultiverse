@@ -3,19 +3,19 @@
 import logging
 import time
 from pathlib import Path
-from typing import List, Optional
 
 from omegaconf import DictConfig
 
 from ..core.types import MediaType, OrganizeResult
 from ..organizer.media_organizer import MediaOrganizer
 from .stages import PipelineStage
+
 # Import understanding stages dynamically to avoid circular imports
 
 logger = logging.getLogger(__name__)
 
 
-def create_pipeline_stages(config: DictConfig) -> Optional[List[PipelineStage]]:
+def create_pipeline_stages(config: DictConfig) -> list[PipelineStage] | None:
     """Create pipeline stages based on configuration.
     
     Args:
@@ -27,11 +27,11 @@ def create_pipeline_stages(config: DictConfig) -> Optional[List[PipelineStage]]:
     pipeline_config = getattr(config, 'pipeline', None)
     if not pipeline_config or not getattr(pipeline_config, 'mode', None):
         return None
-    
+
     # Create stages directly without instantiating PipelineOrganizer to avoid recursion
     stages = []
     mode = pipeline_config.mode
-    
+
     stages_map = {
         # Single provider understanding
         "basic": ["understanding_deepseek"],  # Most cost-effective
@@ -39,18 +39,18 @@ def create_pipeline_stages(config: DictConfig) -> Optional[List[PipelineStage]]:
         "google": ["understanding_google"],
         "openai": ["understanding_openai"],
         "anthropic": ["understanding_anthropic"],
-        
+
         # Multi-provider understanding
         "standard": ["understanding_multi_cheap"],  # DeepSeek + Google
         "premium": ["understanding_multi_all"],     # All providers
         "full": ["understanding_multi_all"],
-        
+
         # Custom
         "custom": getattr(pipeline_config, "stages", []),
     }
-    
+
     stage_names = stages_map.get(mode, [])
-    
+
     for stage_name in stage_names:
         stage = _create_stage_instance(stage_name, pipeline_config)
         if stage:
@@ -58,11 +58,11 @@ def create_pipeline_stages(config: DictConfig) -> Optional[List[PipelineStage]]:
             logger.info(f"Initialized pipeline stage: {stage_name}")
         else:
             logger.warning(f"Failed to initialize stage: {stage_name}")
-    
+
     return stages if stages else None
 
 
-def _create_stage_instance(stage_name: str, pipeline_config: DictConfig) -> Optional[PipelineStage]:
+def _create_stage_instance(stage_name: str, pipeline_config: DictConfig) -> PipelineStage | None:
     """Create a pipeline stage instance by name.
     
     Args:
@@ -75,11 +75,14 @@ def _create_stage_instance(stage_name: str, pipeline_config: DictConfig) -> Opti
     # Image understanding stages
     if stage_name.startswith("understanding_"):
         # Dynamic import to avoid circular imports
-        from ..understanding.pipeline_stages import ImageUnderstandingStage, MultiProviderUnderstandingStage
-        
+        from ..understanding.pipeline_stages import (
+            ImageUnderstandingStage,
+            MultiProviderUnderstandingStage,
+        )
+
         # Extract provider from stage name
         provider = stage_name.replace("understanding_", "")
-        
+
         if provider == "multi_cheap":
             # Cost-effective multi-provider
             return MultiProviderUnderstandingStage(
@@ -102,12 +105,12 @@ def _create_stage_instance(stage_name: str, pipeline_config: DictConfig) -> Opti
                 generate_prompt=True,
                 extract_tags=True
             )
-    
+
     # Legacy quality assessment stages (deprecated)
     elif stage_name in ["brisque", "sightengine", "claude"]:
         logger.warning(f"Quality assessment stage '{stage_name}' is deprecated. Use image understanding instead.")
         return None
-    
+
     else:
         logger.error(f"Unknown pipeline stage: {stage_name}")
         return None
@@ -127,12 +130,12 @@ class PipelineOrganizer(MediaOrganizer):
         self.pipeline_config = config.pipeline
         self.total_cost = 0.0
         self.cost_limit = config.pipeline.cost_limits.get("total", float("inf"))
-        
+
         # Initialize DuckDB search for auto-indexing
         self.search_db = None
         if self._is_auto_indexing_enabled():
             try:
-                from ..storage.duckdb_search import DuckDBSearch
+                from ..storage.unified_duckdb import DuckDBSearch
                 self.search_db = DuckDBSearch()
                 logger.info("Auto-indexing to DuckDB enabled")
             except Exception as e:
@@ -155,12 +158,12 @@ class PipelineOrganizer(MediaOrganizer):
             "google": ["understanding_google"],
             "openai": ["understanding_openai"],
             "anthropic": ["understanding_anthropic"],
-            
+
             # Multi-provider understanding
             "standard": ["understanding_multi_cheap"],  # DeepSeek + Google
             "premium": ["understanding_multi_all"],     # All providers
             "full": ["understanding_multi_all"],
-            
+
             # Custom
             "custom": self.pipeline_config.get("stages", []),
         }
@@ -360,7 +363,7 @@ class PipelineOrganizer(MediaOrganizer):
                 # Cache the results
                 self.metadata_cache.set_metadata(media_path, analysis, analysis_time)
                 self.metadata_cache.update_stats(False)
-                
+
                 # Auto-index in DuckDB if understanding data is available
                 if self._should_auto_index(analysis):
                     self._auto_index_to_search(media_path, analysis)
@@ -493,31 +496,31 @@ class PipelineOrganizer(MediaOrganizer):
             logger.info(f"  Total: ${self.total_cost:.2f}")
 
             # TODO: Add detailed stage cost breakdown in future
-    
+
     def _is_auto_indexing_enabled(self) -> bool:
         """Check if auto-indexing is enabled in configuration."""
         # Auto-indexing is enabled if understanding is enabled
         return getattr(self.config.processing, "understanding", False)
-    
+
     def _should_auto_index(self, analysis: dict) -> bool:
         """Check if we should auto-index this file."""
         if not self.search_db:
             return False
-            
+
         # Index if we have understanding data with tags
         if "understanding" in analysis:
             understanding = analysis["understanding"]
             if isinstance(understanding, dict) and "tags" in understanding:
                 return True
-                
+
         # Also index if we have pipeline stages with understanding results
         pipeline_stages = analysis.get("pipeline_stages", {})
         for stage_name, stage_data in pipeline_stages.items():
             if "understanding" in stage_name and "tags" in stage_data:
                 return True
-                
+
         return False
-    
+
     def _auto_index_to_search(self, media_path: Path, analysis: dict) -> None:
         """Auto-index file metadata to DuckDB search.
         
@@ -540,7 +543,7 @@ class PipelineOrganizer(MediaOrganizer):
                 "prompt": None,
                 "quality_rating": analysis.get("quality_stars"),
             }
-            
+
             # Extract tags from understanding data
             if "understanding" in analysis:
                 understanding = analysis["understanding"]
@@ -557,11 +560,11 @@ class PipelineOrganizer(MediaOrganizer):
                             metadata["tags"] = all_tags
                         elif isinstance(tags_data, list):
                             metadata["tags"] = tags_data
-                    
+
                     # Extract prompt if available
                     if "positive_prompt" in understanding:
                         metadata["prompt"] = understanding["positive_prompt"]
-            
+
             # Also check pipeline stages for understanding data
             pipeline_stages = analysis.get("pipeline_stages", {})
             for stage_name, stage_data in pipeline_stages.items():
@@ -570,22 +573,22 @@ class PipelineOrganizer(MediaOrganizer):
                         metadata["tags"].extend(stage_data["tags"])
                     if "positive_prompt" in stage_data and not metadata["prompt"]:
                         metadata["prompt"] = stage_data["positive_prompt"]
-            
+
             # Deduplicate tags
             metadata["tags"] = list(set(metadata["tags"]))
-            
+
             # Index to DuckDB
             self.search_db.index_asset(metadata)
-            
+
             # Also index perceptual hashes if it's an image
             if metadata["media_type"] == "image":
                 self._index_perceptual_hashes(media_path, metadata["content_hash"])
-            
+
             logger.debug(f"Auto-indexed {media_path.name} with {len(metadata['tags'])} tags")
-            
+
         except Exception as e:
             logger.warning(f"Failed to auto-index {media_path}: {e}")
-    
+
     def _index_perceptual_hashes(self, file_path: Path, content_hash: str) -> None:
         """Calculate and index perceptual hashes for an image.
         
@@ -595,16 +598,16 @@ class PipelineOrganizer(MediaOrganizer):
         """
         try:
             from ..assets.perceptual_hashing import (
-                calculate_perceptual_hash,
+                calculate_average_hash,
                 calculate_difference_hash,
-                calculate_average_hash
+                calculate_perceptual_hash,
             )
-            
+
             # Calculate different hash types
             phash = calculate_perceptual_hash(file_path)
             dhash = calculate_difference_hash(file_path)
             ahash = calculate_average_hash(file_path)
-            
+
             # Store in database
             if any([phash, dhash, ahash]):
                 self.search_db.index_perceptual_hashes(
@@ -613,6 +616,6 @@ class PipelineOrganizer(MediaOrganizer):
                     dhash=dhash,
                     ahash=ahash
                 )
-                
+
         except Exception as e:
             logger.debug(f"Failed to calculate perceptual hashes for {file_path}: {e}")

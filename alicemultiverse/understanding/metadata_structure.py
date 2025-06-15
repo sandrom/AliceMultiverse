@@ -5,9 +5,9 @@ This module defines how we store both individual model outputs
 and merged results in file metadata.
 """
 
-from typing import Dict, List, Optional
 from dataclasses import dataclass, field
 from datetime import datetime
+
 
 @dataclass
 class ModelOutput:
@@ -15,21 +15,21 @@ class ModelOutput:
     provider: str
     model: str
     description: str
-    tags: Dict[str, List[str]]
-    generated_prompt: Optional[str] = None
-    negative_prompt: Optional[str] = None
+    tags: dict[str, list[str]]
+    generated_prompt: str | None = None
+    negative_prompt: str | None = None
     cost: float = 0.0
-    tokens_used: Optional[int] = None
-    processing_time_ms: Optional[int] = None
+    tokens_used: int | None = None
+    processing_time_ms: int | None = None
     analyzed_at: datetime = field(default_factory=datetime.now)
-    
+
     # Rating data (added after comparison)
-    rating: Optional[float] = None
-    rated_at: Optional[datetime] = None
-    rating_session_id: Optional[str] = None
+    rating: float | None = None
+    rated_at: datetime | None = None
+    rating_session_id: str | None = None
 
 
-@dataclass 
+@dataclass
 class MergedMetadata:
     """
     Final metadata structure embedded in files.
@@ -40,22 +40,22 @@ class MergedMetadata:
     3. Individual model outputs for future reference
     4. Comparison/rating history
     """
-    
+
     # Merged results (what users see/search)
-    tags: Dict[str, List[str]]  # Deduplicated and merged
+    tags: dict[str, list[str]]  # Deduplicated and merged
     description: str  # Best or consensus description
     generated_prompt: str  # Best or merged prompt
-    
+
     # Individual model outputs (for comparison/updates)
-    model_outputs: List[ModelOutput] = field(default_factory=list)
-    
+    model_outputs: list[ModelOutput] = field(default_factory=list)
+
     # Which models contributed to final result
-    contributing_models: List[str] = field(default_factory=list)
-    
+    contributing_models: list[str] = field(default_factory=list)
+
     # Comparison metadata
-    comparison_session_id: Optional[str] = None
+    comparison_session_id: str | None = None
     comparison_completed: bool = False
-    
+
     # Versioning
     metadata_version: str = "2.0"
     last_updated: datetime = field(default_factory=datetime.now)
@@ -70,13 +70,13 @@ EXAMPLE_METADATA = {
         "subject": ["woman", "portrait"]
         # No indication of which model provided which tag
     },
-    
+
     "alice:understanding": {
         "description": "A dramatic cyberpunk portrait...",  # Best description
         "generated_prompt": "cyberpunk woman portrait...",  # Best prompt
         "metadata_version": "2.0"
     },
-    
+
     # Preserved model outputs for comparison
     "alice:model_outputs": [
         {
@@ -94,13 +94,13 @@ EXAMPLE_METADATA = {
             "rated_at": "2024-01-15T10:30:00Z"
         },
         {
-            "provider": "openai", 
+            "provider": "openai",
             "model": "gpt-4o",
             "description": "Portrait of a woman in futuristic setting",
             "tags": {
                 "style": ["futuristic", "cyberpunk"],
                 "mood": ["mysterious"],
-                "subject": ["woman", "portrait"]  
+                "subject": ["woman", "portrait"]
             },
             "generated_prompt": "futuristic woman portrait...",
             "cost": 0.001,
@@ -108,7 +108,7 @@ EXAMPLE_METADATA = {
             "rated_at": "2024-01-15T10:30:00Z"
         }
     ],
-    
+
     "alice:comparison": {
         "session_id": "comp_123456",
         "completed": True,
@@ -119,9 +119,9 @@ EXAMPLE_METADATA = {
 
 class MetadataMerger:
     """Merge outputs from multiple models into final metadata."""
-    
+
     @staticmethod
-    def merge_tags(model_outputs: List[ModelOutput]) -> Dict[str, List[str]]:
+    def merge_tags(model_outputs: list[ModelOutput]) -> dict[str, list[str]]:
         """
         Merge tags from multiple models.
         
@@ -131,40 +131,40 @@ class MetadataMerger:
         3. Remove near-duplicates
         """
         merged = {}
-        
+
         for output in model_outputs:
             for category, tags in output.tags.items():
                 if category not in merged:
                     merged[category] = []
                 merged[category].extend(tags)
-        
+
         # Deduplicate
         for category in merged:
             merged[category] = list(set(merged[category]))
-            
+
         return merged
-    
+
     @staticmethod
-    def select_best_description(model_outputs: List[ModelOutput]) -> str:
+    def select_best_description(model_outputs: list[ModelOutput]) -> str:
         """Select best description based on ratings or length."""
         # If we have ratings, use highest rated
         rated_outputs = [o for o in model_outputs if o.rating is not None]
         if rated_outputs:
             best = max(rated_outputs, key=lambda o: o.rating)
             return best.description
-            
+
         # Otherwise, use most detailed (longest)
         return max(model_outputs, key=lambda o: len(o.description)).description
-    
+
     @staticmethod
     def create_merged_metadata(
-        model_outputs: List[ModelOutput],
-        comparison_session_id: Optional[str] = None
+        model_outputs: list[ModelOutput],
+        comparison_session_id: str | None = None
     ) -> MergedMetadata:
         """Create final merged metadata from model outputs."""
-        
+
         merger = MetadataMerger()
-        
+
         return MergedMetadata(
             tags=merger.merge_tags(model_outputs),
             description=merger.select_best_description(model_outputs),

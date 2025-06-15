@@ -1,9 +1,6 @@
 """Integration tests for MCP server and AI workflows."""
 
-import asyncio
-import json
-from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -11,7 +8,6 @@ from alicemultiverse.interface import AliceInterface
 from alicemultiverse.interface.models import (
     OrganizeRequest,
     SearchRequest,
-    TagRequest,
 )
 
 
@@ -26,7 +22,7 @@ class TestMCPServerIntegration:
         organized = tmp_path / "organized"
         inbox.mkdir()
         organized.mkdir()
-        
+
         # Create test config
         config_path = tmp_path / "test_config.yaml"
         config_path.write_text(f"""
@@ -39,7 +35,7 @@ processing:
   
 enhanced_metadata: true
 """)
-        
+
         return AliceInterface(config_path)
 
     @pytest.fixture
@@ -72,14 +68,14 @@ enhanced_metadata: true
 
         # Import and call the MCP function
         from alicemultiverse.mcp_server import search_assets
-        
+
         # Simulate AI assistant calling the function
         result = await search_assets(
             description="dark moody portraits with neon lighting",
             style_tags=["cyberpunk", "noir"],
             min_quality_stars=4
         )
-        
+
         # Verify the call
         assert mock_mcp_server.search_assets.called
         call_args = mock_mcp_server.search_assets.call_args[0][0]
@@ -88,7 +84,7 @@ enhanced_metadata: true
         assert call_args["description"] == "dark moody portraits with neon lighting"
         assert call_args["style_tags"] == ["cyberpunk", "noir"]
         assert call_args["min_quality_stars"] == 4
-        
+
         # Verify response format for AI
         assert result["success"] is True
         assert "results" in result["data"]
@@ -109,13 +105,13 @@ enhanced_metadata: true
         mock_mcp_server.organize_media.return_value = mock_response
 
         from alicemultiverse.mcp_server import organize_media
-        
+
         # Simulate AI organizing with quality
         result = await organize_media(
             quality_assessment=True,
             pipeline="standard"
         )
-        
+
         # Verify the call
         assert mock_mcp_server.organize_media.called
         call_args = mock_mcp_server.organize_media.call_args[0][0]
@@ -123,7 +119,7 @@ enhanced_metadata: true
         assert isinstance(call_args, dict)
         assert call_args["quality_assessment"] is True
         assert call_args["pipeline"] == "standard"
-        
+
         # Verify AI-friendly response
         assert result["success"] is True
         assert result["data"]["processed"] == 10
@@ -140,7 +136,7 @@ enhanced_metadata: true
         mock_mcp_server.tag_assets.return_value = mock_response
 
         from alicemultiverse.mcp_server import tag_assets
-        
+
         # Simulate AI tagging
         result = await tag_assets(
             asset_ids=["id1", "id2", "id3"],
@@ -148,7 +144,7 @@ enhanced_metadata: true
             mood_tags=["serene", "contemplative"],
             role="hero"
         )
-        
+
         # Verify the call
         assert mock_mcp_server.tag_assets.called
         call_args = mock_mcp_server.tag_assets.call_args[0][0]
@@ -164,10 +160,10 @@ enhanced_metadata: true
         mock_mcp_server.search_assets.side_effect = Exception("Database connection failed")
 
         from alicemultiverse.mcp_server import search_assets
-        
+
         # Should return AI-friendly error
         result = await search_assets(description="test search")
-        
+
         assert result["success"] is False
         assert "error" in result
         assert "Search failed" in result["message"]
@@ -191,10 +187,10 @@ enhanced_metadata: true
         mock_mcp_server.get_stats.return_value = mock_response
 
         from alicemultiverse.mcp_server import get_organization_stats
-        
+
         # Simulate AI checking stats
         result = await get_organization_stats()
-        
+
         # Verify response is AI-friendly
         assert result["success"] is True
         assert result["data"]["total_assets"] == 150
@@ -212,14 +208,14 @@ class TestAliceInterfaceIntegration:
         organized = tmp_path / "organized"
         inbox.mkdir()
         organized.mkdir()
-        
+
         config_path = tmp_path / "test_config.yaml"
         config_path.write_text(f"""
 paths:
   inbox: {inbox}
   organized: {organized}
 """)
-        
+
         return AliceInterface(config_path)
 
     def test_search_assets_real(self, alice):
@@ -237,10 +233,10 @@ paths:
         }
         # Access the internal unified cache directly
         alice.organizer.metadata_cache._unified.metadata_index["test123"] = test_metadata
-        
+
         # Update the search engine with new metadata
         alice.organizer._update_search_engine()
-        
+
         # Search for assets
         request = SearchRequest(
             description="cyberpunk portrait",
@@ -248,7 +244,7 @@ paths:
             min_quality_stars=4
         )
         response = alice.search_assets(request)
-        
+
         assert response["success"]
         assert len(response["data"]) > 0
         assert response["data"][0]["id"] == "test123"
@@ -266,10 +262,10 @@ paths:
             "brisque_score": 25.5,
         }
         alice.organizer.metadata_cache._unified.metadata_index["info123"] = test_metadata
-        
+
         # Get asset info
         response = alice.get_asset_info("info123")
-        
+
         assert response["success"]
         assert response["data"]["asset"]["id"] == "info123"
         assert response["data"]["asset"]["source"] == "dalle"
@@ -290,10 +286,10 @@ paths:
             "quality_issues": []
         }
         alice.organizer.metadata_cache._unified.metadata_index["quality123"] = test_metadata
-        
+
         # Assess quality
         response = alice.assess_quality(["quality123"], "standard")
-        
+
         assert response["success"]
         assert len(response["data"]["quality_results"]) == 1
         result = response["data"]["quality_results"][0]
@@ -313,10 +309,10 @@ paths:
                 "date_taken": "2024-01-15T10:00:00",
                 "media_type": "image",
             }
-        
+
         # Get stats
         response = alice.get_stats()
-        
+
         assert response["success"]
         stats = response["data"]
         assert stats["total_assets"] == 5
@@ -332,29 +328,29 @@ class TestAIWorkflowScenarios:
     @pytest.fixture
     def alice(self, tmp_path):
         """Create Alice interface for scenarios."""
-        inbox = tmp_path / "inbox" 
+        inbox = tmp_path / "inbox"
         organized = tmp_path / "organized"
         inbox.mkdir()
         organized.mkdir()
-        
+
         # Create test image
         test_image = inbox / "test-project" / "midjourney_portrait.jpg"
         test_image.parent.mkdir()
         test_image.write_text("fake image data")
-        
+
         config_path = tmp_path / "test_config.yaml"
         config_path.write_text(f"""
 paths:
   inbox: {inbox}
   organized: {organized}
 """)
-        
+
         return AliceInterface(config_path)
 
     def test_ai_conversation_workflow(self, alice):
         """Test a complete AI conversation workflow."""
         # Scenario: AI helps user organize and find best images
-        
+
         # 1. AI organizes media
         organize_request = OrganizeRequest(
             quality_assessment=True,
@@ -362,7 +358,7 @@ paths:
         )
         organize_response = alice.organize_media(organize_request)
         assert organize_response["success"]
-        
+
         # 2. AI searches for specific content
         search_request = SearchRequest(
             description="portrait images",
@@ -371,7 +367,7 @@ paths:
         search_response = alice.search_assets(search_request)
         # Will be empty since we didn't process real images
         assert search_response["success"]
-        
+
         # 3. AI gets statistics
         stats_response = alice.get_stats()
         assert stats_response["success"]
@@ -381,10 +377,10 @@ paths:
         """Test AI handling errors gracefully."""
         # Try to get info for non-existent asset
         response = alice.get_asset_info("nonexistent")
-        
+
         assert not response["success"]
         assert "not found" in response["message"].lower()
         assert response["error"] is not None
-        
+
         # AI should be able to understand and explain the error to user
         assert "Asset not found" in response["error"]

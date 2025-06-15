@@ -5,13 +5,13 @@ import logging
 import os
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import aiohttp
 
 from ..core.file_operations import download_file
-from .provider import Provider, GenerationError, RateLimitError, AuthenticationError
-from .types import (
+from .provider import AuthenticationError, GenerationError, Provider, RateLimitError
+from .provider_types import (
     GenerationRequest,
     GenerationResult,
     GenerationType,
@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 class OpenAIProvider(Provider):
     """Provider for OpenAI API integration (DALL-E, GPT-4 Vision)."""
-    
+
     BASE_URL = "https://api.openai.com/v1"
-    
+
     # Available models
     MODELS = {
         # Image generation
@@ -38,7 +38,7 @@ class OpenAIProvider(Provider):
             "quality": ["standard", "hd"],
         },
         "dall-e-2": {
-            "endpoint": "/images/generations", 
+            "endpoint": "/images/generations",
             "type": GenerationType.IMAGE,
             "max_size": {"256x256", "512x512", "1024x1024"},
         },
@@ -59,7 +59,7 @@ class OpenAIProvider(Provider):
             "capabilities": ["image_analysis", "text_generation"],
         },
     }
-    
+
     # Pricing (approximate per generation/request)
     PRICING = {
         "dall-e-3": {
@@ -76,7 +76,7 @@ class OpenAIProvider(Provider):
         "gpt-4o-mini": 0.00015,
     }
 
-    def __init__(self, api_key: Optional[str] = None, **kwargs):
+    def __init__(self, api_key: str | None = None, **kwargs):
         """Initialize OpenAI provider.
         
         Args:
@@ -86,9 +86,9 @@ class OpenAIProvider(Provider):
         api_key = api_key or os.getenv("OPENAI_API_KEY")
         if not api_key:
             raise ValueError("OpenAI API key is required")
-        
+
         super().__init__(api_key=api_key, **kwargs)
-        self._session: Optional[aiohttp.ClientSession] = None
+        self._session: aiohttp.ClientSession | None = None
 
     @property
     def name(self) -> str:
@@ -143,11 +143,11 @@ class OpenAIProvider(Provider):
                     logger.error("OpenAI authentication failed")
                 else:
                     self._status = ProviderStatus.DEGRADED
-                    
+
         except Exception as e:
             logger.error(f"Failed to check OpenAI status: {e}")
             self._status = ProviderStatus.UNKNOWN
-            
+
         self._last_check = datetime.now()
         return self._status
 
@@ -162,7 +162,7 @@ class OpenAIProvider(Provider):
         """
         # Determine model
         model = request.model or self.get_default_model(request.generation_type)
-        
+
         # Generate based on type
         if request.generation_type == GenerationType.IMAGE:
             result = await self._generate_image(request, model)
@@ -170,18 +170,18 @@ class OpenAIProvider(Provider):
             result = await self._analyze_image(request, model)
         else:
             raise GenerationError(f"Unsupported generation type: {request.generation_type}")
-        
+
         return result
 
     async def _generate_image(self, request: GenerationRequest, model: str) -> GenerationResult:
         """Generate image using DALL-E."""
         # Build parameters
         params = self._build_dalle_params(request, model)
-        
+
         # Call API
         session = await self._get_session()
         endpoint = self.MODELS[model]["endpoint"]
-        
+
         async with session.post(f"{self.BASE_URL}{endpoint}", json=params) as response:
             if response.status == 429:
                 raise RateLimitError("OpenAI rate limit exceeded")
@@ -190,12 +190,12 @@ class OpenAIProvider(Provider):
             elif response.status != 200:
                 error_data = await response.json()
                 raise GenerationError(f"OpenAI API error: {error_data.get('error', {}).get('message', 'Unknown error')}")
-            
+
             data = await response.json()
-        
+
         # Download image
         image_data = data["data"][0]
-        
+
         if "url" in image_data:
             # Download from URL
             image_url = image_data["url"]
@@ -204,13 +204,13 @@ class OpenAIProvider(Provider):
             # Save base64 data
             b64_data = image_data["b64_json"]
             file_path = await self._save_base64_image(request, b64_data)
-        
+
         # Calculate cost
         cost = self._calculate_dalle_cost(model, params)
-        
+
         # Get revised prompt if available (DALL-E 3)
         revised_prompt = image_data.get("revised_prompt") if image_data else request.prompt
-        
+
         return GenerationResult(
             success=True,
             file_path=file_path,
@@ -231,7 +231,7 @@ class OpenAIProvider(Provider):
         """Analyze image using GPT-4 Vision."""
         if not request.reference_assets:
             raise GenerationError("Image analysis requires reference_assets")
-        
+
         # Build vision request
         messages = [{
             "role": "user",
@@ -245,31 +245,31 @@ class OpenAIProvider(Provider):
                 }
             ]
         }]
-        
+
         params = {
             "model": model,
             "messages": messages,
             "max_tokens": request.parameters.get("max_tokens", 300) if request.parameters else 300,
         }
-        
+
         # Call API
         session = await self._get_session()
         endpoint = self.MODELS[model]["endpoint"]
-        
+
         async with session.post(f"{self.BASE_URL}{endpoint}", json=params) as response:
             if response.status != 200:
                 error_data = await response.json()
                 raise GenerationError(f"OpenAI API error: {error_data.get('error', {}).get('message', 'Unknown error')}")
-            
+
             data = await response.json()
-        
+
         # Extract response
         analysis = data["choices"][0]["message"]["content"]
         tokens_used = data.get("usage", {}).get("total_tokens", 0)
-        
+
         # Calculate cost
         cost = (tokens_used / 1000) * self.PRICING.get(model, 0.01)
-        
+
         return GenerationResult(
             success=True,
             provider=self.name,
@@ -282,48 +282,48 @@ class OpenAIProvider(Provider):
             }
         )
 
-    def _build_dalle_params(self, request: GenerationRequest, model: str) -> Dict[str, Any]:
+    def _build_dalle_params(self, request: GenerationRequest, model: str) -> dict[str, Any]:
         """Build parameters for DALL-E request."""
         params = {
             "model": model,
             "prompt": request.prompt,
             "n": 1,  # Number of images
         }
-        
+
         # Get parameters from request
         req_params = request.parameters or {}
-        
+
         if model == "dall-e-3":
             # Size
             size = req_params.get("size", "1024x1024")
             if size not in self.MODELS[model]["max_size"]:
                 size = "1024x1024"  # Default
             params["size"] = size
-            
+
             # Quality
             quality = req_params.get("quality", "standard")
             if quality in ["standard", "hd"]:
                 params["quality"] = quality
-            
+
             # Style
             style = req_params.get("style", "vivid")
             if style in ["vivid", "natural"]:
                 params["style"] = style
-                
+
         elif model == "dall-e-2":
             # Size
             size = req_params.get("size", "1024x1024")
             if size not in self.MODELS[model]["max_size"]:
                 size = "1024x1024"
             params["size"] = size
-        
+
         # Response format
         if req_params.get("response_format") == "b64_json":
             params["response_format"] = "b64_json"
-        
+
         return params
 
-    def _calculate_dalle_cost(self, model: str, params: Dict[str, Any]) -> float:
+    def _calculate_dalle_cost(self, model: str, params: dict[str, Any]) -> float:
         """Calculate cost for DALL-E generation."""
         if model == "dall-e-3":
             quality = params.get("quality", "standard")
@@ -343,13 +343,13 @@ class OpenAIProvider(Provider):
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"dalle_{timestamp}.png"
             output_path = Path.cwd() / "generated" / filename
-        
+
         # Ensure directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Download
         await download_file(url, output_path)
-        
+
         return output_path
 
     async def _save_base64_image(self, request: GenerationRequest, b64_data: str) -> Path:
@@ -361,14 +361,14 @@ class OpenAIProvider(Provider):
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             filename = f"dalle_{timestamp}.png"
             output_path = Path.cwd() / "generated" / filename
-        
+
         # Ensure directory exists
         output_path.parent.mkdir(parents=True, exist_ok=True)
-        
+
         # Decode and save
         image_data = base64.b64decode(b64_data)
         output_path.write_bytes(image_data)
-        
+
         return output_path
 
     async def _encode_image(self, image_path: str) -> str:
@@ -376,7 +376,7 @@ class OpenAIProvider(Provider):
         path = Path(image_path)
         if not path.exists():
             raise GenerationError(f"Image not found: {image_path}")
-        
+
         return base64.b64encode(path.read_bytes()).decode('utf-8')
 
     def get_default_model(self, generation_type: GenerationType) -> str:
@@ -387,13 +387,11 @@ class OpenAIProvider(Provider):
             return "gpt-4o-mini"  # Cheapest vision model
         return super().get_default_model(generation_type)
 
-    def get_models_for_type(self, generation_type: GenerationType) -> List[str]:
+    def get_models_for_type(self, generation_type: GenerationType) -> list[str]:
         """Get available models for a generation type."""
         models = []
         for name, info in self.MODELS.items():
-            if info.get("type") == generation_type:
-                models.append(name)
-            elif generation_type == GenerationType.TEXT and "image_analysis" in info.get("capabilities", []):
+            if info.get("type") == generation_type or (generation_type == GenerationType.TEXT and "image_analysis" in info.get("capabilities", [])):
                 models.append(name)
         return models
 

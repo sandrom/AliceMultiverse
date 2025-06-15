@@ -9,10 +9,10 @@ from unittest.mock import patch
 
 import pytest
 
-from alicemultiverse.core.exceptions import CacheError
 from alicemultiverse.core.cache_migration import MetadataCacheAdapter as MetadataCache
-from alicemultiverse.core.unified_cache import get_content_hash, get_file_hash
+from alicemultiverse.core.exceptions import CacheError
 from alicemultiverse.core.types import MediaType
+from alicemultiverse.core.unified_cache import get_content_hash, get_file_hash
 
 
 class TestHashFunctions:

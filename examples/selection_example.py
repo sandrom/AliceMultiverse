@@ -1,7 +1,6 @@
 """Example of using the selection tracking system in AliceMultiverse."""
 
 import asyncio
-from pathlib import Path
 
 from alicemultiverse.interface.alice_structured import AliceStructuredInterface
 from alicemultiverse.interface.structured_models import (
@@ -16,10 +15,10 @@ from alicemultiverse.interface.structured_models import (
 
 async def main():
     """Demonstrate selection tracking functionality."""
-    
+
     # Initialize Alice interface
     alice = AliceStructuredInterface()
-    
+
     # Example 1: Create a new selection for a portfolio project
     print("\n=== Creating Portfolio Selection ===")
     create_request = SelectionCreateRequest(
@@ -42,7 +41,7 @@ async def main():
             "presentation_order": "theme-based"
         }
     )
-    
+
     response = alice.create_selection(create_request)
     if response["success"]:
         print(f"Created selection: {response['data']['name']} (ID: {response['data']['selection_id']})")
@@ -50,10 +49,10 @@ async def main():
     else:
         print(f"Failed to create selection: {response['error']}")
         return
-    
+
     # Example 2: Add items to the selection
     print("\n=== Adding Items to Selection ===")
-    
+
     # In a real scenario, you would get these from searching your assets
     items_to_add = [
         SelectionItemRequest(
@@ -81,20 +80,20 @@ async def main():
             alternatives=["uvw456rst789..."],  # Alternative options considered
         ),
     ]
-    
+
     update_request = SelectionUpdateRequest(
         selection_id=selection_id,
         add_items=items_to_add,
         notes="Initial selection of hero and supporting images"
     )
-    
+
     response = alice.update_selection(update_request)
     if response["success"]:
         print(f"Added {len(items_to_add)} items to selection")
         print(f"Total items now: {response['data']['item_count']}")
     else:
         print(f"Failed to add items: {response['error']}")
-    
+
     # Example 3: Search for selections
     print("\n=== Searching for Portfolio Selections ===")
     search_request = SelectionSearchRequest(
@@ -102,13 +101,13 @@ async def main():
         purpose=SelectionPurpose.PORTFOLIO,
         status=SelectionStatus.DRAFT
     )
-    
+
     response = alice.search_selections(search_request)
     if response["success"]:
         print(f"Found {response['data']['total_count']} portfolio selections:")
         for sel in response["data"]["selections"]:
             print(f"  - {sel['name']} ({sel['status']}) - {sel['item_count']} items")
-    
+
     # Example 4: Update selection status
     print("\n=== Updating Selection Status ===")
     status_update = SelectionUpdateRequest(
@@ -116,11 +115,11 @@ async def main():
         update_status=SelectionStatus.ACTIVE,
         notes="Finalized selection for client presentation"
     )
-    
+
     response = alice.update_selection(status_update)
     if response["success"]:
         print(f"Selection status updated to: {response['data']['status']}")
-    
+
     # Example 5: Get detailed selection information
     print("\n=== Getting Selection Details ===")
     response = alice.get_selection("my-portfolio-project", selection_id)
@@ -131,14 +130,14 @@ async def main():
         print(f"Status: {data['status']}")
         print(f"Items: {len(data['items'])}")
         print(f"Statistics: {data['statistics']}")
-        
+
         if data['items']:
             print("\nFirst item details:")
             item = data['items'][0]
             print(f"  - Asset: {item['asset_hash'][:16]}...")
             print(f"  - Reason: {item['selection_reason']}")
             print(f"  - Role: {item['role']}")
-    
+
     # Example 6: Export selection
     print("\n=== Exporting Selection ===")
     export_request = {
@@ -150,14 +149,14 @@ async def main():
             "image_format": "high_quality"
         }
     }
-    
+
     # Note: Export would create files at the specified path
     print("Export functionality configured (not executed in example)")
 
 
 def demonstrate_selection_workflow():
     """Show a complete creative workflow with selections."""
-    
+
     print("\n=== Creative Workflow Example ===")
     print("""
     1. Project Creation Phase:
@@ -196,6 +195,6 @@ def demonstrate_selection_workflow():
 if __name__ == "__main__":
     # Run the async example
     asyncio.run(main())
-    
+
     # Show workflow documentation
     demonstrate_selection_workflow()

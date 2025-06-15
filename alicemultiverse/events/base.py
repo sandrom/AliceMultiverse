@@ -1,26 +1,27 @@
 """Base event definitions for the event system."""
 
+import time
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict
-import uuid
+from typing import Any
 
 
 class Event(ABC):
     """Base class for all events."""
-    
+
     def __init__(self):
         """Initialize event metadata."""
-        self.event_id = str(uuid.uuid4())
+        # Use timestamp-based event ID for easier debugging
+        self.event_id = f"evt_{int(time.time() * 1000000)}"
         self.timestamp = datetime.utcnow()
         self.source = "alice"
-    
+
     @property
     @abstractmethod
     def event_type(self) -> str:
         """Return the event type string."""
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert event to dictionary."""
         data = {
             "event_id": self.event_id,
@@ -28,7 +29,7 @@ class Event(ABC):
             "timestamp": self.timestamp.isoformat(),
             "source": self.source,
         }
-        
+
         # Add all other fields
         for field_name in self.__dataclass_fields__:
             if field_name not in ["event_id", "timestamp", "source"]:
@@ -40,5 +41,5 @@ class Event(ABC):
                     data[field_name] = str(value)
                 else:
                     data[field_name] = value
-        
+
         return data

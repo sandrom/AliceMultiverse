@@ -1,16 +1,15 @@
 """MCP tools for natural language timeline editing."""
 
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-from .timeline_nlp import TimelineNLPProcessor, TimelineEdit
+from .timeline_nlp import TimelineNLPProcessor
 from .timeline_preview_mcp import update_preview_timeline
-from ..workflows.video_export import Timeline
 
 logger = logging.getLogger(__name__)
 
 # Global NLP processor instance
-_nlp_processor: Optional[TimelineNLPProcessor] = None
+_nlp_processor: TimelineNLPProcessor | None = None
 
 
 def get_nlp_processor() -> TimelineNLPProcessor:
@@ -23,10 +22,10 @@ def get_nlp_processor() -> TimelineNLPProcessor:
 
 async def process_timeline_command(
     command: str,
-    timeline_data: Dict[str, Any],
-    session_id: Optional[str] = None,
+    timeline_data: dict[str, Any],
+    session_id: str | None = None,
     preview: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Process a natural language command to edit a timeline.
     
@@ -41,11 +40,12 @@ async def process_timeline_command(
     """
     try:
         processor = get_nlp_processor()
-        
+
         # Convert dict to Timeline object
-        from ..workflows.video_export import Timeline, TimelineClip
         from pathlib import Path
-        
+
+        from ..workflows.video_export import Timeline, TimelineClip
+
         clips = []
         for clip_data in timeline_data.get("clips", []):
             clip = TimelineClip(
@@ -61,7 +61,7 @@ async def process_timeline_command(
                 metadata=clip_data.get("metadata", {})
             )
             clips.append(clip)
-        
+
         timeline = Timeline(
             name=timeline_data.get("name", "Timeline"),
             duration=timeline_data.get("duration", 0),
@@ -72,10 +72,10 @@ async def process_timeline_command(
             audio_tracks=timeline_data.get("audio_tracks", []),
             metadata=timeline_data.get("metadata", {})
         )
-        
+
         # Parse command
         edits = processor.parse_command(command, timeline)
-        
+
         if not edits:
             # Try to provide helpful suggestions
             suggestions = processor.suggest_edits(timeline)
@@ -85,10 +85,10 @@ async def process_timeline_command(
                 "suggestions": suggestions[:5],
                 "original_command": command
             }
-        
+
         # Apply edits
         modified_timeline = processor.apply_edits(timeline, edits)
-        
+
         # Convert back to dict
         modified_data = {
             "name": modified_timeline.name,
@@ -114,7 +114,7 @@ async def process_timeline_command(
             "audio_tracks": modified_timeline.audio_tracks,
             "metadata": modified_timeline.metadata
         }
-        
+
         # Update preview if session provided
         if session_id and preview:
             # Convert edits to preview operations
@@ -124,7 +124,7 @@ async def process_timeline_command(
                 operation="natural_language",
                 clips=[]  # Would need to convert edits to clip updates
             )
-            
+
             return {
                 "success": True,
                 "message": f"Applied: {command}",
@@ -153,7 +153,7 @@ async def process_timeline_command(
                 ],
                 "timeline": modified_data
             }
-        
+
     except Exception as e:
         logger.error(f"Failed to process timeline command: {e}")
         return {
@@ -164,8 +164,8 @@ async def process_timeline_command(
 
 
 async def suggest_timeline_edits(
-    timeline_data: Dict[str, Any]
-) -> Dict[str, Any]:
+    timeline_data: dict[str, Any]
+) -> dict[str, Any]:
     """
     Get AI-powered suggestions for timeline improvements.
     
@@ -177,11 +177,12 @@ async def suggest_timeline_edits(
     """
     try:
         processor = get_nlp_processor()
-        
+
         # Convert to Timeline object (similar to above)
-        from ..workflows.video_export import Timeline, TimelineClip
         from pathlib import Path
-        
+
+        from ..workflows.video_export import Timeline, TimelineClip
+
         clips = []
         for clip_data in timeline_data.get("clips", []):
             clip = TimelineClip(
@@ -191,27 +192,28 @@ async def suggest_timeline_edits(
                 metadata=clip_data.get("metadata", {})
             )
             clips.append(clip)
-        
+
         timeline = Timeline(
             name=timeline_data.get("name", "Timeline"),
             duration=timeline_data.get("duration", 0),
             clips=clips,
             markers=timeline_data.get("markers", [])
         )
-        
+
         # Get suggestions
         suggestions = processor.suggest_edits(timeline)
-        
+
         # Analyze timeline
+        average_clip_duration = sum(c.duration for c in timeline.clips) / len(timeline.clips) if timeline.clips else 0
         analysis = {
             "clip_count": len(timeline.clips),
             "total_duration": timeline.duration,
-            "average_clip_duration": sum(c.duration for c in timeline.clips) / len(timeline.clips) if timeline.clips else 0,
+            "average_clip_duration": average_clip_duration,
             "has_transitions": any(c.transition_in or c.transition_out for c in timeline.clips),
             "has_beat_markers": any(m.get("type") == "beat" for m in timeline.markers),
-            "pace": "fast" if analysis["average_clip_duration"] < 2 else "medium" if analysis["average_clip_duration"] < 4 else "slow"
+            "pace": "fast" if average_clip_duration < 2 else "medium" if average_clip_duration < 4 else "slow"
         }
-        
+
         return {
             "success": True,
             "suggestions": suggestions,
@@ -224,7 +226,7 @@ async def suggest_timeline_edits(
                 "Tighten the middle section"
             ]
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to suggest timeline edits: {e}")
         return {
@@ -234,10 +236,10 @@ async def suggest_timeline_edits(
 
 
 async def batch_timeline_edits(
-    commands: List[str],
-    timeline_data: Dict[str, Any],
-    session_id: Optional[str] = None
-) -> Dict[str, Any]:
+    commands: list[str],
+    timeline_data: dict[str, Any],
+    session_id: str | None = None
+) -> dict[str, Any]:
     """
     Apply multiple natural language commands in sequence.
     
@@ -251,7 +253,7 @@ async def batch_timeline_edits(
     """
     results = []
     current_timeline = timeline_data
-    
+
     for i, command in enumerate(commands):
         result = await process_timeline_command(
             command=command,
@@ -259,20 +261,20 @@ async def batch_timeline_edits(
             session_id=session_id,
             preview=(i == len(commands) - 1)  # Only preview on last command
         )
-        
+
         results.append({
             "command": command,
             "success": result["success"],
             "message": result.get("message", ""),
             "edits": result.get("edits_applied", [])
         })
-        
+
         if result["success"]:
             current_timeline = result["timeline"]
         else:
             # Stop on first failure
             break
-    
+
     return {
         "success": all(r["success"] for r in results),
         "commands_processed": len([r for r in results if r["success"]]),
@@ -318,7 +320,7 @@ EXAMPLE_COMMANDS = {
 }
 
 
-def get_command_examples(category: Optional[str] = None) -> Dict[str, List[str]]:
+def get_command_examples(category: str | None = None) -> dict[str, list[str]]:
     """Get example commands for natural language editing.
     
     Args:

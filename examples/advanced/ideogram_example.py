@@ -3,21 +3,18 @@
 
 import asyncio
 import os
-from pathlib import Path
-from PIL import Image
-import io
 
 from alicemultiverse.providers import get_provider
-from alicemultiverse.providers.types import GenerationRequest, GenerationType
 from alicemultiverse.providers.ideogram_provider import IdeogramProvider
+from alicemultiverse.providers.types import GenerationRequest, GenerationType
 
 
 async def logo_generation_example():
     """Generate logos with accurate text rendering."""
     print("\n=== Logo Generation Example ===")
-    
+
     provider = get_provider("ideogram")
-    
+
     # Professional logo with text
     request = GenerationRequest(
         prompt='Minimalist logo for "CloudSync Pro" tech company, '
@@ -32,10 +29,10 @@ async def logo_generation_example():
             "negative_prompt": "complex, cluttered, pixelated text",
         }
     )
-    
-    print(f"Generating logo variations...")
+
+    print("Generating logo variations...")
     result = await provider.generate(request)
-    
+
     if result.success:
         print(f"Success! Logo saved to: {result.file_path}")
         print(f"Cost: ${result.cost} for {request.parameters['number_of_images']} variations")
@@ -47,9 +44,9 @@ async def logo_generation_example():
 async def typography_poster_example():
     """Create typographic posters with custom styling."""
     print("\n=== Typography Poster Example ===")
-    
+
     provider = get_provider("ideogram")
-    
+
     # Motivational poster
     request = GenerationRequest(
         prompt='Bold typographic poster with text "CREATE INSPIRE ACHIEVE" '
@@ -64,10 +61,10 @@ async def typography_poster_example():
             "magic_prompt_option": "AUTO",
         }
     )
-    
+
     print("Creating typography poster...")
     result = await provider.generate(request)
-    
+
     if result.success:
         print(f"Poster created: {result.file_path}")
 
@@ -75,15 +72,15 @@ async def typography_poster_example():
 async def turbo_ideation_example():
     """Fast generation for quick concepts and ideation."""
     print("\n=== Turbo Ideation Example ===")
-    
+
     provider = get_provider("ideogram")
-    
+
     concepts = [
         'T-shirt design with text "Adventure Awaits" in vintage style',
         'Coffee shop menu board with "Today\'s Specials" header',
         'Wedding invitation with "Save the Date" in elegant script',
     ]
-    
+
     print("Generating quick concepts with Turbo model...")
     for i, concept in enumerate(concepts, 1):
         request = GenerationRequest(
@@ -95,10 +92,10 @@ async def turbo_ideation_example():
                 "aspect_ratio": "4:3",
             }
         )
-        
+
         print(f"{i}. Generating: {concept[:50]}...")
         result = await provider.generate(request)
-        
+
         if result.success:
             print(f"   ✓ Generated in ~{result.generation_time}s (${result.cost})")
 
@@ -106,9 +103,9 @@ async def turbo_ideation_example():
 async def multilingual_text_example():
     """Generate images with text in multiple languages."""
     print("\n=== Multilingual Text Example ===")
-    
+
     provider = get_provider("ideogram")
-    
+
     # Japanese anime poster
     request = GenerationRequest(
         prompt='Anime movie poster with Japanese title "桜の約束" (Promise of Cherry Blossoms) '
@@ -121,10 +118,10 @@ async def multilingual_text_example():
             "aspect_ratio": "2:3",  # Movie poster ratio
         }
     )
-    
+
     print("Generating multilingual poster...")
     result = await provider.generate(request)
-    
+
     if result.success:
         print("✓ Multilingual text rendered successfully")
 
@@ -132,19 +129,19 @@ async def multilingual_text_example():
 async def brand_consistency_example():
     """Maintain brand consistency with color palettes."""
     print("\n=== Brand Consistency Example ===")
-    
+
     provider = get_provider("ideogram")
-    
+
     # Brand colors for consistency
     brand_colors = ["#1A1A2E", "#F39C12", "#E74C3C"]
-    
+
     # Social media post series
     posts = [
         '"New Product Launch" announcement banner',
         '"Limited Time Offer" promotional graphic',
         '"Thank You" customer appreciation post',
     ]
-    
+
     for post_text in posts:
         request = GenerationRequest(
             prompt=f"Social media post with {post_text}, modern design, "
@@ -158,27 +155,27 @@ async def brand_consistency_example():
                 "seed": 12345,  # Consistent style
             }
         )
-        
+
         print(f"Creating branded post: {post_text}")
         result = await provider.generate(request)
-        
+
         if result.success:
-            print(f"✓ Saved with consistent brand colors")
+            print("✓ Saved with consistent brand colors")
 
 
 async def text_effects_showcase():
     """Showcase different text effects and styles."""
     print("\n=== Text Effects Showcase ===")
-    
+
     provider = get_provider("ideogram")
-    
+
     effects = [
         ("3D Chrome", "3d", "Metallic chrome 3D text 'PREMIUM' with reflections"),
         ("Neon Glow", "realistic", "Neon sign text 'OPEN 24/7' glowing in the dark"),
         ("Graffiti", "design", "Street art graffiti text 'URBAN' on brick wall"),
         ("Ice", "realistic", "Frozen ice text 'WINTER' with icicles and frost"),
     ]
-    
+
     for effect_name, style, prompt in effects:
         request = GenerationRequest(
             prompt=prompt,
@@ -189,10 +186,10 @@ async def text_effects_showcase():
                 "aspect_ratio": "16:9",
             }
         )
-        
+
         print(f"Creating {effect_name} effect...")
         result = await provider.generate(request)
-        
+
         if result.success:
             print(f"✓ {effect_name} effect completed")
 
@@ -200,9 +197,9 @@ async def text_effects_showcase():
 async def upscaling_example():
     """Generate and upscale a design."""
     print("\n=== Upscaling Example ===")
-    
+
     provider = get_provider("ideogram")
-    
+
     # First, generate a logo
     request = GenerationRequest(
         prompt='App icon design with text "AI" in futuristic style, gradient background',
@@ -213,20 +210,20 @@ async def upscaling_example():
             "aspect_ratio": "1:1",
         }
     )
-    
+
     print("Generating initial design...")
     result = await provider.generate(request)
-    
+
     if result.success and isinstance(provider, IdeogramProvider):
         print(f"Initial design saved: {result.file_path}")
         print("Upscaling to high resolution...")
-        
+
         # Upscale the result
         upscaled = await provider.upscale_image(
             result.file_path,
             resolution="2048x2048"
         )
-        
+
         if upscaled.success:
             print(f"✓ Upscaled version saved: {upscaled.file_path}")
             print(f"Additional cost: ${upscaled.cost}")
@@ -235,9 +232,9 @@ async def upscaling_example():
 async def cost_estimation_example():
     """Demonstrate cost estimation for different options."""
     print("\n=== Cost Estimation Example ===")
-    
+
     provider = get_provider("ideogram")
-    
+
     # Different configurations
     configs = [
         ("V3 Single", "ideogram-v3", 1, False),
@@ -246,7 +243,7 @@ async def cost_estimation_example():
         ("Turbo Single", "turbo", 1, False),
         ("Turbo + Upscale", "turbo", 1, True),
     ]
-    
+
     total_cost = 0
     for name, model, num_images, upscale in configs:
         request = GenerationRequest(
@@ -258,11 +255,11 @@ async def cost_estimation_example():
                 "upscale": upscale,
             }
         )
-        
+
         cost = await provider.estimate_cost(request)
         total_cost += cost
         print(f"{name}: ${cost:.2f}")
-    
+
     print(f"\nTotal estimated cost: ${total_cost:.2f}")
 
 
@@ -273,12 +270,12 @@ async def main():
         print("Please set IDEOGRAM_API_KEY environment variable")
         print("Get your API key from: https://ideogram.ai/")
         return
-    
+
     try:
         # Run examples
         await logo_generation_example()
         await cost_estimation_example()
-        
+
         # Run these selectively as they consume credits
         # await typography_poster_example()
         # await turbo_ideation_example()
@@ -286,7 +283,7 @@ async def main():
         # await brand_consistency_example()
         # await text_effects_showcase()
         # await upscaling_example()
-        
+
     except Exception as e:
         print(f"Error: {e}")
 

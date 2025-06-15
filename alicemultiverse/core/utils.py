@@ -2,9 +2,10 @@
 
 import json
 import logging
-import yaml
 from pathlib import Path
-from typing import Any, Dict, Optional, Union
+from typing import Any
+
+import yaml
 
 logger = logging.getLogger(__name__)
 
@@ -15,8 +16,8 @@ class FileLoadError(Exception):
 
 
 def load_json(
-    file_path: Union[str, Path],
-    default: Optional[Any] = None,
+    file_path: str | Path,
+    default: Any | None = None,
     raise_on_error: bool = False
 ) -> Any:
     """Load JSON file with error handling.
@@ -39,16 +40,16 @@ def load_json(
                 raise FileLoadError(f"File not found: {file_path}")
             logger.warning(f"JSON file not found: {file_path}")
             return default
-            
-        with open(path, 'r', encoding='utf-8') as f:
+
+        with open(path, encoding='utf-8') as f:
             return json.load(f)
-            
+
     except json.JSONDecodeError as e:
         if raise_on_error:
             raise FileLoadError(f"Invalid JSON in {file_path}: {e}")
         logger.error(f"Failed to parse JSON from {file_path}: {e}")
         return default
-        
+
     except Exception as e:
         if raise_on_error:
             raise FileLoadError(f"Error loading {file_path}: {e}")
@@ -58,7 +59,7 @@ def load_json(
 
 def save_json(
     data: Any,
-    file_path: Union[str, Path],
+    file_path: str | Path,
     indent: int = 2,
     ensure_ascii: bool = False,
     create_parents: bool = True
@@ -77,23 +78,23 @@ def save_json(
     """
     try:
         path = Path(file_path)
-        
+
         if create_parents:
             path.parent.mkdir(parents=True, exist_ok=True)
-            
+
         with open(path, 'w', encoding='utf-8') as f:
             json.dump(data, f, indent=indent, ensure_ascii=ensure_ascii, default=str)
-            
+
         return True
-        
+
     except Exception as e:
         logger.error(f"Failed to save JSON to {file_path}: {e}")
         return False
 
 
 def load_yaml(
-    file_path: Union[str, Path],
-    default: Optional[Any] = None,
+    file_path: str | Path,
+    default: Any | None = None,
     raise_on_error: bool = False
 ) -> Any:
     """Load YAML file with error handling.
@@ -116,16 +117,16 @@ def load_yaml(
                 raise FileLoadError(f"File not found: {file_path}")
             logger.warning(f"YAML file not found: {file_path}")
             return default
-            
-        with open(path, 'r', encoding='utf-8') as f:
+
+        with open(path, encoding='utf-8') as f:
             return yaml.safe_load(f) or default
-            
+
     except yaml.YAMLError as e:
         if raise_on_error:
             raise FileLoadError(f"Invalid YAML in {file_path}: {e}")
         logger.error(f"Failed to parse YAML from {file_path}: {e}")
         return default
-        
+
     except Exception as e:
         if raise_on_error:
             raise FileLoadError(f"Error loading {file_path}: {e}")
@@ -135,7 +136,7 @@ def load_yaml(
 
 def save_yaml(
     data: Any,
-    file_path: Union[str, Path],
+    file_path: str | Path,
     default_flow_style: bool = False,
     create_parents: bool = True
 ) -> bool:
@@ -152,25 +153,25 @@ def save_yaml(
     """
     try:
         path = Path(file_path)
-        
+
         if create_parents:
             path.parent.mkdir(parents=True, exist_ok=True)
-            
+
         with open(path, 'w', encoding='utf-8') as f:
             yaml.safe_dump(data, f, default_flow_style=default_flow_style, allow_unicode=True)
-            
+
         return True
-        
+
     except Exception as e:
         logger.error(f"Failed to save YAML to {file_path}: {e}")
         return False
 
 
 def merge_dicts(
-    base: Dict[str, Any],
-    update: Dict[str, Any],
+    base: dict[str, Any],
+    update: dict[str, Any],
     deep: bool = True
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """Merge two dictionaries.
     
     Args:
@@ -184,13 +185,13 @@ def merge_dicts(
     if not deep:
         base.update(update)
         return base
-        
+
     for key, value in update.items():
         if key in base and isinstance(base[key], dict) and isinstance(value, dict):
             merge_dicts(base[key], value, deep=True)
         else:
             base[key] = value
-            
+
     return base
 
 
@@ -213,7 +214,7 @@ def ensure_list(value: Any) -> list:
 
 
 def safe_get(
-    data: Dict[str, Any],
+    data: dict[str, Any],
     path: str,
     default: Any = None,
     separator: str = "."
@@ -232,21 +233,21 @@ def safe_get(
     try:
         keys = path.split(separator)
         result = data
-        
+
         for key in keys:
             if isinstance(result, dict) and key in result:
                 result = result[key]
             else:
                 return default
-                
+
         return result
-        
+
     except Exception:
         return default
 
 
 def safe_set(
-    data: Dict[str, Any],
+    data: dict[str, Any],
     path: str,
     value: Any,
     separator: str = ".",
@@ -267,22 +268,22 @@ def safe_set(
     try:
         keys = path.split(separator)
         current = data
-        
+
         for key in keys[:-1]:
             if key not in current:
                 if create_missing:
                     current[key] = {}
                 else:
                     return False
-                    
+
             if not isinstance(current[key], dict):
                 return False
-                
+
             current = current[key]
-            
+
         current[keys[-1]] = value
         return True
-        
+
     except Exception:
         return False
 
@@ -320,8 +321,8 @@ def truncate_string(
     """
     if len(text) <= max_length:
         return text
-        
+
     if len(suffix) >= max_length:
         return text[:max_length]
-        
+
     return text[:max_length - len(suffix)] + suffix

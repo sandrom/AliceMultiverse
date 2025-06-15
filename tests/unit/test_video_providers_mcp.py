@@ -1,18 +1,17 @@
 """Test video providers MCP integration."""
 
-import pytest
-from unittest.mock import Mock, AsyncMock, patch
 from pathlib import Path
+from unittest.mock import AsyncMock, Mock, patch
+
+import pytest
 
 from alicemultiverse.interface.video_providers_mcp import (
-    generate_video_runway,
-    generate_video_pika,
-    generate_video_luma,
-    generate_video_minimax,
-    generate_video_kling,
-    generate_video_hedra,
     compare_video_providers,
-    estimate_video_costs
+    estimate_video_costs,
+    generate_video_hedra,
+    generate_video_kling,
+    generate_video_pika,
+    generate_video_runway,
 )
 from alicemultiverse.providers.types import GenerationResult
 
@@ -26,18 +25,18 @@ async def test_generate_video_runway():
         cost=0.05,
         metadata={"duration": 5}
     )
-    
+
     with patch("alicemultiverse.interface.video_providers_mcp.get_provider") as mock_get:
         mock_provider = Mock()
         mock_provider.generate = AsyncMock(return_value=mock_result)
         mock_get.return_value = mock_provider
-        
+
         result = await generate_video_runway(
             prompt="A serene landscape",
             duration=5,
             output_path="/tmp/test_video.mp4"
         )
-        
+
         assert result["success"] is True
         assert result["provider"] == "runway"
         assert result["video_path"] == "/tmp/test_video.mp4"
@@ -53,18 +52,18 @@ async def test_generate_video_pika():
         cost=0.03,
         metadata={"duration": 3}
     )
-    
+
     with patch("alicemultiverse.interface.video_providers_mcp.get_provider") as mock_get:
         mock_provider = Mock()
         mock_provider.generate = AsyncMock(return_value=mock_result)
         mock_get.return_value = mock_provider
-        
+
         result = await generate_video_pika(
             prompt="A dancing robot",
             duration=3,
             aspect_ratio="16:9"
         )
-        
+
         assert result["success"] is True
         assert result["provider"] == "pika"
         assert result["aspect_ratio"] == "16:9"
@@ -79,18 +78,18 @@ async def test_generate_video_kling():
         cost=0.04,
         metadata={"quality": "professional"}
     )
-    
+
     with patch("alicemultiverse.interface.video_providers_mcp.get_provider") as mock_get:
         mock_provider = Mock()
         mock_provider.generate = AsyncMock(return_value=mock_result)
         mock_get.return_value = mock_provider
-        
+
         result = await generate_video_kling(
             prompt="Cinematic sunset",
             quality="professional",
             motion_strength=0.7
         )
-        
+
         assert result["success"] is True
         assert result["provider"] == "kling"
         assert result["quality"] == "professional"
@@ -105,18 +104,18 @@ async def test_generate_video_hedra():
         cost=0.02,
         metadata={"type": "avatar"}
     )
-    
+
     with patch("alicemultiverse.interface.video_providers_mcp.get_provider") as mock_get:
         mock_provider = Mock()
         mock_provider.generate = AsyncMock(return_value=mock_result)
         mock_get.return_value = mock_provider
-        
+
         result = await generate_video_hedra(
             prompt="Hello world",
             audio_input="Hello world",
             aspect_ratio="1:1"
         )
-        
+
         assert result["success"] is True
         assert result["provider"] == "hedra"
         assert result["aspect_ratio"] == "1:1"
@@ -127,11 +126,11 @@ async def test_error_handling():
     """Test error handling in video generation."""
     with patch("alicemultiverse.interface.video_providers_mcp.get_provider") as mock_get:
         mock_get.side_effect = Exception("Provider not available")
-        
+
         result = await generate_video_runway(
             prompt="Test prompt"
         )
-        
+
         assert result["success"] is False
         assert "error" in result
         assert result["provider"] == "runway"
@@ -155,22 +154,22 @@ async def test_compare_video_providers():
             metadata={}
         )
     }
-    
+
     with patch("alicemultiverse.interface.video_providers_mcp.get_provider") as mock_get:
         def get_provider_mock(name):
             mock_provider = Mock()
             mock_provider.generate = AsyncMock(return_value=mock_results.get(name))
             return mock_provider
-        
+
         mock_get.side_effect = get_provider_mock
-        
+
         result = await compare_video_providers(
             prompt="Test comparison",
             providers=["runway", "pika"],
             compare_cost=True,
             compare_speed=True
         )
-        
+
         assert result["prompt"] == "Test comparison"
         assert result["summary"]["total_providers"] == 2
         assert result["summary"]["successful"] >= 0
@@ -190,13 +189,13 @@ async def test_estimate_video_costs():
             max_resolution="1920x1080"
         ))
         mock_get.return_value = mock_provider
-        
+
         result = await estimate_video_costs(
             prompt="Test prompt",
             providers=["runway", "pika"],
             duration=5
         )
-        
+
         assert result["duration"] == 5
         assert "providers" in result
         assert "summary" in result

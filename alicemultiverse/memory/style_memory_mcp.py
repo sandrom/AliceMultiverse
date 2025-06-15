@@ -1,22 +1,21 @@
 """MCP tools for style memory and learning system."""
 
-import json
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any
+from typing import Any
 
 from ..core.structured_logging import get_logger
-from .style_memory import StyleMemory, PreferenceType
-from .preference_tracker import PreferenceTracker, WorkflowType
 from .learning_engine import StyleLearningEngine
+from .preference_tracker import PreferenceTracker, WorkflowType
 from .recommendation_engine import StyleRecommendationEngine
+from .style_memory import PreferenceType, StyleMemory
 
 logger = get_logger(__name__)
 
 # Global instances
-_style_memory: Optional[StyleMemory] = None
-_preference_tracker: Optional[PreferenceTracker] = None
-_learning_engine: Optional[StyleLearningEngine] = None
-_recommendation_engine: Optional[StyleRecommendationEngine] = None
+_style_memory: StyleMemory | None = None
+_preference_tracker: PreferenceTracker | None = None
+_learning_engine: StyleLearningEngine | None = None
+_recommendation_engine: StyleRecommendationEngine | None = None
 
 
 def _get_style_memory() -> StyleMemory:
@@ -60,10 +59,10 @@ def _get_recommendation_engine() -> StyleRecommendationEngine:
 async def track_style_preference(
     preference_type: str,
     value: str,
-    project: Optional[str] = None,
-    tags: Optional[List[str]] = None,
-    context: Optional[Dict[str, Any]] = None
-) -> Dict[str, Any]:
+    project: str | None = None,
+    tags: list[str] | None = None,
+    context: dict[str, Any] | None = None
+) -> dict[str, Any]:
     """Track a style preference choice.
     
     Args:
@@ -79,7 +78,7 @@ async def track_style_preference(
     try:
         # Map string to enum
         pref_type = PreferenceType(preference_type.lower())
-        
+
         # Track the preference
         style_memory = _get_style_memory()
         preference = style_memory.track_style_choice(
@@ -89,7 +88,7 @@ async def track_style_preference(
             project=project,
             tags=tags
         )
-        
+
         return {
             "preference_id": preference.preference_id,
             "type": preference.preference_type.value,
@@ -99,17 +98,17 @@ async def track_style_preference(
             "confidence": preference.confidence,
             "tags": preference.tags
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to track preference: {e}")
         raise
 
 
 async def get_style_recommendations(
-    context: Optional[Dict[str, Any]] = None,
-    types: Optional[List[str]] = None,
+    context: dict[str, Any] | None = None,
+    types: list[str] | None = None,
     limit: int = 5
-) -> List[Dict[str, Any]]:
+) -> list[dict[str, Any]]:
     """Get personalized style recommendations.
     
     Args:
@@ -127,7 +126,7 @@ async def get_style_recommendations(
             recommendation_types=types,
             limit=limit
         )
-        
+
         return [
             {
                 "id": rec.recommendation_id,
@@ -145,15 +144,15 @@ async def get_style_recommendations(
             }
             for rec in recommendations
         ]
-        
+
     except Exception as e:
         logger.error(f"Failed to get recommendations: {e}")
         raise
 
 
 async def analyze_style_patterns(
-    time_range_days: Optional[int] = 30
-) -> Dict[str, Any]:
+    time_range_days: int | None = 30
+) -> dict[str, Any]:
     """Analyze style patterns and generate insights.
     
     Args:
@@ -164,17 +163,17 @@ async def analyze_style_patterns(
     """
     try:
         engine = _get_learning_engine()
-        
+
         # Update time window
         if time_range_days:
             engine.learning_window = timedelta(days=time_range_days)
-        
+
         # Analyze patterns
         patterns = engine.analyze_patterns()
-        
+
         # Generate insights
         insights = engine.generate_insights()
-        
+
         return {
             "patterns": [
                 {
@@ -207,7 +206,7 @@ async def analyze_style_patterns(
                 "time_range_days": time_range_days or 30
             }
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to analyze patterns: {e}")
         raise
@@ -215,8 +214,8 @@ async def analyze_style_patterns(
 
 async def start_style_workflow(
     workflow_type: str,
-    project: Optional[str] = None
-) -> Dict[str, Any]:
+    project: str | None = None
+) -> dict[str, Any]:
     """Start tracking a style workflow.
     
     Args:
@@ -229,14 +228,14 @@ async def start_style_workflow(
     try:
         # Map string to enum
         wf_type = WorkflowType(workflow_type.lower())
-        
+
         # Generate workflow ID
         workflow_id = f"{workflow_type}_{datetime.now().timestamp()}"
-        
+
         # Start tracking
         tracker = _get_preference_tracker()
         context = tracker.start_workflow(workflow_id, wf_type, project)
-        
+
         return {
             "workflow_id": context.workflow_id,
             "type": context.workflow_type.value,
@@ -244,7 +243,7 @@ async def start_style_workflow(
             "started_at": context.started_at.isoformat(),
             "status": "active"
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to start workflow: {e}")
         raise
@@ -253,10 +252,10 @@ async def start_style_workflow(
 async def end_style_workflow(
     workflow_id: str,
     successful: bool,
-    quality_score: Optional[float] = None,
-    user_rating: Optional[int] = None,
-    notes: Optional[str] = None
-) -> Dict[str, Any]:
+    quality_score: float | None = None,
+    user_rating: int | None = None,
+    notes: str | None = None
+) -> dict[str, Any]:
     """End a style workflow and get summary.
     
     Args:
@@ -278,12 +277,12 @@ async def end_style_workflow(
             user_rating,
             notes
         )
-        
+
         if not context:
             return {"error": "Workflow not found"}
-        
+
         return tracker.get_workflow_summary(workflow_id)
-        
+
     except Exception as e:
         logger.error(f"Failed to end workflow: {e}")
         raise
@@ -291,8 +290,8 @@ async def end_style_workflow(
 
 async def get_style_evolution(
     days: int = 30,
-    preference_type: Optional[str] = None
-) -> List[Dict[str, Any]]:
+    preference_type: str | None = None
+) -> list[dict[str, Any]]:
     """Get style evolution over time.
     
     Args:
@@ -304,27 +303,27 @@ async def get_style_evolution(
     """
     try:
         style_memory = _get_style_memory()
-        
+
         # Map string to enum if provided
         pref_type = None
         if preference_type:
             pref_type = PreferenceType(preference_type.lower())
-        
+
         evolution = style_memory.get_style_evolution(
             time_range=timedelta(days=days),
             preference_type=pref_type
         )
-        
+
         return evolution
-        
+
     except Exception as e:
         logger.error(f"Failed to get evolution: {e}")
         raise
 
 
 async def suggest_next_action(
-    current_preferences: Dict[str, str]
-) -> Dict[str, Any]:
+    current_preferences: dict[str, str]
+) -> dict[str, Any]:
     """Get next best action suggestion.
     
     Args:
@@ -341,18 +340,18 @@ async def suggest_next_action(
                 for k, v in current_preferences.items()
             }
         }
-        
+
         engine = _get_recommendation_engine()
         suggestion = engine.get_next_best_action(current_state)
-        
+
         return suggestion
-        
+
     except Exception as e:
         logger.error(f"Failed to get next action: {e}")
         raise
 
 
-async def export_style_profile() -> Dict[str, Any]:
+async def export_style_profile() -> dict[str, Any]:
     """Export complete style profile.
     
     Returns:
@@ -361,15 +360,15 @@ async def export_style_profile() -> Dict[str, Any]:
     try:
         style_memory = _get_style_memory()
         return style_memory.export_profile()
-        
+
     except Exception as e:
         logger.error(f"Failed to export profile: {e}")
         raise
 
 
 async def import_style_profile(
-    profile_data: Dict[str, Any]
-) -> Dict[str, Any]:
+    profile_data: dict[str, Any]
+) -> dict[str, Any]:
     """Import a style profile.
     
     Args:
@@ -381,13 +380,13 @@ async def import_style_profile(
     try:
         style_memory = _get_style_memory()
         style_memory.import_profile(profile_data)
-        
+
         return {
             "status": "success",
             "preferences_imported": len(style_memory.all_preferences),
             "profile_id": style_memory.profile.profile_id
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to import profile: {e}")
         raise

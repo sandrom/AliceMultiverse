@@ -2,11 +2,11 @@
 
 import json
 import logging
+import hashlib
 from dataclasses import dataclass, field
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple
-import uuid
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,7 @@ class VariationMetrics:
     revenue: float = 0.0
     tracked_since: datetime = field(default_factory=datetime.now)
     last_updated: datetime = field(default_factory=datetime.now)
-    
+
     def calculate_engagement_rate(self):
         """Calculate engagement rate from metrics."""
         if self.views == 0:
@@ -35,8 +35,8 @@ class VariationMetrics:
         else:
             interactions = self.likes + self.shares + self.comments + self.saves
             self.engagement_rate = interactions / self.views
-    
-    def to_dict(self) -> Dict[str, Any]:
+
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary."""
         return {
             "variation_id": self.variation_id,
@@ -53,9 +53,9 @@ class VariationMetrics:
             "tracked_since": self.tracked_since.isoformat(),
             "last_updated": self.last_updated.isoformat(),
         }
-    
+
     @classmethod
-    def from_dict(cls, data: Dict[str, Any]) -> "VariationMetrics":
+    def from_dict(cls, data: dict[str, Any]) -> "VariationMetrics":
         """Create from dictionary."""
         data["tracked_since"] = datetime.fromisoformat(data["tracked_since"])
         data["last_updated"] = datetime.fromisoformat(data["last_updated"])
@@ -67,16 +67,16 @@ class ContentGroup:
     """Group of related content variations."""
     group_id: str
     base_content_id: str
-    variation_ids: List[str] = field(default_factory=list)
+    variation_ids: list[str] = field(default_factory=list)
     created_at: datetime = field(default_factory=datetime.now)
-    tags: Set[str] = field(default_factory=set)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    tags: set[str] = field(default_factory=set)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 class VariationTracker:
     """Track performance of content variations."""
-    
-    def __init__(self, cache_dir: Optional[Path] = None):
+
+    def __init__(self, cache_dir: Path | None = None):
         """Initialize the variation tracker.
         
         Args:
@@ -84,16 +84,16 @@ class VariationTracker:
         """
         self.cache_dir = cache_dir or Path("data/variation_metrics")
         self.cache_dir.mkdir(parents=True, exist_ok=True)
-        
+
         # In-memory caches
-        self.metrics: Dict[str, VariationMetrics] = {}
-        self.content_groups: Dict[str, ContentGroup] = {}
-        self.content_to_group: Dict[str, str] = {}  # content_id -> group_id
-        
+        self.metrics: dict[str, VariationMetrics] = {}
+        self.content_groups: dict[str, ContentGroup] = {}
+        self.content_to_group: dict[str, str] = {}  # content_id -> group_id
+
         # Load existing data
         self._load_metrics()
         self._load_groups()
-    
+
     def _load_metrics(self):
         """Load metrics from cache."""
         metrics_file = self.cache_dir / "variation_metrics.json"
@@ -102,7 +102,7 @@ class VariationTracker:
                 data = json.load(f)
                 for variation_id, metric_data in data.items():
                     self.metrics[variation_id] = VariationMetrics.from_dict(metric_data)
-    
+
     def _load_groups(self):
         """Load content groups from cache."""
         groups_file = self.cache_dir / "content_groups.json"
@@ -119,22 +119,22 @@ class VariationTracker:
                         metadata=group_data.get("metadata", {}),
                     )
                     self.content_groups[group_id] = group
-                    
+
                     # Build reverse mapping
                     self.content_to_group[group.base_content_id] = group_id
                     for var_id in group.variation_ids:
                         self.content_to_group[var_id] = group_id
-    
+
     def _save_metrics(self):
         """Save metrics to cache."""
         data = {
             var_id: metrics.to_dict()
             for var_id, metrics in self.metrics.items()
         }
-        
+
         with open(self.cache_dir / "variation_metrics.json", "w") as f:
             json.dump(data, f, indent=2)
-    
+
     def _save_groups(self):
         """Save content groups to cache."""
         data = {}
@@ -146,16 +146,16 @@ class VariationTracker:
                 "tags": list(group.tags),
                 "metadata": group.metadata,
             }
-        
+
         with open(self.cache_dir / "content_groups.json", "w") as f:
             json.dump(data, f, indent=2)
-    
+
     def create_content_group(
         self,
         base_content_id: str,
-        variation_ids: List[str],
-        tags: Optional[Set[str]] = None,
-        metadata: Optional[Dict[str, Any]] = None,
+        variation_ids: list[str],
+        tags: set[str] | None = None,
+        metadata: dict[str, Any] | None = None,
     ) -> str:
         """Create a new content group.
         
@@ -168,8 +168,10 @@ class VariationTracker:
         Returns:
             Group ID
         """
-        group_id = str(uuid.uuid4())
-        
+        # Use content-based ID: hash of base content + timestamp
+        id_source = f"{base_content_id}:{datetime.now().isoformat()}"
+        group_id = hashlib.sha256(id_source.encode()).hexdigest()[:16]
+
         group = ContentGroup(
             group_id=group_id,
             base_content_id=base_content_id,
@@ -177,22 +179,22 @@ class VariationTracker:
             tags=tags or set(),
             metadata=metadata or {},
         )
-        
+
         self.content_groups[group_id] = group
-        
+
         # Update mappings
         self.content_to_group[base_content_id] = group_id
         for var_id in variation_ids:
             self.content_to_group[var_id] = group_id
-        
+
         self._save_groups()
-        
+
         return group_id
-    
+
     def track_metrics(
         self,
         content_id: str,
-        metrics_update: Dict[str, Any],
+        metrics_update: dict[str, Any],
     ):
         """Update metrics for a content variation.
         
@@ -206,9 +208,9 @@ class VariationTracker:
                 variation_id=content_id,
                 content_id=content_id,
             )
-        
+
         metrics = self.metrics[content_id]
-        
+
         # Update metrics
         for key, value in metrics_update.items():
             if hasattr(metrics, key):
@@ -218,17 +220,17 @@ class VariationTracker:
                 else:
                     # Set values
                     setattr(metrics, key, value)
-        
+
         # Recalculate rates
         metrics.calculate_engagement_rate()
         metrics.last_updated = datetime.now()
-        
+
         self._save_metrics()
-    
+
     def get_variation_performance(
         self,
         variation_id: str,
-    ) -> Optional[VariationMetrics]:
+    ) -> VariationMetrics | None:
         """Get performance metrics for a variation.
         
         Args:
@@ -238,11 +240,11 @@ class VariationTracker:
             Metrics or None if not found
         """
         return self.metrics.get(variation_id)
-    
+
     def get_group_performance(
         self,
         group_id: str,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Get aggregated performance for a content group.
         
         Args:
@@ -253,25 +255,25 @@ class VariationTracker:
         """
         if group_id not in self.content_groups:
             return {}
-        
+
         group = self.content_groups[group_id]
-        
+
         # Collect metrics for all variations
         all_metrics = []
         for content_id in [group.base_content_id] + group.variation_ids:
             if content_id in self.metrics:
                 all_metrics.append(self.metrics[content_id])
-        
+
         if not all_metrics:
             return {}
-        
+
         # Calculate aggregated stats
         total_views = sum(m.views for m in all_metrics)
         total_engagement = sum(m.likes + m.shares + m.comments + m.saves for m in all_metrics)
-        
+
         # Find best performer
         best_performer = max(all_metrics, key=lambda m: m.engagement_rate)
-        
+
         # Calculate improvement
         base_metrics = self.metrics.get(group.base_content_id)
         improvement = 0.0
@@ -280,7 +282,7 @@ class VariationTracker:
                 (best_performer.engagement_rate - base_metrics.engagement_rate)
                 / base_metrics.engagement_rate * 100
             )
-        
+
         return {
             "group_id": group_id,
             "total_variations": len(group.variation_ids),
@@ -301,13 +303,13 @@ class VariationTracker:
                 for m in all_metrics
             },
         }
-    
+
     def find_top_variations(
         self,
         metric: str = "engagement_rate",
         limit: int = 10,
         min_views: int = 100,
-    ) -> List[Tuple[str, VariationMetrics]]:
+    ) -> list[tuple[str, VariationMetrics]]:
         """Find top performing variations.
         
         Args:
@@ -324,19 +326,19 @@ class VariationTracker:
             for content_id, metrics in self.metrics.items()
             if metrics.views >= min_views
         ]
-        
+
         # Sort by metric
         qualified_metrics.sort(
             key=lambda x: getattr(x[1], metric, 0),
             reverse=True
         )
-        
+
         return qualified_metrics[:limit]
-    
+
     def get_variation_insights(
         self,
-        time_window: Optional[timedelta] = None,
-    ) -> Dict[str, Any]:
+        time_window: timedelta | None = None,
+    ) -> dict[str, Any]:
         """Get insights about variation performance.
         
         Args:
@@ -353,7 +355,7 @@ class VariationTracker:
             "trending_up": [],
             "trending_down": [],
         }
-        
+
         # Filter by time window if specified
         if time_window:
             cutoff = datetime.now() - time_window
@@ -363,24 +365,24 @@ class VariationTracker:
             ]
         else:
             relevant_metrics = list(self.metrics.values())
-        
+
         if not relevant_metrics:
             return insights
-        
+
         # Calculate average improvement
         improvements = []
         for group in self.content_groups.values():
             perf = self.get_group_performance(group.group_id)
             if perf and "improvement_percentage" in perf:
                 improvements.append(perf["improvement_percentage"])
-        
+
         if improvements:
             insights["average_improvement"] = sum(improvements) / len(improvements)
-        
+
         # Find trending content
         recent_window = timedelta(days=7)
         recent_cutoff = datetime.now() - recent_window
-        
+
         for metrics in relevant_metrics:
             if metrics.last_updated >= recent_cutoff:
                 # Simple trend detection based on engagement
@@ -396,7 +398,7 @@ class VariationTracker:
                         "engagement_rate": metrics.engagement_rate,
                         "views": metrics.views,
                     })
-        
+
         # Sort trending lists
         insights["trending_up"].sort(
             key=lambda x: x["engagement_rate"],
@@ -406,16 +408,16 @@ class VariationTracker:
             key=lambda x: x["views"],
             reverse=True
         )
-        
+
         # Limit trending lists
         insights["trending_up"] = insights["trending_up"][:5]
         insights["trending_down"] = insights["trending_down"][:5]
-        
+
         return insights
-    
+
     def export_analytics(
         self,
-        output_path: Optional[Path] = None,
+        output_path: Path | None = None,
     ) -> Path:
         """Export analytics data for external analysis.
         
@@ -428,7 +430,7 @@ class VariationTracker:
         if output_path is None:
             timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
             output_path = self.cache_dir / f"analytics_export_{timestamp}.json"
-        
+
         export_data = {
             "export_date": datetime.now().isoformat(),
             "metrics": {
@@ -438,7 +440,7 @@ class VariationTracker:
             "groups": {},
             "insights": self.get_variation_insights(),
         }
-        
+
         # Add group performance
         for group_id, group in self.content_groups.items():
             export_data["groups"][group_id] = {
@@ -447,9 +449,9 @@ class VariationTracker:
                 "tags": list(group.tags),
                 "performance": self.get_group_performance(group_id),
             }
-        
+
         with open(output_path, "w") as f:
             json.dump(export_data, f, indent=2)
-        
+
         logger.info(f"Exported analytics to {output_path}")
         return output_path

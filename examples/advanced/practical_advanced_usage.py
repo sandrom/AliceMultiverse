@@ -14,17 +14,14 @@ into real workflows, including:
 import asyncio
 import logging
 from pathlib import Path
-from typing import List
 
 from alicemultiverse.database.repository import AssetRepository
 from alicemultiverse.understanding import (
     AdvancedBatchUnderstandingStage,
     AdvancedTagger,
-    BatchAnalysisRequest,
     CustomInstructionManager,
     ImageUnderstandingStage,
     InstructionTemplate,
-    ProviderOptimizer,
 )
 
 logger = logging.getLogger(__name__)
@@ -32,7 +29,7 @@ logger = logging.getLogger(__name__)
 
 class AdvancedImageProcessor:
     """Example processor using advanced understanding features."""
-    
+
     def __init__(self, project_id: str, repository: AssetRepository):
         """Initialize with project configuration.
         
@@ -42,14 +39,14 @@ class AdvancedImageProcessor:
         """
         self.project_id = project_id
         self.repository = repository
-        
+
         # Initialize advanced components
         self.instruction_manager = CustomInstructionManager()
         self.advanced_tagger = AdvancedTagger(repository)
-        
+
         # Set up project-specific configuration
         self._setup_project_instructions()
-    
+
     def _setup_project_instructions(self):
         """Set up custom instructions for the project."""
         # Example: Fashion photography project
@@ -70,17 +67,17 @@ class AdvancedImageProcessor:
                 - Commercial viability and target audience
                 """
             }
-            
+
             templates = ["fashion_detailed"]
             variables = {
                 "additional_focus": "Luxury brand positioning and market appeal"
             }
-            
+
             self.instruction_manager.set_project_instructions(
                 self.project_id, instructions, templates, variables
             )
             logger.info(f"Set up fashion photography instructions for {self.project_id}")
-        
+
         # Add more project types as needed
         elif "product" in self.project_id.lower():
             # Product photography setup
@@ -89,12 +86,12 @@ class AdvancedImageProcessor:
             }
             templates = ["product_photography"]
             variables = {"product_category": "general", "target_platform": "e-commerce"}
-            
+
             self.instruction_manager.set_project_instructions(
                 self.project_id, instructions, templates, variables
             )
-    
-    async def process_single_image(self, image_path: Path, 
+
+    async def process_single_image(self, image_path: Path,
                                  use_optimization: bool = True,
                                  budget_limit: float = None) -> dict:
         """Process a single image with advanced understanding.
@@ -119,26 +116,26 @@ class AdvancedImageProcessor:
             generate_prompt=True,
             extract_tags=True
         )
-        
+
         # Process the image
         metadata = {
             "media_type": "image",
             "project_id": self.project_id,
             "file_path": str(image_path)
         }
-        
+
         result_metadata = stage.process(image_path, metadata)
-        
+
         logger.info(f"Processed {image_path.name} - "
                    f"Tags: {len(result_metadata.get('all_tags', []))}, "
                    f"Cost: ${result_metadata.get('understanding_cost', 0):.4f}")
-        
+
         return result_metadata
-    
-    async def process_batch(self, image_paths: List[Path],
+
+    async def process_batch(self, image_paths: list[Path],
                           max_concurrent: int = 5,
                           budget_limit: float = None,
-                          show_progress: bool = True) -> List[dict]:
+                          show_progress: bool = True) -> list[dict]:
         """Process multiple images efficiently.
         
         Args:
@@ -159,7 +156,7 @@ class AdvancedImageProcessor:
             use_optimization=True,
             checkpoint_interval=10
         )
-        
+
         # Prepare metadata list
         metadata_list = []
         for image_path in image_paths:
@@ -168,22 +165,22 @@ class AdvancedImageProcessor:
                 "project_id": self.project_id,
                 "file_path": str(image_path)
             })
-        
+
         # Process batch
         if show_progress:
             print(f"Processing batch of {len(image_paths)} images...")
-        
+
         result_metadata_list = await stage.process_batch(image_paths, metadata_list)
-        
+
         # Calculate summary statistics
         total_cost = sum(m.get('understanding_cost', 0) for m in result_metadata_list)
         total_tags = sum(len(m.get('all_tags', [])) for m in result_metadata_list)
-        
+
         logger.info(f"Batch complete: {len(image_paths)} images, "
                    f"${total_cost:.2f} total cost, {total_tags} total tags")
-        
+
         return result_metadata_list
-    
+
     def get_project_tag_summary(self) -> dict:
         """Get a summary of tags used in this project.
         
@@ -193,22 +190,22 @@ class AdvancedImageProcessor:
         # Get project vocabulary to show custom tags
         vocab = self.advanced_tagger.get_project_vocabulary(self.project_id)
         all_tags = vocab.get_all_tags()
-        
+
         summary = {
             "total_categories": len(all_tags),
             "total_tags": sum(len(tags) for tags in all_tags.values()),
             "categories": {}
         }
-        
+
         for category, tags in all_tags.items():
             summary["categories"][category] = {
                 "count": len(tags),
                 "examples": list(tags)[:5]  # Show first 5 as examples
             }
-        
+
         return summary
-    
-    def create_custom_template(self, template_id: str, name: str, 
+
+    def create_custom_template(self, template_id: str, name: str,
                              instructions: str, variables: dict = None):
         """Create a custom instruction template for this project type.
         
@@ -225,7 +222,7 @@ class AdvancedImageProcessor:
             instructions=instructions,
             variables=variables or {}
         )
-        
+
         self.instruction_manager.create_template(template)
         logger.info(f"Created custom template: {template_id}")
 
@@ -233,16 +230,16 @@ class AdvancedImageProcessor:
 async def example_fashion_photoshoot():
     """Example: Processing a fashion photoshoot with advanced features."""
     print("\n=== Fashion Photoshoot Example ===")
-    
+
     # Initialize (in real usage, get repository from app config)
     repository = None  # AssetRepository() in production
     if not repository:
         print("Skipping database operations (no repository configured)")
         return
-    
+
     project_id = "luxury_fashion_ss2024"
     processor = AdvancedImageProcessor(project_id, repository)
-    
+
     # Example image paths (in real usage, these would be actual files)
     image_paths = [
         Path("fashion_shoot_001.jpg"),
@@ -251,12 +248,12 @@ async def example_fashion_photoshoot():
         Path("fashion_shoot_004.jpg"),
         Path("fashion_shoot_005.jpg"),
     ]
-    
+
     print(f"Processing {len(image_paths)} fashion images for project: {project_id}")
-    
+
     # Process batch with cost control
     budget_limit = 2.0  # $2 budget for this batch
-    
+
     try:
         results = await processor.process_batch(
             image_paths,
@@ -264,19 +261,19 @@ async def example_fashion_photoshoot():
             budget_limit=budget_limit,
             show_progress=True
         )
-        
+
         # Analyze results
         print(f"\nResults: {len(results)} images processed")
-        
+
         # Show tag summary
         tag_summary = processor.get_project_tag_summary()
         print(f"Tag categories: {tag_summary['total_categories']}")
         print(f"Total unique tags: {tag_summary['total_tags']}")
-        
+
         # Show some example tags by category
         for category, info in list(tag_summary['categories'].items())[:3]:
             print(f"  {category}: {info['count']} tags - {', '.join(info['examples'])}")
-        
+
     except Exception as e:
         print(f"Processing failed: {e}")
 
@@ -284,17 +281,17 @@ async def example_fashion_photoshoot():
 async def example_cost_optimized_processing():
     """Example: Cost-optimized processing with provider selection."""
     print("\n=== Cost-Optimized Processing Example ===")
-    
+
     # This example shows how to process with strict cost controls
     project_id = "budget_conscious_project"
-    
+
     # In a real application, you'd initialize this properly
     print("Setting up cost-optimized processing...")
     print("- Budget limit: $1.00")
     print("- Provider optimization: Enabled")
     print("- Batch processing: 10 images max")
     print("- Checkpoint saving: Every 5 images")
-    
+
     # Mock processing results
     print("\nSimulated processing results:")
     print("✓ Selected cheapest provider: deepseek ($0.001/image)")
@@ -307,9 +304,9 @@ async def example_cost_optimized_processing():
 async def example_custom_instructions():
     """Example: Creating and using custom instructions."""
     print("\n=== Custom Instructions Example ===")
-    
+
     instruction_manager = CustomInstructionManager()
-    
+
     # Create a custom template for art analysis
     art_template = InstructionTemplate(
         id="art_gallery_analysis",
@@ -345,19 +342,19 @@ async def example_custom_instructions():
             "focus_area": "Specific aspect to emphasize in analysis"
         }
     )
-    
+
     instruction_manager.create_template(art_template)
     print("✓ Created custom art gallery analysis template")
-    
+
     # Set up project with custom instructions
     project_id = "museum_digitization_2024"
-    
+
     project_instructions = {
         "general": "Focus on art historical significance and digital archival quality",
         "paintings": "Emphasize artistic technique and historical context",
         "sculptures": "Focus on three-dimensional form and material analysis"
     }
-    
+
     instruction_manager.set_project_instructions(
         project_id,
         project_instructions,
@@ -368,14 +365,14 @@ async def example_custom_instructions():
             "focus_area": "historical significance and artistic technique"
         }
     )
-    
+
     print(f"✓ Configured project: {project_id}")
-    
+
     # Build complete instructions
     complete_instructions = instruction_manager.build_analysis_instructions(
         project_id, "paintings"
     )
-    
+
     print(f"✓ Generated {len(complete_instructions)} character instruction set")
     print("Instructions include project settings + custom template + variables")
 
@@ -384,11 +381,11 @@ async def main():
     """Run all practical examples."""
     print("AliceMultiverse Advanced Understanding - Practical Examples")
     print("=" * 60)
-    
+
     await example_fashion_photoshoot()
     await example_cost_optimized_processing()
     await example_custom_instructions()
-    
+
     print("\n" + "=" * 60)
     print("Examples complete!")
     print("\nKey takeaways:")

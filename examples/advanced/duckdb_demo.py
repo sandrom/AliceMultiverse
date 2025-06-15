@@ -6,11 +6,11 @@ This demonstrates how DuckDB's columnar storage and analytical capabilities
 are perfect for our media search and organization needs.
 """
 
-import duckdb
 import json
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any
+
+import duckdb
 
 # Create in-memory database for demo
 conn = duckdb.connect(':memory:')

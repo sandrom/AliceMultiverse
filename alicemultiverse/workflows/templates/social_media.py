@@ -4,12 +4,11 @@ Optimized for different social platforms with their unique requirements.
 """
 
 import logging
-from typing import List, Dict, Any, Optional, Tuple
-from pathlib import Path
-from enum import Enum
 from dataclasses import dataclass
+from enum import Enum
+from typing import Any
 
-from alicemultiverse.workflows.base import WorkflowTemplate, WorkflowStep, WorkflowContext
+from alicemultiverse.workflows.base import WorkflowContext, WorkflowStep, WorkflowTemplate
 
 logger = logging.getLogger(__name__)
 
@@ -18,14 +17,14 @@ logger = logging.getLogger(__name__)
 class PlatformSpec:
     """Specifications for a social media platform."""
     name: str
-    aspect_ratio: Tuple[int, int]
+    aspect_ratio: tuple[int, int]
     max_duration: float
     min_duration: float
     optimal_duration: float
     fps: int
     max_file_size_mb: int
-    safe_zones: Dict[str, float]  # Percentages for UI elements
-    features: List[str]
+    safe_zones: dict[str, float]  # Percentages for UI elements
+    features: list[str]
     audio_required: bool = True
 
 
@@ -121,18 +120,18 @@ class SocialMediaTemplate(WorkflowTemplate):
         style: Content style (trending, educational, entertaining)
         auto_optimize: Automatically optimize for engagement
     """
-    
+
     def __init__(self):
         super().__init__(name="SocialMedia")
         self.platform_specs = PLATFORM_SPECS
-        
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define social media workflow steps."""
         steps = []
         params = context.initial_params
         platform = SocialPlatform(params["platform"])
         spec = self.platform_specs[platform]
-        
+
         # Step 1: Analyze content
         steps.append(WorkflowStep(
             name="analyze_content",
@@ -147,7 +146,7 @@ class SocialMediaTemplate(WorkflowTemplate):
             },
             cost_limit=0.0
         ))
-        
+
         # Step 2: Optimize for platform
         steps.append(WorkflowStep(
             name="optimize_content",
@@ -164,7 +163,7 @@ class SocialMediaTemplate(WorkflowTemplate):
             condition="analyze_content.success",
             cost_limit=0.0
         ))
-        
+
         # Step 3: Add engagement features
         steps.append(WorkflowStep(
             name="add_engagement",
@@ -181,7 +180,7 @@ class SocialMediaTemplate(WorkflowTemplate):
             condition="optimize_content.success",
             cost_limit=0.0
         ))
-        
+
         # Step 4: Apply platform styling
         steps.append(WorkflowStep(
             name="apply_styling",
@@ -198,7 +197,7 @@ class SocialMediaTemplate(WorkflowTemplate):
             condition="add_engagement.success",
             cost_limit=0.0
         ))
-        
+
         # Step 5: Export for platform
         steps.append(WorkflowStep(
             name="export_platform",
@@ -215,15 +214,15 @@ class SocialMediaTemplate(WorkflowTemplate):
             condition="apply_styling.success",
             cost_limit=0.0
         ))
-        
+
         return steps
-    
-    def analyze_for_social(self, context: WorkflowContext) -> Dict[str, Any]:
+
+    def analyze_for_social(self, context: WorkflowContext) -> dict[str, Any]:
         """Analyze content for social media suitability."""
         params = context.get_step_params("analyze_content")
         images = params["images"]
         platform = params["platform"]
-        
+
         analysis = {
             "total_content": len(images),
             "platform_fit": self._assess_platform_fit(images, platform),
@@ -232,31 +231,31 @@ class SocialMediaTemplate(WorkflowTemplate):
             "warnings": [],
             "optimizations": [],
         }
-        
+
         # Check for potential issues
         if len(images) < 3:
             analysis["warnings"].append("Low content count may reduce engagement")
-        
+
         # Suggest optimizations
         if platform in ["instagram_reel", "tiktok"]:
             analysis["optimizations"].append("Add trending audio for better reach")
             analysis["optimizations"].append("Include hook in first 3 seconds")
-        
+
         return analysis
-    
-    def optimize_for_platform(self, context: WorkflowContext) -> Dict[str, Any]:
+
+    def optimize_for_platform(self, context: WorkflowContext) -> dict[str, Any]:
         """Optimize content for platform specifications."""
         params = context.get_step_params("optimize_content")
         analysis = context.get_result("analyze_content")
-        
+
         spec = params["platform_spec"]
         aspect_ratio = params["aspect_ratio"]
         duration = params["duration"]
-        
+
         # Calculate optimal sequencing
         images_per_second = self._calculate_pacing(params["style"], spec["name"])
         total_images_needed = int(duration * images_per_second)
-        
+
         # Prepare content sequence
         optimized = {
             "sequence": self._create_optimal_sequence(
@@ -269,15 +268,15 @@ class SocialMediaTemplate(WorkflowTemplate):
             "safe_zones_applied": True,
             "pacing": images_per_second,
         }
-        
+
         return optimized
-    
-    def add_engagement_features(self, context: WorkflowContext) -> Dict[str, Any]:
+
+    def add_engagement_features(self, context: WorkflowContext) -> dict[str, Any]:
         """Add platform-specific engagement features."""
         params = context.get_step_params("add_engagement")
         optimized = context.get_result("optimize_content")
         platform = params["platform"]
-        
+
         features = {
             "hook": {
                 "type": self._select_hook_type(platform),
@@ -293,7 +292,7 @@ class SocialMediaTemplate(WorkflowTemplate):
                 "caption_style": self._get_caption_style(platform),
             },
         }
-        
+
         # Add CTA if provided
         if params.get("call_to_action"):
             features["cta"] = {
@@ -301,25 +300,25 @@ class SocialMediaTemplate(WorkflowTemplate):
                 "position": "end",
                 "duration": 2.0,
             }
-        
+
         # Add trending elements
         if params.get("trending_elements"):
             features["trends"] = self._get_trending_elements(platform)
-        
+
         return features
-    
-    def apply_platform_styling(self, context: WorkflowContext) -> Dict[str, Any]:
+
+    def apply_platform_styling(self, context: WorkflowContext) -> dict[str, Any]:
         """Apply platform-specific styling."""
         params = context.get_step_params("apply_styling")
         features = context.get_result("add_engagement")
         platform = params["platform"]
-        
+
         styling = {
             "visual_style": self._get_platform_style(platform),
             "color_correction": "platform_optimized",
             "filters": self._select_filters(platform, params.get("filters")),
         }
-        
+
         # Add text overlays
         if params.get("text_overlays"):
             styling["text"] = {
@@ -327,7 +326,7 @@ class SocialMediaTemplate(WorkflowTemplate):
                 "style": self._get_text_style(platform),
                 "animations": self._get_text_animations(platform),
             }
-        
+
         # Add music if provided
         if params.get("music_file"):
             styling["audio"] = {
@@ -335,19 +334,19 @@ class SocialMediaTemplate(WorkflowTemplate):
                 "sync_to_beat": platform in ["instagram_reel", "tiktok"],
                 "volume_ducking": True,
             }
-        
+
         # Add branding
         if params.get("branding"):
             styling["branding"] = self._apply_branding(params["branding"], platform)
-        
+
         return styling
-    
-    def export_for_social(self, context: WorkflowContext) -> Dict[str, Any]:
+
+    def export_for_social(self, context: WorkflowContext) -> dict[str, Any]:
         """Export content in platform format."""
         params = context.get_step_params("export_platform")
         platform = params["platform"]
         spec = self.platform_specs[SocialPlatform(platform)]
-        
+
         export = {
             "format": params["format"],
             "resolution": self._get_resolution(spec.aspect_ratio),
@@ -355,19 +354,19 @@ class SocialMediaTemplate(WorkflowTemplate):
             "bitrate": "optimized",
             "file_size": f"<{spec.max_file_size_mb}MB",
         }
-        
+
         # Add metadata
         export["metadata"] = params["metadata"]
-        
+
         # Generate preview
         if params.get("preview"):
             export["preview"] = {
                 "thumbnail": "auto_generated",
                 "preview_points": [0, 0.25, 0.5, 0.75],
             }
-        
+
         return export
-    
+
     # Helper methods
     def _get_hook_duration(self, platform: SocialPlatform) -> float:
         """Get optimal hook duration for platform."""
@@ -378,11 +377,11 @@ class SocialMediaTemplate(WorkflowTemplate):
             SocialPlatform.TWITTER_VIDEO: 5.0,
         }
         return hook_durations.get(platform, 3.0)
-    
-    def _prepare_text_overlays(self, params: Dict) -> List[Dict]:
+
+    def _prepare_text_overlays(self, params: dict) -> list[dict]:
         """Prepare text overlays from caption and hashtags."""
         overlays = []
-        
+
         if params.get("caption"):
             # Split caption into readable chunks
             caption_parts = self._split_caption(params["caption"])
@@ -393,10 +392,10 @@ class SocialMediaTemplate(WorkflowTemplate):
                     "timing": i * 3.0,  # Show every 3 seconds
                     "duration": 2.5,
                 })
-        
+
         return overlays
-    
-    def _prepare_metadata(self, params: Dict, platform: SocialPlatform) -> Dict:
+
+    def _prepare_metadata(self, params: dict, platform: SocialPlatform) -> dict:
         """Prepare platform-specific metadata."""
         metadata = {
             "title": params.get("title", ""),
@@ -404,14 +403,14 @@ class SocialMediaTemplate(WorkflowTemplate):
             "tags": params.get("hashtags", []),
             "platform": platform.value,
         }
-        
+
         # Platform-specific metadata
         if platform == SocialPlatform.YOUTUBE_SHORTS:
             metadata["category"] = params.get("category", "Entertainment")
             metadata["visibility"] = params.get("visibility", "public")
-        
+
         return metadata
-    
+
     def _get_export_format(self, platform: SocialPlatform) -> str:
         """Get export format for platform."""
         formats = {
@@ -421,22 +420,22 @@ class SocialMediaTemplate(WorkflowTemplate):
             SocialPlatform.TWITTER_VIDEO: "mp4",
         }
         return formats.get(platform, "mp4")
-    
-    def _assess_platform_fit(self, images: List[str], platform: str) -> float:
+
+    def _assess_platform_fit(self, images: list[str], platform: str) -> float:
         """Assess how well content fits platform."""
         # Placeholder - would analyze content style
         return 0.8
-    
-    def _check_trend_alignment(self, images: List[str], platform: str) -> Dict:
+
+    def _check_trend_alignment(self, images: list[str], platform: str) -> dict:
         """Check alignment with current trends."""
         # Placeholder - would check against trend database
         return {"aligned": True, "trends": ["minimalist", "authentic"]}
-    
-    def _estimate_engagement(self, images: List[str], platform: str) -> float:
+
+    def _estimate_engagement(self, images: list[str], platform: str) -> float:
         """Estimate engagement potential."""
         # Placeholder - would use ML model
         return 0.75
-    
+
     def _calculate_pacing(self, style: str, platform: str) -> float:
         """Calculate images per second for style."""
         pacing_map = {
@@ -447,8 +446,8 @@ class SocialMediaTemplate(WorkflowTemplate):
             "tutorial": 0.3,
         }
         return pacing_map.get(style, 1.0)
-    
-    def _create_optimal_sequence(self, available: int, needed: int, style: str) -> List[int]:
+
+    def _create_optimal_sequence(self, available: int, needed: int, style: str) -> list[int]:
         """Create optimal image sequence."""
         if available >= needed:
             # Select best images
@@ -459,7 +458,7 @@ class SocialMediaTemplate(WorkflowTemplate):
             for i in range(needed):
                 sequence.append(i % available)
             return sequence
-    
+
     def _select_hook_type(self, platform: str) -> str:
         """Select hook type for platform."""
         hooks = {
@@ -468,15 +467,15 @@ class SocialMediaTemplate(WorkflowTemplate):
             "youtube_shorts": "preview_hook",
         }
         return hooks.get(platform, "visual_hook")
-    
-    def _plan_engagement_points(self, duration: float, platform: str) -> List[Dict]:
+
+    def _plan_engagement_points(self, duration: float, platform: str) -> list[dict]:
         """Plan engagement points throughout video."""
         points = []
-        
+
         # Add engagement every 7-10 seconds
         interval = 8.0
         current = interval
-        
+
         while current < duration - 2:
             points.append({
                 "time": current,
@@ -484,10 +483,10 @@ class SocialMediaTemplate(WorkflowTemplate):
                 "duration": 1.0,
             })
             current += interval
-        
+
         return points
-    
-    def _get_caption_style(self, platform: str) -> Dict:
+
+    def _get_caption_style(self, platform: str) -> dict:
         """Get caption style for platform."""
         styles = {
             "instagram_reel": {"position": "bottom", "style": "bold_outline"},
@@ -495,13 +494,13 @@ class SocialMediaTemplate(WorkflowTemplate):
             "youtube_shorts": {"position": "bottom", "style": "youtube_cc"},
         }
         return styles.get(platform, {"position": "bottom", "style": "simple"})
-    
-    def _get_trending_elements(self, platform: str) -> List[str]:
+
+    def _get_trending_elements(self, platform: str) -> list[str]:
         """Get current trending elements."""
         # Placeholder - would fetch from trend API
         return ["trending_audio", "popular_effect", "viral_transition"]
-    
-    def _get_platform_style(self, platform: str) -> Dict:
+
+    def _get_platform_style(self, platform: str) -> dict:
         """Get visual style for platform."""
         styles = {
             "instagram_reel": {"saturation": 1.1, "contrast": 1.05},
@@ -509,8 +508,8 @@ class SocialMediaTemplate(WorkflowTemplate):
             "youtube_shorts": {"clarity": 1.1, "sharpness": 1.05},
         }
         return styles.get(platform, {})
-    
-    def _select_filters(self, platform: str, filter_pref: str) -> List[str]:
+
+    def _select_filters(self, platform: str, filter_pref: str) -> list[str]:
         """Select filters for platform."""
         if filter_pref == "auto":
             platform_filters = {
@@ -520,8 +519,8 @@ class SocialMediaTemplate(WorkflowTemplate):
             }
             return platform_filters.get(platform, ["enhance"])
         return [filter_pref]
-    
-    def _get_text_style(self, platform: str) -> Dict:
+
+    def _get_text_style(self, platform: str) -> dict:
         """Get text style for platform."""
         styles = {
             "instagram_reel": {
@@ -538,8 +537,8 @@ class SocialMediaTemplate(WorkflowTemplate):
             },
         }
         return styles.get(platform, {"font": "Arial", "color": "white"})
-    
-    def _get_text_animations(self, platform: str) -> List[str]:
+
+    def _get_text_animations(self, platform: str) -> list[str]:
         """Get text animations for platform."""
         animations = {
             "instagram_reel": ["fade_in", "bounce"],
@@ -547,8 +546,8 @@ class SocialMediaTemplate(WorkflowTemplate):
             "youtube_shorts": ["slide_in", "fade"],
         }
         return animations.get(platform, ["fade_in"])
-    
-    def _apply_branding(self, branding: Dict, platform: str) -> Dict:
+
+    def _apply_branding(self, branding: dict, platform: str) -> dict:
         """Apply branding elements."""
         return {
             "watermark": branding.get("watermark"),
@@ -556,8 +555,8 @@ class SocialMediaTemplate(WorkflowTemplate):
             "opacity": 0.7,
             "size": "small",
         }
-    
-    def _get_resolution(self, aspect_ratio: Tuple[int, int]) -> Tuple[int, int]:
+
+    def _get_resolution(self, aspect_ratio: tuple[int, int]) -> tuple[int, int]:
         """Get resolution for aspect ratio."""
         if aspect_ratio == (9, 16):  # Vertical
             return (1080, 1920)
@@ -566,36 +565,36 @@ class SocialMediaTemplate(WorkflowTemplate):
         elif aspect_ratio == (1, 1):  # Square
             return (1080, 1080)
         return (1080, 1920)  # Default vertical
-    
-    def _split_caption(self, caption: str, max_length: int = 30) -> List[str]:
+
+    def _split_caption(self, caption: str, max_length: int = 30) -> list[str]:
         """Split caption into readable chunks."""
         words = caption.split()
         chunks = []
         current = []
-        
+
         for word in words:
             current.append(word)
             if len(" ".join(current)) > max_length:
                 chunks.append(" ".join(current[:-1]))
                 current = [word]
-        
+
         if current:
             chunks.append(" ".join(current))
-        
+
         return chunks
 
 
 class InstagramReelTemplate(SocialMediaTemplate):
     """Specialized template for Instagram Reels."""
-    
+
     def __init__(self):
         super().__init__()
         self.name = "InstagramReel"
-        
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Add Instagram-specific steps."""
         steps = super().define_steps(context)
-        
+
         # Insert Instagram-specific step after optimization
         instagram_step = WorkflowStep(
             name="add_instagram_features",
@@ -611,24 +610,24 @@ class InstagramReelTemplate(SocialMediaTemplate):
             condition="optimize_content.success",
             cost_limit=0.0
         )
-        
+
         # Insert after optimize step
         steps.insert(2, instagram_step)
-        
+
         return steps
 
 
 class TikTokTemplate(SocialMediaTemplate):
     """Specialized template for TikTok videos."""
-    
+
     def __init__(self):
         super().__init__()
         self.name = "TikTok"
-        
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Add TikTok-specific steps."""
         steps = super().define_steps(context)
-        
+
         # Add trend integration step
         trend_step = WorkflowStep(
             name="integrate_trends",
@@ -644,19 +643,19 @@ class TikTokTemplate(SocialMediaTemplate):
             condition="optimize_content.success",
             cost_limit=0.0
         )
-        
+
         steps.insert(2, trend_step)
-        
+
         return steps
 
 
 class LinkedInVideoTemplate(SocialMediaTemplate):
     """Professional video template for LinkedIn."""
-    
+
     def __init__(self):
         super().__init__()
         self.name = "LinkedInVideo"
-        
+
         # Override platform specs for professional content
         self.platform_specs[SocialPlatform.LINKEDIN_VIDEO] = PlatformSpec(
             name="LinkedIn Video",
@@ -669,11 +668,11 @@ class LinkedInVideoTemplate(SocialMediaTemplate):
             safe_zones={"all": 0.05},
             features=["captions", "professional", "educational"],
         )
-    
-    def define_steps(self, context: WorkflowContext) -> List[WorkflowStep]:
+
+    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Add LinkedIn-specific professional touches."""
         steps = super().define_steps(context)
-        
+
         # Add professional styling
         professional_step = WorkflowStep(
             name="add_professional_elements",
@@ -690,7 +689,7 @@ class LinkedInVideoTemplate(SocialMediaTemplate):
             condition="optimize_content.success",
             cost_limit=0.0
         )
-        
+
         steps.insert(2, professional_step)
-        
+
         return steps

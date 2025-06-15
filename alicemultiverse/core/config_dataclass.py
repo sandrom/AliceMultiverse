@@ -85,7 +85,7 @@ class MetadataConfig:
 @dataclass
 class StorageLocationConfig:
     """Configuration for a storage location."""
-    
+
     name: str
     type: str = "local"  # local, s3, gcs, network
     path: str = ""
@@ -97,16 +97,16 @@ class StorageLocationConfig:
 @dataclass
 class StorageConfig:
     """Storage configuration."""
-    
+
     search_db: str = "data/search.duckdb"
     location_registry_db: str = "data/locations.duckdb"
     project_paths: list[str] = field(default_factory=lambda: ["projects"])
     asset_paths: list[str] = field(default_factory=lambda: ["organized", "inbox"])
     sorted_out_path: str = "sorted-out"
-    
+
     # New: Multiple storage locations
     locations: list[dict] = field(default_factory=list)
-    
+
     # Legacy paths for backward compatibility
     use_legacy_paths: bool = True
 
@@ -259,7 +259,7 @@ class Config:
         # Update processing
         if "processing" in data:
             config.processing = ProcessingConfig(**data["processing"])
-        
+
         # Update storage
         if "storage" in data:
             config.storage = StorageConfig(**data["storage"])
@@ -282,14 +282,14 @@ class Config:
         if "providers" in data:
             providers_data = data["providers"]
             providers_config = ProvidersConfig()
-            
+
             if "anthropic" in providers_data:
                 providers_config.anthropic = AnthropicConfig(**providers_data["anthropic"])
             if "database" in providers_data:
                 providers_config.database = DatabaseConfig(**providers_data["database"])
             if "events" in providers_data:
                 providers_config.events = EventsConfig(**providers_data["events"])
-                
+
             config.providers = providers_config
 
         if "pipeline" in data:

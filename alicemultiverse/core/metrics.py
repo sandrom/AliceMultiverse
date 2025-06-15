@@ -1,18 +1,19 @@
 """Prometheus metrics for monitoring AliceMultiverse."""
 
 import time
+from collections.abc import Callable
 from functools import wraps
-from typing import Callable, Dict, Any
+from typing import Any
 
 from prometheus_client import (
-    Counter,
-    Histogram,
-    Gauge,
-    Summary,
-    Info,
+    CONTENT_TYPE_LATEST,
     REGISTRY,
+    Counter,
+    Gauge,
+    Histogram,
+    Info,
+    Summary,
     generate_latest,
-    CONTENT_TYPE_LATEST
 )
 
 from .structured_logging import get_logger
@@ -125,6 +126,7 @@ system_info = Info(
 
 # Set system info
 from ..version import __version__
+
 system_info.info({
     'version': __version__,
     'service': 'alicemultiverse'
@@ -148,17 +150,17 @@ def track_api_metrics(
         async def async_wrapper(*args, **kwargs):
             start_time = time.time()
             status = 'success'
-            
+
             try:
                 result = await func(*args, **kwargs)
-                
+
                 # Extract metrics from result if available
                 if hasattr(result, 'cost') and result.cost:
                     api_request_cost_dollars.labels(
                         provider=provider,
                         model=model
                     ).observe(result.cost)
-                
+
                 # Track token usage if available
                 if hasattr(result, 'usage'):
                     usage = result.usage
@@ -174,30 +176,30 @@ def track_api_metrics(
                             model=model,
                             token_type='completion'
                         ).inc(usage.completion_tokens)
-                
+
                 return result
-                
+
             except Exception:
                 status = 'error'
                 raise
-                
+
             finally:
                 # Track request count and duration
                 duration = time.time() - start_time
-                
+
                 api_requests_total.labels(
                     provider=provider,
                     model=model,
                     operation=operation,
                     status=status
                 ).inc()
-                
+
                 api_request_duration_seconds.labels(
                     provider=provider,
                     model=model,
                     operation=operation
                 ).observe(duration)
-                
+
                 logger.debug(
                     "API metrics tracked",
                     provider=provider,
@@ -206,13 +208,13 @@ def track_api_metrics(
                     status=status,
                     duration=duration
                 )
-        
+
         @wraps(func)
         def sync_wrapper(*args, **kwargs):
             # Similar implementation for sync functions
             start_time = time.time()
             status = 'success'
-            
+
             try:
                 result = func(*args, **kwargs)
                 return result
@@ -232,14 +234,14 @@ def track_api_metrics(
                     model=model,
                     operation=operation
                 ).observe(duration)
-        
+
         # Return appropriate wrapper
         import asyncio
         if asyncio.iscoroutinefunction(func):
             return async_wrapper
         else:
             return sync_wrapper
-    
+
     return decorator
 
 
@@ -253,7 +255,7 @@ def track_db_metrics(query_type: str) -> Callable:
         @wraps(func)
         def wrapper(*args, **kwargs):
             start_time = time.time()
-            
+
             try:
                 result = func(*args, **kwargs)
                 return result
@@ -262,13 +264,13 @@ def track_db_metrics(query_type: str) -> Callable:
                 db_query_duration_seconds.labels(
                     query_type=query_type
                 ).observe(duration)
-        
+
         return wrapper
-    
+
     return decorator
 
 
-def update_provider_health_metrics(provider_name: str, health_data: Dict[str, Any]):
+def update_provider_health_metrics(provider_name: str, health_data: dict[str, Any]):
     """Update provider health metrics.
     
     Args:
@@ -280,7 +282,7 @@ def update_provider_health_metrics(provider_name: str, health_data: Dict[str, An
     provider_health_status.labels(provider=provider_name).set(
         1 if is_healthy else 0
     )
-    
+
     # Update circuit breaker state
     circuit_state = health_data.get('circuit_state', 'closed')
     state_value = {
@@ -289,13 +291,13 @@ def update_provider_health_metrics(provider_name: str, health_data: Dict[str, An
         'half_open': 2
     }.get(circuit_state, 0)
     provider_circuit_breaker_state.labels(provider=provider_name).set(state_value)
-    
+
     # Update error rate
     error_rate = health_data.get('error_rate', 0.0)
     provider_error_rate.labels(provider=provider_name).set(error_rate)
 
 
-def update_db_pool_metrics(pool_stats: Dict[str, Any]):
+def update_db_pool_metrics(pool_stats: dict[str, Any]):
     """Update database connection pool metrics.
     
     Args:
@@ -324,10 +326,10 @@ def track_asset_processing(
         async def async_wrapper(*args, **kwargs):
             start_time = time.time()
             status = 'success'
-            
+
             try:
                 result = await func(*args, **kwargs)
-                
+
                 # Track quality scores if available
                 if hasattr(result, 'quality_scores'):
                     for quality_type, score in result.quality_scores.items():
@@ -335,27 +337,27 @@ def track_asset_processing(
                             media_type=media_type,
                             quality_type=quality_type
                         ).observe(score)
-                
+
                 return result
-                
+
             except Exception:
                 status = 'error'
                 raise
-                
+
             finally:
                 duration = time.time() - start_time
-                
+
                 assets_processed_total.labels(
                     media_type=media_type,
                     source=source,
                     status=status
                 ).inc()
-                
+
                 asset_processing_duration_seconds.labels(
                     media_type=media_type,
                     operation=operation
                 ).observe(duration)
-        
+
         # Return appropriate wrapper
         import asyncio
         if asyncio.iscoroutinefunction(func):
@@ -363,7 +365,7 @@ def track_asset_processing(
         else:
             # Similar sync implementation
             return func
-    
+
     return decorator
 
 
@@ -398,12 +400,12 @@ def get_metrics_content_type() -> str:
 def create_metrics_endpoint():
     """Create a FastAPI endpoint for Prometheus metrics."""
     from fastapi import Response
-    
+
     async def metrics_endpoint():
         metrics_data = get_metrics()
         return Response(
             content=metrics_data,
             media_type=get_metrics_content_type()
         )
-    
+
     return metrics_endpoint

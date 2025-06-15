@@ -23,19 +23,25 @@ from .models import (
 from .structured_models import (
     AssetRole,
     DimensionFilter,
-    GenerationRequest as StructuredGenerationRequest,
     GroupingRequest,
     MediaType,
-    OrganizeRequest as StructuredOrganizeRequest,
     ProjectRequest,
     RangeFilter,
     SearchFilters,
-    SearchRequest as StructuredSearchRequest,
     SearchResponse,
     SortField,
     SortOrder,
     TagUpdateRequest,
     WorkflowRequest,
+)
+from .structured_models import (
+    GenerationRequest as StructuredGenerationRequest,
+)
+from .structured_models import (
+    OrganizeRequest as StructuredOrganizeRequest,
+)
+from .structured_models import (
+    SearchRequest as StructuredSearchRequest,
 )
 
 __all__ = [

@@ -4,6 +4,7 @@
 import sys
 from pathlib import Path
 
+
 def main():
     """Entry point that ensures the package can be imported."""
     # This helps with editable installs where the finder might not be initialized yet
@@ -11,7 +12,7 @@ def main():
         # Force site packages to be processed
         import site
         site.main()
-        
+
         from alicemultiverse.interface.main_cli import main as cli_main
     except ImportError as e:
         # If import fails, try adding the package root to Python path
@@ -27,7 +28,7 @@ def main():
         else:
             print(f"Failed to import alicemultiverse: {e}", file=sys.stderr)
             raise
-    
+
     return cli_main()
 
 if __name__ == "__main__":

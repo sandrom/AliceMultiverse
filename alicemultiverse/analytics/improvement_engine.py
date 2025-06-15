@@ -1,14 +1,13 @@
 """Improvement suggestion engine based on analytics."""
 
-import logging
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Any, Tuple
 from collections import defaultdict
 from dataclasses import dataclass
+from datetime import timedelta
+from typing import Any
 
-from .performance_tracker import PerformanceTracker
-from .export_analytics import ExportAnalytics
 from ..core.structured_logging import get_logger
+from .export_analytics import ExportAnalytics
+from .performance_tracker import PerformanceTracker
 
 logger = get_logger(__name__)
 
@@ -23,28 +22,28 @@ class Improvement:
     priority: str  # high, medium, low
     impact: str  # time_saved, quality_improved, errors_reduced
     effort: str  # easy, medium, hard
-    
+
     # Specific recommendations
-    actions: List[str]
-    metrics_before: Dict[str, Any]
-    expected_improvement: Dict[str, Any]
-    
+    actions: list[str]
+    metrics_before: dict[str, Any]
+    expected_improvement: dict[str, Any]
+
     # Examples from data
-    examples: List[Dict[str, Any]]
-    
+    examples: list[dict[str, Any]]
+
     # Implementation hints
     automation_possible: bool = False
     requires_user_input: bool = False
-    affects_workflows: List[str] = None
+    affects_workflows: list[str] = None
 
 
 class ImprovementEngine:
     """Generate actionable improvement suggestions."""
-    
+
     def __init__(
         self,
-        performance_tracker: Optional[PerformanceTracker] = None,
-        export_analytics: Optional[ExportAnalytics] = None
+        performance_tracker: PerformanceTracker | None = None,
+        export_analytics: ExportAnalytics | None = None
     ):
         """Initialize improvement engine.
         
@@ -54,18 +53,18 @@ class ImprovementEngine:
         """
         self.performance = performance_tracker or PerformanceTracker()
         self.exports = export_analytics or ExportAnalytics()
-        
+
         # Improvement templates
         self.improvement_templates = self._load_improvement_templates()
-    
-    def analyze_all(self) -> List[Improvement]:
+
+    def analyze_all(self) -> list[Improvement]:
         """Run all analysis and return improvements.
         
         Returns:
             List of suggested improvements
         """
         improvements = []
-        
+
         # Analyze different aspects
         improvements.extend(self._analyze_workflow_efficiency())
         improvements.extend(self._analyze_export_patterns())
@@ -73,7 +72,7 @@ class ImprovementEngine:
         improvements.extend(self._analyze_user_behavior())
         improvements.extend(self._analyze_performance_bottlenecks())
         improvements.extend(self._analyze_quality_opportunities())
-        
+
         # Sort by priority and impact
         improvements.sort(
             key=lambda x: (
@@ -81,22 +80,22 @@ class ImprovementEngine:
                 {"time_saved": 0, "quality_improved": 1, "errors_reduced": 2}[x.impact]
             )
         )
-        
+
         return improvements
-    
-    def _analyze_workflow_efficiency(self) -> List[Improvement]:
+
+    def _analyze_workflow_efficiency(self) -> list[Improvement]:
         """Analyze workflow efficiency patterns."""
         improvements = []
-        
+
         # Get recent workflow stats
         stats = self.performance.get_performance_stats(time_range=timedelta(days=30))
-        
+
         # Check for repetitive manual adjustments
         recent_workflows = [
             m for m in self.performance.historical_metrics[-50:]
             if m.get("manual_adjustments", 0) > 0
         ]
-        
+
         if recent_workflows:
             # Find common adjustment patterns
             adjustment_patterns = defaultdict(int)
@@ -105,13 +104,13 @@ class ImprovementEngine:
                 for key, value in metadata.items():
                     if key.startswith("action_adjustment"):
                         adjustment_patterns[str(value)] += 1
-            
+
             # If same adjustments appear frequently
             common_adjustments = [
                 adj for adj, count in adjustment_patterns.items()
                 if count > 5
             ]
-            
+
             if common_adjustments:
                 improvements.append(Improvement(
                     id="workflow_automation_001",
@@ -141,7 +140,7 @@ class ImprovementEngine:
                     automation_possible=True,
                     affects_workflows=["video_creation", "timeline_export"]
                 ))
-        
+
         # Check for workflow abandonment
         abandoned_workflows = [
             m for m in self.performance.historical_metrics
@@ -149,9 +148,9 @@ class ImprovementEngine:
                 m.get("exports_created", 0) == 0 and m.get("status") == "completed"
             )
         ]
-        
+
         abandonment_rate = len(abandoned_workflows) / len(self.performance.historical_metrics) * 100 if self.performance.historical_metrics else 0
-        
+
         if abandonment_rate > 10:
             improvements.append(Improvement(
                 id="workflow_completion_001",
@@ -182,16 +181,16 @@ class ImprovementEngine:
                 requires_user_input=True,
                 affects_workflows=["all"]
             ))
-        
+
         return improvements
-    
-    def _analyze_export_patterns(self) -> List[Improvement]:
+
+    def _analyze_export_patterns(self) -> list[Improvement]:
         """Analyze export usage patterns."""
         improvements = []
-        
+
         # Get export insights
         insights = self.exports.get_workflow_insights()
-        
+
         # Check iteration patterns
         if insights.get("exports_per_timeline", 0) > 3:
             improvements.append(Improvement(
@@ -220,12 +219,12 @@ class ImprovementEngine:
                 automation_possible=True,
                 affects_workflows=["timeline_export", "multi_version_export"]
             ))
-        
+
         # Check format preferences
         format_prefs = insights.get("format_preferences", {})
         if format_prefs:
             top_format = list(format_prefs.keys())[0]
-            
+
             improvements.append(Improvement(
                 id="export_defaults_001",
                 title=f"Optimize {top_format.upper()} Export Settings",
@@ -252,11 +251,11 @@ class ImprovementEngine:
                 automation_possible=True,
                 affects_workflows=["timeline_export"]
             ))
-        
+
         # Check platform-specific issues
         for platform in ["instagram_reel", "tiktok", "youtube_shorts"]:
             platform_stats = self.exports.get_platform_performance(platform)
-            
+
             if platform_stats["total_exports"] > 5:
                 if platform_stats["compatibility_score"] < 0.8:
                     improvements.append(Improvement(
@@ -285,22 +284,22 @@ class ImprovementEngine:
                         automation_possible=True,
                         affects_workflows=["multi_version_export"]
                     ))
-        
+
         return improvements
-    
-    def _analyze_error_patterns(self) -> List[Improvement]:
+
+    def _analyze_error_patterns(self) -> list[Improvement]:
         """Analyze error patterns for improvements."""
         improvements = []
-        
+
         # Get performance stats
         stats = self.performance.get_performance_stats(time_range=timedelta(days=30))
-        
+
         # Check common errors
         common_errors = stats.get("common_errors", {})
         if common_errors:
             top_error = list(common_errors.keys())[0]
             error_count = common_errors[top_error]
-            
+
             if error_count > 3:
                 improvements.append(Improvement(
                     id="error_prevention_001",
@@ -328,13 +327,13 @@ class ImprovementEngine:
                     automation_possible=True,
                     affects_workflows=["all"]
                 ))
-        
+
         # Check API failures
         api_errors = [
             e for e, count in common_errors.items()
             if "API" in e or "api" in e
         ]
-        
+
         if api_errors:
             improvements.append(Improvement(
                 id="api_reliability_001",
@@ -362,24 +361,24 @@ class ImprovementEngine:
                 automation_possible=True,
                 affects_workflows=["video_creation", "style_analysis"]
             ))
-        
+
         return improvements
-    
-    def _analyze_user_behavior(self) -> List[Improvement]:
+
+    def _analyze_user_behavior(self) -> list[Improvement]:
         """Analyze user behavior patterns."""
         improvements = []
-        
+
         # Check preview usage
         preview_workflows = [
             m for m in self.performance.historical_metrics
             if m.get("preview_views", 0) > 0
         ]
-        
+
         if preview_workflows:
             avg_previews = sum(
                 w.get("preview_views", 0) for w in preview_workflows
             ) / len(preview_workflows)
-            
+
             if avg_previews > 5:
                 improvements.append(Improvement(
                     id="preview_enhancement_001",
@@ -407,13 +406,13 @@ class ImprovementEngine:
                     requires_user_input=True,
                     affects_workflows=["timeline_preview", "style_preview"]
                 ))
-        
+
         # Check redo patterns
         redo_workflows = [
             m for m in self.performance.historical_metrics
             if m.get("exports_redone", 0) > 0
         ]
-        
+
         if len(redo_workflows) > len(self.performance.historical_metrics) * 0.2:
             improvements.append(Improvement(
                 id="redo_reduction_001",
@@ -441,7 +440,7 @@ class ImprovementEngine:
                 requires_user_input=True,
                 affects_workflows=["timeline_export", "multi_version_export"]
             ))
-        
+
         # Check time patterns
         export_patterns = self.exports.usage_patterns
         if export_patterns.get("hours"):
@@ -450,7 +449,7 @@ class ImprovementEngine:
                 key=lambda x: x[1],
                 reverse=True
             )[:3]
-            
+
             improvements.append(Improvement(
                 id="performance_optimization_001",
                 title="Optimize for Peak Usage Times",
@@ -477,13 +476,13 @@ class ImprovementEngine:
                 automation_possible=True,
                 affects_workflows=["all"]
             ))
-        
+
         return improvements
-    
-    def _analyze_performance_bottlenecks(self) -> List[Improvement]:
+
+    def _analyze_performance_bottlenecks(self) -> list[Improvement]:
         """Analyze performance bottlenecks."""
         improvements = []
-        
+
         # Check workflow durations
         recent_workflows = self.performance.historical_metrics[-50:]
         if recent_workflows:
@@ -491,7 +490,7 @@ class ImprovementEngine:
                 w for w in recent_workflows
                 if w.get("duration_seconds", 0) > 300  # 5 minutes
             ]
-            
+
             if len(long_workflows) > len(recent_workflows) * 0.2:
                 # Find common characteristics
                 workflow_types = defaultdict(list)
@@ -499,12 +498,12 @@ class ImprovementEngine:
                     workflow_types[w.get("workflow_type", "unknown")].append(
                         w.get("duration_seconds", 0)
                     )
-                
+
                 slowest_type = max(
                     workflow_types.items(),
                     key=lambda x: sum(x[1]) / len(x[1])
                 )[0]
-                
+
                 improvements.append(Improvement(
                     id="performance_workflow_001",
                     title=f"Optimize {slowest_type} Performance",
@@ -531,13 +530,13 @@ class ImprovementEngine:
                     automation_possible=True,
                     affects_workflows=[slowest_type]
                 ))
-        
+
         # Check memory usage
         memory_workflows = [
             w for w in recent_workflows
             if w.get("memory_mb", 0) > 1000  # 1GB
         ]
-        
+
         if memory_workflows:
             improvements.append(Improvement(
                 id="memory_optimization_001",
@@ -568,16 +567,16 @@ class ImprovementEngine:
                 automation_possible=True,
                 affects_workflows=["video_processing", "batch_analysis"]
             ))
-        
+
         return improvements
-    
-    def _analyze_quality_opportunities(self) -> List[Improvement]:
+
+    def _analyze_quality_opportunities(self) -> list[Improvement]:
         """Analyze quality improvement opportunities."""
         improvements = []
-        
+
         # Check export quality trends
         quality_trends = self.exports.get_quality_trends(time_range=timedelta(days=60))
-        
+
         # Check if complexity is increasing but satisfaction isn't
         if quality_trends.get("complexity_trends") and quality_trends.get("user_satisfaction", 0) < 4:
             improvements.append(Improvement(
@@ -607,7 +606,7 @@ class ImprovementEngine:
                 requires_user_input=True,
                 affects_workflows=["video_creation", "timeline_export"]
             ))
-        
+
         # Check resolution trends
         if quality_trends.get("resolution_trends"):
             resolutions = list(quality_trends["resolution_trends"].values())
@@ -638,10 +637,10 @@ class ImprovementEngine:
                     automation_possible=True,
                     affects_workflows=["timeline_export", "multi_version_export"]
                 ))
-        
+
         return improvements
-    
-    def _load_improvement_templates(self) -> Dict[str, Dict[str, Any]]:
+
+    def _load_improvement_templates(self) -> dict[str, dict[str, Any]]:
         """Load improvement templates."""
         return {
             "automation": {

@@ -1,6 +1,5 @@
 """Shared pytest fixtures and configuration."""
 
-import os
 import shutil
 import tempfile
 from collections.abc import Generator
@@ -11,7 +10,7 @@ from unittest.mock import Mock
 import pytest
 from omegaconf import OmegaConf
 
-from alicemultiverse.core.types import MediaType, QualityRating
+from alicemultiverse.core.types import MediaType
 
 
 @pytest.fixture

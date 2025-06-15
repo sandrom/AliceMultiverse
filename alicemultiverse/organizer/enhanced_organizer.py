@@ -6,11 +6,9 @@ from pathlib import Path
 
 from omegaconf import DictConfig
 
-from ..core.cache_migration import EnhancedMetadataCacheAdapter as EnhancedMetadataCache
-from ..core.cache_migration import PersistentMetadataManagerAdapter as PersistentMetadataManager
+from ..core.unified_cache import UnifiedCache as EnhancedMetadataCache
 from ..core.types import AnalysisResult, MediaType, OrganizeResult
 from ..metadata.models import AssetMetadata, AssetRole
-from ..metadata.search import AssetSearchEngine
 from .media_organizer import MediaOrganizer
 
 logger = logging.getLogger(__name__)
@@ -29,13 +27,13 @@ class EnhancedMediaOrganizer(MediaOrganizer):
 
         # Replace standard cache with enhanced cache
         project_id = self._get_project_id(config)
-        
+
         # Check if understanding is enabled
         enable_understanding = getattr(config.processing, "understanding", False)
         understanding_provider = None
         if enable_understanding and hasattr(config, "pipeline") and hasattr(config.pipeline, "understanding"):
             understanding_provider = getattr(config.pipeline.understanding, "preferred_provider", None)
-            
+
         self.metadata_cache = EnhancedMetadataCache(
             source_root=Path(config.paths.inbox),
             project_id=project_id,
@@ -67,7 +65,7 @@ class EnhancedMediaOrganizer(MediaOrganizer):
         """Update search engine with current metadata."""
         metadata_store = self.metadata_cache.get_all_metadata()
         # Always create search engine, even with empty metadata
-        self.search_engine = AssetSearchEngine(metadata_store or {})
+        # Search engine removed - use DuckDBSearch instead
 
     def _process_file(self, media_path: Path) -> OrganizeResult:
         """Process a single media file with enhanced metadata.

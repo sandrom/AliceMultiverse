@@ -1,17 +1,18 @@
 """Hooks for integrating prompt tracking with provider generation."""
 
-from typing import Optional, Any, Callable
-from functools import wraps
 import time
+from collections.abc import Callable
+from functools import wraps
+from typing import Any
 
 from ..core.logging import get_logger
-from ..providers.types import GenerationResult
+from ..providers.provider_types import GenerationResult
 from .integration import PromptProviderIntegration
 
 logger = get_logger(__name__)
 
 # Global integration instance
-_prompt_integration: Optional[PromptProviderIntegration] = None
+_prompt_integration: PromptProviderIntegration | None = None
 
 
 def get_prompt_integration() -> PromptProviderIntegration:
@@ -22,7 +23,7 @@ def get_prompt_integration() -> PromptProviderIntegration:
     return _prompt_integration
 
 
-def track_prompt_usage(provider_name: str, project: Optional[str] = None):
+def track_prompt_usage(provider_name: str, project: str | None = None):
     """Decorator to automatically track prompt usage in provider methods.
     
     Usage:
@@ -36,7 +37,7 @@ def track_prompt_usage(provider_name: str, project: Optional[str] = None):
             start_time = time.time()
             result = None
             prompt_text = None
-            
+
             try:
                 # Extract prompt from arguments
                 # Handle both positional and keyword arguments
@@ -46,21 +47,21 @@ def track_prompt_usage(provider_name: str, project: Optional[str] = None):
                     prompt_text = kwargs["prompt"]
                 elif "text" in kwargs:
                     prompt_text = kwargs["text"]
-                
+
                 # Call the original function
                 result = func(*args, **kwargs)
-                
+
                 # Track if we have a prompt and result
                 if prompt_text and isinstance(result, GenerationResult):
                     duration = time.time() - start_time
                     integration = get_prompt_integration()
-                    
+
                     # Extract project from kwargs or result metadata
                     actual_project = project
                     if not actual_project:
                         actual_project = kwargs.get("project") or \
                                        result.metadata.get("project")
-                    
+
                     integration.track_generation(
                         provider=provider_name,
                         prompt_text=prompt_text,
@@ -69,16 +70,16 @@ def track_prompt_usage(provider_name: str, project: Optional[str] = None):
                         duration=duration,
                         project=actual_project
                     )
-                
+
                 return result
-                
+
             except Exception as e:
                 logger.error(f"Error in prompt tracking: {e}")
                 # Don't break the original function
                 if result is None:
                     result = func(*args, **kwargs)
                 return result
-        
+
         return wrapper
     return decorator
 
@@ -95,20 +96,20 @@ def track_prompt_from_metadata(provider_name: str):
         @wraps(func)
         def wrapper(*args, **kwargs) -> Any:
             start_time = time.time()
-            
+
             try:
                 # Call the original function
                 result = func(*args, **kwargs)
-                
+
                 # Track if we have a result with metadata
                 if isinstance(result, GenerationResult) and result.metadata:
                     integration = get_prompt_integration()
                     prompt_text = integration.extract_prompt_from_metadata(result.metadata)
-                    
+
                     if prompt_text:
                         duration = time.time() - start_time
                         project = result.metadata.get("project")
-                        
+
                         integration.track_generation(
                             provider=provider_name,
                             prompt_text=prompt_text,
@@ -117,30 +118,30 @@ def track_prompt_from_metadata(provider_name: str):
                             duration=duration,
                             project=project
                         )
-                
+
                 return result
-                
+
             except Exception as e:
                 logger.error(f"Error in metadata prompt tracking: {e}")
                 return result if 'result' in locals() else func(*args, **kwargs)
-        
+
         return wrapper
     return decorator
 
 
 class PromptTrackingMixin:
     """Mixin class for providers to add prompt tracking capabilities."""
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._prompt_integration = get_prompt_integration()
         self._enable_prompt_tracking = kwargs.get("track_prompts", True)
-    
-    def track_prompt(self, 
+
+    def track_prompt(self,
                     prompt: str,
                     result: GenerationResult,
-                    provider: Optional[str] = None,
-                    **kwargs) -> Optional[str]:
+                    provider: str | None = None,
+                    **kwargs) -> str | None:
         """Track a prompt usage.
         
         Args:
@@ -154,10 +155,10 @@ class PromptTrackingMixin:
         """
         if not self._enable_prompt_tracking:
             return None
-        
+
         try:
             provider_name = provider or self.__class__.__name__.replace("Provider", "").lower()
-            
+
             return self._prompt_integration.track_generation(
                 provider=provider_name,
                 prompt_text=prompt,
@@ -177,7 +178,7 @@ def track_prompt_manually(
     prompt: str,
     result: GenerationResult,
     **kwargs
-) -> Optional[str]:
+) -> str | None:
     """Manually track a prompt usage.
     
     Args:

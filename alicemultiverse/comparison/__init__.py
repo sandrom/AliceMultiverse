@@ -1,13 +1,13 @@
 """Comparison system for evaluating AI models."""
 
-from .models import Asset, Comparison, ModelRating, ComparisonStrength
-from .elo_system import EloRating, ComparisonManager
+from .elo_system import ComparisonManager, EloRating
+from .models import Asset, Comparison, ComparisonStrength, ModelRating
 
 __all__ = [
     "Asset",
-    "Comparison", 
-    "ModelRating",
+    "Comparison",
+    "ComparisonManager",
     "ComparisonStrength",
     "EloRating",
-    "ComparisonManager",
+    "ModelRating",
 ]

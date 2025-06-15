@@ -3,9 +3,9 @@ Data models for scene detection.
 """
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Dict, Any, Tuple
 from enum import Enum
 from pathlib import Path
+from typing import Any
 
 
 class SceneType(str, Enum):
@@ -20,7 +20,7 @@ class SceneType(str, Enum):
     MONTAGE = "montage"              # Montage sequences
     DETAIL = "detail"                 # Detail/insert shots
     POV = "pov"                      # Point of view shots
-    
+
 
 class DetectionMethod(str, Enum):
     """Methods for detecting scene boundaries."""
@@ -29,7 +29,7 @@ class DetectionMethod(str, Enum):
     AUDIO = "audio"                   # Audio-based detection
     AI_VISION = "ai_vision"          # AI vision model detection
     COMBINED = "combined"             # Combined methods
-    
+
 
 class TransitionType(str, Enum):
     """Types of transitions between scenes."""
@@ -38,7 +38,7 @@ class TransitionType(str, Enum):
     DISSOLVE = "dissolve"            # Cross dissolve
     WIPE = "wipe"                    # Wipe transition
     MOTION = "motion"                # Motion-based transition
-    
+
 
 @dataclass
 class SceneTransition:
@@ -46,8 +46,8 @@ class SceneTransition:
     type: TransitionType
     duration: float  # seconds
     confidence: float
-    metadata: Dict[str, Any] = field(default_factory=dict)
-    
+    metadata: dict[str, Any] = field(default_factory=dict)
+
 
 @dataclass
 class Scene:
@@ -57,51 +57,51 @@ class Scene:
     start_time: float  # seconds (0 for images)
     end_time: float    # seconds (same as start for images)
     duration: float
-    
+
     # For image sequences
-    start_frame: Optional[int] = None
-    end_frame: Optional[int] = None
-    images: List[Path] = field(default_factory=list)
-    
+    start_frame: int | None = None
+    end_frame: int | None = None
+    images: list[Path] = field(default_factory=list)
+
     # Scene characteristics
-    dominant_subject: Optional[str] = None
-    location: Optional[str] = None
-    mood: Optional[str] = None
-    action: Optional[str] = None
-    camera_movement: Optional[str] = None
-    
+    dominant_subject: str | None = None
+    location: str | None = None
+    mood: str | None = None
+    action: str | None = None
+    camera_movement: str | None = None
+
     # Technical details
     average_brightness: float = 0.0
-    dominant_colors: List[Tuple[str, float]] = field(default_factory=list)
+    dominant_colors: list[tuple[str, float]] = field(default_factory=list)
     motion_intensity: float = 0.0
-    
+
     # Detection details
     detection_method: DetectionMethod = DetectionMethod.CONTENT
     confidence: float = 0.0
-    
+
     # Relationships
-    previous_scene: Optional[str] = None
-    next_scene: Optional[str] = None
-    transition_in: Optional[SceneTransition] = None
-    transition_out: Optional[SceneTransition] = None
-    
+    previous_scene: str | None = None
+    next_scene: str | None = None
+    transition_in: SceneTransition | None = None
+    transition_out: SceneTransition | None = None
+
     # AI analysis
-    ai_description: Optional[str] = None
-    ai_tags: List[str] = field(default_factory=list)
-    ai_suggestions: List[str] = field(default_factory=list)
-    
+    ai_description: str | None = None
+    ai_tags: list[str] = field(default_factory=list)
+    ai_suggestions: list[str] = field(default_factory=list)
+
     @property
     def is_image(self) -> bool:
         """Check if this is a single image scene."""
         return self.start_time == self.end_time
-        
+
     @property
     def frame_count(self) -> int:
         """Get number of frames in scene."""
         if self.start_frame is not None and self.end_frame is not None:
             return self.end_frame - self.start_frame + 1
         return len(self.images)
-        
+
 
 @dataclass
 class Shot:
@@ -111,63 +111,63 @@ class Shot:
     shot_type: str  # "Wide", "Medium", "Close-up", etc.
     duration: float
     description: str
-    
+
     # Technical details
-    camera_angle: Optional[str] = None
-    camera_movement: Optional[str] = None
-    lens: Optional[str] = None
-    
+    camera_angle: str | None = None
+    camera_movement: str | None = None
+    lens: str | None = None
+
     # Production notes
-    notes: List[str] = field(default_factory=list)
+    notes: list[str] = field(default_factory=list)
     vfx_required: bool = False
-    audio_notes: Optional[str] = None
-    
+    audio_notes: str | None = None
+
     # References
-    reference_images: List[Path] = field(default_factory=list)
-    storyboard: Optional[Path] = None
-    
+    reference_images: list[Path] = field(default_factory=list)
+    storyboard: Path | None = None
+
 
 @dataclass
 class ShotList:
     """Complete shot list for a video project."""
     project_name: str
     total_duration: float
-    shots: List[Shot] = field(default_factory=list)
-    scenes: List[Scene] = field(default_factory=list)
-    
+    shots: list[Shot] = field(default_factory=list)
+    scenes: list[Scene] = field(default_factory=list)
+
     # Metadata
-    created_date: Optional[str] = None
-    director: Optional[str] = None
-    cinematographer: Optional[str] = None
-    notes: List[str] = field(default_factory=list)
-    
+    created_date: str | None = None
+    director: str | None = None
+    cinematographer: str | None = None
+    notes: list[str] = field(default_factory=list)
+
     # Statistics
     shot_count: int = 0
     scene_count: int = 0
     average_shot_duration: float = 0.0
-    
+
     def add_shot(self, shot: Shot):
         """Add a shot and update statistics."""
         self.shots.append(shot)
         self.shot_count = len(self.shots)
         self._update_statistics()
-        
+
     def add_scene(self, scene: Scene):
         """Add a scene."""
         self.scenes.append(scene)
         self.scene_count = len(self.scenes)
-        
+
     def _update_statistics(self):
         """Update shot list statistics."""
         if self.shots:
             total_duration = sum(shot.duration for shot in self.shots)
             self.average_shot_duration = total_duration / len(self.shots)
-            
-    def get_shots_for_scene(self, scene_id: str) -> List[Shot]:
+
+    def get_shots_for_scene(self, scene_id: str) -> list[Shot]:
         """Get all shots for a specific scene."""
         return [shot for shot in self.shots if shot.scene_id == scene_id]
-        
-    def export_to_dict(self) -> Dict[str, Any]:
+
+    def export_to_dict(self) -> dict[str, Any]:
         """Export shot list to dictionary format."""
         return {
             "project_name": self.project_name,

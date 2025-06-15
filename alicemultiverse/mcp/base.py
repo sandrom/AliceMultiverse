@@ -1,9 +1,10 @@
 """Base classes and utilities for MCP tools."""
 
 import logging
+from collections.abc import Callable
 from functools import wraps
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional, TypeVar, Union
+from typing import Any, TypeVar
 
 from mcp.types import TextContent, Tool
 
@@ -31,10 +32,10 @@ class ServiceError(MCPError):
 
 def create_tool_response(
     success: bool,
-    data: Optional[Any] = None,
-    error: Optional[str] = None,
-    message: Optional[str] = None
-) -> List[TextContent]:
+    data: Any | None = None,
+    error: str | None = None,
+    message: str | None = None
+) -> list[TextContent]:
     """Create a standardized tool response.
     
     Args:
@@ -47,14 +48,14 @@ def create_tool_response(
         List containing single TextContent with response
     """
     response = {"success": success}
-    
+
     if data is not None:
         response["data"] = data
     if error is not None:
         response["error"] = error
     if message is not None:
         response["message"] = message
-    
+
     # Format response based on content
     if success and data:
         # For successful operations with data
@@ -73,7 +74,7 @@ def create_tool_response(
         # For errors or simple messages
         import json
         text = json.dumps(response, indent=2, default=str)
-    
+
     return [TextContent(type="text", text=text)]
 
 
@@ -104,10 +105,10 @@ def handle_errors(func: ToolFunc) -> ToolFunc:
             logger.exception(f"Unexpected error in {func.__name__}")
             return create_tool_response(
                 success=False,
-                error=f"Unexpected error: {type(e).__name__}: {str(e)}",
+                error=f"Unexpected error: {type(e).__name__}: {e!s}",
                 message="An unexpected error occurred"
             )
-    
+
     return wrapper
 
 
@@ -126,10 +127,10 @@ def validate_path(path: str, must_exist: bool = False) -> Path:
     """
     try:
         path_obj = Path(path).expanduser().resolve()
-        
+
         if must_exist and not path_obj.exists():
             raise ValidationError(f"Path does not exist: {path}")
-        
+
         return path_obj
     except Exception as e:
         raise ValidationError(f"Invalid path '{path}': {e}")
@@ -157,7 +158,7 @@ def validate_positive_int(value: Any, name: str) -> int:
         raise ValidationError(f"{name} must be a positive integer, got {type(value).__name__}")
 
 
-def validate_enum(value: str, allowed: List[str], name: str) -> str:
+def validate_enum(value: str, allowed: list[str], name: str) -> str:
     """Validate an enum-like string value.
     
     Args:
@@ -180,11 +181,11 @@ def validate_enum(value: str, allowed: List[str], name: str) -> str:
 
 class LazyServiceLoader:
     """Lazy loader for services to improve startup time."""
-    
+
     def __init__(self):
-        self._services: Dict[str, Any] = {}
-        self._loaders: Dict[str, Callable[[], Any]] = {}
-    
+        self._services: dict[str, Any] = {}
+        self._loaders: dict[str, Callable[[], Any]] = {}
+
     def register(self, name: str, loader: Callable[[], Any]) -> None:
         """Register a service loader.
         
@@ -193,7 +194,7 @@ class LazyServiceLoader:
             loader: Function that creates/returns the service
         """
         self._loaders[name] = loader
-    
+
     def get(self, name: str) -> Any:
         """Get a service, loading it if necessary.
         
@@ -208,15 +209,15 @@ class LazyServiceLoader:
         """
         if name not in self._loaders:
             raise ServiceError(f"Service '{name}' not registered")
-        
+
         if name not in self._services:
             try:
                 self._services[name] = self._loaders[name]()
             except Exception as e:
                 raise ServiceError(f"Failed to load service '{name}': {e}")
-        
+
         return self._services[name]
-    
+
     def is_loaded(self, name: str) -> bool:
         """Check if a service is loaded.
         
@@ -236,7 +237,7 @@ services = LazyServiceLoader()
 def create_tool_definition(
     name: str,
     description: str,
-    parameters: Dict[str, Any]
+    parameters: dict[str, Any]
 ) -> Tool:
     """Create a tool definition helper.
     
