@@ -59,11 +59,8 @@ class AssetMetadata(TypedDict):
     referenced_by: list[str]  # IDs of assets that reference this
     grouped_with: list[str]  # Logical grouping with other assets
 
-    # Quality assessment
-    quality_score: float | None  # Overall quality (0-100)
-    quality_stars: int | None  # Star rating (1-5)
-    technical_scores: dict[str, float]  # Detailed scores (sharpness, exposure, etc.)
-    ai_defects: list[str]  # Detected AI artifacts
+    # Quality assessment moved to understanding system
+    # Use understanding providers for quality and defect analysis
 
     # Creative metadata
     role: AssetRole  # Role in project

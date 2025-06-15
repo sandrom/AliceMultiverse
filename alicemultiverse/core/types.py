@@ -13,15 +13,7 @@ class MediaType(Enum):
     UNKNOWN = "unknown"
 
 
-class QualityRating(Enum):
-    """Quality rating levels."""
-
-    FIVE_STAR = 5
-    FOUR_STAR = 4
-    THREE_STAR = 3
-    TWO_STAR = 2
-    ONE_STAR = 1
-    UNRATED = 0
+# QualityRating removed - use understanding system instead
 
 
 class AnalysisResult(TypedDict):
@@ -32,9 +24,7 @@ class AnalysisResult(TypedDict):
     project_folder: str
     media_type: MediaType
     file_number: int | None
-    quality_stars: int | None
-    brisque_score: float | None
-    pipeline_result: str | None
+    # Quality assessment moved to understanding system
 
 
 class CacheMetadata(TypedDict):
@@ -63,9 +53,7 @@ class OrganizeResult(TypedDict):
     source_type: str | None
     media_type: MediaType | None
     file_number: int | None
-    quality_stars: int | None
-    brisque_score: float | None
-    pipeline_result: str | None
+    # Quality assessment moved to understanding system
     error: str | None
 
 
@@ -81,10 +69,7 @@ class Statistics(TypedDict):
     by_date: dict[str, int]
     by_source: dict[str, int]
     by_project: dict[str, int]
-    by_quality: dict[int, int]
-    quality_assessed: int
-    quality_skipped: int
+    # Quality metrics moved to understanding system
     images_found: int
     videos_found: int
-    pipeline_results: dict[str, int]
-    pipeline_costs: dict[str, float]
+    # Pipeline results moved to understanding system

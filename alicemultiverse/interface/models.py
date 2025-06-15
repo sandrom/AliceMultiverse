@@ -30,7 +30,7 @@ class SearchRequest(TypedDict):
 
     # Filters
     source_types: list[str] | None  # ["midjourney", "flux"]
-    min_quality_stars: int | None
+    # Quality filtering moved to understanding system
     roles: list[str] | None  # ["hero", "b_roll"]
 
     # Options
