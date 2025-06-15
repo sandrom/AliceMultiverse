@@ -1176,11 +1176,11 @@ class UnifiedDuckDBStorage:
             try:
                 # Try ISO format first
                 return datetime.fromisoformat(value.replace('Z', '+00:00'))
-            except:
+            except ValueError:
                 try:
                     # Try other common formats
                     return datetime.strptime(value, "%Y-%m-%d %H:%M:%S")
-                except:
+                except ValueError:
                     logger.warning(f"Could not parse timestamp: {value}")
                     return None
 

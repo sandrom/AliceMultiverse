@@ -297,7 +297,7 @@ class OllamaImageAnalyzer(ImageAnalyzer):
                                 data = json.loads(line)
                                 if "status" in data:
                                     logger.info(f"Pull progress: {data['status']}")
-                            except:
+                            except (json.JSONDecodeError, KeyError):
                                 pass
 
                     return True

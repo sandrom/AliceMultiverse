@@ -163,7 +163,7 @@ NEGATIVE: <negative prompt>
             if json_match:
                 try:
                     result.tags = json.loads(json_match.group())
-                except:
+                except (json.JSONDecodeError, ValueError):
                     logger.warning("Failed to parse tags JSON")
 
         if generate_prompt:
@@ -339,7 +339,7 @@ NEGATIVE: <negative prompt>
             if json_match:
                 try:
                     result.tags = json.loads(json_match.group())
-                except:
+                except (json.JSONDecodeError, ValueError):
                     logger.warning("Failed to parse tags JSON from OpenAI")
 
         if generate_prompt:
@@ -521,7 +521,7 @@ NEGATIVE: Things to avoid""")
             if json_match:
                 try:
                     result.tags = json.loads(json_match.group())
-                except:
+                except (json.JSONDecodeError, ValueError):
                     logger.warning("Failed to parse tags JSON from Gemini")
 
         if generate_prompt:
@@ -687,7 +687,7 @@ NEGATIVE: Elements to avoid""")
             if json_match:
                 try:
                     result.tags = json.loads(json_match.group())
-                except:
+                except (json.JSONDecodeError, ValueError):
                     logger.warning("Failed to parse tags JSON from DeepSeek")
 
         if generate_prompt:

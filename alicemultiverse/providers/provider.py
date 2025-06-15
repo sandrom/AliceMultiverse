@@ -16,9 +16,7 @@ from ..core.metrics import (
 )
 from ..core.structured_logging import get_logger
 from ..events import publish_event_sync
-# Generation tracking not yet implemented
-# from .generation_tracker import get_generation_tracker
-# from .health_monitor import health_monitor
+# Removed generation tracking and health monitoring for simplicity
 from .provider_types import (
     CostEstimate,
     GenerationRequest,
@@ -119,15 +117,7 @@ class Provider(ABC):
             ProviderError: If generation fails
             BudgetExceededError: If request would exceed budget
         """
-        # Health monitoring not implemented
-        # if not health_monitor.can_execute(self.name):
-        #     error_msg = f"{self.name} is currently unavailable (circuit breaker open)"
-        #     logger.error(
-        #         error_msg,
-        #         provider=self.name,
-        #         circuit_breaker_state="open"
-        #     )
-        #     raise GenerationError(error_msg)
+        # Removed circuit breaker for simplicity
 
         start_time = time.time()
 
@@ -153,15 +143,7 @@ class Provider(ABC):
             self._total_cost += result.cost or 0.0
             self._generation_count += 1
 
-            # Health monitoring not implemented
-            # health_monitor.record_success(self.name, result.generation_time)
 
-            # Generation tracking not implemented
-            # if result.file_path:
-            #     tracker = get_generation_tracker()
-            #     asset_id = await tracker.track_generation(request, result, self.name)
-            #     if asset_id:
-            #         result.asset_id = asset_id
 
             # Update metrics
             api_requests_total.labels(
@@ -265,22 +247,12 @@ class Provider(ABC):
         """Get provider health metrics.
         
         Returns:
-            Health metrics if available
+            Basic health metrics for personal use
         """
-        # Health monitoring not implemented
-        metrics = {}
-        if not metrics:
-            return None
-
         return {
-            "total_requests": metrics.total_requests,
-            "failed_requests": metrics.failed_requests,
-            "failure_rate": metrics.failure_rate,
-            "consecutive_failures": metrics.consecutive_failures,
-            "average_response_time": metrics.average_response_time,
-            "last_success": metrics.last_success_time.isoformat() if metrics.last_success_time else None,
-            "last_failure": metrics.last_failure_time.isoformat() if metrics.last_failure_time else None,
-            "is_healthy": metrics.is_healthy
+            "total_requests": self._generation_count,
+            "total_cost": self._total_cost,
+            "is_available": True
         }
 
     async def estimate_cost(self, request: GenerationRequest) -> CostEstimate:

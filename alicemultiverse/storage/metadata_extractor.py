@@ -97,7 +97,7 @@ class MetadataExtractor:
                 # Try to parse as JSON (for structured data)
                 try:
                     parsed["user_data"] = json.loads(value)
-                except:
+                except (json.JSONDecodeError, TypeError):
                     parsed["user_comment"] = value
             elif tag == "Software":
                 parsed["software"] = value

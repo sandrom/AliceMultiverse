@@ -330,7 +330,7 @@ class AutoMigrationService:
                 stat = os.stat(path)
                 file_date = datetime.fromtimestamp(stat.st_mtime)
                 age_days = (datetime.now() - file_date).days
-            except:
+            except (OSError, IOError):
                 pass
 
         # Build metadata for rule evaluation
