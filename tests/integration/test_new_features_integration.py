@@ -22,9 +22,10 @@ import pytest
 from alicemultiverse.selections.models import Selection, SelectionItem, SelectionPurpose
 from alicemultiverse.selections.service import SelectionService
 from alicemultiverse.storage import UnifiedDuckDBStorage
-from alicemultiverse.understanding.enhanced_analyzer import EnhancedImageAnalyzer
-from alicemultiverse.understanding.optimized_batch_analyzer import OptimizedBatchAnalyzer
-from alicemultiverse.understanding.style_clustering import StyleClusteringSystem
+# Removed imports - modules were deleted:
+# from alicemultiverse.understanding.enhanced_analyzer import EnhancedImageAnalyzer
+# from alicemultiverse.understanding.optimized_batch_analyzer import OptimizedBatchAnalyzer
+# from alicemultiverse.understanding.style_clustering import StyleClusteringSystem
 from alicemultiverse.workflows.music_analyzer import (
     BeatInfo,
     MusicAnalyzer,
@@ -265,7 +266,8 @@ class TestVideoExportIntegration:
         assert len(data['tracks']['audio']) == 1
 
 
-class TestStyleClusteringIntegration:
+# REMOVED - uses deleted modules
+# class TestStyleClusteringIntegration:
     """Test style clustering and similarity features."""
 
     @pytest.mark.asyncio
@@ -389,7 +391,8 @@ class TestStyleClusteringIntegration:
                     assert cluster.style_summary
 
 
-class TestTagHierarchyIntegration:
+# REMOVED - uses deleted modules
+# class TestTagHierarchyIntegration:
     """Test tag hierarchy and intelligent tagging."""
 
     @pytest.mark.asyncio
@@ -450,7 +453,8 @@ class TestTagHierarchyIntegration:
             assert len(cluster.tags) > 0
 
 
-class TestOptimizedBatchAnalysis:
+# REMOVED - uses deleted modules
+# class TestOptimizedBatchAnalysis:
     """Test optimized batch analysis with similarity detection."""
 
     @pytest.mark.asyncio
@@ -507,7 +511,8 @@ class TestOptimizedBatchAnalysis:
             assert len(large_group.members) >= 2
 
 
-class TestQuickSelectionWorkflow:
+# REMOVED - uses deleted modules
+# class TestQuickSelectionWorkflow:
     """Test quick selection workflow integration."""
 
     def test_quick_mark_favorites(self, tmp_path):
