@@ -6,7 +6,6 @@ from pathlib import Path
 
 from PIL import Image
 
-from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 from alicemultiverse.storage.location_registry import (
     StorageLocation,
     StorageRegistry,
@@ -14,6 +13,7 @@ from alicemultiverse.storage.location_registry import (
     StorageType,
 )
 from alicemultiverse.storage.multi_path_scanner import MultiPathScanner
+from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 
 
 def create_test_images(directory: Path, count: int = 50):

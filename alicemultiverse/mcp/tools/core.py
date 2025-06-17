@@ -13,7 +13,7 @@ def register_core_tools(server) -> None:
         server: MCP server instance
     """
     alice = AliceInterface()
-    
+
     @server.tool()
     async def search_assets(
         description: str | None = None,
@@ -59,10 +59,10 @@ def register_core_tools(server) -> None:
             time_filter=time_reference,
             limit=limit
         )
-        
+
         result = alice.search(request)
         return result.model_dump()
-    
+
     @server.tool()
     async def organize_media(
         source_path: str | None = None,
@@ -88,15 +88,13 @@ def register_core_tools(server) -> None:
         """
         request = OrganizeRequest(
             source_path=source_path,
-            output_path=output_path,
             quality_assessment=quality_assessment,
-            auto_tag=auto_tag,
-            pipeline=pipeline
+            understanding=understanding
         )
-        
+
         result = alice.organize(request)
         return result.model_dump()
-    
+
     @server.tool()
     async def update_tags(
         asset_ids: list[str],
@@ -121,10 +119,10 @@ def register_core_tools(server) -> None:
             remove_tags=remove_tags,
             set_tags=set_tags
         )
-        
+
         result = alice.update_tags(request)
         return result.model_dump()
-    
+
     @server.tool()
     async def get_asset_details(asset_id: str) -> dict[str, Any]:
         """
@@ -141,7 +139,7 @@ def register_core_tools(server) -> None:
         """
         result = alice.get_asset(asset_id)
         return result.model_dump()
-    
+
     @server.tool()
     async def soft_delete_assets(
         asset_ids: list[str],
@@ -159,12 +157,12 @@ def register_core_tools(server) -> None:
         Returns status and moved file count.
         """
         from ...interface.models import SoftDeleteRequest
-        
+
         request = SoftDeleteRequest(
             asset_ids=asset_ids,
             category=category,
             reason=reason
         )
-        
+
         result = alice.soft_delete(request)
         return result.model_dump()

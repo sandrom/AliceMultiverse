@@ -8,13 +8,14 @@ This module consolidates all media asset handling functionality:
 """
 
 # Re-export commonly used classes for backward compatibility
-from .hashing import calculate_content_hash as get_content_hash, hash_file_content as get_file_hash
-from .metadata.embedder import MetadataEmbedder
-from .metadata.extractor import MetadataExtractor
-from .metadata.models import AssetMetadata, AssetRole
 from .deduplication.duplicate_finder import DuplicateFinder
 from .deduplication.perceptual_hasher import PerceptualHasher
 from .deduplication.similarity_index import SimilarityIndex
+from .hashing import calculate_content_hash as get_content_hash
+from .hashing import hash_file_content as get_file_hash
+from .metadata.embedder import MetadataEmbedder
+from .metadata.extractor import MetadataExtractor
+from .metadata.models import AssetMetadata, AssetRole
 
 __all__ = [
     "get_content_hash",

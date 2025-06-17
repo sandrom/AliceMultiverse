@@ -2,8 +2,8 @@
 
 from typing import Any
 
-from .duckdb_base import DuckDBBase
 from ..core.structured_logging import get_logger
+from .duckdb_base import DuckDBBase
 
 logger = get_logger(__name__)
 
@@ -35,7 +35,7 @@ class DuckDBSimilarity(DuckDBBase):
             (content_hash, phash, dhash, ahash, whash, colorhash)
             VALUES (?, ?, ?, ?, ?, ?)
         """, [content_hash, phash, dhash, ahash, whash, colorhash])
-        
+
         logger.debug(f"Indexed perceptual hashes for {content_hash}")
 
     def find_similar(
@@ -61,13 +61,13 @@ class DuckDBSimilarity(DuckDBBase):
             f"SELECT {hash_type} FROM perceptual_hashes WHERE content_hash = ?",
             [content_hash]
         ).fetchone()
-        
+
         if not ref_result or not ref_result[0]:
             logger.warning(f"No {hash_type} found for {content_hash}")
             return []
-        
+
         ref_hash = ref_result[0]
-        
+
         # Find similar hashes
         # DuckDB doesn't have built-in hamming distance, so we use a workaround
         # This gets all hashes and we'll calculate similarity in Python
@@ -85,19 +85,19 @@ class DuckDBSimilarity(DuckDBBase):
             WHERE p.{hash_type} IS NOT NULL
             AND p.content_hash != ?
         """
-        
+
         results = self.conn.execute(query, [content_hash]).fetchall()
-        
+
         # Calculate similarities
         similar_assets = []
         for row in results:
             other_hash = row[1]
             if not other_hash:
                 continue
-            
+
             # Calculate hamming distance
             similarity = self._calculate_hash_similarity(ref_hash, other_hash)
-            
+
             if similarity >= threshold:
                 asset = {
                     "content_hash": row[0],
@@ -109,7 +109,7 @@ class DuckDBSimilarity(DuckDBBase):
                     "locations": row[6],
                 }
                 similar_assets.append(asset)
-        
+
         # Sort by similarity and limit
         similar_assets.sort(key=lambda x: x["similarity"], reverse=True)
         return similar_assets[:limit]
@@ -130,10 +130,10 @@ class DuckDBSimilarity(DuckDBBase):
         """
         if not hash_types:
             hash_types = ["phash", "dhash", "ahash"]
-        
+
         duplicate_groups = []
         processed = set()
-        
+
         for hash_type in hash_types:
             # Find hashes that appear multiple times
             query = f"""
@@ -143,19 +143,19 @@ class DuckDBSimilarity(DuckDBBase):
                 GROUP BY {hash_type}
                 HAVING COUNT(*) > 1
             """
-            
+
             duplicates = self.conn.execute(query).fetchall()
-            
+
             for hash_value, content_hashes in duplicates:
                 hashes = content_hashes.split(",")
-                
+
                 # Skip if already processed
                 if any(h in processed for h in hashes):
                     continue
-                
+
                 duplicate_groups.append(hashes)
                 processed.update(hashes)
-        
+
         return duplicate_groups
 
     def get_similarity_matrix(
@@ -180,34 +180,34 @@ class DuckDBSimilarity(DuckDBBase):
             WHERE content_hash IN ({placeholders})
             AND {hash_type} IS NOT NULL
         """
-        
+
         results = self.conn.execute(query, content_hashes).fetchall()
-        
+
         # Build hash lookup
         hash_lookup = {row[0]: row[1] for row in results}
-        
+
         # Calculate similarities
         matrix = {}
         for i, hash1 in enumerate(content_hashes):
             if hash1 not in hash_lookup:
                 continue
-            
+
             matrix[hash1] = {}
-            
+
             for j, hash2 in enumerate(content_hashes):
                 if i == j:
                     matrix[hash1][hash2] = 1.0
                     continue
-                
+
                 if hash2 not in hash_lookup:
                     continue
-                
+
                 similarity = self._calculate_hash_similarity(
                     hash_lookup[hash1],
                     hash_lookup[hash2]
                 )
                 matrix[hash1][hash2] = similarity
-        
+
         return matrix
 
     def _calculate_hash_similarity(self, hash1: str, hash2: str) -> float:
@@ -222,25 +222,25 @@ class DuckDBSimilarity(DuckDBBase):
         """
         if len(hash1) != len(hash2):
             return 0.0
-        
+
         # Convert hex to binary
         try:
             # Remove '0x' prefix if present
             hash1 = hash1.replace("0x", "")
             hash2 = hash2.replace("0x", "")
-            
+
             # Convert to binary
             bin1 = bin(int(hash1, 16))[2:].zfill(len(hash1) * 4)
             bin2 = bin(int(hash2, 16))[2:].zfill(len(hash2) * 4)
-            
+
             # Calculate hamming distance
             distance = sum(b1 != b2 for b1, b2 in zip(bin1, bin2))
-            
+
             # Convert to similarity (0-1)
             similarity = 1.0 - (distance / len(bin1))
-            
+
             return similarity
-            
+
         except (ValueError, TypeError):
             logger.warning(f"Invalid hash format: {hash1} or {hash2}")
             return 0.0

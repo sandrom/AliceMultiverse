@@ -4,7 +4,6 @@ import logging
 import re
 from datetime import datetime
 from pathlib import Path
-from typing import Any
 
 from ...core.config import load_config
 from ...organizer.enhanced_organizer import EnhancedMediaOrganizer
@@ -24,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 class StructuredInterfaceBase:
     """Base class with common functionality for structured interface operations."""
-    
+
     def __init__(self, config_path: Path | None = None):
         """Initialize base structured interface.
         
@@ -77,7 +76,7 @@ class StructuredInterfaceBase:
         """Convert metadata dict to Asset object."""
         # Get file path
         file_path = metadata.get("file_path", "")
-        
+
         # Determine media type
         extension = Path(file_path).suffix.lower()
         if extension in ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif']:
@@ -86,7 +85,7 @@ class StructuredInterfaceBase:
             media_type = MediaType.VIDEO
         else:
             media_type = MediaType.OTHER
-        
+
         return Asset(
             id=metadata.get("content_hash", ""),
             path=file_path,
@@ -104,7 +103,7 @@ class StructuredInterfaceBase:
     def _collect_all_tags(self, metadata: dict) -> list[str]:
         """Collect all tags from various metadata fields."""
         tags = set()
-        
+
         # Add tags from different fields
         for field in ['tags', 'keywords', 'labels']:
             if field in metadata and metadata[field]:
@@ -113,7 +112,7 @@ class StructuredInterfaceBase:
                 elif isinstance(metadata[field], str):
                     # Split comma-separated tags
                     tags.update(tag.strip() for tag in metadata[field].split(','))
-        
+
         # Add technical tags
         if metadata.get('media_type'):
             tags.add(f"type:{metadata['media_type']}")
@@ -121,5 +120,5 @@ class StructuredInterfaceBase:
             tags.add(f"source:{metadata['source']}")
         if metadata.get('project'):
             tags.add(f"project:{metadata['project']}")
-            
+
         return sorted(list(tags))

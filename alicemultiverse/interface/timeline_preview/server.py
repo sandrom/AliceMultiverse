@@ -46,7 +46,7 @@ class TimelinePreviewServer(TimelineOperationsMixin, HTMLGeneratorMixin):
     def _setup_routes(self):
         """Setup API routes."""
         handlers = RouteHandlers(self)
-        
+
         self.app.get("/", response_class=HTMLResponse)(handlers.index)
         self.app.get("/api/timeline/{session_id}")(handlers.get_timeline)
         self.app.get("/media/{file_path:path}")(handlers.serve_media)

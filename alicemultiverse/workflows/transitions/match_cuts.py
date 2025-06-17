@@ -9,14 +9,13 @@ Match cuts are edits where two shots share similar:
 """
 
 import json
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 import cv2
 import numpy as np
-
-import logging
 
 logger = logging.getLogger(__name__)
 

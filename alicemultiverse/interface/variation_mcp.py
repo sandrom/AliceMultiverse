@@ -5,6 +5,7 @@ from typing import Any
 
 from ..analytics.performance_tracker import PerformanceTracker
 from ..memory.style_memory import StyleMemory
+
 # Provider functionality not yet implemented
 # from ..providers import get_provider
 from ..workflows.variations import (
@@ -85,7 +86,7 @@ async def generate_content_variations(
         try:
             # Generate variation - placeholder
             # result = await provider_instance.generate(request)
-            
+
             # Return placeholder result
             results.append({
                 "variation_id": request.parameters.get("variation_id"),

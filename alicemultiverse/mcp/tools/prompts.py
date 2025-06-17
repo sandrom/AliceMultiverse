@@ -12,7 +12,7 @@ def register_prompt_tools(server) -> None:
     """
     # Initialize prompt tools
     prompt_tools = PromptMCPTools()
-    
+
     # Register each prompt tool
     server.tool()(prompt_tools.add_prompt)
     server.tool()(prompt_tools.search_prompts)

@@ -2,15 +2,12 @@
 
 import base64
 import logging
-import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-import aiohttp
-
 from .base_provider import BaseProvider
-from .provider import AuthenticationError, GenerationError, RateLimitError
+from .provider import GenerationError
 from .provider_types import (
     GenerationRequest,
     GenerationResult,

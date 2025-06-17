@@ -3,51 +3,49 @@
 import argparse
 import logging
 import sys
-from pathlib import Path
 
 from omegaconf import DictConfig
 
 from ..core.config import load_config
 from ..core.exceptions import AliceMultiverseError, ConfigurationError
 from ..core.structured_logging import setup_structured_logging
-from ..version import __version__
-from .cli_parser import (
-    create_base_parser,
-    add_keys_subcommand,
-    add_setup_subcommand,
-    add_recreate_subcommand,
-    add_interface_subcommand,
-    add_mcp_subcommand,
-    add_migrate_subcommand,
-    add_monitor_subcommand,
-    add_storage_subcommand,
-    add_scenes_subcommand,
-    add_dedup_subcommand,
-    add_prompts_subcommand,
-    add_index_subcommand,
-    add_comparison_subcommand,
-    add_transitions_subcommand,
-    add_organization_args,
-    add_understanding_args,
-    add_output_args,
-    add_technical_args,
-)
 from .cli_handlers import (
-    handle_keys_command,
-    handle_setup_command,
-    handle_recreate_command,
+    handle_comparison_command,
+    handle_dedup_command,
+    handle_index_command,
     handle_interface_command,
+    handle_keys_command,
     handle_mcp_command,
     handle_migrate_command,
     handle_monitor_command,
-    handle_storage_command,
-    handle_scenes_command,
-    handle_dedup_command,
-    handle_prompts_command,
     handle_organize_command,
-    handle_index_command,
-    handle_comparison_command,
+    handle_prompts_command,
+    handle_recreate_command,
+    handle_scenes_command,
+    handle_setup_command,
+    handle_storage_command,
     handle_transitions_command,
+)
+from .cli_parser import (
+    add_comparison_subcommand,
+    add_dedup_subcommand,
+    add_index_subcommand,
+    add_interface_subcommand,
+    add_keys_subcommand,
+    add_mcp_subcommand,
+    add_migrate_subcommand,
+    add_monitor_subcommand,
+    add_organization_args,
+    add_output_args,
+    add_prompts_subcommand,
+    add_recreate_subcommand,
+    add_scenes_subcommand,
+    add_setup_subcommand,
+    add_storage_subcommand,
+    add_technical_args,
+    add_transitions_subcommand,
+    add_understanding_args,
+    create_base_parser,
 )
 
 logger = logging.getLogger(__name__)
@@ -56,10 +54,10 @@ logger = logging.getLogger(__name__)
 def create_parser() -> argparse.ArgumentParser:
     """Create and configure argument parser."""
     parser = create_base_parser()
-    
+
     # Subparsers for commands
     subparsers = parser.add_subparsers(dest="command", help="Commands")
-    
+
     # Add subcommands
     add_keys_subcommand(subparsers)
     add_setup_subcommand(subparsers)
@@ -75,13 +73,13 @@ def create_parser() -> argparse.ArgumentParser:
     add_index_subcommand(subparsers)
     add_comparison_subcommand(subparsers)
     add_transitions_subcommand(subparsers)
-    
+
     # Add main organization arguments
     add_organization_args(parser)
     add_understanding_args(parser)
     add_output_args(parser)
     add_technical_args(parser)
-    
+
     return parser
 
 
@@ -157,13 +155,13 @@ def apply_cli_args_to_config(config: DictConfig, args: argparse.Namespace) -> No
 def check_dependencies() -> bool:
     """Check system dependencies."""
     print("Checking system dependencies...")
-    
+
     dependencies = {
         "ffmpeg": "ffmpeg -version",
         "ffprobe": "ffprobe -version",
         "exiftool": "exiftool -ver",
     }
-    
+
     all_ok = True
     for name, cmd in dependencies.items():
         try:
@@ -173,7 +171,7 @@ def check_dependencies() -> bool:
         except (subprocess.CalledProcessError, FileNotFoundError):
             print(f"✗ {name}: NOT FOUND")
             all_ok = False
-    
+
     return all_ok
 
 

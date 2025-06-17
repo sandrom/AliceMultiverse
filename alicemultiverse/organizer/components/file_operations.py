@@ -4,15 +4,14 @@ import hashlib
 from pathlib import Path
 
 from ...core.logging import get_logger
-from ...core.types import MediaType, OrganizeResult
-from ..organization_helpers import extract_project_folder
+from ...core.types import MediaType
 
 logger = get_logger(__name__)
 
 
 class FileOperationsMixin:
     """Mixin for file-related operations."""
-    
+
     def _find_media_files(self) -> list[Path]:
         """Find all media files in source directory."""
         media_files = []

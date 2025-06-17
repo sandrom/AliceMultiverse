@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 
 class KlingIntegrationMixin:
     """Mixin for Kling AI integration."""
-    
+
     def create_kling_requests(
         self,
         storyboard: VideoStoryboard,
@@ -66,7 +66,7 @@ class KlingIntegrationMixin:
             requests.append(request)
 
         return requests
-    
+
     def create_transition_guide(self, storyboard: VideoStoryboard) -> str:
         """Create a text guide for video editing with transitions.
         
@@ -93,10 +93,10 @@ class KlingIntegrationMixin:
             guide_lines.append(f"- **Transition In**: {shot.transition_in.value}")
             guide_lines.append(f"- **Transition Out**: {shot.transition_out.value}")
             guide_lines.append(f"- **Prompt**: {shot.prompt}")
-            
+
             if shot.motion_keywords:
                 guide_lines.append(f"- **Motion Keywords**: {', '.join(shot.motion_keywords)}")
-            
+
             guide_lines.append("")
 
         # Add editing tips
@@ -106,7 +106,7 @@ class KlingIntegrationMixin:
             "1. Import all video clips in sequence",
             "2. Apply transitions as specified above",
             "3. Consider adding ambient music that matches the style",
-            f"4. Recommended frame rate: 30fps",
+            "4. Recommended frame rate: 30fps",
             "5. Export settings: H.264, High Quality",
             "",
             "## Style Notes:",

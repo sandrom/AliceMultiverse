@@ -3,7 +3,6 @@
 import logging
 from typing import Any
 
-from ...storage.unified_duckdb import DuckDBSearch
 from .enums import CameraMotion
 
 logger = logging.getLogger(__name__)
@@ -11,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class AnalysisMixin:
     """Mixin for image analysis operations."""
-    
+
     # Motion indicators mapping
     MOTION_INDICATORS = {
         CameraMotion.ZOOM_IN: ["close-up", "detail", "intimate", "focus"],
@@ -25,7 +24,7 @@ class AnalysisMixin:
         CameraMotion.ORBIT_LEFT: ["orbit", "circular", "around left"],
         CameraMotion.ORBIT_RIGHT: ["orbit", "circular", "around right"],
     }
-    
+
     async def analyze_image_for_video(self, image_hash: str) -> dict[str, Any]:
         """Analyze image characteristics for video generation.
         
@@ -39,19 +38,19 @@ class AnalysisMixin:
         metadata = self.search_db.get_asset_by_hash(image_hash)
         if not metadata:
             raise ValueError(f"Image not found: {image_hash}")
-        
+
         # Extract tags
         tags = metadata.get("tags", [])
-        
+
         # Analyze composition
         composition = self._analyze_composition(tags)
-        
+
         # Suggest camera motion
         suggested_motion = self._suggest_camera_motion(tags, composition)
-        
+
         # Extract motion keywords
         motion_keywords = self._extract_motion_keywords(tags)
-        
+
         return {
             "image_hash": image_hash,
             "file_path": metadata.get("file_path"),
@@ -61,7 +60,7 @@ class AnalysisMixin:
             "motion_keywords": motion_keywords,
             "original_prompt": metadata.get("prompt", "")
         }
-    
+
     def _analyze_composition(self, tags: list[str]) -> dict[str, Any]:
         """Analyze image composition from tags."""
         composition = {
@@ -73,14 +72,14 @@ class AnalysisMixin:
             "depth": "deep" if any(tag in ["perspective", "depth", "layers"] for tag in tags) else "shallow"
         }
         return composition
-    
+
     def _suggest_camera_motion(self, tags: list[str], composition: dict[str, Any]) -> CameraMotion:
         """Suggest camera motion based on image analysis."""
         # Check for explicit motion indicators in tags
         for motion, keywords in self.MOTION_INDICATORS.items():
             if any(keyword in tag.lower() for tag in tags for keyword in keywords):
                 return motion
-        
+
         # Rule-based suggestions
         if composition["has_character"] and not composition["is_landscape"]:
             return CameraMotion.ZOOM_IN  # Focus on character
@@ -94,7 +93,7 @@ class AnalysisMixin:
             return CameraMotion.PAN_RIGHT  # Follow action
         else:
             return CameraMotion.STATIC  # Default to static
-    
+
     def _extract_motion_keywords(self, tags: list[str]) -> list[str]:
         """Extract keywords that suggest motion or dynamism."""
         motion_words = [
@@ -103,5 +102,5 @@ class AnalysisMixin:
             "wind", "wave", "storm", "fire", "explosion",
             "speed", "velocity", "energy", "dynamic", "kinetic"
         ]
-        
+
         return [tag for tag in tags if any(word in tag.lower() for word in motion_words)]

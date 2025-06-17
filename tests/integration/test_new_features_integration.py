@@ -22,6 +22,7 @@ import pytest
 from alicemultiverse.selections.models import Selection, SelectionItem, SelectionPurpose
 from alicemultiverse.selections.service import SelectionService
 from alicemultiverse.storage import UnifiedDuckDBStorage
+
 # Removed imports - modules were deleted:
 # from alicemultiverse.understanding.enhanced_analyzer import EnhancedImageAnalyzer
 # from alicemultiverse.understanding.optimized_batch_analyzer import OptimizedBatchAnalyzer

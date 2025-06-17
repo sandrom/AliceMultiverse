@@ -1,6 +1,5 @@
 """Search and indexing operations for media organizer."""
 
-import time
 from datetime import datetime
 from pathlib import Path
 
@@ -12,7 +11,7 @@ logger = get_logger(__name__)
 
 class SearchOperationsMixin:
     """Mixin for search index and perceptual hashing operations."""
-    
+
     def _update_search_index(self, file_path: Path, analysis: dict) -> None:
         """Update search index with newly organized file.
         
@@ -119,21 +118,21 @@ class SearchOperationsMixin:
         """Clean up search index of removed files."""
         if not self.search_db:
             return
-            
+
         try:
             # Get all indexed files
             indexed_files = self.search_db.get_all_file_paths()
             removed_count = 0
-            
+
             # Check each file still exists
             for file_path in indexed_files:
                 if not Path(file_path).exists():
                     # Remove from index
                     self.search_db.remove_asset(file_path)
                     removed_count += 1
-                    
+
             if removed_count > 0:
                 logger.info(f"Cleaned up {removed_count} missing files from search index")
-                
+
         except Exception as e:
             logger.warning(f"Failed to clean up search index: {e}")

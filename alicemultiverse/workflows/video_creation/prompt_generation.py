@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class PromptGenerationMixin:
     """Mixin for video prompt generation."""
-    
+
     # Style templates for different video types
     STYLE_TEMPLATES = {
         "cinematic": {
@@ -46,7 +46,7 @@ class PromptGenerationMixin:
             "transitions": ["cut", "motion_blur"]
         }
     }
-    
+
     async def generate_video_prompts(
         self,
         image_hashes: list[str],
@@ -123,7 +123,7 @@ class PromptGenerationMixin:
         )
 
         return storyboard
-    
+
     def _generate_shot_prompt(self, analysis: dict[str, Any], style_template: dict[str, Any]) -> str:
         """Generate a video prompt for a single shot."""
         # Start with style prefix
@@ -156,7 +156,7 @@ class PromptGenerationMixin:
             prompt_parts.append(f"featuring {', '.join(analysis['motion_keywords'][:2])}")
 
         return ", ".join(prompt_parts)
-    
+
     async def _enhance_prompt_with_ai(
         self,
         base_prompt: str,

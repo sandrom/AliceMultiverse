@@ -51,7 +51,7 @@ def register_cost_tools(server: Server) -> None:
             # Image analysis cost estimates
             if not provider:
                 provider = "deepseek"  # Cheapest by default
-            
+
             # Approximate costs per image
             base_costs = {
                 "openai": 0.01,
@@ -60,16 +60,16 @@ def register_cost_tools(server: Server) -> None:
                 "deepseek": 0.0003,
                 "ollama": 0.0,  # Free local models
             }
-            
+
             cost_per_item = base_costs.get(provider, 0.01)
             total_cost = cost_per_item * count
-            
+
         elif operation == "generate":
             # Generation cost estimates
             if not provider:
                 provider = "openai"
                 model = "dall-e-3"
-            
+
             # Rough estimates
             if provider == "openai" and model == "dall-e-3":
                 cost_per_item = 0.04  # Standard quality
@@ -79,12 +79,12 @@ def register_cost_tools(server: Server) -> None:
                 cost_per_item = 0.002  # Imagen
             else:
                 cost_per_item = 0.02  # Default estimate
-            
+
             total_cost = cost_per_item * count
-            
+
         else:
             raise ValidationError(f"Unknown operation: {operation}")
-        
+
         return create_tool_response(
             success=True,
             data={
@@ -98,5 +98,5 @@ def register_cost_tools(server: Server) -> None:
                 "note": "This is an estimate only - actual costs may vary"
             }
         )
-    
+
     logger.info("Registered simplified cost estimation tools")

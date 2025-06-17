@@ -2,7 +2,6 @@
 
 import signal
 import time
-from pathlib import Path
 
 from tqdm import tqdm
 
@@ -13,7 +12,7 @@ logger = get_logger(__name__)
 
 class WatchModeMixin:
     """Mixin for continuous monitoring of new media files."""
-    
+
     def _watch_and_organize(self) -> bool:
         """Watch for new files and organize them continuously."""
         logger.info(f"Watching {self.source_dir} for new files...")

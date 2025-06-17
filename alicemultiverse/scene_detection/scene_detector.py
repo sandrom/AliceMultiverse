@@ -408,7 +408,7 @@ class SceneDetector:
                     continue
 
                 # Analyze with AI
-                analysis = self._analyze_frame_with_ai(img, provider)
+                analysis = self._analyze_frame_with_ai(img, self.ai_provider)
 
                 # Update scene
                 if analysis:

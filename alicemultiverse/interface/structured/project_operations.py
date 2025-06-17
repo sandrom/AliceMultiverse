@@ -2,19 +2,19 @@
 
 import logging
 
+from ...core.exceptions import ValidationError
 from ..structured_models import (
     AliceResponse,
     ProjectRequest,
 )
 from ..validation import validate_project_request
-from ...core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
 
 class ProjectOperationsMixin:
     """Mixin for project-related operations."""
-    
+
     def manage_project(self, request: ProjectRequest, client_id: str = "default") -> AliceResponse:
         """Manage projects with structured operations.
         

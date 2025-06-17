@@ -2,6 +2,8 @@
 
 import logging
 
+from ...core.exceptions import ValidationError
+from ...organizer.enhanced_organizer import EnhancedMediaOrganizer
 from ..structured_models import (
     AliceResponse,
     GroupingRequest,
@@ -14,15 +16,13 @@ from ..validation import (
     validate_organize_request,
     validate_tag_update_request,
 )
-from ...core.exceptions import ValidationError
-from ...organizer.enhanced_organizer import EnhancedMediaOrganizer
 
 logger = logging.getLogger(__name__)
 
 
 class OrganizationOperationsMixin:
     """Mixin for media organization operations."""
-    
+
     def organize_media(self, request: OrganizeRequest, client_id: str = "default") -> AliceResponse:
         """Organize media files with structured parameters only.
         

@@ -3,7 +3,7 @@
 
 class HTMLGeneratorMixin:
     """Mixin for generating timeline preview HTML."""
-    
+
     def _generate_default_html(self) -> str:
         """Generate default HTML for timeline preview."""
         return """

@@ -1,8 +1,8 @@
 """Selection operations for structured interface."""
 
 import logging
-from typing import Optional
 
+from ...core.exceptions import ValidationError
 from ..structured_models import (
     AliceResponse,
     SelectionCreateRequest,
@@ -17,14 +17,13 @@ from ..validation import (
     validate_selection_search_request,
     validate_selection_update_request,
 )
-from ...core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
 
 class SelectionOperationsMixin:
     """Mixin for selection-related operations."""
-    
+
     def create_selection(self, request: SelectionCreateRequest, client_id: str = "default") -> AliceResponse:
         """Create a new selection for a project.
         
@@ -133,22 +132,22 @@ class SelectionOperationsMixin:
 
             # Handle different update operations
             result = None
-            
+
             if "add_items" in request:
                 result = self.selection_service.add_items_to_selection(
                     project_id, request["selection_id"], request["add_items"]
                 )
-                
+
             if "remove_items" in request:
                 result = self.selection_service.remove_items_from_selection(
                     project_id, request["selection_id"], request["remove_items"]
                 )
-                
+
             if "status" in request:
                 result = self.selection_service.update_selection_status(
                     project_id, request["selection_id"], request["status"]
                 )
-                
+
             if "metadata" in request:
                 result = self.selection_service.update_selection_metadata(
                     project_id, request["selection_id"], request["metadata"]
@@ -159,7 +158,7 @@ class SelectionOperationsMixin:
                 updated_selection = self.selection_service.get_selection(
                     project_id, request["selection_id"]
                 )
-                
+
                 return AliceResponse(
                     success=True,
                     message="Selection updated",
@@ -287,7 +286,7 @@ class SelectionOperationsMixin:
             # Find selection
             selection = None
             project_id = None
-            
+
             for project in self.project_service.list_projects():
                 test_selection = self.selection_service.get_selection(
                     project["id"], request["selection_id"]
@@ -415,9 +414,9 @@ class SelectionOperationsMixin:
             )
 
     def find_similar_to_selection(
-        self, 
-        project_id: str, 
-        selection_id: str, 
+        self,
+        project_id: str,
+        selection_id: str,
         limit: int = 20,
         client_id: str = "default"
     ) -> AliceResponse:

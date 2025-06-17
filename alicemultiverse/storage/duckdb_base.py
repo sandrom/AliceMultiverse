@@ -71,7 +71,7 @@ class DuckDBBase:
                 cached_at TIMESTAMP
             );
         """)
-        
+
         # Main assets table with multi-location support
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS assets (

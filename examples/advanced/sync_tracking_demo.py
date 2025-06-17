@@ -7,7 +7,6 @@ from pathlib import Path
 
 from PIL import Image
 
-from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 from alicemultiverse.storage.location_registry import (
     StorageLocation,
     StorageRegistry,
@@ -19,6 +18,7 @@ from alicemultiverse.storage.sync_tracker import (
     SyncTracker,
     VersionTracker,
 )
+from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 
 
 def create_test_image(path: Path, color: tuple = (255, 0, 0), size: tuple = (100, 100)):

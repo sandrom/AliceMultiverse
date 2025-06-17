@@ -14,9 +14,9 @@ from .provider import (
     AuthenticationError,
     BudgetExceededError,
     GenerationError,
+    Provider,
     RateLimitError,
 )
-from .provider import Provider
 from .provider_types import GenerationRequest, GenerationType
 
 

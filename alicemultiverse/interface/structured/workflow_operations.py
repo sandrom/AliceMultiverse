@@ -2,6 +2,7 @@
 
 import logging
 
+from ...core.exceptions import ValidationError
 from ..structured_models import (
     AliceResponse,
     GenerationRequest,
@@ -11,14 +12,13 @@ from ..validation import (
     validate_generation_request,
     validate_workflow_request,
 )
-from ...core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
 
 class WorkflowOperationsMixin:
     """Mixin for workflow and generation operations."""
-    
+
     def execute_workflow(self, request: WorkflowRequest, client_id: str = "default") -> AliceResponse:
         """Execute workflows with structured parameters.
         

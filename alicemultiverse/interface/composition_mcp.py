@@ -3,13 +3,13 @@
 from pathlib import Path
 from typing import Any
 
+from ..storage.unified_duckdb import DuckDBSearch
 from ..workflows.composition import (
     CompositionAnalyzer,
     FlowAnalyzer,
     OptimizationStrategy,
     TimelineOptimizer,
 )
-from ..storage.unified_duckdb import DuckDBSearch
 from ..workflows.video_export import Timeline, TimelineClip
 
 

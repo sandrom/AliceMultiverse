@@ -15,12 +15,12 @@ def register_presentation_tools(server) -> None:
     """
     # Image presentation
     register_image_presentation_tools(server)
-    
+
     # Multi-version export
     register_multi_version_export_tools(server)
-    
+
     # Timeline NLP
     register_timeline_nlp_tools(server)
-    
+
     # Timeline preview
     register_timeline_preview_tools(server)

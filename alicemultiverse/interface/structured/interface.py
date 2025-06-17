@@ -2,8 +2,8 @@
 
 from pathlib import Path
 
-from .base import StructuredInterfaceBase
 from .asset_operations import AssetOperationsMixin
+from .base import StructuredInterfaceBase
 from .organization_operations import OrganizationOperationsMixin
 from .project_operations import ProjectOperationsMixin
 from .selection_operations import SelectionOperationsMixin
@@ -31,7 +31,7 @@ class AliceStructuredInterface(
                                 export_selection, get_selection, find_similar_to_selection
     - WorkflowOperationsMixin: execute_workflow, generate_content
     """
-    
+
     def __init__(self, config_path: Path | None = None):
         """Initialize Alice structured interface.
         

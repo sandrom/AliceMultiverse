@@ -7,7 +7,6 @@ import pytest
 from PIL import Image
 
 from alicemultiverse.storage.auto_migration import AutoMigrationService, MigrationScheduler
-from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 from alicemultiverse.storage.location_registry import (
     StorageLocation,
     StorageRegistry,
@@ -15,6 +14,7 @@ from alicemultiverse.storage.location_registry import (
     StorageType,
 )
 from alicemultiverse.storage.multi_path_scanner import MultiPathScanner
+from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 
 
 def create_test_image(path: Path, age_days: int = 0, quality: int = 3):

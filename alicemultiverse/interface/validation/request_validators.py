@@ -7,10 +7,10 @@ from ..structured_models import (
     MediaType,
     OrganizeRequest,
     ProjectRequest,
+    SearchRequest,
     SoftDeleteRequest,
     SortField,
     SortOrder,
-    SearchRequest,
     TagUpdateRequest,
     WorkflowRequest,
 )
@@ -228,13 +228,13 @@ def validate_grouping_request(request: GroupingRequest) -> GroupingRequest:
     # Validate group name
     if not isinstance(request["group_name"], str):
         raise ValidationError("group_name must be a string")
-    
+
     if len(request["group_name"]) == 0:
         raise ValidationError("group_name cannot be empty")
-    
+
     if len(request["group_name"]) > MAX_GROUP_NAME_LENGTH:
         raise ValidationError(f"group_name exceeds maximum length of {MAX_GROUP_NAME_LENGTH}")
-    
+
     if not SAFE_NAME_PATTERN.match(request["group_name"]):
         raise ValidationError("group_name contains invalid characters")
 
@@ -262,13 +262,13 @@ def validate_project_request(request: ProjectRequest) -> ProjectRequest:
     # Validate project name
     if not isinstance(request["project_name"], str):
         raise ValidationError("project_name must be a string")
-    
+
     if len(request["project_name"]) == 0:
         raise ValidationError("project_name cannot be empty")
-    
+
     if len(request["project_name"]) > MAX_PROJECT_NAME_LENGTH:
         raise ValidationError(f"project_name exceeds maximum length of {MAX_PROJECT_NAME_LENGTH}")
-    
+
     if not SAFE_NAME_PATTERN.match(request["project_name"]):
         raise ValidationError("project_name contains invalid characters")
 
@@ -300,10 +300,10 @@ def validate_workflow_request(request: WorkflowRequest) -> WorkflowRequest:
     # Validate workflow name
     if not isinstance(request["workflow"], str):
         raise ValidationError("workflow must be a string")
-    
+
     if len(request["workflow"]) == 0:
         raise ValidationError("workflow cannot be empty")
-    
+
     if len(request["workflow"]) > MAX_WORKFLOW_NAME_LENGTH:
         raise ValidationError(f"workflow exceeds maximum length of {MAX_WORKFLOW_NAME_LENGTH}")
 
@@ -335,17 +335,17 @@ def validate_generation_request(request: GenerationRequest) -> GenerationRequest
     # Validate prompt
     if not isinstance(request["prompt"], str):
         raise ValidationError("prompt must be a string")
-    
+
     if len(request["prompt"]) == 0:
         raise ValidationError("prompt cannot be empty")
-    
+
     if len(request["prompt"]) > MAX_PROMPT_LENGTH:
         raise ValidationError(f"prompt exceeds maximum length of {MAX_PROMPT_LENGTH}")
 
     # Validate model
     if not isinstance(request["model"], str):
         raise ValidationError("model must be a string")
-    
+
     if len(request["model"]) == 0:
         raise ValidationError("model cannot be empty")
 
@@ -357,17 +357,17 @@ def validate_generation_request(request: GenerationRequest) -> GenerationRequest
     if "parameters" in request and request["parameters"] is not None:
         if not isinstance(request["parameters"], dict):
             raise ValidationError("parameters must be a dictionary")
-        
+
         # Validate specific parameters
         params = request["parameters"]
-        
+
         # Validate steps
         if "steps" in params and params["steps"] is not None:
             if not isinstance(params["steps"], int):
                 raise ValidationError("steps must be an integer")
             if params["steps"] < 1 or params["steps"] > 1000:
                 raise ValidationError("steps must be between 1 and 1000")
-        
+
         # Validate guidance scale
         if "guidance_scale" in params and params["guidance_scale"] is not None:
             if not isinstance(params["guidance_scale"], (int, float)):
@@ -399,7 +399,7 @@ def validate_soft_delete_request(request: SoftDeleteRequest) -> SoftDeleteReques
     if "reason" in request and request["reason"] is not None:
         if not isinstance(request["reason"], str):
             raise ValidationError("reason must be a string")
-        
+
         if len(request["reason"]) > 500:
             raise ValidationError("reason exceeds maximum length of 500")
 

@@ -1,8 +1,7 @@
 """High-level service for prompt management."""
 
-import json
 import hashlib
-from datetime import datetime
+import json
 from datetime import datetime
 from pathlib import Path
 from typing import Any
@@ -137,7 +136,7 @@ class PromptService:
     ) -> PromptUsage:
         """Record usage of a prompt."""
         usage = PromptUsage(
-            id=hashlib.sha256(f"{text}:{datetime.now().isoformat()}".encode()).hexdigest()[:16],
+            id=hashlib.sha256(f"{prompt_id}:{datetime.now().isoformat()}".encode()).hexdigest()[:16],
             prompt_id=prompt_id,
             provider=provider,
             timestamp=datetime.now(),

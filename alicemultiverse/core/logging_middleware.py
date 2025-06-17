@@ -1,7 +1,6 @@
 """Middleware for structured logging and correlation IDs."""
 
 import time
-import time
 from collections.abc import Callable
 
 from fastapi import Request, Response

@@ -7,7 +7,7 @@ from PIL import Image
 
 from ...core.constants import OUTPUT_DATE_FORMAT
 from ...core.logging import get_logger
-from ...core.types import AnalysisResult, MediaType
+from ...core.types import MediaType
 from ..organization_helpers import match_ai_source_patterns
 
 logger = get_logger(__name__)
@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 class MediaAnalysisMixin:
     """Mixin for media analysis operations."""
-    
+
     def _analyze_media(self, media_path: Path, project_folder: str) -> dict:
         """Analyze media file to extract metadata and characteristics.
         
@@ -129,7 +129,7 @@ class MediaAnalysisMixin:
         """
         # Use the metadata cache to get or create analysis
         metadata = self.metadata_cache.get_metadata(media_path)
-        
+
         if metadata:
             # Convert cached metadata to analysis format
             return {

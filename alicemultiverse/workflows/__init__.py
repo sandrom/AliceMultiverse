@@ -7,6 +7,8 @@ This module provides workflow templates for chaining AI operations like:
 - Multi-provider optimization
 """
 
+# Re-export submodules for backward compatibility
+from . import composition, transitions, variations
 from .base import (
     WorkflowContext,
     WorkflowResult,
@@ -15,6 +17,7 @@ from .base import (
     WorkflowTemplate,
 )
 from .executor import WorkflowExecutor
+
 # Registry removed - import workflows directly instead
 from .video_creation import (
     CameraMotion,
@@ -23,9 +26,6 @@ from .video_creation import (
     VideoCreationWorkflow,
     VideoStoryboard,
 )
-
-# Re-export submodules for backward compatibility
-from . import composition, transitions, variations
 
 __all__ = [
     # Base classes

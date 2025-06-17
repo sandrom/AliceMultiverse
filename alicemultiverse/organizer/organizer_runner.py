@@ -57,7 +57,7 @@ def run_organizer(
         organizer = EnhancedMediaOrganizer(config)
         if config.get("enhanced_metadata", False):
             logger.info("Enhanced metadata features enabled")
-        
+
         # Note: Pipeline has been removed - use understanding flag instead
 
         return organizer.organize()

@@ -5,11 +5,11 @@ handling aspect ratios, durations, and platform-specific requirements.
 """
 
 import copy
+import logging
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
-import logging
 from ..workflows.video_export import Timeline, TimelineClip
 
 logger = logging.getLogger(__name__)

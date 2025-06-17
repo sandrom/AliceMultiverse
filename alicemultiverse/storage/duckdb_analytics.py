@@ -4,8 +4,8 @@ import json
 from datetime import datetime, timedelta
 from typing import Any
 
-from .duckdb_base import DuckDBBase
 from ..core.structured_logging import get_logger
+from .duckdb_base import DuckDBBase
 
 logger = get_logger(__name__)
 
@@ -139,11 +139,11 @@ class DuckDBAnalytics(DuckDBBase):
     def get_facets(self, filters: dict[str, Any] | None = None) -> dict[str, list[dict[str, Any]]]:
         """Get faceted counts for filtering."""
         facets = {}
-        
+
         # Build base WHERE clause from filters
         where_conditions = []
         params = []
-        
+
         if filters:
             for key, value in filters.items():
                 if key == "media_type" and value:
@@ -155,9 +155,9 @@ class DuckDBAnalytics(DuckDBBase):
                 elif key == "project" and value:
                     where_conditions.append("project = ?")
                     params.append(value)
-        
+
         where_clause = " WHERE " + " AND ".join(where_conditions) if where_conditions else ""
-        
+
         # Media type facets
         query = f"""
             SELECT media_type, COUNT(*) as count
@@ -170,7 +170,7 @@ class DuckDBAnalytics(DuckDBBase):
         facets["media_types"] = [
             {"value": mt, "count": count} for mt, count in media_types if mt
         ]
-        
+
         # AI source facets
         query = f"""
             SELECT ai_source, COUNT(*) as count
@@ -183,7 +183,7 @@ class DuckDBAnalytics(DuckDBBase):
         facets["ai_sources"] = [
             {"value": source, "count": count} for source, count in ai_sources if source
         ]
-        
+
         # Project facets
         query = f"""
             SELECT project, COUNT(*) as count
@@ -197,12 +197,12 @@ class DuckDBAnalytics(DuckDBBase):
         facets["projects"] = [
             {"value": proj, "count": count} for proj, count in projects if proj
         ]
-        
+
         # Quality rating facets
         quality_where = "WHERE quality_rating IS NOT NULL"
         if where_clause:
             quality_where = where_clause + " AND quality_rating IS NOT NULL"
-        
+
         query = f"""
             SELECT quality_rating, COUNT(*) as count
             FROM assets
@@ -214,7 +214,7 @@ class DuckDBAnalytics(DuckDBBase):
         facets["quality_ratings"] = [
             {"value": rating, "count": count} for rating, count in quality_ratings
         ]
-        
+
         # Tag facets - check cache first
         cache_key = f"tags_{where_clause}_{json.dumps(params)}"
         cached = self.conn.execute("""
@@ -223,7 +223,7 @@ class DuckDBAnalytics(DuckDBBase):
             WHERE cache_key = ?
             AND cached_at > ?
         """, [cache_key, datetime.now() - timedelta(minutes=5)]).fetchone()
-        
+
         if cached:
             facets["tags"] = json.loads(cached[0])
         else:
@@ -249,34 +249,34 @@ class DuckDBAnalytics(DuckDBBase):
                     ORDER BY count DESC
                     LIMIT 100
                 """).fetchall()
-            
+
             # Group tags by type
             tag_groups = {}
             for tag_type, tag_value, count in tags:
                 if tag_type not in tag_groups:
                     tag_groups[tag_type] = []
                 tag_groups[tag_type].append({"value": tag_value, "count": count})
-            
+
             facets["tags"] = tag_groups
-            
+
             # Cache the result
             self.conn.execute("""
                 INSERT OR REPLACE INTO tag_cache (cache_key, tag_counts, cached_at)
                 VALUES (?, ?, ?)
             """, [cache_key, json.dumps(tag_groups), datetime.now()])
-        
+
         return facets
 
     def get_table_stats(self) -> dict[str, dict[str, Any]]:
         """Get statistics about database tables."""
-        tables = ["assets", "tags", "understanding", "generation_metadata", 
+        tables = ["assets", "tags", "understanding", "generation_metadata",
                   "perceptual_hashes", "query_cache", "tag_cache"]
-        
+
         stats = {}
         for table in tables:
             # Get row count
             count = self.conn.execute(f"SELECT COUNT(*) FROM {table}").fetchone()[0]
-            
+
             # Get table size (approximate)
             # DuckDB doesn't have direct table size info like SQLite's page_count
             # So we estimate based on data
@@ -286,13 +286,13 @@ class DuckDBAnalytics(DuckDBBase):
                 FROM {table}
             """
             size = self.conn.execute(size_query).fetchone()[0]
-            
+
             stats[table] = {
                 "row_count": count,
                 "estimated_size_bytes": size,
                 "estimated_size_mb": size / (1024 * 1024)
             }
-        
+
         # Get total database size
         if self.db_path:
             try:
@@ -300,7 +300,7 @@ class DuckDBAnalytics(DuckDBBase):
                 stats["total_size_mb"] = stats["total_size_bytes"] / (1024 * 1024)
             except Exception:
                 pass
-        
+
         return stats
 
     def analyze_query_performance(self, query: str, params: list[Any] | None = None) -> dict[str, Any]:
@@ -312,7 +312,7 @@ class DuckDBAnalytics(DuckDBBase):
                 plan = self.conn.execute(explain_query, params).fetchall()
             else:
                 plan = self.conn.execute(explain_query).fetchall()
-            
+
             # Get query profile if available
             profile_query = f"EXPLAIN ANALYZE {query}"
             try:
@@ -322,14 +322,14 @@ class DuckDBAnalytics(DuckDBBase):
                     profile = self.conn.execute(profile_query).fetchall()
             except Exception:
                 profile = None
-            
+
             return {
                 "query": query,
                 "plan": [str(row) for row in plan],
                 "profile": [str(row) for row in profile] if profile else None,
                 "status": "analyzed"
             }
-            
+
         except Exception as e:
             logger.error(f"Query analysis failed: {e}")
             return {

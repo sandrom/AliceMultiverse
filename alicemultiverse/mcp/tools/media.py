@@ -31,7 +31,7 @@ def register_media_tools(server) -> None:
     """
     # B-roll suggestions
     register_broll_tools(server)
-    
+
     # Composition analysis
     server.tool()(analyze_image_composition)
     server.tool()(analyze_timeline_compositions)
@@ -39,10 +39,10 @@ def register_media_tools(server) -> None:
     server.tool()(detect_composition_patterns)
     server.tool()(optimize_timeline)
     server.tool()(suggest_clip_order)
-    
+
     # Deduplication
     register_deduplication_tools(server)
-    
+
     # Variations
     server.tool()(generate_content_variations)
     server.tool()(create_variation_group)

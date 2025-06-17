@@ -120,12 +120,12 @@ def validate_tags(tags: list[str] | None) -> list[str] | None:
     for i, tag in enumerate(tags):
         try:
             validated_tag = validate_tag(tag)
-            
+
             # Check for duplicates
             tag_lower = validated_tag.lower()
             if tag_lower in seen_tags:
                 continue  # Skip duplicates silently
-            
+
             seen_tags.add(tag_lower)
             validated_tags.append(validated_tag)
         except ValidationError as e:
@@ -182,11 +182,11 @@ def validate_asset_ids(asset_ids: list[str]) -> list[str]:
     for i, asset_id in enumerate(asset_ids):
         try:
             validated_id = validate_content_hash(asset_id)
-            
+
             # Check for duplicates
             if validated_id in seen_ids:
                 continue  # Skip duplicates silently
-            
+
             seen_ids.add(validated_id)
             validated_ids.append(validated_id)
         except ValidationError as e:
@@ -231,7 +231,7 @@ def validate_regex_pattern(pattern: str | None, param_name: str = "pattern") -> 
         r'(a+)+',    # Nested quantifiers
         r'(.*)*',    # Catastrophic backtracking
     ]
-    
+
     for dangerous in dangerous_patterns:
         if dangerous in pattern:
             raise ValidationError(f"{param_name} contains potentially dangerous regex pattern")
@@ -253,10 +253,10 @@ def validate_asset_role(role: str | AssetRole) -> AssetRole:
     """
     if isinstance(role, AssetRole):
         return role
-    
+
     if not isinstance(role, str):
         raise ValidationError("Asset role must be a string or AssetRole enum")
-    
+
     try:
         # Try to convert string to enum
         return AssetRole(role.lower())

@@ -6,6 +6,9 @@ rhythmic video edits that match musical or narrative flow.
 """
 
 import json
+
+# ImagePath type removed - using str instead
+import logging
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -13,9 +16,6 @@ from typing import Any
 import cv2
 import numpy as np
 from scipy import signal
-
-# ImagePath type removed - using str instead
-import logging
 
 logger = logging.getLogger(__name__)
 

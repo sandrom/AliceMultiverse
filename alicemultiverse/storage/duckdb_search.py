@@ -3,11 +3,10 @@
 import hashlib
 import json
 from datetime import datetime, timedelta
-from pathlib import Path
 from typing import Any
 
-from .duckdb_base import DuckDBBase
 from ..core.structured_logging import get_logger
+from .duckdb_base import DuckDBBase
 
 logger = get_logger(__name__)
 
@@ -40,31 +39,31 @@ class DuckDBSearch(DuckDBBase):
         # Build query
         base_query = "SELECT * FROM assets"
         count_query = "SELECT COUNT(*) FROM assets"
-        
+
         where_clause, params = self._apply_search_filters(filters or {})
-        
+
         if where_clause:
             base_query += f" WHERE {where_clause}"
             count_query += f" WHERE {where_clause}"
-        
+
         # Get total count
         total_count = self.conn.execute(count_query, params).fetchone()[0]
-        
+
         # Add sorting and pagination
         sort_field = self._map_sort_field(sort_by)
         base_query += f" ORDER BY {sort_field} {sort_order.upper()}"
         base_query += f" LIMIT {limit} OFFSET {offset}"
-        
+
         # Execute search
         results = self.conn.execute(base_query, params).fetchall()
         # Store column names before doing other queries
         columns = [desc[0] for desc in self.conn.description]
-        
+
         # Convert to dictionaries
         assets = []
         for row in results:
             asset = self._row_to_dict(row, columns)
-            
+
             if include_metadata:
                 # Add tags
                 content_hash = asset["content_hash"]
@@ -73,7 +72,7 @@ class DuckDBSearch(DuckDBBase):
                     FROM tags WHERE content_hash = ?
                     ORDER BY tag_type, confidence DESC
                 """, [content_hash]).fetchall()
-                
+
                 if tags_result:
                     asset["tags"] = {}
                     for tag_type, tag_value, confidence, source in tags_result:
@@ -84,9 +83,9 @@ class DuckDBSearch(DuckDBBase):
                             "confidence": confidence,
                             "source": source
                         })
-            
+
             assets.append(asset)
-        
+
         return assets, total_count
 
     def search_by_tags(
@@ -115,17 +114,17 @@ class DuckDBSearch(DuckDBBase):
         # Build tag query
         tag_conditions = []
         params = []
-        
+
         for tag in tags:
             condition = "tag_value = ?"
             params.append(tag)
-            
+
             if tag_type:
                 condition += " AND tag_type = ?"
                 params.append(tag_type)
-            
+
             tag_conditions.append(f"({condition})")
-        
+
         if match_all:
             # All tags must match
             tag_query = f"""
@@ -142,11 +141,11 @@ class DuckDBSearch(DuckDBBase):
                 FROM tags 
                 WHERE {" OR ".join(tag_conditions)}
             """
-        
+
         # Get count
         count_query = f"SELECT COUNT(*) FROM ({tag_query}) t"
         total_count = self.conn.execute(count_query, params).fetchone()[0]
-        
+
         # Get assets
         asset_query = f"""
             SELECT a.* 
@@ -155,16 +154,16 @@ class DuckDBSearch(DuckDBBase):
             ORDER BY a.created_at DESC
             LIMIT {limit} OFFSET {offset}
         """
-        
+
         results = self.conn.execute(asset_query, params).fetchall()
         # Store column names before doing other queries
         columns = [desc[0] for desc in self.conn.description]
-        
+
         # Convert to dictionaries
         assets = []
         for row in results:
             asset = self._row_to_dict(row, columns)
-            
+
             # Add tags
             content_hash = asset["content_hash"]
             tags_result = self.conn.execute("""
@@ -172,7 +171,7 @@ class DuckDBSearch(DuckDBBase):
                 FROM tags WHERE content_hash = ?
                 ORDER BY tag_type, confidence DESC
             """, [content_hash]).fetchall()
-            
+
             if tags_result:
                 asset["tags"] = {}
                 for tag_type, tag_value, confidence, source in tags_result:
@@ -183,9 +182,9 @@ class DuckDBSearch(DuckDBBase):
                         "confidence": confidence,
                         "source": source
                     })
-            
+
             assets.append(asset)
-        
+
         return assets, total_count
 
     def search_by_text(
@@ -215,7 +214,7 @@ class DuckDBSearch(DuckDBBase):
         # Build search conditions
         conditions = []
         params = []
-        
+
         for field in search_fields:
             if field in ["prompt", "description"]:
                 # Use FTS if available
@@ -225,13 +224,13 @@ class DuckDBSearch(DuckDBBase):
                 # Use LIKE for other fields
                 conditions.append(f"{field} LIKE ?")
                 params.append(f"%{query}%")
-        
+
         where_clause = " OR ".join(conditions)
-        
+
         # Get count
         count_query = f"SELECT COUNT(*) FROM assets WHERE {where_clause}"
         total_count = self.conn.execute(count_query, params).fetchone()[0]
-        
+
         # Get results
         search_query = f"""
             SELECT * FROM assets 
@@ -239,12 +238,12 @@ class DuckDBSearch(DuckDBBase):
             ORDER BY created_at DESC
             LIMIT {limit} OFFSET {offset}
         """
-        
+
         results = self.conn.execute(search_query, params).fetchall()
-        
+
         # Convert to dictionaries
         assets = [self._row_to_dict(row) for row in results]
-        
+
         return assets, total_count
 
     def search_with_cache(
@@ -278,7 +277,7 @@ class DuckDBSearch(DuckDBBase):
             "offset": offset
         }
         cache_key = hashlib.md5(json.dumps(cache_data, sort_keys=True).encode()).hexdigest()
-        
+
         # Check cache
         cutoff_time = datetime.now() - timedelta(seconds=cache_ttl)
         cached = self.conn.execute("""
@@ -286,30 +285,30 @@ class DuckDBSearch(DuckDBBase):
             FROM query_cache 
             WHERE cache_key = ? AND cached_at > ?
         """, [cache_key, cutoff_time]).fetchone()
-        
+
         if cached:
             results = json.loads(cached[0])
             total_count = cached[1]
             logger.debug(f"Cache hit for query {cache_key}")
             return results, total_count
-        
+
         # Execute search
         results, total_count = self.search(
             filters, sort_by, sort_order, limit, offset, include_metadata=True
         )
-        
+
         # Cache results
         self.conn.execute("""
             INSERT OR REPLACE INTO query_cache (cache_key, results, total_count, cached_at)
             VALUES (?, ?, ?, ?)
         """, [cache_key, json.dumps(results, default=str), total_count, datetime.now()])
-        
+
         # Clean old cache entries
         self.conn.execute(
             "DELETE FROM query_cache WHERE cached_at < ?",
             [datetime.now() - timedelta(hours=1)]
         )
-        
+
         return results, total_count
 
     def _apply_search_filters(
@@ -335,7 +334,7 @@ class DuckDBSearch(DuckDBBase):
             if key == "content_hash":
                 conditions.append("content_hash = ?")
                 params.append(value)
-                
+
             elif key == "media_type":
                 conditions.append("media_type = ?")
                 params.append(value)
@@ -388,7 +387,7 @@ class DuckDBSearch(DuckDBBase):
             elif key == "collection":
                 conditions.append("collection = ?")
                 params.append(value)
-            
+
             elif key == "asset_role":
                 if isinstance(value, list):
                     placeholders = ",".join("?" * len(value))
@@ -454,5 +453,5 @@ class DuckDBSearch(DuckDBBase):
             "type": "media_type",
             "source": "ai_source",
         }
-        
+
         return field_mapping.get(field, field)

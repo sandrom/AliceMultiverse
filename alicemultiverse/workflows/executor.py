@@ -14,6 +14,7 @@ from alicemultiverse.events.workflow_events import (
     WorkflowStepCompletedEvent,
     WorkflowStepStartedEvent,
 )
+
 # Provider functionality not yet implemented
 # from alicemultiverse.providers.registry import get_provider_async
 from alicemultiverse.providers.provider_types import GenerationRequest, GenerationType
@@ -227,18 +228,18 @@ class WorkflowExecutor:
         try:
             # Provider functionality not yet implemented
             logger.warning(f"Step {step.name} cannot execute - provider functionality not implemented")
-            
+
             # Mark step as failed
             step.status = StepStatus.FAILED
             step.error = "Provider functionality not yet implemented"
-            
+
             # Create minimal result for compatibility
             class MinimalResult:
                 success = False
                 error = "Provider functionality not yet implemented"
                 cost = 0.0
                 file_path = None
-            
+
             result = MinimalResult()
             step.result = result
             context.results[step.name] = result

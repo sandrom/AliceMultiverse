@@ -133,8 +133,8 @@ class MetadataExtractor:
                     # Unescape and parse JSON
                     json_str = understanding_match.group(1).replace('&quot;', '"')
                     parsed["understanding"] = json.loads(json_str)
-                except:
-                    logger.warning("Failed to parse understanding metadata")
+                except (json.JSONDecodeError, ValueError) as e:
+                    logger.warning(f"Failed to parse understanding metadata: {e}")
 
             # Extract generation data
             generation_match = re.search(r'alice:generation="([^"]+)"', xmp_str)
@@ -142,8 +142,8 @@ class MetadataExtractor:
                 try:
                     json_str = generation_match.group(1).replace('&quot;', '"')
                     parsed["generation"] = json.loads(json_str)
-                except:
-                    logger.warning("Failed to parse generation metadata")
+                except (json.JSONDecodeError, ValueError) as e:
+                    logger.warning(f"Failed to parse generation metadata: {e}")
 
             # Extract tags
             tags_match = re.search(r'alice:tags="([^"]+)"', xmp_str)
@@ -151,8 +151,8 @@ class MetadataExtractor:
                 try:
                     json_str = tags_match.group(1).replace('&quot;', '"')
                     parsed["tags"] = json.loads(json_str)
-                except:
-                    logger.warning("Failed to parse tags metadata")
+                except (json.JSONDecodeError, ValueError) as e:
+                    logger.warning(f"Failed to parse tags metadata: {e}")
 
             # Extract metadata version
             version_match = re.search(r'alice:metadata_version="([^"]+)"', xmp_str)
@@ -184,7 +184,7 @@ class MetadataExtractor:
                 try:
                     alice_data = json.loads(comment)
                     metadata.update(alice_data)
-                except:
+                except (json.JSONDecodeError, ValueError):
                     metadata["comment"] = comment
 
             # Extract other useful tags
@@ -229,7 +229,7 @@ class MetadataExtractor:
                         try:
                             alice_data = json.loads(comment)
                             metadata.update(alice_data)
-                        except:
+                        except (json.JSONDecodeError, ValueError):
                             metadata["comment"] = comment
                         break
 

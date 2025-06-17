@@ -11,8 +11,8 @@ from pathlib import Path
 from tqdm import tqdm
 
 from ..core.structured_logging import get_logger
-from .unified_duckdb import DuckDBSearchCache
 from .metadata_extractor import MetadataExtractor
+from .unified_duckdb import DuckDBSearchCache
 
 logger = get_logger(__name__)
 

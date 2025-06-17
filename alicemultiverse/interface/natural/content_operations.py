@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 class ContentOperationsMixin:
     """Mixin for content generation operations."""
-    
+
     def generate_content(self, request: GenerateRequest) -> AliceResponse:
         """Generate new content based on prompt and references.
 

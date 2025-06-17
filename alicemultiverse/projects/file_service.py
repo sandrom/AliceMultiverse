@@ -1,7 +1,6 @@
 """File-based project management service."""
 
 import hashlib
-from datetime import datetime
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -371,7 +370,7 @@ class FileProjectService:
 
         # Create generation record
         generation = {
-            "id": hashlib.sha256(f"{name}:{datetime.now().isoformat()}".encode()).hexdigest()[:16],
+            "id": hashlib.sha256(f"{project_id_or_name}:{datetime.now().isoformat()}".encode()).hexdigest()[:16],
             "provider": provider,
             "cost": cost,
             "request_params": request_params or {},

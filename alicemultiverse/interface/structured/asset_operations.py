@@ -3,6 +3,7 @@
 import logging
 from pathlib import Path
 
+from ...core.exceptions import ValidationError
 from ..structured_models import (
     AliceResponse,
     AssetRole,
@@ -16,14 +17,13 @@ from ..validation import (
     validate_search_request,
     validate_soft_delete_request,
 )
-from ...core.exceptions import ValidationError
 
 logger = logging.getLogger(__name__)
 
 
 class AssetOperationsMixin:
     """Mixin for asset-related operations."""
-    
+
     def search_assets(self, request: SearchRequest, client_id: str = "default") -> AliceResponse:
         """Search for assets using structured queries only.
         
@@ -174,10 +174,10 @@ class AssetOperationsMixin:
 
             # Use content hash as asset ID
             content_hash = asset_id
-            
+
             # Set the role using DuckDB through search handler
             success = self.search_handler.search_db.set_asset_role(content_hash, role.value)
-            
+
             if not success:
                 logger.warning(f"Failed to set role for asset {asset_id}")
 

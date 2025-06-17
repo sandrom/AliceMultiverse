@@ -65,7 +65,7 @@ class VideoStoryboard:
         """Load storyboard from JSON file."""
         with open(file_path, 'r') as f:
             data = json.load(f)
-        
+
         # Convert shots back to ShotDescription objects
         shots = []
         for shot_data in data["shots"]:
@@ -80,7 +80,7 @@ class VideoStoryboard:
                 style_notes=shot_data.get("style_notes", [])
             )
             shots.append(shot)
-        
+
         return cls(
             project_name=data["project_name"],
             shots=shots,

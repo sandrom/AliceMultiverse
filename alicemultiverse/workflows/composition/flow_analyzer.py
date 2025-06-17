@@ -9,7 +9,6 @@ from typing import Any
 import numpy as np
 
 from ...core.unified_cache import UnifiedCache
-from ...understanding.simple_analysis import analyze_image
 from ..video_export import Timeline, TimelineClip
 
 logger = logging.getLogger(__name__)
@@ -250,7 +249,7 @@ Include these scores in your description using this format:
 motion=X.X, complexity=X.X, energy=X.X"""
 
                 from ...understanding.analyzer import ImageAnalyzer
-                
+
                 analyzer = ImageAnalyzer()
                 if self.vision_provider in analyzer.get_available_providers():
                     result = await analyzer.analyze(
@@ -261,7 +260,7 @@ motion=X.X, complexity=X.X, energy=X.X"""
                         generate_prompt=False,
                         custom_instructions=custom_instructions
                     )
-                    
+
                     # Convert to simple format
                     if result:
                         description = result.description

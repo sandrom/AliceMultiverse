@@ -3,10 +3,10 @@
 from pathlib import Path
 
 from .base import NaturalInterfaceBase
-from .search_operations import SearchOperationsMixin
 from .content_operations import ContentOperationsMixin
 from .organization_operations import OrganizationOperationsMixin
 from .project_operations import ProjectOperationsMixin
+from .search_operations import SearchOperationsMixin
 from .similarity_operations import SimilarityOperationsMixin
 
 
@@ -32,7 +32,7 @@ class AliceInterface(
                               get_asset_info
     - SimilarityOperationsMixin: (reserved for future similarity operations)
     """
-    
+
     def __init__(self, config_path: Path | None = None):
         """Initialize Alice interface.
 

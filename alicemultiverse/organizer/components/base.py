@@ -1,21 +1,20 @@
 """Base class for media organizer components."""
 
-import signal
 from pathlib import Path
 
 from omegaconf import DictConfig
 
-from ...core.unified_cache import UnifiedCache as MetadataCache
 from ...core.file_operations import FileHandler
 from ...core.logging import get_logger
 from ...core.types import Statistics
+from ...core.unified_cache import UnifiedCache as MetadataCache
 
 logger = get_logger(__name__)
 
 
 class MediaOrganizerBase:
     """Base class with common functionality for media organizer."""
-    
+
     def __init__(self, config: DictConfig):
         """Initialize the media organizer base.
         

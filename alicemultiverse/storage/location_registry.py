@@ -4,13 +4,13 @@ This module provides a registry for tracking files across multiple storage locat
 (local, S3/GCS, network drives) using content-addressed storage with SHA-256 hashes.
 """
 
+import hashlib
 import json
 from dataclasses import dataclass, field
 from datetime import datetime
 from enum import Enum
 from pathlib import Path
 from typing import Any
-import hashlib
 
 import duckdb
 

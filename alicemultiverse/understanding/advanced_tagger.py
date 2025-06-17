@@ -448,35 +448,16 @@ class AdvancedTagger:
         for category in analysis_result.tags:
             analysis_result.tags[category] = sorted(analysis_result.tags[category])
 
-    def save_tags_to_database(self, asset_hash: str, tags: dict[str, list[str]],
-                            source: str = "ai", confidence: float = 1.0) -> None:
-        """Save tags to the database.
-        
-        Args:
-            asset_hash: The asset's content hash
-            tags: Dictionary of tags by category
-            source: Tag source ('ai', 'user', 'auto')
-            confidence: Confidence score for AI-generated tags
-        """
-        with self.repository.get_session() as session:
-            # Remove existing AI tags if we're updating
-            if source == "ai":
-                session.query(Tag).filter(
-                    Tag.asset_id == asset_hash,
-                    Tag.source == "ai"
-                ).delete()
-
-            # Add new tags
-            for category, tag_list in tags.items():
-                for tag_value in tag_list:
-                    tag = Tag(
-                        asset_id=asset_hash,
-                        tag_type=category,
-                        tag_value=tag_value,
-                        confidence=confidence,
-                        source=source
-                    )
-                    session.add(tag)
-
-            session.commit()
-            logger.info(f"Saved {sum(len(v) for v in tags.values())} tags for asset {asset_hash}")
+    # NOTE: Database storage has been removed. Tags are now stored in file metadata.
+    # def save_tags_to_database(self, asset_hash: str, tags: dict[str, list[str]],
+    #                         source: str = "ai", confidence: float = 1.0) -> None:
+    #     """Save tags to the database.
+    #     
+    #     Args:
+    #         asset_hash: The asset's content hash
+    #         tags: Dictionary of tags by category
+    #         source: Tag source ('ai', 'user', 'auto')
+    #         confidence: Confidence score for AI-generated tags
+    #     """
+    #     # This method is deprecated - tags are now stored in file metadata
+    #     pass

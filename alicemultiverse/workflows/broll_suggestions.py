@@ -1,9 +1,9 @@
 """Automatic B-roll suggestion system for video projects."""
 
+import logging
 from dataclasses import dataclass
 from typing import Any
 
-import logging
 from ..assets.deduplication.similarity_index import SimilarityIndex
 from ..scene_detection.scene_detector import SceneDetector
 from ..storage.unified_duckdb import UnifiedDuckDBStorage
@@ -135,12 +135,12 @@ class BRollSuggestionEngine:
             filters={'file_path': clip['asset_path']},
             limit=1
         )
-        
+
         if not results:
             return {}
-            
+
         asset_info = results[0]
-        
+
         # Extract tag values from structured format
         tag_values = self._extract_tag_values(asset_info.get('tags', {}))
 
@@ -265,29 +265,29 @@ class BRollSuggestionEngine:
             tags=tags,
             limit=10
         )
-        
+
         # Also search for assets marked as b-roll
         broll_results, _ = self.metadata_search.search(
             filters={'asset_role': 'b-roll'},
             limit=10
         )
-        
+
         # Combine results, preferring b-roll assets
         all_results = []
         seen_hashes = set()
-        
+
         # Add b-roll results first
         for result in broll_results:
             if result['content_hash'] not in seen_hashes:
                 all_results.append(result)
                 seen_hashes.add(result['content_hash'])
-        
+
         # Add tag-based results
         for result in results:
             if result['content_hash'] not in seen_hashes:
                 all_results.append(result)
                 seen_hashes.add(result['content_hash'])
-        
+
         results = all_results[:10]  # Limit to 10 total
 
         suggestions = []
@@ -446,7 +446,7 @@ class BRollSuggestionEngine:
 
         # Return first noun-like tag
         return tags[0] if tags else None
-    
+
     def _extract_tag_values(self, tags_dict: dict[str, list[dict[str, Any]]]) -> list[str]:
         """Extract tag values from the structured tags dictionary."""
         tag_values = []

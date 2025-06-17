@@ -3,8 +3,8 @@
 import logging
 from typing import Any
 
-from ...core.ai_errors import AIFriendlyError
 from ...assets.metadata.models import AssetRole
+from ...core.ai_errors import AIFriendlyError
 from ..models import ProjectContextRequest
 from .base import AliceResponse
 
@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 class ProjectOperationsMixin:
     """Mixin for project-related operations."""
-    
+
     def get_project_context(self, request: ProjectContextRequest) -> AliceResponse:
         """Get project context and statistics.
 
@@ -150,7 +150,7 @@ class ProjectOperationsMixin:
         """
         try:
             project = self.project_service.get_project(project_id)
-            
+
             if not project:
                 return AliceResponse(
                     success=False,
@@ -194,7 +194,7 @@ class ProjectOperationsMixin:
         """
         try:
             projects = self.project_service.list_projects()
-            
+
             # Filter by status if requested
             if status:
                 projects = [p for p in projects if p.get("status") == status]
@@ -265,7 +265,7 @@ class ProjectOperationsMixin:
 
             # Search for the asset
             all_metadata = self.organizer.metadata_cache.get_all_metadata()
-            
+
             for file_path, metadata in all_metadata.items():
                 if metadata.get("asset_id") == asset_id or metadata.get("file_hash") == asset_id:
                     metadata["file_path"] = str(file_path)

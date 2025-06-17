@@ -4,9 +4,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from ..core.structured_logging import get_logger
 from ..assets.deduplication.duplicate_finder import DuplicateFinder
 from ..assets.deduplication.similarity_index import SimilarityIndex
+from ..core.structured_logging import get_logger
 
 logger = get_logger(__name__)
 

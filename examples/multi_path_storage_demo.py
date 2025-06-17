@@ -7,7 +7,6 @@ from pathlib import Path
 from uuid import uuid4
 
 from alicemultiverse.core.config import load_config
-from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 from alicemultiverse.storage.location_registry import (
     StorageLocation,
     StorageRegistry,
@@ -15,6 +14,7 @@ from alicemultiverse.storage.location_registry import (
     StorageType,
 )
 from alicemultiverse.storage.multi_path_scanner import MultiPathScanner
+from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

@@ -5,6 +5,7 @@ Production usage should be through AI assistants (MCP server).
 """
 
 import argparse
+import importlib.util
 
 
 def register_debug_commands(parser: argparse.ArgumentParser) -> None:
@@ -15,7 +16,7 @@ def register_debug_commands(parser: argparse.ArgumentParser) -> None:
     """
     # Create debug subparser
     debug_parser = parser.add_subparsers(dest="debug_command", help="Debug commands")
-    
+
     # Deduplication commands
     try:
         from ..assets.deduplication.cli import register_dedup_commands
@@ -23,7 +24,7 @@ def register_debug_commands(parser: argparse.ArgumentParser) -> None:
         register_dedup_commands(dedup_parser)
     except ImportError:
         pass
-    
+
     # Comparison commands
     try:
         from ..comparison.cli import register_comparison_commands
@@ -31,16 +32,15 @@ def register_debug_commands(parser: argparse.ArgumentParser) -> None:
         register_comparison_commands(comparison_parser)
     except ImportError:
         pass
-    
+
     # Prompts commands
     try:
-        from ..prompts.cli import prompts_cli
+        # Prompts CLI exists but uses Click framework
+        # TODO: Convert to argparse for integration
         debug_parser.add_parser("prompts", help="Prompt management")
-        # Convert Click commands to argparse
-        # This is complex - for now just note it exists
     except ImportError:
         pass
-    
+
     # Scene detection commands
     try:
         from ..scene_detection.cli import register_scene_commands
@@ -48,7 +48,7 @@ def register_debug_commands(parser: argparse.ArgumentParser) -> None:
         register_scene_commands(scene_parser)
     except ImportError:
         pass
-    
+
     # Storage commands
     try:
         from ..storage.cli import register_storage_commands
@@ -56,7 +56,7 @@ def register_debug_commands(parser: argparse.ArgumentParser) -> None:
         register_storage_commands(storage_parser)
     except ImportError:
         pass
-    
+
     # Transitions commands
     try:
         from ..workflows.transitions.cli import register_transition_commands
@@ -73,42 +73,24 @@ def list_available_commands() -> list[str]:
         List of command names
     """
     commands = []
-    
+
     # Check which modules are available
-    try:
-        import alicemultiverse.assets.deduplication.cli
+    if importlib.util.find_spec("alicemultiverse.assets.deduplication.cli"):
         commands.append("dedup")
-    except ImportError:
-        pass
-    
-    try:
-        import alicemultiverse.comparison.cli
+
+    if importlib.util.find_spec("alicemultiverse.comparison.cli"):
         commands.append("compare")
-    except ImportError:
-        pass
-    
-    try:
-        import alicemultiverse.prompts.cli
+
+    if importlib.util.find_spec("alicemultiverse.prompts.cli"):
         commands.append("prompts")
-    except ImportError:
-        pass
-    
-    try:
-        import alicemultiverse.scene_detection.cli
+
+    if importlib.util.find_spec("alicemultiverse.scene_detection.cli"):
         commands.append("scenes")
-    except ImportError:
-        pass
-    
-    try:
-        import alicemultiverse.storage.cli
+
+    if importlib.util.find_spec("alicemultiverse.storage.cli"):
         commands.append("storage")
-    except ImportError:
-        pass
-    
-    try:
-        import alicemultiverse.workflows.transitions.cli
+
+    if importlib.util.find_spec("alicemultiverse.workflows.transitions.cli"):
         commands.append("transitions")
-    except ImportError:
-        pass
-    
+
     return commands

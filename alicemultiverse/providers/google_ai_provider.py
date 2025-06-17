@@ -12,8 +12,6 @@ from datetime import datetime
 from enum import Enum
 from typing import Any
 
-import aiohttp
-
 from .base_provider import BaseProvider
 from .provider import GenerationError
 from .provider_types import (
@@ -324,7 +322,7 @@ class GoogleAIProvider(BaseProvider):
         for attempt in range(max_attempts):
             url = f"{self._get_base_url()}/v1/{operation_name}"
 
-            async with session.get(url, headers=headers) as resp:
+            async with self._session.get(url, headers=headers) as resp:
                 await self._handle_response_errors(resp, "Operation status check")
 
                 data = await resp.json()
@@ -501,7 +499,7 @@ class GoogleAIProvider(BaseProvider):
                 # Vertex AI health check
                 url = f"{self._get_base_url()}/v1/projects/{self.project_id}/locations/{self.location}/models"
 
-            async with session.get(url, headers=headers) as resp:
+            async with self._session.get(url, headers=headers) as resp:
                 if resp.status == 200:
                     self._status = ProviderStatus.AVAILABLE
                     return ProviderStatus.AVAILABLE

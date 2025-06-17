@@ -35,5 +35,5 @@ class MediaOrganizer(
     - Watch mode for continuous monitoring
     - Comprehensive statistics tracking
     """
-    
+
     pass  # All functionality comes from mixins

@@ -279,7 +279,7 @@ class ImageAnalyzer:
                     "per_image": cost_per_image,
                     "total": cost_per_image * image_count
                 }
-        
+
         # Find cheapest provider
         if estimates:
             cheapest = min(estimates.items(), key=lambda x: x[1]["total"])
@@ -289,7 +289,7 @@ class ImageAnalyzer:
                 "cheapest_total": cheapest[1]["total"],
                 "image_count": image_count
             }
-        
+
         return {"error": "No providers available", "image_count": image_count}
 
     def _get_cheapest_analyzer(self, detailed: bool = False):

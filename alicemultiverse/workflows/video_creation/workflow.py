@@ -60,5 +60,5 @@ class VideoCreationWorkflow(
         """
         self.search_db = search_db
         self.understanding_provider = understanding_provider
-        
+
         logger.info("VideoCreationWorkflow initialized")

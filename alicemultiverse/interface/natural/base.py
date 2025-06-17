@@ -5,8 +5,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from ...core.config import load_config
 from ...assets.metadata.models import AssetRole
+from ...core.config import load_config
 from ...organizer.enhanced_organizer import EnhancedMediaOrganizer
 from ...projects import ProjectService
 from ..models import AssetInfo
@@ -27,7 +27,7 @@ def AliceResponse(success: bool, message: str, data: Any = None, error: str = No
 
 class NaturalInterfaceBase:
     """Base class with common functionality for natural language interface operations."""
-    
+
     def __init__(self, config_path: Path | None = None):
         """Initialize natural language interface.
         

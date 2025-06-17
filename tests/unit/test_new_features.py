@@ -4,9 +4,7 @@ These tests ensure basic functionality works without errors.
 They don't test deep functionality but verify imports and basic operations.
 """
 
-from pathlib import Path
 
-import pytest
 
 
 # TestBatchOptimization removed - OptimizedBatchAnalyzer module was deleted

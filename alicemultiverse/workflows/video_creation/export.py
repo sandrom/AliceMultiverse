@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class ExportMixin:
     """Mixin for exporting video projects."""
-    
+
     def export_to_davinci_resolve(
         self,
         storyboard: VideoStoryboard,
@@ -75,7 +75,7 @@ class ExportMixin:
         timeline.export(output_path)
 
         return output_path
-    
+
     def create_flux_kontext_requests(
         self,
         storyboard: VideoStoryboard,
@@ -91,20 +91,20 @@ class ExportMixin:
             Dictionary mapping shot indices to Flux requests
         """
         flux_requests = {}
-        
+
         for i, shot in enumerate(storyboard.shots):
             requests = []
-            
+
             # Create keyframe at start and end of motion
             for frame_pos in ["start", "end"]:
                 prompt = shot.prompt
-                
+
                 # Modify prompt based on frame position
                 if frame_pos == "start":
                     prompt = f"{prompt}, at the beginning of {shot.camera_motion.value} motion"
                 else:
                     prompt = f"{prompt}, at the end of {shot.camera_motion.value} motion"
-                
+
                 request = {
                     "prompt": prompt,
                     "model": "flux-kontext",
@@ -112,9 +112,9 @@ class ExportMixin:
                     "frame_position": frame_pos,
                     "camera_motion": shot.camera_motion.value
                 }
-                
+
                 requests.append(request)
-            
+
             flux_requests[str(i)] = requests
-        
+
         return flux_requests

@@ -12,7 +12,7 @@ logger = get_logger(__name__)
 
 class ProcessFileMixin:
     """Mixin for core file processing logic."""
-    
+
     def _process_file(self, media_path: Path) -> OrganizeResult:
         """Process a single media file."""
         try:

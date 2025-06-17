@@ -10,7 +10,7 @@ logger = get_logger(__name__)
 
 class StatisticsMixin:
     """Mixin for statistics tracking and reporting."""
-    
+
     def _init_statistics(self) -> Statistics:
         """Initialize statistics tracking.
         
@@ -129,7 +129,7 @@ class StatisticsMixin:
             "deepseek": 0.0003,
             "ollama": 0.0,  # Free local
         }
-        
+
         cost_per_image = cost_estimates.get(provider, 0.01)
         total_cost = cost_per_image * len(media_files)
 

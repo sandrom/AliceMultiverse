@@ -22,10 +22,10 @@ def register_video_tools(server) -> None:
     """
     # Video creation tools
     register_video_creation_tools(server)
-    
+
     # Video provider tools
     register_video_providers_tools(server)
-    
+
     # Template-based video creation
     server.tool()(create_social_media_video)
     server.tool()(create_instagram_reel)

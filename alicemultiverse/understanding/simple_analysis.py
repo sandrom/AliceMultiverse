@@ -30,12 +30,12 @@ async def analyze_image(
         Dictionary with analysis results to merge into metadata
     """
     analyzer = ImageAnalyzer()
-    
+
     # Check if we have any providers
     if not analyzer.get_available_providers():
         logger.warning("No image understanding providers available")
         return {}
-    
+
     try:
         # Run analysis
         result = await analyzer.analyze(
@@ -45,10 +45,10 @@ async def analyze_image(
             extract_tags=extract_tags,
             detailed=detailed,
         )
-        
+
         if not result:
             return {}
-        
+
         # Build simple metadata dict
         metadata = {
             "image_description": result.description,
@@ -56,31 +56,31 @@ async def analyze_image(
             "understanding_model": result.model,
             "understanding_cost": result.cost,
         }
-        
+
         # Add optional fields
         if result.detailed_description:
             metadata["detailed_description"] = result.detailed_description
-            
+
         if result.generated_prompt:
             metadata["generated_prompt"] = result.generated_prompt
-            
+
         if result.negative_prompt:
             metadata["generated_negative_prompt"] = result.negative_prompt
-            
+
         if result.tags:
             metadata["tags"] = result.tags
             metadata["all_tags"] = result.get_all_tags()
-            
+
         if result.technical_details:
             metadata["technical_analysis"] = result.technical_details
-            
+
         logger.info(
             f"Analyzed {image_path.name} with {result.provider} "
             f"(${result.cost:.4f}, {len(result.get_all_tags())} tags)"
         )
-        
+
         return metadata
-        
+
     except Exception as e:
         logger.error(f"Image analysis failed for {image_path.name}: {e}")
         return {}
@@ -104,10 +104,10 @@ async def analyze_images_batch(
         Dictionary mapping paths to analysis results
     """
     from .batch_analyzer import BatchAnalysisRequest, BatchAnalyzer
-    
+
     analyzer = ImageAnalyzer()
     batch_analyzer = BatchAnalyzer(analyzer)
-    
+
     try:
         # Create batch request
         request = BatchAnalysisRequest(
@@ -120,10 +120,10 @@ async def analyze_images_batch(
             skip_existing=True,
             show_progress=True,
         )
-        
+
         # Process batch
         results = await batch_analyzer.analyze_batch(request)
-        
+
         # Convert to simple format
         output = {}
         for path, result in results:
@@ -134,19 +134,19 @@ async def analyze_images_batch(
                     "understanding_model": result.model,
                     "understanding_cost": result.cost,
                 }
-                
+
                 if result.tags:
                     output[path]["tags"] = result.tags
                     output[path]["all_tags"] = result.get_all_tags()
-                    
+
                 if result.generated_prompt:
                     output[path]["generated_prompt"] = result.generated_prompt
-                    
+
         total_cost = sum(r.cost for _, r in results if r)
         logger.info(f"Batch analysis complete: {len(results)} images, ${total_cost:.2f}")
-        
+
         return output
-        
+
     except Exception as e:
         logger.error(f"Batch analysis failed: {e}")
         return {}
@@ -164,11 +164,11 @@ def should_analyze_image(metadata: dict[str, Any]) -> bool:
     # Only process images
     if metadata.get("media_type") != MediaType.IMAGE:
         return False
-        
+
     # Skip if already analyzed
     if "understanding_provider" in metadata:
         return False
-        
+
     return True
 
 
@@ -188,15 +188,15 @@ async def estimate_analysis_cost(
         Estimated total cost
     """
     analyzer = ImageAnalyzer()
-    
+
     if not analyzer.get_available_providers():
         return 0.0
-        
+
     # Get cost for specific provider or cheapest
     if provider and provider in analyzer.analyzers:
         cost_per_image = analyzer.analyzers[provider].estimate_cost(detailed)
     else:
         costs = analyzer.estimate_costs(detailed)
         cost_per_image = min(costs.values()) if costs else 0.0
-        
+
     return cost_per_image * num_images

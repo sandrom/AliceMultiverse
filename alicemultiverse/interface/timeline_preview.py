@@ -5,10 +5,10 @@ has been refactored into modular components in the timeline_preview/ directory.
 """
 
 from .timeline_preview import (
-    TimelinePreviewRequest,
-    TimelineUpdateRequest,
     PreviewSession,
+    TimelinePreviewRequest,
     TimelinePreviewServer,
+    TimelineUpdateRequest,
     create_preview_server,
 )
 

@@ -1,6 +1,7 @@
 """Command-line parser creation for AliceMultiverse."""
 
 import argparse
+
 from ..version import __version__
 
 
@@ -29,7 +30,7 @@ For normal usage, use Alice through an AI assistant instead.
     )
 
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
-    
+
     return parser
 
 
@@ -215,14 +216,14 @@ def add_technical_args(parser):
         action="store_true",
         help="Check system dependencies and exit",
     )
-    
+
     # Config overrides
     parser.add_argument(
         "cli_overrides",
         nargs="*",
         help="Configuration overrides in the format key=value (e.g., paths.inbox=/custom/path)",
     )
-    
+
     # Force CLI option
     parser.add_argument("--force-cli", action="store_true", help="Force CLI usage without deprecation warning")
 

@@ -16,7 +16,7 @@ from .duckdb_storage import DuckDBStorage
 
 class UnifiedDuckDBStorage(
     DuckDBStorage,
-    DuckDBSearch, 
+    DuckDBSearch,
     DuckDBAnalytics,
     DuckDBSimilarity,
     DuckDBMaintenance
@@ -26,7 +26,7 @@ class UnifiedDuckDBStorage(
     This class inherits from all the modular components to provide
     the complete unified interface while keeping the code organized.
     """
-    
+
     def __init__(self, db_path: Path | None = None, read_only: bool = False):
         """Initialize unified DuckDB storage.
         
@@ -36,7 +36,7 @@ class UnifiedDuckDBStorage(
         """
         # Initialize base class which handles connection and schema
         super().__init__(db_path, read_only)
-    
+
     def clear_index(self) -> None:
         """Clear all data from the index (backward compatibility)."""
         self.rebuild_from_scratch()
@@ -47,7 +47,7 @@ class DuckDBSearchCache(UnifiedDuckDBStorage):
     
     This is now just an alias for UnifiedDuckDBStorage.
     """
-    
+
     def get_connection(self):
         """Get the database connection (backward compatibility)."""
         return self.conn
@@ -58,7 +58,7 @@ class DuckDBSearch(UnifiedDuckDBStorage):
     
     This is now just an alias for UnifiedDuckDBStorage.
     """
-    
+
     def index_asset(self, metadata: dict[str, Any]) -> None:
         """Index an asset (backward compatibility method).
         
@@ -67,8 +67,8 @@ class DuckDBSearch(UnifiedDuckDBStorage):
         """
         content_hash = metadata.get("content_hash")
         file_path = metadata.get("file_path")
-        
+
         if not content_hash or not file_path:
             raise ValueError("content_hash and file_path are required")
-        
+
         self.upsert_asset(content_hash, file_path, metadata)

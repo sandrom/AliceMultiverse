@@ -10,6 +10,7 @@ from typing import Any
 from alicemultiverse.transitions import TransitionMatcher
 from alicemultiverse.workflows.base import WorkflowContext, WorkflowStep, WorkflowTemplate
 from alicemultiverse.workflows.music_analyzer import MusicAnalyzer
+from alicemultiverse.workflows.transitions.models import TransitionType
 
 logger = logging.getLogger(__name__)
 

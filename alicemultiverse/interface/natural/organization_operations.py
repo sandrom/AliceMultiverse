@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class OrganizationOperationsMixin:
     """Mixin for media organization operations."""
-    
+
     def organize_media(self, request: OrganizeRequest) -> AliceResponse:
         """Organize media files with optional enhancements.
 

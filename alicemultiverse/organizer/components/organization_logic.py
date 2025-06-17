@@ -1,7 +1,6 @@
 """Organization logic for media organizer."""
 
 import re
-from collections import defaultdict
 from pathlib import Path
 
 from ...core.constants import SEQUENCE_FORMAT
@@ -13,7 +12,7 @@ logger = get_logger(__name__)
 
 class OrganizationLogicMixin:
     """Mixin for media organization logic."""
-    
+
     def _find_existing_organized_file(
         self, source_path: Path, date_taken: str, project_folder: str, source_type: str
     ) -> Path | None:

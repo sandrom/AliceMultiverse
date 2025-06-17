@@ -2,8 +2,8 @@
 
 import logging
 
-from ...core.ai_errors import AIFriendlyError
 from ...assets.metadata.models import AssetRole
+from ...core.ai_errors import AIFriendlyError
 from ..models import SearchRequest
 from .base import AliceResponse
 
@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class SearchOperationsMixin:
     """Mixin for search-related operations."""
-    
+
     def search_assets(self, request: SearchRequest) -> AliceResponse:
         """Search for assets based on creative criteria.
 

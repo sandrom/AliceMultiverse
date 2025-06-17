@@ -5,8 +5,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from .duckdb_base import DuckDBBase
 from ..core.structured_logging import get_logger
+from .duckdb_base import DuckDBBase
 
 logger = get_logger(__name__)
 
@@ -191,7 +191,7 @@ class DuckDBStorage(DuckDBBase):
         analysis_date = self._parse_timestamp(understanding.get("analysis_date", datetime.now()))
 
         # Remove fields that are stored separately
-        metadata = {k: v for k, v in understanding.items() 
+        metadata = {k: v for k, v in understanding.items()
                    if k not in ["provider", "model", "description", "cost", "analysis_date"]}
 
         self.conn.execute("""
@@ -361,7 +361,7 @@ class DuckDBStorage(DuckDBBase):
             "errors": errors,
             "success_rate": processed / total if total > 0 else 0
         }
-    
+
     def set_asset_role(self, content_hash: str, role: str) -> bool:
         """Set the role of an asset.
         
@@ -378,19 +378,19 @@ class DuckDBStorage(DuckDBBase):
                 SET asset_role = ?, modified_at = ?
                 WHERE content_hash = ?
             """, [role, datetime.now(), content_hash])
-            
+
             # Check if the update was successful by verifying the role
             check_result = self.conn.execute(
                 "SELECT asset_role FROM assets WHERE content_hash = ?",
                 [content_hash]
             ).fetchone()
-            
+
             return check_result is not None and check_result[0] == role
-            
+
         except Exception as e:
             logger.error(f"Failed to set asset role: {e}")
             return False
-    
+
     def get_assets_by_role(self, role: str, limit: int = 100) -> list[dict[str, Any]]:
         """Get all assets with a specific role.
         
@@ -407,5 +407,5 @@ class DuckDBStorage(DuckDBBase):
             ORDER BY modified_at DESC
             LIMIT ?
         """, [role, limit]).fetchall()
-        
+
         return [self._row_to_dict(row) for row in results]

@@ -5,12 +5,12 @@ before exporting to professional editing software.
 """
 
 from .models import TimelinePreviewRequest, TimelineUpdateRequest
-from .session import PreviewSession
 from .server import TimelinePreviewServer, create_preview_server
+from .session import PreviewSession
 
 __all__ = [
     "TimelinePreviewRequest",
-    "TimelineUpdateRequest", 
+    "TimelineUpdateRequest",
     "PreviewSession",
     "TimelinePreviewServer",
     "create_preview_server",

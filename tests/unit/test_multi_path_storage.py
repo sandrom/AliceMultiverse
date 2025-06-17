@@ -20,7 +20,6 @@ def create_test_jpeg(path):
     img = Image.new('RGB', (1, 1), color='blue')
     img.save(path, 'JPEG')
 
-from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 from alicemultiverse.storage.location_registry import (
     StorageLocation,
     StorageRegistry,
@@ -28,6 +27,7 @@ from alicemultiverse.storage.location_registry import (
     StorageType,
 )
 from alicemultiverse.storage.multi_path_scanner import MultiPathScanner
+from alicemultiverse.storage.unified_duckdb import DuckDBSearchCache
 
 
 class TestStorageRegistry:
