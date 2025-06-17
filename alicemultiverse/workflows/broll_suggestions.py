@@ -58,8 +58,8 @@ class BRollSuggestionEngine:
         self.db = UnifiedDuckDBStorage(db_path) if db_path else UnifiedDuckDBStorage()
         self.similarity_index = similarity_index
         self.scene_detector = scene_detector or SceneDetector()
-        # Use DuckDBSearch instead of AssetSearchEngine
-        self.metadata_search = None  # TODO: Replace with DuckDBSearch
+        # Use DuckDB's search functionality directly
+        self.metadata_search = self.db
 
     async def suggest_broll_for_timeline(
         self,
@@ -130,18 +130,27 @@ class BRollSuggestionEngine:
 
     async def _analyze_clip_scene(self, clip: dict[str, Any]) -> dict[str, Any]:
         """Analyze a clip's scene content."""
-        # Get asset metadata
-        asset_info = self.db.get_asset_by_path(clip['asset_path'])
-        if not asset_info:
+        # Get asset metadata by searching for the file path
+        results, _ = self.db.search(
+            filters={'file_path': clip['asset_path']},
+            limit=1
+        )
+        
+        if not results:
             return {}
+            
+        asset_info = results[0]
+        
+        # Extract tag values from structured format
+        tag_values = self._extract_tag_values(asset_info.get('tags', {}))
 
         # Use existing metadata
         scene_info = {
             'type': asset_info.get('scene_type', 'unknown'),
-            'tags': asset_info.get('tags', []),
-            'mood': self._extract_mood_from_tags(asset_info.get('tags', [])),
-            'subject': self._extract_subject_from_tags(asset_info.get('tags', [])),
-            'location': self._extract_location_from_tags(asset_info.get('tags', []))
+            'tags': tag_values,
+            'mood': self._extract_mood_from_tags(tag_values),
+            'subject': self._extract_subject_from_tags(tag_values),
+            'location': self._extract_location_from_tags(tag_values)
         }
 
         return scene_info
@@ -252,11 +261,13 @@ class BRollSuggestionEngine:
             tags.append(location)
 
         # Search for matching assets
-        results = self.metadata_search.search_by_tags(
+        results, _ = self.metadata_search.search_by_tags(
             tags=tags,
-            limit=10,
-            role='b-roll'  # Prefer assets marked as b-roll
+            limit=10
         )
+        
+        # Filter for b-roll assets if available
+        # TODO: Add role filtering when asset roles are implemented
 
         suggestions = []
         for result in results:
@@ -267,7 +278,7 @@ class BRollSuggestionEngine:
                     relevance_score=result.get('score', 0.8),
                     suggestion_type='contextual',
                     reasoning=f"Matches subject: {subject}" + (f" and location: {location}" if location else ""),
-                    tags=result.get('tags', []),
+                    tags=self._extract_tag_values(result.get('tags', {})),
                     placement_hint='cutaway'
                 ))
 
@@ -283,7 +294,7 @@ class BRollSuggestionEngine:
         # Search for mood-matching assets
         mood_tags = [mood, f"{energy_level}_energy"]
 
-        results = self.metadata_search.search_by_tags(
+        results, _ = self.metadata_search.search_by_tags(
             tags=mood_tags,
             limit=10
         )
@@ -297,7 +308,7 @@ class BRollSuggestionEngine:
                     relevance_score=result.get('score', 0.7),
                     suggestion_type='mood',
                     reasoning=f"Matches {mood} mood with {energy_level} energy",
-                    tags=result.get('tags', []),
+                    tags=self._extract_tag_values(result.get('tags', {})),
                     placement_hint='overlay'
                 ))
 
@@ -350,7 +361,7 @@ class BRollSuggestionEngine:
         else:
             transition_tags.extend(['static', 'calm', 'minimal'])
 
-        results = self.metadata_search.search_by_tags(
+        results, _ = self.metadata_search.search_by_tags(
             tags=transition_tags,
             limit=5
         )
@@ -414,6 +425,17 @@ class BRollSuggestionEngine:
 
         # Return first noun-like tag
         return tags[0] if tags else None
+    
+    def _extract_tag_values(self, tags_dict: dict[str, list[dict[str, Any]]]) -> list[str]:
+        """Extract tag values from the structured tags dictionary."""
+        tag_values = []
+        for tag_type, tag_list in tags_dict.items():
+            for tag_info in tag_list:
+                if isinstance(tag_info, dict) and 'value' in tag_info:
+                    tag_values.append(tag_info['value'])
+                elif isinstance(tag_info, str):
+                    tag_values.append(tag_info)
+        return tag_values
 
     def _extract_location_from_tags(self, tags: list[str]) -> str | None:
         """Extract location from tags."""

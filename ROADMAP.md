@@ -787,3 +787,162 @@ platforms:
 ---
 
 **Remember**: This is MY personal tool. Every decision should optimize for my specific workflow, not hypothetical users.
+
+---
+
+## 📋 Local Issue Tracker
+
+### Technical Debt & TODO Items
+
+#### 1. Timeline Export Enhancements
+**Location**: `alicemultiverse/interface/timeline_preview.py`
+- **Lines 290, 293**: Implement EDL and XML export functionality
+- **Line 808**: Implement actual file download in web interface
+- **Impact**: Medium - Export features are partially working but missing formats
+- **Steps**:
+  1. Research EDL/XML format specifications
+  2. Implement export serializers for each format
+  3. Add file download endpoint to FastAPI server
+  4. Test with DaVinci Resolve and Premiere Pro
+
+#### 2. Asset ID Support in Search Index
+**Location**: `alicemultiverse/interface/alice_structured.py`
+- **Lines 582, 628, 678, 732**: Add proper asset ID support in DuckDB search
+- **Impact**: High - Asset tracking and updates are incomplete
+- **Dependencies**: DuckDB schema may need updates
+- **Steps**:
+  1. Add asset_id column to DuckDB schema
+  2. Update upsert methods to generate/store IDs
+  3. Implement asset role management
+  4. Add deletion/soft-delete support
+  5. Update search queries to use asset IDs
+
+#### 3. Similarity Search Implementation
+**Location**: `alicemultiverse/interface/image_presentation.py`
+- **Line 104**: Implement similarity search when embeddings are available
+- **Impact**: Low - Feature enhancement, not critical
+- **Steps**:
+  1. Choose embedding model (CLIP, etc.)
+  2. Add embedding generation to understanding pipeline
+  3. Store embeddings in DuckDB
+  4. Implement vector similarity search
+
+#### 4. JSON Schema Validation
+**Location**: `alicemultiverse/core/validation.py`
+- **Line 393**: Add JSON schema validation if schema provided
+- **Impact**: Low - Nice to have for API robustness
+- **Steps**:
+  1. Add jsonschema dependency
+  2. Implement schema validation logic
+  3. Add schemas for all API endpoints
+  4. Test with invalid inputs
+
+#### 5. B-Roll Metadata Search Integration
+**Location**: `alicemultiverse/workflows/broll_suggestions.py`
+- **Line 62**: Replace None with DuckDBSearch instance
+- **Impact**: Medium - B-roll suggestions limited without search
+- **Steps**:
+  1. Import DuckDBSearch
+  2. Initialize in __init__
+  3. Update search methods to use DuckDB
+  4. Test b-roll suggestion accuracy
+
+#### 6. Vision Provider Restoration
+**Location**: `alicemultiverse/workflows/composition/flow_analyzer.py`
+- **Lines 12, 241**: Re-enable get_vision_provider functionality
+- **Impact**: High - Flow analysis disabled without vision
+- **Steps**:
+  1. Check if get_vision_provider was moved/renamed
+  2. Update imports
+  3. Re-enable visual analysis features
+  4. Test with multiple providers
+
+#### 7. Storage Location Scanning
+**Location**: `alicemultiverse/storage/location_registry.py`
+- **Line 618**: Implement actual scanning based on storage type
+- **Impact**: Medium - Multi-location support incomplete
+- **Steps**:
+  1. Implement scanners for each StorageType
+  2. Add cloud storage support (S3, GCS)
+  3. Implement sync status tracking
+  4. Add background scanning
+
+#### 8. Pattern Detection Enhancement
+**Location**: `alicemultiverse/prompts/templates.py`
+- **Line 375**: Implement more sophisticated pattern detection
+- **Impact**: Low - Current detection works, could be better
+- **Steps**:
+  1. Research advanced pattern detection algorithms
+  2. Add ML-based pattern recognition
+  3. Implement pattern caching
+  4. Add pattern evolution tracking
+
+### Code Quality Issues
+
+#### 9. Large File Refactoring
+**Priority**: Medium
+- `main_cli.py` (1397 lines) - Split into command modules
+- `alice_structured.py` (1282 lines) - Modularize by operation type
+- `alice_interface.py` (1093 lines) - Separate interface concerns
+- `media_organizer.py` (1058 lines) - Extract organization strategies
+
+#### 10. Test Coverage Gaps
+**Priority**: High
+- Integration tests for video export pipeline
+- End-to-end tests for understanding system
+- Performance tests for large collections
+- Error handling test scenarios
+
+### Performance Optimizations
+
+#### 11. Startup Time Optimization
+**Priority**: Low
+- Lazy loading of providers
+- Deferred imports for heavy modules
+- Cache provider initialization
+
+#### 12. Query Performance
+**Priority**: Medium
+- Add query plan analysis
+- Optimize frequently used queries
+- Implement query result caching
+
+### Future Enhancements
+
+#### 13. Plugin System Architecture
+**Priority**: Low
+- Design plugin API
+- Implement provider plugins
+- Add workflow plugins
+- Create plugin marketplace
+
+#### 14. Distributed Processing
+**Priority**: Low
+- Add job queue system
+- Implement worker nodes
+- Scale understanding processing
+- Distributed search
+
+---
+
+## Implementation Priority
+
+### Immediate (This Week)
+1. Vision provider restoration (#6) - Critical functionality
+2. Asset ID support (#2) - Core feature completion
+3. B-roll search integration (#5) - Feature completion
+
+### Short Term (This Month)
+4. Timeline export formats (#1) - User-requested feature
+5. Large file refactoring (#9) - Maintainability
+6. Integration tests (#10) - Quality assurance
+
+### Long Term (When Needed)
+7. Storage scanning (#7) - Multi-location support
+8. Similarity search (#3) - Advanced feature
+9. Pattern detection (#8) - Enhancement
+10. Performance optimizations (#11, #12)
+11. Plugin system (#13) - Extensibility
+12. JSON validation (#4) - API robustness
+
+---

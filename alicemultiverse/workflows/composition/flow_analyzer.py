@@ -9,7 +9,7 @@ from typing import Any
 import numpy as np
 
 from ...core.unified_cache import UnifiedCache
-# from ...understanding.providers import get_vision_provider  # TODO: Removed during refactoring
+from ...understanding.simple_analysis import analyze_image
 from ..video_export import Timeline, TimelineClip
 
 logger = logging.getLogger(__name__)
@@ -238,31 +238,41 @@ class FlowAnalyzer:
                 energy_level = max(0, min(1, energy_level))
 
         # Use vision provider for deeper analysis if available
-        # TODO: Re-enable when get_vision_provider is restored
-        if False and self.vision_provider and clip.asset_path.suffix.lower() in [".jpg", ".png", ".webp"]:
+        if self.vision_provider and clip.asset_path.suffix.lower() in [".jpg", ".png", ".webp"]:
             try:
-                provider = None  # get_vision_provider(self.vision_provider)
-
                 # Analyze for motion and complexity
-                analysis_prompt = """Analyze this image and provide scores (0-1):
+                custom_instructions = """Analyze this image and provide scores (0-1):
 1. Motion level: How much movement/action is implied
 2. Visual complexity: How complex/busy vs simple
 3. Overall energy: Dynamic vs calm
 
-Format: motion=X.X, complexity=X.X, energy=X.X"""
+Include these scores in your description using this format:
+motion=X.X, complexity=X.X, energy=X.X"""
 
-                result = await provider.analyze_image(
-                    str(clip.asset_path),
-                    analysis_prompt
-                )
+                from ...understanding.analyzer import ImageAnalyzer
+                
+                analyzer = ImageAnalyzer()
+                if self.vision_provider in analyzer.get_available_providers():
+                    result = await analyzer.analyze(
+                        clip.asset_path,
+                        provider=self.vision_provider,
+                        detailed=True,
+                        extract_tags=False,
+                        generate_prompt=False,
+                        custom_instructions=custom_instructions
+                    )
+                    
+                    # Convert to simple format
+                    if result:
+                        description = result.description
 
-                # Parse results
-                if "motion=" in result:
-                    motion_level = float(result.split("motion=")[1].split(",")[0])
-                if "complexity=" in result:
-                    complexity = float(result.split("complexity=")[1].split(",")[0])
-                if "energy=" in result:
-                    energy_level = float(result.split("energy=")[1].split(",")[0])
+                        # Parse results from description
+                        if "motion=" in description:
+                            motion_level = float(description.split("motion=")[1].split(",")[0])
+                        if "complexity=" in description:
+                            complexity = float(description.split("complexity=")[1].split(",")[0])
+                        if "energy=" in description:
+                            energy_level = float(description.split("energy=")[1].split(",")[0])
 
             except Exception as e:
                 logger.warning(f"Vision analysis failed for {clip.asset_path}: {e}")
