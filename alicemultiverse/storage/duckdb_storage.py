@@ -373,14 +373,19 @@ class DuckDBStorage(DuckDBBase):
             True if successful, False otherwise
         """
         try:
-            result = self.conn.execute("""
+            self.conn.execute("""
                 UPDATE assets 
                 SET asset_role = ?, modified_at = ?
                 WHERE content_hash = ?
             """, [role, datetime.now(), content_hash])
             
-            # Check if any rows were updated
-            return result.rowcount > 0
+            # Check if the update was successful by verifying the role
+            check_result = self.conn.execute(
+                "SELECT asset_role FROM assets WHERE content_hash = ?",
+                [content_hash]
+            ).fetchone()
+            
+            return check_result is not None and check_result[0] == role
             
         except Exception as e:
             logger.error(f"Failed to set asset role: {e}")

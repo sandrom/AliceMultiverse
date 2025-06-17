@@ -57,11 +57,13 @@ class DuckDBSearch(DuckDBBase):
         
         # Execute search
         results = self.conn.execute(base_query, params).fetchall()
+        # Store column names before doing other queries
+        columns = [desc[0] for desc in self.conn.description]
         
         # Convert to dictionaries
         assets = []
         for row in results:
-            asset = self._row_to_dict(row)
+            asset = self._row_to_dict(row, columns)
             
             if include_metadata:
                 # Add tags
@@ -155,11 +157,13 @@ class DuckDBSearch(DuckDBBase):
         """
         
         results = self.conn.execute(asset_query, params).fetchall()
+        # Store column names before doing other queries
+        columns = [desc[0] for desc in self.conn.description]
         
         # Convert to dictionaries
         assets = []
         for row in results:
-            asset = self._row_to_dict(row)
+            asset = self._row_to_dict(row, columns)
             
             # Add tags
             content_hash = asset["content_hash"]

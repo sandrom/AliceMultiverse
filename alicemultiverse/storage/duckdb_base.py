@@ -221,13 +221,19 @@ class DuckDBBase:
 
         return None
 
-    def _row_to_dict(self, row: tuple) -> dict[str, Any]:
-        """Convert database row to dictionary."""
+    def _row_to_dict(self, row: tuple, columns: list[str] | None = None) -> dict[str, Any]:
+        """Convert database row to dictionary.
+        
+        Args:
+            row: Database row tuple
+            columns: Column names (if not provided, uses conn.description)
+        """
         if not row:
             return {}
 
-        # Get column names from the last query
-        columns = [desc[0] for desc in self.conn.description]
+        # Get column names
+        if columns is None:
+            columns = [desc[0] for desc in self.conn.description]
 
         result = {}
         for i, col in enumerate(columns):
