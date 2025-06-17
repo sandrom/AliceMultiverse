@@ -313,7 +313,7 @@ class GoogleAIProvider(BaseProvider):
 
     async def _poll_long_running_operation(self, operation_name: str) -> dict[str, Any]:
         """Poll a long-running operation until completion."""
-        session = await self._ensure_session()
+        await self._ensure_session()
 
         headers = self._get_headers()
 

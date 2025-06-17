@@ -41,7 +41,7 @@ class MediaAnalysisMixin:
         # Calculate content hash
         content_hash = self.metadata_cache.get_content_hash(media_path)
 
-        # Build metadata dict for pipeline stages
+        # Build metadata dict
         metadata = {
             "source_type": source_type,
             "date_taken": date_taken,
@@ -53,18 +53,13 @@ class MediaAnalysisMixin:
 
         # Image analysis happens in pipeline stages if configured
 
-        # Create the analysis result dict instead of AnalysisResult
-        analysis = {
-            "source_type": source_type,
-            "date_taken": date_taken,
-            "project_folder": project_folder,
-            "media_type": media_type,
-            "file_number": file_number,
+        # Create the analysis result dict from metadata
+        analysis = metadata.copy()
+        analysis.update({
             "quality_stars": None,
             "brisque_score": None,
             "pipeline_result": None,  # Pipeline has been removed
-            "content_hash": content_hash,  # Include content hash
-        }
+        })
 
         return analysis
 

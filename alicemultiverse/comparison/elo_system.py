@@ -4,6 +4,7 @@ import random
 import uuid
 from datetime import datetime
 from pathlib import Path
+from typing import ClassVar
 
 import duckdb
 
@@ -15,7 +16,7 @@ class EloRating:
 
     # K-factor determines how much ratings change per comparison
     # Higher K = more volatile ratings
-    K_FACTORS = {
+    K_FACTORS: ClassVar[dict[ComparisonStrength, int]] = {
         ComparisonStrength.SLIGHT: 16,
         ComparisonStrength.CLEAR: 32,
         ComparisonStrength.STRONG: 64,

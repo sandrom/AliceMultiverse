@@ -381,7 +381,6 @@ def handle_organize_command(args, config: DictConfig) -> int:
     """Handle the default organize command."""
     # Validate paths
     inbox_path = Path(config.paths.inbox)
-    organized_path = Path(config.paths.organized)
 
     if not inbox_path.exists():
         logger.error(f"Inbox directory does not exist: {inbox_path}")

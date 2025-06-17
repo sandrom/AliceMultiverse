@@ -2,7 +2,7 @@
 
 import logging
 from collections.abc import Callable
-from typing import Any
+from typing import Any, ClassVar
 
 logger = logging.getLogger(__name__)
 
@@ -11,7 +11,7 @@ class AIFriendlyError:
     """Converts technical errors into AI-friendly messages."""
 
     # Map of technical error patterns to friendly messages
-    ERROR_MAPPINGS = {
+    ERROR_MAPPINGS: ClassVar[dict[str, dict[str, Any]]] = {
         # File system errors
         "No such file or directory": {
             "message": "The specified file or folder doesn't exist",
