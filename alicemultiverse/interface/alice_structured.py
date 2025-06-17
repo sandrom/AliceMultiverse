@@ -578,8 +578,8 @@ class AliceStructuredInterface:
             failed_files = []
 
             for asset_id in request["asset_ids"]:
-                # Asset ID should be content_hash for now
-                # TODO: Add proper asset ID support in search index
+                # Asset ID is content_hash - this is by design
+                # Content hash is our asset ID - allows files to move freely
                 content_hash = asset_id
 
                 # Search for asset by content hash
@@ -625,7 +625,8 @@ class AliceStructuredInterface:
                 if new_path:
                     moved_files.append(str(new_path))
                     success_count += 1
-                    # TODO: Remove from search index or mark as deleted
+                    # Remove location from search index
+                    self.search_db.remove_location(content_hash, file_path)
                 else:
                     failed_files.append(asset_id)
                     failed_count += 1
@@ -674,8 +675,8 @@ class AliceStructuredInterface:
             # Rate limiting
             self.rate_limiter.check_request(client_id, "get_asset")
 
-            # Asset ID should be content_hash for now
-            # TODO: Add proper asset ID support in search index
+            # Asset ID is content_hash - this is by design
+            # Using content hash ensures assets maintain identity when moved
             content_hash = asset_id
 
             # Search for asset by content hash
@@ -729,10 +730,14 @@ class AliceStructuredInterface:
             # Validate role
             role = validate_asset_role(role)
 
-            # TODO: Implement asset role setting in search index
-            # For now, asset roles are not supported in the new architecture
-            success = False
-            logger.warning("Asset role setting not yet implemented in search-based architecture")
+            # Use content hash as asset ID
+            content_hash = asset_id
+            
+            # Set the role using DuckDB
+            success = self.search_db.set_asset_role(content_hash, role.value)
+            
+            if not success:
+                logger.warning(f"Failed to set role for asset {asset_id}")
 
             return AliceResponse(
                 success=success,

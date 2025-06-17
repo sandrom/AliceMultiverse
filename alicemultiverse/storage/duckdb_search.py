@@ -328,7 +328,11 @@ class DuckDBSearch(DuckDBBase):
                 continue
 
             # Handle different filter types
-            if key == "media_type":
+            if key == "content_hash":
+                conditions.append("content_hash = ?")
+                params.append(value)
+                
+            elif key == "media_type":
                 conditions.append("media_type = ?")
                 params.append(value)
 
@@ -380,6 +384,15 @@ class DuckDBSearch(DuckDBBase):
             elif key == "collection":
                 conditions.append("collection = ?")
                 params.append(value)
+            
+            elif key == "asset_role":
+                if isinstance(value, list):
+                    placeholders = ",".join("?" * len(value))
+                    conditions.append(f"asset_role IN ({placeholders})")
+                    params.extend(value)
+                else:
+                    conditions.append("asset_role = ?")
+                    params.append(value)
 
             elif key == "has_prompt":
                 if value:

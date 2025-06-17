@@ -805,17 +805,17 @@ platforms:
   3. Add file download endpoint to FastAPI server
   4. Test with DaVinci Resolve and Premiere Pro
 
-#### 2. Asset ID Support in Search Index
+#### 2. Asset Role Support in Search Index
 **Location**: `alicemultiverse/interface/alice_structured.py`
-- **Lines 582, 628, 678, 732**: Add proper asset ID support in DuckDB search
-- **Impact**: High - Asset tracking and updates are incomplete
-- **Dependencies**: DuckDB schema may need updates
+- **Line 732**: Implement asset role setting in DuckDB
+- **Impact**: Medium - Cannot mark assets for specific purposes (e.g., b-roll)
+- **Note**: Asset IDs are content hashes by design - this allows files to move freely
 - **Steps**:
-  1. Add asset_id column to DuckDB schema
-  2. Update upsert methods to generate/store IDs
-  3. Implement asset role management
-  4. Add deletion/soft-delete support
-  5. Update search queries to use asset IDs
+  1. Add role column to DuckDB assets table
+  2. Update upsert methods to handle roles
+  3. Add role filtering to search queries
+  4. Implement set_asset_role method
+  5. Add role-based search filters
 
 #### 3. Similarity Search Implementation
 **Location**: `alicemultiverse/interface/image_presentation.py`

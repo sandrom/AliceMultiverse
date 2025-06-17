@@ -103,6 +103,9 @@ class DuckDBBase:
                 project VARCHAR,
                 collection VARCHAR,
                 
+                -- Asset role (e.g., 'primary', 'b-roll', 'reference')
+                asset_role VARCHAR DEFAULT 'primary',
+                
                 -- Metadata blob for flexibility
                 metadata JSON
             );

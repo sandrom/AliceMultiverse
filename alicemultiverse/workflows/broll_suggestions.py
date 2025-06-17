@@ -266,8 +266,29 @@ class BRollSuggestionEngine:
             limit=10
         )
         
-        # Filter for b-roll assets if available
-        # TODO: Add role filtering when asset roles are implemented
+        # Also search for assets marked as b-roll
+        broll_results, _ = self.metadata_search.search(
+            filters={'asset_role': 'b-roll'},
+            limit=10
+        )
+        
+        # Combine results, preferring b-roll assets
+        all_results = []
+        seen_hashes = set()
+        
+        # Add b-roll results first
+        for result in broll_results:
+            if result['content_hash'] not in seen_hashes:
+                all_results.append(result)
+                seen_hashes.add(result['content_hash'])
+        
+        # Add tag-based results
+        for result in results:
+            if result['content_hash'] not in seen_hashes:
+                all_results.append(result)
+                seen_hashes.add(result['content_hash'])
+        
+        results = all_results[:10]  # Limit to 10 total
 
         suggestions = []
         for result in results:

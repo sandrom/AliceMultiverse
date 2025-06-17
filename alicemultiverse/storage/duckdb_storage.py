@@ -361,3 +361,46 @@ class DuckDBStorage(DuckDBBase):
             "errors": errors,
             "success_rate": processed / total if total > 0 else 0
         }
+    
+    def set_asset_role(self, content_hash: str, role: str) -> bool:
+        """Set the role of an asset.
+        
+        Args:
+            content_hash: Content hash of the asset
+            role: Role to set (e.g., 'primary', 'b-roll', 'reference')
+            
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            result = self.conn.execute("""
+                UPDATE assets 
+                SET asset_role = ?, modified_at = ?
+                WHERE content_hash = ?
+            """, [role, datetime.now(), content_hash])
+            
+            # Check if any rows were updated
+            return result.rowcount > 0
+            
+        except Exception as e:
+            logger.error(f"Failed to set asset role: {e}")
+            return False
+    
+    def get_assets_by_role(self, role: str, limit: int = 100) -> list[dict[str, Any]]:
+        """Get all assets with a specific role.
+        
+        Args:
+            role: Role to filter by
+            limit: Maximum number of results
+            
+        Returns:
+            List of assets with the specified role
+        """
+        results = self.conn.execute("""
+            SELECT * FROM assets 
+            WHERE asset_role = ?
+            ORDER BY modified_at DESC
+            LIMIT ?
+        """, [role, limit]).fetchall()
+        
+        return [self._row_to_dict(row) for row in results]
