@@ -4,6 +4,7 @@ Integrates music analysis, transition matching, and timeline generation.
 """
 
 import logging
+import tempfile
 from pathlib import Path
 from typing import Any
 
@@ -407,7 +408,10 @@ class MusicVideoTemplate(WorkflowTemplate):
 
             for clip in timeline:
                 source = clip["source"]
-                proxy_path = f"/tmp/proxies/{Path(source).stem}_proxy.mp4"
+                # Use secure temp directory
+                proxy_dir = Path(tempfile.gettempdir()) / "alice_proxies"
+                proxy_dir.mkdir(exist_ok=True)
+                proxy_path = str(proxy_dir / f"{Path(source).stem}_proxy.mp4")
                 proxy_paths[source] = proxy_path
 
             return {
