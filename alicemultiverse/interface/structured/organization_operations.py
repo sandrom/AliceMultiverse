@@ -25,11 +25,11 @@ class OrganizationOperationsMixin:
 
     def organize_media(self, request: OrganizeRequest, client_id: str = "default") -> AliceResponse:
         """Organize media files with structured parameters only.
-        
+
         Args:
             request: Structured organization request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with organization results
         """
@@ -93,11 +93,11 @@ class OrganizationOperationsMixin:
 
     def update_tags(self, request: TagUpdateRequest, client_id: str = "default") -> AliceResponse:
         """Update asset tags with structured operations.
-        
+
         Args:
             request: Tag update request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response indicating success
         """
@@ -190,11 +190,11 @@ class OrganizationOperationsMixin:
 
     def group_assets(self, request: GroupingRequest, client_id: str = "default") -> AliceResponse:
         """Group assets together with structured parameters.
-        
+
         Args:
             request: Grouping request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response indicating success
         """

@@ -140,7 +140,7 @@ def setup_structured_logging(
     include_caller_info: bool = True
 ):
     """Setup structured logging for the application.
-    
+
     Args:
         log_level: Logging level (DEBUG, INFO, WARNING, ERROR)
         json_logs: Output logs as JSON (for production)

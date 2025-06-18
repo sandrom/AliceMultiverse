@@ -78,7 +78,7 @@ class VariationTracker:
 
     def __init__(self, cache_dir: Path | None = None):
         """Initialize the variation tracker.
-        
+
         Args:
             cache_dir: Directory for caching metrics
         """
@@ -158,13 +158,13 @@ class VariationTracker:
         metadata: dict[str, Any] | None = None,
     ) -> str:
         """Create a new content group.
-        
+
         Args:
             base_content_id: ID of the base content
             variation_ids: IDs of variations
             tags: Optional tags for the group
             metadata: Optional metadata
-            
+
         Returns:
             Group ID
         """
@@ -197,7 +197,7 @@ class VariationTracker:
         metrics_update: dict[str, Any],
     ):
         """Update metrics for a content variation.
-        
+
         Args:
             content_id: Content or variation ID
             metrics_update: Dictionary of metric updates
@@ -232,10 +232,10 @@ class VariationTracker:
         variation_id: str,
     ) -> VariationMetrics | None:
         """Get performance metrics for a variation.
-        
+
         Args:
             variation_id: Variation ID
-            
+
         Returns:
             Metrics or None if not found
         """
@@ -246,10 +246,10 @@ class VariationTracker:
         group_id: str,
     ) -> dict[str, Any]:
         """Get aggregated performance for a content group.
-        
+
         Args:
             group_id: Group ID
-            
+
         Returns:
             Aggregated performance data
         """
@@ -311,12 +311,12 @@ class VariationTracker:
         min_views: int = 100,
     ) -> list[tuple[str, VariationMetrics]]:
         """Find top performing variations.
-        
+
         Args:
             metric: Metric to sort by
             limit: Maximum results
             min_views: Minimum views threshold
-            
+
         Returns:
             List of (content_id, metrics) tuples
         """
@@ -340,10 +340,10 @@ class VariationTracker:
         time_window: timedelta | None = None,
     ) -> dict[str, Any]:
         """Get insights about variation performance.
-        
+
         Args:
             time_window: Optional time window for analysis
-            
+
         Returns:
             Insights dictionary
         """
@@ -420,10 +420,10 @@ class VariationTracker:
         output_path: Path | None = None,
     ) -> Path:
         """Export analytics data for external analysis.
-        
+
         Args:
             output_path: Optional output path
-            
+
         Returns:
             Path to exported file
         """

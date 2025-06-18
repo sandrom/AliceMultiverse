@@ -29,7 +29,7 @@ async def generate_content_variations(
     output_dir: str | None = None,
 ) -> dict[str, Any]:
     """Generate smart variations of successful content.
-    
+
     Args:
         base_content_id: ID of the base content
         original_prompt: Original generation prompt
@@ -39,7 +39,7 @@ async def generate_content_variations(
         strategy: Variation selection strategy
         max_variations: Maximum number of variations
         output_dir: Output directory for variations
-        
+
     Returns:
         Dictionary with variation results
     """
@@ -121,11 +121,11 @@ async def track_variation_performance(
     metrics: dict[str, Any],
 ) -> dict[str, Any]:
     """Track performance metrics for a content variation.
-    
+
     Args:
         content_id: Content or variation ID
         metrics: Performance metrics to track
-        
+
     Returns:
         Updated metrics summary
     """
@@ -156,13 +156,13 @@ async def create_variation_group(
     metadata: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Create a group of related content variations.
-    
+
     Args:
         base_content_id: ID of the base content
         variation_ids: IDs of variations
         tags: Optional tags
         metadata: Optional metadata
-        
+
     Returns:
         Group information
     """
@@ -191,10 +191,10 @@ async def get_variation_insights(
     time_window_days: int | None = None,
 ) -> dict[str, Any]:
     """Get insights about content variation performance.
-    
+
     Args:
         time_window_days: Optional time window in days
-        
+
     Returns:
         Variation insights
     """
@@ -214,12 +214,12 @@ async def find_top_variations(
     min_views: int = 100,
 ) -> dict[str, Any]:
     """Find top performing content variations.
-    
+
     Args:
         metric: Metric to sort by
         limit: Maximum results
         min_views: Minimum views threshold
-        
+
     Returns:
         Top variations list
     """
@@ -255,11 +255,11 @@ async def get_variation_recommendations(
     limit: int = 5,
 ) -> dict[str, Any]:
     """Get recommended variations based on past success.
-    
+
     Args:
         content_type: Type of content
         limit: Maximum recommendations
-        
+
     Returns:
         Recommended variations
     """
@@ -295,13 +295,13 @@ async def analyze_variation_success(
     performance_metrics: dict[str, float],
 ) -> dict[str, Any]:
     """Analyze and record variation success.
-    
+
     Args:
         variation_id: Variation ID
         base_content_id: Base content ID
         variation_type: Type of variation
         performance_metrics: Performance metrics
-        
+
     Returns:
         Analysis results
     """
@@ -340,10 +340,10 @@ async def export_variation_analytics(
     output_dir: str | None = None,
 ) -> dict[str, Any]:
     """Export variation analytics data.
-    
+
     Args:
         output_dir: Optional output directory
-        
+
     Returns:
         Export information
     """

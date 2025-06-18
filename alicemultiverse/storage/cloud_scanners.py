@@ -18,7 +18,7 @@ class S3Scanner:
 
     def __init__(self, location: StorageLocation):
         """Initialize S3 scanner.
-        
+
         Args:
             location: Storage location configuration
         """
@@ -62,10 +62,10 @@ class S3Scanner:
 
     async def scan(self, show_progress: bool = True) -> dict[str, any]:
         """Scan S3 bucket for media files.
-        
+
         Args:
             show_progress: Whether to show progress
-            
+
         Returns:
             Scan statistics
         """
@@ -133,7 +133,7 @@ class S3Scanner:
 
     async def download_file(self, key: str, local_path: Path) -> None:
         """Download a file from S3.
-        
+
         Args:
             key: S3 object key
             local_path: Local path to save file
@@ -149,7 +149,7 @@ class S3Scanner:
 
     async def upload_file(self, local_path: Path, key: str) -> None:
         """Upload a file to S3.
-        
+
         Args:
             local_path: Local file path
             key: S3 object key
@@ -162,10 +162,10 @@ class S3Scanner:
 
     async def calculate_content_hash(self, key: str) -> str:
         """Calculate SHA-256 hash of an S3 object.
-        
+
         Args:
             key: S3 object key
-            
+
         Returns:
             SHA-256 hash hex string
         """
@@ -186,7 +186,7 @@ class GCSScanner:
 
     def __init__(self, location: StorageLocation):
         """Initialize GCS scanner.
-        
+
         Args:
             location: Storage location configuration
         """
@@ -228,10 +228,10 @@ class GCSScanner:
 
     async def scan(self, show_progress: bool = True) -> dict[str, any]:
         """Scan GCS bucket for media files.
-        
+
         Args:
             show_progress: Whether to show progress
-            
+
         Returns:
             Scan statistics
         """
@@ -290,7 +290,7 @@ class GCSScanner:
 
     async def download_file(self, blob_name: str, local_path: Path) -> None:
         """Download a file from GCS.
-        
+
         Args:
             blob_name: GCS blob name
             local_path: Local path to save file
@@ -307,7 +307,7 @@ class GCSScanner:
 
     async def upload_file(self, local_path: Path, blob_name: str) -> None:
         """Upload a file to GCS.
-        
+
         Args:
             local_path: Local file path
             blob_name: GCS blob name
@@ -321,10 +321,10 @@ class GCSScanner:
 
     async def calculate_content_hash(self, blob_name: str) -> str:
         """Calculate SHA-256 hash of a GCS blob.
-        
+
         Args:
             blob_name: GCS blob name
-            
+
         Returns:
             SHA-256 hash hex string
         """
@@ -343,13 +343,13 @@ class GCSScanner:
 # Factory function to create appropriate scanner
 def create_cloud_scanner(location: StorageLocation):
     """Create appropriate cloud scanner for storage location.
-    
+
     Args:
         location: Storage location configuration
-        
+
     Returns:
         Cloud scanner instance
-        
+
     Raises:
         ValueError: If storage type is not supported
     """

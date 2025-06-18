@@ -20,7 +20,7 @@ class DaVinciResolveTimeline:
         resolution: tuple[int, int] = (1920, 1080)
     ):
         """Initialize timeline.
-        
+
         Args:
             project_name: Name of the project
             frame_rate: Timeline frame rate
@@ -44,7 +44,7 @@ class DaVinciResolveTimeline:
         notes: str | None = None
     ):
         """Add a clip to the timeline.
-        
+
         Args:
             file_path: Path to video file
             start_time: Start time in seconds
@@ -69,7 +69,7 @@ class DaVinciResolveTimeline:
         duration: float = 0.5
     ):
         """Add a transition between clips.
-        
+
         Args:
             transition_type: Type of transition
             start_time: Start time of transition
@@ -85,7 +85,7 @@ class DaVinciResolveTimeline:
 
     def export(self, output_path: Path) -> None:
         """Export timeline to FCPXML format.
-        
+
         Args:
             output_path: Path to save the .fcpxml file
         """

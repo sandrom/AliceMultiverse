@@ -19,12 +19,12 @@ async def analyze_timeline_flow(
     target_energy: str | None = None,
 ) -> dict[str, Any]:
     """Analyze timeline flow and detect issues.
-    
+
     Args:
         timeline_data: Timeline data dictionary
         target_mood: Target mood (upbeat, dramatic, calm)
         target_energy: Target energy curve (rising_action, steady, etc.)
-        
+
     Returns:
         Flow analysis with issues and suggestions
     """
@@ -91,10 +91,10 @@ async def analyze_image_composition(
     image_path: str,
 ) -> dict[str, Any]:
     """Analyze visual composition of an image.
-    
+
     Args:
         image_path: Path to image file
-        
+
     Returns:
         Composition analysis with metrics and suggestions
     """
@@ -137,11 +137,11 @@ async def analyze_timeline_compositions(
     sample_rate: float = 0.2,
 ) -> dict[str, Any]:
     """Analyze composition of all clips in timeline.
-    
+
     Args:
         timeline_data: Timeline data dictionary
         sample_rate: Fraction of clips to sample (0-1)
-        
+
     Returns:
         Aggregated composition analysis
     """
@@ -204,13 +204,13 @@ async def optimize_timeline(
     target_duration: float | None = None,
 ) -> dict[str, Any]:
     """Optimize timeline based on flow analysis.
-    
+
     Args:
         timeline_data: Timeline data dictionary
         strategy: Optimization strategy
         preserve_clips: Indices of clips to preserve
         target_duration: Target duration in seconds
-        
+
     Returns:
         Optimized timeline with changes report
     """
@@ -277,11 +277,11 @@ async def suggest_clip_order(
     target_flow: str = "rising_action",
 ) -> dict[str, Any]:
     """Suggest optimal clip order based on composition analysis.
-    
+
     Args:
         clip_paths: List of clip paths
         target_flow: Target energy flow pattern
-        
+
     Returns:
         Suggested clip order with reasoning
     """
@@ -360,11 +360,11 @@ async def detect_composition_patterns(
     limit: int = 100,
 ) -> dict[str, Any]:
     """Detect composition patterns in a project or collection.
-    
+
     Args:
         project_name: Optional project filter
         limit: Maximum images to analyze
-        
+
     Returns:
         Composition patterns and insights
     """

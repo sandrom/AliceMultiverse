@@ -34,7 +34,7 @@ class DuplicateFinder:
     ):
         """
         Initialize duplicate finder.
-        
+
         Args:
             hasher: Perceptual hasher instance
             similarity_threshold: Threshold for considering images similar
@@ -53,12 +53,12 @@ class DuplicateFinder:
     ) -> tuple[int, int]:
         """
         Scan directory for duplicates.
-        
+
         Args:
             directory: Directory to scan
             recursive: Whether to scan subdirectories
             extensions: File extensions to include
-            
+
         Returns:
             Tuple of (exact_duplicates_found, similar_images_found)
         """
@@ -249,12 +249,12 @@ class DuplicateFinder:
     ) -> dict[str, int]:
         """
         Remove duplicate files.
-        
+
         Args:
             dry_run: If True, only report what would be removed
             backup_dir: If provided, move files here instead of deleting
             remove_similar: If True, also remove similar (not just exact)
-            
+
         Returns:
             Statistics about removed files
         """
@@ -326,10 +326,10 @@ class DuplicateFinder:
     def create_hardlinks(self, dry_run: bool = True) -> dict[str, int]:
         """
         Replace duplicates with hardlinks to save space.
-        
+
         Args:
             dry_run: If True, only report what would be done
-            
+
         Returns:
             Statistics about created hardlinks
         """

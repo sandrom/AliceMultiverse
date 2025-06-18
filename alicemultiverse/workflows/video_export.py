@@ -77,7 +77,7 @@ class DaVinciResolveExporter:
     @staticmethod
     def export_edl(timeline: Timeline, output_path: Path) -> bool:
         """Export timeline as EDL (Edit Decision List).
-        
+
         EDL is a simple text format supported by most NLEs.
         """
         try:
@@ -405,7 +405,7 @@ class ProxyGenerator:
         codec: str = "h264"
     ) -> dict[str, Path]:
         """Generate proxy files for all clips in timeline.
-        
+
         Returns mapping of original path to proxy path.
         """
         import asyncio
@@ -481,14 +481,14 @@ class VideoExportManager:
         proxy_resolution: tuple[int, int] = (1280, 720)
     ) -> dict[str, Any]:
         """Export timeline in multiple formats.
-        
+
         Args:
             timeline: Timeline to export
             output_dir: Directory for output files
             formats: List of formats to export ("edl", "xml", "capcut")
             generate_proxies: Whether to generate proxy files
             proxy_resolution: Resolution for proxy files
-            
+
         Returns:
             Dictionary with export results and paths
         """

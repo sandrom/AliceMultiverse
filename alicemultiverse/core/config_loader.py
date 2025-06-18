@@ -12,7 +12,7 @@ class ConfigLoader:
 
     def __init__(self, defaults_path: Path | None = None):
         """Initialize configuration loader.
-        
+
         Args:
             defaults_path: Path to defaults.yaml file
         """
@@ -24,11 +24,11 @@ class ConfigLoader:
 
     def get(self, path: str, default: Any = None) -> Any:
         """Get configuration value.
-        
+
         Args:
             path: Dot-separated path (e.g., "providers.openai.base_url")
             default: Default value if not found
-            
+
         Returns:
             Configuration value with environment overrides applied
         """
@@ -48,10 +48,10 @@ class ConfigLoader:
 
     def get_provider_config(self, provider_name: str) -> dict[str, Any]:
         """Get all configuration for a provider.
-        
+
         Args:
             provider_name: Provider name
-            
+
         Returns:
             Provider configuration dictionary
         """
@@ -68,10 +68,10 @@ class ConfigLoader:
 
     def get_service_config(self, service_name: str) -> dict[str, Any]:
         """Get all configuration for a service.
-        
+
         Args:
             service_name: Service name
-            
+
         Returns:
             Service configuration dictionary
         """
@@ -88,7 +88,7 @@ class ConfigLoader:
 
     def _load_env_overrides(self) -> dict[str, Any]:
         """Load all ALICE_ prefixed environment variables.
-        
+
         Returns:
             Dictionary of overrides organized by path
         """
@@ -106,10 +106,10 @@ class ConfigLoader:
 
     def _path_to_env_key(self, path: str) -> str:
         """Convert config path to environment variable name.
-        
+
         Args:
             path: Dot-separated path
-            
+
         Returns:
             Environment variable name
         """
@@ -119,10 +119,10 @@ class ConfigLoader:
 
     def _env_key_to_path(self, env_key: str) -> str | None:
         """Convert environment variable name to config path.
-        
+
         Args:
             env_key: Environment variable name
-            
+
         Returns:
             Dot-separated path or None
         """
@@ -149,10 +149,10 @@ class ConfigLoader:
 
     def _parse_env_value(self, value: str) -> Any:
         """Parse environment variable value to appropriate type.
-        
+
         Args:
             value: String value from environment
-            
+
         Returns:
             Parsed value
         """
@@ -180,7 +180,7 @@ class ConfigLoader:
 
     def _set_nested_value(self, data: dict[str, Any], path: str, value: Any) -> None:
         """Set a nested value in a dictionary.
-        
+
         Args:
             data: Dictionary to modify
             path: Dot-separated path
@@ -203,7 +203,7 @@ _config_loader: ConfigLoader | None = None
 
 def get_config() -> ConfigLoader:
     """Get global configuration loader instance.
-    
+
     Returns:
         ConfigLoader instance
     """
@@ -215,11 +215,11 @@ def get_config() -> ConfigLoader:
 
 def get_config_value(path: str, default: Any = None) -> Any:
     """Get configuration value using global loader.
-    
+
     Args:
         path: Dot-separated path
         default: Default value
-        
+
     Returns:
         Configuration value
     """

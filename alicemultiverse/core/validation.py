@@ -37,13 +37,13 @@ def validate_path(
     base_path: Path | None = None
 ) -> Callable[[F], F]:
     """Decorator to validate file paths.
-    
+
     Args:
         must_exist: Whether the path must exist
         allow_symlinks: Whether to allow symbolic links
         allowed_extensions: Set of allowed file extensions
         base_path: Base path for relative path resolution
-        
+
     Returns:
         Decorator function
     """
@@ -103,12 +103,12 @@ def validate_url(
     require_https: bool = False
 ) -> Callable[[F], F]:
     """Decorator to validate URLs.
-    
+
     Args:
         allowed_schemes: Set of allowed URL schemes
         allowed_domains: Set of allowed domains
         require_https: Whether to require HTTPS
-        
+
     Returns:
         Decorator function
     """
@@ -166,17 +166,17 @@ def validate_file_path(
     base_path: Path | None = None
 ) -> Path:
     """Validate a file path for security and correctness.
-    
+
     Args:
         path: Path to validate
         must_exist: Whether the path must exist
         allow_symlinks: Whether to allow symbolic links
         allowed_extensions: Set of allowed file extensions
         base_path: Base path for relative path resolution
-        
+
     Returns:
         Validated Path object
-        
+
     Raises:
         ValidationError: If validation fails
     """
@@ -240,16 +240,16 @@ def validate_url_string(
     require_https: bool = False
 ) -> str:
     """Validate a URL string.
-    
+
     Args:
         url: URL to validate
         allowed_schemes: Set of allowed URL schemes
         allowed_domains: Set of allowed domains
         require_https: Whether to require HTTPS
-        
+
     Returns:
         Validated URL string
-        
+
     Raises:
         ValidationError: If validation fails
     """
@@ -306,11 +306,11 @@ def validate_url_string(
 
 def sanitize_filename(filename: str, default: str = "file") -> str:
     """Sanitize a filename for safe file system usage.
-    
+
     Args:
         filename: Original filename
         default: Default name if sanitization fails
-        
+
     Returns:
         Safe filename
     """
@@ -346,12 +346,12 @@ def validate_json_input(
     max_size: int = 10 * 1024 * 1024  # 10MB default
 ) -> Callable[[F], F]:
     """Decorator to validate JSON input.
-    
+
     Args:
         schema: JSON schema for validation
         required_fields: List of required fields
         max_size: Maximum allowed size in bytes
-        
+
     Returns:
         Decorator function
     """
@@ -400,11 +400,11 @@ def validate_json_input(
 
 def sanitize_error_message(error: Exception, show_type: bool = True) -> str:
     """Sanitize error message to remove sensitive information.
-    
+
     Args:
         error: Exception to sanitize
         show_type: Whether to include error type
-        
+
     Returns:
         Safe error message
     """

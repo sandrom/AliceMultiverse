@@ -112,11 +112,11 @@ class AIFriendlyError:
     @classmethod
     def make_friendly(cls, error: Exception, context: dict[str, Any] | None = None) -> dict[str, Any]:
         """Convert an exception to an AI-friendly error response.
-        
+
         Args:
             error: The exception to convert
             context: Optional context about what was being attempted
-            
+
         Returns:
             Dictionary with friendly error information
         """
@@ -190,7 +190,7 @@ class AIFriendlyError:
 
 def wrap_error_response(func: Callable[..., Any]) -> Callable[..., Any]:
     """Decorator to automatically convert exceptions to AI-friendly responses.
-    
+
     Use this on interface methods to ensure all errors are AI-friendly.
     """
     def wrapper(*args: Any, **kwargs: Any) -> dict[str, Any]:

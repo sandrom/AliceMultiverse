@@ -59,7 +59,7 @@ class BudgetExceededError(ProviderError):
 
 class Provider(ABC):
     """Unified base class for AI generation providers.
-    
+
     This class combines all provider functionality:
     - Core provider interface
     - Event publishing
@@ -78,7 +78,7 @@ class Provider(ABC):
 
     def __init__(self, api_key: str | None = None):
         """Initialize provider.
-        
+
         Args:
             api_key: API key for authentication
         """
@@ -107,13 +107,13 @@ class Provider(ABC):
 
     async def generate(self, request: GenerationRequest) -> GenerationResult:
         """Generate content based on request with retry logic and health monitoring.
-        
+
         Args:
             request: Generation request
-            
+
         Returns:
             Generation result
-            
+
         Raises:
             ProviderError: If generation fails
             BudgetExceededError: If request would exceed budget
@@ -211,13 +211,13 @@ class Provider(ABC):
     @abstractmethod
     async def _generate(self, request: GenerationRequest) -> GenerationResult:
         """Perform the actual generation (implemented by subclasses).
-        
+
         Args:
             request: Generation request
-            
+
         Returns:
             Generation result
-            
+
         Raises:
             ProviderError: If generation fails
         """
@@ -225,14 +225,14 @@ class Provider(ABC):
     @abstractmethod
     async def check_status(self) -> ProviderStatus:
         """Check provider availability.
-        
+
         Returns:
             Provider status
         """
 
     def get_health_status(self) -> ProviderStatus:
         """Get provider health status from monitor.
-        
+
         Returns:
             Provider status based on circuit breaker state
         """
@@ -246,7 +246,7 @@ class Provider(ABC):
 
     def get_health_metrics(self) -> dict[str, Any] | None:
         """Get provider health metrics.
-        
+
         Returns:
             Basic health metrics for personal use
         """
@@ -258,10 +258,10 @@ class Provider(ABC):
 
     async def estimate_cost(self, request: GenerationRequest) -> CostEstimate:
         """Estimate cost for a generation request.
-        
+
         Args:
             request: Generation request
-            
+
         Returns:
             Cost estimate with breakdown
         """
@@ -312,10 +312,10 @@ class Provider(ABC):
 
     async def validate_request(self, request: GenerationRequest) -> None:
         """Validate a generation request.
-        
+
         Args:
             request: Generation request
-            
+
         Raises:
             ValueError: If request is invalid
             BudgetExceededError: If request would exceed budget
@@ -360,10 +360,10 @@ class Provider(ABC):
 
     def get_default_model(self, generation_type: GenerationType) -> str:
         """Get default model for a generation type.
-        
+
         Args:
             generation_type: Type of generation
-            
+
         Returns:
             Default model name
         """
@@ -372,10 +372,10 @@ class Provider(ABC):
 
     def get_models_for_type(self, generation_type: GenerationType) -> list[str]:
         """Get available models for a generation type.
-        
+
         Args:
             generation_type: Type of generation
-            
+
         Returns:
             List of model names
         """
@@ -468,7 +468,7 @@ class Provider(ABC):
 
     def _should_retry(self, exception: Exception) -> bool:
         """Determine if an exception should trigger a retry.
-        
+
         Override this method in subclasses to customize retry logic.
         """
         # Don't retry validation errors or budget exceeded
@@ -546,7 +546,7 @@ class Provider(ABC):
 
     def retry_with_backoff(self, func: Callable[..., T]) -> Callable[..., T]:
         """Decorator to retry a sync function with exponential backoff.
-        
+
         For use with synchronous methods in providers.
         """
         @wraps(func)

@@ -21,10 +21,10 @@ class MediaOrganizer(
     WatchModeMixin,
 ):
     """Main class for organizing AI-generated media files.
-    
+
     This class combines all the functionality from various mixins to provide
     a complete media organization solution. It handles:
-    
+
     - Finding and analyzing media files
     - Detecting AI generation sources
     - Organizing files by date/project/source

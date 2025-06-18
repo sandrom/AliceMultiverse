@@ -16,7 +16,7 @@ from alicemultiverse.storage.unified_duckdb import DuckDBSearch
 def demo_similarity_search(target_image_path: str, threshold: int = 10):
     """
     Find images similar to a target image using perceptual hashing.
-    
+
     Args:
         target_image_path: Path to the image to find similar images for
         threshold: Maximum hamming distance for similarity (default: 10)

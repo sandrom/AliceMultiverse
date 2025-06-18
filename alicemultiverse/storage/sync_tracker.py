@@ -39,7 +39,7 @@ class SyncTracker:
 
     def __init__(self, registry: StorageRegistry):
         """Initialize sync tracker.
-        
+
         Args:
             registry: Storage location registry
         """
@@ -50,10 +50,10 @@ class SyncTracker:
         content_hash: str
     ) -> dict[str, any]:
         """Check synchronization status for a file.
-        
+
         Args:
             content_hash: SHA-256 hash of the file
-            
+
         Returns:
             Sync status information
         """
@@ -99,10 +99,10 @@ class SyncTracker:
         show_progress: bool = True
     ) -> list[dict[str, any]]:
         """Detect all files with sync conflicts.
-        
+
         Args:
             show_progress: Show progress bar
-            
+
         Returns:
             List of conflicts
         """
@@ -147,11 +147,11 @@ class SyncTracker:
         strategy: ConflictResolution = ConflictResolution.NEWEST_WINS
     ) -> dict[str, any]:
         """Resolve a sync conflict using the specified strategy.
-        
+
         Args:
             content_hash: File content hash
             strategy: Resolution strategy
-            
+
         Returns:
             Resolution result
         """
@@ -231,13 +231,13 @@ class SyncTracker:
         scanner = None  # MultiPathScanner instance
     ) -> dict[str, any]:
         """Sync a file from source to target location.
-        
+
         Args:
             content_hash: File content hash
             source_location_id: Source location ID
             target_location_id: Target location ID
             scanner: Optional MultiPathScanner for file transfers
-            
+
         Returns:
             Sync result
         """
@@ -304,7 +304,7 @@ class SyncTracker:
 
     def get_sync_queue(self) -> list[dict[str, any]]:
         """Get all pending sync operations.
-        
+
         Returns:
             List of pending syncs
         """
@@ -317,12 +317,12 @@ class SyncTracker:
         show_progress: bool = True
     ) -> dict[str, any]:
         """Process all pending sync operations.
-        
+
         Args:
             scanner: MultiPathScanner for file transfers
             max_concurrent: Maximum concurrent operations
             show_progress: Show progress bar
-            
+
         Returns:
             Processing statistics
         """
@@ -410,7 +410,7 @@ class VersionTracker:
 
     def __init__(self, registry: StorageRegistry):
         """Initialize version tracker.
-        
+
         Args:
             registry: Storage location registry
         """
@@ -425,7 +425,7 @@ class VersionTracker:
         metadata: dict | None = None
     ) -> None:
         """Track a new version of a file.
-        
+
         Args:
             content_hash: Current content hash
             file_path: File path
@@ -457,10 +457,10 @@ class VersionTracker:
         content_hash: str
     ) -> list[dict[str, any]]:
         """Get version history for a file.
-        
+
         Args:
             content_hash: Content hash
-            
+
         Returns:
             Version history
         """

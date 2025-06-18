@@ -75,13 +75,13 @@ def populate_from_directory(
 ) -> int:
     """
     Populate comparison system with images from a directory.
-    
+
     Args:
         directory: Directory to scan for images
         manager: ComparisonManager instance
         recursive: Whether to search recursively
         limit: Maximum number of assets to add
-        
+
     Returns:
         Number of assets added
     """
@@ -143,7 +143,7 @@ def populate_from_directory(
 
 def populate_default_directories(manager: ComparisonManager, limit: int = None, config=None) -> int:
     """Populate from default organized directories.
-    
+
     Args:
         manager: ComparisonManager instance
         limit: Optional limit on number of assets to add

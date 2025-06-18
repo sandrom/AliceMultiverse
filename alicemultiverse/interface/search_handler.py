@@ -23,7 +23,7 @@ class OptimizedSearchHandler:
 
     def __init__(self, db_path: str = None, config=None):
         """Initialize search handler.
-        
+
         Args:
             db_path: Path to DuckDB database file. If None, uses config or local test path.
             config: Optional configuration object
@@ -52,10 +52,10 @@ class OptimizedSearchHandler:
 
     def search_assets(self, request: SearchRequest) -> SearchResponse:
         """Execute optimized search query.
-        
+
         Args:
             request: Search request
-            
+
         Returns:
             Search response with results
         """
@@ -171,10 +171,10 @@ class OptimizedSearchHandler:
 
     def _convert_db_to_api_asset(self, db_asset: dict) -> Asset:
         """Convert database asset to API asset model.
-        
+
         Args:
             db_asset: Database asset dictionary from DuckDB
-            
+
         Returns:
             API asset model
         """
@@ -213,11 +213,11 @@ class OptimizedSearchHandler:
 
     def _apply_additional_filters(self, asset: Asset, filters: dict) -> bool:
         """Apply filters that aren't supported by database query.
-        
+
         Args:
             asset: API asset model
             filters: Filter criteria
-            
+
         Returns:
             True if asset passes all filters
         """
@@ -275,10 +275,10 @@ class OptimizedSearchHandler:
 
     def _calculate_facets(self, assets: list[dict]) -> SearchFacets:
         """Calculate facets from database results.
-        
+
         Args:
             assets: Database asset dictionaries from DuckDB
-            
+
         Returns:
             Search facets
         """
@@ -346,10 +346,10 @@ class OptimizedSearchHandler:
 
     def _build_cache_key(self, request: SearchRequest) -> dict:
         """Build cache key from search request.
-        
+
         Args:
             request: Search request
-            
+
         Returns:
             Cache key dictionary
         """
@@ -364,10 +364,10 @@ class OptimizedSearchHandler:
 
     def _serialize_db_asset(self, asset: dict) -> dict:
         """Serialize database asset for caching.
-        
+
         Args:
             asset: Database asset dictionary from DuckDB
-            
+
         Returns:
             Serializable dictionary
         """
@@ -383,10 +383,10 @@ class OptimizedSearchHandler:
 
     def rebuild_index(self, paths: list[Path]) -> int:
         """Rebuild the search index from files.
-        
+
         Args:
             paths: List of paths to scan for media files
-            
+
         Returns:
             Number of files indexed
         """
@@ -398,7 +398,7 @@ class OptimizedSearchHandler:
 
     def index_asset(self, metadata: dict) -> None:
         """Index a single asset.
-        
+
         Args:
             metadata: Asset metadata to index
         """
@@ -410,7 +410,7 @@ class OptimizedSearchHandler:
 
     def get_statistics(self) -> dict:
         """Get search index statistics.
-        
+
         Returns:
             Dictionary with statistics
         """

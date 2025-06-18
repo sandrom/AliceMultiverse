@@ -106,7 +106,7 @@ class ColorFlowAnalyzer:
     def __init__(self, n_colors: int = 5):
         """
         Initialize the color flow analyzer.
-        
+
         Args:
             n_colors: Number of dominant colors to extract from each shot
         """
@@ -116,12 +116,12 @@ class ColorFlowAnalyzer:
                          transition_duration: int = 30) -> ColorFlowAnalysis:
         """
         Analyze color flow between two shots.
-        
+
         Args:
             shot1_path: Path to first shot (image or first frame of video)
             shot2_path: Path to second shot (image or first frame of video)
             transition_duration: Duration of transition in frames
-            
+
         Returns:
             Complete color flow analysis
         """
@@ -463,7 +463,7 @@ def export_analysis_for_editor(analysis: ColorFlowAnalysis, output_path: str,
                               editor: str = 'resolve') -> None:
     """
     Export color flow analysis for video editors.
-    
+
     Args:
         analysis: Color flow analysis results
         output_path: Path to save export file
@@ -691,13 +691,13 @@ def analyze_sequence(shot_paths: list[str], transition_duration: int = 30,
                     editor: str = 'resolve') -> list[ColorFlowAnalysis]:
     """
     Analyze color flow for a sequence of shots.
-    
+
     Args:
         shot_paths: List of paths to shots in sequence
         transition_duration: Duration of each transition in frames
         export_path: Optional path to export analysis
         editor: Target editor for export
-        
+
     Returns:
         List of color flow analyses for each consecutive pair
     """

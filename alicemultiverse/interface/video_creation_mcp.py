@@ -31,7 +31,7 @@ logger = get_logger(__name__)
 
 def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> None:
     """Register video creation tools with MCP server.
-    
+
     Args:
         server: MCP server instance
         search_db: DuckDB search instance for asset lookup
@@ -45,10 +45,10 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         image_hash: str
     ) -> dict[str, Any]:
         """Analyze a single image for video generation potential.
-        
+
         Args:
             image_hash: Hash of image to analyze
-            
+
         Returns:
             Analysis including suggested camera motion and keywords
         """
@@ -86,14 +86,14 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         save_to_file: bool = True
     ) -> dict[str, Any]:
         """Generate a complete video storyboard from selected images.
-        
+
         Args:
             image_hashes: List of selected image hashes
             style: Video style - cinematic, documentary, music_video, narrative, abstract
             target_duration: Target video duration in seconds
             project_name: Optional project name (auto-generated if not provided)
             save_to_file: Whether to save storyboard to file
-            
+
         Returns:
             Complete storyboard with shots and transitions
         """
@@ -165,12 +165,12 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         output_format: str = "list"
     ) -> dict[str, Any]:
         """Create Kling-ready prompts from a storyboard.
-        
+
         Args:
             storyboard_file: Path to storyboard JSON file
             model: Kling model to use (text or image variants)
             output_format: Format - 'list', 'script', or 'detailed'
-            
+
         Returns:
             Kling prompts formatted for video generation
         """
@@ -271,12 +271,12 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         shots_to_process: list[int] | None = None
     ) -> dict[str, Any]:
         """Prepare enhanced keyframes using Flux Kontext.
-        
+
         Args:
             storyboard_file: Path to storyboard JSON file
             modifications: Optional modifications per shot (shot_number -> modification prompt)
             shots_to_process: Specific shots to process (1-indexed), or None for all
-            
+
         Returns:
             Flux generation requests for keyframe preparation
         """
@@ -361,11 +361,11 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         output_file: str | None = None
     ) -> dict[str, Any]:
         """Create a transition guide for video editing.
-        
+
         Args:
             storyboard_file: Path to storyboard JSON file
             output_file: Optional output file path for the guide
-            
+
         Returns:
             Formatted transition guide
         """
@@ -417,14 +417,14 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         auto_open: bool = True
     ) -> dict[str, Any]:
         """Open an interactive web preview of a video timeline.
-        
+
         Allows drag-and-drop reordering, trimming, and transition editing
         before exporting to your video editor.
-        
+
         Args:
             timeline_data: Timeline data with clips, transitions, and markers
             auto_open: Whether to automatically open browser
-            
+
         Returns:
             Preview URL and session ID
         """
@@ -437,17 +437,17 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         clips: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Update a timeline in the preview interface.
-        
+
         Operations:
         - reorder: Change clip order with drag-drop
         - trim: Adjust clip in/out points and duration
         - add_transition: Add or modify transitions
-        
+
         Args:
             session_id: Preview session ID
             operation: Operation type
             clips: List of clip updates
-            
+
         Returns:
             Updated timeline data
         """
@@ -460,17 +460,17 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         output_path: str | None = None
     ) -> dict[str, Any]:
         """Export a timeline from the preview interface.
-        
+
         Formats:
         - json: Full timeline data
         - edl: DaVinci Resolve EDL format
         - xml: Final Cut Pro XML format
-        
+
         Args:
             session_id: Preview session ID
             format: Export format
             output_path: Optional file path to save
-            
+
         Returns:
             Export result with file path or data
         """
@@ -480,7 +480,7 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
     @server.tool()
     async def get_timeline_preview_status() -> dict[str, Any]:
         """Check if timeline preview server is running.
-        
+
         Returns:
             Server status and URL
         """
@@ -495,19 +495,19 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         session_id: str | None = None
     ) -> dict[str, Any]:
         """Edit timeline using natural language commands.
-        
+
         Examples:
         - "Make the intro punchier"
         - "Add breathing room after the drop"
         - "Sync all cuts to the beat"
         - "Speed up the middle section"
         - "Add dissolve transitions"
-        
+
         Args:
             command: Natural language edit command
             timeline_data: Timeline to edit
             session_id: Optional preview session to update
-            
+
         Returns:
             Modified timeline with applied edits
         """
@@ -522,16 +522,16 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         timeline_data: dict[str, Any]
     ) -> dict[str, Any]:
         """Get AI-powered suggestions for timeline improvements.
-        
+
         Analyzes your timeline and suggests edits like:
         - Pacing adjustments
         - Rhythm synchronization
         - Energy flow improvements
         - Transition recommendations
-        
+
         Args:
             timeline_data: Timeline to analyze
-            
+
         Returns:
             Suggested commands and timeline analysis
         """
@@ -544,15 +544,15 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         session_id: str | None = None
     ) -> dict[str, Any]:
         """Apply multiple natural language edits in sequence.
-        
+
         Useful for complex edits like:
         ["Make the intro faster", "Add breathing room after", "Sync to beat"]
-        
+
         Args:
             commands: List of commands to apply in order
             timeline_data: Timeline to edit
             session_id: Optional preview session
-            
+
         Returns:
             Final timeline after all edits
         """
@@ -567,17 +567,17 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         category: str | None = None
     ) -> dict[str, Any]:
         """Get examples of natural language timeline commands.
-        
+
         Categories:
         - pace: Speed and timing adjustments
         - rhythm: Music synchronization
         - energy: Intensity and mood changes
         - space: Pauses and breathing room
         - transitions: Effect changes
-        
+
         Args:
             category: Optional category filter
-            
+
         Returns:
             Example commands by category
         """
@@ -599,7 +599,7 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         maintain_sync: bool = True
     ) -> dict[str, Any]:
         """Create platform-specific versions of your timeline.
-        
+
         Automatically adapts for:
         - instagram_reel (9:16, 90s max)
         - instagram_story (9:16, 60s max)
@@ -608,13 +608,13 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         - youtube_shorts (9:16, 60s max)
         - youtube (16:9, no limit)
         - twitter (16:9, 140s max)
-        
+
         Args:
             timeline_data: Master timeline to adapt
             platforms: List of target platforms
             smart_crop: AI-powered intelligent cropping
             maintain_sync: Keep music sync when adapting
-            
+
         Returns:
             Platform-adapted timeline versions
         """
@@ -630,15 +630,15 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         timeline_data: dict[str, Any]
     ) -> dict[str, Any]:
         """Check which platforms your timeline is suitable for.
-        
+
         Analyzes:
         - Duration compatibility
         - Aspect ratio requirements
         - Platform-specific optimizations
-        
+
         Args:
             timeline_data: Timeline to analyze
-            
+
         Returns:
             Platform recommendations and required adjustments
         """
@@ -653,17 +653,17 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
         create_master: bool = True
     ) -> dict[str, Any]:
         """Export timeline for multiple platforms in one go.
-        
+
         Creates properly named files for each platform with
         automatic adaptations applied.
-        
+
         Args:
             timeline_data: Master timeline
             platforms: Target platforms
             output_dir: Where to save exports
             format: Export format (json, edl)
             create_master: Also export master version
-            
+
         Returns:
             Export results with file paths
         """
@@ -678,13 +678,13 @@ def register_video_creation_tools(server: Server, search_db: DuckDBSearch) -> No
     @server.tool()
     async def get_platform_specs() -> dict[str, Any]:
         """Get specifications for all supported platforms.
-        
+
         Returns details on:
         - Aspect ratios and resolutions
         - Duration limits
         - Special features
         - File size limits
-        
+
         Returns:
             Platform specifications and categories
         """

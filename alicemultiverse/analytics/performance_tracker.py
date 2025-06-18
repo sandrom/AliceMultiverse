@@ -75,7 +75,7 @@ class PerformanceTracker:
 
     def __init__(self, config: Config | None = None):
         """Initialize performance tracker.
-        
+
         Args:
             config: Configuration object
         """
@@ -98,10 +98,10 @@ class PerformanceTracker:
 
     def start_session(self, session_id: str) -> SessionMetrics:
         """Start a new tracking session.
-        
+
         Args:
             session_id: Unique session identifier
-            
+
         Returns:
             New session metrics
         """
@@ -113,7 +113,7 @@ class PerformanceTracker:
 
     def end_session(self) -> SessionMetrics | None:
         """End current session and save metrics.
-        
+
         Returns:
             Completed session metrics
         """
@@ -141,12 +141,12 @@ class PerformanceTracker:
         metadata: dict[str, Any] | None = None
     ) -> WorkflowMetrics:
         """Start tracking a workflow.
-        
+
         Args:
             workflow_id: Unique workflow identifier
             workflow_type: Type of workflow (video_creation, export, etc.)
             metadata: Additional metadata
-            
+
         Returns:
             New workflow metrics
         """
@@ -168,11 +168,11 @@ class PerformanceTracker:
         updates: dict[str, Any]
     ) -> WorkflowMetrics | None:
         """Update workflow metrics.
-        
+
         Args:
             workflow_id: Workflow to update
             updates: Dictionary of updates
-            
+
         Returns:
             Updated metrics or None
         """
@@ -202,11 +202,11 @@ class PerformanceTracker:
         status: str = "completed"
     ) -> WorkflowMetrics | None:
         """End workflow tracking.
-        
+
         Args:
             workflow_id: Workflow to end
             status: Final status
-            
+
         Returns:
             Completed metrics or None
         """
@@ -257,7 +257,7 @@ class PerformanceTracker:
         metadata: dict[str, Any] | None = None
     ):
         """Track an export operation.
-        
+
         Args:
             workflow_id: Associated workflow
             platform: Export platform
@@ -289,7 +289,7 @@ class PerformanceTracker:
         cost: float | None = None
     ):
         """Track an API call.
-        
+
         Args:
             workflow_id: Associated workflow
             provider: API provider
@@ -320,7 +320,7 @@ class PerformanceTracker:
         metadata: dict[str, Any] | None = None
     ):
         """Track a user action.
-        
+
         Args:
             workflow_id: Associated workflow
             action: Action type (adjustment, preview, redo, etc.)
@@ -344,10 +344,10 @@ class PerformanceTracker:
 
     def get_workflow_summary(self, workflow_id: str) -> dict[str, Any] | None:
         """Get summary of workflow performance.
-        
+
         Args:
             workflow_id: Workflow to summarize
-            
+
         Returns:
             Summary dictionary or None
         """
@@ -398,11 +398,11 @@ class PerformanceTracker:
         workflow_type: str | None = None
     ) -> dict[str, Any]:
         """Get aggregated performance statistics.
-        
+
         Args:
             time_range: Time range to analyze
             workflow_type: Filter by workflow type
-            
+
         Returns:
             Performance statistics
         """
@@ -474,7 +474,7 @@ class PerformanceTracker:
 
     def get_improvement_opportunities(self) -> list[dict[str, Any]]:
         """Identify areas for improvement based on historical data.
-        
+
         Returns:
             List of improvement suggestions
         """

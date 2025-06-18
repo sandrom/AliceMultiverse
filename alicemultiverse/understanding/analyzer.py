@@ -99,7 +99,7 @@ class ImageAnalyzer:
 
     def add_analyzer(self, name: str, api_key: str, model: str | None = None):
         """Add a specific analyzer.
-        
+
         Args:
             name: Provider name
             api_key: API key for the provider
@@ -126,7 +126,7 @@ class ImageAnalyzer:
         custom_instructions: str | None = None
     ) -> ImageAnalysisResult:
         """Analyze an image using specified or cheapest provider.
-        
+
         Args:
             image_path: Path to the image
             provider: Specific provider to use (None = use cheapest)
@@ -134,7 +134,7 @@ class ImageAnalyzer:
             extract_tags: Whether to extract semantic tags
             detailed: Whether to include detailed descriptions
             custom_instructions: Additional instructions for analysis
-            
+
         Returns:
             ImageAnalysisResult with extracted information
         """
@@ -187,7 +187,7 @@ class ImageAnalyzer:
         max_concurrent: int = 5
     ) -> list[ImageAnalysisResult]:
         """Analyze multiple images concurrently.
-        
+
         Args:
             image_paths: List of image paths
             provider: Specific provider to use
@@ -196,7 +196,7 @@ class ImageAnalyzer:
             detailed: Whether to include detailed descriptions
             custom_instructions: Additional instructions
             max_concurrent: Maximum concurrent analyses
-            
+
         Returns:
             List of ImageAnalysisResult objects
         """
@@ -230,12 +230,12 @@ class ImageAnalyzer:
         **kwargs
     ) -> dict[str, ImageAnalysisResult]:
         """Compare analysis results from multiple providers.
-        
+
         Args:
             image_path: Path to the image
             providers: List of providers to compare (None = all available)
             **kwargs: Arguments passed to analyze()
-            
+
         Returns:
             Dictionary mapping provider name to result
         """
@@ -257,12 +257,12 @@ class ImageAnalyzer:
 
     async def estimate_batch_cost(self, image_count: int, providers: list[str] | None = None, detailed: bool = False) -> dict[str, Any]:
         """Estimate cost for analyzing a batch of images.
-        
+
         Args:
             image_count: Number of images to analyze
             providers: List of providers to use (None = all available)
             detailed: Whether detailed analysis is requested
-            
+
         Returns:
             Cost estimate with breakdown
         """
@@ -307,10 +307,10 @@ class ImageAnalyzer:
 
     def estimate_costs(self, detailed: bool = False) -> dict[str, float]:
         """Get cost estimates for all available providers.
-        
+
         Args:
             detailed: Whether estimating for detailed analysis
-            
+
         Returns:
             Dictionary mapping provider name to estimated cost
         """
@@ -326,12 +326,12 @@ class ImageAnalyzer:
         detailed: bool = False
     ) -> str | None:
         """Find the best provider that fits within budget.
-        
+
         Args:
             budget: Total budget in USD
             num_images: Number of images to analyze
             detailed: Whether using detailed analysis
-            
+
         Returns:
             Best provider name or None if budget too low
         """

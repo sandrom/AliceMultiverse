@@ -17,11 +17,11 @@ class ProjectOperationsMixin:
 
     def manage_project(self, request: ProjectRequest, client_id: str = "default") -> AliceResponse:
         """Manage projects with structured operations.
-        
+
         Args:
             request: Project management request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with project operation result
         """

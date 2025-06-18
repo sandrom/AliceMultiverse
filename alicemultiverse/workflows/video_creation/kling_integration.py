@@ -19,12 +19,12 @@ class KlingIntegrationMixin:
         output_dir: Path | None = None
     ) -> list[GenerationRequest]:
         """Create Kling generation requests from storyboard.
-        
+
         Args:
             storyboard: Video storyboard
             model: Kling model to use
             output_dir: Output directory for videos
-            
+
         Returns:
             List of generation requests ready for Kling
         """
@@ -69,10 +69,10 @@ class KlingIntegrationMixin:
 
     def create_transition_guide(self, storyboard: VideoStoryboard) -> str:
         """Create a text guide for video editing with transitions.
-        
+
         Args:
             storyboard: Video storyboard
-            
+
         Returns:
             Text guide for manual editing
         """

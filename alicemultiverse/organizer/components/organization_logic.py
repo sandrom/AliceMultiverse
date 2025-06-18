@@ -148,12 +148,12 @@ class OrganizationLogicMixin:
 
     def _handle_duplicate_destination(self, dest_path: Path, media_path: Path, content_hash: str) -> Path:
         """Handle cases where destination file already exists.
-        
+
         Args:
             dest_path: Intended destination path
             media_path: Source media path
             content_hash: Content hash of the media file
-            
+
         Returns:
             Final destination path (may be modified to avoid conflicts)
         """

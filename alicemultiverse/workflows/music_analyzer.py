@@ -86,10 +86,10 @@ class MusicAnalyzer:
 
     async def analyze_audio(self, audio_path: Path) -> MusicAnalysis:
         """Analyze audio file for video synchronization.
-        
+
         Args:
             audio_path: Path to audio file
-            
+
         Returns:
             Complete music analysis
         """
@@ -380,11 +380,11 @@ class MusicAnalyzer:
     def match_images_to_mood(self, music_analysis: MusicAnalysis,
                            image_moods: dict[str, list[str]]) -> list[tuple[str, float, float]]:
         """Match images to music sections based on mood.
-        
+
         Args:
             music_analysis: Analyzed music
             image_moods: Dict mapping image paths to mood tags
-            
+
         Returns:
             List of (image_path, start_time, end_time) tuples
         """
@@ -436,11 +436,11 @@ class MusicAnalyzer:
     def create_rhythm_timeline(self, music_analysis: MusicAnalysis,
                              target_duration: float | None = None) -> dict[str, Any]:
         """Create a rhythm-based timeline for video editing.
-        
+
         Args:
             music_analysis: Analyzed music
             target_duration: Target video duration (uses music duration if None)
-            
+
         Returns:
             Timeline with cut points and timing info
         """

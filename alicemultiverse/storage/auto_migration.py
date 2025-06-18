@@ -28,7 +28,7 @@ class AutoMigrationService:
         scanner: MultiPathScanner | None = None
     ):
         """Initialize auto-migration service.
-        
+
         Args:
             cache: DuckDB search cache
             registry: Storage location registry
@@ -44,11 +44,11 @@ class AutoMigrationService:
         show_progress: bool = True
     ) -> dict[str, list[dict]]:
         """Analyze which files should be migrated based on rules.
-        
+
         Args:
             dry_run: If True, only analyze without making changes
             show_progress: Show progress bars
-            
+
         Returns:
             Dictionary mapping file hashes to proposed migrations
         """
@@ -148,13 +148,13 @@ class AutoMigrationService:
         max_concurrent: int = 5
     ) -> dict[str, any]:
         """Execute the migration plan.
-        
+
         Args:
             migrations: Migration plan from analyze_migrations
             move_files: If True, move files; if False, copy them
             show_progress: Show progress bars
             max_concurrent: Maximum concurrent transfers
-            
+
         Returns:
             Migration statistics
         """
@@ -263,12 +263,12 @@ class AutoMigrationService:
         show_progress: bool = True
     ) -> dict[str, any]:
         """Run complete auto-migration process.
-        
+
         Args:
             dry_run: If True, only analyze without making changes
             move_files: If True, move files; if False, copy them
             show_progress: Show progress bars
-            
+
         Returns:
             Migration results
         """
@@ -311,10 +311,10 @@ class AutoMigrationService:
 
     def _prepare_metadata(self, asset: dict) -> dict:
         """Prepare metadata for rule evaluation.
-        
+
         Args:
             asset: Asset information from cache
-            
+
         Returns:
             Metadata dictionary for rule evaluation
         """
@@ -348,11 +348,11 @@ class AutoMigrationService:
         target_location: StorageLocation
     ) -> str:
         """Get human-readable reason for migration.
-        
+
         Args:
             metadata: File metadata
             target_location: Target storage location
-            
+
         Returns:
             Reason string
         """
@@ -379,7 +379,7 @@ class MigrationScheduler:
 
     def __init__(self, migration_service: AutoMigrationService):
         """Initialize migration scheduler.
-        
+
         Args:
             migration_service: Auto-migration service instance
         """
@@ -393,7 +393,7 @@ class MigrationScheduler:
         move_files: bool = False
     ):
         """Start periodic migration checks.
-        
+
         Args:
             interval_hours: Hours between migration runs
             move_files: Whether to move files (vs copy)

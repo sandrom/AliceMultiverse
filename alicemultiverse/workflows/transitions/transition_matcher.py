@@ -28,10 +28,10 @@ class TransitionMatcher:
     def analyze_sequence(self, image_paths: list[str]) -> list[TransitionSuggestion]:
         """
         Analyze a sequence of images and suggest transitions.
-        
+
         Args:
             image_paths: List of image file paths in sequence order
-            
+
         Returns:
             List of transition suggestions between consecutive images
         """
@@ -71,13 +71,13 @@ class TransitionMatcher:
     ) -> TransitionSuggestion:
         """
         Suggest optimal transition between two analyzed images.
-        
+
         Args:
             source_analysis: Analysis data for source image
             target_analysis: Analysis data for target image
             source_path: Path to source image
             target_path: Path to target image
-            
+
         Returns:
             Transition suggestion with type, duration, and effects
         """
@@ -478,13 +478,13 @@ class TransitionMatcher:
     async def analyze_sequence_with_morphing(self, image_paths: list[str]) -> list[TransitionSuggestion]:
         """
         Analyze a sequence with enhanced morphing detection.
-        
+
         This method integrates subject morphing analysis with traditional
         transition analysis for more sophisticated transitions.
-        
+
         Args:
             image_paths: List of image file paths in sequence order
-            
+
         Returns:
             List of transition suggestions including morphing opportunities
         """

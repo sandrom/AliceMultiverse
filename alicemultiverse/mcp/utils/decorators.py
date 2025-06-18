@@ -11,10 +11,10 @@ ToolFunc = TypeVar("ToolFunc", bound=Callable[..., Any])
 
 def require_service(service_name: str) -> Callable[[ToolFunc], ToolFunc]:
     """Decorator to ensure a service is available before tool execution.
-    
+
     Args:
         service_name: Name of required service
-        
+
     Returns:
         Decorator function
     """
@@ -43,13 +43,13 @@ def require_service(service_name: str) -> Callable[[ToolFunc], ToolFunc]:
 
 def validate_params(**validators: dict[str, Callable[[Any], Any]]) -> Callable[[ToolFunc], ToolFunc]:
     """Decorator to validate tool parameters.
-    
+
     Args:
         **validators: Mapping of parameter names to validation functions
-        
+
     Returns:
         Decorator function
-        
+
     Example:
         @validate_params(
             limit=lambda x: validate_positive_int(x, "limit"),

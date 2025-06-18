@@ -15,7 +15,7 @@ from ...interface.analytics_mcp import (
 
 def register_analytics_tools(server) -> None:
     """Register analytics tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """

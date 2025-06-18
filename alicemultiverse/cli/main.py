@@ -16,14 +16,14 @@ def create_parser() -> argparse.ArgumentParser:
     """Create simplified argument parser with only essential commands."""
     parser = argparse.ArgumentParser(
         description="""AliceMultiverse - AI-Native Media Organization
-        
+
 ⚠️  This CLI is for debugging only. Use Alice through AI assistants for normal usage.
-        
+
 Essential commands:
   alice mcp-server     Start MCP server for Claude Desktop
   alice keys setup     Configure API keys
   alice --version      Show version
-  
+
 Debug commands (use --debug flag):
   alice --debug organize    Basic file organization
   alice --debug dedup      Deduplication tools

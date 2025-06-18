@@ -29,7 +29,7 @@ class MultiPathScanner:
         project_service: ProjectService | None = None
     ):
         """Initialize multi-path scanner.
-        
+
         Args:
             cache: DuckDB search cache
             registry: Storage location registry
@@ -47,12 +47,12 @@ class MultiPathScanner:
         progress_callback: Callable[[str, int, int], None] | None = None
     ) -> dict[str, any]:
         """Discover all assets across all registered storage locations.
-        
+
         Args:
             force_scan: Force re-scan even if location was recently scanned
             show_progress: Show progress bars
             progress_callback: Optional callback for progress updates (message, current, total)
-            
+
         Returns:
             Dictionary with discovery statistics
         """
@@ -141,12 +141,12 @@ class MultiPathScanner:
         show_progress: bool
     ) -> dict[str, any]:
         """Scan a single storage location.
-        
+
         Args:
             location: Storage location to scan
             force_scan: Force re-scan
             show_progress: Show progress
-            
+
         Returns:
             Scan statistics for this location
         """
@@ -190,11 +190,11 @@ class MultiPathScanner:
         show_progress: bool
     ) -> dict[str, any]:
         """Scan a local filesystem location.
-        
+
         Args:
             location: Local storage location
             show_progress: Show progress
-            
+
         Returns:
             Scan statistics
         """
@@ -237,10 +237,10 @@ class MultiPathScanner:
 
     async def _scan_s3_location(self, location: StorageLocation) -> dict[str, any]:
         """Scan an S3 bucket location.
-        
+
         Args:
             location: S3 storage location
-            
+
         Returns:
             Scan statistics
         """
@@ -301,10 +301,10 @@ class MultiPathScanner:
 
     async def _scan_gcs_location(self, location: StorageLocation) -> dict[str, any]:
         """Scan a Google Cloud Storage location.
-        
+
         Args:
             location: GCS storage location
-            
+
         Returns:
             Scan statistics
         """
@@ -365,10 +365,10 @@ class MultiPathScanner:
 
     async def _scan_network_location(self, location: StorageLocation) -> dict[str, any]:
         """Scan a network drive location.
-        
+
         Args:
             location: Network storage location
-            
+
         Returns:
             Scan statistics
         """
@@ -381,7 +381,7 @@ class MultiPathScanner:
         base_path: Path
     ) -> None:
         """Update registry with files found during scan.
-        
+
         Args:
             location: Storage location
             base_path: Base path that was scanned
@@ -389,8 +389,8 @@ class MultiPathScanner:
         # Get all files from this location in the cache
         # Note: DuckDB arrays are 1-indexed
         results = self.cache.conn.execute("""
-            SELECT 
-                content_hash, 
+            SELECT
+                content_hash,
                 locations,
                 file_size
             FROM assets
@@ -420,11 +420,11 @@ class MultiPathScanner:
         asset_types: list[str] | None = None
     ) -> list[dict[str, any]]:
         """Find all assets belonging to a specific project.
-        
+
         Args:
             project_name: Name of the project
             asset_types: Optional list of asset types to filter
-            
+
         Returns:
             List of assets with their locations
         """
@@ -490,14 +490,14 @@ class MultiPathScanner:
         progress_callback: Callable[[str, int, int], None] | None = None
     ) -> dict[str, any]:
         """Consolidate all project assets to a single location.
-        
+
         Args:
             project_name: Name of the project
             target_location_id: Target location ID
             move_files: Whether to move files (vs copy)
             show_progress: Whether to show progress bar
             progress_callback: Optional callback for progress updates
-            
+
         Returns:
             Consolidation statistics
         """
@@ -586,7 +586,7 @@ class MultiPathScanner:
 
     async def get_location_summary(self) -> list[dict[str, any]]:
         """Get summary of all storage locations with statistics.
-        
+
         Returns:
             List of location summaries
         """
@@ -595,7 +595,7 @@ class MultiPathScanner:
         for location in self.registry.get_locations():
             # Get file count and size for this location
             result = self.registry.conn.execute("""
-                SELECT 
+                SELECT
                     COUNT(DISTINCT content_hash) as file_count,
                     SUM(file_size) as total_size
                 FROM file_locations
@@ -627,7 +627,7 @@ class MultiPathScanner:
         move: bool = False
     ) -> None:
         """Transfer a file to a target location.
-        
+
         Args:
             source_path: Source file path
             content_hash: File content hash
@@ -781,10 +781,10 @@ class MultiPathScanner:
 
     def _guess_media_type(self, filename: str) -> str:
         """Guess media type from filename extension.
-        
+
         Args:
             filename: File name or path
-            
+
         Returns:
             Media type string
         """

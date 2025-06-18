@@ -14,7 +14,7 @@ class SearchOperationsMixin:
 
     def _update_search_index(self, file_path: Path, analysis: dict) -> None:
         """Update search index with newly organized file.
-        
+
         Args:
             file_path: Path to the organized file
             analysis: Analysis results containing metadata
@@ -79,9 +79,9 @@ class SearchOperationsMixin:
 
     def _index_perceptual_hashes(self, file_path: Path, content_hash: str) -> None:
         """Calculate and index perceptual hashes for an image.
-        
+
         Args:
-            file_path: Path to image file  
+            file_path: Path to image file
             content_hash: Content hash of the file
         """
         if not self.search_db or not content_hash:

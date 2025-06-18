@@ -18,7 +18,7 @@ class PerceptualHasher:
     def __init__(self, hash_size: int = 16):
         """
         Initialize perceptual hasher.
-        
+
         Args:
             hash_size: Size of hash (larger = more precise but slower)
         """
@@ -28,10 +28,10 @@ class PerceptualHasher:
     def compute_hashes(self, image_path: Path) -> dict[str, str]:
         """
         Compute multiple perceptual hashes for an image.
-        
+
         Args:
             image_path: Path to image file
-            
+
         Returns:
             Dictionary of hash algorithm -> hash value
         """
@@ -73,11 +73,11 @@ class PerceptualHasher:
     def compute_similarity(self, hash1: dict[str, str], hash2: dict[str, str]) -> float:
         """
         Compute similarity score between two hash sets.
-        
+
         Args:
             hash1: First set of hashes
             hash2: Second set of hashes
-            
+
         Returns:
             Similarity score (0-1, higher = more similar)
         """
@@ -119,11 +119,11 @@ class PerceptualHasher:
     ) -> list[list[str]]:
         """
         Group images by similarity.
-        
+
         Args:
             hashes: Dictionary of image_path -> hashes
             threshold: Similarity threshold (0-1)
-            
+
         Returns:
             List of groups, each containing similar image paths
         """
@@ -165,10 +165,10 @@ class PerceptualHasher:
     def compute_visual_features(self, image_path: Path) -> np.ndarray | None:
         """
         Compute additional visual features for similarity.
-        
+
         Args:
             image_path: Path to image
-            
+
         Returns:
             Feature vector or None if error
         """

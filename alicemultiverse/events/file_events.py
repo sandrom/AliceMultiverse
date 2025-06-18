@@ -23,7 +23,7 @@ class FileBasedEventSystem:
 
     def __init__(self, event_log_dir: Path | None = None):
         """Initialize file-based event system.
-        
+
         Args:
             event_log_dir: Directory to store event logs (defaults to ~/.alice/events)
         """
@@ -37,11 +37,11 @@ class FileBasedEventSystem:
 
     def publish_sync(self, event_type: str, data: dict[str, Any]) -> str:
         """Publish event synchronously to file.
-        
+
         Args:
             event_type: Type of event
             data: Event data
-            
+
         Returns:
             Event ID
         """
@@ -76,11 +76,11 @@ class FileBasedEventSystem:
 
     async def publish(self, event_type: str, data: dict[str, Any]) -> str:
         """Async wrapper for compatibility with Redis interface.
-        
+
         Args:
             event_type: Type of event
             data: Event data
-            
+
         Returns:
             Event ID
         """
@@ -90,7 +90,7 @@ class FileBasedEventSystem:
 
     def subscribe(self, event_types: list[str], callback: Callable) -> None:
         """Subscribe to events.
-        
+
         Args:
             event_types: List of event types to subscribe to
             callback: Function to call when event is received
@@ -104,7 +104,7 @@ class FileBasedEventSystem:
 
     async def listen(self) -> None:
         """Start listening for events.
-        
+
         This method monitors the event log files for new events.
         In a file-based system, this is less efficient than Redis
         but suitable for personal use.
@@ -156,7 +156,7 @@ class FileBasedEventSystem:
 
     def _notify_listeners(self, event_type: str, event: dict[str, Any]) -> None:
         """Notify listeners of an event.
-        
+
         Args:
             event_type: Type of event
             event: Full event data
@@ -188,12 +188,12 @@ class FileBasedEventSystem:
                          limit: int = 100,
                          since: datetime | None = None) -> list[dict[str, Any]]:
         """Get recent events from log files.
-        
+
         Args:
             event_types: Filter by event types (None for all)
             limit: Maximum number of events to return
             since: Only return events after this time
-            
+
         Returns:
             List of events (newest first)
         """
@@ -246,10 +246,10 @@ class FileBasedEventSystem:
 
     def cleanup_old_logs(self, days_to_keep: int = 7) -> int:
         """Clean up old event log files.
-        
+
         Args:
             days_to_keep: Number of days of logs to keep
-            
+
         Returns:
             Number of files deleted
         """

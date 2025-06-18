@@ -57,7 +57,7 @@ class OllamaImageAnalyzer(ImageAnalyzer):
         timeout: int = 120
     ):
         """Initialize Ollama analyzer.
-        
+
         Args:
             base_url: Ollama API endpoint (default: http://localhost:11434)
             model: Vision model to use (default: llava:latest)
@@ -252,10 +252,10 @@ class OllamaImageAnalyzer(ImageAnalyzer):
     @classmethod
     def get_recommended_model(cls, use_case: str = "general") -> str:
         """Get recommended model for specific use case.
-        
+
         Args:
             use_case: One of "general", "fast", "quality", "text"
-            
+
         Returns:
             Model name
         """
@@ -269,10 +269,10 @@ class OllamaImageAnalyzer(ImageAnalyzer):
 
     async def pull_model(self, model: str | None = None) -> bool:
         """Pull/download a model if not available.
-        
+
         Args:
             model: Model to pull (default: self.model)
-            
+
         Returns:
             True if successful
         """

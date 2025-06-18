@@ -46,7 +46,7 @@ class AnthropicProvider(BaseProvider):
 
     def __init__(self, api_key: str | None = None, event_bus: Any | None = None, **kwargs):
         """Initialize Anthropic provider.
-        
+
         Args:
             api_key: Anthropic API key (or set ANTHROPIC_API_KEY env var)
             event_bus: Deprecated parameter, kept for compatibility
@@ -108,10 +108,10 @@ class AnthropicProvider(BaseProvider):
 
     async def _generate(self, request: GenerationRequest) -> GenerationResult:
         """Perform the actual generation using Anthropic Claude.
-        
+
         Args:
             request: Generation request
-            
+
         Returns:
             Generation result
         """

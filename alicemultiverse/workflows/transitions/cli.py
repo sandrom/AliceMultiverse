@@ -30,7 +30,7 @@ def transitions():
 def analyze(images: list[str], output: str, verbose: bool):
     """
     Analyze transitions between a sequence of images.
-    
+
     Example:
         alice transitions analyze img1.jpg img2.jpg img3.jpg -o transitions.json
     """
@@ -101,7 +101,7 @@ def analyze(images: list[str], output: str, verbose: bool):
 def motion(image: str, verbose: bool):
     """
     Analyze motion characteristics of a single image.
-    
+
     Example:
         alice transitions motion image.jpg
     """
@@ -163,10 +163,10 @@ def motion(image: str, verbose: bool):
 def morph(images: list[str], output: str, duration: float, fps: float, min_similarity: float, verbose: bool):
     """
     Analyze images for subject morphing opportunities.
-    
+
     Creates After Effects compatible morph data for smooth transitions
     between similar subjects across shots.
-    
+
     Example:
         alice transitions morph img1.jpg img2.jpg img3.jpg -o morph_data/
     """
@@ -255,7 +255,7 @@ def morph(images: list[str], output: str, duration: float, fps: float, min_simil
 def subjects(image: str, verbose: bool):
     """
     Detect subjects in an image for morphing analysis.
-    
+
     Example:
         alice transitions subjects portrait.jpg
     """
@@ -299,10 +299,10 @@ def subjects(image: str, verbose: bool):
 def colorflow(images: list[str], output: str, duration: int, editor: str, verbose: bool):
     """
     Analyze color flow between shots for smooth color-based transitions.
-    
+
     This command analyzes color palettes, lighting direction, and creates
     gradient transitions with matching data for video editors.
-    
+
     Example:
         alice transitions colorflow shot1.jpg shot2.jpg shot3.jpg -o color_data/
     """
@@ -427,7 +427,7 @@ def colorflow(images: list[str], output: str, duration: int, editor: str, verbos
 def colorpair(shot1: str, shot2: str, output: str, duration: int, verbose: bool):
     """
     Analyze color flow between a single pair of shots.
-    
+
     Example:
         alice transitions colorpair shot1.jpg shot2.jpg -o transition.json
     """
@@ -504,10 +504,10 @@ def colorpair(shot1: str, shot2: str, output: str, duration: int, verbose: bool)
 def matchcuts(images: list[str], output: str, threshold: float, format: str, verbose: bool):
     """
     Find and analyze match cuts in image sequence.
-    
+
     Match cuts are edits where movement, shapes, or composition
     align between shots for seamless transitions.
-    
+
     Example:
         alice transitions matchcuts shot*.jpg -o cuts.json
     """
@@ -558,10 +558,10 @@ def matchcuts(images: list[str], output: str, threshold: float, format: str, ver
 def portal(shot1: str, shot2: str, output: str, format: str, verbose: bool):
     """
     Detect portal shapes for creative transitions.
-    
+
     Finds circles, rectangles, and arch shapes that can be used
     as "portals" to transition between shots.
-    
+
     Example:
         alice transitions portal door_shot.jpg destination.jpg
     """
@@ -616,10 +616,10 @@ def portal(shot1: str, shot2: str, output: str, format: str, verbose: bool):
 def rhythm(images: list[str], output: str, duration: float, bpm: float, format: str, verbose: bool):
     """
     Analyze visual rhythm and suggest pacing.
-    
+
     Analyzes visual complexity and energy to suggest optimal
     shot durations for rhythmic editing.
-    
+
     Example:
         alice transitions rhythm shot*.jpg -d 30 -b 120
     """

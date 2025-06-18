@@ -54,11 +54,11 @@ class CompositionAnalyzer:
         return_visualization: bool = False,
     ) -> CompositionMetrics:
         """Analyze composition of a single image.
-        
+
         Args:
             image_path: Path to image
             return_visualization: Whether to return visualization
-            
+
         Returns:
             Composition metrics
         """

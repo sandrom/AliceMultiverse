@@ -149,7 +149,7 @@ class AIAssistantExample:
    - Prompt: "cyberpunk portrait with neon lighting"
 
 2. **Cyber Character** (★★★★☆)
-   - Created: March 14, 2024  
+   - Created: March 14, 2024
    - ID: b8g4c3d2e6f7
    - Prompt: "futuristic character in cyberpunk city"
 

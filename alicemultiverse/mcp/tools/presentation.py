@@ -9,7 +9,7 @@ from ...interface.timeline_preview_mcp import register_timeline_preview_tools
 
 def register_presentation_tools(server) -> None:
     """Register presentation and preview tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """

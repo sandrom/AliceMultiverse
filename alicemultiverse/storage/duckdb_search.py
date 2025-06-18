@@ -24,7 +24,7 @@ class DuckDBSearch(DuckDBBase):
         include_metadata: bool = True,
     ) -> tuple[list[dict[str, Any]], int]:
         """Search assets with filters and pagination.
-        
+
         Args:
             filters: Search filters
             sort_by: Field to sort by
@@ -32,7 +32,7 @@ class DuckDBSearch(DuckDBBase):
             limit: Maximum results to return
             offset: Number of results to skip
             include_metadata: Include full metadata in results
-            
+
         Returns:
             Tuple of (results, total_count)
         """
@@ -97,14 +97,14 @@ class DuckDBSearch(DuckDBBase):
         offset: int = 0,
     ) -> tuple[list[dict[str, Any]], int]:
         """Search assets by tags.
-        
+
         Args:
             tags: List of tags to search for
             tag_type: Specific tag type to search in
             match_all: Require all tags to match
             limit: Maximum results
             offset: Skip results
-            
+
         Returns:
             Tuple of (results, total_count)
         """
@@ -128,8 +128,8 @@ class DuckDBSearch(DuckDBBase):
         if match_all:
             # All tags must match
             tag_query = f"""
-                SELECT content_hash 
-                FROM tags 
+                SELECT content_hash
+                FROM tags
                 WHERE {" OR ".join(tag_conditions)}
                 GROUP BY content_hash
                 HAVING COUNT(DISTINCT tag_value) = {len(tags)}
@@ -137,8 +137,8 @@ class DuckDBSearch(DuckDBBase):
         else:
             # Any tag can match
             tag_query = f"""
-                SELECT DISTINCT content_hash 
-                FROM tags 
+                SELECT DISTINCT content_hash
+                FROM tags
                 WHERE {" OR ".join(tag_conditions)}
             """
 
@@ -148,7 +148,7 @@ class DuckDBSearch(DuckDBBase):
 
         # Get assets
         asset_query = f"""
-            SELECT a.* 
+            SELECT a.*
             FROM assets a
             INNER JOIN ({tag_query}) t ON a.content_hash = t.content_hash
             ORDER BY a.created_at DESC
@@ -195,13 +195,13 @@ class DuckDBSearch(DuckDBBase):
         offset: int = 0,
     ) -> tuple[list[dict[str, Any]], int]:
         """Full-text search across specified fields.
-        
+
         Args:
             query: Search query
             search_fields: Fields to search in (default: prompt, description)
             limit: Maximum results
             offset: Skip results
-            
+
         Returns:
             Tuple of (results, total_count)
         """
@@ -233,7 +233,7 @@ class DuckDBSearch(DuckDBBase):
 
         # Get results
         search_query = f"""
-            SELECT * FROM assets 
+            SELECT * FROM assets
             WHERE {where_clause}
             ORDER BY created_at DESC
             LIMIT {limit} OFFSET {offset}
@@ -256,7 +256,7 @@ class DuckDBSearch(DuckDBBase):
         cache_ttl: int = 300,  # 5 minutes
     ) -> tuple[list[dict[str, Any]], int]:
         """Search with query caching for performance.
-        
+
         Args:
             filters: Search filters
             sort_by: Sort field
@@ -264,7 +264,7 @@ class DuckDBSearch(DuckDBBase):
             limit: Maximum results
             offset: Skip results
             cache_ttl: Cache time-to-live in seconds
-            
+
         Returns:
             Tuple of (results, total_count)
         """
@@ -281,8 +281,8 @@ class DuckDBSearch(DuckDBBase):
         # Check cache
         cutoff_time = datetime.now() - timedelta(seconds=cache_ttl)
         cached = self.conn.execute("""
-            SELECT results, total_count 
-            FROM query_cache 
+            SELECT results, total_count
+            FROM query_cache
             WHERE cache_key = ? AND cached_at > ?
         """, [cache_key, cutoff_time]).fetchone()
 
@@ -316,10 +316,10 @@ class DuckDBSearch(DuckDBBase):
         filters: dict[str, Any]
     ) -> tuple[str, list[Any]]:
         """Apply search filters to build WHERE clause.
-        
+
         Args:
             filters: Dictionary of filters
-            
+
         Returns:
             Tuple of (where_clause, parameters)
         """
@@ -415,8 +415,8 @@ class DuckDBSearch(DuckDBBase):
                     # Search for assets with any of these tags
                     tag_query = """
                         EXISTS (
-                            SELECT 1 FROM tags t 
-                            WHERE t.content_hash = assets.content_hash 
+                            SELECT 1 FROM tags t
+                            WHERE t.content_hash = assets.content_hash
                             AND t.tag_value IN ({})
                         )
                     """.format(",".join("?" * len(value)))
@@ -428,9 +428,9 @@ class DuckDBSearch(DuckDBBase):
                         if isinstance(tag_values, list):
                             tag_query = """
                                 EXISTS (
-                                    SELECT 1 FROM tags t 
-                                    WHERE t.content_hash = assets.content_hash 
-                                    AND t.tag_type = ? 
+                                    SELECT 1 FROM tags t
+                                    WHERE t.content_hash = assets.content_hash
+                                    AND t.tag_type = ?
                                     AND t.tag_value IN ({})
                                 )
                             """.format(",".join("?" * len(tag_values)))

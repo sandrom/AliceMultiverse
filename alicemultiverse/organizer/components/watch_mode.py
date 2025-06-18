@@ -96,7 +96,7 @@ class WatchModeMixin:
 
     def organize(self) -> bool:
         """Main entry point for organizing media files.
-        
+
         Returns:
             True if successful, False otherwise
         """

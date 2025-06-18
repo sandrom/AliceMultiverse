@@ -37,13 +37,13 @@ class EloRating:
     ) -> tuple[float, float]:
         """
         Update Elo ratings based on comparison result.
-        
+
         Args:
             rating_a: Current rating of A
             rating_b: Current rating of B
             winner: "a", "b", or "tie"
             strength: Strength of preference
-            
+
         Returns:
             Tuple of (new_rating_a, new_rating_b)
         """
@@ -335,8 +335,8 @@ class ComparisonManager:
         """Get recent comparison history."""
         with duckdb.connect(str(self.db_path)) as conn:
             result = conn.execute("""
-                SELECT 
-                    id, asset_a_model, asset_b_model, 
+                SELECT
+                    id, asset_a_model, asset_b_model,
                     winner, strength, timestamp
                 FROM comparisons
                 ORDER BY timestamp DESC

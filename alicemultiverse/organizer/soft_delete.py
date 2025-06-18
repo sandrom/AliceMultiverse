@@ -15,7 +15,7 @@ class SoftDeleteManager:
 
     def __init__(self, sorted_out_path: str = "sorted-out"):
         """Initialize soft delete manager.
-        
+
         Args:
             sorted_out_path: Base path for sorted-out files
         """
@@ -38,13 +38,13 @@ class SoftDeleteManager:
         metadata: dict[str, Any] | None = None
     ) -> Path | None:
         """Soft delete a file by moving it to sorted-out folder.
-        
+
         Args:
             file_path: Path to file to soft delete
             category: Category for sorting (broken, duplicate, etc.)
             reason: Optional reason for deletion
             metadata: Optional metadata to preserve
-            
+
         Returns:
             New path if moved successfully, None otherwise
         """
@@ -106,12 +106,12 @@ class SoftDeleteManager:
         reason: str | None = None
     ) -> dict[str, list[Path]]:
         """Soft delete multiple files.
-        
+
         Args:
             file_paths: List of file paths to soft delete
             category: Category for all files
             reason: Reason for deletion (applies to all)
-            
+
         Returns:
             Dict with 'moved' and 'failed' lists
         """
@@ -138,11 +138,11 @@ class SoftDeleteManager:
 
     def restore(self, file_path: Path, target_dir: Path | None = None) -> Path | None:
         """Restore a soft-deleted file.
-        
+
         Args:
             file_path: Path to file in sorted-out folder
             target_dir: Where to restore to (defaults to original location)
-            
+
         Returns:
             Restored path if successful, None otherwise
         """
@@ -204,10 +204,10 @@ class SoftDeleteManager:
 
     def list_sorted_out(self, category: str | None = None) -> dict[str, list[Path]]:
         """List all sorted-out files.
-        
+
         Args:
             category: Optional category filter
-            
+
         Returns:
             Dict mapping categories to file lists
         """
@@ -232,7 +232,7 @@ class SoftDeleteManager:
 
     def get_exclusion_patterns(self) -> list[str]:
         """Get glob patterns to exclude sorted-out folders.
-        
+
         Returns:
             List of glob patterns to exclude
         """

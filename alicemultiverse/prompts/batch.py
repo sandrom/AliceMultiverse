@@ -25,7 +25,7 @@ class PromptBatchProcessor:
 
     def batch_create_from_csv(self, csv_path: Path) -> list[Prompt]:
         """Create multiple prompts from a CSV file.
-        
+
         Expected CSV columns:
         - text: Prompt text (required)
         - category: Category name (required)
@@ -35,10 +35,10 @@ class PromptBatchProcessor:
         - style: Style name
         - description: Description
         - notes: Notes
-        
+
         Args:
             csv_path: Path to CSV file
-            
+
         Returns:
             List of created prompts
         """
@@ -96,11 +96,11 @@ class PromptBatchProcessor:
                            prompt_ids: list[str],
                            rating_function: Callable[[Prompt], float | None]) -> int:
         """Update ratings for multiple prompts using a custom function.
-        
+
         Args:
             prompt_ids: List of prompt IDs to update
             rating_function: Function that takes a Prompt and returns a rating
-            
+
         Returns:
             Number of prompts updated
         """
@@ -126,11 +126,11 @@ class PromptBatchProcessor:
                          prompts: list[Prompt],
                          tag_function: Callable[[Prompt], list[str]]) -> int:
         """Add tags to multiple prompts using a custom function.
-        
+
         Args:
             prompts: List of prompts to tag
             tag_function: Function that takes a Prompt and returns tags to add
-            
+
         Returns:
             Number of prompts tagged
         """
@@ -156,11 +156,11 @@ class PromptBatchProcessor:
                                   category: PromptCategory | None = None,
                                   min_uses: int = 3) -> dict[str, Any]:
         """Analyze effectiveness across multiple prompts.
-        
+
         Args:
             category: Filter by category
             min_uses: Minimum uses to include in analysis
-            
+
         Returns:
             Analysis results
         """
@@ -224,11 +224,11 @@ class PromptBatchProcessor:
                                 base_prompt: Prompt,
                                 variation_specs: list[dict[str, str]]) -> list[Prompt]:
         """Generate multiple variations of a base prompt.
-        
+
         Args:
             base_prompt: The base prompt to vary
             variation_specs: List of dicts with 'modification' and 'purpose' keys
-            
+
         Returns:
             List of created variation prompts
         """
@@ -274,12 +274,12 @@ class PromptBatchProcessor:
                                provider_instance: Any,
                                test_params: dict[str, Any] | None = None) -> list[tuple[Prompt, GenerationResult]]:
         """Test multiple prompts with a provider.
-        
+
         Args:
             prompts: List of prompts to test
             provider_instance: Provider instance with generate method
             test_params: Additional parameters for generation
-            
+
         Returns:
             List of (prompt, result) tuples
         """
@@ -323,7 +323,7 @@ class PromptBatchProcessor:
                            output_path: Path,
                            format: str = "json") -> None:
         """Export batch of prompts with full details.
-        
+
         Args:
             prompts: List of prompts to export
             output_path: Output file path

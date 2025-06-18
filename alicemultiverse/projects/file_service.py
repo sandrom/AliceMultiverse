@@ -15,14 +15,14 @@ logger = get_logger(__name__)
 
 class FileProjectService:
     """File-based service for managing projects and budget tracking.
-    
+
     Projects are stored as YAML files within project directories.
     A global registry tracks all known projects.
     """
 
     def __init__(self, storage_paths: list[str] = None):
         """Initialize file-based project service.
-        
+
         Args:
             storage_paths: List of paths where projects can be stored
                          Can include local paths or cloud URLs (s3://, gcs://)
@@ -78,10 +78,10 @@ class FileProjectService:
 
     def _find_project_root(self, start_path: Path = None) -> Path | None:
         """Find project root by looking for project.yaml file.
-        
+
         Args:
             start_path: Starting directory (defaults to current directory)
-            
+
         Returns:
             Path to project root or None if not found
         """
@@ -119,7 +119,7 @@ class FileProjectService:
         path: str = None
     ) -> dict[str, Any]:
         """Create a new project.
-        
+
         Args:
             name: Project name (used as directory name)
             description: Optional project description
@@ -127,7 +127,7 @@ class FileProjectService:
             creative_context: Optional creative context (style, characters, etc.)
             settings: Optional project-specific settings
             path: Optional specific path for the project
-            
+
         Returns:
             Project data dictionary
         """
@@ -198,10 +198,10 @@ class FileProjectService:
 
     def get_project(self, project_id_or_name: str) -> dict[str, Any] | None:
         """Get project by ID or name.
-        
+
         Args:
             project_id_or_name: Project ID or name
-            
+
         Returns:
             Project data or None if not found
         """
@@ -229,7 +229,7 @@ class FileProjectService:
 
     def get_current_project(self) -> dict[str, Any] | None:
         """Get the project in the current directory.
-        
+
         Returns:
             Project data or None if not in a project directory
         """
@@ -243,10 +243,10 @@ class FileProjectService:
 
     def list_projects(self, status: str = None) -> list[dict[str, Any]]:
         """List all projects, optionally filtered by status.
-        
+
         Args:
             status: Optional status filter (active, paused, completed, archived)
-            
+
         Returns:
             List of projects
         """
@@ -271,11 +271,11 @@ class FileProjectService:
         creative_context: dict[str, Any]
     ) -> dict[str, Any] | None:
         """Update project creative context.
-        
+
         Args:
             project_id_or_name: Project ID or name
             creative_context: New creative context to merge
-            
+
         Returns:
             Updated project or None if not found
         """
@@ -310,11 +310,11 @@ class FileProjectService:
         status: str
     ) -> dict[str, Any] | None:
         """Update project status.
-        
+
         Args:
             project_id_or_name: Project ID or name
             status: New status (active, paused, completed, archived)
-            
+
         Returns:
             Updated project or None if not found
         """
@@ -354,7 +354,7 @@ class FileProjectService:
         file_path: str = None
     ) -> None:
         """Record a generation and update project budget.
-        
+
         Args:
             project_id_or_name: Project ID or name
             provider: Provider name (e.g., "midjourney", "dalle")
@@ -430,10 +430,10 @@ class FileProjectService:
 
     def get_project_budget_status(self, project_id_or_name: str) -> dict[str, Any] | None:
         """Get project budget status.
-        
+
         Args:
             project_id_or_name: Project ID or name
-            
+
         Returns:
             Budget status or None if project not found
         """
@@ -458,10 +458,10 @@ class FileProjectService:
 
     def get_project_cost_breakdown(self, project_id_or_name: str) -> dict[str, float]:
         """Get cost breakdown by provider.
-        
+
         Args:
             project_id_or_name: Project ID or name
-            
+
         Returns:
             Cost breakdown by provider or empty dict
         """
@@ -473,10 +473,10 @@ class FileProjectService:
 
     def find_project_from_path(self, current_path: str = None) -> dict[str, Any] | None:
         """Find project based on directory path.
-        
+
         Args:
             current_path: Directory path to search from
-            
+
         Returns:
             Project dict or None
         """
@@ -494,11 +494,11 @@ class FileProjectService:
         create_if_missing: bool = True
     ) -> dict[str, Any] | None:
         """Get project from path or create one if missing.
-        
+
         Args:
             path: Directory path
             create_if_missing: Whether to create project if not found
-            
+
         Returns:
             Project dict or None
         """

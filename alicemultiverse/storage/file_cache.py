@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class FileCache:
     """File-based cache manager for AliceMultiverse.
-    
+
     Provides the same interface as RedisCache but uses local files.
     Perfect for personal use and development environments.
     """
@@ -30,7 +30,7 @@ class FileCache:
         **kwargs  # Accept and ignore Redis-specific parameters
     ):
         """Initialize file cache.
-        
+
         Args:
             cache_dir: Directory for cache files. Defaults to ~/.alice/cache
             prefix: Key prefix for all cache keys
@@ -58,11 +58,11 @@ class FileCache:
 
     def _make_key(self, namespace: str, key: str) -> str:
         """Create a namespaced key.
-        
+
         Args:
             namespace: Cache namespace (e.g., "search", "embedding")
             key: Specific key
-            
+
         Returns:
             Full cache key
         """
@@ -82,11 +82,11 @@ class FileCache:
 
     def get(self, namespace: str, key: str) -> Any | None:
         """Get value from cache.
-        
+
         Args:
             namespace: Cache namespace
             key: Cache key
-            
+
         Returns:
             Cached value or None if not found/expired
         """
@@ -120,13 +120,13 @@ class FileCache:
         ttl: int | None = None
     ) -> bool:
         """Set value in cache.
-        
+
         Args:
             namespace: Cache namespace
             key: Cache key
             value: Value to cache
             ttl: Time to live in seconds (uses default if not specified)
-            
+
         Returns:
             True if successful
         """
@@ -153,11 +153,11 @@ class FileCache:
 
     def delete(self, namespace: str, key: str) -> bool:
         """Delete value from cache.
-        
+
         Args:
             namespace: Cache namespace
             key: Cache key
-            
+
         Returns:
             True if deleted
         """
@@ -173,10 +173,10 @@ class FileCache:
 
     def clear_namespace(self, namespace: str) -> int:
         """Clear all keys in a namespace.
-        
+
         Args:
             namespace: Cache namespace to clear
-            
+
         Returns:
             Number of keys deleted
         """
@@ -203,10 +203,10 @@ class FileCache:
 
     def _hash_dict(self, data: dict) -> str:
         """Create hash from dictionary for cache keys.
-        
+
         Args:
             data: Dictionary to hash
-            
+
         Returns:
             Hash string
         """
@@ -218,10 +218,10 @@ class FileCache:
 
     def get_search_results(self, query_hash: str) -> dict | None:
         """Get cached search results.
-        
+
         Args:
             query_hash: Hash of search query
-            
+
         Returns:
             Cached results or None
         """
@@ -234,12 +234,12 @@ class FileCache:
         ttl: int | None = None
     ) -> bool:
         """Cache search results.
-        
+
         Args:
             query_hash: Hash of search query
             results: Search results to cache
             ttl: Time to live in seconds
-            
+
         Returns:
             True if successful
         """
@@ -249,10 +249,10 @@ class FileCache:
 
     def get_embedding(self, content_hash: str) -> list[float] | None:
         """Get cached embedding.
-        
+
         Args:
             content_hash: Hash of content
-            
+
         Returns:
             Embedding vector or None
         """
@@ -265,12 +265,12 @@ class FileCache:
         ttl: int | None = None
     ) -> bool:
         """Cache embedding.
-        
+
         Args:
             content_hash: Hash of content
             embedding: Embedding vector
             ttl: Time to live in seconds
-            
+
         Returns:
             True if successful
         """
@@ -281,10 +281,10 @@ class FileCache:
         content_hashes: list[str]
     ) -> dict[str, list[float]]:
         """Get multiple embeddings.
-        
+
         Args:
             content_hashes: List of content hashes
-            
+
         Returns:
             Dictionary of hash -> embedding
         """
@@ -301,11 +301,11 @@ class FileCache:
         ttl: int | None = None
     ) -> int:
         """Set multiple embeddings.
-        
+
         Args:
             embeddings: Dictionary of hash -> embedding
             ttl: Time to live in seconds
-            
+
         Returns:
             Number of embeddings cached
         """
@@ -319,7 +319,7 @@ class FileCache:
 
     def cleanup_expired(self) -> int:
         """Remove expired cache entries.
-        
+
         Returns:
             Number of entries removed
         """

@@ -90,7 +90,7 @@ class PromptProviderIntegration:
                         duration: float | None = None,
                         project: str | None = None) -> str | None:
         """Track a generation and potentially create/update a prompt.
-        
+
         Args:
             provider: Provider name
             prompt_text: The prompt used
@@ -98,7 +98,7 @@ class PromptProviderIntegration:
             cost: Cost of generation
             duration: Time taken
             project: Project name
-            
+
         Returns:
             Prompt ID if tracked, None otherwise
         """

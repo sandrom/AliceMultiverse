@@ -27,7 +27,7 @@ async def create_story_arc_video(
     export_formats: list[str] | None = None
 ) -> dict[str, Any]:
     """Create a narrative-driven video using story arc template.
-    
+
     Args:
         images: List of image paths
         structure: Story structure (three_act, five_act, heros_journey, kishoten, circular)
@@ -37,7 +37,7 @@ async def create_story_arc_video(
         music_file: Optional music for pacing
         voiceover_markers: Add markers for voiceover timing
         export_formats: Export formats (edl, xml, json)
-        
+
     Returns:
         Workflow execution results with timeline
     """
@@ -104,7 +104,7 @@ async def create_documentary_video(
     export_formats: list[str] | None = None
 ) -> dict[str, Any]:
     """Create a documentary-style video.
-    
+
     Args:
         images: List of image paths
         duration: Target video duration in seconds
@@ -112,7 +112,7 @@ async def create_documentary_video(
         music_file: Optional background music
         voiceover_markers: Add markers for narration (default True)
         export_formats: Export formats
-        
+
     Returns:
         Workflow execution results
     """
@@ -170,7 +170,7 @@ async def create_social_media_video(
     auto_optimize: bool = True
 ) -> dict[str, Any]:
     """Create a social media optimized video.
-    
+
     Args:
         platform: Target platform (instagram_reel, tiktok, youtube_shorts, etc.)
         images: List of image paths
@@ -180,7 +180,7 @@ async def create_social_media_video(
         style: Content style (trending, educational, entertaining)
         duration: Optional duration (uses platform optimal if not set)
         auto_optimize: Automatically optimize for engagement
-        
+
     Returns:
         Workflow execution results with platform export
     """
@@ -251,7 +251,7 @@ async def create_instagram_reel(
     duration: float = 15.0
 ) -> dict[str, Any]:
     """Create an Instagram Reel with optimizations.
-    
+
     Args:
         images: List of image paths
         music_file: Music track (required for Reels)
@@ -259,7 +259,7 @@ async def create_instagram_reel(
         hashtags: Hashtags for discovery
         effects: Instagram effects to apply
         duration: Reel duration (max 90 seconds)
-        
+
     Returns:
         Reel export with Instagram features
     """
@@ -290,7 +290,7 @@ async def create_tiktok_video(
     duration: float = 30.0
 ) -> dict[str, Any]:
     """Create a TikTok video with trend integration.
-    
+
     Args:
         images: List of image paths
         music_file: Optional trending sound
@@ -299,7 +299,7 @@ async def create_tiktok_video(
         challenges: Hashtag challenges to join
         duet_ready: Prepare for duet format
         duration: Video duration (max 180 seconds)
-        
+
     Returns:
         TikTok optimized export
     """
@@ -324,10 +324,10 @@ async def get_platform_specifications(
     platform: str | None = None
 ) -> dict[str, Any]:
     """Get specifications for social media platforms.
-    
+
     Args:
         platform: Specific platform or None for all
-        
+
     Returns:
         Platform specifications
     """
@@ -377,11 +377,11 @@ async def suggest_story_structure(
     theme: str | None = None
 ) -> dict[str, Any]:
     """Suggest appropriate story structure based on content.
-    
+
     Args:
         images: List of image paths
         theme: Optional theme hint
-        
+
     Returns:
         Structure suggestions with reasoning
     """

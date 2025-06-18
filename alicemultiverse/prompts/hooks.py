@@ -25,7 +25,7 @@ def get_prompt_integration() -> PromptProviderIntegration:
 
 def track_prompt_usage(provider_name: str, project: str | None = None):
     """Decorator to automatically track prompt usage in provider methods.
-    
+
     Usage:
         @track_prompt_usage("midjourney")
         def generate(self, prompt: str, **kwargs) -> GenerationResult:
@@ -86,7 +86,7 @@ def track_prompt_usage(provider_name: str, project: str | None = None):
 
 def track_prompt_from_metadata(provider_name: str):
     """Decorator for providers that store prompts in metadata.
-    
+
     Usage:
         @track_prompt_from_metadata("leonardo")
         def generate_from_config(self, config: Dict) -> GenerationResult:
@@ -143,13 +143,13 @@ class PromptTrackingMixin:
                     provider: str | None = None,
                     **kwargs) -> str | None:
         """Track a prompt usage.
-        
+
         Args:
             prompt: The prompt text
             result: Generation result
             provider: Provider name (defaults to class name)
             **kwargs: Additional tracking parameters
-            
+
         Returns:
             Prompt ID if tracked
         """
@@ -180,13 +180,13 @@ def track_prompt_manually(
     **kwargs
 ) -> str | None:
     """Manually track a prompt usage.
-    
+
     Args:
         provider: Provider name
         prompt: Prompt text
         result: Generation result
         **kwargs: Additional parameters (cost, duration, project)
-        
+
     Returns:
         Prompt ID if tracked
     """

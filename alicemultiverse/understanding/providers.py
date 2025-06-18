@@ -93,7 +93,7 @@ Format tags as JSON: {"category": ["tag1", "tag2"]}
             prompt_parts.append("""
 Generate a detailed prompt that could recreate this image.
 Also suggest a negative prompt for what to avoid.
-Format as: 
+Format as:
 PROMPT: <positive prompt>
 NEGATIVE: <negative prompt>
 """)
@@ -255,7 +255,7 @@ class OpenAIImageAnalyzer(ImageAnalyzer):
         if extract_tags:
             user_prompt_parts.append("""
 Extract semantic tags and return them as a JSON object with these categories:
-style, mood, subject, color, technical, fashion, hair, pose, setting, 
+style, mood, subject, color, technical, fashion, hair, pose, setting,
 camera, art_movement, emotion, composition, texture, weather, action,
 gender, age_group, accessories, time_period, genre
 
@@ -607,7 +607,7 @@ Extract semantic tags as a JSON object:
 {
   "style": ["visual/artistic style"],
   "mood": ["emotional tone"],
-  "subject": ["main subjects"],  
+  "subject": ["main subjects"],
   "color": ["color descriptors"],
   "technical": ["camera/technical aspects"],
   "fashion": ["clothing/accessories"],

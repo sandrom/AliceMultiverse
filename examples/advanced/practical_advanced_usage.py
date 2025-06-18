@@ -32,7 +32,7 @@ class AdvancedImageProcessor:
 
     def __init__(self, project_id: str, repository: AssetRepository):
         """Initialize with project configuration.
-        
+
         Args:
             project_id: The project identifier
             repository: Database repository for asset management
@@ -95,12 +95,12 @@ class AdvancedImageProcessor:
                                  use_optimization: bool = True,
                                  budget_limit: float = None) -> dict:
         """Process a single image with advanced understanding.
-        
+
         Args:
             image_path: Path to the image file
             use_optimization: Whether to use provider optimization
             budget_limit: Optional budget limit for this analysis
-            
+
         Returns:
             Dictionary with analysis results and metadata
         """
@@ -137,13 +137,13 @@ class AdvancedImageProcessor:
                           budget_limit: float = None,
                           show_progress: bool = True) -> list[dict]:
         """Process multiple images efficiently.
-        
+
         Args:
             image_paths: List of image paths to process
             max_concurrent: Maximum concurrent analyses
             budget_limit: Total budget limit for the batch
             show_progress: Whether to show progress indicators
-            
+
         Returns:
             List of metadata dictionaries
         """
@@ -183,7 +183,7 @@ class AdvancedImageProcessor:
 
     def get_project_tag_summary(self) -> dict:
         """Get a summary of tags used in this project.
-        
+
         Returns:
             Dictionary with tag statistics and common patterns
         """
@@ -208,7 +208,7 @@ class AdvancedImageProcessor:
     def create_custom_template(self, template_id: str, name: str,
                              instructions: str, variables: dict = None):
         """Create a custom instruction template for this project type.
-        
+
         Args:
             template_id: Unique identifier for the template
             name: Human-readable name
@@ -314,26 +314,26 @@ async def example_custom_instructions():
         description="Analysis for art gallery and museum pieces",
         instructions="""
         Analyze this artwork with focus on:
-        
+
         1. Artistic Elements:
            - Style and movement (impressionism, modern, contemporary, etc.)
            - Technique and medium
            - Color palette and composition
-           
+
         2. Cultural Context:
            - Historical period indicators
            - Cultural references and symbolism
            - Social or political themes
-           
+
         3. Technical Quality:
            - Condition and preservation
            - Photography quality for cataloging
            - Display suitability
-           
+
         4. Market Information:
            - Estimated era: {time_period}
            - Collection type: {collection_type}
-           
+
         Focus especially on: {focus_area}
         """,
         variables={

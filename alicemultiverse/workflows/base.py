@@ -35,7 +35,7 @@ class StepStatus(str, Enum):
 @dataclass
 class WorkflowStep:
     """Individual step in a workflow.
-    
+
     Attributes:
         name: Step name for identification
         provider: Provider name (e.g., "leonardo", "magnific")
@@ -67,7 +67,7 @@ class WorkflowStep:
 @dataclass
 class WorkflowContext:
     """Shared context between workflow steps.
-    
+
     Stores intermediate results and allows data passing between steps.
     """
     # Input data
@@ -112,7 +112,7 @@ class WorkflowContext:
 
     def evaluate_condition(self, condition: str) -> bool:
         """Evaluate a simple condition.
-        
+
         Supports:
         - "previous.success": Last step was successful
         - "step_name.success": Specific step was successful
@@ -166,7 +166,7 @@ class WorkflowResult:
 
 class WorkflowTemplate(ABC):
     """Abstract base class for workflow templates.
-    
+
     Subclasses define specific workflows like:
     - ImageEnhancementWorkflow
     - VideoProductionWorkflow
@@ -175,7 +175,7 @@ class WorkflowTemplate(ABC):
 
     def __init__(self, name: str | None = None):
         """Initialize workflow template.
-        
+
         Args:
             name: Workflow name (defaults to class name)
         """
@@ -185,20 +185,20 @@ class WorkflowTemplate(ABC):
     @abstractmethod
     def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
         """Define the workflow steps.
-        
+
         Args:
             context: Workflow context with initial parameters
-            
+
         Returns:
             List of workflow steps to execute
         """
 
     def validate(self, context: WorkflowContext) -> list[str]:
         """Validate the workflow can execute.
-        
+
         Args:
             context: Workflow context
-            
+
         Returns:
             List of validation errors (empty if valid)
         """
@@ -213,10 +213,10 @@ class WorkflowTemplate(ABC):
 
     def estimate_cost(self, context: WorkflowContext) -> float:
         """Estimate total workflow cost.
-        
+
         Args:
             context: Workflow context
-            
+
         Returns:
             Estimated total cost in USD
         """
@@ -248,7 +248,7 @@ class WorkflowTemplate(ABC):
 
     def cleanup(self, context: WorkflowContext):
         """Clean up temporary files.
-        
+
         Args:
             context: Workflow context with temp files
         """

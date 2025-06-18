@@ -12,13 +12,13 @@ from .file_service import FileProjectService
 
 class ProjectService:
     """Service for managing projects and tracking budgets.
-    
+
     Uses file-based storage when database is not available.
     """
 
     def __init__(self, db_session: Any | None = None, event_bus: Any | None = None, config=None):
         """Initialize project service.
-        
+
         Args:
             db_session: Database session (no longer used)
             event_bus: Deprecated, kept for compatibility
@@ -51,9 +51,9 @@ class ProjectService:
         settings: dict[str, Any] | None = None
     ) -> dict | None:
         """Create a new project.
-        
+
         Uses file-based storage when database is not available.
-        
+
         Returns:
             Project dict or None
         """
@@ -82,9 +82,9 @@ class ProjectService:
 
     def get_project(self, project_id: str) -> dict | None:
         """Get project by ID.
-        
+
         Uses file-based storage when database is not available.
-        
+
         Returns:
             Project dict or None
         """
@@ -95,9 +95,9 @@ class ProjectService:
 
     def list_projects(self, status: str | None = None) -> list:
         """List all projects, optionally filtered by status.
-        
+
         Uses file-based storage when database is not available.
-        
+
         Returns:
             List of project dicts
         """
@@ -112,9 +112,9 @@ class ProjectService:
         creative_context: dict[str, Any]
     ) -> dict | None:
         """Update project creative context.
-        
+
         Uses file-based storage when database is not available.
-        
+
         Returns:
             Updated project dict or None
         """
@@ -137,9 +137,9 @@ class ProjectService:
         status: str
     ) -> dict | None:
         """Update project status.
-        
+
         Uses file-based storage when database is not available.
-        
+
         Returns:
             Updated project dict or None
         """
@@ -167,7 +167,7 @@ class ProjectService:
         file_path: str | None = None
     ) -> None:
         """Record a generation and update project budget.
-        
+
         Uses file-based storage when database is not available.
         """
         if self._file_service:
@@ -202,9 +202,9 @@ class ProjectService:
 
     def get_project_budget_status(self, project_id: str) -> dict[str, Any] | None:
         """Get project budget status.
-        
+
         Uses file-based storage when database is not available.
-        
+
         Returns:
             Budget status dict or None
         """
@@ -215,9 +215,9 @@ class ProjectService:
 
     def get_project_cost_breakdown(self, project_id: str) -> dict[str, float]:
         """Get cost breakdown by provider.
-        
+
         Uses file-based storage when database is not available.
-        
+
         Returns:
             Dict mapping providers to costs
         """
@@ -228,9 +228,9 @@ class ProjectService:
 
     def find_project_from_path(self, current_path: str | None = None) -> dict | None:
         """Find project based on current directory.
-        
+
         Uses file-based storage when database is not available.
-        
+
         Returns:
             Project dict or None
         """
@@ -245,9 +245,9 @@ class ProjectService:
         create_if_missing: bool = True
     ) -> dict | None:
         """Get project from path or create one if missing.
-        
+
         Uses file-based storage when database is not available.
-        
+
         Returns:
             Project dict or None
         """

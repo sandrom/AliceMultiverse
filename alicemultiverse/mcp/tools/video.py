@@ -16,7 +16,7 @@ from ...workflows.templates.template_mcp import (
 
 def register_video_tools(server) -> None:
     """Register video creation and processing tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """

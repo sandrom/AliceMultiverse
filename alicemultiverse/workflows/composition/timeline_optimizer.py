@@ -41,7 +41,7 @@ class TimelineOptimizer:
         composition_analyzer: CompositionAnalyzer | None = None,
     ):
         """Initialize the timeline optimizer.
-        
+
         Args:
             flow_analyzer: Flow analyzer instance
             composition_analyzer: Composition analyzer instance
@@ -57,13 +57,13 @@ class TimelineOptimizer:
         target_duration: float | None = None,
     ) -> OptimizationResult:
         """Optimize timeline based on composition analysis.
-        
+
         Args:
             timeline: Timeline to optimize
             strategy: Optimization strategy
             preserve_clips: Indices of clips to preserve
             target_duration: Target duration to achieve
-            
+
         Returns:
             Optimization result
         """

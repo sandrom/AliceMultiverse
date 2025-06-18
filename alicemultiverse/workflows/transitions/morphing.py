@@ -108,11 +108,11 @@ class SubjectMorpher:
     ) -> list[SubjectRegion]:
         """
         Detect subjects in an image using AI analysis.
-        
+
         Args:
             image_path: Path to the image
             metadata: Optional existing metadata
-            
+
         Returns:
             List of detected subject regions
         """
@@ -168,11 +168,11 @@ class SubjectMorpher:
     ) -> list[tuple[SubjectRegion, SubjectRegion]]:
         """
         Find matching subjects between two images.
-        
+
         Args:
             source_subjects: Subjects from source image
             target_subjects: Subjects from target image
-            
+
         Returns:
             List of matched subject pairs
         """
@@ -215,13 +215,13 @@ class SubjectMorpher:
     ) -> list[MorphKeyframe]:
         """
         Generate keyframes for morphing animation.
-        
+
         Args:
             subject_pairs: Matched subject pairs
             duration: Transition duration in seconds
             morph_type: Type of morph animation
             keyframe_count: Number of keyframes to generate
-            
+
         Returns:
             List of morph keyframes
         """
@@ -257,7 +257,7 @@ class SubjectMorpher:
     ) -> MorphTransition | None:
         """
         Create a complete morph transition between two images.
-        
+
         Args:
             source_path: Path to source image
             target_path: Path to target image
@@ -265,7 +265,7 @@ class SubjectMorpher:
             target_subjects: Subjects in target image
             duration: Transition duration
             morph_type: Type of morphing animation
-            
+
         Returns:
             MorphTransition object or None if no matches found
         """
@@ -298,12 +298,12 @@ class SubjectMorpher:
     ) -> dict[str, Any]:
         """
         Export morph data in After Effects compatible format.
-        
+
         Args:
             morph_transition: Morph transition data
             output_path: Path for output file
             fps: Frames per second for keyframe timing
-            
+
         Returns:
             Export summary
         """
@@ -626,34 +626,34 @@ angle + value;
 
 function importMorphData() {
     var data = %s;
-    
+
     // Get active composition
     var comp = app.project.activeItem;
     if (!comp || !(comp instanceof CompItem)) {
         alert("Please select a composition first");
         return;
     }
-    
+
     // Create null object for control
     var controlNull = comp.layers.addNull();
     controlNull.name = "Morph Control";
-    
+
     // Add slider controls
     var progressSlider = controlNull.Effects.addProperty("ADBE Slider Control");
     progressSlider.name = "Progress";
     progressSlider.property("Slider").setValueAtTime(0, 0);
     progressSlider.property("Slider").setValueAtTime(data.project.duration, 100);
-    
+
     var curveSlider = controlNull.Effects.addProperty("ADBE Slider Control");
     curveSlider.name = "Morph Curve";
     curveSlider.property("Slider").setValue(100);
-    
+
     // Process each morph layer
     for (var i = 0; i < data.morph_data.length; i++) {
         var morphData = data.morph_data[i];
         createMorphLayer(comp, morphData, controlNull);
     }
-    
+
     alert("Morph data imported successfully!");
 }
 
@@ -661,11 +661,11 @@ function createMorphLayer(comp, morphData, controlNull) {
     // Create shape layer for morph
     var morphLayer = comp.layers.addShape();
     morphLayer.name = morphData.name;
-    
+
     // Add mask shape
     var shapeGroup = morphLayer.property("Contents").addProperty("ADBE Vector Group");
     var maskPath = shapeGroup.property("Contents").addProperty("ADBE Vector Shape - Group");
-    
+
     // Set mask vertices
     var path = maskPath.property("Path");
     var shape = new Shape();
@@ -674,18 +674,18 @@ function createMorphLayer(comp, morphData, controlNull) {
     shape.outTangents = morphData.mask_data.source.outTangents;
     shape.closed = morphData.mask_data.source.closed;
     path.setValue(shape);
-    
+
     // Add keyframes
     for (var j = 0; j < morphData.keyframes.length; j++) {
         var kf = morphData.keyframes[j];
         var time = kf.time / %.1f; // Convert frames to seconds
-        
+
         morphLayer.transform.position.setValueAtTime(time, kf.position);
         morphLayer.transform.opacity.setValueAtTime(time, kf.opacity);
         morphLayer.transform.scale.setValueAtTime(time, kf.scale);
         morphLayer.transform.rotation.setValueAtTime(time, kf.rotation);
     }
-    
+
     // Link to control null
     morphLayer.parent = controlNull;
 }
@@ -711,11 +711,11 @@ class MorphingTransitionMatcher:
     ) -> list[MorphTransition]:
         """
         Analyze image sequence for potential morphing transitions.
-        
+
         Args:
             image_paths: List of image paths in sequence
             min_similarity: Minimum similarity score for morphing
-            
+
         Returns:
             List of morph transitions
         """
@@ -755,13 +755,13 @@ class MorphingTransitionMatcher:
     ) -> TransitionSuggestion | None:
         """
         Create a transition suggestion with morphing.
-        
+
         Args:
             source_path: Source image path
             target_path: Target image path
             source_subjects: Subjects in source
             target_subjects: Subjects in target
-            
+
         Returns:
             Transition suggestion or None
         """

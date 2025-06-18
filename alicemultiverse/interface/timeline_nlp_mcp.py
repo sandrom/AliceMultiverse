@@ -28,13 +28,13 @@ async def process_timeline_command(
 ) -> dict[str, Any]:
     """
     Process a natural language command to edit a timeline.
-    
+
     Args:
         command: Natural language command (e.g., "make the intro punchier")
         timeline_data: Timeline data dictionary
         session_id: Optional preview session ID to update
         preview: Whether to show preview of changes
-        
+
     Returns:
         Result with applied edits and suggestions
     """
@@ -168,10 +168,10 @@ async def suggest_timeline_edits(
 ) -> dict[str, Any]:
     """
     Get AI-powered suggestions for timeline improvements.
-    
+
     Args:
         timeline_data: Timeline data dictionary
-        
+
     Returns:
         Suggested edit commands and analysis
     """
@@ -242,12 +242,12 @@ async def batch_timeline_edits(
 ) -> dict[str, Any]:
     """
     Apply multiple natural language commands in sequence.
-    
+
     Args:
         commands: List of commands to apply
         timeline_data: Timeline data dictionary
         session_id: Optional preview session ID
-        
+
     Returns:
         Result with all applied edits
     """
@@ -322,10 +322,10 @@ EXAMPLE_COMMANDS = {
 
 def get_command_examples(category: str | None = None) -> dict[str, list[str]]:
     """Get example commands for natural language editing.
-    
+
     Args:
         category: Optional category filter
-        
+
     Returns:
         Dictionary of example commands by category
     """

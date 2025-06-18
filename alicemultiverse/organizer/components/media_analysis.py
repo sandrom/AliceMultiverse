@@ -18,11 +18,11 @@ class MediaAnalysisMixin:
 
     def _analyze_media(self, media_path: Path, project_folder: str) -> dict:
         """Analyze media file to extract metadata and characteristics.
-        
+
         Args:
             media_path: Path to media file
             project_folder: Project folder name
-            
+
         Returns:
             Analysis results dictionary
         """
@@ -114,11 +114,11 @@ class MediaAnalysisMixin:
 
     def _get_or_analyze_media(self, media_path: Path, project_folder: str) -> dict:
         """Get cached analysis or analyze media file.
-        
+
         Args:
             media_path: Path to media file
             project_folder: Project folder name
-            
+
         Returns:
             Analysis results dictionary
         """

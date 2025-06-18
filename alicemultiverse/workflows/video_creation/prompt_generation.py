@@ -55,13 +55,13 @@ class PromptGenerationMixin:
         enhance_with_ai: bool = False
     ) -> VideoStoryboard:
         """Generate video prompts from selected images.
-        
+
         Args:
             image_hashes: List of selected image hashes
             style: Video style (cinematic, documentary, etc.)
             target_duration: Target video duration in seconds
             enhance_with_ai: Use AI to enhance prompts
-            
+
         Returns:
             Complete video storyboard
         """
@@ -170,11 +170,11 @@ class PromptGenerationMixin:
         # Create enhancement prompt
         enhancement_prompt = f"""
         Enhance this video generation prompt for Kling AI:
-        
+
         Base prompt: {base_prompt}
         Style: {style_template.get('prefix', 'cinematic')}
         Camera motion: {analysis['suggested_motion'].value}
-        
+
         Make it more cinematic and specific for video generation.
         Keep it under 100 words. Focus on movement and atmosphere.
         """

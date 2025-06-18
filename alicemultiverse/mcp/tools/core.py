@@ -8,7 +8,7 @@ from ...interface.models import OrganizeRequest, SearchRequest, TagRequest
 
 def register_core_tools(server) -> None:
     """Register core Alice tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """
@@ -28,7 +28,7 @@ def register_core_tools(server) -> None:
     ) -> dict[str, Any]:
         """
         Search for AI-generated assets using natural language or structured queries.
-        
+
         Parameters:
         - description: Natural language description of what you're looking for
         - style_tags: Specific style tags (e.g., ["cyberpunk", "minimalist"])
@@ -39,7 +39,7 @@ def register_core_tools(server) -> None:
         - media_type: Filter by type ("image", "video", "document")
         - ai_source: Filter by AI source (e.g., "midjourney", "flux")
         - limit: Maximum number of results (default: 50)
-        
+
         Returns dictionary with:
         - assets: List of matching assets
         - total_count: Total number of matches
@@ -73,14 +73,14 @@ def register_core_tools(server) -> None:
     ) -> dict[str, Any]:
         """
         Organize AI-generated media files into a structured directory layout.
-        
+
         Parameters:
         - source_path: Source directory (uses configured inbox if not specified)
         - output_path: Output directory (uses configured organized if not specified)
         - quality_assessment: Enable quality assessment
         - auto_tag: Enable automatic tagging
         - understanding: Enable AI-powered image understanding
-        
+
         Returns dictionary with:
         - processed: Number of files processed
         - organized: Number of files organized
@@ -104,13 +104,13 @@ def register_core_tools(server) -> None:
     ) -> dict[str, Any]:
         """
         Update tags for one or more assets.
-        
+
         Parameters:
         - asset_ids: List of asset content hashes
         - add_tags: Tags to add
         - remove_tags: Tags to remove
         - set_tags: Replace all tags with these (overrides add/remove)
-        
+
         Returns success status and updated asset count.
         """
         request = TagRequest(
@@ -127,10 +127,10 @@ def register_core_tools(server) -> None:
     async def get_asset_details(asset_id: str) -> dict[str, Any]:
         """
         Get detailed information about a specific asset.
-        
+
         Parameters:
         - asset_id: Asset content hash
-        
+
         Returns complete asset metadata including:
         - Basic info (path, size, type)
         - AI generation details
@@ -148,12 +148,12 @@ def register_core_tools(server) -> None:
     ) -> dict[str, Any]:
         """
         Soft delete assets by moving them to sorted-out folder.
-        
+
         Parameters:
         - asset_ids: List of asset content hashes to delete
         - category: Category for organization (e.g., "duplicates", "low_quality")
         - reason: Optional reason for deletion
-        
+
         Returns status and moved file count.
         """
         from ...interface.models import SoftDeleteRequest

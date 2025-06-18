@@ -180,7 +180,30 @@ My personal AI creative workflow orchestrator, accessed through Claude. Built fo
 
 ## Immediate Priorities
 
-### 1. Documentation Updates 📚 ✅
+### 1. Test Suite Modernization 🧪
+**Why**: Tests are severely outdated after major refactoring
+
+#### Issues to Fix:
+- [ ] **Import Errors**: Update tests to match new modular structure
+  - Remove references to deleted functions (get_workflow, list_workflows, get_registry)
+  - Update imports to use new component paths
+  - Fix 35+ test files with import errors
+  
+- [ ] **Dependency Issues**: 
+  - Fix OpenCV version conflict (cv2.dnn.DictValue)
+  - Update to opencv-python==4.8.1.78
+  
+- [ ] **New Module Tests**: Write tests for refactored components
+  - 44 new modules created from 6 large files
+  - Each needs unit tests for core functionality
+  - Integration tests for module interactions
+  
+- [ ] **Coverage Goals**:
+  - Target 80% coverage for core modules
+  - Priority: organization, search, understanding, MCP tools
+  - Set up CI/CD to prevent future test rot
+
+### 2. Documentation Updates 📚 ✅
 **Why**: New features are useless if people don't know how to use them
 
 #### Essential Guides Needed:

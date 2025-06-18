@@ -18,14 +18,14 @@ async def analyze_image(
     generate_prompt: bool = True,
 ) -> dict[str, Any]:
     """Analyze a single image and return metadata.
-    
+
     Args:
         image_path: Path to image file
         provider: Specific provider to use (None = cheapest)
         detailed: Whether to do detailed analysis
         extract_tags: Whether to extract semantic tags
         generate_prompt: Whether to generate prompts
-        
+
     Returns:
         Dictionary with analysis results to merge into metadata
     """
@@ -93,13 +93,13 @@ async def analyze_images_batch(
     detailed: bool = False,
 ) -> dict[Path, dict[str, Any]]:
     """Analyze multiple images efficiently.
-    
+
     Args:
         image_paths: List of image paths
         provider: Specific provider to use
         max_concurrent: Maximum concurrent analyses
         detailed: Whether to do detailed analysis
-        
+
     Returns:
         Dictionary mapping paths to analysis results
     """
@@ -154,10 +154,10 @@ async def analyze_images_batch(
 
 def should_analyze_image(metadata: dict[str, Any]) -> bool:
     """Check if an image should be analyzed.
-    
+
     Args:
         metadata: Current metadata
-        
+
     Returns:
         True if image should be analyzed
     """
@@ -178,12 +178,12 @@ async def estimate_analysis_cost(
     detailed: bool = False,
 ) -> float:
     """Estimate cost for analyzing images.
-    
+
     Args:
         num_images: Number of images to analyze
         provider: Specific provider to use
         detailed: Whether detailed analysis
-        
+
     Returns:
         Estimated total cost
     """

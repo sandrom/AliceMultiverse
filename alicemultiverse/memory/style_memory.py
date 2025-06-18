@@ -183,7 +183,7 @@ class StyleMemory:
 
     def __init__(self, data_dir: Path | None = None):
         """Initialize style memory.
-        
+
         Args:
             data_dir: Directory for storing memory data
         """
@@ -212,14 +212,14 @@ class StyleMemory:
         tags: list[str] | None = None
     ) -> StylePreference:
         """Track a style choice.
-        
+
         Args:
             preference_type: Type of preference
             value: The chosen value
             context: Additional context
             project: Associated project
             tags: Descriptive tags
-            
+
         Returns:
             Created or updated preference
         """
@@ -274,7 +274,7 @@ class StyleMemory:
         user_rating: int | None = None
     ):
         """Track the result of using certain preferences.
-        
+
         Args:
             preference_ids: Preferences used
             successful: Whether the result was successful
@@ -312,12 +312,12 @@ class StyleMemory:
         limit: int = 5
     ) -> dict[PreferenceType, list[StylePreference]]:
         """Get relevant preferences for a given context.
-        
+
         Args:
             context: Current context (project, time, mood, etc.)
             preference_types: Types to consider
             limit: Max preferences per type
-            
+
         Returns:
             Preferences organized by type
         """
@@ -362,11 +362,11 @@ class StyleMemory:
         max_suggestions: int = 5
     ) -> list[list[str]]:
         """Suggest preference combinations based on history.
-        
+
         Args:
             base_preferences: Starting preferences
             max_suggestions: Maximum suggestions to return
-            
+
         Returns:
             List of suggested combinations
         """
@@ -403,11 +403,11 @@ class StyleMemory:
         preference_type: PreferenceType | None = None
     ) -> list[dict[str, Any]]:
         """Get style evolution over time.
-        
+
         Args:
             time_range: Time range to analyze
             preference_type: Specific type to track
-            
+
         Returns:
             Evolution timeline
         """
@@ -455,7 +455,7 @@ class StyleMemory:
 
     def export_profile(self) -> dict[str, Any]:
         """Export complete style profile.
-        
+
         Returns:
             Complete profile data
         """
@@ -481,7 +481,7 @@ class StyleMemory:
 
     def import_profile(self, profile_data: dict[str, Any]):
         """Import a style profile.
-        
+
         Args:
             profile_data: Profile data to import
         """

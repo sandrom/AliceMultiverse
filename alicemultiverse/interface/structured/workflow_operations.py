@@ -21,11 +21,11 @@ class WorkflowOperationsMixin:
 
     def execute_workflow(self, request: WorkflowRequest, client_id: str = "default") -> AliceResponse:
         """Execute workflows with structured parameters.
-        
+
         Args:
             request: Workflow execution request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with workflow result
         """
@@ -55,11 +55,11 @@ class WorkflowOperationsMixin:
 
     def generate_content(self, request: GenerationRequest, client_id: str = "default") -> AliceResponse:
         """Generate content with structured parameters.
-        
+
         Args:
             request: Generation request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with generation result
         """

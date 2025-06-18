@@ -103,8 +103,8 @@ async def main():
 
         # Get the content hash of our test file
         results = cache.conn.execute("""
-            SELECT DISTINCT content_hash 
-            FROM assets 
+            SELECT DISTINCT content_hash
+            FROM assets
             WHERE len(locations) > 0
         """).fetchall()
 

@@ -22,13 +22,13 @@ class AliceInterface(
 
     This class provides high-level functions that AI can call using natural
     language concepts, while Alice handles all technical complexity.
-    
+
     The interface is composed of several operation mixins:
     - SearchOperationsMixin: search_assets, find_similar_assets
     - ContentOperationsMixin: generate_content
     - OrganizationOperationsMixin: organize_media, tag_assets, group_assets
     - ProjectOperationsMixin: get_project_context, create_project, update_project_context,
-                              get_project_budget_status, list_projects, set_asset_role, 
+                              get_project_budget_status, list_projects, set_asset_role,
                               get_asset_info
     - SimilarityOperationsMixin: (reserved for future similarity operations)
     """

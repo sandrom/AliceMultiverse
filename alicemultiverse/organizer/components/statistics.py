@@ -13,7 +13,7 @@ class StatisticsMixin:
 
     def _init_statistics(self) -> Statistics:
         """Initialize statistics tracking.
-        
+
         Returns:
             Initialized statistics object
         """

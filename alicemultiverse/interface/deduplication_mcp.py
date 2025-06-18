@@ -21,7 +21,7 @@ async def find_duplicates_advanced(
     limit: int = 100
 ) -> dict[str, Any]:
     """Find duplicate and similar images using advanced perceptual hashing.
-    
+
     Args:
         paths: Directories to search (defaults to configured paths)
         exact_only: Only find exact duplicates (MD5 hash)
@@ -30,7 +30,7 @@ async def find_duplicates_advanced(
         min_file_size: Minimum file size in bytes to consider
         recursive: Search directories recursively
         limit: Maximum number of duplicate groups to return
-        
+
     Returns:
         Duplicate groups with similarity scores and recommendations
     """
@@ -120,14 +120,14 @@ async def remove_duplicates(
     use_hardlinks: bool = False
 ) -> dict[str, Any]:
     """Remove duplicate files with various strategies.
-    
+
     Args:
         duplicate_groups: Groups from find_duplicates_advanced (if None, finds them first)
         strategy: Removal strategy - keep_organized, keep_largest, keep_newest, interactive
         backup: Create backup before removal
         dry_run: Preview what would be removed without actually removing
         use_hardlinks: Use hardlinks instead of deletion to save space
-        
+
     Returns:
         Removal results with space saved
     """
@@ -193,13 +193,13 @@ async def build_similarity_index(
     include_videos: bool = False
 ) -> dict[str, Any]:
     """Build a similarity search index for fast duplicate/similar image detection.
-    
+
     Args:
         paths: Directories to index (defaults to configured paths)
         index_type: Index type - flat, ivf, hnsw
         force_rebuild: Force rebuild even if index exists
         include_videos: Include video keyframes in index
-        
+
     Returns:
         Index build results with statistics
     """
@@ -278,13 +278,13 @@ async def find_similar_images(
     use_index: bool = True
 ) -> dict[str, Any]:
     """Find images similar to a given image using perceptual hashing.
-    
+
     Args:
         image_path: Path to the query image
         count: Number of similar images to return
         similarity_threshold: Minimum similarity score (0.0-1.0)
         use_index: Use similarity index if available
-        
+
     Returns:
         Similar images with similarity scores
     """
@@ -384,12 +384,12 @@ async def get_deduplication_report(
     export_path: str | None = None
 ) -> dict[str, Any]:
     """Generate a comprehensive deduplication report.
-    
+
     Args:
         paths: Directories to analyze (defaults to configured paths)
         include_recommendations: Include removal recommendations
         export_path: Export report to JSON file
-        
+
     Returns:
         Comprehensive deduplication analysis
     """
@@ -508,7 +508,7 @@ def _get_deduplication_recommendations(
 
 def register_deduplication_tools(server) -> None:
     """Register deduplication tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """

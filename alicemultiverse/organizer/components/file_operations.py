@@ -70,11 +70,11 @@ class FileOperationsMixin:
 
     def _perform_file_operation(self, media_path: Path, dest_path: Path) -> bool:
         """Perform the actual file operation (copy or move).
-        
+
         Args:
             media_path: Source file path
             dest_path: Destination file path
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -99,7 +99,7 @@ class FileOperationsMixin:
 
     def _handle_existing_file_relocation(self, existing_file: Path, dest_path: Path) -> None:
         """Handle relocation of existing organized files.
-        
+
         Args:
             existing_file: Path to existing file
             dest_path: New destination path
@@ -154,10 +154,10 @@ class FileOperationsMixin:
 
     def _calculate_file_hash(self, file_path: Path) -> str:
         """Calculate SHA256 hash of a file.
-        
+
         Args:
             file_path: Path to the file
-            
+
         Returns:
             Hex string of the file hash
         """

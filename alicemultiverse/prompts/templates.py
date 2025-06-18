@@ -31,10 +31,10 @@ class PromptTemplate:
 
     def render(self, **kwargs) -> str:
         """Render the template with provided variables.
-        
+
         Args:
             **kwargs: Variable values to substitute
-            
+
         Returns:
             Rendered prompt text
         """
@@ -64,10 +64,10 @@ class PromptTemplate:
 
     def to_prompt(self, **kwargs) -> Prompt:
         """Create a Prompt instance from this template.
-        
+
         Args:
             **kwargs: Variable values and additional prompt fields
-            
+
         Returns:
             Prompt instance
         """
@@ -294,12 +294,12 @@ class TemplateManager:
     def create_from_prompt(self, prompt: Prompt, template_name: str,
                           variables: list[str] | None = None) -> PromptTemplate:
         """Create a template from an existing prompt.
-        
+
         Args:
             prompt: Source prompt
             template_name: Name for the template
             variables: List of variable names to extract
-            
+
         Returns:
             Created template
         """
@@ -351,14 +351,14 @@ class TemplateManager:
 def create_template_from_variations(prompts: list[Prompt],
                                   template_name: str) -> PromptTemplate:
     """Create a template by analyzing prompt variations.
-    
+
     This function attempts to identify common patterns and variable parts
     in a set of related prompts.
-    
+
     Args:
         prompts: List of related prompts
         template_name: Name for the template
-        
+
     Returns:
         Created template
     """

@@ -10,7 +10,7 @@ import importlib.util
 
 def register_debug_commands(parser: argparse.ArgumentParser) -> None:
     """Register all debug commands to the parser.
-    
+
     Args:
         parser: The main argument parser
     """
@@ -68,7 +68,7 @@ def register_debug_commands(parser: argparse.ArgumentParser) -> None:
 
 def list_available_commands() -> list[str]:
     """List all available debug commands.
-    
+
     Returns:
         List of command names
     """

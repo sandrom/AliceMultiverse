@@ -162,28 +162,28 @@ def demonstrate_selection_workflow():
     1. Project Creation Phase:
        - Create project for new campaign
        - Define creative direction and constraints
-    
+
     2. Asset Discovery Phase:
        - Search for relevant assets using tags/criteria
        - Browse and evaluate options
-    
+
     3. Selection Building Phase:
        - Create selection with specific purpose (e.g., "Client Presentation")
        - Add assets with detailed notes about why they were chosen
        - Group related assets together
        - Define sequence for presentation
-    
+
     4. Review and Refinement Phase:
        - Share selection with team/client
        - Update based on feedback
        - Remove rejected options
        - Add alternatives
-    
+
     5. Finalization Phase:
        - Mark selection as final
        - Export for delivery
        - Track usage and outcomes
-    
+
     Benefits:
     - Complete history of creative decisions
     - Reusable selections for similar projects

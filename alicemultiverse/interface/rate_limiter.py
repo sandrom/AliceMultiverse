@@ -55,7 +55,7 @@ class RateLimiter:
 
     def __init__(self, config: RateLimitConfig | None = None) -> None:
         """Initialize rate limiter.
-        
+
         Args:
             config: Rate limit configuration
         """
@@ -128,17 +128,17 @@ class RateLimiter:
         operation: str = "request"
     ) -> bool:
         """Check if a request is within rate limit.
-        
+
         Args:
             client_id: Client identifier
             tracker: Request tracker for this window
             limit: Maximum requests allowed
             window: Time window duration
             operation: Operation name for error messages
-            
+
         Returns:
             True if within limit
-            
+
         Raises:
             ValidationError: If rate limit exceeded
         """
@@ -160,11 +160,11 @@ class RateLimiter:
 
     def check_request(self, client_id: str, operation: str | None = None) -> None:
         """Check if a request is allowed under rate limits.
-        
+
         Args:
             client_id: Client identifier (e.g., IP address, API key)
             operation: Specific operation being performed
-            
+
         Raises:
             ValidationError: If rate limit exceeded
         """
@@ -233,10 +233,10 @@ class RateLimiter:
 
     def get_remaining_quota(self, client_id: str) -> dict[str, int]:
         """Get remaining quota for a client.
-        
+
         Args:
             client_id: Client identifier
-            
+
         Returns:
             Dictionary of remaining quotas by time window
         """
@@ -261,7 +261,7 @@ class RateLimiter:
 
     def reset_client(self, client_id: str) -> None:
         """Reset all rate limit tracking for a client.
-        
+
         Args:
             client_id: Client identifier
         """

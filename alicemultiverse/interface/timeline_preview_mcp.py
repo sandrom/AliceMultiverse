@@ -60,12 +60,12 @@ async def preview_timeline(
 ) -> dict[str, Any]:
     """
     Open a timeline in the web preview interface.
-    
+
     Args:
         timeline_data: Timeline data dictionary
         auto_open: Whether to automatically open browser
         port: Server port
-        
+
     Returns:
         Dict with preview URL and session ID
     """
@@ -124,13 +124,13 @@ async def update_preview_timeline(
 ) -> dict[str, Any]:
     """
     Update a timeline in the preview interface.
-    
+
     Args:
         session_id: Preview session ID
         operation: Operation type (reorder, trim, add_transition)
         clips: List of clip updates
         port: Server port
-        
+
     Returns:
         Updated timeline data
     """
@@ -171,13 +171,13 @@ async def export_preview_timeline(
 ) -> dict[str, Any]:
     """
     Export a timeline from the preview interface.
-    
+
     Args:
         session_id: Preview session ID
         format: Export format (json, edl, xml)
         output_path: Optional output file path
         port: Server port
-        
+
     Returns:
         Export result
     """
@@ -239,10 +239,10 @@ async def export_preview_timeline(
 async def get_preview_status(port: int = 8001) -> dict[str, Any]:
     """
     Check if preview server is running and get status.
-    
+
     Args:
         port: Server port
-        
+
     Returns:
         Server status information
     """

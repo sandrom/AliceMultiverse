@@ -124,10 +124,10 @@ class PortalDetector:
     def detect_portals(self, image_path: str) -> list[Portal]:
         """
         Detect portal shapes in an image.
-        
+
         Args:
             image_path: Path to image
-            
+
         Returns:
             List of detected portals
         """
@@ -326,11 +326,11 @@ class PortalEffectGenerator:
     ) -> PortalEffectAnalysis:
         """
         Analyze potential portal transition between images.
-        
+
         Args:
             image1_path: Path to first image
             image2_path: Path to second image
-            
+
         Returns:
             PortalEffectAnalysis with matches and recommendations
         """

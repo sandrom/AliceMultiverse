@@ -17,7 +17,7 @@ class MediaOrganizerBase:
 
     def __init__(self, config: DictConfig):
         """Initialize the media organizer base.
-        
+
         Args:
             config: Configuration object
         """
@@ -88,7 +88,7 @@ class MediaOrganizerBase:
 
     def _init_statistics(self) -> Statistics:
         """Initialize statistics tracking.
-        
+
         Returns:
             Initialized statistics object
         """
@@ -106,7 +106,7 @@ class MediaOrganizerBase:
 
     def _signal_handler(self, signum: int, frame) -> None:
         """Handle interrupt signals gracefully.
-        
+
         Args:
             signum: Signal number
             frame: Current stack frame

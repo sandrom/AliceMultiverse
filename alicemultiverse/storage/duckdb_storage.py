@@ -23,7 +23,7 @@ class DuckDBStorage(DuckDBBase):
         storage_metadata: dict[str, Any] | None = None,
     ) -> None:
         """Upsert asset with location tracking.
-        
+
         Args:
             content_hash: Content hash of the asset
             file_path: Path to the file
@@ -309,12 +309,12 @@ class DuckDBStorage(DuckDBBase):
         batch_size: int = 100,
     ) -> dict[str, Any]:
         """Batch upsert multiple assets for performance.
-        
+
         Args:
             assets: List of (content_hash, file_path, metadata) tuples
             storage_type: Type of storage for all assets
             batch_size: Number of assets to process at once
-            
+
         Returns:
             Summary of the operation
         """
@@ -364,17 +364,17 @@ class DuckDBStorage(DuckDBBase):
 
     def set_asset_role(self, content_hash: str, role: str) -> bool:
         """Set the role of an asset.
-        
+
         Args:
             content_hash: Content hash of the asset
             role: Role to set (e.g., 'primary', 'b-roll', 'reference')
-            
+
         Returns:
             True if successful, False otherwise
         """
         try:
             self.conn.execute("""
-                UPDATE assets 
+                UPDATE assets
                 SET asset_role = ?, modified_at = ?
                 WHERE content_hash = ?
             """, [role, datetime.now(), content_hash])
@@ -393,16 +393,16 @@ class DuckDBStorage(DuckDBBase):
 
     def get_assets_by_role(self, role: str, limit: int = 100) -> list[dict[str, Any]]:
         """Get all assets with a specific role.
-        
+
         Args:
             role: Role to filter by
             limit: Maximum number of results
-            
+
         Returns:
             List of assets with the specified role
         """
         results = self.conn.execute("""
-            SELECT * FROM assets 
+            SELECT * FROM assets
             WHERE asset_role = ?
             ORDER BY modified_at DESC
             LIMIT ?

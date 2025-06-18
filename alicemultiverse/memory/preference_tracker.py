@@ -46,7 +46,7 @@ class PreferenceTracker:
 
     def __init__(self, style_memory: StyleMemory):
         """Initialize tracker with style memory.
-        
+
         Args:
             style_memory: StyleMemory instance for persistence
         """
@@ -61,12 +61,12 @@ class PreferenceTracker:
         project: str | None = None
     ) -> WorkflowContext:
         """Start tracking a new workflow.
-        
+
         Args:
             workflow_id: Unique workflow identifier
             workflow_type: Type of workflow
             project: Associated project name
-            
+
         Returns:
             WorkflowContext for tracking
         """
@@ -89,7 +89,7 @@ class PreferenceTracker:
         metadata: dict[str, Any] | None = None
     ):
         """Track a choice made during workflow.
-        
+
         Args:
             workflow_id: Workflow being tracked
             choice_type: Type of choice (e.g., "color_palette", "transition")
@@ -129,7 +129,7 @@ class PreferenceTracker:
         details: dict[str, Any] | None = None
     ):
         """Track an outcome during workflow.
-        
+
         Args:
             workflow_id: Workflow being tracked
             outcome_type: Type of outcome
@@ -159,7 +159,7 @@ class PreferenceTracker:
         reason: str | None = None
     ):
         """Track manual adjustments to generated content.
-        
+
         Args:
             workflow_id: Workflow being tracked
             original_value: Original/generated value
@@ -199,7 +199,7 @@ class PreferenceTracker:
         improved: bool = True
     ):
         """Track iterations and refinements.
-        
+
         Args:
             workflow_id: Workflow being tracked
             iteration_number: Which iteration this is
@@ -225,14 +225,14 @@ class PreferenceTracker:
         notes: str | None = None
     ) -> WorkflowContext | None:
         """End workflow tracking and analyze results.
-        
+
         Args:
             workflow_id: Workflow to end
             successful: Whether workflow was successful
             quality_score: Objective quality (0-1)
             user_rating: User satisfaction (1-5)
             notes: Optional notes
-            
+
         Returns:
             Completed workflow context
         """
@@ -264,10 +264,10 @@ class PreferenceTracker:
 
     def get_workflow_summary(self, workflow_id: str) -> dict[str, Any] | None:
         """Get summary of a workflow (active or completed).
-        
+
         Args:
             workflow_id: Workflow to summarize
-            
+
         Returns:
             Summary dictionary or None
         """
@@ -300,7 +300,7 @@ class PreferenceTracker:
 
     def get_active_workflows(self) -> list[dict[str, Any]]:
         """Get all active workflows.
-        
+
         Returns:
             List of workflow summaries
         """
@@ -315,11 +315,11 @@ class PreferenceTracker:
         limit: int = 100
     ) -> dict[str, Any]:
         """Analyze patterns across completed workflows.
-        
+
         Args:
             workflow_type: Filter by type
             limit: Max workflows to analyze
-            
+
         Returns:
             Pattern analysis
         """
@@ -386,7 +386,7 @@ class PreferenceTracker:
 
     def get_improvement_areas(self) -> list[dict[str, Any]]:
         """Identify areas for improvement based on patterns.
-        
+
         Returns:
             List of improvement suggestions
         """
@@ -454,10 +454,10 @@ class PreferenceTracker:
 
     def _map_to_preference_type(self, choice_type: str) -> PreferenceType | None:
         """Map choice type string to PreferenceType enum.
-        
+
         Args:
             choice_type: String choice type
-            
+
         Returns:
             PreferenceType or None
         """
@@ -495,7 +495,7 @@ class PreferenceTracker:
 
     def _update_style_memory(self, context: WorkflowContext):
         """Update style memory based on workflow results.
-        
+
         Args:
             context: Completed workflow context
         """

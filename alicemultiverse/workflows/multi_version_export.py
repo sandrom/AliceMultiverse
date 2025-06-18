@@ -199,13 +199,13 @@ class MultiVersionExporter:
         maintain_sync: bool = True
     ) -> dict[Platform, ExportVersion]:
         """Create platform-specific versions from a master timeline.
-        
+
         Args:
             timeline: Master timeline to adapt
             platforms: List of target platforms
             smart_crop: Use AI to detect important regions
             maintain_sync: Try to keep music sync when adapting
-            
+
         Returns:
             Dictionary of platform versions
         """

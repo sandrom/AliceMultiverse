@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 def register_selection_tools(server: Server) -> None:
     """Register all selection/quick mark tools with the MCP server.
-    
+
     Args:
         server: MCP server instance
     """
@@ -43,14 +43,14 @@ def register_selection_tools(server: Server) -> None:
         rating: int | None = None
     ) -> Any:
         """Quickly mark files for later reference.
-        
+
         Args:
             paths: List of file paths to mark
             name: Optional name for the selection
             tags: Optional tags
             notes: Optional notes
             rating: Optional rating (1-5)
-            
+
         Returns:
             Created selection information
         """
@@ -114,12 +114,12 @@ def register_selection_tools(server: Server) -> None:
         include_paths: bool = False
     ) -> Any:
         """List recent quick marks/selections.
-        
+
         Args:
             tags: Filter by tags
             limit: Maximum number to return
             include_paths: Whether to include file paths in response
-            
+
         Returns:
             List of selections
         """
@@ -172,12 +172,12 @@ def register_selection_tools(server: Server) -> None:
         format: str = "json"
     ) -> Any:
         """Export quick marks/selections to a file.
-        
+
         Args:
             selection_id: Specific selection to export (exports all if not provided)
             output_path: Output file path
             format: Export format (json, txt, csv)
-            
+
         Returns:
             Export information
         """

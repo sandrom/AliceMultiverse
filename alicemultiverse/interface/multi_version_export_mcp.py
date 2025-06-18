@@ -30,13 +30,13 @@ async def create_platform_versions(
 ) -> dict[str, Any]:
     """
     Create platform-specific versions of a timeline.
-    
+
     Args:
         timeline_data: Master timeline data
         platforms: List of platform names (instagram_reel, tiktok, etc.)
         smart_crop: Use AI to detect important regions
         maintain_sync: Try to keep music sync when adapting
-        
+
     Returns:
         Platform versions with adapted timelines
     """
@@ -179,10 +179,10 @@ async def get_platform_recommendations(
 ) -> dict[str, Any]:
     """
     Get recommendations for each platform based on timeline analysis.
-    
+
     Args:
         timeline_data: Timeline to analyze
-        
+
     Returns:
         Platform-specific recommendations and suitability
     """
@@ -270,13 +270,13 @@ async def export_platform_version(
 ) -> dict[str, Any]:
     """
     Export a single platform version with proper naming.
-    
+
     Args:
         platform: Target platform
         timeline_data: Platform-adapted timeline
         output_dir: Output directory
         format: Export format (json, edl, xml)
-        
+
     Returns:
         Export result with file paths
     """
@@ -360,14 +360,14 @@ async def batch_export_all_platforms(
 ) -> dict[str, Any]:
     """
     Create and export all platform versions in one operation.
-    
+
     Args:
         timeline_data: Master timeline
         platforms: List of platforms to export
         output_dir: Output directory
         format: Export format
         create_master: Also export master version
-        
+
     Returns:
         Export results for all platforms
     """

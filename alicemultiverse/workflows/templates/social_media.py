@@ -103,14 +103,14 @@ PLATFORM_SPECS = {
 
 class SocialMediaTemplate(WorkflowTemplate):
     """Base template for social media content creation.
-    
+
     This workflow:
     1. Analyzes content for platform fit
     2. Optimizes for platform specifications
     3. Adds platform-specific features
     4. Ensures engagement optimization
     5. Exports in platform format
-    
+
     Parameters:
         platform: Target social platform
         images: List of image paths

@@ -52,7 +52,7 @@ class DuckDBAnalytics(DuckDBBase):
 
         # Storage statistics
         storage_stats = self.conn.execute("""
-            SELECT 
+            SELECT
                 COUNT(*) as total_files,
                 SUM(file_size) as total_size,
                 AVG(file_size) as avg_size,
@@ -73,7 +73,7 @@ class DuckDBAnalytics(DuckDBBase):
 
         # Recent activity
         recent_stats = self.conn.execute("""
-            SELECT 
+            SELECT
                 COUNT(CASE WHEN discovered_at > ? THEN 1 END) as added_24h,
                 COUNT(CASE WHEN discovered_at > ? THEN 1 END) as added_7d,
                 COUNT(CASE WHEN discovered_at > ? THEN 1 END) as added_30d
@@ -92,7 +92,7 @@ class DuckDBAnalytics(DuckDBBase):
 
         # Tag statistics
         tag_stats = self.conn.execute("""
-            SELECT 
+            SELECT
                 COUNT(DISTINCT content_hash) as tagged_assets,
                 COUNT(*) as total_tags,
                 COUNT(DISTINCT tag_value) as unique_tags
@@ -117,7 +117,7 @@ class DuckDBAnalytics(DuckDBBase):
 
         # Understanding statistics
         understanding_stats = self.conn.execute("""
-            SELECT 
+            SELECT
                 provider,
                 COUNT(*) as count,
                 SUM(cost) as total_cost,
@@ -281,7 +281,7 @@ class DuckDBAnalytics(DuckDBBase):
             # DuckDB doesn't have direct table size info like SQLite's page_count
             # So we estimate based on data
             size_query = f"""
-                SELECT 
+                SELECT
                     COUNT(*) * 1000 as estimated_size
                 FROM {table}
             """

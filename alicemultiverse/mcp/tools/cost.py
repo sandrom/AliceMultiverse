@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 def register_cost_tools(server: Server) -> None:
     """Register cost estimation tools with the MCP server.
-    
+
     Args:
         server: MCP server instance
     """
@@ -32,14 +32,14 @@ def register_cost_tools(server: Server) -> None:
         parameters: dict[str, Any] | None = None
     ) -> Any:
         """Estimate cost for an operation.
-        
+
         Args:
             operation: Type of operation (analyze, generate, etc.)
             provider: Provider name
             model: Model name
             count: Number of items
             parameters: Additional parameters
-            
+
         Returns:
             Cost estimate
         """

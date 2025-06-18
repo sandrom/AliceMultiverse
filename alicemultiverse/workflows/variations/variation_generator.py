@@ -159,7 +159,7 @@ class VariationGenerator:
         cache_dir: Path | None = None,
     ):
         """Initialize the variation generator.
-        
+
         Args:
             style_memory: Style memory system for preferences
             performance_tracker: Performance tracking system
@@ -257,13 +257,13 @@ class VariationGenerator:
         max_variations: int = 5,
     ) -> list[GenerationRequest]:
         """Generate variation requests for base content.
-        
+
         Args:
             base_content: Base content to vary
             variation_types: Types of variations to generate
             strategy: Strategy for selecting variations
             max_variations: Maximum number of variations
-            
+
         Returns:
             List of generation requests for variations
         """
@@ -431,7 +431,7 @@ class VariationGenerator:
         metrics: dict[str, float],
     ):
         """Analyze and record variation success.
-        
+
         Args:
             result: Variation generation result
             metrics: Performance metrics (views, engagement, etc.)
@@ -581,11 +581,11 @@ class VariationGenerator:
         limit: int = 5,
     ) -> list[VariationTemplate]:
         """Get recommended variations based on past success.
-        
+
         Args:
             content_type: Type of content (e.g., "video", "image")
             limit: Maximum recommendations
-            
+
         Returns:
             List of recommended variation templates
         """

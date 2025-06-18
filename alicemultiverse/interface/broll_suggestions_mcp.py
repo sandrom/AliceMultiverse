@@ -17,20 +17,20 @@ async def suggest_broll_for_timeline(
 ) -> dict[str, Any]:
     """
     Suggest relevant b-roll footage for a video timeline.
-    
+
     Analyzes the timeline to identify opportunities where b-roll would enhance
     the narrative, then suggests appropriate footage based on:
     - Scene context (subject, location, mood)
     - Visual similarity to main footage
     - Energy levels and pacing
     - Transition needs
-    
+
     Args:
         timeline_data: Timeline with clips to analyze
         project_context: Optional project info (genre, style, etc.)
         max_suggestions_per_scene: Max b-roll suggestions per scene
         db_path: Optional database path
-        
+
     Returns:
         Dictionary with b-roll suggestions mapped to clip indices
     """
@@ -85,19 +85,19 @@ async def auto_insert_broll(
 ) -> dict[str, Any]:
     """
     Automatically insert b-roll clips into a timeline.
-    
+
     Enhances the timeline by intelligently placing b-roll footage to:
     - Break up long shots
     - Add visual interest during dialogue
     - Smooth transitions between scenes
     - Maintain viewer engagement
-    
+
     Args:
         timeline_data: Original timeline to enhance
         max_broll_percentage: Max percentage of timeline for b-roll (0.0-1.0)
         prefer_types: Preferred b-roll types ['contextual', 'mood', 'visual']
         db_path: Optional database path
-        
+
     Returns:
         Enhanced timeline with b-roll clips inserted
     """
@@ -145,19 +145,19 @@ async def analyze_scene_for_broll(
 ) -> dict[str, Any]:
     """
     Analyze a single scene to determine b-roll needs.
-    
+
     Evaluates a specific scene/clip to determine:
     - Whether b-roll would enhance the scene
     - What type of b-roll would work best
     - Suggested placement and duration
-    
+
     Args:
         asset_path: Path to the main footage
         start_time: Scene start time in timeline
         duration: Scene duration
         scene_metadata: Optional pre-analyzed scene data
         db_path: Optional database path
-        
+
     Returns:
         Analysis with b-roll recommendations
     """
@@ -224,13 +224,13 @@ async def find_broll_by_criteria(
 ) -> dict[str, Any]:
     """
     Find b-roll footage matching specific criteria.
-    
+
     Search for b-roll assets based on various criteria:
     - Subject matter (people, objects, nature, etc.)
     - Mood (happy, dramatic, peaceful, etc.)
     - Energy level (high, medium, low)
     - Location (indoor, outdoor, urban, etc.)
-    
+
     Args:
         subject: Subject to match
         mood: Mood to match
@@ -239,7 +239,7 @@ async def find_broll_by_criteria(
         exclude_paths: Paths to exclude from results
         limit: Maximum results
         db_path: Optional database path
-        
+
     Returns:
         List of matching b-roll assets with metadata
     """
@@ -312,18 +312,18 @@ async def generate_broll_shot_list(
 ) -> dict[str, Any]:
     """
     Generate a b-roll shot list for a project.
-    
+
     Creates a detailed shot list of recommended b-roll footage based on:
     - Timeline analysis
     - Project style (documentary, narrative, music video, etc.)
     - Scene requirements
-    
+
     Args:
         timeline_data: Timeline to analyze
         style: Project style for b-roll recommendations
         include_descriptions: Include detailed shot descriptions
         db_path: Optional database path
-        
+
     Returns:
         Structured b-roll shot list with timing and descriptions
     """
@@ -430,7 +430,7 @@ def _generate_shot_description(suggestion, main_clip, style):
 
 def register_broll_tools(server) -> None:
     """Register b-roll suggestion tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """

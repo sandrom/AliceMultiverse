@@ -139,7 +139,7 @@ def track_api_metrics(
     operation: str
 ) -> Callable:
     """Decorator to track API call metrics.
-    
+
     Args:
         provider: Provider name (e.g., 'openai', 'anthropic')
         model: Model name (e.g., 'gpt-4', 'claude-3')
@@ -247,7 +247,7 @@ def track_api_metrics(
 
 def track_db_metrics(query_type: str) -> Callable:
     """Decorator to track database query metrics.
-    
+
     Args:
         query_type: Type of query (select, insert, update, delete)
     """
@@ -272,7 +272,7 @@ def track_db_metrics(query_type: str) -> Callable:
 
 def update_provider_health_metrics(provider_name: str, health_data: dict[str, Any]):
     """Update provider health metrics.
-    
+
     Args:
         provider_name: Provider name
         health_data: Health data including status, error rate, circuit breaker state
@@ -299,7 +299,7 @@ def update_provider_health_metrics(provider_name: str, health_data: dict[str, An
 
 def update_db_pool_metrics(pool_stats: dict[str, Any]):
     """Update database connection pool metrics.
-    
+
     Args:
         pool_stats: Pool statistics from monitoring
     """
@@ -315,7 +315,7 @@ def track_asset_processing(
     operation: str
 ) -> Callable:
     """Decorator to track asset processing metrics.
-    
+
     Args:
         media_type: Type of media (image, video)
         source: Source of asset (e.g., provider name)
@@ -371,7 +371,7 @@ def track_asset_processing(
 
 def track_event_metrics(event_type: str):
     """Track event system metrics.
-    
+
     Args:
         event_type: Type of event being published/processed
     """
@@ -380,7 +380,7 @@ def track_event_metrics(event_type: str):
 
 def get_metrics() -> bytes:
     """Generate current metrics in Prometheus format.
-    
+
     Returns:
         Metrics data in Prometheus text format
     """
@@ -389,7 +389,7 @@ def get_metrics() -> bytes:
 
 def get_metrics_content_type() -> str:
     """Get content type for Prometheus metrics.
-    
+
     Returns:
         Content type string
     """

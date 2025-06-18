@@ -66,7 +66,7 @@ class StyleLearningEngine:
         preference_tracker: PreferenceTracker | None = None
     ):
         """Initialize learning engine.
-        
+
         Args:
             style_memory: StyleMemory instance
             preference_tracker: Optional PreferenceTracker
@@ -85,10 +85,10 @@ class StyleLearningEngine:
 
     def analyze_patterns(self, force_full: bool = False) -> list[StylePattern]:
         """Analyze usage patterns and detect trends.
-        
+
         Args:
             force_full: Force full analysis instead of incremental
-            
+
         Returns:
             List of detected patterns
         """
@@ -117,7 +117,7 @@ class StyleLearningEngine:
 
     def generate_insights(self) -> list[LearningInsight]:
         """Generate actionable insights from patterns.
-        
+
         Returns:
             List of learning insights
         """
@@ -152,11 +152,11 @@ class StyleLearningEngine:
         preference_types: list[PreferenceType] | None = None
     ) -> dict[PreferenceType, list[tuple[Any, float]]]:
         """Predict likely preferences based on context and history.
-        
+
         Args:
             context: Current context
             preference_types: Types to predict
-            
+
         Returns:
             Predictions with confidence scores
         """
@@ -192,11 +192,11 @@ class StyleLearningEngine:
         context: dict[str, Any] | None = None
     ) -> list[dict[str, Any]]:
         """Suggest preference combinations based on learning.
-        
+
         Args:
             base_preferences: Starting preferences
             context: Optional context
-            
+
         Returns:
             List of combination suggestions with scores
         """
@@ -238,7 +238,7 @@ class StyleLearningEngine:
 
     def reinforce_pattern(self, preference_ids: list[str], successful: bool):
         """Reinforce or weaken a pattern based on outcome.
-        
+
         Args:
             preference_ids: Preferences used
             successful: Whether outcome was successful
@@ -566,11 +566,11 @@ class StyleLearningEngine:
         context: dict[str, Any]
     ) -> float:
         """Score how likely a preference is given context.
-        
+
         Args:
             preference: Preference to score
             context: Current context
-            
+
         Returns:
             Likelihood score (0-1)
         """

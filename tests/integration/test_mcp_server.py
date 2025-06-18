@@ -32,7 +32,7 @@ paths:
 
 processing:
   quality: true
-  
+
 enhanced_metadata: true
 """)
 

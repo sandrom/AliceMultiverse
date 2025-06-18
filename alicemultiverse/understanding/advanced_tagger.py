@@ -131,7 +131,7 @@ class TagVocabulary:
 
     def add_hierarchy(self, category: str, relationships: list[tuple[str, str | None]]):
         """Add a hierarchy of tags.
-        
+
         Args:
             category: The category name
             relationships: List of (tag, parent) tuples
@@ -211,7 +211,7 @@ class ProjectTagVocabulary:
 
     def __init__(self, project_id: str, repository: Any):
         """Initialize project vocabulary.
-        
+
         Args:
             project_id: The project ID
             repository: Asset repository for database access
@@ -288,7 +288,7 @@ class AdvancedTagger:
 
     def __init__(self, repository: Any):
         """Initialize the advanced tagger.
-        
+
         Args:
             repository: Asset repository for database access
         """
@@ -306,11 +306,11 @@ class AdvancedTagger:
     def expand_tags(self, analysis_result: ImageAnalysisResult,
                     project_id: str | None = None) -> dict[str, list[str]]:
         """Expand tags with hierarchical relationships.
-        
+
         Args:
             analysis_result: The analysis result with initial tags
             project_id: Optional project ID for custom vocabulary
-            
+
         Returns:
             Expanded tag dictionary with hierarchical tags added
         """
@@ -338,11 +338,11 @@ class AdvancedTagger:
     def add_specialized_categories(self, analysis_result: ImageAnalysisResult,
                                  image_path: Path) -> dict[str, list[str]]:
         """Add specialized tag categories beyond basic ones.
-        
+
         Args:
             analysis_result: The analysis result to enhance
             image_path: Path to the image file
-            
+
         Returns:
             Dictionary of specialized tags
         """
@@ -422,7 +422,7 @@ class AdvancedTagger:
     def apply_custom_vocabulary(self, analysis_result: ImageAnalysisResult,
                               project_id: str) -> None:
         """Apply project-specific custom vocabulary to tags.
-        
+
         Args:
             analysis_result: The analysis result to enhance
             project_id: The project ID
@@ -452,7 +452,7 @@ class AdvancedTagger:
     # def save_tags_to_database(self, asset_hash: str, tags: dict[str, list[str]],
     #                         source: str = "ai", confidence: float = 1.0) -> None:
     #     """Save tags to the database.
-    #     
+    #
     #     Args:
     #         asset_hash: The asset's content hash
     #         tags: Dictionary of tags by category

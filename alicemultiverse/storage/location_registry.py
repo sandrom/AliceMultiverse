@@ -159,7 +159,7 @@ class StorageRegistry:
 
     def __init__(self, db_path: Path = None):
         """Initialize storage registry.
-        
+
         Args:
             db_path: Path to DuckDB database file. If None, uses in-memory database.
         """
@@ -227,10 +227,10 @@ class StorageRegistry:
 
     def register_location(self, location: StorageLocation) -> StorageLocation:
         """Register a new storage location.
-        
+
         Args:
             location: Storage location to register
-            
+
         Returns:
             The registered location with generated ID if needed
         """
@@ -241,7 +241,7 @@ class StorageRegistry:
 
         self.conn.execute("""
             INSERT INTO storage_locations (
-                location_id, name, type, path, priority, rules, 
+                location_id, name, type, path, priority, rules,
                 last_scan, status, config, updated_at
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """, [
@@ -262,13 +262,13 @@ class StorageRegistry:
 
     def update_location(self, location: StorageLocation) -> None:
         """Update an existing storage location.
-        
+
         Args:
             location: Storage location with updated information
         """
         self.conn.execute("""
-            UPDATE storage_locations 
-            SET name = ?, type = ?, path = ?, priority = ?, 
+            UPDATE storage_locations
+            SET name = ?, type = ?, path = ?, priority = ?,
                 rules = ?, last_scan = ?, status = ?, config = ?,
                 updated_at = ?
             WHERE location_id = ?
@@ -289,12 +289,12 @@ class StorageRegistry:
 
     def update_scan_time(self, location_id: str) -> None:
         """Update only the last scan time for a location.
-        
+
         Args:
             location_id: ID of the location to update
         """
         self.conn.execute("""
-            UPDATE storage_locations 
+            UPDATE storage_locations
             SET last_scan = ?, updated_at = ?
             WHERE location_id = ?
         """, [datetime.now(), datetime.now(), str(location_id)])
@@ -305,11 +305,11 @@ class StorageRegistry:
         type: StorageType | None = None
     ) -> list[StorageLocation]:
         """Get all storage locations, optionally filtered.
-        
+
         Args:
             status: Filter by location status
             type: Filter by storage type
-            
+
         Returns:
             List of storage locations sorted by priority
         """
@@ -346,10 +346,10 @@ class StorageRegistry:
 
     def get_location_by_id(self, location_id: str) -> StorageLocation | None:
         """Get a specific storage location by ID.
-        
+
         Args:
             location_id: str of the location
-            
+
         Returns:
             Storage location or None if not found
         """
@@ -379,11 +379,11 @@ class StorageRegistry:
         file_metadata: dict[str, Any]
     ) -> StorageLocation | None:
         """Determine the best storage location for a file based on rules.
-        
+
         Args:
             content_hash: SHA-256 hash of the file
             file_metadata: Metadata about the file (size, type, age, tags, etc.)
-            
+
         Returns:
             Best matching storage location or None
         """
@@ -404,11 +404,11 @@ class StorageRegistry:
 
     def _evaluate_rules(self, location: StorageLocation, metadata: dict[str, Any]) -> bool:
         """Evaluate if a file matches location rules.
-        
+
         Args:
             location: Storage location to evaluate
             metadata: File metadata
-            
+
         Returns:
             True if file matches all rules
         """
@@ -490,8 +490,8 @@ class StorageRegistry:
         self.conn.execute("""
             INSERT INTO rule_evaluations (content_hash, location_id, evaluated_at, matches, rule_details)
             VALUES (?, ?, ?, ?, ?)
-            ON CONFLICT (content_hash, location_id) 
-            DO UPDATE SET 
+            ON CONFLICT (content_hash, location_id)
+            DO UPDATE SET
                 evaluated_at = ?,
                 matches = EXCLUDED.matches,
                 rule_details = EXCLUDED.rule_details
@@ -506,7 +506,7 @@ class StorageRegistry:
         metadata_embedded: bool = False
     ) -> None:
         """Track a file in a specific location.
-        
+
         Args:
             content_hash: SHA-256 hash of the file
             location_id: ID of the storage location
@@ -516,11 +516,11 @@ class StorageRegistry:
         """
         self.conn.execute("""
             INSERT INTO file_locations (
-                content_hash, location_id, file_path, file_size, 
+                content_hash, location_id, file_path, file_size,
                 metadata_embedded, last_verified
             ) VALUES (?, ?, ?, ?, ?, ?)
-            ON CONFLICT (content_hash, location_id) 
-            DO UPDATE SET 
+            ON CONFLICT (content_hash, location_id)
+            DO UPDATE SET
                 file_path = EXCLUDED.file_path,
                 file_size = EXCLUDED.file_size,
                 metadata_embedded = EXCLUDED.metadata_embedded,
@@ -531,15 +531,15 @@ class StorageRegistry:
 
     def get_file_locations(self, content_hash: str) -> list[dict[str, Any]]:
         """Get all locations where a file exists.
-        
+
         Args:
             content_hash: SHA-256 hash of the file
-            
+
         Returns:
             List of location information for the file
         """
         results = self.conn.execute("""
-            SELECT 
+            SELECT
                 fl.location_id,
                 fl.file_path,
                 fl.file_size,
@@ -577,31 +577,31 @@ class StorageRegistry:
 
     def remove_file_from_location(self, content_hash: str, location_id: str) -> None:
         """Remove a file from a specific location.
-        
+
         Args:
             content_hash: SHA-256 hash of the file
             location_id: ID of the storage location
         """
         self.conn.execute("""
-            DELETE FROM file_locations 
+            DELETE FROM file_locations
             WHERE content_hash = ? AND location_id = ?
         """, [content_hash, str(location_id)])
 
         # Also remove rule evaluation cache
         self.conn.execute("""
-            DELETE FROM rule_evaluations 
+            DELETE FROM rule_evaluations
             WHERE content_hash = ? AND location_id = ?
         """, [content_hash, str(location_id)])
 
     def scan_location(self, location_id: str) -> dict[str, Any]:
         """Scan a storage location to discover files.
-        
+
         This is a placeholder for the actual implementation which would
         depend on the storage type (local filesystem, S3, etc.)
-        
+
         Args:
             location_id: ID of the storage location to scan
-            
+
         Returns:
             Scan results including discovered files
         """
@@ -641,7 +641,7 @@ class StorageRegistry:
         action: str = "upload"
     ) -> None:
         """Mark a file for synchronization between locations.
-        
+
         Args:
             content_hash: SHA-256 hash of the file
             source_location_id: Source location ID
@@ -650,7 +650,7 @@ class StorageRegistry:
         """
         # Update source to indicate pending operation
         self.conn.execute("""
-            UPDATE file_locations 
+            UPDATE file_locations
             SET sync_status = ?
             WHERE content_hash = ? AND location_id = ?
         """, [f"pending_{action}", content_hash, str(source_location_id)])
@@ -666,12 +666,12 @@ class StorageRegistry:
 
     def get_pending_syncs(self) -> list[dict[str, Any]]:
         """Get all files pending synchronization.
-        
+
         Returns:
             List of files needing sync with their details
         """
         results = self.conn.execute("""
-            SELECT 
+            SELECT
                 fl.content_hash,
                 fl.location_id,
                 fl.file_path,
@@ -699,7 +699,7 @@ class StorageRegistry:
 
     def get_statistics(self) -> dict[str, Any]:
         """Get registry statistics.
-        
+
         Returns:
             Dictionary with various statistics
         """
@@ -738,7 +738,7 @@ class StorageRegistry:
 
         # Files by location
         location_stats = self.conn.execute("""
-            SELECT 
+            SELECT
                 sl.name,
                 COUNT(fl.content_hash) as file_count,
                 SUM(fl.file_size) as total_size,

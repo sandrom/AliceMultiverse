@@ -16,7 +16,7 @@ from ...memory.style_memory_mcp import (
 
 def register_memory_tools(server) -> None:
     """Register memory and style learning tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """

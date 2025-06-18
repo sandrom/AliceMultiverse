@@ -13,7 +13,7 @@ class SystemMonitor:
 
     def __init__(self, log_interval: int = 60):
         """Initialize system monitor.
-        
+
         Args:
             log_interval: Seconds between logging stats (0 to disable)
         """
@@ -45,7 +45,7 @@ class SystemMonitor:
 
     def get_stats(self) -> dict[str, Any]:
         """Get current statistics.
-        
+
         Returns:
             Dictionary of current stats
         """

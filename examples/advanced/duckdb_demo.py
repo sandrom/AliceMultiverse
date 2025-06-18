@@ -21,7 +21,7 @@ conn.execute("""
     CREATE TABLE assets (
         -- Identity
         content_hash VARCHAR PRIMARY KEY,
-        
+
         -- File locations (array of structs)
         locations STRUCT(
             name VARCHAR,
@@ -29,13 +29,13 @@ conn.execute("""
             type VARCHAR,
             last_verified TIMESTAMP
         )[],
-        
+
         -- Core metadata
         media_type VARCHAR,
         file_size BIGINT,
         created_at TIMESTAMP,
         project VARCHAR,
-        
+
         -- Nested tags structure
         tags STRUCT(
             style VARCHAR[],
@@ -46,7 +46,7 @@ conn.execute("""
             fashion VARCHAR[],
             setting VARCHAR[]
         ),
-        
+
         -- AI Understanding results
         understanding STRUCT(
             description TEXT,
@@ -57,14 +57,14 @@ conn.execute("""
             cost DECIMAL(10,6),
             analyzed_at TIMESTAMP
         ),
-        
+
         -- Embeddings for similarity search
         embedding FLOAT[],
-        
+
         -- Full metadata as JSON for flexibility
         metadata JSON
     );
-    
+
     -- Indexes for common queries
     CREATE INDEX idx_created ON assets(created_at);
     CREATE INDEX idx_project ON assets(project);
@@ -151,7 +151,7 @@ print("=== DuckDB Demo for AliceMultiverse ===\n")
 # 1. Tag Search - Show how arrays work
 print("1. Search for cyberpunk style images:")
 result = conn.execute("""
-    SELECT 
+    SELECT
         content_hash,
         understanding.description,
         tags.style
@@ -164,11 +164,11 @@ for row in result:
 # 2. Multi-tag search with OR
 print("\n2. Search for dramatic OR mysterious mood:")
 result = conn.execute("""
-    SELECT 
+    SELECT
         content_hash,
         tags.mood
     FROM assets
-    WHERE list_contains(tags.mood, 'dramatic') 
+    WHERE list_contains(tags.mood, 'dramatic')
        OR list_contains(tags.mood, 'mysterious')
 """).fetchall()
 for row in result:
@@ -177,7 +177,7 @@ for row in result:
 # 3. Complex nested query
 print("\n3. Find images with woman subject AND neon colors:")
 result = conn.execute("""
-    SELECT 
+    SELECT
         content_hash,
         understanding.generated_prompt
     FROM assets
@@ -190,7 +190,7 @@ for row in result:
 # 4. Aggregation - cost by provider
 print("\n4. Total cost by AI provider:")
 result = conn.execute("""
-    SELECT 
+    SELECT
         understanding.provider,
         COUNT(*) as count,
         SUM(understanding.cost) as total_cost
@@ -203,7 +203,7 @@ for row in result:
 # 5. Find files across locations
 print("\n5. Files available in S3:")
 result = conn.execute("""
-    SELECT 
+    SELECT
         content_hash,
         location.path
     FROM assets,

@@ -1,8 +1,8 @@
 """
 Media Organization Helper Functions
 
-Utility functions for project extraction and AI source detection patterns. 
-Used throughout the organizer modules for consistent file organization 
+Utility functions for project extraction and AI source detection patterns.
+Used throughout the organizer modules for consistent file organization
 and source identification.
 """
 
@@ -16,10 +16,10 @@ from typing import Any
 
 def get_quality_folder_name(stars: int) -> str:
     """Get folder name for quality star rating.
-    
+
     Args:
         stars: Star rating (1-5)
-        
+
     Returns:
         Folder name like "5-star"
     """

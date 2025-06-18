@@ -22,7 +22,7 @@ from .provider_types import GenerationRequest, GenerationType
 
 class BaseProvider(Provider):
     """Enhanced base provider with common functionality.
-    
+
     This class extends the abstract Provider class with common patterns
     found across all provider implementations.
     """
@@ -34,7 +34,7 @@ class BaseProvider(Provider):
         config: dict[str, Any] | None = None
     ):
         """Initialize base provider.
-        
+
         Args:
             name: Provider name
             api_key: Optional API key (will check env vars if not provided)
@@ -47,13 +47,13 @@ class BaseProvider(Provider):
 
     def _get_api_key(self, env_var_name: str) -> str:
         """Get API key from init parameter or environment variable.
-        
+
         Args:
             env_var_name: Name of environment variable to check
-            
+
         Returns:
             API key string
-            
+
         Raises:
             ValueError: If no API key found
         """
@@ -72,10 +72,10 @@ class BaseProvider(Provider):
 
     async def _create_session(self, headers: dict[str, str] | None = None) -> aiohttp.ClientSession:
         """Create an aiohttp session with common headers.
-        
+
         Args:
             headers: Optional additional headers
-            
+
         Returns:
             Configured aiohttp session
         """
@@ -89,7 +89,7 @@ class BaseProvider(Provider):
 
     async def _ensure_session(self) -> aiohttp.ClientSession:
         """Ensure session exists, create if needed.
-        
+
         Returns:
             Active aiohttp session
         """
@@ -100,7 +100,7 @@ class BaseProvider(Provider):
     @abstractmethod
     def _get_headers(self) -> dict[str, str]:
         """Get provider-specific headers.
-        
+
         Returns:
             Dictionary of headers including authentication
         """
@@ -114,11 +114,11 @@ class BaseProvider(Provider):
         context: str = ""
     ) -> None:
         """Handle common HTTP error responses.
-        
+
         Args:
             response: aiohttp response object
             context: Optional context for error messages
-            
+
         Raises:
             Various exceptions based on status code
         """
@@ -148,10 +148,10 @@ class BaseProvider(Provider):
 
     def _extract_common_params(self, parameters: dict[str, Any] | None) -> dict[str, Any]:
         """Extract common parameters that most providers use.
-        
+
         Args:
             parameters: Input parameters dictionary
-            
+
         Returns:
             Dictionary of common parameters
         """
@@ -198,12 +198,12 @@ class BaseProvider(Provider):
         filename: str | None = None
     ) -> Path:
         """Download generated content from URL.
-        
+
         Args:
             url: URL to download from
             output_dir: Directory to save to
             filename: Optional filename override
-            
+
         Returns:
             Path to downloaded file
         """
@@ -220,16 +220,16 @@ class BaseProvider(Provider):
         progress_callback: Callable[[float], None] | None = None
     ) -> Any:
         """Poll for async job completion.
-        
+
         Args:
             check_func: Async function that returns (is_complete, result)
             poll_interval: Seconds between polls
             max_wait: Maximum seconds to wait
             progress_callback: Optional callback for progress updates
-            
+
         Returns:
             The result when complete
-            
+
         Raises:
             GenerationError: If max wait time exceeded
         """
@@ -254,14 +254,14 @@ class BaseProvider(Provider):
 
     def _validate_model(self, model: str | None, generation_type: GenerationType) -> str:
         """Validate and resolve model name.
-        
+
         Args:
             model: Model name to validate
             generation_type: Type of generation
-            
+
         Returns:
             Validated model name
-            
+
         Raises:
             ValueError: If model not supported
         """
@@ -297,11 +297,11 @@ class BaseProvider(Provider):
         aliases: dict[str, str]
     ) -> str:
         """Resolve model name using alias dictionary.
-        
+
         Args:
             model: Model name or alias
             aliases: Dictionary of aliases to actual model names
-            
+
         Returns:
             Resolved model name
         """
@@ -330,7 +330,7 @@ class BaseProvider(Provider):
         duration_multiplier: float = 1.0
     ) -> float:
         """Calculate cost with resolution/duration modifiers.
-        
+
         Args:
             base_cost: Base cost for the model
             width: Image/video width
@@ -338,7 +338,7 @@ class BaseProvider(Provider):
             duration: Video duration in seconds
             resolution_multiplier: Multiplier per megapixel
             duration_multiplier: Multiplier per second
-            
+
         Returns:
             Total cost
         """
@@ -378,12 +378,12 @@ class BaseProvider(Provider):
         method: str = "POST"
     ) -> dict[str, Any]:
         """Build base request configuration.
-        
+
         Args:
             request: Generation request
             endpoint: API endpoint
             method: HTTP method
-            
+
         Returns:
             Dictionary with url, method, and base payload
         """
@@ -400,10 +400,10 @@ class BaseProvider(Provider):
 
     def _parse_error_response(self, response_data: dict[str, Any]) -> str:
         """Parse error message from response data.
-        
+
         Args:
             response_data: Response JSON data
-            
+
         Returns:
             Error message string
         """
@@ -435,17 +435,17 @@ class BaseProvider(Provider):
         exponential_base: float = 2.0
     ) -> Any:
         """Retry a function with exponential backoff.
-        
+
         Args:
             func: Async function to retry
             max_retries: Maximum number of retries
             base_delay: Initial delay in seconds
             max_delay: Maximum delay in seconds
             exponential_base: Base for exponential backoff
-            
+
         Returns:
             Result from successful function call
-            
+
         Raises:
             Last exception if all retries fail
         """

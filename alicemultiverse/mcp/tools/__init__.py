@@ -16,7 +16,7 @@ from .workflows import register_workflow_tools
 
 def register_all_tools(server) -> None:
     """Register all MCP tools with the server.
-    
+
     Args:
         server: MCP server instance
     """

@@ -156,7 +156,7 @@ notes: |
   This prompt works exceptionally well for creating calming scenes.
   Best results with Midjourney v6 using --ar 16:9 --q 2
   For Flux, increase the steps to 50 for better detail
-  
+
   Variations to try:
   - Change "morning light" to "golden hour" for warmer tones
   - Add "misty atmosphere" for more mystical feeling

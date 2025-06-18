@@ -82,14 +82,14 @@ class EnhancedMediaOrganizer(MediaOrganizer):
 
     def _analyze_media(self, media_path: Path, project_folder: str) -> dict:
         """Analyze media file to extract metadata with AI understanding.
-        
+
         This overrides the parent method to add direct AI understanding
         without using the pipeline system.
-        
+
         Args:
             media_path: Path to media file
             project_folder: Project folder name
-            
+
         Returns:
             Analysis result as dictionary
         """

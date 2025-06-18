@@ -79,7 +79,7 @@ class ExportAnalytics:
 
     def __init__(self, data_dir: Path | None = None):
         """Initialize export analytics.
-        
+
         Args:
             data_dir: Directory for storing analytics data
         """
@@ -95,7 +95,7 @@ class ExportAnalytics:
 
     def track_export(self, metrics: ExportMetrics) -> None:
         """Track an export operation.
-        
+
         Args:
             metrics: Export metrics to track
         """
@@ -129,11 +129,11 @@ class ExportAnalytics:
         time_range: timedelta | None = None
     ) -> dict[str, Any]:
         """Get statistics for export formats.
-        
+
         Args:
             format: Specific format to analyze
             time_range: Time range to consider
-            
+
         Returns:
             Format statistics
         """
@@ -196,11 +196,11 @@ class ExportAnalytics:
         time_range: timedelta | None = None
     ) -> dict[str, Any]:
         """Analyze performance for a specific platform.
-        
+
         Args:
             platform: Platform to analyze
             time_range: Time range to consider
-            
+
         Returns:
             Platform performance metrics
         """
@@ -258,10 +258,10 @@ class ExportAnalytics:
         timeline_id: str | None = None
     ) -> dict[str, Any]:
         """Get insights about export workflows.
-        
+
         Args:
             timeline_id: Specific timeline to analyze
-            
+
         Returns:
             Workflow insights
         """
@@ -337,10 +337,10 @@ class ExportAnalytics:
         time_range: timedelta | None = None
     ) -> dict[str, Any]:
         """Analyze quality trends over time.
-        
+
         Args:
             time_range: Time range to analyze
-            
+
         Returns:
             Quality trend analysis
         """
@@ -409,7 +409,7 @@ class ExportAnalytics:
 
     def suggest_improvements(self) -> list[dict[str, Any]]:
         """Suggest improvements based on export analytics.
-        
+
         Returns:
             List of improvement suggestions
         """

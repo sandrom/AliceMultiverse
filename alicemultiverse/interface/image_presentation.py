@@ -39,7 +39,7 @@ class ImagePresentationAPI:
         cache_dir: Path | None = None
     ):
         """Initialize the Image Presentation API.
-        
+
         Args:
             storage: Storage backend (DuckDB)
             cache_dir: Directory for caching selection feedback
@@ -67,7 +67,7 @@ class ImagePresentationAPI:
         offset: int = 0
     ) -> ImageSearchResult:
         """Search images based on various criteria.
-        
+
         Args:
             query: Natural language search query
             tags: Tags to search for
@@ -77,10 +77,10 @@ class ImagePresentationAPI:
             date_range: Date range filter
             limit: Maximum results to return
             offset: Pagination offset
-            
+
         Returns:
             ImageSearchResult with presentable images
-            
+
         Raises:
             ValueError: Invalid parameters
         """
@@ -181,7 +181,7 @@ class ImagePresentationAPI:
         session_id: str | None = None
     ) -> None:
         """Track user's selection decision and reasoning.
-        
+
         Args:
             image_hash: Hash of the selected/rejected image
             selected: Whether image was selected
@@ -221,15 +221,15 @@ class ImagePresentationAPI:
         category: SoftDeleteCategory = SoftDeleteCategory.REJECTED
     ) -> str:
         """Move image to sorted-out folder based on category.
-        
+
         Args:
             image_hash: Hash of image to soft delete
             reason: Reason for deletion
             category: Category of deletion
-            
+
         Returns:
             New path in sorted-out structure
-            
+
         Raises:
             FileNotFoundError: Image not found
         """
@@ -290,10 +290,10 @@ class ImagePresentationAPI:
 
     async def _create_presentable_image(self, img_data: dict[str, Any]) -> PresentableImage:
         """Convert raw image data to presentable format.
-        
+
         Args:
             img_data: Raw image data from storage
-            
+
         Returns:
             PresentableImage ready for display
         """
@@ -347,11 +347,11 @@ class ImagePresentationAPI:
 
     async def _generate_thumbnail(self, image_path: str, size: tuple[int, int] = (256, 256)) -> str:
         """Generate base64 thumbnail for image.
-        
+
         Args:
             image_path: Path to image file
             size: Thumbnail size
-            
+
         Returns:
             Base64 data URL for thumbnail
         """
@@ -378,10 +378,10 @@ class ImagePresentationAPI:
 
     async def _get_selection_history(self, image_hash: str) -> dict[str, Any]:
         """Get selection history for an image.
-        
+
         Args:
             image_hash: Image hash
-            
+
         Returns:
             Selection information
         """
@@ -411,10 +411,10 @@ class ImagePresentationAPI:
 
     def _parse_query_to_tags(self, query: str) -> list[str]:
         """Parse natural language query to tags.
-        
+
         Args:
             query: Natural language query
-            
+
         Returns:
             List of extracted tags
         """
@@ -434,11 +434,11 @@ class ImagePresentationAPI:
         search_result: dict[str, Any]
     ) -> list[str]:
         """Generate search refinement suggestions.
-        
+
         Args:
             current_tags: Currently searched tags
             search_result: Current search results
-            
+
         Returns:
             List of suggested refinements
         """

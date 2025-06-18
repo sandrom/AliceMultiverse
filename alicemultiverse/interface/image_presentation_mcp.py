@@ -15,7 +15,7 @@ logger = get_logger(__name__)
 
 def register_image_presentation_tools(server: Server, api: ImagePresentationAPI) -> None:
     """Register image presentation tools with MCP server.
-    
+
     Args:
         server: MCP server instance
         api: Image Presentation API instance
@@ -32,7 +32,7 @@ def register_image_presentation_tools(server: Server, api: ImagePresentationAPI)
         offset: int = 0
     ) -> list[dict[str, Any]]:
         """Search and display images for user selection.
-        
+
         Args:
             query: Natural language search query
             tags: Tags to search for
@@ -41,7 +41,7 @@ def register_image_presentation_tools(server: Server, api: ImagePresentationAPI)
             exclude_folders: Folders to exclude from search
             limit: Maximum results to return
             offset: Pagination offset
-            
+
         Returns:
             List of images formatted for chat display
         """
@@ -86,13 +86,13 @@ def register_image_presentation_tools(server: Server, api: ImagePresentationAPI)
         session_id: str | None = None
     ) -> dict[str, Any]:
         """Track user's selection decision and reasoning.
-        
+
         Args:
             image_hash: Hash of the selected/rejected image
             selected: Whether image was selected
             reason: User's reason for selection/rejection
             session_id: Optional session identifier
-            
+
         Returns:
             Confirmation of tracking
         """
@@ -124,12 +124,12 @@ def register_image_presentation_tools(server: Server, api: ImagePresentationAPI)
         category: str = "rejected"
     ) -> dict[str, Any]:
         """Move image to sorted-out folder.
-        
+
         Args:
             image_hash: Hash of image to soft delete
             reason: Reason for deletion
             category: Category - rejected, broken, or maybe-later
-            
+
         Returns:
             New path and confirmation
         """
@@ -168,11 +168,11 @@ def register_image_presentation_tools(server: Server, api: ImagePresentationAPI)
         selected_only: bool = True
     ) -> dict[str, Any]:
         """Get summary of selected images for the session.
-        
+
         Args:
             session_id: Optional session identifier
             selected_only: Whether to include only selected images
-            
+
         Returns:
             Summary of selections
         """

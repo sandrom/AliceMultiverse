@@ -18,14 +18,14 @@ logger = logging.getLogger(__name__)
 
 class MusicVideoTemplate(WorkflowTemplate):
     """Template for creating music-driven videos with smart transitions.
-    
+
     This workflow:
     1. Analyzes music for beats, tempo, and structure
     2. Selects and sequences images based on mood/energy
     3. Analyzes transitions between images
     4. Syncs cuts to music beats
     5. Exports timeline for editing software
-    
+
     Parameters:
         music_file: Path to audio file (MP3, WAV, M4A)
         images: List of image paths or selection criteria

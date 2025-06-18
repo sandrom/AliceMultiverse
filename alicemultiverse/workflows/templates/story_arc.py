@@ -24,14 +24,14 @@ class StoryStructure(Enum):
 
 class StoryArcTemplate(WorkflowTemplate):
     """Template for creating narrative-driven videos with story structure.
-    
+
     This workflow:
     1. Defines narrative structure and pacing
     2. Maps images to story beats
     3. Applies appropriate transitions for narrative flow
     4. Adjusts pacing for emotional impact
     5. Adds narrative markers for post-production
-    
+
     Parameters:
         images: List of image paths or selection criteria
         structure: Story structure type (three_act, five_act, etc.)
@@ -573,7 +573,7 @@ class StoryArcTemplate(WorkflowTemplate):
 
 class DocumentaryStoryTemplate(StoryArcTemplate):
     """Specialized story arc for documentary-style narratives.
-    
+
     Focuses on:
     - Information delivery
     - Evidence presentation
@@ -595,7 +595,7 @@ class DocumentaryStoryTemplate(StoryArcTemplate):
 
 class EmotionalJourneyTemplate(StoryArcTemplate):
     """Story arc focused on emotional progression.
-    
+
     Maps images to emotional journey rather than plot points.
     """
 

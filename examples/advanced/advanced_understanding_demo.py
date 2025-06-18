@@ -5,7 +5,7 @@ Advanced Image Understanding Demo
 This demo showcases the new advanced image understanding capabilities:
 
 1. Hierarchical tagging with custom vocabularies
-2. Project-specific custom instructions 
+2. Project-specific custom instructions
 3. Batch analysis with progress tracking and cost management
 4. Provider optimization with automatic failover
 5. Comprehensive tag expansion and specialized categories

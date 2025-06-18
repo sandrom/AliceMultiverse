@@ -27,10 +27,10 @@ class MetadataExtractor:
 
     def extract_metadata(self, file_path: Path) -> dict[str, Any]:
         """Extract all metadata from a file.
-        
+
         Args:
             file_path: Path to the media file
-            
+
         Returns:
             Dictionary containing all extracted metadata
         """
@@ -254,10 +254,10 @@ class MetadataExtractor:
 
     def has_alice_metadata(self, file_path: Path) -> bool:
         """Check if a file has Alice metadata embedded.
-        
+
         Args:
             file_path: Path to check
-            
+
         Returns:
             True if file has Alice metadata
         """

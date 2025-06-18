@@ -18,14 +18,14 @@ from .constants import (
 
 def validate_path(path: str | None, param_name: str = "path") -> Path | None:
     """Validate and sanitize file system paths.
-    
+
     Args:
         path: Path string to validate
         param_name: Parameter name for error messages
-        
+
     Returns:
         Validated Path object or None
-        
+
     Raises:
         ValidationError: If path is invalid or potentially malicious
     """
@@ -57,13 +57,13 @@ def validate_path(path: str | None, param_name: str = "path") -> Path | None:
 
 def validate_tag(tag: str) -> str:
     """Validate a single tag.
-    
+
     Args:
         tag: Tag string to validate
-        
+
     Returns:
         Validated tag
-        
+
     Raises:
         ValidationError: If tag is invalid
     """
@@ -95,13 +95,13 @@ def validate_tag(tag: str) -> str:
 
 def validate_tags(tags: list[str] | None) -> list[str] | None:
     """Validate a list of tags.
-    
+
     Args:
         tags: List of tag strings
-        
+
     Returns:
         Validated list of tags or None
-        
+
     Raises:
         ValidationError: If any tag is invalid
     """
@@ -136,13 +136,13 @@ def validate_tags(tags: list[str] | None) -> list[str] | None:
 
 def validate_content_hash(content_hash: str) -> str:
     """Validate a content hash (SHA256).
-    
+
     Args:
         content_hash: Hash string to validate
-        
+
     Returns:
         Validated hash (lowercase)
-        
+
     Raises:
         ValidationError: If hash is invalid
     """
@@ -157,13 +157,13 @@ def validate_content_hash(content_hash: str) -> str:
 
 def validate_asset_ids(asset_ids: list[str]) -> list[str]:
     """Validate a list of asset IDs (content hashes).
-    
+
     Args:
         asset_ids: List of asset ID strings
-        
+
     Returns:
         Validated list of asset IDs
-        
+
     Raises:
         ValidationError: If any ID is invalid
     """
@@ -197,14 +197,14 @@ def validate_asset_ids(asset_ids: list[str]) -> list[str]:
 
 def validate_regex_pattern(pattern: str | None, param_name: str = "pattern") -> str | None:
     """Validate a regex pattern for safety.
-    
+
     Args:
         pattern: Regex pattern string
         param_name: Parameter name for error messages
-        
+
     Returns:
         Validated pattern or None
-        
+
     Raises:
         ValidationError: If pattern is invalid or potentially malicious
     """
@@ -241,13 +241,13 @@ def validate_regex_pattern(pattern: str | None, param_name: str = "pattern") -> 
 
 def validate_asset_role(role: str | AssetRole) -> AssetRole:
     """Validate asset role.
-    
+
     Args:
         role: Role string or enum
-        
+
     Returns:
         Validated AssetRole enum
-        
+
     Raises:
         ValidationError: If role is invalid
     """

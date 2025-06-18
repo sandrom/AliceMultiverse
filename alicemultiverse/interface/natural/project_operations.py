@@ -53,13 +53,13 @@ class ProjectOperationsMixin:
         creative_context: dict[str, Any] | None = None
     ) -> AliceResponse:
         """Create a new project for organizing creative work.
-        
+
         Args:
             name: Project name
             description: Optional project description
             budget: Optional budget limit in USD
             creative_context: Optional creative context (style preferences, characters, etc.)
-            
+
         Returns:
             Response with created project details
         """
@@ -99,11 +99,11 @@ class ProjectOperationsMixin:
         creative_context: dict[str, Any]
     ) -> AliceResponse:
         """Update project's creative context.
-        
+
         Args:
             project_id: Project identifier
             creative_context: New creative context to merge
-            
+
         Returns:
             Response with updated project
         """
@@ -141,10 +141,10 @@ class ProjectOperationsMixin:
 
     def get_project_budget_status(self, project_id: str) -> AliceResponse:
         """Get budget status for a project.
-        
+
         Args:
             project_id: Project identifier
-            
+
         Returns:
             Response with budget information
         """
@@ -185,10 +185,10 @@ class ProjectOperationsMixin:
 
     def list_projects(self, status: str | None = None) -> AliceResponse:
         """List all projects with optional status filter.
-        
+
         Args:
             status: Optional status filter ('active', 'completed', 'archived')
-            
+
         Returns:
             Response with project list
         """

@@ -107,7 +107,7 @@ class FlowAnalyzer:
         vision_provider: str | None = None,
     ):
         """Initialize the flow analyzer.
-        
+
         Args:
             metadata_cache: Cache for clip metadata
             vision_provider: Vision provider for analysis
@@ -125,12 +125,12 @@ class FlowAnalyzer:
         target_energy: str | None = None,
     ) -> tuple[list[FlowIssue], list[FlowSuggestion]]:
         """Analyze timeline flow and generate suggestions.
-        
+
         Args:
             timeline: Timeline to analyze
             target_mood: Target mood (e.g., "upbeat", "dramatic")
             target_energy: Target energy curve
-            
+
         Returns:
             Tuple of (issues, suggestions)
         """

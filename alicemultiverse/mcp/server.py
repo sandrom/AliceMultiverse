@@ -15,10 +15,10 @@ logger = logging.getLogger(__name__)
 
 def create_server(name: str = "alice-mcp") -> Server:
     """Create and configure the MCP server.
-    
+
     Args:
         name: Server name
-        
+
     Returns:
         Configured MCP server instance
     """
@@ -61,7 +61,7 @@ async def run_server(
     transport: str = "stdio"
 ) -> None:
     """Run the MCP server.
-    
+
     Args:
         server: Server instance (creates default if not provided)
         transport: Transport type (stdio, websocket, etc.)

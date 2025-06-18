@@ -15,13 +15,13 @@ from .constants import MAX_PROJECT_NAME_LENGTH, SAFE_NAME_PATTERN, SQL_INJECTION
 
 def validate_selection_create_request(request: SelectionCreateRequest) -> SelectionCreateRequest:
     """Validate selection create request parameters.
-    
+
     Args:
         request: Selection create request to validate
-        
+
     Returns:
         Validated selection create request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -73,13 +73,13 @@ def validate_selection_create_request(request: SelectionCreateRequest) -> Select
 
 def validate_selection_update_request(request: SelectionUpdateRequest) -> SelectionUpdateRequest:
     """Validate selection update request parameters.
-    
+
     Args:
         request: Selection update request to validate
-        
+
     Returns:
         Validated selection update request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -140,13 +140,13 @@ def validate_selection_update_request(request: SelectionUpdateRequest) -> Select
 
 def validate_selection_export_request(request: SelectionExportRequest) -> SelectionExportRequest:
     """Validate selection export request parameters.
-    
+
     Args:
         request: Selection export request to validate
-        
+
     Returns:
         Validated selection export request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -167,13 +167,13 @@ def validate_selection_export_request(request: SelectionExportRequest) -> Select
 
 def validate_selection_search_request(request: SelectionSearchRequest) -> SelectionSearchRequest:
     """Validate selection search request parameters.
-    
+
     Args:
         request: Selection search request to validate
-        
+
     Returns:
         Validated selection search request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """

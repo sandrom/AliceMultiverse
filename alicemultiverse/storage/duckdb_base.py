@@ -22,7 +22,7 @@ class DuckDBBase:
 
     def __init__(self, db_path: Path | None = None, read_only: bool = False):
         """Initialize DuckDB connection.
-        
+
         Args:
             db_path: Path to DuckDB database file. If None, uses in-memory database.
             read_only: Open database in read-only mode (better for concurrent reads)
@@ -77,35 +77,35 @@ class DuckDBBase:
             CREATE TABLE IF NOT EXISTS assets (
                 -- Identity
                 content_hash VARCHAR PRIMARY KEY,
-                
+
                 -- Locations (array of paths/URLs where file exists)
                 locations JSON,
-                
+
                 -- Basic metadata
                 media_type VARCHAR,
                 file_size BIGINT,
                 ai_source VARCHAR,
-                
+
                 -- Quality metrics
                 quality_rating INTEGER,
                 quality_score DOUBLE,
-                
+
                 -- Content analysis
                 description TEXT,
                 prompt TEXT,
-                
+
                 -- Temporal
                 created_at TIMESTAMP,
                 modified_at TIMESTAMP,
                 discovered_at TIMESTAMP,
-                
+
                 -- Organization
                 project VARCHAR,
                 collection VARCHAR,
-                
+
                 -- Asset role (e.g., 'primary', 'b-roll', 'reference')
                 asset_role VARCHAR DEFAULT 'primary',
-                
+
                 -- Metadata blob for flexibility
                 metadata JSON
             );
@@ -223,7 +223,7 @@ class DuckDBBase:
 
     def _row_to_dict(self, row: tuple, columns: list[str] | None = None) -> dict[str, Any]:
         """Convert database row to dictionary.
-        
+
         Args:
             row: Database row tuple
             columns: Column names (if not provided, uses conn.description)

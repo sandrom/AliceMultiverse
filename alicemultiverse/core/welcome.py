@@ -23,7 +23,7 @@ images through natural conversation with AI assistants.
 
 def check_setup_status() -> tuple[bool, str]:
     """Check if Alice is properly set up.
-    
+
     Returns:
         (is_setup, message): Whether setup is complete and a status message
     """
@@ -90,7 +90,7 @@ This will help you:
         print(f"""
 ✅ {status}
 ─────────────────
-        
+
 Quick Commands:
 • alice setup         - Run setup wizard
 • alice keys setup    - Configure API keys
@@ -117,7 +117,7 @@ Debug Mode (for testing):
 
 def show_first_run_prompt() -> bool:
     """Show first-run prompt and return whether to continue.
-    
+
     Returns:
         True if user wants to run setup, False to skip
     """

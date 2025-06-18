@@ -64,14 +64,14 @@ async def track_style_preference(
     context: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     """Track a style preference choice.
-    
+
     Args:
         preference_type: Type of preference (color_palette, composition, etc.)
         value: The chosen value
         project: Optional project context
         tags: Optional descriptive tags
         context: Optional additional context
-        
+
     Returns:
         Tracked preference details
     """
@@ -110,12 +110,12 @@ async def get_style_recommendations(
     limit: int = 5
 ) -> list[dict[str, Any]]:
     """Get personalized style recommendations.
-    
+
     Args:
         context: Optional context (project, time, etc.)
         types: Recommendation types (preset, variation, exploration, trending)
         limit: Maximum recommendations
-        
+
     Returns:
         List of recommendations
     """
@@ -154,10 +154,10 @@ async def analyze_style_patterns(
     time_range_days: int | None = 30
 ) -> dict[str, Any]:
     """Analyze style patterns and generate insights.
-    
+
     Args:
         time_range_days: Days to analyze
-        
+
     Returns:
         Pattern analysis and insights
     """
@@ -217,11 +217,11 @@ async def start_style_workflow(
     project: str | None = None
 ) -> dict[str, Any]:
     """Start tracking a style workflow.
-    
+
     Args:
         workflow_type: Type of workflow
         project: Optional project context
-        
+
     Returns:
         Workflow tracking details
     """
@@ -257,14 +257,14 @@ async def end_style_workflow(
     notes: str | None = None
 ) -> dict[str, Any]:
     """End a style workflow and get summary.
-    
+
     Args:
         workflow_id: Workflow to end
         successful: Whether workflow was successful
         quality_score: Optional quality score (0-1)
         user_rating: Optional user rating (1-5)
         notes: Optional notes
-        
+
     Returns:
         Workflow summary
     """
@@ -293,11 +293,11 @@ async def get_style_evolution(
     preference_type: str | None = None
 ) -> list[dict[str, Any]]:
     """Get style evolution over time.
-    
+
     Args:
         days: Number of days to analyze
         preference_type: Optional specific type
-        
+
     Returns:
         Evolution timeline
     """
@@ -325,10 +325,10 @@ async def suggest_next_action(
     current_preferences: dict[str, str]
 ) -> dict[str, Any]:
     """Get next best action suggestion.
-    
+
     Args:
         current_preferences: Current preference selections
-        
+
     Returns:
         Action recommendation
     """
@@ -353,7 +353,7 @@ async def suggest_next_action(
 
 async def export_style_profile() -> dict[str, Any]:
     """Export complete style profile.
-    
+
     Returns:
         Complete profile data
     """
@@ -370,10 +370,10 @@ async def import_style_profile(
     profile_data: dict[str, Any]
 ) -> dict[str, Any]:
     """Import a style profile.
-    
+
     Args:
         profile_data: Profile data to import
-        
+
     Returns:
         Import status
     """

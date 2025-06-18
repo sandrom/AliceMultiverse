@@ -63,7 +63,7 @@ class FirstRunWizard:
 
     def run(self) -> bool:
         """Run the first-run wizard.
-        
+
         Returns:
             True if setup completed successfully
         """
@@ -541,7 +541,7 @@ Then ask Claude: "Help me organize my AI images"
 
 def check_first_run() -> bool:
     """Check if this is the first run and launch wizard if needed.
-    
+
     Returns:
         True if setup is complete (or was already done)
     """

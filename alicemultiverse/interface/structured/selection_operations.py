@@ -26,11 +26,11 @@ class SelectionOperationsMixin:
 
     def create_selection(self, request: SelectionCreateRequest, client_id: str = "default") -> AliceResponse:
         """Create a new selection for a project.
-        
+
         Args:
             request: Selection creation request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with created selection
         """
@@ -93,11 +93,11 @@ class SelectionOperationsMixin:
 
     def update_selection(self, request: SelectionUpdateRequest, client_id: str = "default") -> AliceResponse:
         """Update a selection (add/remove items, change status, etc).
-        
+
         Args:
             request: Selection update request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with updated selection
         """
@@ -198,11 +198,11 @@ class SelectionOperationsMixin:
 
     def search_selections(self, request: SelectionSearchRequest, client_id: str = "default") -> AliceResponse:
         """Search for selections across projects.
-        
+
         Args:
             request: Selection search request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with search results
         """
@@ -268,11 +268,11 @@ class SelectionOperationsMixin:
 
     def export_selection(self, request: SelectionExportRequest, client_id: str = "default") -> AliceResponse:
         """Export a selection in various formats.
-        
+
         Args:
             request: Selection export request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with export result
         """
@@ -353,12 +353,12 @@ class SelectionOperationsMixin:
 
     def get_selection(self, project_id: str, selection_id: str, client_id: str = "default") -> AliceResponse:
         """Get details of a specific selection.
-        
+
         Args:
             project_id: Project identifier
             selection_id: Selection identifier
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with selection details
         """
@@ -421,13 +421,13 @@ class SelectionOperationsMixin:
         client_id: str = "default"
     ) -> AliceResponse:
         """Find assets similar to those in a selection.
-        
+
         Args:
             project_id: Project identifier
             selection_id: Selection identifier
             limit: Maximum number of similar assets to return
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with similar assets
         """

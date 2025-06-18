@@ -19,16 +19,16 @@ def calculate_perceptual_hash(
     highfreq_factor: int = 4
 ) -> str | None:
     """Calculate perceptual hash (pHash) for an image.
-    
+
     This uses the DCT (Discrete Cosine Transform) method to create
     a hash that's robust to scaling, aspect ratio changes, and
     minor color/brightness variations.
-    
+
     Args:
         file_path: Path to image file
         hash_size: Size of the hash (8 = 64 bit hash)
         highfreq_factor: Factor for high frequency extraction
-        
+
     Returns:
         Hex string of perceptual hash or None if failed
     """
@@ -68,14 +68,14 @@ def calculate_perceptual_hash(
 
 def calculate_difference_hash(file_path: Path, hash_size: int = 8) -> str | None:
     """Calculate difference hash (dHash) for an image.
-    
+
     This is simpler and faster than pHash but still effective
     for finding similar images.
-    
+
     Args:
         file_path: Path to image file
         hash_size: Size of the hash
-        
+
     Returns:
         Hex string of difference hash or None if failed
     """
@@ -104,13 +104,13 @@ def calculate_difference_hash(file_path: Path, hash_size: int = 8) -> str | None
 
 def calculate_average_hash(file_path: Path, hash_size: int = 8) -> str | None:
     """Calculate average hash (aHash) for an image.
-    
+
     This is the simplest and fastest perceptual hash.
-    
+
     Args:
         file_path: Path to image file
         hash_size: Size of the hash
-        
+
     Returns:
         Hex string of average hash or None if failed
     """
@@ -142,11 +142,11 @@ def calculate_average_hash(file_path: Path, hash_size: int = 8) -> str | None:
 
 def hamming_distance(hash1: str, hash2: str) -> int:
     """Calculate Hamming distance between two hashes.
-    
+
     Args:
         hash1: First hash (hex string)
         hash2: Second hash (hex string)
-        
+
     Returns:
         Hamming distance (number of differing bits)
     """
@@ -167,12 +167,12 @@ def find_similar_hashes(
     threshold: int = 10
 ) -> list[tuple[str, int]]:
     """Find hashes similar to target within threshold.
-    
+
     Args:
         target_hash: Target hash to compare against
         hash_list: List of (identifier, hash) tuples
         threshold: Maximum Hamming distance for similarity
-        
+
     Returns:
         List of (identifier, distance) tuples sorted by distance
     """
@@ -195,10 +195,10 @@ def find_similar_hashes(
 
 def _dct2d(matrix: np.ndarray) -> np.ndarray:
     """2D Discrete Cosine Transform.
-    
+
     Args:
         matrix: 2D numpy array
-        
+
     Returns:
         DCT coefficients
     """
@@ -224,10 +224,10 @@ def _dct2d(matrix: np.ndarray) -> np.ndarray:
 
 def _bits_to_hex(bits: np.ndarray) -> str:
     """Convert bit array to hex string.
-    
+
     Args:
         bits: Boolean array
-        
+
     Returns:
         Hex string representation
     """

@@ -258,10 +258,10 @@ class UnifiedCache:
 
     async def analyze_with_understanding(self, media_path: Path) -> Any:
         """Run AI understanding analysis on media file.
-        
+
         Args:
             media_path: Path to the media file
-            
+
         Returns:
             Understanding analysis result or None
         """
@@ -287,11 +287,11 @@ class UnifiedCache:
         understanding: Any
     ) -> AnalysisResult:
         """Merge understanding results into analysis.
-        
+
         Args:
             analysis: Basic analysis results
             understanding: Understanding analysis results
-            
+
         Returns:
             Merged analysis
         """
@@ -442,10 +442,10 @@ class UnifiedCache:
 
     def get_content_hash(self, file_path: Path) -> str:
         """Get content hash for a file.
-        
+
         Args:
             file_path: Path to file
-            
+
         Returns:
             SHA256 hash of file content
         """
@@ -457,7 +457,7 @@ class UnifiedCache:
 
     def save(self, media_path: Path, analysis: Any, analysis_time: float) -> None:
         """Save analysis to cache (for backward compatibility).
-        
+
         Args:
             media_path: Path to media file
             analysis: Analysis result

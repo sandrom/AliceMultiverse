@@ -30,7 +30,7 @@ class NaturalInterfaceBase:
 
     def __init__(self, config_path: Path | None = None):
         """Initialize natural language interface.
-        
+
         Args:
             config_path: Optional path to configuration file
         """

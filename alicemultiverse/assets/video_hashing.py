@@ -11,10 +11,10 @@ logger = logging.getLogger(__name__)
 
 def extract_video_info(video_path: Path) -> dict | None:
     """Extract video information using ffprobe.
-    
+
     Args:
         video_path: Path to video file
-        
+
     Returns:
         Video information dict or None if failed
     """
@@ -43,11 +43,11 @@ def extract_video_info(video_path: Path) -> dict | None:
 
 def extract_keyframes(video_path: Path, max_frames: int = 10) -> list[bytes]:
     """Extract keyframes from video for hashing.
-    
+
     Args:
         video_path: Path to video file
         max_frames: Maximum number of keyframes to extract
-        
+
     Returns:
         List of keyframe data as bytes
     """
@@ -110,11 +110,11 @@ def extract_keyframes(video_path: Path, max_frames: int = 10) -> list[bytes]:
 
 def hash_video_keyframes(video_path: Path, max_frames: int = 10) -> str:
     """Hash video content based on keyframes.
-    
+
     Args:
         video_path: Path to video file
         max_frames: Maximum number of keyframes to extract
-        
+
     Returns:
         SHA-256 hash of video keyframes
     """
@@ -151,12 +151,12 @@ def hash_video_keyframes(video_path: Path, max_frames: int = 10) -> str:
 
 def hash_video_stream_only(video_path: Path) -> str:
     """Hash only the video stream data, excluding container metadata.
-    
+
     This is faster than keyframe extraction but still excludes metadata.
-    
+
     Args:
         video_path: Path to video file
-        
+
     Returns:
         SHA-256 hash of video stream
     """

@@ -70,7 +70,7 @@ class MetricsServer:
 
     def __init__(self, host: str = "0.0.0.0", port: int = 9090):
         """Initialize metrics server.
-        
+
         Args:
             host: Host to bind to
             port: Port to listen on
@@ -132,7 +132,7 @@ class MetricsServer:
 # CLI command to run metrics server
 def run_metrics_server(host: str = "0.0.0.0", port: int = 9090):
     """Run the metrics server standalone.
-    
+
     Args:
         host: Host to bind to
         port: Port to listen on

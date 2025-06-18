@@ -47,14 +47,14 @@ class WorkflowExecutor:
         dry_run: bool = False
     ) -> WorkflowResult:
         """Execute a workflow template.
-        
+
         Args:
             workflow: Workflow template to execute
             initial_prompt: Initial prompt for the workflow
             parameters: Additional parameters
             budget_limit: Maximum budget for the workflow
             dry_run: If True, only estimate costs without executing
-            
+
         Returns:
             Workflow execution result
         """
@@ -212,7 +212,7 @@ class WorkflowExecutor:
         workflow_id: str
     ):
         """Execute a single workflow step.
-        
+
         Args:
             step: Step to execute
             context: Workflow context
@@ -256,11 +256,11 @@ class WorkflowExecutor:
         context: WorkflowContext
     ) -> GenerationRequest:
         """Build generation request for a step.
-        
+
         Args:
             step: Workflow step
             context: Workflow context
-            
+
         Returns:
             Generation request
         """
@@ -332,11 +332,11 @@ class WorkflowExecutor:
         context: WorkflowContext
     ) -> float:
         """Estimate total workflow cost.
-        
+
         Args:
             steps: Workflow steps
             context: Workflow context
-            
+
         Returns:
             Estimated total cost
         """

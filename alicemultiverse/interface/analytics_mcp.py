@@ -45,9 +45,9 @@ def get_improvement_engine() -> ImprovementEngine:
 
 async def start_analytics_session() -> dict[str, Any]:
     """Start a new analytics session.
-    
+
     Begins tracking performance metrics for the current session.
-    
+
     Returns:
         Session information
     """
@@ -81,9 +81,9 @@ async def start_analytics_session() -> dict[str, Any]:
 
 async def end_analytics_session() -> dict[str, Any]:
     """End the current analytics session.
-    
+
     Stops tracking and provides session summary.
-    
+
     Returns:
         Session summary and metrics
     """
@@ -146,14 +146,14 @@ async def track_workflow_event(
     data: dict[str, Any]
 ) -> dict[str, Any]:
     """Track a workflow event.
-    
+
     Records performance data for workflow analysis.
-    
+
     Args:
         workflow_id: Workflow identifier
         event_type: Type of event (start, update, complete, fail)
         data: Event data
-        
+
     Returns:
         Tracking result
     """
@@ -232,16 +232,16 @@ async def track_export_event(
     metrics: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     """Track an export operation.
-    
+
     Records detailed export metrics for analysis.
-    
+
     Args:
         export_id: Unique export identifier
         timeline_id: Associated timeline
         format: Export format (edl, xml, json, capcut)
         platform: Target platform if applicable
         metrics: Export metrics
-        
+
     Returns:
         Tracking result
     """
@@ -300,13 +300,13 @@ async def get_performance_insights(
     workflow_type: str | None = None
 ) -> dict[str, Any]:
     """Get performance insights and statistics.
-    
+
     Analyzes workflow performance over time.
-    
+
     Args:
         time_range_days: Days to analyze (default 30)
         workflow_type: Filter by workflow type
-        
+
     Returns:
         Performance insights and statistics
     """
@@ -361,14 +361,14 @@ async def get_export_analytics(
     time_range_days: int | None = 30
 ) -> dict[str, Any]:
     """Get export analytics and patterns.
-    
+
     Analyzes export usage and success patterns.
-    
+
     Args:
         format: Filter by export format
         platform: Filter by platform
         time_range_days: Days to analyze
-        
+
     Returns:
         Export analytics and insights
     """
@@ -434,12 +434,12 @@ async def get_improvement_suggestions(
     max_suggestions: int = 10
 ) -> dict[str, Any]:
     """Get improvement suggestions based on analytics.
-    
+
     Analyzes usage patterns and suggests optimizations.
-    
+
     Args:
         max_suggestions: Maximum suggestions to return
-        
+
     Returns:
         Prioritized improvement suggestions
     """
@@ -512,13 +512,13 @@ async def apply_improvement(
     parameters: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     """Apply an improvement suggestion.
-    
+
     Implements the suggested improvement automatically where possible.
-    
+
     Args:
         improvement_id: Improvement to apply
         parameters: Implementation parameters
-        
+
     Returns:
         Application result
     """
@@ -548,13 +548,13 @@ async def track_user_action(
     metadata: dict[str, Any] | None = None
 ) -> dict[str, Any]:
     """Track a user action for analytics.
-    
+
     Records user interactions for behavior analysis.
-    
+
     Args:
         action: Action type (adjustment, preview, redo, etc.)
         metadata: Additional context
-        
+
     Returns:
         Tracking result
     """

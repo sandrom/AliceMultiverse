@@ -33,11 +33,11 @@ class ProjectPromptStorage:
 
     def save_to_project(self, prompt: Prompt, project_path: Path) -> Path:
         """Save a prompt to a project directory.
-        
+
         Args:
             prompt: The prompt to save
             project_path: Path to the project directory
-            
+
         Returns:
             Path to the saved prompt file
         """
@@ -98,10 +98,10 @@ class ProjectPromptStorage:
 
     def load_from_project(self, project_path: Path) -> list[Prompt]:
         """Load all prompts from a project directory.
-        
+
         Args:
             project_path: Path to the project directory
-            
+
         Returns:
             List of prompts found in the project
         """
@@ -133,10 +133,10 @@ class ProjectPromptStorage:
 
     def sync_project_to_index(self, project_path: Path) -> int:
         """Sync prompts from a project to the central index.
-        
+
         Args:
             project_path: Path to the project directory
-            
+
         Returns:
             Number of prompts synced
         """
@@ -161,11 +161,11 @@ class ProjectPromptStorage:
 
     def sync_index_to_project(self, project_name: str, project_path: Path) -> int:
         """Sync prompts from the index to a project.
-        
+
         Args:
             project_name: Name of the project to filter by
             project_path: Path to the project directory
-            
+
         Returns:
             Number of prompts synced
         """
@@ -182,10 +182,10 @@ class ProjectPromptStorage:
 
     def discover_project_prompts(self, base_paths: list[Path]) -> dict[str, list[Prompt]]:
         """Discover all prompts in project directories.
-        
+
         Args:
             base_paths: List of base paths to search for projects
-            
+
         Returns:
             Dictionary mapping project names to their prompts
         """
@@ -210,7 +210,7 @@ class ProjectPromptStorage:
 
     def export_project_prompts(self, project_path: Path, output_path: Path) -> None:
         """Export all prompts from a project to a standalone file.
-        
+
         Args:
             project_path: Path to the project directory
             output_path: Path for the export file
@@ -232,11 +232,11 @@ class ProjectPromptStorage:
 
     def create_prompt_template(self, project_path: Path, template_name: str = "example") -> Path:
         """Create a prompt template file in the project.
-        
+
         Args:
             project_path: Path to the project directory
             template_name: Name for the template
-            
+
         Returns:
             Path to the created template file
         """
@@ -276,7 +276,7 @@ context:
   # Add any parameters or settings
   aspect_ratio: "16:9"
   quality: "high"
-  
+
 notes: |
   Add usage notes, tips, and variations here.
   This is a multiline field for detailed information.
@@ -325,7 +325,7 @@ alice prompts add -t "your prompt" -c image_generation -p midjourney --project {
 # Pull prompts from central database
 alice prompts project {project_path} --sync-from-index
 
-# Push prompts to central database  
+# Push prompts to central database
 alice prompts project {project_path} --sync-to-index
 ```
 

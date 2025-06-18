@@ -21,7 +21,7 @@ class SearchIndexBuilder:
 
     def __init__(self, db_path: str | None = None):
         """Initialize index builder.
-        
+
         Args:
             db_path: Path to DuckDB database file
         """
@@ -30,11 +30,11 @@ class SearchIndexBuilder:
 
     def rebuild_from_paths(self, paths: list[str], show_progress: bool = True) -> int:
         """Rebuild search index from files in given paths.
-        
+
         Args:
             paths: List of directories to scan
             show_progress: Whether to show progress bar
-            
+
         Returns:
             Number of assets indexed
         """
@@ -111,7 +111,7 @@ class SearchIndexBuilder:
 
     def _index_perceptual_hashes(self, file_path: Path, content_hash: str) -> None:
         """Calculate and index perceptual hashes for an image.
-        
+
         Args:
             file_path: Path to image file
             content_hash: Content hash of the file
@@ -143,10 +143,10 @@ class SearchIndexBuilder:
 
     def update_from_path(self, path: str) -> int:
         """Update index with new or modified files from a path.
-        
+
         Args:
             path: Directory to scan for updates
-            
+
         Returns:
             Number of files updated
         """
@@ -189,7 +189,7 @@ class SearchIndexBuilder:
 
     def verify_index(self) -> dict:
         """Verify index integrity and find missing files.
-        
+
         Returns:
             Dict with verification results
         """
@@ -224,10 +224,10 @@ class SearchIndexBuilder:
 
     def _extract_full_metadata(self, file_path: Path) -> dict[str, Any]:
         """Extract full metadata including content hash and required fields.
-        
+
         Args:
             file_path: Path to media file
-            
+
         Returns:
             Complete metadata dict ready for indexing
         """
@@ -300,11 +300,11 @@ class SearchIndexBuilder:
 
     def _load_cached_metadata(self, file_path: Path, content_hash: str) -> dict[str, Any] | None:
         """Load metadata from cache if available.
-        
+
         Args:
             file_path: Path to media file
             content_hash: SHA256 hash of file content
-            
+
         Returns:
             Cached metadata dict or None
         """
@@ -348,10 +348,10 @@ class SearchIndexBuilder:
 
     def _extract_indexable_data(self, cached_data: dict[str, Any]) -> dict[str, Any]:
         """Extract indexable fields from cached metadata.
-        
+
         Args:
             cached_data: Full cached metadata
-            
+
         Returns:
             Metadata dict with indexable fields
         """
@@ -425,10 +425,10 @@ class SearchIndexBuilder:
 
     def _calculate_content_hash(self, file_path: Path) -> str:
         """Calculate SHA256 hash of file content.
-        
+
         Args:
             file_path: Path to file
-            
+
         Returns:
             Hex string of content hash
         """

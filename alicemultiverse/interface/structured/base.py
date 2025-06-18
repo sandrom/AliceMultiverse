@@ -26,7 +26,7 @@ class StructuredInterfaceBase:
 
     def __init__(self, config_path: Path | None = None):
         """Initialize base structured interface.
-        
+
         Args:
             config_path: Optional path to configuration file
         """

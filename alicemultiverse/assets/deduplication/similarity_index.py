@@ -34,7 +34,7 @@ class SimilarityIndex:
     ):
         """
         Initialize similarity index.
-        
+
         Args:
             hasher: Perceptual hasher instance
             index_type: Type of FAISS index (Flat, IVF, HNSW)
@@ -55,11 +55,11 @@ class SimilarityIndex:
     ) -> int:
         """
         Build similarity index from images.
-        
+
         Args:
             image_paths: List of image paths
             cache_dir: Directory to cache features
-            
+
         Returns:
             Number of images indexed
         """
@@ -173,12 +173,12 @@ class SimilarityIndex:
     ) -> list[SimilarImage]:
         """
         Find similar images.
-        
+
         Args:
             query_path: Image to search for
             k: Number of results
             include_self: Whether to include the query image
-            
+
         Returns:
             List of similar images
         """
@@ -228,11 +228,11 @@ class SimilarityIndex:
     ) -> dict[str, list[SimilarImage]]:
         """
         Search for multiple images at once.
-        
+
         Args:
             query_paths: Images to search for
             k: Number of results per query
-            
+
         Returns:
             Dictionary of query_path -> similar images
         """
@@ -250,11 +250,11 @@ class SimilarityIndex:
     ) -> list[list[str]]:
         """
         Find clusters of similar images.
-        
+
         Args:
             min_cluster_size: Minimum images per cluster
             max_distance: Maximum distance within cluster
-            
+
         Returns:
             List of clusters (each cluster is a list of paths)
         """

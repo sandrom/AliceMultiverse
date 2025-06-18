@@ -46,7 +46,7 @@ class ImprovementEngine:
         export_analytics: ExportAnalytics | None = None
     ):
         """Initialize improvement engine.
-        
+
         Args:
             performance_tracker: Performance tracking instance
             export_analytics: Export analytics instance
@@ -59,7 +59,7 @@ class ImprovementEngine:
 
     def analyze_all(self) -> list[Improvement]:
         """Run all analysis and return improvements.
-        
+
         Returns:
             List of suggested improvements
         """

@@ -185,7 +185,7 @@ pipeline:
   stages:
     - understanding_deepseek
     - understanding_google
-    
+
 # Or for premium analysis:
 pipeline:
   mode: premium  # Uses all providers

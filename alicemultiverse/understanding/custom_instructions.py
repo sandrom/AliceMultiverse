@@ -62,7 +62,7 @@ class CustomInstructionManager:
 
     def __init__(self, db_path: Path | None = None):
         """Initialize the instruction manager.
-        
+
         Args:
             db_path: Path to DuckDB database file (None for in-memory)
         """
@@ -127,28 +127,28 @@ class CustomInstructionManager:
                 name="Fashion Photography Analysis",
                 description="Detailed analysis for fashion and portrait photography",
                 instructions="""Analyze this fashion/portrait image with special attention to:
-                
+
 1. Fashion and Styling:
    - Describe all clothing items, accessories, and styling choices
    - Note fabric types, textures, and patterns
    - Identify fashion style (casual, formal, streetwear, haute couture, etc.)
-   
+
 2. Model and Pose:
    - Describe the model's pose, expression, and body language
    - Note any distinctive features or characteristics
    - Analyze the mood and emotion conveyed
-   
+
 3. Photography Technique:
    - Camera angle and framing
    - Lighting setup and quality
    - Depth of field and focus
    - Color grading and post-processing style
-   
+
 4. Brand/Editorial Feel:
    - What type of brand or publication would use this image?
    - Target audience and market segment
    - Overall aesthetic and vibe
-   
+
 {additional_focus}""",
                 variables={
                     "additional_focus": "Any specific aspect to focus on"
@@ -164,31 +164,31 @@ class CustomInstructionManager:
                 name="Product Photography Analysis",
                 description="Analysis focused on product shots and commercial photography",
                 instructions="""Analyze this product image for commercial use:
-                
+
 1. Product Presentation:
    - Main product and any secondary items
    - Product condition and quality visible
    - Key features highlighted
    - Scale and proportions
-   
+
 2. Styling and Props:
    - Background and surface choices
    - Supporting props and their purpose
    - Color coordination
    - Overall composition
-   
+
 3. Technical Quality:
    - Sharpness and detail reproduction
    - Color accuracy and consistency
    - Lighting evenness and shadows
    - Post-processing quality
-   
+
 4. Commercial Appeal:
    - Target market indicators
    - Lifestyle associations
    - Emotional triggers
    - Call-to-action potential
-   
+
 Category: {product_category}
 Platform: {target_platform}""",
                 variables={
@@ -202,29 +202,29 @@ Platform: {target_platform}""",
                 name="Artistic Style Analysis",
                 description="Deep analysis of artistic and stylistic elements",
                 instructions="""Provide an artistic analysis of this image:
-                
+
 1. Visual Style:
    - Art movement influences (impressionism, surrealism, minimalism, etc.)
    - Technique and medium appearance
    - Stylistic choices and their effects
-   
+
 2. Composition and Design:
    - Rule of thirds, golden ratio, or other principles
    - Balance and visual weight
    - Leading lines and visual flow
    - Negative space usage
-   
+
 3. Color Theory:
    - Color palette and harmony
    - Emotional impact of colors
    - Contrast and saturation choices
-   
+
 4. Artistic Intent:
    - Apparent message or theme
    - Symbolism and metaphors
    - Emotional resonance
    - Cultural or historical references
-   
+
 Specific style focus: {style_focus}""",
                 variables={
                     "style_focus": "Particular artistic style or movement to emphasize"
@@ -236,29 +236,29 @@ Specific style focus: {style_focus}""",
                 name="Content Moderation Analysis",
                 description="Check for content policy compliance",
                 instructions="""Analyze this image for content moderation purposes:
-                
+
 1. Safety Check:
    - Any violence, gore, or disturbing content
    - Nudity or sexual content
    - Hate symbols or offensive imagery
    - Drug or alcohol references
-   
+
 2. Legal Compliance:
    - Visible logos or trademarks
    - Recognizable people (privacy concerns)
    - Copyright-protected elements
    - Age-appropriate content
-   
+
 3. Platform Suitability:
    - Social media friendliness
    - Professional use appropriateness
    - Family-friendly rating
-   
+
 4. Cultural Sensitivity:
    - Potentially offensive elements
    - Cultural appropriation concerns
    - Religious or political symbols
-   
+
 Platform guidelines: {platform_rules}
 Audience: {target_audience}""",
                 variables={
@@ -272,29 +272,29 @@ Audience: {target_audience}""",
                 name="Character Consistency Check",
                 description="Verify character appearance consistency across images",
                 instructions="""Analyze this character image for consistency tracking:
-                
+
 1. Physical Characteristics:
    - Face shape and features
    - Hair color, style, and length
    - Eye color and shape
    - Skin tone and complexion
    - Body type and proportions
-   
+
 2. Distinguishing Features:
    - Scars, tattoos, or markings
    - Accessories (glasses, jewelry)
    - Unique characteristics
-   
+
 3. Clothing and Style:
    - Outfit description
    - Color schemes
    - Style consistency
-   
+
 4. Pose and Expression:
    - Facial expression
    - Body language
    - Mood conveyed
-   
+
 Character name: {character_name}
 Reference notes: {reference_notes}""",
                 variables={
@@ -313,7 +313,7 @@ Reference notes: {reference_notes}""",
         try:
             if update_if_exists:
                 self.conn.execute("""
-                    INSERT OR REPLACE INTO instruction_templates 
+                    INSERT OR REPLACE INTO instruction_templates
                     (id, name, description, instructions, variables, examples, updated_at)
                     VALUES (?, ?, ?, ?, ?, ?, ?)
                 """, [
@@ -334,7 +334,7 @@ Reference notes: {reference_notes}""",
 
                 if not existing:
                     self.conn.execute("""
-                        INSERT INTO instruction_templates 
+                        INSERT INTO instruction_templates
                         (id, name, description, instructions, variables, examples)
                         VALUES (?, ?, ?, ?, ?, ?)
                     """, [
@@ -398,7 +398,7 @@ Reference notes: {reference_notes}""",
                                templates: list[str] | None = None,
                                variables: dict[str, Any] | None = None) -> None:
         """Set custom instructions for a project.
-        
+
         Args:
             project_id: The project ID
             instructions: Dictionary of category -> instruction text
@@ -410,7 +410,7 @@ Reference notes: {reference_notes}""",
 
         # Save new instructions
         self.conn.execute("""
-            INSERT OR REPLACE INTO project_instructions 
+            INSERT OR REPLACE INTO project_instructions
             (project_id, instructions, templates, variables, updated_at)
             VALUES (?, ?, ?, ?, ?)
         """, [
@@ -423,7 +423,7 @@ Reference notes: {reference_notes}""",
 
         # Record in history
         self.conn.execute("""
-            INSERT INTO instruction_history 
+            INSERT INTO instruction_history
             (project_id, change_type, old_value, new_value)
             VALUES (?, ?, ?, ?)
         """, [
@@ -461,12 +461,12 @@ Reference notes: {reference_notes}""",
     def build_analysis_instructions(self, project_id: str, category: str = "general",
                                   template_vars: dict[str, Any] | None = None) -> str:
         """Build complete analysis instructions for a project.
-        
+
         Args:
             project_id: The project ID
             category: Instruction category (general, fashion, product, etc.)
             template_vars: Variables to pass to templates
-            
+
         Returns:
             Complete instruction text
         """

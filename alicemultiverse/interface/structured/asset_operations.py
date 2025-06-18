@@ -26,11 +26,11 @@ class AssetOperationsMixin:
 
     def search_assets(self, request: SearchRequest, client_id: str = "default") -> AliceResponse:
         """Search for assets using structured queries only.
-        
+
         Args:
             request: Structured search request
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with search results
         """
@@ -105,11 +105,11 @@ class AssetOperationsMixin:
 
     def get_asset_by_id(self, asset_id: str, client_id: str = "default") -> AliceResponse:
         """Get a specific asset by ID.
-        
+
         Args:
             asset_id: Asset identifier
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with asset information
         """
@@ -156,12 +156,12 @@ class AssetOperationsMixin:
 
     def set_asset_role(self, asset_id: str, role: AssetRole, client_id: str = "default") -> AliceResponse:
         """Set asset role with structured enum.
-        
+
         Args:
             asset_id: Asset identifier
             role: Asset role enum value
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response indicating success
         """
@@ -210,11 +210,11 @@ class AssetOperationsMixin:
 
     def soft_delete_assets(self, request: SoftDeleteRequest, client_id: str = "default") -> AliceResponse:
         """Soft delete assets by moving them to sorted-out folder.
-        
+
         Args:
             request: Soft delete request with asset IDs and category
             client_id: Client identifier for rate limiting
-            
+
         Returns:
             Response with deletion results
         """

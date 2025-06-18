@@ -100,11 +100,11 @@ class TimelineNLPProcessor:
 
     def parse_command(self, command: str, timeline: Timeline) -> list[TimelineEdit]:
         """Parse a natural language command into timeline edits.
-        
+
         Args:
             command: Natural language command
             timeline: Current timeline to edit
-            
+
         Returns:
             List of parsed timeline edits
         """
@@ -255,11 +255,11 @@ class TimelineNLPProcessor:
 
     def apply_edits(self, timeline: Timeline, edits: list[TimelineEdit]) -> Timeline:
         """Apply parsed edits to a timeline.
-        
+
         Args:
             timeline: Timeline to modify
             edits: List of edits to apply
-            
+
         Returns:
             Modified timeline
         """
@@ -443,10 +443,10 @@ class TimelineNLPProcessor:
 
     def suggest_edits(self, timeline: Timeline) -> list[str]:
         """Suggest possible edits for the timeline.
-        
+
         Args:
             timeline: Timeline to analyze
-            
+
         Returns:
             List of suggested edit commands
         """

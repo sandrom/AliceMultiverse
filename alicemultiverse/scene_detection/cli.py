@@ -38,7 +38,7 @@ def detect(
 ):
     """
     Detect scenes in a video or image sequence.
-    
+
     Examples:
         alice scenes detect video.mp4 -o scenes.json
         alice scenes detect ./images/ --group-similar
@@ -133,7 +133,7 @@ def shotlist(
 ):
     """
     Generate a shot list from detected scenes.
-    
+
     Example:
         alice scenes shotlist scenes.json -o shotlist.md --format markdown
     """
@@ -215,7 +215,7 @@ def extract(
 ):
     """
     Extract representative frames from video scenes.
-    
+
     Example:
         alice scenes extract video.mp4 -o ./shots/
     """

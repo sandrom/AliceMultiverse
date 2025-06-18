@@ -121,12 +121,12 @@ class VisualRhythmAnalyzer:
     ) -> RhythmAnalysis:
         """
         Analyze rhythm of an image sequence.
-        
+
         Args:
             images: List of image paths
             target_duration: Target total duration in seconds
             music_bpm: Music tempo for rhythm matching
-            
+
         Returns:
             RhythmAnalysis with pacing suggestions
         """
@@ -415,12 +415,12 @@ def match_rhythm_to_music(
 ) -> dict[str, Any]:
     """
     Match visual rhythm to music energy and beats.
-    
+
     Args:
         visual_rhythm: Visual rhythm analysis
         music_energy: Energy values over time
         music_beats: Beat timestamps
-        
+
     Returns:
         Matched rhythm with cut points
     """

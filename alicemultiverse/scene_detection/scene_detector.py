@@ -28,7 +28,7 @@ class SceneDetector:
     ):
         """
         Initialize scene detector.
-        
+
         Args:
             threshold: Sensitivity threshold for scene detection (0-1)
             min_scene_duration: Minimum scene duration in seconds
@@ -48,10 +48,10 @@ class SceneDetector:
     def detect_video_scenes(self, video_path: str | Path) -> list[Scene]:
         """
         Detect scenes in a video file.
-        
+
         Args:
             video_path: Path to video file
-            
+
         Returns:
             List of detected scenes
         """
@@ -91,11 +91,11 @@ class SceneDetector:
     ) -> list[Scene]:
         """
         Detect scenes in an image sequence.
-        
+
         Args:
             images: List of image paths
             group_similar: Whether to group similar images into scenes
-            
+
         Returns:
             List of detected scenes
         """
@@ -124,7 +124,7 @@ class SceneDetector:
     ) -> list[tuple[int, float]]:
         """
         Detect scene boundaries in video.
-        
+
         Returns list of (frame_number, confidence) tuples.
         """
         boundaries = []

@@ -93,10 +93,10 @@ class DuckDBMaintenance(DuckDBBase):
 
     def export_to_parquet(self, output_dir: Path) -> dict[str, Path]:
         """Export tables to Parquet format for analytics.
-        
+
         Args:
             output_dir: Directory to save Parquet files
-            
+
         Returns:
             Dictionary mapping table names to output paths
         """
@@ -234,19 +234,19 @@ class DuckDBMaintenance(DuckDBBase):
 
     def _clean_cache(self) -> int:
         """Clean old cache entries.
-        
+
         Returns:
             Number of entries deleted
         """
         # Clean query cache older than 1 hour
         query_deleted = self.conn.execute("""
-            DELETE FROM query_cache 
+            DELETE FROM query_cache
             WHERE cached_at < datetime('now', '-1 hour')
         """).rowcount or 0
 
         # Clean tag cache older than 30 minutes
         tag_deleted = self.conn.execute("""
-            DELETE FROM tag_cache 
+            DELETE FROM tag_cache
             WHERE cached_at < datetime('now', '-30 minutes')
         """).rowcount or 0
 

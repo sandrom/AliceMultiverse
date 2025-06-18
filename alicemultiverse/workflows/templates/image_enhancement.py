@@ -12,12 +12,12 @@ logger = logging.getLogger(__name__)
 
 class ImageEnhancementWorkflow(WorkflowTemplate):
     """Workflow for enhancing images through generation, upscaling, and variations.
-    
+
     This workflow:
     1. Generates an initial image using a high-quality provider
     2. Upscales it using Magnific/Freepik for maximum quality
     3. Optionally generates variations of the upscaled image
-    
+
     Parameters:
         initial_provider: Provider for initial generation (default: leonardo)
         initial_model: Model for initial generation (default: phoenix)
@@ -160,7 +160,7 @@ class ImageEnhancementWorkflow(WorkflowTemplate):
 
 class QuickEnhanceWorkflow(ImageEnhancementWorkflow):
     """Simplified enhancement workflow for quick results.
-    
+
     Uses faster models and skips variations by default.
     """
 
@@ -182,7 +182,7 @@ class QuickEnhanceWorkflow(ImageEnhancementWorkflow):
 
 class PremiumEnhanceWorkflow(ImageEnhancementWorkflow):
     """Premium enhancement workflow for maximum quality.
-    
+
     Uses best models and includes variations.
     """
 

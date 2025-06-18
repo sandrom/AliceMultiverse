@@ -20,7 +20,7 @@ class SelectionService:
 
     def __init__(self, project_service: ProjectService | None = None):
         """Initialize selection service.
-        
+
         Args:
             project_service: Optional project service instance
         """
@@ -29,10 +29,10 @@ class SelectionService:
 
     def _get_selections_dir(self, project_id: str) -> Path | None:
         """Get the selections directory for a project.
-        
+
         Args:
             project_id: Project ID or name
-            
+
         Returns:
             Path to selections directory or None if project not found
         """
@@ -52,11 +52,11 @@ class SelectionService:
 
     def _get_selection_file(self, project_id: str, selection_id: str) -> Path | None:
         """Get the file path for a selection.
-        
+
         Args:
             project_id: Project ID or name
             selection_id: Selection ID
-            
+
         Returns:
             Path to selection file or None
         """
@@ -81,7 +81,7 @@ class SelectionService:
         metadata: dict[str, Any] | None = None,
     ) -> Selection | None:
         """Create a new selection.
-        
+
         Args:
             project_id: Project ID or name
             name: Selection name
@@ -91,7 +91,7 @@ class SelectionService:
             constraints: Any constraints applied
             tags: Optional tags
             metadata: Optional metadata
-            
+
         Returns:
             Created selection or None if project not found
         """
@@ -133,11 +133,11 @@ class SelectionService:
 
     def get_selection(self, project_id: str, selection_id: str) -> Selection | None:
         """Get a selection by ID.
-        
+
         Args:
             project_id: Project ID or name
             selection_id: Selection ID
-            
+
         Returns:
             Selection or None if not found
         """
@@ -155,12 +155,12 @@ class SelectionService:
         purpose: SelectionPurpose | None = None,
     ) -> list[Selection]:
         """List selections for a project.
-        
+
         Args:
             project_id: Project ID or name
             status: Optional status filter
             purpose: Optional purpose filter
-            
+
         Returns:
             List of selections
         """
@@ -188,11 +188,11 @@ class SelectionService:
 
     def update_selection(self, project_id: str, selection: Selection) -> bool:
         """Update a selection.
-        
+
         Args:
             project_id: Project ID or name
             selection: Updated selection
-            
+
         Returns:
             True if successful, False otherwise
         """
@@ -226,13 +226,13 @@ class SelectionService:
         notes: str | None = None,
     ) -> Selection | None:
         """Add items to a selection.
-        
+
         Args:
             project_id: Project ID or name
             selection_id: Selection ID
             items: List of item data (must include asset_hash and file_path)
             notes: Optional notes about why items were added
-            
+
         Returns:
             Updated selection or None
         """
@@ -286,13 +286,13 @@ class SelectionService:
         reason: str | None = None,
     ) -> Selection | None:
         """Remove items from a selection.
-        
+
         Args:
             project_id: Project ID or name
             selection_id: Selection ID
             asset_hashes: List of asset hashes to remove
             reason: Optional reason for removal
-            
+
         Returns:
             Updated selection or None
         """
@@ -329,13 +329,13 @@ class SelectionService:
         notes: str | None = None,
     ) -> Selection | None:
         """Update selection status.
-        
+
         Args:
             project_id: Project ID or name
             selection_id: Selection ID
             status: New status
             notes: Optional notes about the change
-            
+
         Returns:
             Updated selection or None
         """
@@ -378,13 +378,13 @@ class SelectionService:
         export_settings: dict[str, Any] | None = None,
     ) -> bool:
         """Export a selection to a directory.
-        
+
         Args:
             project_id: Project ID or name
             selection_id: Selection ID
             export_path: Path to export to
             export_settings: Optional export settings
-            
+
         Returns:
             True if successful
         """
@@ -453,11 +453,11 @@ class SelectionService:
         asset_hash: str,
     ) -> list[Selection]:
         """Find all selections containing a specific asset.
-        
+
         Args:
             project_id: Project ID or name
             asset_hash: Asset hash to search for
-            
+
         Returns:
             List of selections containing the asset
         """
@@ -476,11 +476,11 @@ class SelectionService:
         selection_id: str,
     ) -> dict[str, Any]:
         """Get statistics about a selection.
-        
+
         Args:
             project_id: Project ID or name
             selection_id: Selection ID
-            
+
         Returns:
             Statistics dictionary
         """
@@ -528,18 +528,18 @@ class SelectionService:
         exclude_existing: bool = True,
     ) -> list[dict[str, Any]]:
         """Find images similar to those in a selection.
-        
+
         This method uses perceptual hashing to find images visually similar
         to the items already in the selection. It's useful for discovering
         more images that match the aesthetic or style of the selection.
-        
+
         Args:
             project_id: Project ID or name
             selection_id: Selection ID
             threshold: Maximum Hamming distance for similarity (0-64, lower is more similar)
             limit: Maximum number of results to return
             exclude_existing: Whether to exclude items already in the selection
-            
+
         Returns:
             List of similar images with similarity scores
         """

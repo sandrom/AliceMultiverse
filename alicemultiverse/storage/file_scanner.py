@@ -31,7 +31,7 @@ class FileScanner:
 
     def __init__(self, cache: DuckDBSearchCache):
         """Initialize file scanner.
-        
+
         Args:
             cache: DuckDB search cache to populate
         """
@@ -47,13 +47,13 @@ class FileScanner:
         show_progress: bool = True
     ) -> int:
         """Scan a directory and update cache with file metadata.
-        
+
         Args:
             directory: Directory to scan
             storage_type: Type of storage (local, s3, gcs, network)
             recursive: Whether to scan subdirectories
             show_progress: Whether to show progress bar
-            
+
         Returns:
             Number of files processed
         """
@@ -91,11 +91,11 @@ class FileScanner:
         show_progress: bool = True
     ) -> int:
         """Scan multiple directories with different storage types.
-        
+
         Args:
             directories: List of (directory, storage_type) tuples
             show_progress: Whether to show progress bar
-            
+
         Returns:
             Total number of files processed
         """
@@ -116,11 +116,11 @@ class FileScanner:
 
     def _collect_files(self, directory: Path, recursive: bool) -> list[Path]:
         """Collect all supported media files in directory.
-        
+
         Args:
             directory: Directory to search
             recursive: Whether to search subdirectories
-            
+
         Returns:
             List of file paths
         """
@@ -144,7 +144,7 @@ class FileScanner:
 
     async def _process_file(self, file_path: Path, storage_type: str) -> None:
         """Process a single file and update cache.
-        
+
         Args:
             file_path: Path to the file
             storage_type: Type of storage
@@ -186,10 +186,10 @@ class FileScanner:
 
     async def _calculate_file_hash(self, file_path: Path) -> str:
         """Calculate SHA-256 hash of file content.
-        
+
         Args:
             file_path: Path to the file
-            
+
         Returns:
             Hex string of SHA-256 hash
         """
@@ -207,10 +207,10 @@ class FileScanner:
         remove_missing: bool = False
     ) -> dict:
         """Verify that all cached files still exist.
-        
+
         Args:
             remove_missing: Whether to remove missing files from cache
-            
+
         Returns:
             Dictionary with verification statistics
         """
@@ -283,11 +283,11 @@ class FileScanner:
         clear_first: bool = True
     ) -> dict:
         """Rebuild entire cache from scratch.
-        
+
         Args:
             directories: List of (directory, storage_type) tuples to scan
             clear_first: Whether to clear cache before rebuilding
-            
+
         Returns:
             Dictionary with rebuild statistics
         """

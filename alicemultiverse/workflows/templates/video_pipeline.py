@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 
 class VideoProductionWorkflow(WorkflowTemplate):
     """Workflow for producing videos with synchronized audio.
-    
+
     This workflow:
     1. Generates a video using providers like Veo, Kling, or Runway
     2. Adds synchronized audio using mmaudio
     3. Optionally enhances the video quality
     4. Optionally adds captions or effects
-    
+
     Parameters:
         video_provider: Provider for video generation (default: veo)
         video_model: Model for video generation
@@ -212,7 +212,7 @@ class VideoProductionWorkflow(WorkflowTemplate):
 
 class QuickVideoWorkflow(VideoProductionWorkflow):
     """Quick video generation workflow for fast results.
-    
+
     Uses faster settings and skips enhancement.
     """
 
@@ -235,7 +235,7 @@ class QuickVideoWorkflow(VideoProductionWorkflow):
 
 class CinematicVideoWorkflow(VideoProductionWorkflow):
     """Cinematic video workflow for film-quality results.
-    
+
     Uses best settings and full enhancement pipeline.
     """
 

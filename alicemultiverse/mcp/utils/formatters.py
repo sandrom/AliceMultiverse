@@ -11,12 +11,12 @@ def format_file_list(
     include_stats: bool = False
 ) -> str:
     """Format a list of files for display.
-    
+
     Args:
         files: List of file paths
         base_path: Base path to make paths relative to
         include_stats: Whether to include file statistics
-        
+
     Returns:
         Formatted string
     """
@@ -51,10 +51,10 @@ def format_file_list(
 
 def format_asset_info(asset: dict[str, Any]) -> str:
     """Format asset information for display.
-    
+
     Args:
         asset: Asset dictionary
-        
+
     Returns:
         Formatted string
     """
@@ -108,11 +108,11 @@ def format_asset_info(asset: dict[str, Any]) -> str:
 
 def format_stats(stats: dict[str, Any], title: str | None = None) -> str:
     """Format statistics for display.
-    
+
     Args:
         stats: Statistics dictionary
         title: Optional title
-        
+
     Returns:
         Formatted string
     """
@@ -147,10 +147,10 @@ def format_stats(stats: dict[str, Any], title: str | None = None) -> str:
 
 def _format_size(size_bytes: int) -> str:
     """Format byte size as human-readable string.
-    
+
     Args:
         size_bytes: Size in bytes
-        
+
     Returns:
         Formatted size
     """
@@ -163,10 +163,10 @@ def _format_size(size_bytes: int) -> str:
 
 def _format_datetime(dt: str | datetime) -> str:
     """Format datetime for display.
-    
+
     Args:
         dt: Datetime object or ISO string
-        
+
     Returns:
         Formatted datetime
     """

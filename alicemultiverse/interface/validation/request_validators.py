@@ -33,13 +33,13 @@ from .constants import (
 
 def validate_search_request(request: SearchRequest) -> SearchRequest:
     """Validate search request parameters.
-    
+
     Args:
         request: Search request to validate
-        
+
     Returns:
         Validated search request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -131,13 +131,13 @@ def validate_search_request(request: SearchRequest) -> SearchRequest:
 
 def validate_organize_request(request: OrganizeRequest) -> OrganizeRequest:
     """Validate organize request parameters.
-    
+
     Args:
         request: Organize request to validate
-        
+
     Returns:
         Validated organize request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -173,13 +173,13 @@ def validate_organize_request(request: OrganizeRequest) -> OrganizeRequest:
 
 def validate_tag_update_request(request: TagUpdateRequest) -> TagUpdateRequest:
     """Validate tag update request parameters.
-    
+
     Args:
         request: Tag update request to validate
-        
+
     Returns:
         Validated tag update request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -210,13 +210,13 @@ def validate_tag_update_request(request: TagUpdateRequest) -> TagUpdateRequest:
 
 def validate_grouping_request(request: GroupingRequest) -> GroupingRequest:
     """Validate grouping request parameters.
-    
+
     Args:
         request: Grouping request to validate
-        
+
     Returns:
         Validated grouping request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -247,13 +247,13 @@ def validate_grouping_request(request: GroupingRequest) -> GroupingRequest:
 
 def validate_project_request(request: ProjectRequest) -> ProjectRequest:
     """Validate project request parameters.
-    
+
     Args:
         request: Project request to validate
-        
+
     Returns:
         Validated project request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -285,13 +285,13 @@ def validate_project_request(request: ProjectRequest) -> ProjectRequest:
 
 def validate_workflow_request(request: WorkflowRequest) -> WorkflowRequest:
     """Validate workflow request parameters.
-    
+
     Args:
         request: Workflow request to validate
-        
+
     Returns:
         Validated workflow request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -320,13 +320,13 @@ def validate_workflow_request(request: WorkflowRequest) -> WorkflowRequest:
 
 def validate_generation_request(request: GenerationRequest) -> GenerationRequest:
     """Validate generation request parameters.
-    
+
     Args:
         request: Generation request to validate
-        
+
     Returns:
         Validated generation request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """
@@ -380,13 +380,13 @@ def validate_generation_request(request: GenerationRequest) -> GenerationRequest
 
 def validate_soft_delete_request(request: SoftDeleteRequest) -> SoftDeleteRequest:
     """Validate soft delete request parameters.
-    
+
     Args:
         request: Soft delete request to validate
-        
+
     Returns:
         Validated soft delete request
-        
+
     Raises:
         ValidationError: If request contains invalid data
     """

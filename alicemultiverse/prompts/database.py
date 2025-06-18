@@ -45,8 +45,8 @@ class PromptDatabase:
                     keywords TEXT,  -- JSON array
                     -- Full-text search
                     search_text TEXT GENERATED ALWAYS AS (
-                        text || ' ' || 
-                        COALESCE(description, '') || ' ' || 
+                        text || ' ' ||
+                        COALESCE(description, '') || ' ' ||
                         COALESCE(notes, '') || ' ' ||
                         COALESCE(project, '') || ' ' ||
                         COALESCE(style, '') || ' ' ||
@@ -279,15 +279,15 @@ class PromptDatabase:
             # Update prompt stats
             if usage.success:
                 conn.execute("""
-                    UPDATE prompts 
-                    SET use_count = use_count + 1, 
+                    UPDATE prompts
+                    SET use_count = use_count + 1,
                         success_count = success_count + 1,
                         updated_at = ?
                     WHERE id = ?
                 """, [datetime.now(), usage.prompt_id])
             else:
                 conn.execute("""
-                    UPDATE prompts 
+                    UPDATE prompts
                     SET use_count = use_count + 1,
                         updated_at = ?
                     WHERE id = ?
@@ -297,9 +297,9 @@ class PromptDatabase:
         """Get usage history for a prompt."""
         with duckdb.connect(str(self.db_path)) as conn:
             results = conn.execute("""
-                SELECT * FROM prompt_usage 
-                WHERE prompt_id = ? 
-                ORDER BY timestamp DESC 
+                SELECT * FROM prompt_usage
+                WHERE prompt_id = ?
+                ORDER BY timestamp DESC
                 LIMIT ?
             """, [prompt_id, limit]).fetchall()
 

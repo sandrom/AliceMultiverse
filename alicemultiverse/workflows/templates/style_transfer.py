@@ -12,13 +12,13 @@ logger = logging.getLogger(__name__)
 
 class StyleTransferWorkflow(WorkflowTemplate):
     """Workflow for transferring artistic styles to images.
-    
+
     This workflow:
     1. Takes an input image (or generates one)
     2. Applies style transfer using various techniques
     3. Generates multiple style variations
     4. Optionally enhances the results
-    
+
     Parameters:
         input_image: Path to input image (optional, will generate if not provided)
         style_reference: Path or description of style reference
@@ -245,7 +245,7 @@ class StyleTransferWorkflow(WorkflowTemplate):
 
 class ArtisticStyleWorkflow(StyleTransferWorkflow):
     """Workflow optimized for artistic style transfer.
-    
+
     Focuses on painting and artistic styles.
     """
 
@@ -268,7 +268,7 @@ class ArtisticStyleWorkflow(StyleTransferWorkflow):
 
 class PhotoStyleWorkflow(StyleTransferWorkflow):
     """Workflow optimized for photographic style transfer.
-    
+
     Maintains photorealism while applying style.
     """
 

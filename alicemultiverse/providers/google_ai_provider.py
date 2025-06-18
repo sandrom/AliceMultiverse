@@ -72,7 +72,7 @@ class GoogleAIProvider(BaseProvider):
     def __init__(self, api_key: str = None, backend: GoogleAIBackend = GoogleAIBackend.GEMINI,
                  project_id: str = None, location: str = "us-central1", **kwargs):
         """Initialize Google AI provider.
-        
+
         Args:
             api_key: API key for Gemini or service account key for Vertex
             backend: Which backend to use (GEMINI or VERTEX)

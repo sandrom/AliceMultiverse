@@ -122,11 +122,11 @@ class MatchCutDetector:
     ) -> MatchCutAnalysis:
         """
         Analyze potential match cut between two images.
-        
+
         Args:
             image1_path: Path to first image
             image2_path: Path to second image
-            
+
         Returns:
             MatchCutAnalysis with detected matches
         """
@@ -448,11 +448,11 @@ def find_match_cuts(
 ) -> list[tuple[int, int, MatchCutAnalysis]]:
     """
     Find potential match cuts in a sequence of images.
-    
+
     Args:
         images: List of image paths
         threshold: Minimum confidence for match cut
-        
+
     Returns:
         List of (index1, index2, analysis) tuples
     """

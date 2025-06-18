@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class AssetDiscovery:
     """Handles finding and tracking assets regardless of location.
-    
+
     Note: This class requires PostgreSQL which has been removed.
     Most methods will return None or empty results.
     """

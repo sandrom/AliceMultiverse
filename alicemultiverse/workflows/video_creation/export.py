@@ -22,14 +22,14 @@ class ExportMixin:
         resolution: tuple[int, int] = (1920, 1080)
     ) -> Path:
         """Export storyboard and videos to DaVinci Resolve timeline format.
-        
+
         Args:
             storyboard: Video storyboard
             video_files: Dict mapping shot index to video file paths
             project_name: Optional project name (uses storyboard name if not provided)
             frame_rate: Timeline frame rate (default: 30 fps)
             resolution: Timeline resolution (default: 1920x1080)
-            
+
         Returns:
             Path to the exported .fcpxml file
         """
@@ -82,11 +82,11 @@ class ExportMixin:
         frames_per_shot: int = 2
     ) -> dict[str, list[dict]]:
         """Create Flux Kontext requests for keyframe preparation.
-        
+
         Args:
             storyboard: Video storyboard
             frames_per_shot: Number of keyframes per shot
-            
+
         Returns:
             Dictionary mapping shot indices to Flux requests
         """

@@ -203,12 +203,12 @@ def find_duplicate(source_path: Path, dest_dir: Path, file_handler: FileHandler)
 
 async def download_file(url: str, destination: Path, session: Optional['aiohttp.ClientSession'] = None) -> None:
     """Download a file from URL to destination.
-    
+
     Args:
         url: URL to download from
         destination: Path to save file
         session: Optional aiohttp session to reuse
-        
+
     Raises:
         FileOperationError: If download fails or aiohttp not available
     """
@@ -247,12 +247,12 @@ async def _download_with_session(url: str, destination: Path, session: 'aiohttp.
 
 async def save_text_file(path: Path, content: str, encoding: str = 'utf-8') -> None:
     """Save text content to a file.
-    
+
     Args:
         path: Path to save file
         content: Text content to save
         encoding: Text encoding (default: utf-8)
-        
+
     Raises:
         FileOperationError: If save fails
     """

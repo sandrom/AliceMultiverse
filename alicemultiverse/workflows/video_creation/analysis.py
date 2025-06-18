@@ -27,10 +27,10 @@ class AnalysisMixin:
 
     async def analyze_image_for_video(self, image_hash: str) -> dict[str, Any]:
         """Analyze image characteristics for video generation.
-        
+
         Args:
             image_hash: Content hash of the image
-            
+
         Returns:
             Analysis with suggested camera motion and prompt elements
         """

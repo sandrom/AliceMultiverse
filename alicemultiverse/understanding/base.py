@@ -85,7 +85,7 @@ class ImageAnalyzer(ABC):
 
     def __init__(self, api_key: str, model: str | None = None):
         """Initialize analyzer.
-        
+
         Args:
             api_key: API key for the service
             model: Specific model to use (provider-dependent)
@@ -103,14 +103,14 @@ class ImageAnalyzer(ABC):
         custom_instructions: str | None = None
     ) -> ImageAnalysisResult:
         """Analyze an image.
-        
+
         Args:
             image_path: Path to the image file
             generate_prompt: Whether to generate a prompt from the image
             extract_tags: Whether to extract semantic tags
             detailed: Whether to include detailed descriptions
             custom_instructions: Additional instructions for analysis
-            
+
         Returns:
             ImageAnalysisResult with extracted information
         """
@@ -118,10 +118,10 @@ class ImageAnalyzer(ABC):
     @abstractmethod
     def estimate_cost(self, detailed: bool = False) -> float:
         """Estimate cost per image analysis.
-        
+
         Args:
             detailed: Whether using detailed analysis
-            
+
         Returns:
             Estimated cost in USD
         """
@@ -138,7 +138,7 @@ class ImageAnalyzer(ABC):
 
     def _extract_tags_from_text(self, text: str) -> dict[str, list[str]]:
         """Extract tags from descriptive text.
-        
+
         This is a helper method that can be overridden by specific providers.
         """
         # Basic implementation - providers can override with better extraction

@@ -25,7 +25,7 @@ from ...interface.variation_mcp import (
 
 def register_media_tools(server) -> None:
     """Register media processing tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """

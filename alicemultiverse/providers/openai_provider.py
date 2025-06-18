@@ -75,7 +75,7 @@ class OpenAIProvider(BaseProvider):
 
     def __init__(self, api_key: str | None = None, **kwargs):
         """Initialize OpenAI provider.
-        
+
         Args:
             api_key: OpenAI API key (or from OPENAI_API_KEY env var)
             **kwargs: Additional arguments for BaseProvider
@@ -133,10 +133,10 @@ class OpenAIProvider(BaseProvider):
 
     async def _generate(self, request: GenerationRequest) -> GenerationResult:
         """Perform the actual generation using OpenAI.
-        
+
         Args:
             request: Generation request
-            
+
         Returns:
             Generation result
         """

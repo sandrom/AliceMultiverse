@@ -64,7 +64,7 @@ class AssetProcessorClient:
         self, file_path: Path, content_hash: str, provider: str | None = None
     ) -> dict[str, Any]:
         """Assess quality of a media file.
-        
+
         DEPRECATED: Quality assessment replaced with understanding system.
 
         Args:

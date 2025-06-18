@@ -37,13 +37,13 @@ def create_tool_response(
     message: str | None = None
 ) -> list[TextContent]:
     """Create a standardized tool response.
-    
+
     Args:
         success: Whether the operation succeeded
         data: Response data (for successful operations)
         error: Error message (for failed operations)
         message: Additional message
-        
+
     Returns:
         List containing single TextContent with response
     """
@@ -80,7 +80,7 @@ def create_tool_response(
 
 def handle_errors(func: ToolFunc) -> ToolFunc:
     """Decorator to handle errors in MCP tools.
-    
+
     Catches exceptions and returns standardized error responses.
     """
     @wraps(func)
@@ -114,14 +114,14 @@ def handle_errors(func: ToolFunc) -> ToolFunc:
 
 def validate_path(path: str, must_exist: bool = False) -> Path:
     """Validate and convert a path string.
-    
+
     Args:
         path: Path string to validate
         must_exist: Whether the path must exist
-        
+
     Returns:
         Path object
-        
+
     Raises:
         ValidationError: If path is invalid
     """
@@ -138,14 +138,14 @@ def validate_path(path: str, must_exist: bool = False) -> Path:
 
 def validate_positive_int(value: Any, name: str) -> int:
     """Validate a positive integer value.
-    
+
     Args:
         value: Value to validate
         name: Parameter name for error messages
-        
+
     Returns:
         Validated integer
-        
+
     Raises:
         ValidationError: If value is invalid
     """
@@ -160,15 +160,15 @@ def validate_positive_int(value: Any, name: str) -> int:
 
 def validate_enum(value: str, allowed: list[str], name: str) -> str:
     """Validate an enum-like string value.
-    
+
     Args:
         value: Value to validate
         allowed: List of allowed values
         name: Parameter name for error messages
-        
+
     Returns:
         Validated value
-        
+
     Raises:
         ValidationError: If value not in allowed list
     """
@@ -188,7 +188,7 @@ class LazyServiceLoader:
 
     def register(self, name: str, loader: Callable[[], Any]) -> None:
         """Register a service loader.
-        
+
         Args:
             name: Service name
             loader: Function that creates/returns the service
@@ -197,13 +197,13 @@ class LazyServiceLoader:
 
     def get(self, name: str) -> Any:
         """Get a service, loading it if necessary.
-        
+
         Args:
             name: Service name
-            
+
         Returns:
             Service instance
-            
+
         Raises:
             ServiceError: If service not registered or loading fails
         """
@@ -220,10 +220,10 @@ class LazyServiceLoader:
 
     def is_loaded(self, name: str) -> bool:
         """Check if a service is loaded.
-        
+
         Args:
             name: Service name
-            
+
         Returns:
             True if loaded
         """
@@ -240,12 +240,12 @@ def create_tool_definition(
     parameters: dict[str, Any]
 ) -> Tool:
     """Create a tool definition helper.
-    
+
     Args:
         name: Tool name
         description: Tool description
         parameters: Parameter schema
-        
+
     Returns:
         Tool definition
     """

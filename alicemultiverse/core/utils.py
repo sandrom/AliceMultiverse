@@ -21,15 +21,15 @@ def load_json(
     raise_on_error: bool = False
 ) -> Any:
     """Load JSON file with error handling.
-    
+
     Args:
         file_path: Path to JSON file
         default: Default value to return on error
         raise_on_error: Whether to raise exception on error
-        
+
     Returns:
         Loaded JSON data or default value
-        
+
     Raises:
         FileLoadError: If raise_on_error is True and loading fails
     """
@@ -65,14 +65,14 @@ def save_json(
     create_parents: bool = True
 ) -> bool:
     """Save data to JSON file with error handling.
-    
+
     Args:
         data: Data to save
         file_path: Path to save to
         indent: JSON indentation
         ensure_ascii: Whether to escape non-ASCII characters
         create_parents: Whether to create parent directories
-        
+
     Returns:
         True if successful, False otherwise
     """
@@ -98,15 +98,15 @@ def load_yaml(
     raise_on_error: bool = False
 ) -> Any:
     """Load YAML file with error handling.
-    
+
     Args:
         file_path: Path to YAML file
         default: Default value to return on error
         raise_on_error: Whether to raise exception on error
-        
+
     Returns:
         Loaded YAML data or default value
-        
+
     Raises:
         FileLoadError: If raise_on_error is True and loading fails
     """
@@ -141,13 +141,13 @@ def save_yaml(
     create_parents: bool = True
 ) -> bool:
     """Save data to YAML file with error handling.
-    
+
     Args:
         data: Data to save
         file_path: Path to save to
         default_flow_style: YAML flow style
         create_parents: Whether to create parent directories
-        
+
     Returns:
         True if successful, False otherwise
     """
@@ -173,12 +173,12 @@ def merge_dicts(
     deep: bool = True
 ) -> dict[str, Any]:
     """Merge two dictionaries.
-    
+
     Args:
         base: Base dictionary
         update: Dictionary to merge in
         deep: Whether to do deep merge
-        
+
     Returns:
         Merged dictionary (base is modified)
     """
@@ -197,10 +197,10 @@ def merge_dicts(
 
 def ensure_list(value: Any) -> list:
     """Ensure value is a list.
-    
+
     Args:
         value: Value to convert
-        
+
     Returns:
         Value as list
     """
@@ -220,13 +220,13 @@ def safe_get(
     separator: str = "."
 ) -> Any:
     """Safely get nested value from dictionary.
-    
+
     Args:
         data: Dictionary to get from
         path: Dot-separated path (e.g., "user.profile.name")
         default: Default value if not found
         separator: Path separator
-        
+
     Returns:
         Value at path or default
     """
@@ -254,14 +254,14 @@ def safe_set(
     create_missing: bool = True
 ) -> bool:
     """Safely set nested value in dictionary.
-    
+
     Args:
         data: Dictionary to set in
         path: Dot-separated path (e.g., "user.profile.name")
         value: Value to set
         separator: Path separator
         create_missing: Whether to create missing intermediate dicts
-        
+
     Returns:
         True if successful
     """
@@ -290,10 +290,10 @@ def safe_set(
 
 def format_size(size_bytes: int) -> str:
     """Format byte size as human-readable string.
-    
+
     Args:
         size_bytes: Size in bytes
-        
+
     Returns:
         Formatted size string
     """
@@ -310,12 +310,12 @@ def truncate_string(
     suffix: str = "..."
 ) -> str:
     """Truncate string to maximum length.
-    
+
     Args:
         text: Text to truncate
         max_length: Maximum length
         suffix: Suffix to add if truncated
-        
+
     Returns:
         Truncated string
     """

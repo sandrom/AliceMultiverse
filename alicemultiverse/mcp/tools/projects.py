@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 def register_project_tools(server: Server) -> None:
     """Register all project management tools with the MCP server.
-    
+
     Args:
         server: MCP server instance
     """
@@ -39,14 +39,14 @@ def register_project_tools(server: Server) -> None:
         metadata: dict[str, Any] | None = None
     ) -> Any:
         """Create a new project.
-        
+
         Args:
             name: Project name
             description: Project description
             path: Optional path to project directory
             tags: Optional project tags
             metadata: Optional additional metadata
-            
+
         Returns:
             Created project information
         """
@@ -95,11 +95,11 @@ def register_project_tools(server: Server) -> None:
         with_stats: bool = False
     ) -> Any:
         """List all projects.
-        
+
         Args:
             active_only: Only show active projects
             with_stats: Include project statistics
-            
+
         Returns:
             List of projects
         """
@@ -151,11 +151,11 @@ def register_project_tools(server: Server) -> None:
         project_name: str | None = None
     ) -> Any:
         """Get context for a specific project.
-        
+
         Args:
             project_id: Project ID
             project_name: Project name (alternative to ID)
-            
+
         Returns:
             Project context including assets and metadata
         """
@@ -222,13 +222,13 @@ def register_project_tools(server: Server) -> None:
         merge: bool = True
     ) -> Any:
         """Update project context.
-        
+
         Args:
             project_id: Project ID
             context_key: Context key to update
             context_value: New context value
             merge: Whether to merge with existing value (for dicts/lists)
-            
+
         Returns:
             Updated context
         """

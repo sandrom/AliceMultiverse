@@ -6,7 +6,7 @@ from ...prompts.mcp_tools import PromptMCPTools
 
 def register_prompt_tools(server) -> None:
     """Register prompt management tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """

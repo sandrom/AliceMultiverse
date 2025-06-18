@@ -7,7 +7,7 @@
 
 def register_workflow_tools(server) -> None:
     """Register workflow tools with MCP server.
-    
+
     Args:
         server: MCP server instance
     """

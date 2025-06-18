@@ -22,14 +22,14 @@ class UnifiedDuckDBStorage(
     DuckDBMaintenance
 ):
     """Unified DuckDB storage combining all functionality.
-    
+
     This class inherits from all the modular components to provide
     the complete unified interface while keeping the code organized.
     """
 
     def __init__(self, db_path: Path | None = None, read_only: bool = False):
         """Initialize unified DuckDB storage.
-        
+
         Args:
             db_path: Path to DuckDB database file. If None, uses in-memory database.
             read_only: Open database in read-only mode (better for concurrent reads)
@@ -44,7 +44,7 @@ class UnifiedDuckDBStorage(
 
 class DuckDBSearchCache(UnifiedDuckDBStorage):
     """Backward compatibility class for DuckDBSearchCache.
-    
+
     This is now just an alias for UnifiedDuckDBStorage.
     """
 
@@ -55,13 +55,13 @@ class DuckDBSearchCache(UnifiedDuckDBStorage):
 
 class DuckDBSearch(UnifiedDuckDBStorage):
     """Backward compatibility class for standalone DuckDBSearch.
-    
+
     This is now just an alias for UnifiedDuckDBStorage.
     """
 
     def index_asset(self, metadata: dict[str, Any]) -> None:
         """Index an asset (backward compatibility method).
-        
+
         Args:
             metadata: Asset metadata including content_hash and file_path
         """

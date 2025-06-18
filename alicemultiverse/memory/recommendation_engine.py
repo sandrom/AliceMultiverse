@@ -62,7 +62,7 @@ class StyleRecommendationEngine:
         learning_engine: StyleLearningEngine | None = None
     ):
         """Initialize recommendation engine.
-        
+
         Args:
             style_memory: StyleMemory instance
             learning_engine: Optional learning engine
@@ -82,12 +82,12 @@ class StyleRecommendationEngine:
         limit: int = 5
     ) -> list[StyleRecommendation]:
         """Get personalized style recommendations.
-        
+
         Args:
             context: Current context
             recommendation_types: Types to include
             limit: Maximum recommendations
-            
+
         Returns:
             List of recommendations
         """
@@ -123,11 +123,11 @@ class StyleRecommendationEngine:
         project: str | None = None
     ) -> list[RecommendationSet]:
         """Get themed recommendation sets.
-        
+
         Args:
             theme: Optional theme filter
             project: Optional project context
-            
+
         Returns:
             List of recommendation sets
         """
@@ -153,10 +153,10 @@ class StyleRecommendationEngine:
         current_state: dict[str, Any]
     ) -> dict[str, Any]:
         """Suggest next best action based on current state.
-        
+
         Args:
             current_state: Current workflow state
-            
+
         Returns:
             Action recommendation
         """
@@ -223,7 +223,7 @@ class StyleRecommendationEngine:
         notes: str | None = None
     ):
         """Track feedback on recommendations.
-        
+
         Args:
             recommendation_id: Recommendation that was shown
             accepted: Whether user accepted it

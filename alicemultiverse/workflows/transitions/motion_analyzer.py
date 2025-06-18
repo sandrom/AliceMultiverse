@@ -23,10 +23,10 @@ class MotionAnalyzer:
     def analyze_image(self, image_path: str | Path) -> dict[str, any]:
         """
         Comprehensive analysis of an image for transition planning.
-        
+
         Args:
             image_path: Path to the image file
-            
+
         Returns:
             Dictionary containing motion, composition, and color analysis
         """

@@ -19,22 +19,22 @@ class AliceStructuredInterface(
     WorkflowOperationsMixin
 ):
     """Structured interface for AI assistants to interact with AliceMultiverse.
-    
+
     This interface accepts ONLY structured queries - no natural language processing.
     All NLP should happen at the AI assistant layer before calling these methods.
-    
+
     The interface is composed of several operation mixins:
     - AssetOperationsMixin: search_assets, get_asset_by_id, set_asset_role, soft_delete_assets
     - OrganizationOperationsMixin: organize_media, update_tags, group_assets
     - ProjectOperationsMixin: manage_project
-    - SelectionOperationsMixin: create_selection, update_selection, search_selections, 
+    - SelectionOperationsMixin: create_selection, update_selection, search_selections,
                                 export_selection, get_selection, find_similar_to_selection
     - WorkflowOperationsMixin: execute_workflow, generate_content
     """
 
     def __init__(self, config_path: Path | None = None):
         """Initialize Alice structured interface.
-        
+
         Args:
             config_path: Optional path to configuration file
         """

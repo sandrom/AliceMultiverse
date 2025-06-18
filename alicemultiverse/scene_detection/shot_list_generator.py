@@ -67,7 +67,7 @@ class ShotListGenerator:
     ):
         """
         Initialize shot list generator.
-        
+
         Args:
             style: Visual style (cinematic, documentary, commercial, etc.)
             shot_duration_range: Min/max shot duration in seconds
@@ -87,12 +87,12 @@ class ShotListGenerator:
     ) -> ShotList:
         """
         Generate a complete shot list from detected scenes.
-        
+
         Args:
             scenes: List of detected scenes
             project_name: Name of the project
             target_duration: Target total duration (uses scene duration if None)
-            
+
         Returns:
             Complete shot list
         """
@@ -335,7 +335,7 @@ class ShotListGenerator:
     ):
         """
         Export shot list to file.
-        
+
         Args:
             shot_list: Shot list to export
             output_path: Output file path

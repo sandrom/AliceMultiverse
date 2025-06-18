@@ -162,7 +162,7 @@ class BatchAnalyzer:
 
     def __init__(self, analyzer: ImageAnalyzer):
         """Initialize batch analyzer.
-        
+
         Args:
             analyzer: Image analyzer instance
         """
@@ -171,10 +171,10 @@ class BatchAnalyzer:
 
     async def estimate_cost(self, request: BatchAnalysisRequest) -> Tuple[float, Dict[str, Any]]:
         """Estimate the cost of batch analysis.
-        
+
         Args:
             request: Batch analysis request
-            
+
         Returns:
             Tuple of (total_cost, details_dict)
         """
@@ -219,10 +219,10 @@ class BatchAnalyzer:
 
     async def analyze_batch(self, request: BatchAnalysisRequest) -> List[Tuple[Path, Optional[ImageAnalysisResult]]]:
         """Analyze a batch of images.
-        
+
         Args:
             request: Batch analysis request
-            
+
         Returns:
             List of (image_path, result) tuples
         """

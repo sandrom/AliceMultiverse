@@ -21,7 +21,7 @@ class DuckDBSimilarity(DuckDBBase):
         colorhash: str | None = None,
     ) -> None:
         """Index perceptual hashes for an asset.
-        
+
         Args:
             content_hash: Content hash of the asset
             phash: Perceptual hash
@@ -31,7 +31,7 @@ class DuckDBSimilarity(DuckDBBase):
             colorhash: Color hash
         """
         self.conn.execute("""
-            INSERT OR REPLACE INTO perceptual_hashes 
+            INSERT OR REPLACE INTO perceptual_hashes
             (content_hash, phash, dhash, ahash, whash, colorhash)
             VALUES (?, ?, ?, ?, ?, ?)
         """, [content_hash, phash, dhash, ahash, whash, colorhash])
@@ -46,13 +46,13 @@ class DuckDBSimilarity(DuckDBBase):
         hash_type: str = "phash"
     ) -> list[dict[str, Any]]:
         """Find similar images using perceptual hashes.
-        
+
         Args:
             content_hash: Reference image hash
             threshold: Similarity threshold (0-1)
             limit: Maximum results
             hash_type: Type of hash to use (phash, dhash, ahash, whash)
-            
+
         Returns:
             List of similar assets with similarity scores
         """
@@ -72,7 +72,7 @@ class DuckDBSimilarity(DuckDBBase):
         # DuckDB doesn't have built-in hamming distance, so we use a workaround
         # This gets all hashes and we'll calculate similarity in Python
         query = f"""
-            SELECT 
+            SELECT
                 p.content_hash,
                 p.{hash_type} as hash_value,
                 a.media_type,
@@ -120,11 +120,11 @@ class DuckDBSimilarity(DuckDBBase):
         exact_only: bool = False
     ) -> list[list[str]]:
         """Find duplicate images.
-        
+
         Args:
             hash_types: Hash types to check (default: all)
             exact_only: Only find exact matches
-            
+
         Returns:
             List of duplicate groups (list of content hashes)
         """
@@ -164,11 +164,11 @@ class DuckDBSimilarity(DuckDBBase):
         hash_type: str = "phash"
     ) -> dict[str, dict[str, float]]:
         """Calculate similarity matrix for a set of images.
-        
+
         Args:
             content_hashes: List of content hashes to compare
             hash_type: Type of hash to use
-            
+
         Returns:
             Dictionary mapping pairs of hashes to similarity scores
         """
@@ -212,11 +212,11 @@ class DuckDBSimilarity(DuckDBBase):
 
     def _calculate_hash_similarity(self, hash1: str, hash2: str) -> float:
         """Calculate similarity between two perceptual hashes.
-        
+
         Args:
             hash1: First hash
             hash2: Second hash
-            
+
         Returns:
             Similarity score (0-1)
         """

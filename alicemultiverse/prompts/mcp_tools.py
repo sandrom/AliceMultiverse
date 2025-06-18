@@ -27,12 +27,12 @@ class PromptMCPTools:
                                    style: str | None = None,
                                    min_success_rate: float = 0.7) -> dict[str, Any]:
         """Find effective prompts for a given use case.
-        
+
         Args:
             category: Type of generation (image_generation, video_generation, etc.)
             style: Visual style (cyberpunk, photorealistic, etc.)
             min_success_rate: Minimum success rate threshold
-            
+
         Returns:
             Dictionary with found prompts and recommendations
         """
@@ -89,12 +89,12 @@ class PromptMCPTools:
                            project: str | None = None,
                            limit: int = 20) -> dict[str, Any]:
         """Search for prompts containing specific terms or concepts.
-        
+
         Args:
             query: Search query
             project: Filter by project name
             limit: Maximum results
-            
+
         Returns:
             Search results with prompts
         """
@@ -136,7 +136,7 @@ class PromptMCPTools:
                           style: str | None = None,
                           description: str | None = None) -> dict[str, Any]:
         """Create a new prompt with metadata.
-        
+
         Args:
             text: The prompt text
             category: Category (image_generation, etc.)
@@ -145,7 +145,7 @@ class PromptMCPTools:
             tags: List of tags
             style: Visual style
             description: What this prompt is good for
-            
+
         Returns:
             Created prompt information
         """
@@ -198,10 +198,10 @@ class PromptMCPTools:
 
     async def get_project_prompts(self, project_name: str) -> dict[str, Any]:
         """Get all prompts for a specific project with insights.
-        
+
         Args:
             project_name: Name of the project
-            
+
         Returns:
             Project prompts and statistics
         """
@@ -237,13 +237,13 @@ class PromptMCPTools:
                             save_as_prompt: bool = False,
                             project: str | None = None) -> dict[str, Any]:
         """Render a prompt template with variables.
-        
+
         Args:
             template_name: Name of the template
             variables: Variable values
             save_as_prompt: Whether to save the result
             project: Project to save to
-            
+
         Returns:
             Rendered prompt
         """
@@ -296,14 +296,14 @@ class PromptMCPTools:
                                 cost: float | None = None,
                                 notes: str | None = None) -> dict[str, Any]:
         """Track usage of a prompt.
-        
+
         Args:
             prompt_id: Prompt ID or partial ID
             provider: Provider used
             success: Whether generation was successful
             cost: Cost of generation
             notes: Additional notes
-            
+
         Returns:
             Usage tracking result
         """
@@ -350,10 +350,10 @@ class PromptMCPTools:
 
     async def suggest_improvements(self, prompt_id: str) -> dict[str, Any]:
         """Suggest improvements for a prompt based on its performance.
-        
+
         Args:
             prompt_id: Prompt ID or partial ID
-            
+
         Returns:
             Improvement suggestions
         """

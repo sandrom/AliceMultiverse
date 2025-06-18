@@ -49,7 +49,7 @@ class BRollSuggestionEngine:
     ):
         """
         Initialize b-roll suggestion engine.
-        
+
         Args:
             db_path: Path to DuckDB database
             similarity_index: Pre-built similarity index
@@ -69,12 +69,12 @@ class BRollSuggestionEngine:
     ) -> dict[str, list[BRollSuggestion]]:
         """
         Suggest b-roll for an entire timeline.
-        
+
         Args:
             timeline: Timeline data with clips
             project_context: Project information (style, genre, etc.)
             max_suggestions_per_scene: Maximum suggestions per scene
-            
+
         Returns:
             Dictionary mapping clip indices to b-roll suggestions
         """
@@ -487,12 +487,12 @@ class BRollWorkflow:
     ) -> dict[str, Any]:
         """
         Enhance a timeline with b-roll suggestions.
-        
+
         Args:
             timeline: Original timeline
             auto_insert: Whether to automatically insert b-roll
             max_broll_percentage: Maximum percentage of timeline for b-roll
-            
+
         Returns:
             Enhanced timeline with b-roll
         """
