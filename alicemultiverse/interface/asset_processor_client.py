@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 class AssetProcessorClient:
     """Client for communicating with Asset Processor service."""
 
-    def __init__(self, base_url: str | None = None):
+    def __init__(self, base_url: str | None = None) -> None:
         """Initialize client.
 
         Args:

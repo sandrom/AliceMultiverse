@@ -68,7 +68,7 @@ async def update_dynamic_metrics():
 class MetricsServer:
     """Manages the Prometheus metrics server."""
 
-    def __init__(self, host: str = "0.0.0.0", port: int = 9090):
+    def __init__(self, host: str = "0.0.0.0", port: int = 9090) -> None:
         """Initialize metrics server.
 
         Args:
@@ -130,7 +130,7 @@ class MetricsServer:
 
 
 # CLI command to run metrics server
-def run_metrics_server(host: str = "0.0.0.0", port: int = 9090):
+def run_metrics_server(host: str = "0.0.0.0", port: int = 9090) -> None:
     """Run the metrics server standalone.
 
     Args:

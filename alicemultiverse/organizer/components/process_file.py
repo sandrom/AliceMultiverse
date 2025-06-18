@@ -1,17 +1,29 @@
 """Core file processing logic for media organizer."""
+from typing import TYPE_CHECKING
 
 import time
 from pathlib import Path
 
 from ...core.logging import get_logger
+from ...core.config import Config
 from ...core.types import OrganizeResult
 from ..organization_helpers import extract_project_folder
 
 logger = get_logger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasConfig, HasMetadataCache, HasStats
+
 class ProcessFileMixin:
     """Mixin for core file processing logic."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        metadata_cache: Any
+        config: Config
+        stats: Statistics
+
 
     def _process_file(self, media_path: Path) -> OrganizeResult:
         """Process a single media file."""

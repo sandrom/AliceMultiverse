@@ -69,6 +69,8 @@ Debug commands (use --debug flag):
     debug_subparsers.add_parser("storage", help="Multi-location storage management")
     debug_subparsers.add_parser("scenes", help="Scene detection and analysis")
     debug_subparsers.add_parser("transitions", help="Video transition analysis")
+    debug_subparsers.add_parser("performance", help="Performance monitoring and metrics")
+    debug_subparsers.add_parser("config", help="Configuration validation and management")
 
     return parser
 
@@ -123,7 +125,7 @@ def main(argv: list[str] | None = None) -> int:
                 return 0 if results else 1
 
             # Delegate to Click-based commands
-            elif args.debug_command in ["dedup", "prompts", "storage", "scenes", "transitions"]:
+            elif args.debug_command in ["dedup", "prompts", "storage", "scenes", "transitions", "performance", "config"]:
                 # Import the appropriate Click command group
                 click_args = sys.argv[sys.argv.index(args.debug_command) + 1:]
 
@@ -142,6 +144,12 @@ def main(argv: list[str] | None = None) -> int:
                 elif args.debug_command == "transitions":
                     from ..workflows.transitions.cli import transitions_cli
                     return transitions_cli(click_args, standalone_mode=False)
+                elif args.debug_command == "performance":
+                    from ..cli.performance_command import performance
+                    return performance(click_args, standalone_mode=False)
+                elif args.debug_command == "config":
+                    from ..cli.config_command import config
+                    return config(click_args, standalone_mode=False)
 
             else:
                 parser.print_help()

@@ -10,7 +10,7 @@ from .utils import load_yaml, safe_get
 class ConfigLoader:
     """Loads configuration with defaults and environment overrides."""
 
-    def __init__(self, defaults_path: Path | None = None):
+    def __init__(self, defaults_path: Path | None = None) -> None:
         """Initialize configuration loader.
 
         Args:

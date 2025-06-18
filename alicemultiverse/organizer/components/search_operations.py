@@ -1,4 +1,5 @@
 """Search and indexing operations for media organizer."""
+from typing import TYPE_CHECKING
 
 from datetime import datetime
 from pathlib import Path
@@ -9,8 +10,17 @@ from ...core.types import MediaType
 logger = get_logger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasOrganizer, HasSearchHandler
+
 class SearchOperationsMixin:
     """Mixin for search index and perceptual hashing operations."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        search_handler: Any
+        organizer: Any
+
 
     def _update_search_index(self, file_path: Path, analysis: dict) -> None:
         """Update search index with newly organized file.

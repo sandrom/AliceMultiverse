@@ -4,6 +4,7 @@ Data models for transition analysis.
 
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
 
 
 class TransitionType(str, Enum):
@@ -72,7 +73,7 @@ class TransitionSuggestion:
     transition_type: TransitionType
     duration: float  # seconds
     timing: str | None = None  # e.g., "on_beat", "between_beats"
-    effects: dict[str, any] | None = None  # Additional effect parameters
+    effects: dict[str, Any] | None = None  # Additional effect parameters
     compatibility: SceneCompatibility | None = None
     confidence: float = 0.0
 
@@ -81,7 +82,7 @@ class TransitionSuggestion:
 class TransitionRule:
     """Rule for automatic transition selection."""
     name: str
-    condition: dict[str, any]  # Conditions to match
+    condition: dict[str, Any]  # Conditions to match
     transition_type: TransitionType
     duration_multiplier: float = 1.0
     priority: int = 0  # Higher priority rules override lower ones

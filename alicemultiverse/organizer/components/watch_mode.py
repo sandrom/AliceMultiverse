@@ -1,4 +1,5 @@
 """Watch mode functionality for media organizer."""
+from typing import TYPE_CHECKING
 
 import signal
 import time
@@ -6,12 +7,22 @@ import time
 from tqdm import tqdm
 
 from ...core.logging import get_logger
+from ...core.config import Config
 
 logger = get_logger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasConfig, HasOrganizer
+
 class WatchModeMixin:
     """Mixin for continuous monitoring of new media files."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        config: Config
+        organizer: Any
+
 
     def _watch_and_organize(self) -> bool:
         """Watch for new files and organize them continuously."""

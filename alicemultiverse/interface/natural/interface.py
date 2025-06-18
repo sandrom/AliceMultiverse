@@ -33,7 +33,7 @@ class AliceInterface(
     - SimilarityOperationsMixin: (reserved for future similarity operations)
     """
 
-    def __init__(self, config_path: Path | None = None):
+    def __init__(self, config_path: Path | None = None) -> None:
         """Initialize Alice interface.
 
         Args:

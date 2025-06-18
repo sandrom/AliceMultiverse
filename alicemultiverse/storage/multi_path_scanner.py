@@ -15,6 +15,7 @@ from ..projects.service import ProjectService
 from .duckdb_cache import DuckDBSearchCache
 from .file_scanner import FileScanner
 from .location_registry import StorageLocation, StorageRegistry, StorageType
+from typing import Any
 
 logger = get_logger(__name__)
 
@@ -45,7 +46,7 @@ class MultiPathScanner:
         force_scan: bool = False,
         show_progress: bool = True,
         progress_callback: Callable[[str, int, int], None] | None = None
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Discover all assets across all registered storage locations.
 
         Args:
@@ -139,7 +140,7 @@ class MultiPathScanner:
         location: StorageLocation,
         force_scan: bool,
         show_progress: bool
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Scan a single storage location.
 
         Args:
@@ -188,7 +189,7 @@ class MultiPathScanner:
         self,
         location: StorageLocation,
         show_progress: bool
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Scan a local filesystem location.
 
         Args:
@@ -235,7 +236,7 @@ class MultiPathScanner:
             "projects": projects
         }
 
-    async def _scan_s3_location(self, location: StorageLocation) -> dict[str, any]:
+    async def _scan_s3_location(self, location: StorageLocation) -> dict[str, Any]:
         """Scan an S3 bucket location.
 
         Args:
@@ -299,7 +300,7 @@ class MultiPathScanner:
             "projects": projects
         }
 
-    async def _scan_gcs_location(self, location: StorageLocation) -> dict[str, any]:
+    async def _scan_gcs_location(self, location: StorageLocation) -> dict[str, Any]:
         """Scan a Google Cloud Storage location.
 
         Args:
@@ -363,7 +364,7 @@ class MultiPathScanner:
             "projects": projects
         }
 
-    async def _scan_network_location(self, location: StorageLocation) -> dict[str, any]:
+    async def _scan_network_location(self, location: StorageLocation) -> dict[str, Any]:
         """Scan a network drive location.
 
         Args:
@@ -418,7 +419,7 @@ class MultiPathScanner:
         self,
         project_name: str,
         asset_types: list[str] | None = None
-    ) -> list[dict[str, any]]:
+    ) -> list[dict[str, Any]]:
         """Find all assets belonging to a specific project.
 
         Args:
@@ -488,7 +489,7 @@ class MultiPathScanner:
         move_files: bool = False,
         show_progress: bool = True,
         progress_callback: Callable[[str, int, int], None] | None = None
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Consolidate all project assets to a single location.
 
         Args:
@@ -584,7 +585,7 @@ class MultiPathScanner:
 
         return stats
 
-    async def get_location_summary(self) -> list[dict[str, any]]:
+    async def get_location_summary(self) -> list[dict[str, Any]]:
         """Get summary of all storage locations with statistics.
 
         Returns:

@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 class SystemMonitor:
     """Monitor system health and performance."""
 
-    def __init__(self, log_interval: int = 60):
+    def __init__(self, log_interval: int = 60) -> None:
         """Initialize system monitor.
 
         Args:

@@ -124,6 +124,9 @@ alice --debug dedup ~/Pictures/AI
 - ✅ Content-based deduplication
 - ✅ Semantic search through tags
 - ✅ Watch mode for continuous organization
+- ✅ **NEW**: Parallel processing for large collections
+- ✅ **NEW**: Performance profiles (fast, memory_constrained, large_collection)
+- ✅ **NEW**: Batch database operations for 15x faster processing
 
 ### Understanding
 - ✅ Multi-provider image analysis (OpenAI, Claude, Google)
@@ -155,6 +158,23 @@ organization:
   watch_mode: true
   move_files: false
 ```
+
+## ⚡ Performance
+
+AliceMultiverse now handles large collections efficiently:
+
+```bash
+# Fast processing for powerful machines
+export ALICE_PERFORMANCE=fast
+
+# Memory-constrained mode for older systems  
+export ALICE_PERFORMANCE=memory_constrained
+
+# Optimized for thousands of files
+export ALICE_PERFORMANCE=large_collection
+```
+
+See the [Performance Guide](docs/PERFORMANCE_GUIDE.md) for detailed configuration.
 
 ## 💰 Cost Management
 

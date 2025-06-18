@@ -63,7 +63,7 @@ class TestMetadataCache:
     @pytest.fixture
     def cache(self, temp_dir):
         """Create a metadata cache instance."""
-        return MetadataCache(temp_dir)
+        return UnifiedCache(temp_dir)
 
     @pytest.fixture
     def sample_file(self, temp_dir):
@@ -87,7 +87,7 @@ class TestMetadataCache:
 
     def test_init(self, temp_dir):
         """Test cache initialization."""
-        cache = MetadataCache(temp_dir)
+        cache = UnifiedCache(temp_dir)
         assert cache.source_root == temp_dir
         assert cache.force_reindex is False
         assert cache.cache_hits == 0
@@ -100,7 +100,7 @@ class TestMetadataCache:
 
     def test_init_force_reindex(self, temp_dir):
         """Test cache initialization with force reindex."""
-        cache = MetadataCache(temp_dir, force_reindex=True)
+        cache = UnifiedCache(temp_dir, force_reindex=True)
         assert cache.force_reindex is True
 
         # Cache directory should not be created with force_reindex
@@ -170,12 +170,12 @@ class TestMetadataCache:
     def test_force_reindex(self, temp_dir, sample_file, sample_analysis):
         """Test force reindex bypasses cache."""
         # First save with normal cache
-        normal_cache = MetadataCache(temp_dir)
+        normal_cache = UnifiedCache(temp_dir)
         normal_cache.save(sample_file, sample_analysis, 1.0)
         assert normal_cache.load(sample_file) is not None
 
         # Create cache with force_reindex
-        force_cache = MetadataCache(temp_dir, force_reindex=True)
+        force_cache = UnifiedCache(temp_dir, force_reindex=True)
 
         # Load should return None due to force_reindex
         metadata = force_cache.load(sample_file)

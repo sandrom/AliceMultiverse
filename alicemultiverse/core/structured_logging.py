@@ -26,7 +26,7 @@ def get_correlation_id() -> str:
     return correlation_id
 
 
-def set_correlation_id(correlation_id: str):
+def set_correlation_id(correlation_id: str) -> None:
     """Set correlation ID for current context."""
     correlation_id_var.set(correlation_id)
 
@@ -36,7 +36,7 @@ def get_request_id() -> str | None:
     return request_id_var.get()
 
 
-def set_request_id(request_id: str):
+def set_request_id(request_id: str) -> None:
     """Set request ID for current context."""
     request_id_var.set(request_id)
 
@@ -44,7 +44,7 @@ def set_request_id(request_id: str):
 class StructuredLogger:
     """Structured logger with correlation ID support."""
 
-    def __init__(self, name: str):
+    def __init__(self, name: str) -> None:
         self.logger = structlog.get_logger(name)
         self.name = name
 
@@ -67,29 +67,29 @@ class StructuredLogger:
         self.logger = self.logger.bind(**kwargs)
         return self
 
-    def info(self, msg: str, **kwargs):
+    def info(self, msg: str, **kwargs) -> None:
         """Log info message."""
         event_dict = self._add_context(kwargs)
         self.logger.info(msg, **event_dict)
 
-    def warning(self, msg: str, **kwargs):
+    def warning(self, msg: str, **kwargs) -> None:
         """Log warning message."""
         event_dict = self._add_context(kwargs)
         self.logger.warning(msg, **event_dict)
 
-    def error(self, msg: str, exc_info: bool = False, **kwargs):
+    def error(self, msg: str, exc_info: bool = False, **kwargs) -> None:
         """Log error message."""
         event_dict = self._add_context(kwargs)
         if exc_info:
             event_dict['exc_info'] = True
         self.logger.error(msg, **event_dict)
 
-    def debug(self, msg: str, **kwargs):
+    def debug(self, msg: str, **kwargs) -> None:
         """Log debug message."""
         event_dict = self._add_context(kwargs)
         self.logger.debug(msg, **event_dict)
 
-    def critical(self, msg: str, **kwargs):
+    def critical(self, msg: str, **kwargs) -> None:
         """Log critical message."""
         event_dict = self._add_context(kwargs)
         self.logger.critical(msg, **event_dict)
@@ -208,7 +208,7 @@ def setup_structured_logging(
 
 
 # Decorators for tracing
-def trace_operation(operation_name: str):
+def trace_operation(operation_name: str) -> Any:
     """Decorator to trace function execution with timing."""
     def decorator(func):
         @wraps(func)
@@ -305,7 +305,7 @@ def trace_operation(operation_name: str):
     return decorator
 
 
-def log_api_call(provider: str, model: str, operation: str):
+def log_api_call(provider: str, model: str, operation: str) -> Any:
     """Log API call details."""
     def decorator(func):
         @wraps(func)
@@ -380,15 +380,15 @@ def log_api_call(provider: str, model: str, operation: str):
 class CorrelationContext:
     """Context manager for correlation ID."""
 
-    def __init__(self, correlation_id: str | None = None):
+    def __init__(self, correlation_id: str | None = None) -> None:
         self.correlation_id = correlation_id or f"{int(time.time() * 1000000)}"
         self.token = None
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         self.token = correlation_id_var.set(self.correlation_id)
         return self.correlation_id
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         if self.token:
             correlation_id_var.reset(self.token)
 
@@ -396,14 +396,14 @@ class CorrelationContext:
 class RequestContext:
     """Context manager for request ID."""
 
-    def __init__(self, request_id: str):
+    def __init__(self, request_id: str) -> None:
         self.request_id = request_id
         self.token = None
 
-    def __enter__(self):
+    def __enter__(self) -> Any:
         self.token = request_id_var.set(self.request_id)
         return self.request_id
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type, exc_val, exc_tb) -> None:
         if self.token:
             request_id_var.reset(self.token)

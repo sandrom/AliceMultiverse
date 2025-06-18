@@ -1,4 +1,5 @@
 """Search operations for natural language interface."""
+from typing import TYPE_CHECKING
 
 import logging
 
@@ -10,8 +11,17 @@ from .base import AliceResponse
 logger = logging.getLogger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasOrganizer, HasSearchHandler
+
 class SearchOperationsMixin:
     """Mixin for search-related operations."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        search_handler: Any
+        organizer: Any
+
 
     def search_assets(self, request: SearchRequest) -> AliceResponse:
         """Search for assets based on creative criteria.

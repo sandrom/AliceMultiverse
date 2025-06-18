@@ -1,17 +1,28 @@
 """Organization logic for media organizer."""
+from typing import TYPE_CHECKING
 
 import re
 from pathlib import Path
 
 from ...core.constants import SEQUENCE_FORMAT
+from ...core.config import Config
 from ...core.logging import get_logger
 from ..organization_helpers import get_quality_folder_name
 
 logger = get_logger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasConfig, HasStats
+
 class OrganizationLogicMixin:
     """Mixin for media organization logic."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        config: Config
+        stats: Statistics
+
 
     def _find_existing_organized_file(
         self, source_path: Path, date_taken: str, project_folder: str, source_type: str

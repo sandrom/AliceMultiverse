@@ -1,16 +1,27 @@
 """File operations for media organizer."""
+from typing import TYPE_CHECKING
 
 import hashlib
 from pathlib import Path
 
 from ...core.logging import get_logger
+from ...core.config import Config
 from ...core.types import MediaType
 
 logger = get_logger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasConfig, HasStats
+
 class FileOperationsMixin:
     """Mixin for file-related operations."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        config: Config
+        stats: Statistics
+
 
     def _find_media_files(self) -> list[Path]:
         """Find all media files in source directory."""

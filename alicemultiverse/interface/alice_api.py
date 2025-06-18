@@ -25,7 +25,7 @@ class AliceAPI:
         response = await alice.request("Remember what styles we've been using")
     """
 
-    def __init__(self, project_id: str | None = None):
+    def __init__(self, project_id: str | None = None) -> None:
         """Initialize Alice API.
 
         Args:
@@ -160,7 +160,7 @@ class AliceMCP:
     as tools to AI assistants like Claude.
     """
 
-    def __init__(self, project_id: str | None = None):
+    def __init__(self, project_id: str | None = None) -> None:
         self.api = AliceAPI(project_id)
 
     def search(self, query: str) -> dict[str, Any]:

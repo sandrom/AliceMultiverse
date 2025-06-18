@@ -192,11 +192,37 @@ class RouteHandlers:
         if format == "json":
             return self.server._timeline_to_dict(session.timeline)
         elif format == "edl":
-            # TODO: Implement EDL export
-            return {"format": "edl", "content": "EDL export not yet implemented"}
+            # Use the EDL exporter from video_export module
+            from ...workflows.video_export import TimelineExporter
+            
+            # Convert session timeline to export format
+            export_timeline = self._convert_to_export_timeline(session.timeline)
+            
+            # Export to temporary file
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.edl', delete=False) as tmp:
+                TimelineExporter.export_edl(export_timeline, Path(tmp.name))
+                tmp.flush()
+                with open(tmp.name, 'r') as f:
+                    content = f.read()
+                Path(tmp.name).unlink()  # Clean up
+            
+            return {"format": "edl", "content": content}
         elif format == "xml":
-            # TODO: Implement XML export
-            return {"format": "xml", "content": "XML export not yet implemented"}
+            # Use the XML exporter from video_export module  
+            from ...workflows.video_export import TimelineExporter
+            
+            # Convert session timeline to export format
+            export_timeline = self._convert_to_export_timeline(session.timeline)
+            
+            # Export to temporary file
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.xml', delete=False) as tmp:
+                TimelineExporter.export_davinci_xml(export_timeline, Path(tmp.name))
+                tmp.flush()
+                with open(tmp.name, 'r') as f:
+                    content = f.read()
+                Path(tmp.name).unlink()  # Clean up
+                
+            return {"format": "xml", "content": content}
         else:
             raise HTTPException(status_code=400, detail=f"Unknown format: {format}")
 
@@ -253,6 +279,47 @@ class RouteHandlers:
             logger.error(f"WebSocket error: {e}")
         finally:
             await websocket.close()
+
+    def _convert_to_export_timeline(self, session_timeline) -> 'Timeline':
+        """Convert session timeline to export format."""
+        from ...workflows.video_export import Timeline as ExportTimeline, TimelineClip as ExportClip
+        
+        # Create export timeline
+        export_timeline = ExportTimeline(
+            name=getattr(session_timeline, 'name', 'Untitled Timeline'),
+            duration=getattr(session_timeline, 'duration', 0),
+            fps=getattr(session_timeline, 'fps', 30.0)
+        )
+        
+        # Convert clips
+        if hasattr(session_timeline, 'clips'):
+            for clip in session_timeline.clips:
+                export_clip = ExportClip(
+                    asset_path=Path(clip.asset_path) if hasattr(clip, 'asset_path') else Path(clip.path),
+                    start_time=clip.start_time,
+                    duration=clip.duration,
+                    in_point=getattr(clip, 'in_point', 0.0),
+                    out_point=getattr(clip, 'out_point', None),
+                    transition_in=getattr(clip, 'transition_in', None),
+                    transition_in_duration=getattr(clip, 'transition_in_duration', 0.0),
+                    transition_out=getattr(clip, 'transition_out', None),
+                    transition_out_duration=getattr(clip, 'transition_out_duration', 0.0),
+                    effects=getattr(clip, 'effects', []),
+                    metadata=getattr(clip, 'metadata', {}),
+                    beat_aligned=getattr(clip, 'beat_aligned', False),
+                    sync_point=getattr(clip, 'sync_point', None)
+                )
+                export_timeline.add_clip(export_clip)
+        
+        # Convert markers
+        if hasattr(session_timeline, 'markers'):
+            export_timeline.markers = session_timeline.markers
+            
+        # Convert audio tracks
+        if hasattr(session_timeline, 'audio_tracks'):
+            export_timeline.audio_tracks = session_timeline.audio_tracks
+            
+        return export_timeline
 
     async def generate_preview(self, request: dict):
         """Generate a preview video file from timeline."""

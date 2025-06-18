@@ -1,4 +1,5 @@
 """Kling AI integration for video generation."""
+from typing import TYPE_CHECKING
 
 import logging
 from pathlib import Path
@@ -9,8 +10,16 @@ from .models import VideoStoryboard
 logger = logging.getLogger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasUnderstandingProvider
+
 class KlingIntegrationMixin:
     """Mixin for Kling AI integration."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        understanding_provider: Any
+
 
     def create_kling_requests(
         self,

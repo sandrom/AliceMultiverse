@@ -211,7 +211,7 @@ class Config:
     providers: ProvidersConfig = field(default_factory=ProvidersConfig)
     storage: StorageConfig = field(default_factory=StorageConfig)
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         """Post-initialization processing."""
         # Sync quality.enabled with processing.quality
         self.quality.enabled = self.processing.quality

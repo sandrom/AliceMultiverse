@@ -22,7 +22,7 @@ class TestMetadataCache:
     @pytest.fixture
     def cache(self, temp_dir):
         """Create a metadata cache instance."""
-        return MetadataCache(temp_dir)
+        return UnifiedCache(temp_dir)
 
     @pytest.fixture
     def sample_file(self, temp_dir):
@@ -85,7 +85,7 @@ class TestMetadataCache:
 
     def test_force_reindex(self, temp_dir, sample_file):
         """Test force reindex bypasses cache."""
-        cache = MetadataCache(temp_dir, force_reindex=True)
+        cache = UnifiedCache(temp_dir, force_reindex=True)
 
         analysis: AnalysisResult = {
             "source_type": "image",

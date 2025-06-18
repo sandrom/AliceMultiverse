@@ -615,23 +615,32 @@ class StorageRegistry:
             [datetime.now(), str(location_id)]
         )
 
-        # TODO: Implement actual scanning based on storage type
-        # This would involve:
-        # 1. Listing files in the location
-        # 2. Computing content hashes
-        # 3. Tracking discovered files
-        # 4. Identifying missing/deleted files
-
-        logger.info(f"Scanned location {location.name} (placeholder implementation)")
-
-        return {
+        # Implement scanning based on storage type
+        scan_result = {
             "location_id": str(location_id),
             "location_name": location.name,
             "scan_time": datetime.now().isoformat(),
-            "files_discovered": 0,  # Placeholder
-            "files_updated": 0,     # Placeholder
-            "files_removed": 0      # Placeholder
+            "files_discovered": 0,
+            "files_updated": 0,
+            "files_removed": 0
         }
+        
+        if location.type == StorageType.LOCAL:
+            # Scan local filesystem
+            scan_result = self._scan_local_location(location)
+        elif location.type == StorageType.S3:
+            # Scan S3 bucket
+            scan_result = self._scan_s3_location(location)
+        elif location.type == StorageType.GCS:
+            # Scan Google Cloud Storage
+            scan_result = self._scan_gcs_location(location)
+        else:
+            logger.warning(f"Unsupported storage type: {location.type}")
+            
+        logger.info(f"Scanned location {location.name}: {scan_result['files_discovered']} new, "
+                   f"{scan_result['files_updated']} updated, {scan_result['files_removed']} removed")
+
+        return scan_result
 
     def mark_file_for_sync(
         self,
@@ -790,3 +799,132 @@ class StorageRegistry:
 
         # Re-enable foreign key constraints
         self.conn.execute("SET foreign_keys=true")
+    
+    def add_file_to_location(self, content_hash: str, location_id: str, file_path: str, file_size: int) -> None:
+        """Add a new file to a location. Alias for track_file."""
+        self.track_file(content_hash, location_id, file_path, file_size)
+    
+    def update_file_in_location(self, content_hash: str, location_id: str, file_path: str, file_size: int) -> None:
+        """Update an existing file in a location."""
+        # First remove the old entry for this file path
+        self.conn.execute(
+            "DELETE FROM file_locations WHERE location_id = ? AND file_path = ?",
+            [str(location_id), file_path]
+        )
+        # Then add the new one
+        self.track_file(content_hash, location_id, file_path, file_size)
+    
+    def _scan_local_location(self, location: StorageLocation, full_scan: bool = False) -> dict[str, Any]:
+        """Scan a local filesystem location."""
+        from pathlib import Path
+        import hashlib
+        
+        path = Path(location.path)
+        if not path.exists():
+            logger.error(f"Location path does not exist: {location.path}")
+            return {
+                "location_id": str(location.location_id),
+                "location_name": location.name,
+                "scan_time": datetime.now().isoformat(),
+                "files_discovered": 0,
+                "files_updated": 0,
+                "files_removed": 0,
+                "error": "Path does not exist"
+            }
+        
+        files_discovered = 0
+        files_updated = 0
+        files_removed = 0
+        
+        # Get existing files in this location
+        existing_files = {}
+        for row in self.conn.execute(
+            "SELECT file_path, content_hash FROM file_locations WHERE location_id = ?",
+            [str(location.location_id)]
+        ).fetchall():
+            existing_files[row[0]] = row[1]
+        
+        # Scan for media files
+        media_extensions = {'.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.mp4', '.mov'}
+        scanned_paths = set()
+        
+        for file_path in path.rglob('*'):
+            if file_path.is_file() and file_path.suffix.lower() in media_extensions:
+                relative_path = str(file_path.relative_to(path))
+                scanned_paths.add(relative_path)
+                
+                # Compute content hash
+                try:
+                    with open(file_path, 'rb') as f:
+                        content_hash = hashlib.sha256(f.read()).hexdigest()
+                    
+                    if relative_path in existing_files:
+                        # Check if file changed
+                        if existing_files[relative_path] != content_hash:
+                            # Update file
+                            self.update_file_in_location(
+                                content_hash, 
+                                str(location.location_id),
+                                relative_path,
+                                file_path.stat().st_size
+                            )
+                            files_updated += 1
+                    else:
+                        # New file
+                        self.add_file_to_location(
+                            content_hash,
+                            str(location.location_id),
+                            relative_path,
+                            file_path.stat().st_size
+                        )
+                        files_discovered += 1
+                        
+                except Exception as e:
+                    logger.error(f"Error scanning file {file_path}: {e}")
+        
+        # Find removed files
+        for existing_path in existing_files:
+            if existing_path not in scanned_paths:
+                # Mark as removed
+                self.conn.execute(
+                    "UPDATE file_locations SET sync_status = 'missing' WHERE location_id = ? AND file_path = ?",
+                    [str(location.location_id), existing_path]
+                )
+                files_removed += 1
+        
+        return {
+            "location_id": str(location.location_id),
+            "location_name": location.name,
+            "scan_time": datetime.now().isoformat(),
+            "files_discovered": files_discovered,
+            "files_updated": files_updated,
+            "files_removed": files_removed
+        }
+    
+    def _scan_s3_location(self, location: StorageLocation, full_scan: bool = False) -> dict[str, Any]:
+        """Scan an S3 bucket location."""
+        # Placeholder for S3 scanning - would use boto3
+        logger.info(f"S3 scanning not yet implemented for {location.name}")
+        return {
+            "location_id": str(location.location_id),
+            "location_name": location.name,
+            "scan_time": datetime.now().isoformat(),
+            "files_discovered": 0,
+            "files_updated": 0,
+            "files_removed": 0,
+            "error": "S3 scanning not implemented"
+        }
+    
+    def _scan_gcs_location(self, location: StorageLocation, full_scan: bool = False) -> dict[str, Any]:
+        """Scan a Google Cloud Storage location."""
+        # Placeholder for GCS scanning - would use google-cloud-storage
+        logger.info(f"GCS scanning not yet implemented for {location.name}")
+        return {
+            "location_id": str(location.location_id),
+            "location_name": location.name,
+            "scan_time": datetime.now().isoformat(),
+            "files_discovered": 0,
+            "files_updated": 0,
+            "files_removed": 0,
+            "error": "GCS scanning not implemented"
+        }

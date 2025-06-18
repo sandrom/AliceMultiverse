@@ -209,8 +209,8 @@ async def suggest_timeline_edits(
             "clip_count": len(timeline.clips),
             "total_duration": timeline.duration,
             "average_clip_duration": average_clip_duration,
-            "has_transitions": any(c.transition_in or c.transition_out for c in timeline.clips),
-            "has_beat_markers": any(m.get("type") == "beat" for m in timeline.markers),
+            "has_transitions": Any(c.transition_in or c.transition_out for c in timeline.clips),
+            "has_beat_markers": Any(m.get("type") == "beat" for m in timeline.markers),
             "pace": "fast" if average_clip_duration < 2 else "medium" if average_clip_duration < 4 else "slow"
         }
 

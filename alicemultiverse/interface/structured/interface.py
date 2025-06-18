@@ -32,7 +32,7 @@ class AliceStructuredInterface(
     - WorkflowOperationsMixin: execute_workflow, generate_content
     """
 
-    def __init__(self, config_path: Path | None = None):
+    def __init__(self, config_path: Path | None = None) -> None:
         """Initialize Alice structured interface.
 
         Args:

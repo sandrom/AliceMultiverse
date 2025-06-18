@@ -28,7 +28,7 @@ def AliceResponse(success: bool, message: str, data: Any = None, error: str = No
 class NaturalInterfaceBase:
     """Base class with common functionality for natural language interface operations."""
 
-    def __init__(self, config_path: Path | None = None):
+    def __init__(self, config_path: Path | None = None) -> None:
         """Initialize natural language interface.
 
         Args:

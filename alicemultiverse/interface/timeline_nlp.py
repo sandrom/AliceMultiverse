@@ -37,7 +37,7 @@ class TimelineEdit:
     parameters: dict[str, Any] = None
     confidence: float = 0.0
 
-    def __post_init__(self):
+    def __post_init__(self) -> None:
         if self.parameters is None:
             self.parameters = {}
 
@@ -86,7 +86,7 @@ class TimelineNLPProcessor:
         "buildup": ["buildup", "build up", "build-up", "rise"],
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the NLP processor."""
         self.section_map = self._build_section_map()
 

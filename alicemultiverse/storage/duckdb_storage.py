@@ -7,11 +7,12 @@ from typing import Any
 
 from ..core.structured_logging import get_logger
 from .duckdb_base import DuckDBBase
+from .batch_operations import BatchOperationsMixin
 
 logger = get_logger(__name__)
 
 
-class DuckDBStorage(DuckDBBase):
+class DuckDBStorage(DuckDBBase, BatchOperationsMixin):
     """Storage operations for assets in DuckDB."""
 
     def upsert_asset(

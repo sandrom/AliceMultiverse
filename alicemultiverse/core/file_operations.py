@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 class FileHandler:
     """Handle file operations with proper error handling and logging."""
 
-    def __init__(self, dry_run: bool = False):
+    def __init__(self, dry_run: bool = False) -> None:
         """Initialize file handler.
 
         Args:

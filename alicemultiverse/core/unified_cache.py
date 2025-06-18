@@ -106,35 +106,43 @@ class UnifiedCache:
         # Check if file exists first
         if not media_path.exists():
             self.cache.cache_misses += 1
+            track_cache_access(False)
             return None
 
         # Try embedded metadata first (self-contained assets)
         if media_path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
             try:
-                embedded = self.embedder.extract_metadata(media_path)
+                with track_operation("cache.extract_embedded"):
+                    embedded = self.embedder.extract_metadata(media_path)
                 if embedded:
                     # Check various possible locations for our metadata
                     if "alice_metadata" in embedded:
                         logger.debug(f"Loaded alice_metadata from image: {media_path.name}")
+                        track_cache_access(True)
                         return embedded["alice_metadata"]
                     elif "metadata" in embedded:
                         logger.debug(f"Loaded metadata from image: {media_path.name}")
+                        track_cache_access(True)
                         return embedded["metadata"]
                     elif any(key.startswith("claude_") for key in embedded):
                         # This is the format the embedder extracts
                         logger.debug(f"Loaded embedded metadata from image: {media_path.name}")
+                        track_cache_access(True)
                         return embedded
             except Exception as e:
                 logger.debug(f"Could not extract embedded metadata: {e}")
 
         # Fall back to cache
-        result = self.cache.load(media_path)
+        with track_operation("cache.load_file"):
+            result = self.cache.load(media_path)
 
         # Track cache hit/miss
         if result is not None:
             self.cache.cache_hits += 1
+            track_cache_access(True)
         else:
             self.cache.cache_misses += 1
+            track_cache_access(False)
 
         return result
 
@@ -149,37 +157,38 @@ class UnifiedCache:
             analysis: Analysis results to cache
             analysis_time: Time taken for analysis
         """
-        # Run understanding if enabled and not already present
-        if self.enable_understanding and "understanding" not in analysis:
-            import asyncio
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
-            try:
-                understanding_result = loop.run_until_complete(
-                    self.analyze_with_understanding(media_path)
-                )
-                if understanding_result:
-                    analysis = self._merge_understanding_into_analysis(
-                        analysis, understanding_result
+        with track_operation("cache.save"):
+            # Run understanding if enabled and not already present
+            if self.enable_understanding and "understanding" not in analysis:
+                import asyncio
+                loop = asyncio.new_event_loop()
+                asyncio.set_event_loop(loop)
+                try:
+                    understanding_result = loop.run_until_complete(
+                        self.analyze_with_understanding(media_path)
                     )
-                    # Add cost to analysis time (as proxy for time spent)
-                    analysis_time += understanding_result.cost * 10  # Rough estimate: $0.01 = 0.1s
-            finally:
-                loop.close()
+                    if understanding_result:
+                        analysis = self._merge_understanding_into_analysis(
+                            analysis, understanding_result
+                        )
+                        # Add cost to analysis time (as proxy for time spent)
+                        analysis_time += understanding_result.cost * 10  # Rough estimate: $0.01 = 0.1s
+                finally:
+                    loop.close()
 
-        # First embed in image if supported (this modifies the file)
-        if media_path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
-            # The embedder expects the metadata directly, not wrapped
-            metadata_to_embed = dict(analysis)
-            metadata_to_embed["analysis_time"] = analysis_time
-            metadata_to_embed["cached_at"] = datetime.now().isoformat()
+            # First embed in image if supported (this modifies the file)
+            if media_path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
+                # The embedder expects the metadata directly, not wrapped
+                metadata_to_embed = dict(analysis)
+                metadata_to_embed["analysis_time"] = analysis_time
+                metadata_to_embed["cached_at"] = datetime.now().isoformat()
 
-            success = self.embedder.embed_metadata(media_path, metadata_to_embed)
-            if success:
-                logger.debug(f"Embedded metadata in image: {media_path.name}")
+                success = self.embedder.embed_metadata(media_path, metadata_to_embed)
+                if success:
+                    logger.debug(f"Embedded metadata in image: {media_path.name}")
 
-        # Save to cache AFTER embedding (so hash is correct)
-        self.cache.save(media_path, analysis, analysis_time)
+            # Save to cache AFTER embedding (so hash is correct)
+            self.cache.save(media_path, analysis, analysis_time)
 
     # ===== Enhanced Metadata Interface =====
 

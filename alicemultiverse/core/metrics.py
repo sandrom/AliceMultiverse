@@ -270,7 +270,7 @@ def track_db_metrics(query_type: str) -> Callable:
     return decorator
 
 
-def update_provider_health_metrics(provider_name: str, health_data: dict[str, Any]):
+def update_provider_health_metrics(provider_name: str, health_data: dict[str, Any]) -> None:
     """Update provider health metrics.
 
     Args:
@@ -297,7 +297,7 @@ def update_provider_health_metrics(provider_name: str, health_data: dict[str, An
     provider_error_rate.labels(provider=provider_name).set(error_rate)
 
 
-def update_db_pool_metrics(pool_stats: dict[str, Any]):
+def update_db_pool_metrics(pool_stats: dict[str, Any]) -> None:
     """Update database connection pool metrics.
 
     Args:
@@ -369,7 +369,7 @@ def track_asset_processing(
     return decorator
 
 
-def track_event_metrics(event_type: str):
+def track_event_metrics(event_type: str) -> None:
     """Track event system metrics.
 
     Args:
@@ -397,7 +397,7 @@ def get_metrics_content_type() -> str:
 
 
 # Create a metrics endpoint for FastAPI
-def create_metrics_endpoint():
+def create_metrics_endpoint() -> Any:
     """Create a FastAPI endpoint for Prometheus metrics."""
     from fastapi import Response
 

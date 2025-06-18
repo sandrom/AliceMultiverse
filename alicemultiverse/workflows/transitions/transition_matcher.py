@@ -6,6 +6,8 @@ import logging
 
 import numpy as np
 
+from typing import Any
+
 from .models import (
     MotionDirection,
     SceneCompatibility,
@@ -364,7 +366,7 @@ class TransitionMatcher:
         transition_type: TransitionType,
         source: dict,
         target: dict
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Generate effect parameters for the transition."""
         effects = {}
 

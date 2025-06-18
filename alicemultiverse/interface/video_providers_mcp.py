@@ -218,7 +218,7 @@ async def generate_video_veo3(
     return _not_implemented_response("veo3", "veo3-alpha", resolution=resolution, duration=duration)
 
 
-def register_video_providers_tools():
+def register_video_providers_tools() -> list[Any]:
     """Return all video provider tools for MCP registration."""
     return [
         generate_video_runway,

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 class OptimizedSearchHandler:
     """Handles search operations with database optimization."""
 
-    def __init__(self, db_path: str = None, config=None):
+    def __init__(self, db_path: str = None, config=None) -> None:
         """Initialize search handler.
 
         Args:

@@ -1,4 +1,5 @@
 """Selection operations for structured interface."""
+from typing import TYPE_CHECKING
 
 import logging
 
@@ -21,8 +22,17 @@ from ..validation import (
 logger = logging.getLogger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasProjectService, HasSelectionService
+
 class SelectionOperationsMixin:
     """Mixin for selection-related operations."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        selection_service: Any
+        project_service: Any
+
 
     def create_selection(self, request: SelectionCreateRequest, client_id: str = "default") -> AliceResponse:
         """Create a new selection for a project.

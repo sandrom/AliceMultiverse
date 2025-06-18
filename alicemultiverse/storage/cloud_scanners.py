@@ -9,6 +9,7 @@ from pathlib import Path
 
 from ..core.structured_logging import get_logger
 from .location_registry import StorageLocation, StorageType
+from typing import Any
 
 logger = get_logger(__name__)
 
@@ -60,7 +61,7 @@ class S3Scanner:
 
         return self._client
 
-    async def scan(self, show_progress: bool = True) -> dict[str, any]:
+    async def scan(self, show_progress: bool = True) -> dict[str, Any]:
         """Scan S3 bucket for media files.
 
         Args:
@@ -226,7 +227,7 @@ class GCSScanner:
 
         return self._client, self._bucket
 
-    async def scan(self, show_progress: bool = True) -> dict[str, any]:
+    async def scan(self, show_progress: bool = True) -> dict[str, Any]:
         """Scan GCS bucket for media files.
 
         Args:

@@ -9,6 +9,7 @@ import cv2
 import numpy as np
 
 from .models import CompositionAnalysis, MotionDirection, MotionVector
+from typing import Any
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,7 @@ class MotionAnalyzer:
         self.feature_detector = cv2.SIFT_create()
         self.edge_detector = cv2.Canny
 
-    def analyze_image(self, image_path: str | Path) -> dict[str, any]:
+    def analyze_image(self, image_path: str | Path) -> dict[str, Any]:
         """
         Comprehensive analysis of an image for transition planning.
 
@@ -148,7 +149,7 @@ class MotionAnalyzer:
             brightness_map=brightness_map
         )
 
-    def _analyze_colors(self, img: np.ndarray, hsv: np.ndarray) -> dict[str, any]:
+    def _analyze_colors(self, img: np.ndarray, hsv: np.ndarray) -> dict[str, Any]:
         """Analyze color properties of the image."""
         # Calculate color histogram
         cv2.calcHist([hsv], [0], None, [180], [0, 180])

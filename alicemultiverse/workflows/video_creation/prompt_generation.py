@@ -2,7 +2,7 @@
 
 import logging
 from datetime import datetime
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from .enums import CameraMotion, TransitionType
 from .models import ShotDescription, VideoStoryboard
@@ -10,8 +10,16 @@ from .models import ShotDescription, VideoStoryboard
 logger = logging.getLogger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasUnderstandingProvider
+
 class PromptGenerationMixin:
     """Mixin for video prompt generation."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        understanding_provider: Any
+
 
     # Style templates for different video types
     STYLE_TEMPLATES = {

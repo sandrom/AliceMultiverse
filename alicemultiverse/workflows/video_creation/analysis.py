@@ -1,15 +1,23 @@
 """Image analysis for video creation."""
 
 import logging
-from typing import Any
+from typing import Any, TYPE_CHECKING
 
 from .enums import CameraMotion
 
 logger = logging.getLogger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasSearchDB
+
 class AnalysisMixin:
     """Mixin for image analysis operations."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        search_db: Any
+
 
     # Motion indicators mapping
     MOTION_INDICATORS = {

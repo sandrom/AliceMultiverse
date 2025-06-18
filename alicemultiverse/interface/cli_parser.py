@@ -34,7 +34,7 @@ For normal usage, use Alice through an AI assistant instead.
     return parser
 
 
-def add_keys_subcommand(subparsers):
+def add_keys_subcommand(subparsers) -> None:
     """Add keys management subcommand."""
     keys_parser = subparsers.add_parser("keys", help="Manage API keys")
     keys_subparsers = keys_parser.add_subparsers(
@@ -78,7 +78,7 @@ def add_keys_subcommand(subparsers):
     keys_subparsers.add_parser("setup", help="Interactive setup wizard")
 
 
-def add_organization_args(parser):
+def add_organization_args(parser) -> None:
     """Add media organization arguments."""
     # Directory arguments
     parser.add_argument(
@@ -159,7 +159,7 @@ def add_organization_args(parser):
     )
 
 
-def add_understanding_args(parser):
+def add_understanding_args(parser) -> None:
     """Add understanding-related arguments."""
     parser.add_argument(
         "--openai-key", help="OpenAI API key (overrides config)", dest="openai_api_key"
@@ -185,7 +185,7 @@ def add_understanding_args(parser):
     )
 
 
-def add_output_args(parser):
+def add_output_args(parser) -> None:
     """Add output-related arguments."""
     # Output options
     parser.add_argument(
@@ -208,7 +208,7 @@ def add_output_args(parser):
     )
 
 
-def add_technical_args(parser):
+def add_technical_args(parser) -> None:
     """Add technical/system arguments."""
     # System checks
     parser.add_argument(
@@ -228,7 +228,7 @@ def add_technical_args(parser):
     parser.add_argument("--force-cli", action="store_true", help="Force CLI usage without deprecation warning")
 
 
-def add_setup_subcommand(subparsers):
+def add_setup_subcommand(subparsers) -> None:
     """Add setup subcommand."""
     setup_parser = subparsers.add_parser(
         "setup",
@@ -241,7 +241,7 @@ def add_setup_subcommand(subparsers):
     )
 
 
-def add_recreate_subcommand(subparsers):
+def add_recreate_subcommand(subparsers) -> None:
     """Add recreate subcommand."""
     recreate_parser = subparsers.add_parser("recreate", help="Recreate AI generations")
     recreate_subparsers = recreate_parser.add_subparsers(
@@ -265,7 +265,7 @@ def add_recreate_subcommand(subparsers):
     recreate_catalog.add_argument("-o", "--output", help="Output catalog file")
 
 
-def add_interface_subcommand(subparsers):
+def add_interface_subcommand(subparsers) -> None:
     """Add interface subcommand."""
     interface_parser = subparsers.add_parser(
         "interface",
@@ -279,7 +279,7 @@ def add_interface_subcommand(subparsers):
     )
 
 
-def add_mcp_subcommand(subparsers):
+def add_mcp_subcommand(subparsers) -> None:
     """Add MCP server subcommand."""
     mcp_parser = subparsers.add_parser("mcp-server", help="Start MCP server for AI integration")
     mcp_parser.add_argument("--transport", default="stdio", help="Transport method")
@@ -287,7 +287,7 @@ def add_mcp_subcommand(subparsers):
     mcp_parser.add_argument("--port", type=int, help="Port for network transport")
 
 
-def add_migrate_subcommand(subparsers):
+def add_migrate_subcommand(subparsers) -> None:
     """Add migration subcommand."""
     migrate_parser = subparsers.add_parser("migrate", help="Migration tools")
     migrate_subparsers = migrate_parser.add_subparsers(
@@ -301,7 +301,7 @@ def add_migrate_subcommand(subparsers):
     migrate_legacy.add_argument("-n", "--dry-run", action="store_true", help="Show what would be done")
 
 
-def add_monitor_subcommand(subparsers):
+def add_monitor_subcommand(subparsers) -> None:
     """Add monitor subcommand."""
     monitor_parser = subparsers.add_parser("monitor", help="Monitor AliceMultiverse operations")
     monitor_subparsers = monitor_parser.add_subparsers(
@@ -319,7 +319,7 @@ def add_monitor_subcommand(subparsers):
     monitor_metrics.add_argument("--interval", type=int, help="Update interval in seconds")
 
 
-def add_storage_subcommand(subparsers):
+def add_storage_subcommand(subparsers) -> None:
     """Add storage subcommand."""
     storage_parser = subparsers.add_parser("storage", help="Storage operations")
     storage_subparsers = storage_parser.add_subparsers(
@@ -336,7 +336,7 @@ def add_storage_subcommand(subparsers):
     storage_index.add_argument("action", choices=["rebuild", "update", "optimize"])
 
 
-def add_scenes_subcommand(subparsers):
+def add_scenes_subcommand(subparsers) -> None:
     """Add scenes subcommand."""
     scenes_parser = subparsers.add_parser("scenes", help="Scene detection and analysis")
     scenes_subparsers = scenes_parser.add_subparsers(
@@ -362,7 +362,7 @@ def add_scenes_subcommand(subparsers):
     scenes_extract.add_argument("--scenes-file", help="Use existing scenes JSON")
 
 
-def add_dedup_subcommand(subparsers):
+def add_dedup_subcommand(subparsers) -> None:
     """Add deduplication subcommand."""
     dedup_parser = subparsers.add_parser("dedup", help="Advanced deduplication with perceptual hashing")
     dedup_subparsers = dedup_parser.add_subparsers(
@@ -380,7 +380,7 @@ def add_dedup_subcommand(subparsers):
     dedup_remove.add_argument("-s", "--strategy", choices=["safe", "aggressive"], default="safe")
 
 
-def add_prompts_subcommand(subparsers):
+def add_prompts_subcommand(subparsers) -> None:
     """Add prompts management subcommand."""
     prompts_parser = subparsers.add_parser("prompts", help="Manage AI prompts and their effectiveness")
     prompts_subparsers = prompts_parser.add_subparsers(
@@ -397,7 +397,7 @@ def add_prompts_subcommand(subparsers):
     prompts_search.add_argument("-q", "--query", help="Search query")
 
 
-def add_index_subcommand(subparsers):
+def add_index_subcommand(subparsers) -> None:
     """Add index subcommand."""
     index_parser = subparsers.add_parser("index", help="Manage search index")
     index_subparsers = index_parser.add_subparsers(
@@ -426,7 +426,7 @@ def add_index_subcommand(subparsers):
     index_subparsers.add_parser("stats", help="Show index statistics")
 
 
-def add_comparison_subcommand(subparsers):
+def add_comparison_subcommand(subparsers) -> None:
     """Add comparison subcommand."""
     comparison_parser = subparsers.add_parser("comparison", help="Model comparison system")
     comparison_subparsers = comparison_parser.add_subparsers(
@@ -462,7 +462,7 @@ def add_comparison_subcommand(subparsers):
     comparison_subparsers.add_parser("reset", help="Reset all comparison data")
 
 
-def add_transitions_subcommand(subparsers):
+def add_transitions_subcommand(subparsers) -> None:
     """Add transitions subcommand."""
     transitions_parser = subparsers.add_parser("transitions", help="Analyze scene transitions")
     transitions_subparsers = transitions_parser.add_subparsers(

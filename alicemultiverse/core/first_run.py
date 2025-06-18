@@ -54,7 +54,7 @@ class FirstRunWizard:
         }
     }
 
-    def __init__(self):
+    def __init__(self) -> None:
         """Initialize the wizard."""
         self.key_manager = APIKeyManager()
         self.config_path = Path("settings.yaml")
@@ -577,7 +577,7 @@ def check_first_run() -> bool:
     return True
 
 
-def run_setup_command():
+def run_setup_command() -> Any:
     """Run the setup wizard (can be called explicitly via CLI)."""
     wizard = FirstRunWizard()
     success = wizard.run()

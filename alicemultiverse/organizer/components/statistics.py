@@ -1,15 +1,23 @@
 """Statistics tracking for media organizer."""
 
 from collections import defaultdict
+from typing import TYPE_CHECKING
 
 from ...core.logging import get_logger
 from ...core.types import MediaType, OrganizeResult, Statistics
+
+if TYPE_CHECKING:
+    from ...core.protocols import HasStats
 
 logger = get_logger(__name__)
 
 
 class StatisticsMixin:
     """Mixin for statistics tracking and reporting."""
+    
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        stats: Statistics
 
     def _init_statistics(self) -> Statistics:
         """Initialize statistics tracking.

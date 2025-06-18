@@ -14,6 +14,7 @@ from ..core.structured_logging import get_logger
 from .duckdb_cache import DuckDBSearchCache
 from .location_registry import StorageLocation, StorageRegistry
 from .multi_path_scanner import MultiPathScanner
+from typing import Any
 
 logger = get_logger(__name__)
 
@@ -146,7 +147,7 @@ class AutoMigrationService:
         move_files: bool = False,
         show_progress: bool = True,
         max_concurrent: int = 5
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Execute the migration plan.
 
         Args:
@@ -261,7 +262,7 @@ class AutoMigrationService:
         dry_run: bool = False,
         move_files: bool = False,
         show_progress: bool = True
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Run complete auto-migration process.
 
         Args:

@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 class StructuredInterfaceBase:
     """Base class with common functionality for structured interface operations."""
 
-    def __init__(self, config_path: Path | None = None):
+    def __init__(self, config_path: Path | None = None) -> None:
         """Initialize base structured interface.
 
         Args:

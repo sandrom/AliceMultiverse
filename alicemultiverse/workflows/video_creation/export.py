@@ -1,4 +1,5 @@
 """Export functionality for video creation workflow."""
+from typing import TYPE_CHECKING
 
 import logging
 from pathlib import Path
@@ -10,8 +11,16 @@ from .models import VideoStoryboard
 logger = logging.getLogger(__name__)
 
 
+if TYPE_CHECKING:
+    from ...core.protocols import HasSearchDB
+
 class ExportMixin:
     """Mixin for exporting video projects."""
+
+    if TYPE_CHECKING:
+        # Type hints for mypy
+        search_db: Any
+
 
     def export_to_davinci_resolve(
         self,

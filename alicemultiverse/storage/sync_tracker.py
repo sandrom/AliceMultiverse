@@ -10,6 +10,7 @@ from enum import Enum
 
 from ..core.structured_logging import get_logger
 from .location_registry import StorageRegistry
+from typing import Any
 
 logger = get_logger(__name__)
 
@@ -48,7 +49,7 @@ class SyncTracker:
     async def check_sync_status(
         self,
         content_hash: str
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Check synchronization status for a file.
 
         Args:
@@ -97,7 +98,7 @@ class SyncTracker:
     async def detect_conflicts(
         self,
         show_progress: bool = True
-    ) -> list[dict[str, any]]:
+    ) -> list[dict[str, Any]]:
         """Detect all files with sync conflicts.
 
         Args:
@@ -145,7 +146,7 @@ class SyncTracker:
         self,
         content_hash: str,
         strategy: ConflictResolution = ConflictResolution.NEWEST_WINS
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Resolve a sync conflict using the specified strategy.
 
         Args:
@@ -229,7 +230,7 @@ class SyncTracker:
         source_location_id: str,
         target_location_id: str,
         scanner = None  # MultiPathScanner instance
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Sync a file from source to target location.
 
         Args:
@@ -302,7 +303,7 @@ class SyncTracker:
             'marked_for_sync': True
         }
 
-    def get_sync_queue(self) -> list[dict[str, any]]:
+    def get_sync_queue(self) -> list[dict[str, Any]]:
         """Get all pending sync operations.
 
         Returns:
@@ -315,7 +316,7 @@ class SyncTracker:
         scanner = None,
         max_concurrent: int = 5,
         show_progress: bool = True
-    ) -> dict[str, any]:
+    ) -> dict[str, Any]:
         """Process all pending sync operations.
 
         Args:
@@ -455,7 +456,7 @@ class VersionTracker:
     def get_version_history(
         self,
         content_hash: str
-    ) -> list[dict[str, any]]:
+    ) -> list[dict[str, Any]]:
         """Get version history for a file.
 
         Args:
