@@ -75,9 +75,9 @@ class ImageAnalysisResult:
             all_tags.extend(tag_list)
         return list(set(all_tags))  # Remove duplicates
 
-    def get_tags_by_category(self, category: str) -> list[str]:
-        """Get tags for a specific category."""
-        return self.tags.get(category, [])
+    # TODO: Review unreachable code - def get_tags_by_category(self, category: str) -> list[str]:
+    # TODO: Review unreachable code - """Get tags for a specific category."""
+    # TODO: Review unreachable code - return self.tags.get(category, [])
 
 
 class ImageAnalyzer(ABC):

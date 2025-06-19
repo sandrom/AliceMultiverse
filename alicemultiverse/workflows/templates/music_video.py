@@ -141,400 +141,400 @@ class MusicVideoTemplate(WorkflowTemplate):
 
         return steps
 
-    def execute_operation(self, step: WorkflowStep, context: WorkflowContext) -> dict[str, Any]:
-        """Execute a specific operation in the workflow."""
-        operation = step.operation
-        params = step.parameters
+    # TODO: Review unreachable code - def execute_operation(self, step: WorkflowStep, context: WorkflowContext) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Execute a specific operation in the workflow."""
+    # TODO: Review unreachable code - operation = step.operation
+    # TODO: Review unreachable code - params = step.parameters
 
-        if operation == "analyze_music":
-            return self._analyze_music(params)
-        elif operation == "sequence_images":
-            return self._sequence_images(params, context)
-        elif operation == "analyze_transitions":
-            return self._analyze_transitions(params, context)
-        elif operation == "create_timeline":
-            return self._create_timeline(params, context)
-        elif operation == "generate_proxies":
-            return self._generate_proxies(params, context)
-        elif operation.startswith("export_"):
-            return self._export_timeline(operation, params, context)
-        else:
-            return super().execute_operation(step, context)
+    # TODO: Review unreachable code - if operation == "analyze_music":
+    # TODO: Review unreachable code - return self._analyze_music(params)
+    # TODO: Review unreachable code - elif operation == "sequence_images":
+    # TODO: Review unreachable code - return self._sequence_images(params, context)
+    # TODO: Review unreachable code - elif operation == "analyze_transitions":
+    # TODO: Review unreachable code - return self._analyze_transitions(params, context)
+    # TODO: Review unreachable code - elif operation == "create_timeline":
+    # TODO: Review unreachable code - return self._create_timeline(params, context)
+    # TODO: Review unreachable code - elif operation == "generate_proxies":
+    # TODO: Review unreachable code - return self._generate_proxies(params, context)
+    # TODO: Review unreachable code - elif operation.startswith("export_"):
+    # TODO: Review unreachable code - return self._export_timeline(operation, params, context)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return super().execute_operation(step, context)
 
-    def _analyze_music(self, params: dict) -> dict[str, Any]:
-        """Analyze music file for structure and beats."""
-        music_file = params["music_file"]
+    # TODO: Review unreachable code - def _analyze_music(self, params: dict) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Analyze music file for structure and beats."""
+    # TODO: Review unreachable code - music_file = params["music_file"]
 
-        try:
-            import asyncio
-            analysis = asyncio.run(self.music_analyzer.analyze_audio(Path(music_file)))
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - import asyncio
+    # TODO: Review unreachable code - analysis = asyncio.run(self.music_analyzer.analyze_audio(Path(music_file)))
 
-            # Extract key information
-            return {
-                "success": True,
-                "tempo": analysis["tempo"],
-                "beats": analysis["beats"],
-                "downbeats": analysis["downbeats"],
-                "sections": analysis["sections"],
-                "mood": analysis.get("mood", "neutral"),
-                "energy_profile": analysis.get("energy_profile", []),
-                "duration": analysis["duration"],
-            }
-        except Exception as e:
-            logger.error(f"Music analysis failed: {e}")
-            return {"success": False, "error": str(e)}
+    # TODO: Review unreachable code - # Extract key information
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "success": True,
+    # TODO: Review unreachable code - "tempo": analysis["tempo"],
+    # TODO: Review unreachable code - "beats": analysis["beats"],
+    # TODO: Review unreachable code - "downbeats": analysis["downbeats"],
+    # TODO: Review unreachable code - "sections": analysis["sections"],
+    # TODO: Review unreachable code - "mood": analysis.get("mood", "neutral"),
+    # TODO: Review unreachable code - "energy_profile": analysis.get("energy_profile", []),
+    # TODO: Review unreachable code - "duration": analysis["duration"],
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Music analysis failed: {e}")
+    # TODO: Review unreachable code - return {"success": False, "error": str(e)}
 
-    def _sequence_images(self, params: dict, context: WorkflowContext) -> dict[str, Any]:
-        """Select and sequence images based on music analysis."""
-        images = params["images"]
-        music_data = context.get_result(params["music_analysis_from"])
+    # TODO: Review unreachable code - def _sequence_images(self, params: dict, context: WorkflowContext) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Select and sequence images based on music analysis."""
+    # TODO: Review unreachable code - images = params["images"]
+    # TODO: Review unreachable code - music_data = context.get_result(params["music_analysis_from"])
 
-        if not music_data or not music_data.get("success"):
-            return {"success": False, "error": "Music analysis not available"}
+    # TODO: Review unreachable code - if not music_data or not music_data.get("success"):
+    # TODO: Review unreachable code - return {"success": False, "error": "Music analysis not available"}
 
-        try:
-            # If energy matching is enabled, sort by energy levels
-            if params.get("energy_matching"):
-                sequenced = self._match_images_to_energy(
-                    images,
-                    music_data["energy_profile"],
-                    music_data["sections"]
-                )
-            else:
-                # Simple sequential ordering
-                sequenced = images
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # If energy matching is enabled, sort by energy levels
+    # TODO: Review unreachable code - if params.get("energy_matching"):
+    # TODO: Review unreachable code - sequenced = self._match_images_to_energy(
+    # TODO: Review unreachable code - images,
+    # TODO: Review unreachable code - music_data["energy_profile"],
+    # TODO: Review unreachable code - music_data["sections"]
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Simple sequential ordering
+    # TODO: Review unreachable code - sequenced = images
 
-            # Calculate shot count based on tempo and duration
-            tempo = music_data["tempo"]
-            duration = params.get("target_duration") or music_data["duration"]
+    # TODO: Review unreachable code - # Calculate shot count based on tempo and duration
+    # TODO: Review unreachable code - tempo = music_data["tempo"]
+    # TODO: Review unreachable code - duration = params.get("target_duration") or music_data["duration"]
 
-            # Approximate shots based on tempo
-            if tempo < 80:  # Slow
-                avg_shot_duration = 3.0
-            elif tempo < 120:  # Medium
-                avg_shot_duration = 2.0
-            else:  # Fast
-                avg_shot_duration = 1.0
+    # TODO: Review unreachable code - # Approximate shots based on tempo
+    # TODO: Review unreachable code - if tempo < 80:  # Slow
+    # TODO: Review unreachable code - avg_shot_duration = 3.0
+    # TODO: Review unreachable code - elif tempo < 120:  # Medium
+    # TODO: Review unreachable code - avg_shot_duration = 2.0
+    # TODO: Review unreachable code - else:  # Fast
+    # TODO: Review unreachable code - avg_shot_duration = 1.0
 
-            shot_count = int(duration / avg_shot_duration)
+    # TODO: Review unreachable code - shot_count = int(duration / avg_shot_duration)
 
-            # Adjust sequence length
-            if len(sequenced) > shot_count:
-                sequenced = sequenced[:shot_count]
-            elif len(sequenced) < shot_count:
-                # Repeat images if needed
-                import itertools
-                sequenced = list(itertools.islice(
-                    itertools.cycle(sequenced), shot_count
-                ))
+    # TODO: Review unreachable code - # Adjust sequence length
+    # TODO: Review unreachable code - if len(sequenced) > shot_count:
+    # TODO: Review unreachable code - sequenced = sequenced[:shot_count]
+    # TODO: Review unreachable code - elif len(sequenced) < shot_count:
+    # TODO: Review unreachable code - # Repeat images if needed
+    # TODO: Review unreachable code - import itertools
+    # TODO: Review unreachable code - sequenced = list(itertools.islice(
+    # TODO: Review unreachable code - itertools.cycle(sequenced), shot_count
+    # TODO: Review unreachable code - ))
 
-            return {
-                "success": True,
-                "sequence": sequenced,
-                "shot_count": len(sequenced),
-                "avg_shot_duration": avg_shot_duration,
-            }
-        except Exception as e:
-            logger.error(f"Image sequencing failed: {e}")
-            return {"success": False, "error": str(e)}
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "success": True,
+    # TODO: Review unreachable code - "sequence": sequenced,
+    # TODO: Review unreachable code - "shot_count": len(sequenced),
+    # TODO: Review unreachable code - "avg_shot_duration": avg_shot_duration,
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Image sequencing failed: {e}")
+    # TODO: Review unreachable code - return {"success": False, "error": str(e)}
 
-    def _match_images_to_energy(
-        self,
-        images: list[str],
-        energy_profile: list[dict],
-        sections: list[dict]
-    ) -> list[str]:
-        """Match images to music energy levels."""
-        # This is a simplified implementation
-        # In production, you'd analyze image characteristics
+    # TODO: Review unreachable code - def _match_images_to_energy(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - images: list[str],
+    # TODO: Review unreachable code - energy_profile: list[dict],
+    # TODO: Review unreachable code - sections: list[dict]
+    # TODO: Review unreachable code - ) -> list[str]:
+    # TODO: Review unreachable code - """Match images to music energy levels."""
+    # TODO: Review unreachable code - # This is a simplified implementation
+    # TODO: Review unreachable code - # In production, you'd analyze image characteristics
 
-        # Sort images by assumed energy (for demo, use filename)
-        # In reality, you'd analyze visual complexity, colors, etc.
-        sorted_images = sorted(images)
+    # TODO: Review unreachable code - # Sort images by assumed energy (for demo, use filename)
+    # TODO: Review unreachable code - # In reality, you'd analyze visual complexity, colors, etc.
+    # TODO: Review unreachable code - sorted_images = sorted(images)
 
-        # Distribute images across sections
-        sequenced = []
-        for section in sections:
-            section_energy = section.get("energy", 0.5)
+    # TODO: Review unreachable code - # Distribute images across sections
+    # TODO: Review unreachable code - sequenced = []
+    # TODO: Review unreachable code - for section in sections:
+    # TODO: Review unreachable code - section_energy = section.get("energy", 0.5)
 
-            # High energy = later images (assumed more complex)
-            if section_energy > 0.7:
-                idx_start = int(len(sorted_images) * 0.7)
-            elif section_energy > 0.4:
-                idx_start = int(len(sorted_images) * 0.3)
-            else:
-                idx_start = 0
+    # TODO: Review unreachable code - # High energy = later images (assumed more complex)
+    # TODO: Review unreachable code - if section_energy > 0.7:
+    # TODO: Review unreachable code - idx_start = int(len(sorted_images) * 0.7)
+    # TODO: Review unreachable code - elif section_energy > 0.4:
+    # TODO: Review unreachable code - idx_start = int(len(sorted_images) * 0.3)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - idx_start = 0
 
-            # Add images for this section
-            section_duration = section["end"] - section["start"]
-            section_shots = max(1, int(section_duration / 2))  # 2 sec avg
+    # TODO: Review unreachable code - # Add images for this section
+    # TODO: Review unreachable code - section_duration = section["end"] - section["start"]
+    # TODO: Review unreachable code - section_shots = max(1, int(section_duration / 2))  # 2 sec avg
 
-            for i in range(section_shots):
-                idx = (idx_start + i) % len(sorted_images)
-                sequenced.append(sorted_images[idx])
+    # TODO: Review unreachable code - for i in range(section_shots):
+    # TODO: Review unreachable code - idx = (idx_start + i) % len(sorted_images)
+    # TODO: Review unreachable code - sequenced.append(sorted_images[idx])
 
-        return sequenced
+    # TODO: Review unreachable code - return sequenced
 
-    def _analyze_transitions(self, params: dict, context: WorkflowContext) -> dict[str, Any]:
-        """Analyze transitions between sequenced images."""
-        sequence_data = context.get_result(params["image_sequence_from"])
+    # TODO: Review unreachable code - def _analyze_transitions(self, params: dict, context: WorkflowContext) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Analyze transitions between sequenced images."""
+    # TODO: Review unreachable code - sequence_data = context.get_result(params["image_sequence_from"])
 
-        if not sequence_data or not sequence_data.get("success"):
-            return {"success": False, "error": "Image sequence not available"}
+    # TODO: Review unreachable code - if not sequence_data or not sequence_data.get("success"):
+    # TODO: Review unreachable code - return {"success": False, "error": "Image sequence not available"}
 
-        try:
-            sequence = sequence_data["sequence"]
-            music_data = context.get_result(params["music_analysis_from"])
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - sequence = sequence_data["sequence"]
+    # TODO: Review unreachable code - music_data = context.get_result(params["music_analysis_from"])
 
-            # Analyze transitions
-            suggestions = self.transition_matcher.analyze_sequence(sequence)
+    # TODO: Review unreachable code - # Analyze transitions
+    # TODO: Review unreachable code - suggestions = self.transition_matcher.analyze_sequence(sequence)
 
-            # Adjust based on music tempo
-            tempo = music_data["tempo"]
-            transition_style = params.get("transition_style", "auto")
+    # TODO: Review unreachable code - # Adjust based on music tempo
+    # TODO: Review unreachable code - tempo = music_data["tempo"]
+    # TODO: Review unreachable code - transition_style = params.get("transition_style", "auto")
 
-            # Modify suggestions based on style
-            if transition_style == "energetic" or tempo > 120:
-                # Faster cuts, shorter transitions
-                for s in suggestions:
-                    s.duration *= 0.5
-                    if s.transition_type.value == "dissolve":
-                        s.transition_type = TransitionType.CUT
-            elif transition_style == "smooth" or tempo < 80:
-                # Longer transitions
-                for s in suggestions:
-                    s.duration *= 1.5
+    # TODO: Review unreachable code - # Modify suggestions based on style
+    # TODO: Review unreachable code - if transition_style == "energetic" or tempo > 120:
+    # TODO: Review unreachable code - # Faster cuts, shorter transitions
+    # TODO: Review unreachable code - for s in suggestions:
+    # TODO: Review unreachable code - s.duration *= 0.5
+    # TODO: Review unreachable code - if s.transition_type.value == "dissolve":
+    # TODO: Review unreachable code - s.transition_type = TransitionType.CUT
+    # TODO: Review unreachable code - elif transition_style == "smooth" or tempo < 80:
+    # TODO: Review unreachable code - # Longer transitions
+    # TODO: Review unreachable code - for s in suggestions:
+    # TODO: Review unreachable code - s.duration *= 1.5
 
-            return {
-                "success": True,
-                "transitions": [
-                    {
-                        "source": s.source_image,
-                        "target": s.target_image,
-                        "type": s.transition_type.value,
-                        "duration": s.duration,
-                        "confidence": s.confidence,
-                    }
-                    for s in suggestions
-                ],
-                "count": len(suggestions),
-            }
-        except Exception as e:
-            logger.error(f"Transition analysis failed: {e}")
-            return {"success": False, "error": str(e)}
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "success": True,
+    # TODO: Review unreachable code - "transitions": [
+    # TODO: Review unreachable code - {
+    # TODO: Review unreachable code - "source": s.source_image,
+    # TODO: Review unreachable code - "target": s.target_image,
+    # TODO: Review unreachable code - "type": s.transition_type.value,
+    # TODO: Review unreachable code - "duration": s.duration,
+    # TODO: Review unreachable code - "confidence": s.confidence,
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - for s in suggestions
+    # TODO: Review unreachable code - ],
+    # TODO: Review unreachable code - "count": len(suggestions),
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Transition analysis failed: {e}")
+    # TODO: Review unreachable code - return {"success": False, "error": str(e)}
 
-    def _create_timeline(self, params: dict, context: WorkflowContext) -> dict[str, Any]:
-        """Create timeline with beat-synced cuts."""
-        sequence_data = context.get_result(params["sequence_from"])
-        transitions_data = context.get_result(params["transitions_from"])
-        music_data = context.get_result(params["music_from"])
+    # TODO: Review unreachable code - def _create_timeline(self, params: dict, context: WorkflowContext) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Create timeline with beat-synced cuts."""
+    # TODO: Review unreachable code - sequence_data = context.get_result(params["sequence_from"])
+    # TODO: Review unreachable code - transitions_data = context.get_result(params["transitions_from"])
+    # TODO: Review unreachable code - music_data = context.get_result(params["music_from"])
 
-        if not all([sequence_data, transitions_data, music_data]):
-            return {"success": False, "error": "Required data not available"}
+    # TODO: Review unreachable code - if not all([sequence_data, transitions_data, music_data]):
+    # TODO: Review unreachable code - return {"success": False, "error": "Required data not available"}
 
-        try:
-            sequence = sequence_data["sequence"]
-            transitions = transitions_data["transitions"]
-            sync_mode = params.get("sync_mode", "beat")
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - sequence = sequence_data["sequence"]
+    # TODO: Review unreachable code - transitions = transitions_data["transitions"]
+    # TODO: Review unreachable code - sync_mode = params.get("sync_mode", "beat")
 
-            # Get sync points based on mode
-            if sync_mode == "beat":
-                sync_points = music_data["beats"]
-            elif sync_mode == "downbeat":
-                sync_points = music_data["downbeats"]
-            else:  # section
-                sync_points = [s["start"] for s in music_data["sections"]]
+    # TODO: Review unreachable code - # Get sync points based on mode
+    # TODO: Review unreachable code - if sync_mode == "beat":
+    # TODO: Review unreachable code - sync_points = music_data["beats"]
+    # TODO: Review unreachable code - elif sync_mode == "downbeat":
+    # TODO: Review unreachable code - sync_points = music_data["downbeats"]
+    # TODO: Review unreachable code - else:  # section
+    # TODO: Review unreachable code - sync_points = [s["start"] for s in music_data["sections"]]
 
-            # Create timeline
-            timeline = []
-            current_time = 0.0
+    # TODO: Review unreachable code - # Create timeline
+    # TODO: Review unreachable code - timeline = []
+    # TODO: Review unreachable code - current_time = 0.0
 
-            for i, image in enumerate(sequence):
-                # Find next sync point
-                next_sync = next(
-                    (sp for sp in sync_points if sp > current_time),
-                    None
-                )
+    # TODO: Review unreachable code - for i, image in enumerate(sequence):
+    # TODO: Review unreachable code - # Find next sync point
+    # TODO: Review unreachable code - next_sync = next(
+    # TODO: Review unreachable code - (sp for sp in sync_points if sp > current_time),
+    # TODO: Review unreachable code - None
+    # TODO: Review unreachable code - )
 
-                if next_sync is None:
-                    # No more sync points, use average duration
-                    duration = sequence_data["avg_shot_duration"]
-                else:
-                    duration = next_sync - current_time
+    # TODO: Review unreachable code - if next_sync is None:
+    # TODO: Review unreachable code - # No more sync points, use average duration
+    # TODO: Review unreachable code - duration = sequence_data["avg_shot_duration"]
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - duration = next_sync - current_time
 
-                # Apply min/max constraints
-                duration = max(params["min_shot_duration"], duration)
-                duration = min(params["max_shot_duration"], duration)
+    # TODO: Review unreachable code - # Apply min/max constraints
+    # TODO: Review unreachable code - duration = max(params["min_shot_duration"], duration)
+    # TODO: Review unreachable code - duration = min(params["max_shot_duration"], duration)
 
-                # Get transition info
-                transition = None
-                if i < len(transitions):
-                    transition = transitions[i]
+    # TODO: Review unreachable code - # Get transition info
+    # TODO: Review unreachable code - transition = None
+    # TODO: Review unreachable code - if i < len(transitions):
+    # TODO: Review unreachable code - transition = transitions[i]
 
-                timeline.append({
-                    "clip_id": f"clip_{i}",
-                    "source": image,
-                    "start_time": current_time,
-                    "duration": duration,
-                    "transition": transition,
-                    "beat_aligned": True,
-                })
+    # TODO: Review unreachable code - timeline.append({
+    # TODO: Review unreachable code - "clip_id": f"clip_{i}",
+    # TODO: Review unreachable code - "source": image,
+    # TODO: Review unreachable code - "start_time": current_time,
+    # TODO: Review unreachable code - "duration": duration,
+    # TODO: Review unreachable code - "transition": transition,
+    # TODO: Review unreachable code - "beat_aligned": True,
+    # TODO: Review unreachable code - })
 
-                current_time += duration
+    # TODO: Review unreachable code - current_time += duration
 
-            return {
-                "success": True,
-                "timeline": timeline,
-                "total_duration": current_time,
-                "clip_count": len(timeline),
-                "music_file": music_data.get("file_path"),
-            }
-        except Exception as e:
-            logger.error(f"Timeline creation failed: {e}")
-            return {"success": False, "error": str(e)}
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "success": True,
+    # TODO: Review unreachable code - "timeline": timeline,
+    # TODO: Review unreachable code - "total_duration": current_time,
+    # TODO: Review unreachable code - "clip_count": len(timeline),
+    # TODO: Review unreachable code - "music_file": music_data.get("file_path"),
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Timeline creation failed: {e}")
+    # TODO: Review unreachable code - return {"success": False, "error": str(e)}
 
-    def _generate_proxies(self, params: dict, context: WorkflowContext) -> dict[str, Any]:
-        """Generate proxy files for smooth editing."""
-        timeline_data = context.get_result(params["timeline_from"])
+    # TODO: Review unreachable code - def _generate_proxies(self, params: dict, context: WorkflowContext) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Generate proxy files for smooth editing."""
+    # TODO: Review unreachable code - timeline_data = context.get_result(params["timeline_from"])
 
-        if not timeline_data or not timeline_data.get("success"):
-            return {"success": False, "error": "Timeline not available"}
+    # TODO: Review unreachable code - if not timeline_data or not timeline_data.get("success"):
+    # TODO: Review unreachable code - return {"success": False, "error": "Timeline not available"}
 
-        try:
-            # In a real implementation, this would generate actual proxy files
-            # For now, we'll simulate the process
-            timeline = timeline_data["timeline"]
-            proxy_paths = {}
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # In a real implementation, this would generate actual proxy files
+    # TODO: Review unreachable code - # For now, we'll simulate the process
+    # TODO: Review unreachable code - timeline = timeline_data["timeline"]
+    # TODO: Review unreachable code - proxy_paths = {}
 
-            for clip in timeline:
-                source = clip["source"]
-                # Use secure temp directory
-                proxy_dir = Path(tempfile.gettempdir()) / "alice_proxies"
-                proxy_dir.mkdir(exist_ok=True)
-                proxy_path = str(proxy_dir / f"{Path(source).stem}_proxy.mp4")
-                proxy_paths[source] = proxy_path
+    # TODO: Review unreachable code - for clip in timeline:
+    # TODO: Review unreachable code - source = clip["source"]
+    # TODO: Review unreachable code - # Use secure temp directory
+    # TODO: Review unreachable code - proxy_dir = Path(tempfile.gettempdir()) / "alice_proxies"
+    # TODO: Review unreachable code - proxy_dir.mkdir(exist_ok=True)
+    # TODO: Review unreachable code - proxy_path = str(proxy_dir / f"{Path(source).stem}_proxy.mp4")
+    # TODO: Review unreachable code - proxy_paths[source] = proxy_path
 
-            return {
-                "success": True,
-                "proxy_paths": proxy_paths,
-                "proxy_count": len(proxy_paths),
-                "resolution": params["proxy_resolution"],
-                "codec": params["proxy_codec"],
-            }
-        except Exception as e:
-            logger.error(f"Proxy generation failed: {e}")
-            return {"success": False, "error": str(e)}
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "success": True,
+    # TODO: Review unreachable code - "proxy_paths": proxy_paths,
+    # TODO: Review unreachable code - "proxy_count": len(proxy_paths),
+    # TODO: Review unreachable code - "resolution": params["proxy_resolution"],
+    # TODO: Review unreachable code - "codec": params["proxy_codec"],
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Proxy generation failed: {e}")
+    # TODO: Review unreachable code - return {"success": False, "error": str(e)}
 
-    def _export_timeline(
-        self,
-        operation: str,
-        params: dict,
-        context: WorkflowContext
-    ) -> dict[str, Any]:
-        """Export timeline in requested format."""
-        timeline_data = context.get_result(params["timeline_from"])
+    # TODO: Review unreachable code - def _export_timeline(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - operation: str,
+    # TODO: Review unreachable code - params: dict,
+    # TODO: Review unreachable code - context: WorkflowContext
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Export timeline in requested format."""
+    # TODO: Review unreachable code - timeline_data = context.get_result(params["timeline_from"])
 
-        if not timeline_data or not timeline_data.get("success"):
-            return {"success": False, "error": "Timeline not available"}
+    # TODO: Review unreachable code - if not timeline_data or not timeline_data.get("success"):
+    # TODO: Review unreachable code - return {"success": False, "error": "Timeline not available"}
 
-        format_type = operation.replace("export_", "")
+    # TODO: Review unreachable code - format_type = operation.replace("export_", "")
 
-        try:
-            timeline = timeline_data["timeline"]
-            music_file = timeline_data.get("music_file")
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - timeline = timeline_data["timeline"]
+    # TODO: Review unreachable code - music_file = timeline_data.get("music_file")
 
-            # Convert timeline data to Timeline object
-            from alicemultiverse.workflows.video_export import (
-                CapCutExporter,
-                DaVinciResolveExporter,
-                Timeline,
-                TimelineClip,
-            )
+    # TODO: Review unreachable code - # Convert timeline data to Timeline object
+    # TODO: Review unreachable code - from alicemultiverse.workflows.video_export import (
+    # TODO: Review unreachable code - CapCutExporter,
+    # TODO: Review unreachable code - DaVinciResolveExporter,
+    # TODO: Review unreachable code - Timeline,
+    # TODO: Review unreachable code - TimelineClip,
+    # TODO: Review unreachable code - )
 
-            # Create Timeline object
-            timeline_obj = Timeline(
-                name=params["project_name"],
-                duration=timeline_data["total_duration"],
-                frame_rate=params["frame_rate"]
-            )
+    # TODO: Review unreachable code - # Create Timeline object
+    # TODO: Review unreachable code - timeline_obj = Timeline(
+    # TODO: Review unreachable code - name=params["project_name"],
+    # TODO: Review unreachable code - duration=timeline_data["total_duration"],
+    # TODO: Review unreachable code - frame_rate=params["frame_rate"]
+    # TODO: Review unreachable code - )
 
-            # Add clips
-            for clip_data in timeline:
-                clip = TimelineClip(
-                    asset_path=Path(clip_data["source"]),
-                    start_time=clip_data["start_time"],
-                    duration=clip_data["duration"],
-                    beat_aligned=clip_data.get("beat_aligned", False)
-                )
-                if clip_data.get("transition"):
-                    trans = clip_data["transition"]
-                    clip.transition_in = trans.get("type")
-                    clip.transition_in_duration = trans.get("duration", 0)
-                timeline_obj.clips.append(clip)
+    # TODO: Review unreachable code - # Add clips
+    # TODO: Review unreachable code - for clip_data in timeline:
+    # TODO: Review unreachable code - clip = TimelineClip(
+    # TODO: Review unreachable code - asset_path=Path(clip_data["source"]),
+    # TODO: Review unreachable code - start_time=clip_data["start_time"],
+    # TODO: Review unreachable code - duration=clip_data["duration"],
+    # TODO: Review unreachable code - beat_aligned=clip_data.get("beat_aligned", False)
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - if clip_data.get("transition"):
+    # TODO: Review unreachable code - trans = clip_data["transition"]
+    # TODO: Review unreachable code - clip.transition_in = trans.get("type")
+    # TODO: Review unreachable code - clip.transition_in_duration = trans.get("duration", 0)
+    # TODO: Review unreachable code - timeline_obj.clips.append(clip)
 
-            # Add audio track if available
-            if music_file:
-                timeline_obj.audio_tracks.append({
-                    "path": music_file,
-                    "start_time": 0,
-                    "duration": timeline_data["total_duration"]
-                })
+    # TODO: Review unreachable code - # Add audio track if available
+    # TODO: Review unreachable code - if music_file:
+    # TODO: Review unreachable code - timeline_obj.audio_tracks.append({
+    # TODO: Review unreachable code - "path": music_file,
+    # TODO: Review unreachable code - "start_time": 0,
+    # TODO: Review unreachable code - "duration": timeline_data["total_duration"]
+    # TODO: Review unreachable code - })
 
-            # Export based on format
-            output_path = Path(f"{params['project_name']}_{format_type}.{format_type}")
+    # TODO: Review unreachable code - # Export based on format
+    # TODO: Review unreachable code - output_path = Path(f"{params['project_name']}_{format_type}.{format_type}")
 
-            if format_type == "edl":
-                success = DaVinciResolveExporter.export_edl(timeline_obj, output_path)
-            elif format_type == "xml":
-                success = DaVinciResolveExporter.export_xml(timeline_obj, output_path)
-            elif format_type == "capcut":
-                success = CapCutExporter.export_json(timeline_obj, output_path)
-            else:
-                return {"success": False, "error": f"Unknown format: {format_type}"}
+    # TODO: Review unreachable code - if format_type == "edl":
+    # TODO: Review unreachable code - success = DaVinciResolveExporter.export_edl(timeline_obj, output_path)
+    # TODO: Review unreachable code - elif format_type == "xml":
+    # TODO: Review unreachable code - success = DaVinciResolveExporter.export_xml(timeline_obj, output_path)
+    # TODO: Review unreachable code - elif format_type == "capcut":
+    # TODO: Review unreachable code - success = CapCutExporter.export_json(timeline_obj, output_path)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return {"success": False, "error": f"Unknown format: {format_type}"}
 
-            if not success:
-                return {"success": False, "error": f"Failed to export {format_type}"}
+    # TODO: Review unreachable code - if not success:
+    # TODO: Review unreachable code - return {"success": False, "error": f"Failed to export {format_type}"}
 
-            return {
-                "success": True,
-                "output_path": str(output_path),
-                "format": format_type,
-                "clip_count": len(timeline),
-                "duration": timeline_data["total_duration"],
-            }
-        except Exception as e:
-            logger.error(f"Timeline export failed: {e}")
-            return {"success": False, "error": str(e)}
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "success": True,
+    # TODO: Review unreachable code - "output_path": str(output_path),
+    # TODO: Review unreachable code - "format": format_type,
+    # TODO: Review unreachable code - "clip_count": len(timeline),
+    # TODO: Review unreachable code - "duration": timeline_data["total_duration"],
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Timeline export failed: {e}")
+    # TODO: Review unreachable code - return {"success": False, "error": str(e)}
 
-    def validate(self, context: WorkflowContext) -> list[str]:
-        """Validate the workflow can execute."""
-        errors = super().validate(context)
-        params = context.initial_params
+    # TODO: Review unreachable code - def validate(self, context: WorkflowContext) -> list[str]:
+    # TODO: Review unreachable code - """Validate the workflow can execute."""
+    # TODO: Review unreachable code - errors = super().validate(context)
+    # TODO: Review unreachable code - params = context.initial_params
 
-        # Check required parameters
-        if not params.get("music_file"):
-            errors.append("music_file is required")
+    # TODO: Review unreachable code - # Check required parameters
+    # TODO: Review unreachable code - if not params.get("music_file"):
+    # TODO: Review unreachable code - errors.append("music_file is required")
 
-        if not params.get("images"):
-            errors.append("images list is required")
+    # TODO: Review unreachable code - if not params.get("images"):
+    # TODO: Review unreachable code - errors.append("images list is required")
 
-        # Check sync mode
-        valid_sync_modes = ["beat", "downbeat", "section"]
-        if params.get("sync_mode", "beat") not in valid_sync_modes:
-            errors.append(f"Invalid sync_mode. Choose from: {valid_sync_modes}")
+    # TODO: Review unreachable code - # Check sync mode
+    # TODO: Review unreachable code - valid_sync_modes = ["beat", "downbeat", "section"]
+    # TODO: Review unreachable code - if params.get("sync_mode", "beat") not in valid_sync_modes:
+    # TODO: Review unreachable code - errors.append(f"Invalid sync_mode. Choose from: {valid_sync_modes}")
 
-        # Check export formats
-        valid_formats = ["edl", "xml", "capcut"]
-        for fmt in params.get("export_formats", ["xml"]):
-            if fmt not in valid_formats:
-                errors.append(f"Invalid export format: {fmt}")
+    # TODO: Review unreachable code - # Check export formats
+    # TODO: Review unreachable code - valid_formats = ["edl", "xml", "capcut"]
+    # TODO: Review unreachable code - for fmt in params.get("export_formats", ["xml"]):
+    # TODO: Review unreachable code - if fmt not in valid_formats:
+    # TODO: Review unreachable code - errors.append(f"Invalid export format: {fmt}")
 
-        return errors
+    # TODO: Review unreachable code - return errors
 
-    def estimate_cost(self, context: WorkflowContext) -> float:
-        """Estimate total workflow cost."""
-        # All operations are local, so no API costs
-        return 0.0
+    # TODO: Review unreachable code - def estimate_cost(self, context: WorkflowContext) -> float:
+    # TODO: Review unreachable code - """Estimate total workflow cost."""
+    # TODO: Review unreachable code - # All operations are local, so no API costs
+    # TODO: Review unreachable code - return 0.0
 
 
 class QuickMusicVideoTemplate(MusicVideoTemplate):
@@ -557,42 +557,42 @@ class QuickMusicVideoTemplate(MusicVideoTemplate):
         return super().define_steps(context)
 
 
-class CinematicMusicVideoTemplate(MusicVideoTemplate):
-    """Cinematic music video template with advanced features."""
+# TODO: Review unreachable code - class CinematicMusicVideoTemplate(MusicVideoTemplate):
+# TODO: Review unreachable code - """Cinematic music video template with advanced features."""
 
-    def __init__(self):
-        super().__init__()
-        self.name = "CinematicMusicVideo"
+# TODO: Review unreachable code - def __init__(self):
+# TODO: Review unreachable code - super().__init__()
+# TODO: Review unreachable code - self.name = "CinematicMusicVideo"
 
-    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
-        """Define cinematic music video steps."""
-        # Override defaults for quality
-        params = context.initial_params
-        params.setdefault("sync_mode", "beat")  # Precise sync
-        params.setdefault("transition_style", "smooth")  # Elegant transitions
-        params.setdefault("generate_proxies", True)  # High-quality proxies
-        params.setdefault("proxy_resolution", "1080p")
-        params.setdefault("export_formats", ["xml", "edl"])  # Pro formats
-        params.setdefault("energy_matching", True)  # Smart sequencing
-        params.setdefault("min_shot_duration", 0.5)
-        params.setdefault("max_shot_duration", 4.0)
+# TODO: Review unreachable code - def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
+# TODO: Review unreachable code - """Define cinematic music video steps."""
+# TODO: Review unreachable code - # Override defaults for quality
+# TODO: Review unreachable code - params = context.initial_params
+# TODO: Review unreachable code - params.setdefault("sync_mode", "beat")  # Precise sync
+# TODO: Review unreachable code - params.setdefault("transition_style", "smooth")  # Elegant transitions
+# TODO: Review unreachable code - params.setdefault("generate_proxies", True)  # High-quality proxies
+# TODO: Review unreachable code - params.setdefault("proxy_resolution", "1080p")
+# TODO: Review unreachable code - params.setdefault("export_formats", ["xml", "edl"])  # Pro formats
+# TODO: Review unreachable code - params.setdefault("energy_matching", True)  # Smart sequencing
+# TODO: Review unreachable code - params.setdefault("min_shot_duration", 0.5)
+# TODO: Review unreachable code - params.setdefault("max_shot_duration", 4.0)
 
-        steps = super().define_steps(context)
+# TODO: Review unreachable code - steps = super().define_steps(context)
 
-        # Add color analysis step
-        color_step = WorkflowStep(
-            name="analyze_color_flow",
-            provider="local",
-            operation="analyze_color_flow",
-            parameters={
-                "sequence_from": "sequence_images",
-                "smooth_transitions": True,
-            },
-            condition="sequence_images.success",
-            cost_limit=0.0
-        )
+# TODO: Review unreachable code - # Add color analysis step
+# TODO: Review unreachable code - color_step = WorkflowStep(
+# TODO: Review unreachable code - name="analyze_color_flow",
+# TODO: Review unreachable code - provider="local",
+# TODO: Review unreachable code - operation="analyze_color_flow",
+# TODO: Review unreachable code - parameters={
+# TODO: Review unreachable code - "sequence_from": "sequence_images",
+# TODO: Review unreachable code - "smooth_transitions": True,
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - condition="sequence_images.success",
+# TODO: Review unreachable code - cost_limit=0.0
+# TODO: Review unreachable code - )
 
-        # Insert after sequence_images
-        steps.insert(2, color_step)
+# TODO: Review unreachable code - # Insert after sequence_images
+# TODO: Review unreachable code - steps.insert(2, color_step)
 
-        return steps
+# TODO: Review unreachable code - return steps

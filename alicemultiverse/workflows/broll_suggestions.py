@@ -99,377 +99,377 @@ class BRollSuggestionEngine:
 
         return suggestions
 
-    async def _identify_broll_opportunities(
-        self,
-        timeline: dict[str, Any]
-    ) -> dict[int, SceneContext]:
-        """Identify where b-roll would enhance the timeline."""
-        opportunities = {}
+    # TODO: Review unreachable code - async def _identify_broll_opportunities(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - timeline: dict[str, Any]
+    # TODO: Review unreachable code - ) -> dict[int, SceneContext]:
+    # TODO: Review unreachable code - """Identify where b-roll would enhance the timeline."""
+    # TODO: Review unreachable code - opportunities = {}
 
-        for idx, clip in enumerate(timeline['clips']):
-            # Analyze clip content
-            scene_info = await self._analyze_clip_scene(clip)
+    # TODO: Review unreachable code - for idx, clip in enumerate(timeline['clips']):
+    # TODO: Review unreachable code - # Analyze clip content
+    # TODO: Review unreachable code - scene_info = await self._analyze_clip_scene(clip)
 
-            # Determine if b-roll would help
-            context = SceneContext(
-                start_time=clip['start_time'],
-                end_time=clip['start_time'] + clip['duration'],
-                scene_type=scene_info.get('type', 'unknown'),
-                primary_subject=scene_info.get('subject'),
-                mood=scene_info.get('mood'),
-                location=scene_info.get('location'),
-                dialogue='dialogue' in scene_info.get('tags', []),
-                energy_level=self._assess_energy_level(scene_info),
-                needs_visual_interest=self._needs_broll(clip, scene_info, idx, timeline)
-            )
+    # TODO: Review unreachable code - # Determine if b-roll would help
+    # TODO: Review unreachable code - context = SceneContext(
+    # TODO: Review unreachable code - start_time=clip['start_time'],
+    # TODO: Review unreachable code - end_time=clip['start_time'] + clip['duration'],
+    # TODO: Review unreachable code - scene_type=scene_info.get('type', 'unknown'),
+    # TODO: Review unreachable code - primary_subject=scene_info.get('subject'),
+    # TODO: Review unreachable code - mood=scene_info.get('mood'),
+    # TODO: Review unreachable code - location=scene_info.get('location'),
+    # TODO: Review unreachable code - dialogue='dialogue' in scene_info.get('tags', []),
+    # TODO: Review unreachable code - energy_level=self._assess_energy_level(scene_info),
+    # TODO: Review unreachable code - needs_visual_interest=self._needs_broll(clip, scene_info, idx, timeline)
+    # TODO: Review unreachable code - )
 
-            if context.needs_visual_interest:
-                opportunities[idx] = context
+    # TODO: Review unreachable code - if context.needs_visual_interest:
+    # TODO: Review unreachable code - opportunities[idx] = context
 
-        return opportunities
+    # TODO: Review unreachable code - return opportunities
 
-    async def _analyze_clip_scene(self, clip: dict[str, Any]) -> dict[str, Any]:
-        """Analyze a clip's scene content."""
-        # Get asset metadata by searching for the file path
-        results, _ = self.db.search(
-            filters={'file_path': clip['asset_path']},
-            limit=1
-        )
+    # TODO: Review unreachable code - async def _analyze_clip_scene(self, clip: dict[str, Any]) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Analyze a clip's scene content."""
+    # TODO: Review unreachable code - # Get asset metadata by searching for the file path
+    # TODO: Review unreachable code - results, _ = self.db.search(
+    # TODO: Review unreachable code - filters={'file_path': clip['asset_path']},
+    # TODO: Review unreachable code - limit=1
+    # TODO: Review unreachable code - )
 
-        if not results:
-            return {}
+    # TODO: Review unreachable code - if not results:
+    # TODO: Review unreachable code - return {}
 
-        asset_info = results[0]
+    # TODO: Review unreachable code - asset_info = results[0]
 
-        # Extract tag values from structured format
-        tag_values = self._extract_tag_values(asset_info.get('tags', {}))
+    # TODO: Review unreachable code - # Extract tag values from structured format
+    # TODO: Review unreachable code - tag_values = self._extract_tag_values(asset_info.get('tags', {}))
 
-        # Use existing metadata
-        scene_info = {
-            'type': asset_info.get('scene_type', 'unknown'),
-            'tags': tag_values,
-            'mood': self._extract_mood_from_tags(tag_values),
-            'subject': self._extract_subject_from_tags(tag_values),
-            'location': self._extract_location_from_tags(tag_values)
-        }
+    # TODO: Review unreachable code - # Use existing metadata
+    # TODO: Review unreachable code - scene_info = {
+    # TODO: Review unreachable code - 'type': asset_info.get('scene_type', 'unknown'),
+    # TODO: Review unreachable code - 'tags': tag_values,
+    # TODO: Review unreachable code - 'mood': self._extract_mood_from_tags(tag_values),
+    # TODO: Review unreachable code - 'subject': self._extract_subject_from_tags(tag_values),
+    # TODO: Review unreachable code - 'location': self._extract_location_from_tags(tag_values)
+    # TODO: Review unreachable code - }
 
-        return scene_info
+    # TODO: Review unreachable code - return scene_info
 
-    def _assess_energy_level(self, scene_info: dict[str, Any]) -> str:
-        """Assess the energy level of a scene."""
-        tags = scene_info.get('tags', [])
+    # TODO: Review unreachable code - def _assess_energy_level(self, scene_info: dict[str, Any]) -> str:
+    # TODO: Review unreachable code - """Assess the energy level of a scene."""
+    # TODO: Review unreachable code - tags = scene_info.get('tags', [])
 
-        # High energy indicators
-        high_energy = ['action', 'dynamic', 'fast', 'intense', 'exciting']
-        if any(tag in tags for tag in high_energy):
-            return 'high'
+    # TODO: Review unreachable code - # High energy indicators
+    # TODO: Review unreachable code - high_energy = ['action', 'dynamic', 'fast', 'intense', 'exciting']
+    # TODO: Review unreachable code - if any(tag in tags for tag in high_energy):
+    # TODO: Review unreachable code - return 'high'
 
-        # Low energy indicators
-        low_energy = ['calm', 'peaceful', 'slow', 'quiet', 'serene']
-        if any(tag in tags for tag in low_energy):
-            return 'low'
+    # TODO: Review unreachable code - # Low energy indicators
+    # TODO: Review unreachable code - low_energy = ['calm', 'peaceful', 'slow', 'quiet', 'serene']
+    # TODO: Review unreachable code - if any(tag in tags for tag in low_energy):
+    # TODO: Review unreachable code - return 'low'
 
-        return 'medium'
+    # TODO: Review unreachable code - return 'medium'
 
-    def _needs_broll(
-        self,
-        clip: dict[str, Any],
-        scene_info: dict[str, Any],
-        clip_idx: int,
-        timeline: dict[str, Any]
-    ) -> bool:
-        """Determine if a clip would benefit from b-roll."""
-        # Long clips often need visual variety
-        if clip['duration'] > 5.0:
-            return True
+    # TODO: Review unreachable code - def _needs_broll(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - clip: dict[str, Any],
+    # TODO: Review unreachable code - scene_info: dict[str, Any],
+    # TODO: Review unreachable code - clip_idx: int,
+    # TODO: Review unreachable code - timeline: dict[str, Any]
+    # TODO: Review unreachable code - ) -> bool:
+    # TODO: Review unreachable code - """Determine if a clip would benefit from b-roll."""
+    # TODO: Review unreachable code - # Long clips often need visual variety
+    # TODO: Review unreachable code - if clip['duration'] > 5.0:
+    # TODO: Review unreachable code - return True
 
-        # Dialogue scenes benefit from cutaways
-        if 'dialogue' in scene_info.get('tags', []):
-            return True
+    # TODO: Review unreachable code - # Dialogue scenes benefit from cutaways
+    # TODO: Review unreachable code - if 'dialogue' in scene_info.get('tags', []):
+    # TODO: Review unreachable code - return True
 
-        # Static shots need movement
-        if scene_info.get('type') in ['establishing', 'wide', 'static']:
-            return True
+    # TODO: Review unreachable code - # Static shots need movement
+    # TODO: Review unreachable code - if scene_info.get('type') in ['establishing', 'wide', 'static']:
+    # TODO: Review unreachable code - return True
 
-        # Check for repetitive sequences
-        if clip_idx > 0:
-            prev_clip = timeline['clips'][clip_idx - 1]
-            if prev_clip.get('asset_path') == clip['asset_path']:
-                return True
+    # TODO: Review unreachable code - # Check for repetitive sequences
+    # TODO: Review unreachable code - if clip_idx > 0:
+    # TODO: Review unreachable code - prev_clip = timeline['clips'][clip_idx - 1]
+    # TODO: Review unreachable code - if prev_clip.get('asset_path') == clip['asset_path']:
+    # TODO: Review unreachable code - return True
 
-        return False
+    # TODO: Review unreachable code - return False
 
-    async def _get_suggestions_for_context(
-        self,
-        context: SceneContext,
-        clip: dict[str, Any],
-        project_context: dict[str, Any] | None,
-        max_suggestions: int
-    ) -> list[BRollSuggestion]:
-        """Get b-roll suggestions for a specific context."""
-        suggestions = []
+    # TODO: Review unreachable code - async def _get_suggestions_for_context(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - context: SceneContext,
+    # TODO: Review unreachable code - clip: dict[str, Any],
+    # TODO: Review unreachable code - project_context: dict[str, Any] | None,
+    # TODO: Review unreachable code - max_suggestions: int
+    # TODO: Review unreachable code - ) -> list[BRollSuggestion]:
+    # TODO: Review unreachable code - """Get b-roll suggestions for a specific context."""
+    # TODO: Review unreachable code - suggestions = []
 
-        # 1. Contextual suggestions (matching subject/location)
-        if context.primary_subject:
-            contextual = await self._find_contextual_broll(
-                context.primary_subject,
-                context.location,
-                exclude_path=clip['asset_path']
-            )
-            suggestions.extend(contextual[:max_suggestions // 3])
+    # TODO: Review unreachable code - # 1. Contextual suggestions (matching subject/location)
+    # TODO: Review unreachable code - if context.primary_subject:
+    # TODO: Review unreachable code - contextual = await self._find_contextual_broll(
+    # TODO: Review unreachable code - context.primary_subject,
+    # TODO: Review unreachable code - context.location,
+    # TODO: Review unreachable code - exclude_path=clip['asset_path']
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - suggestions.extend(contextual[:max_suggestions // 3])
 
-        # 2. Mood-based suggestions
-        if context.mood:
-            mood_based = await self._find_mood_matching_broll(
-                context.mood,
-                context.energy_level,
-                exclude_path=clip['asset_path']
-            )
-            suggestions.extend(mood_based[:max_suggestions // 3])
+    # TODO: Review unreachable code - # 2. Mood-based suggestions
+    # TODO: Review unreachable code - if context.mood:
+    # TODO: Review unreachable code - mood_based = await self._find_mood_matching_broll(
+    # TODO: Review unreachable code - context.mood,
+    # TODO: Review unreachable code - context.energy_level,
+    # TODO: Review unreachable code - exclude_path=clip['asset_path']
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - suggestions.extend(mood_based[:max_suggestions // 3])
 
-        # 3. Visual similarity suggestions
-        if self.similarity_index and clip.get('content_hash'):
-            visual_similar = await self._find_visually_similar_broll(
-                clip['content_hash'],
-                exclude_path=clip['asset_path']
-            )
-            suggestions.extend(visual_similar[:max_suggestions // 3])
+    # TODO: Review unreachable code - # 3. Visual similarity suggestions
+    # TODO: Review unreachable code - if self.similarity_index and clip.get('content_hash'):
+    # TODO: Review unreachable code - visual_similar = await self._find_visually_similar_broll(
+    # TODO: Review unreachable code - clip['content_hash'],
+    # TODO: Review unreachable code - exclude_path=clip['asset_path']
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - suggestions.extend(visual_similar[:max_suggestions // 3])
 
-        # 4. Transition helpers (for scene changes)
-        if context.scene_type in ['establishing', 'transition']:
-            transition_helpers = await self._find_transition_broll(
-                context.energy_level,
-                project_context
-            )
-            suggestions.extend(transition_helpers[:max_suggestions // 4])
+    # TODO: Review unreachable code - # 4. Transition helpers (for scene changes)
+    # TODO: Review unreachable code - if context.scene_type in ['establishing', 'transition']:
+    # TODO: Review unreachable code - transition_helpers = await self._find_transition_broll(
+    # TODO: Review unreachable code - context.energy_level,
+    # TODO: Review unreachable code - project_context
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - suggestions.extend(transition_helpers[:max_suggestions // 4])
 
-        # Sort by relevance and deduplicate
-        suggestions = self._rank_and_deduplicate(suggestions)
+    # TODO: Review unreachable code - # Sort by relevance and deduplicate
+    # TODO: Review unreachable code - suggestions = self._rank_and_deduplicate(suggestions)
 
-        return suggestions[:max_suggestions]
+    # TODO: Review unreachable code - return suggestions[:max_suggestions]
 
-    async def _find_contextual_broll(
-        self,
-        subject: str,
-        location: str | None,
-        exclude_path: str
-    ) -> list[BRollSuggestion]:
-        """Find b-roll matching subject/location context."""
-        # Build search query
-        tags = [subject]
-        if location:
-            tags.append(location)
+    # TODO: Review unreachable code - async def _find_contextual_broll(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - subject: str,
+    # TODO: Review unreachable code - location: str | None,
+    # TODO: Review unreachable code - exclude_path: str
+    # TODO: Review unreachable code - ) -> list[BRollSuggestion]:
+    # TODO: Review unreachable code - """Find b-roll matching subject/location context."""
+    # TODO: Review unreachable code - # Build search query
+    # TODO: Review unreachable code - tags = [subject]
+    # TODO: Review unreachable code - if location:
+    # TODO: Review unreachable code - tags.append(location)
 
-        # Search for matching assets
-        results, _ = self.metadata_search.search_by_tags(
-            tags=tags,
-            limit=10
-        )
+    # TODO: Review unreachable code - # Search for matching assets
+    # TODO: Review unreachable code - results, _ = self.metadata_search.search_by_tags(
+    # TODO: Review unreachable code - tags=tags,
+    # TODO: Review unreachable code - limit=10
+    # TODO: Review unreachable code - )
 
-        # Also search for assets marked as b-roll
-        broll_results, _ = self.metadata_search.search(
-            filters={'asset_role': 'b-roll'},
-            limit=10
-        )
+    # TODO: Review unreachable code - # Also search for assets marked as b-roll
+    # TODO: Review unreachable code - broll_results, _ = self.metadata_search.search(
+    # TODO: Review unreachable code - filters={'asset_role': 'b-roll'},
+    # TODO: Review unreachable code - limit=10
+    # TODO: Review unreachable code - )
 
-        # Combine results, preferring b-roll assets
-        all_results = []
-        seen_hashes = set()
+    # TODO: Review unreachable code - # Combine results, preferring b-roll assets
+    # TODO: Review unreachable code - all_results = []
+    # TODO: Review unreachable code - seen_hashes = set()
 
-        # Add b-roll results first
-        for result in broll_results:
-            if result['content_hash'] not in seen_hashes:
-                all_results.append(result)
-                seen_hashes.add(result['content_hash'])
+    # TODO: Review unreachable code - # Add b-roll results first
+    # TODO: Review unreachable code - for result in broll_results:
+    # TODO: Review unreachable code - if result['content_hash'] not in seen_hashes:
+    # TODO: Review unreachable code - all_results.append(result)
+    # TODO: Review unreachable code - seen_hashes.add(result['content_hash'])
 
-        # Add tag-based results
-        for result in results:
-            if result['content_hash'] not in seen_hashes:
-                all_results.append(result)
-                seen_hashes.add(result['content_hash'])
+    # TODO: Review unreachable code - # Add tag-based results
+    # TODO: Review unreachable code - for result in results:
+    # TODO: Review unreachable code - if result['content_hash'] not in seen_hashes:
+    # TODO: Review unreachable code - all_results.append(result)
+    # TODO: Review unreachable code - seen_hashes.add(result['content_hash'])
 
-        results = all_results[:10]  # Limit to 10 total
+    # TODO: Review unreachable code - results = all_results[:10]  # Limit to 10 total
 
-        suggestions = []
-        for result in results:
-            if result['file_path'] != exclude_path:
-                suggestions.append(BRollSuggestion(
-                    asset_path=result['file_path'],
-                    content_hash=result['content_hash'],
-                    relevance_score=result.get('score', 0.8),
-                    suggestion_type='contextual',
-                    reasoning=f"Matches subject: {subject}" + (f" and location: {location}" if location else ""),
-                    tags=self._extract_tag_values(result.get('tags', {})),
-                    placement_hint='cutaway'
-                ))
+    # TODO: Review unreachable code - suggestions = []
+    # TODO: Review unreachable code - for result in results:
+    # TODO: Review unreachable code - if result['file_path'] != exclude_path:
+    # TODO: Review unreachable code - suggestions.append(BRollSuggestion(
+    # TODO: Review unreachable code - asset_path=result['file_path'],
+    # TODO: Review unreachable code - content_hash=result['content_hash'],
+    # TODO: Review unreachable code - relevance_score=result.get('score', 0.8),
+    # TODO: Review unreachable code - suggestion_type='contextual',
+    # TODO: Review unreachable code - reasoning=f"Matches subject: {subject}" + (f" and location: {location}" if location else ""),
+    # TODO: Review unreachable code - tags=self._extract_tag_values(result.get('tags', {})),
+    # TODO: Review unreachable code - placement_hint='cutaway'
+    # TODO: Review unreachable code - ))
 
-        return suggestions
+    # TODO: Review unreachable code - return suggestions
 
-    async def _find_mood_matching_broll(
-        self,
-        mood: str,
-        energy_level: str,
-        exclude_path: str
-    ) -> list[BRollSuggestion]:
-        """Find b-roll matching mood and energy."""
-        # Search for mood-matching assets
-        mood_tags = [mood, f"{energy_level}_energy"]
+    # TODO: Review unreachable code - async def _find_mood_matching_broll(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - mood: str,
+    # TODO: Review unreachable code - energy_level: str,
+    # TODO: Review unreachable code - exclude_path: str
+    # TODO: Review unreachable code - ) -> list[BRollSuggestion]:
+    # TODO: Review unreachable code - """Find b-roll matching mood and energy."""
+    # TODO: Review unreachable code - # Search for mood-matching assets
+    # TODO: Review unreachable code - mood_tags = [mood, f"{energy_level}_energy"]
 
-        results, _ = self.metadata_search.search_by_tags(
-            tags=mood_tags,
-            limit=10
-        )
+    # TODO: Review unreachable code - results, _ = self.metadata_search.search_by_tags(
+    # TODO: Review unreachable code - tags=mood_tags,
+    # TODO: Review unreachable code - limit=10
+    # TODO: Review unreachable code - )
 
-        suggestions = []
-        for result in results:
-            if result['file_path'] != exclude_path:
-                suggestions.append(BRollSuggestion(
-                    asset_path=result['file_path'],
-                    content_hash=result['content_hash'],
-                    relevance_score=result.get('score', 0.7),
-                    suggestion_type='mood',
-                    reasoning=f"Matches {mood} mood with {energy_level} energy",
-                    tags=self._extract_tag_values(result.get('tags', {})),
-                    placement_hint='overlay'
-                ))
+    # TODO: Review unreachable code - suggestions = []
+    # TODO: Review unreachable code - for result in results:
+    # TODO: Review unreachable code - if result['file_path'] != exclude_path:
+    # TODO: Review unreachable code - suggestions.append(BRollSuggestion(
+    # TODO: Review unreachable code - asset_path=result['file_path'],
+    # TODO: Review unreachable code - content_hash=result['content_hash'],
+    # TODO: Review unreachable code - relevance_score=result.get('score', 0.7),
+    # TODO: Review unreachable code - suggestion_type='mood',
+    # TODO: Review unreachable code - reasoning=f"Matches {mood} mood with {energy_level} energy",
+    # TODO: Review unreachable code - tags=self._extract_tag_values(result.get('tags', {})),
+    # TODO: Review unreachable code - placement_hint='overlay'
+    # TODO: Review unreachable code - ))
 
-        return suggestions
+    # TODO: Review unreachable code - return suggestions
 
-    async def _find_visually_similar_broll(
-        self,
-        content_hash: str,
-        exclude_path: str
-    ) -> list[BRollSuggestion]:
-        """Find visually similar b-roll."""
-        if not self.similarity_index:
-            return []
+    # TODO: Review unreachable code - async def _find_visually_similar_broll(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - content_hash: str,
+    # TODO: Review unreachable code - exclude_path: str
+    # TODO: Review unreachable code - ) -> list[BRollSuggestion]:
+    # TODO: Review unreachable code - """Find visually similar b-roll."""
+    # TODO: Review unreachable code - if not self.similarity_index:
+    # TODO: Review unreachable code - return []
 
-        # Find similar images
-        similar = self.similarity_index.find_similar(
-            content_hash,
-            k=10,
-            threshold=0.7
-        )
+    # TODO: Review unreachable code - # Find similar images
+    # TODO: Review unreachable code - similar = self.similarity_index.find_similar(
+    # TODO: Review unreachable code - content_hash,
+    # TODO: Review unreachable code - k=10,
+    # TODO: Review unreachable code - threshold=0.7
+    # TODO: Review unreachable code - )
 
-        suggestions = []
-        for sim_hash, score in similar:
-            asset = self.db.get_asset_by_hash(sim_hash)
-            if asset and asset['file_path'] != exclude_path:
-                suggestions.append(BRollSuggestion(
-                    asset_path=asset['file_path'],
-                    content_hash=sim_hash,
-                    relevance_score=score,
-                    suggestion_type='visual',
-                    reasoning=f"Visually similar (score: {score:.2f})",
-                    tags=asset.get('tags', []),
-                    placement_hint='transition'
-                ))
+    # TODO: Review unreachable code - suggestions = []
+    # TODO: Review unreachable code - for sim_hash, score in similar:
+    # TODO: Review unreachable code - asset = self.db.get_asset_by_hash(sim_hash)
+    # TODO: Review unreachable code - if asset and asset['file_path'] != exclude_path:
+    # TODO: Review unreachable code - suggestions.append(BRollSuggestion(
+    # TODO: Review unreachable code - asset_path=asset['file_path'],
+    # TODO: Review unreachable code - content_hash=sim_hash,
+    # TODO: Review unreachable code - relevance_score=score,
+    # TODO: Review unreachable code - suggestion_type='visual',
+    # TODO: Review unreachable code - reasoning=f"Visually similar (score: {score:.2f})",
+    # TODO: Review unreachable code - tags=asset.get('tags', []),
+    # TODO: Review unreachable code - placement_hint='transition'
+    # TODO: Review unreachable code - ))
 
-        return suggestions
+    # TODO: Review unreachable code - return suggestions
 
-    async def _find_transition_broll(
-        self,
-        energy_level: str,
-        project_context: dict[str, Any] | None
-    ) -> list[BRollSuggestion]:
-        """Find b-roll suitable for transitions."""
-        # Look for abstract or neutral content
-        transition_tags = ['abstract', 'texture', 'pattern', 'nature', 'neutral']
+    # TODO: Review unreachable code - async def _find_transition_broll(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - energy_level: str,
+    # TODO: Review unreachable code - project_context: dict[str, Any] | None
+    # TODO: Review unreachable code - ) -> list[BRollSuggestion]:
+    # TODO: Review unreachable code - """Find b-roll suitable for transitions."""
+    # TODO: Review unreachable code - # Look for abstract or neutral content
+    # TODO: Review unreachable code - transition_tags = ['abstract', 'texture', 'pattern', 'nature', 'neutral']
 
-        # Match energy level
-        if energy_level == 'high':
-            transition_tags.extend(['motion', 'dynamic', 'flowing'])
-        else:
-            transition_tags.extend(['static', 'calm', 'minimal'])
+    # TODO: Review unreachable code - # Match energy level
+    # TODO: Review unreachable code - if energy_level == 'high':
+    # TODO: Review unreachable code - transition_tags.extend(['motion', 'dynamic', 'flowing'])
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - transition_tags.extend(['static', 'calm', 'minimal'])
 
-        results, _ = self.metadata_search.search_by_tags(
-            tags=transition_tags,
-            limit=5
-        )
+    # TODO: Review unreachable code - results, _ = self.metadata_search.search_by_tags(
+    # TODO: Review unreachable code - tags=transition_tags,
+    # TODO: Review unreachable code - limit=5
+    # TODO: Review unreachable code - )
 
-        suggestions = []
-        for result in results:
-            suggestions.append(BRollSuggestion(
-                asset_path=result['file_path'],
-                content_hash=result['content_hash'],
-                relevance_score=0.6,
-                suggestion_type='transition',
-                reasoning=f"Good for {energy_level} energy transitions",
-                tags=result.get('tags', []),
-                duration_suggestion=1.0,  # Short duration for transitions
-                placement_hint='transition'
-            ))
+    # TODO: Review unreachable code - suggestions = []
+    # TODO: Review unreachable code - for result in results:
+    # TODO: Review unreachable code - suggestions.append(BRollSuggestion(
+    # TODO: Review unreachable code - asset_path=result['file_path'],
+    # TODO: Review unreachable code - content_hash=result['content_hash'],
+    # TODO: Review unreachable code - relevance_score=0.6,
+    # TODO: Review unreachable code - suggestion_type='transition',
+    # TODO: Review unreachable code - reasoning=f"Good for {energy_level} energy transitions",
+    # TODO: Review unreachable code - tags=result.get('tags', []),
+    # TODO: Review unreachable code - duration_suggestion=1.0,  # Short duration for transitions
+    # TODO: Review unreachable code - placement_hint='transition'
+    # TODO: Review unreachable code - ))
 
-        return suggestions
+    # TODO: Review unreachable code - return suggestions
 
-    def _rank_and_deduplicate(
-        self,
-        suggestions: list[BRollSuggestion]
-    ) -> list[BRollSuggestion]:
-        """Rank suggestions by relevance and remove duplicates."""
-        # Remove duplicates by content hash
-        seen = set()
-        unique = []
+    # TODO: Review unreachable code - def _rank_and_deduplicate(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - suggestions: list[BRollSuggestion]
+    # TODO: Review unreachable code - ) -> list[BRollSuggestion]:
+    # TODO: Review unreachable code - """Rank suggestions by relevance and remove duplicates."""
+    # TODO: Review unreachable code - # Remove duplicates by content hash
+    # TODO: Review unreachable code - seen = set()
+    # TODO: Review unreachable code - unique = []
 
-        for suggestion in suggestions:
-            if suggestion.content_hash not in seen:
-                seen.add(suggestion.content_hash)
-                unique.append(suggestion)
+    # TODO: Review unreachable code - for suggestion in suggestions:
+    # TODO: Review unreachable code - if suggestion.content_hash not in seen:
+    # TODO: Review unreachable code - seen.add(suggestion.content_hash)
+    # TODO: Review unreachable code - unique.append(suggestion)
 
-        # Sort by relevance score
-        unique.sort(key=lambda x: x.relevance_score, reverse=True)
+    # TODO: Review unreachable code - # Sort by relevance score
+    # TODO: Review unreachable code - unique.sort(key=lambda x: x.relevance_score, reverse=True)
 
-        return unique
+    # TODO: Review unreachable code - return unique
 
-    def _extract_mood_from_tags(self, tags: list[str]) -> str | None:
-        """Extract mood from tags."""
-        mood_tags = [
-            'happy', 'sad', 'energetic', 'calm', 'dramatic',
-            'mysterious', 'romantic', 'tense', 'peaceful', 'exciting'
-        ]
+    # TODO: Review unreachable code - def _extract_mood_from_tags(self, tags: list[str]) -> str | None:
+    # TODO: Review unreachable code - """Extract mood from tags."""
+    # TODO: Review unreachable code - mood_tags = [
+    # TODO: Review unreachable code - 'happy', 'sad', 'energetic', 'calm', 'dramatic',
+    # TODO: Review unreachable code - 'mysterious', 'romantic', 'tense', 'peaceful', 'exciting'
+    # TODO: Review unreachable code - ]
 
-        for tag in tags:
-            if tag.lower() in mood_tags:
-                return tag.lower()
+    # TODO: Review unreachable code - for tag in tags:
+    # TODO: Review unreachable code - if tag.lower() in mood_tags:
+    # TODO: Review unreachable code - return tag.lower()
 
-        return None
+    # TODO: Review unreachable code - return None
 
-    def _extract_subject_from_tags(self, tags: list[str]) -> str | None:
-        """Extract primary subject from tags."""
-        # Common subject indicators
-        subject_prefixes = ['person', 'people', 'animal', 'object', 'landscape']
+    # TODO: Review unreachable code - def _extract_subject_from_tags(self, tags: list[str]) -> str | None:
+    # TODO: Review unreachable code - """Extract primary subject from tags."""
+    # TODO: Review unreachable code - # Common subject indicators
+    # TODO: Review unreachable code - subject_prefixes = ['person', 'people', 'animal', 'object', 'landscape']
 
-        for tag in tags:
-            for prefix in subject_prefixes:
-                if tag.lower().startswith(prefix):
-                    return tag
+    # TODO: Review unreachable code - for tag in tags:
+    # TODO: Review unreachable code - for prefix in subject_prefixes:
+    # TODO: Review unreachable code - if tag.lower().startswith(prefix):
+    # TODO: Review unreachable code - return tag
 
-        # Return first noun-like tag
-        return tags[0] if tags else None
+    # TODO: Review unreachable code - # Return first noun-like tag
+    # TODO: Review unreachable code - return tags[0] if tags else None
 
-    def _extract_tag_values(self, tags_dict: dict[str, list[dict[str, Any]]]) -> list[str]:
-        """Extract tag values from the structured tags dictionary."""
-        tag_values = []
-        for tag_type, tag_list in tags_dict.items():
-            for tag_info in tag_list:
-                if isinstance(tag_info, dict) and 'value' in tag_info:
-                    tag_values.append(tag_info['value'])
-                elif isinstance(tag_info, str):
-                    tag_values.append(tag_info)
-        return tag_values
+    # TODO: Review unreachable code - def _extract_tag_values(self, tags_dict: dict[str, list[dict[str, Any]]]) -> list[str]:
+    # TODO: Review unreachable code - """Extract tag values from the structured tags dictionary."""
+    # TODO: Review unreachable code - tag_values = []
+    # TODO: Review unreachable code - for tag_type, tag_list in tags_dict.items():
+    # TODO: Review unreachable code - for tag_info in tag_list:
+    # TODO: Review unreachable code - if isinstance(tag_info, dict) and 'value' in tag_info:
+    # TODO: Review unreachable code - tag_values.append(tag_info['value'])
+    # TODO: Review unreachable code - elif isinstance(tag_info, str):
+    # TODO: Review unreachable code - tag_values.append(tag_info)
+    # TODO: Review unreachable code - return tag_values
 
-    def _extract_location_from_tags(self, tags: list[str]) -> str | None:
-        """Extract location from tags."""
-        location_indicators = [
-            'indoor', 'outdoor', 'city', 'nature', 'beach',
-            'mountain', 'forest', 'desert', 'urban', 'rural'
-        ]
+    # TODO: Review unreachable code - def _extract_location_from_tags(self, tags: list[str]) -> str | None:
+    # TODO: Review unreachable code - """Extract location from tags."""
+    # TODO: Review unreachable code - location_indicators = [
+    # TODO: Review unreachable code - 'indoor', 'outdoor', 'city', 'nature', 'beach',
+    # TODO: Review unreachable code - 'mountain', 'forest', 'desert', 'urban', 'rural'
+    # TODO: Review unreachable code - ]
 
-        for tag in tags:
-            if tag.lower() in location_indicators:
-                return tag.lower()
+    # TODO: Review unreachable code - for tag in tags:
+    # TODO: Review unreachable code - if tag.lower() in location_indicators:
+    # TODO: Review unreachable code - return tag.lower()
 
-        return None
+    # TODO: Review unreachable code - return None
 
 
 class BRollWorkflow:
@@ -504,14 +504,14 @@ class BRollWorkflow:
             timeline['broll_suggestions'] = suggestions
             return timeline
 
-        # Auto-insert b-roll
-        enhanced_timeline = self._insert_broll_clips(
-            timeline,
-            suggestions,
-            max_broll_percentage
-        )
+        # TODO: Review unreachable code - # Auto-insert b-roll
+        # TODO: Review unreachable code - enhanced_timeline = self._insert_broll_clips(
+        # TODO: Review unreachable code - timeline,
+        # TODO: Review unreachable code - suggestions,
+        # TODO: Review unreachable code - max_broll_percentage
+        # TODO: Review unreachable code - )
 
-        return enhanced_timeline
+        # TODO: Review unreachable code - return enhanced_timeline
 
     def _insert_broll_clips(
         self,

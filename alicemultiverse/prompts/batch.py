@@ -92,312 +92,312 @@ class PromptBatchProcessor:
         logger.info(f"Created {len(created_prompts)} prompts from CSV")
         return created_prompts
 
-    def batch_update_ratings(self,
-                           prompt_ids: list[str],
-                           rating_function: Callable[[Prompt], float | None]) -> int:
-        """Update ratings for multiple prompts using a custom function.
+    # TODO: Review unreachable code - def batch_update_ratings(self,
+    # TODO: Review unreachable code - prompt_ids: list[str],
+    # TODO: Review unreachable code - rating_function: Callable[[Prompt], float | None]) -> int:
+    # TODO: Review unreachable code - """Update ratings for multiple prompts using a custom function.
 
-        Args:
-            prompt_ids: List of prompt IDs to update
-            rating_function: Function that takes a Prompt and returns a rating
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - prompt_ids: List of prompt IDs to update
+    # TODO: Review unreachable code - rating_function: Function that takes a Prompt and returns a rating
 
-        Returns:
-            Number of prompts updated
-        """
-        updated = 0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Number of prompts updated
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - updated = 0
 
-        for prompt_id in prompt_ids:
-            prompt = self.service.get_prompt(prompt_id)
-            if not prompt:
-                logger.warning(f"Prompt not found: {prompt_id}")
-                continue
+    # TODO: Review unreachable code - for prompt_id in prompt_ids:
+    # TODO: Review unreachable code - prompt = self.service.get_prompt(prompt_id)
+    # TODO: Review unreachable code - if not prompt:
+    # TODO: Review unreachable code - logger.warning(f"Prompt not found: {prompt_id}")
+    # TODO: Review unreachable code - continue
 
-            new_rating = rating_function(prompt)
-            if new_rating is not None:
-                prompt.effectiveness_rating = new_rating
-                self.service.update_prompt(prompt)
-                updated += 1
-                logger.debug(f"Updated rating for {prompt_id} to {new_rating}")
+    # TODO: Review unreachable code - new_rating = rating_function(prompt)
+    # TODO: Review unreachable code - if new_rating is not None:
+    # TODO: Review unreachable code - prompt.effectiveness_rating = new_rating
+    # TODO: Review unreachable code - self.service.update_prompt(prompt)
+    # TODO: Review unreachable code - updated += 1
+    # TODO: Review unreachable code - logger.debug(f"Updated rating for {prompt_id} to {new_rating}")
 
-        logger.info(f"Updated ratings for {updated} prompts")
-        return updated
+    # TODO: Review unreachable code - logger.info(f"Updated ratings for {updated} prompts")
+    # TODO: Review unreachable code - return updated
 
-    def batch_tag_prompts(self,
-                         prompts: list[Prompt],
-                         tag_function: Callable[[Prompt], list[str]]) -> int:
-        """Add tags to multiple prompts using a custom function.
+    # TODO: Review unreachable code - def batch_tag_prompts(self,
+    # TODO: Review unreachable code - prompts: list[Prompt],
+    # TODO: Review unreachable code - tag_function: Callable[[Prompt], list[str]]) -> int:
+    # TODO: Review unreachable code - """Add tags to multiple prompts using a custom function.
 
-        Args:
-            prompts: List of prompts to tag
-            tag_function: Function that takes a Prompt and returns tags to add
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - prompts: List of prompts to tag
+    # TODO: Review unreachable code - tag_function: Function that takes a Prompt and returns tags to add
 
-        Returns:
-            Number of prompts tagged
-        """
-        tagged = 0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Number of prompts tagged
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - tagged = 0
 
-        for prompt in prompts:
-            new_tags = tag_function(prompt)
-            if new_tags:
-                # Add unique tags
-                existing = set(prompt.tags)
-                for tag in new_tags:
-                    if tag not in existing:
-                        prompt.tags.append(tag)
+    # TODO: Review unreachable code - for prompt in prompts:
+    # TODO: Review unreachable code - new_tags = tag_function(prompt)
+    # TODO: Review unreachable code - if new_tags:
+    # TODO: Review unreachable code - # Add unique tags
+    # TODO: Review unreachable code - existing = set(prompt.tags)
+    # TODO: Review unreachable code - for tag in new_tags:
+    # TODO: Review unreachable code - if tag not in existing:
+    # TODO: Review unreachable code - prompt.tags.append(tag)
 
-                self.service.update_prompt(prompt)
-                tagged += 1
-                logger.debug(f"Added tags to {prompt.id}: {new_tags}")
+    # TODO: Review unreachable code - self.service.update_prompt(prompt)
+    # TODO: Review unreachable code - tagged += 1
+    # TODO: Review unreachable code - logger.debug(f"Added tags to {prompt.id}: {new_tags}")
 
-        logger.info(f"Tagged {tagged} prompts")
-        return tagged
+    # TODO: Review unreachable code - logger.info(f"Tagged {tagged} prompts")
+    # TODO: Review unreachable code - return tagged
 
-    def batch_analyze_effectiveness(self,
-                                  category: PromptCategory | None = None,
-                                  min_uses: int = 3) -> dict[str, Any]:
-        """Analyze effectiveness across multiple prompts.
+    # TODO: Review unreachable code - def batch_analyze_effectiveness(self,
+    # TODO: Review unreachable code - category: PromptCategory | None = None,
+    # TODO: Review unreachable code - min_uses: int = 3) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Analyze effectiveness across multiple prompts.
 
-        Args:
-            category: Filter by category
-            min_uses: Minimum uses to include in analysis
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - category: Filter by category
+    # TODO: Review unreachable code - min_uses: Minimum uses to include in analysis
 
-        Returns:
-            Analysis results
-        """
-        prompts = self.service.search_prompts(category=category)
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Analysis results
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - prompts = self.service.search_prompts(category=category)
 
-        # Filter by minimum uses
-        analyzed_prompts = [p for p in prompts if p.use_count >= min_uses]
+    # TODO: Review unreachable code - # Filter by minimum uses
+    # TODO: Review unreachable code - analyzed_prompts = [p for p in prompts if p.use_count >= min_uses]
 
-        if not analyzed_prompts:
-            return {"error": "No prompts with sufficient usage data"}
+    # TODO: Review unreachable code - if not analyzed_prompts:
+    # TODO: Review unreachable code - return {"error": "No prompts with sufficient usage data"}
 
-        # Calculate statistics
-        success_rates = [p.success_rate() for p in analyzed_prompts]
-        ratings = [p.effectiveness_rating for p in analyzed_prompts if p.effectiveness_rating]
+    # TODO: Review unreachable code - # Calculate statistics
+    # TODO: Review unreachable code - success_rates = [p.success_rate() for p in analyzed_prompts]
+    # TODO: Review unreachable code - ratings = [p.effectiveness_rating for p in analyzed_prompts if p.effectiveness_rating]
 
-        # Group by provider
-        by_provider = {}
-        for prompt in analyzed_prompts:
-            for provider in prompt.providers:
-                prov = provider.value
-                if prov not in by_provider:
-                    by_provider[prov] = {
-                        "count": 0,
-                        "total_uses": 0,
-                        "total_successes": 0,
-                        "ratings": []
-                    }
+    # TODO: Review unreachable code - # Group by provider
+    # TODO: Review unreachable code - by_provider = {}
+    # TODO: Review unreachable code - for prompt in analyzed_prompts:
+    # TODO: Review unreachable code - for provider in prompt.providers:
+    # TODO: Review unreachable code - prov = provider.value
+    # TODO: Review unreachable code - if prov not in by_provider:
+    # TODO: Review unreachable code - by_provider[prov] = {
+    # TODO: Review unreachable code - "count": 0,
+    # TODO: Review unreachable code - "total_uses": 0,
+    # TODO: Review unreachable code - "total_successes": 0,
+    # TODO: Review unreachable code - "ratings": []
+    # TODO: Review unreachable code - }
 
-                by_provider[prov]["count"] += 1
-                by_provider[prov]["total_uses"] += prompt.use_count
-                by_provider[prov]["total_successes"] += prompt.success_count
-                if prompt.effectiveness_rating:
-                    by_provider[prov]["ratings"].append(prompt.effectiveness_rating)
+    # TODO: Review unreachable code - by_provider[prov]["count"] += 1
+    # TODO: Review unreachable code - by_provider[prov]["total_uses"] += prompt.use_count
+    # TODO: Review unreachable code - by_provider[prov]["total_successes"] += prompt.success_count
+    # TODO: Review unreachable code - if prompt.effectiveness_rating:
+    # TODO: Review unreachable code - by_provider[prov]["ratings"].append(prompt.effectiveness_rating)
 
-        # Calculate provider stats
-        for prov, data in by_provider.items():
-            data["success_rate"] = data["total_successes"] / data["total_uses"] if data["total_uses"] > 0 else 0
-            data["avg_rating"] = sum(data["ratings"]) / len(data["ratings"]) if data["ratings"] else None
-            del data["ratings"]  # Remove raw data
+    # TODO: Review unreachable code - # Calculate provider stats
+    # TODO: Review unreachable code - for prov, data in by_provider.items():
+    # TODO: Review unreachable code - data["success_rate"] = data["total_successes"] / data["total_uses"] if data is not None and data["total_uses"] > 0 else 0
+    # TODO: Review unreachable code - data["avg_rating"] = sum(data["ratings"]) / len(data["ratings"]) if data is not None and data["ratings"] else None
+    # TODO: Review unreachable code - del data["ratings"]  # Remove raw data
 
-        return {
-            "total_analyzed": len(analyzed_prompts),
-            "average_success_rate": sum(success_rates) / len(success_rates),
-            "average_rating": sum(ratings) / len(ratings) if ratings else None,
-            "by_provider": by_provider,
-            "top_performers": [
-                {
-                    "id": p.id,
-                    "text": p.text[:100] + "..." if len(p.text) > 100 else p.text,
-                    "success_rate": p.success_rate(),
-                    "uses": p.use_count,
-                    "rating": p.effectiveness_rating
-                }
-                for p in sorted(analyzed_prompts,
-                              key=lambda x: (x.success_rate(), x.use_count),
-                              reverse=True)[:10]
-            ]
-        }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "total_analyzed": len(analyzed_prompts),
+    # TODO: Review unreachable code - "average_success_rate": sum(success_rates) / len(success_rates),
+    # TODO: Review unreachable code - "average_rating": sum(ratings) / len(ratings) if ratings else None,
+    # TODO: Review unreachable code - "by_provider": by_provider,
+    # TODO: Review unreachable code - "top_performers": [
+    # TODO: Review unreachable code - {
+    # TODO: Review unreachable code - "id": p.id,
+    # TODO: Review unreachable code - "text": p.text[:100] + "..." if len(p.text) > 100 else p.text,
+    # TODO: Review unreachable code - "success_rate": p.success_rate(),
+    # TODO: Review unreachable code - "uses": p.use_count,
+    # TODO: Review unreachable code - "rating": p.effectiveness_rating
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - for p in sorted(analyzed_prompts,
+    # TODO: Review unreachable code - key=lambda x: (x.success_rate(), x.use_count),
+    # TODO: Review unreachable code - reverse=True)[:10]
+    # TODO: Review unreachable code - ]
+    # TODO: Review unreachable code - }
 
-    def batch_generate_variations(self,
-                                base_prompt: Prompt,
-                                variation_specs: list[dict[str, str]]) -> list[Prompt]:
-        """Generate multiple variations of a base prompt.
+    # TODO: Review unreachable code - def batch_generate_variations(self,
+    # TODO: Review unreachable code - base_prompt: Prompt,
+    # TODO: Review unreachable code - variation_specs: list[dict[str, str]]) -> list[Prompt]:
+    # TODO: Review unreachable code - """Generate multiple variations of a base prompt.
 
-        Args:
-            base_prompt: The base prompt to vary
-            variation_specs: List of dicts with 'modification' and 'purpose' keys
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - base_prompt: The base prompt to vary
+    # TODO: Review unreachable code - variation_specs: List of dicts with 'modification' and 'purpose' keys
 
-        Returns:
-            List of created variation prompts
-        """
-        variations = []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of created variation prompts
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - variations = []
 
-        for spec in variation_specs:
-            modification = spec.get('modification', '')
-            purpose = spec.get('purpose', '')
+    # TODO: Review unreachable code - for spec in variation_specs:
+    # TODO: Review unreachable code - modification = spec.get('modification', '')
+    # TODO: Review unreachable code - purpose = spec.get('purpose', '')
 
-            # Apply modification to base text
-            # This is a simple implementation - could be made more sophisticated
-            if "{BASE}" in modification:
-                new_text = modification.replace("{BASE}", base_prompt.text)
-            else:
-                new_text = f"{base_prompt.text}, {modification}"
+    # TODO: Review unreachable code - # Apply modification to base text
+    # TODO: Review unreachable code - # This is a simple implementation - could be made more sophisticated
+    # TODO: Review unreachable code - if "{BASE}" in modification:
+    # TODO: Review unreachable code - new_text = modification.replace("{BASE}", base_prompt.text)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - new_text = f"{base_prompt.text}, {modification}"
 
-            # Create variation
-            variation = self.service.create_prompt(
-                text=new_text,
-                category=base_prompt.category,
-                providers=base_prompt.providers,
-                tags=base_prompt.tags + ["variation"],
-                project=base_prompt.project,
-                style=base_prompt.style,
-                parent_id=base_prompt.id,
-                notes=f"Variation: {modification}\nPurpose: {purpose}"
-            )
+    # TODO: Review unreachable code - # Create variation
+    # TODO: Review unreachable code - variation = self.service.create_prompt(
+    # TODO: Review unreachable code - text=new_text,
+    # TODO: Review unreachable code - category=base_prompt.category,
+    # TODO: Review unreachable code - providers=base_prompt.providers,
+    # TODO: Review unreachable code - tags=base_prompt.tags + ["variation"],
+    # TODO: Review unreachable code - project=base_prompt.project,
+    # TODO: Review unreachable code - style=base_prompt.style,
+    # TODO: Review unreachable code - parent_id=base_prompt.id,
+    # TODO: Review unreachable code - notes=f"Variation: {modification}\nPurpose: {purpose}"
+    # TODO: Review unreachable code - )
 
-            variations.append(variation)
-            logger.info(f"Created variation {variation.id}")
+    # TODO: Review unreachable code - variations.append(variation)
+    # TODO: Review unreachable code - logger.info(f"Created variation {variation.id}")
 
-            # Update base prompt's related IDs
-            if variation.id not in base_prompt.related_ids:
-                base_prompt.related_ids.append(variation.id)
+    # TODO: Review unreachable code - # Update base prompt's related IDs
+    # TODO: Review unreachable code - if variation.id not in base_prompt.related_ids:
+    # TODO: Review unreachable code - base_prompt.related_ids.append(variation.id)
 
-        # Update base prompt
-        self.service.update_prompt(base_prompt)
+    # TODO: Review unreachable code - # Update base prompt
+    # TODO: Review unreachable code - self.service.update_prompt(base_prompt)
 
-        return variations
+    # TODO: Review unreachable code - return variations
 
-    async def batch_test_prompts(self,
-                               prompts: list[Prompt],
-                               provider_instance: Any,
-                               test_params: dict[str, Any] | None = None) -> list[tuple[Prompt, GenerationResult]]:
-        """Test multiple prompts with a provider.
+    # TODO: Review unreachable code - async def batch_test_prompts(self,
+    # TODO: Review unreachable code - prompts: list[Prompt],
+    # TODO: Review unreachable code - provider_instance: Any,
+    # TODO: Review unreachable code - test_params: dict[str, Any] | None = None) -> list[tuple[Prompt, GenerationResult]]:
+    # TODO: Review unreachable code - """Test multiple prompts with a provider.
 
-        Args:
-            prompts: List of prompts to test
-            provider_instance: Provider instance with generate method
-            test_params: Additional parameters for generation
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - prompts: List of prompts to test
+    # TODO: Review unreachable code - provider_instance: Provider instance with generate method
+    # TODO: Review unreachable code - test_params: Additional parameters for generation
 
-        Returns:
-            List of (prompt, result) tuples
-        """
-        results = []
-        test_params = test_params or {}
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of (prompt, result) tuples
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - results = []
+    # TODO: Review unreachable code - test_params = test_params or {}
 
-        # Run generations concurrently
-        tasks = []
-        for prompt in prompts:
-            task = provider_instance.generate(prompt.text, **test_params)
-            tasks.append((prompt, task))
+    # TODO: Review unreachable code - # Run generations concurrently
+    # TODO: Review unreachable code - tasks = []
+    # TODO: Review unreachable code - for prompt in prompts:
+    # TODO: Review unreachable code - task = provider_instance.generate(prompt.text, **test_params)
+    # TODO: Review unreachable code - tasks.append((prompt, task))
 
-        for prompt, task in tasks:
-            try:
-                result = await task
-                results.append((prompt, result))
+    # TODO: Review unreachable code - for prompt, task in tasks:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - result = await task
+    # TODO: Review unreachable code - results.append((prompt, result))
 
-                # Record usage
-                if hasattr(provider_instance, "__class__"):
-                    provider_name = provider_instance.__class__.__name__.replace("Provider", "").lower()
-                    self.service.record_usage(
-                        prompt_id=prompt.id,
-                        provider=ProviderType(provider_name),
-                        success=result.success,
-                        cost=result.cost
-                    )
+    # TODO: Review unreachable code - # Record usage
+    # TODO: Review unreachable code - if hasattr(provider_instance, "__class__"):
+    # TODO: Review unreachable code - provider_name = provider_instance.__class__.__name__.replace("Provider", "").lower()
+    # TODO: Review unreachable code - self.service.record_usage(
+    # TODO: Review unreachable code - prompt_id=prompt.id,
+    # TODO: Review unreachable code - provider=ProviderType(provider_name),
+    # TODO: Review unreachable code - success=result.success,
+    # TODO: Review unreachable code - cost=result.cost
+    # TODO: Review unreachable code - )
 
-            except Exception as e:
-                logger.error(f"Failed to test prompt {prompt.id}: {e}")
-                # Create failed result
-                failed_result = GenerationResult(
-                    success=False,
-                    error_message=str(e)
-                )
-                results.append((prompt, failed_result))
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to test prompt {prompt.id}: {e}")
+    # TODO: Review unreachable code - # Create failed result
+    # TODO: Review unreachable code - failed_result = GenerationResult(
+    # TODO: Review unreachable code - success=False,
+    # TODO: Review unreachable code - error_message=str(e)
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - results.append((prompt, failed_result))
 
-        return results
+    # TODO: Review unreachable code - return results
 
-    def export_batch_results(self,
-                           prompts: list[Prompt],
-                           output_path: Path,
-                           format: str = "json") -> None:
-        """Export batch of prompts with full details.
+    # TODO: Review unreachable code - def export_batch_results(self,
+    # TODO: Review unreachable code - prompts: list[Prompt],
+    # TODO: Review unreachable code - output_path: Path,
+    # TODO: Review unreachable code - format: str = "json") -> None:
+    # TODO: Review unreachable code - """Export batch of prompts with full details.
 
-        Args:
-            prompts: List of prompts to export
-            output_path: Output file path
-            format: Export format (json, csv)
-        """
-        if format == "json":
-            data = {
-                "exported_at": datetime.now().isoformat(),
-                "total_prompts": len(prompts),
-                "prompts": []
-            }
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - prompts: List of prompts to export
+    # TODO: Review unreachable code - output_path: Output file path
+    # TODO: Review unreachable code - format: Export format (json, csv)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - if format == "json":
+    # TODO: Review unreachable code - data = {
+    # TODO: Review unreachable code - "exported_at": datetime.now().isoformat(),
+    # TODO: Review unreachable code - "total_prompts": len(prompts),
+    # TODO: Review unreachable code - "prompts": []
+    # TODO: Review unreachable code - }
 
-            for prompt in prompts:
-                prompt_data = {
-                    "id": prompt.id,
-                    "text": prompt.text,
-                    "category": prompt.category.value,
-                    "providers": [p.value for p in prompt.providers],
-                    "tags": prompt.tags,
-                    "project": prompt.project,
-                    "style": prompt.style,
-                    "effectiveness_rating": prompt.effectiveness_rating,
-                    "use_count": prompt.use_count,
-                    "success_rate": prompt.success_rate(),
-                    "created_at": prompt.created_at.isoformat(),
-                    "updated_at": prompt.updated_at.isoformat()
-                }
+    # TODO: Review unreachable code - for prompt in prompts:
+    # TODO: Review unreachable code - prompt_data = {
+    # TODO: Review unreachable code - "id": prompt.id,
+    # TODO: Review unreachable code - "text": prompt.text,
+    # TODO: Review unreachable code - "category": prompt.category.value,
+    # TODO: Review unreachable code - "providers": [p.value for p in prompt.providers],
+    # TODO: Review unreachable code - "tags": prompt.tags,
+    # TODO: Review unreachable code - "project": prompt.project,
+    # TODO: Review unreachable code - "style": prompt.style,
+    # TODO: Review unreachable code - "effectiveness_rating": prompt.effectiveness_rating,
+    # TODO: Review unreachable code - "use_count": prompt.use_count,
+    # TODO: Review unreachable code - "success_rate": prompt.success_rate(),
+    # TODO: Review unreachable code - "created_at": prompt.created_at.isoformat(),
+    # TODO: Review unreachable code - "updated_at": prompt.updated_at.isoformat()
+    # TODO: Review unreachable code - }
 
-                # Add usage history
-                usage_history = self.service.get_usage_history(prompt.id, limit=10)
-                prompt_data["recent_usage"] = [
-                    {
-                        "timestamp": u.timestamp.isoformat(),
-                        "provider": u.provider.value,
-                        "success": u.success,
-                        "cost": u.cost
-                    }
-                    for u in usage_history
-                ]
+    # TODO: Review unreachable code - # Add usage history
+    # TODO: Review unreachable code - usage_history = self.service.get_usage_history(prompt.id, limit=10)
+    # TODO: Review unreachable code - prompt_data["recent_usage"] = [
+    # TODO: Review unreachable code - {
+    # TODO: Review unreachable code - "timestamp": u.timestamp.isoformat(),
+    # TODO: Review unreachable code - "provider": u.provider.value,
+    # TODO: Review unreachable code - "success": u.success,
+    # TODO: Review unreachable code - "cost": u.cost
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - for u in usage_history
+    # TODO: Review unreachable code - ]
 
-                data["prompts"].append(prompt_data)
+    # TODO: Review unreachable code - data["prompts"].append(prompt_data)
 
-            with open(output_path, 'w') as f:
-                json.dump(data, f, indent=2)
+    # TODO: Review unreachable code - with open(output_path, 'w') as f:
+    # TODO: Review unreachable code - json.dump(data, f, indent=2)
 
-        elif format == "csv":
-            with open(output_path, 'w', newline='', encoding='utf-8') as f:
-                writer = csv.writer(f)
+    # TODO: Review unreachable code - elif format == "csv":
+    # TODO: Review unreachable code - with open(output_path, 'w', newline='', encoding='utf-8') as f:
+    # TODO: Review unreachable code - writer = csv.writer(f)
 
-                # Header
-                writer.writerow([
-                    "ID", "Text", "Category", "Providers", "Tags",
-                    "Project", "Style", "Rating", "Uses", "Success Rate",
-                    "Created", "Updated"
-                ])
+    # TODO: Review unreachable code - # Header
+    # TODO: Review unreachable code - writer.writerow([
+    # TODO: Review unreachable code - "ID", "Text", "Category", "Providers", "Tags",
+    # TODO: Review unreachable code - "Project", "Style", "Rating", "Uses", "Success Rate",
+    # TODO: Review unreachable code - "Created", "Updated"
+    # TODO: Review unreachable code - ])
 
-                # Data
-                for prompt in prompts:
-                    writer.writerow([
-                        prompt.id,
-                        prompt.text,
-                        prompt.category.value,
-                        ",".join([p.value for p in prompt.providers]),
-                        ",".join(prompt.tags),
-                        prompt.project or "",
-                        prompt.style or "",
-                        prompt.effectiveness_rating or "",
-                        prompt.use_count,
-                        f"{prompt.success_rate()*100:.1f}%",
-                        prompt.created_at.strftime("%Y-%m-%d %H:%M"),
-                        prompt.updated_at.strftime("%Y-%m-%d %H:%M")
-                    ])
+    # TODO: Review unreachable code - # Data
+    # TODO: Review unreachable code - for prompt in prompts:
+    # TODO: Review unreachable code - writer.writerow([
+    # TODO: Review unreachable code - prompt.id,
+    # TODO: Review unreachable code - prompt.text,
+    # TODO: Review unreachable code - prompt.category.value,
+    # TODO: Review unreachable code - ",".join([p.value for p in prompt.providers]),
+    # TODO: Review unreachable code - ",".join(prompt.tags),
+    # TODO: Review unreachable code - prompt.project or "",
+    # TODO: Review unreachable code - prompt.style or "",
+    # TODO: Review unreachable code - prompt.effectiveness_rating or "",
+    # TODO: Review unreachable code - prompt.use_count,
+    # TODO: Review unreachable code - f"{prompt.success_rate()*100:.1f}%",
+    # TODO: Review unreachable code - prompt.created_at.strftime("%Y-%m-%d %H:%M"),
+    # TODO: Review unreachable code - prompt.updated_at.strftime("%Y-%m-%d %H:%M")
+    # TODO: Review unreachable code - ])
 
-        logger.info(f"Exported {len(prompts)} prompts to {output_path}")
+    # TODO: Review unreachable code - logger.info(f"Exported {len(prompts)} prompts to {output_path}")
 
 
 def auto_rate_by_success(prompt: Prompt) -> float | None:
@@ -405,21 +405,21 @@ def auto_rate_by_success(prompt: Prompt) -> float | None:
     if prompt.use_count < 3:
         return None
 
-    success_rate = prompt.success_rate()
+    # TODO: Review unreachable code - success_rate = prompt.success_rate()
 
-    # Map success rate to 0-10 rating
-    if success_rate >= 0.95:
-        return 9.5
-    elif success_rate >= 0.90:
-        return 8.5
-    elif success_rate >= 0.80:
-        return 7.5
-    elif success_rate >= 0.70:
-        return 6.5
-    elif success_rate >= 0.60:
-        return 5.5
-    else:
-        return 4.0
+    # TODO: Review unreachable code - # Map success rate to 0-10 rating
+    # TODO: Review unreachable code - if success_rate >= 0.95:
+    # TODO: Review unreachable code - return 9.5
+    # TODO: Review unreachable code - elif success_rate >= 0.90:
+    # TODO: Review unreachable code - return 8.5
+    # TODO: Review unreachable code - elif success_rate >= 0.80:
+    # TODO: Review unreachable code - return 7.5
+    # TODO: Review unreachable code - elif success_rate >= 0.70:
+    # TODO: Review unreachable code - return 6.5
+    # TODO: Review unreachable code - elif success_rate >= 0.60:
+    # TODO: Review unreachable code - return 5.5
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return 4.0
 
 
 def auto_tag_by_content(prompt: Prompt) -> list[str]:

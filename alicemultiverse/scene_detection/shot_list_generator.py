@@ -99,37 +99,37 @@ class ShotListGenerator:
         if not scenes:
             return ShotList(project_name=project_name, total_duration=0.0)
 
-        # Calculate total duration
-        total_duration = target_duration or sum(s.duration for s in scenes)
+        # TODO: Review unreachable code - # Calculate total duration
+        # TODO: Review unreachable code - total_duration = target_duration or sum(s.duration for s in scenes)
 
-        # Create shot list
-        shot_list = ShotList(
-            project_name=project_name,
-            total_duration=total_duration
-        )
+        # TODO: Review unreachable code - # Create shot list
+        # TODO: Review unreachable code - shot_list = ShotList(
+        # TODO: Review unreachable code - project_name=project_name,
+        # TODO: Review unreachable code - total_duration=total_duration
+        # TODO: Review unreachable code - )
 
-        # Add scenes
-        for scene in scenes:
-            shot_list.add_scene(scene)
+        # TODO: Review unreachable code - # Add scenes
+        # TODO: Review unreachable code - for scene in scenes:
+        # TODO: Review unreachable code - shot_list.add_scene(scene)
 
-        # Generate shots for each scene
-        shot_number = 1
-        for scene in scenes:
-            shots = self._generate_shots_for_scene(
-                scene,
-                shot_number,
-                target_duration
-            )
+        # TODO: Review unreachable code - # Generate shots for each scene
+        # TODO: Review unreachable code - shot_number = 1
+        # TODO: Review unreachable code - for scene in scenes:
+        # TODO: Review unreachable code - shots = self._generate_shots_for_scene(
+        # TODO: Review unreachable code - scene,
+        # TODO: Review unreachable code - shot_number,
+        # TODO: Review unreachable code - target_duration
+        # TODO: Review unreachable code - )
 
-            for shot in shots:
-                shot_list.add_shot(shot)
-                shot_number += 1
+        # TODO: Review unreachable code - for shot in shots:
+        # TODO: Review unreachable code - shot_list.add_shot(shot)
+        # TODO: Review unreachable code - shot_number += 1
 
-        # Add AI suggestions if enabled
-        if self.use_ai_suggestions:
-            shot_list = self._enhance_with_ai_suggestions(shot_list, scenes)
+        # TODO: Review unreachable code - # Add AI suggestions if enabled
+        # TODO: Review unreachable code - if self.use_ai_suggestions:
+        # TODO: Review unreachable code - shot_list = self._enhance_with_ai_suggestions(shot_list, scenes)
 
-        return shot_list
+        # TODO: Review unreachable code - return shot_list
 
     def _generate_shots_for_scene(
         self,
@@ -190,213 +190,213 @@ class ShotListGenerator:
 
         return shots
 
-    def _distribute_shot_types(
-        self,
-        templates: list[tuple[str, float, str]],
-        num_shots: int
-    ) -> list[tuple[str, str]]:
-        """Distribute shot types based on weights."""
-        if num_shots <= 0:
-            return []
+    # TODO: Review unreachable code - def _distribute_shot_types(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - templates: list[tuple[str, float, str]],
+    # TODO: Review unreachable code - num_shots: int
+    # TODO: Review unreachable code - ) -> list[tuple[str, str]]:
+    # TODO: Review unreachable code - """Distribute shot types based on weights."""
+    # TODO: Review unreachable code - if num_shots <= 0:
+    # TODO: Review unreachable code - return []
 
-        # Normalize weights
-        total_weight = sum(t[1] for t in templates)
+    # TODO: Review unreachable code - # Normalize weights
+    # TODO: Review unreachable code - total_weight = sum(t[1] for t in templates)
 
-        distributed = []
-        for shot_type, weight, description in templates:
-            count = max(1, int(num_shots * weight / total_weight))
-            distributed.extend([(shot_type, description)] * count)
+    # TODO: Review unreachable code - distributed = []
+    # TODO: Review unreachable code - for shot_type, weight, description in templates:
+    # TODO: Review unreachable code - count = max(1, int(num_shots * weight / total_weight))
+    # TODO: Review unreachable code - distributed.extend([(shot_type, description)] * count)
 
-        # Adjust to exact number
-        if len(distributed) > num_shots:
-            distributed = distributed[:num_shots]
-        elif len(distributed) < num_shots:
-            # Repeat pattern
-            while len(distributed) < num_shots:
-                distributed.append(distributed[len(distributed) % len(templates)])
+    # TODO: Review unreachable code - # Adjust to exact number
+    # TODO: Review unreachable code - if len(distributed) > num_shots:
+    # TODO: Review unreachable code - distributed = distributed[:num_shots]
+    # TODO: Review unreachable code - elif len(distributed) < num_shots:
+    # TODO: Review unreachable code - # Repeat pattern
+    # TODO: Review unreachable code - while len(distributed) < num_shots:
+    # TODO: Review unreachable code - distributed.append(distributed[len(distributed) % len(templates)])
 
-        return distributed
+    # TODO: Review unreachable code - return distributed
 
-    def _add_technical_details(self, shot: Shot, scene: Scene, style: str):
-        """Add technical details based on style."""
-        if style == "cinematic":
-            # Cinematic style preferences
-            shot.lens = self._suggest_lens_cinematic(shot.shot_type)
-            shot.camera_movement = self._suggest_movement_cinematic(scene)
-            shot.camera_angle = "Eye level" if "close" in shot.shot_type.lower() else "Slightly low"
+    # TODO: Review unreachable code - def _add_technical_details(self, shot: Shot, scene: Scene, style: str):
+    # TODO: Review unreachable code - """Add technical details based on style."""
+    # TODO: Review unreachable code - if style == "cinematic":
+    # TODO: Review unreachable code - # Cinematic style preferences
+    # TODO: Review unreachable code - shot.lens = self._suggest_lens_cinematic(shot.shot_type)
+    # TODO: Review unreachable code - shot.camera_movement = self._suggest_movement_cinematic(scene)
+    # TODO: Review unreachable code - shot.camera_angle = "Eye level" if "close" in shot.shot_type.lower() else "Slightly low"
 
-        elif style == "documentary":
-            # Documentary style
-            shot.lens = "24-70mm zoom"
-            shot.camera_movement = "Handheld" if scene.scene_type == SceneType.ACTION else "Tripod"
-            shot.camera_angle = "Eye level"
+    # TODO: Review unreachable code - elif style == "documentary":
+    # TODO: Review unreachable code - # Documentary style
+    # TODO: Review unreachable code - shot.lens = "24-70mm zoom"
+    # TODO: Review unreachable code - shot.camera_movement = "Handheld" if scene.scene_type == SceneType.ACTION else "Tripod"
+    # TODO: Review unreachable code - shot.camera_angle = "Eye level"
 
-        elif style == "commercial":
-            # Commercial style
-            shot.lens = self._suggest_lens_commercial(shot.shot_type)
-            shot.camera_movement = "Steadicam" if scene.motion_intensity > 0.5 else "Dolly"
-            shot.camera_angle = "Dynamic"
+    # TODO: Review unreachable code - elif style == "commercial":
+    # TODO: Review unreachable code - # Commercial style
+    # TODO: Review unreachable code - shot.lens = self._suggest_lens_commercial(shot.shot_type)
+    # TODO: Review unreachable code - shot.camera_movement = "Steadicam" if scene.motion_intensity > 0.5 else "Dolly"
+    # TODO: Review unreachable code - shot.camera_angle = "Dynamic"
 
-        # Add notes based on scene characteristics
-        if scene.mood:
-            shot.notes.append(f"Mood: {scene.mood}")
-        if scene.dominant_colors:
-            color_note = f"Key colors: {', '.join(c[0] for c in scene.dominant_colors[:3])}"
-            shot.notes.append(color_note)
+    # TODO: Review unreachable code - # Add notes based on scene characteristics
+    # TODO: Review unreachable code - if scene.mood:
+    # TODO: Review unreachable code - shot.notes.append(f"Mood: {scene.mood}")
+    # TODO: Review unreachable code - if scene.dominant_colors:
+    # TODO: Review unreachable code - color_note = f"Key colors: {', '.join(c[0] for c in scene.dominant_colors[:3])}"
+    # TODO: Review unreachable code - shot.notes.append(color_note)
 
-    def _suggest_lens_cinematic(self, shot_type: str) -> str:
-        """Suggest lens for cinematic style."""
-        lens_map = {
-            "Wide": "18-24mm",
-            "Extreme wide": "14-18mm",
-            "Medium": "35-50mm",
-            "Close-up": "85-135mm",
-            "Extreme close-up": "100mm macro",
-            "Two-shot": "50mm",
-            "Over-shoulder": "85mm",
-        }
+    # TODO: Review unreachable code - def _suggest_lens_cinematic(self, shot_type: str) -> str:
+    # TODO: Review unreachable code - """Suggest lens for cinematic style."""
+    # TODO: Review unreachable code - lens_map = {
+    # TODO: Review unreachable code - "Wide": "18-24mm",
+    # TODO: Review unreachable code - "Extreme wide": "14-18mm",
+    # TODO: Review unreachable code - "Medium": "35-50mm",
+    # TODO: Review unreachable code - "Close-up": "85-135mm",
+    # TODO: Review unreachable code - "Extreme close-up": "100mm macro",
+    # TODO: Review unreachable code - "Two-shot": "50mm",
+    # TODO: Review unreachable code - "Over-shoulder": "85mm",
+    # TODO: Review unreachable code - }
 
-        for key, lens in lens_map.items():
-            if key.lower() in shot_type.lower():
-                return lens
+    # TODO: Review unreachable code - for key, lens in lens_map.items():
+    # TODO: Review unreachable code - if key.lower() in shot_type.lower():
+    # TODO: Review unreachable code - return lens
 
-        return "50mm"  # Default
+    # TODO: Review unreachable code - return "50mm"  # Default
 
-    def _suggest_lens_commercial(self, shot_type: str) -> str:
-        """Suggest lens for commercial style."""
-        if "wide" in shot_type.lower():
-            return "24-35mm"
-        elif "close" in shot_type.lower():
-            return "85-105mm"
-        else:
-            return "50-85mm"
+    # TODO: Review unreachable code - def _suggest_lens_commercial(self, shot_type: str) -> str:
+    # TODO: Review unreachable code - """Suggest lens for commercial style."""
+    # TODO: Review unreachable code - if "wide" in shot_type.lower():
+    # TODO: Review unreachable code - return "24-35mm"
+    # TODO: Review unreachable code - elif "close" in shot_type.lower():
+    # TODO: Review unreachable code - return "85-105mm"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return "50-85mm"
 
-    def _suggest_movement_cinematic(self, scene: Scene) -> str:
-        """Suggest camera movement for cinematic style."""
-        if scene.scene_type == SceneType.ESTABLISHING:
-            return "Slow dolly in"
-        elif scene.scene_type == SceneType.ACTION:
-            return "Tracking"
-        elif scene.scene_type == SceneType.DIALOGUE:
-            return "Static or subtle push"
-        elif scene.motion_intensity > 0.7:
-            return "Steadicam follow"
-        else:
-            return "Static with subtle movement"
+    # TODO: Review unreachable code - def _suggest_movement_cinematic(self, scene: Scene) -> str:
+    # TODO: Review unreachable code - """Suggest camera movement for cinematic style."""
+    # TODO: Review unreachable code - if scene.scene_type == SceneType.ESTABLISHING:
+    # TODO: Review unreachable code - return "Slow dolly in"
+    # TODO: Review unreachable code - elif scene.scene_type == SceneType.ACTION:
+    # TODO: Review unreachable code - return "Tracking"
+    # TODO: Review unreachable code - elif scene.scene_type == SceneType.DIALOGUE:
+    # TODO: Review unreachable code - return "Static or subtle push"
+    # TODO: Review unreachable code - elif scene.motion_intensity > 0.7:
+    # TODO: Review unreachable code - return "Steadicam follow"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return "Static with subtle movement"
 
-    def _enhance_with_ai_suggestions(
-        self,
-        shot_list: ShotList,
-        scenes: list[Scene]
-    ) -> ShotList:
-        """Enhance shot list with AI suggestions."""
-        if not self.ai_provider:
-            return shot_list
+    # TODO: Review unreachable code - def _enhance_with_ai_suggestions(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - shot_list: ShotList,
+    # TODO: Review unreachable code - scenes: list[Scene]
+    # TODO: Review unreachable code - ) -> ShotList:
+    # TODO: Review unreachable code - """Enhance shot list with AI suggestions."""
+    # TODO: Review unreachable code - if not self.ai_provider:
+    # TODO: Review unreachable code - return shot_list
 
-        try:
-            analyzer = ImageAnalyzer()
-            if self.ai_provider and self.ai_provider not in analyzer.analyzers:
-                logger.warning(f"Provider {self.ai_provider} not available")
-                return shot_list
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - analyzer = ImageAnalyzer()
+    # TODO: Review unreachable code - if self.ai_provider and self.ai_provider not in analyzer.analyzers:
+    # TODO: Review unreachable code - logger.warning(f"Provider {self.ai_provider} not available")
+    # TODO: Review unreachable code - return shot_list
 
-            # Get overall project suggestions
-            {
-                "style": self.style,
-                "scene_count": len(scenes),
-                "total_duration": shot_list.total_duration,
-                "scene_types": [s.scene_type.value for s in scenes],
-            }
+    # TODO: Review unreachable code - # Get overall project suggestions
+    # TODO: Review unreachable code - {
+    # TODO: Review unreachable code - "style": self.style,
+    # TODO: Review unreachable code - "scene_count": len(scenes),
+    # TODO: Review unreachable code - "total_duration": shot_list.total_duration,
+    # TODO: Review unreachable code - "scene_types": [s.scene_type.value for s in scenes],
+    # TODO: Review unreachable code - }
 
-            # This would call the AI provider for suggestions
-            # For now, add some generic notes
-            shot_list.notes.extend([
-                f"Visual style: {self.style}",
-                f"Average shot duration: {shot_list.average_shot_duration:.1f}s",
-                "Consider color grading for mood consistency",
-            ])
+    # TODO: Review unreachable code - # This would call the AI provider for suggestions
+    # TODO: Review unreachable code - # For now, add some generic notes
+    # TODO: Review unreachable code - shot_list.notes.extend([
+    # TODO: Review unreachable code - f"Visual style: {self.style}",
+    # TODO: Review unreachable code - f"Average shot duration: {shot_list.average_shot_duration:.1f}s",
+    # TODO: Review unreachable code - "Consider color grading for mood consistency",
+    # TODO: Review unreachable code - ])
 
-            # Add scene-specific suggestions
-            for scene in scenes:
-                scene_shots = shot_list.get_shots_for_scene(scene.scene_id)
-                if scene.ai_suggestions:
-                    for shot in scene_shots:
-                        shot.notes.extend(scene.ai_suggestions[:2])  # Add top suggestions
+    # TODO: Review unreachable code - # Add scene-specific suggestions
+    # TODO: Review unreachable code - for scene in scenes:
+    # TODO: Review unreachable code - scene_shots = shot_list.get_shots_for_scene(scene.scene_id)
+    # TODO: Review unreachable code - if scene.ai_suggestions:
+    # TODO: Review unreachable code - for shot in scene_shots:
+    # TODO: Review unreachable code - shot.notes.extend(scene.ai_suggestions[:2])  # Add top suggestions
 
-        except Exception as e:
-            logger.warning(f"AI enhancement failed: {e}")
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.warning(f"AI enhancement failed: {e}")
 
-        return shot_list
+    # TODO: Review unreachable code - return shot_list
 
-    def export_shot_list(
-        self,
-        shot_list: ShotList,
-        output_path: Path,
-        format: str = "json"
-    ):
-        """
-        Export shot list to file.
+    # TODO: Review unreachable code - def export_shot_list(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - shot_list: ShotList,
+    # TODO: Review unreachable code - output_path: Path,
+    # TODO: Review unreachable code - format: str = "json"
+    # TODO: Review unreachable code - ):
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Export shot list to file.
 
-        Args:
-            shot_list: Shot list to export
-            output_path: Output file path
-            format: Export format (json, csv, pdf)
-        """
-        output_path = Path(output_path)
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - shot_list: Shot list to export
+    # TODO: Review unreachable code - output_path: Output file path
+    # TODO: Review unreachable code - format: Export format (json, csv, pdf)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - output_path = Path(output_path)
 
-        if format == "json":
-            with open(output_path, 'w') as f:
-                json.dump(shot_list.export_to_dict(), f, indent=2)
+    # TODO: Review unreachable code - if format == "json":
+    # TODO: Review unreachable code - with open(output_path, 'w') as f:
+    # TODO: Review unreachable code - json.dump(shot_list.export_to_dict(), f, indent=2)
 
-        elif format == "csv":
-            import csv
+    # TODO: Review unreachable code - elif format == "csv":
+    # TODO: Review unreachable code - import csv
 
-            with open(output_path, 'w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow([
-                    "Shot #", "Scene", "Type", "Duration",
-                    "Description", "Camera", "Movement", "Notes"
-                ])
+    # TODO: Review unreachable code - with open(output_path, 'w', newline='') as f:
+    # TODO: Review unreachable code - writer = csv.writer(f)
+    # TODO: Review unreachable code - writer.writerow([
+    # TODO: Review unreachable code - "Shot #", "Scene", "Type", "Duration",
+    # TODO: Review unreachable code - "Description", "Camera", "Movement", "Notes"
+    # TODO: Review unreachable code - ])
 
-                for shot in shot_list.shots:
-                    writer.writerow([
-                        shot.shot_number,
-                        shot.scene_id,
-                        shot.shot_type,
-                        f"{shot.duration:.1f}s",
-                        shot.description,
-                        shot.camera_angle or "",
-                        shot.camera_movement or "",
-                        "; ".join(shot.notes)
-                    ])
+    # TODO: Review unreachable code - for shot in shot_list.shots:
+    # TODO: Review unreachable code - writer.writerow([
+    # TODO: Review unreachable code - shot.shot_number,
+    # TODO: Review unreachable code - shot.scene_id,
+    # TODO: Review unreachable code - shot.shot_type,
+    # TODO: Review unreachable code - f"{shot.duration:.1f}s",
+    # TODO: Review unreachable code - shot.description,
+    # TODO: Review unreachable code - shot.camera_angle or "",
+    # TODO: Review unreachable code - shot.camera_movement or "",
+    # TODO: Review unreachable code - "; ".join(shot.notes)
+    # TODO: Review unreachable code - ])
 
-        elif format == "markdown":
-            with open(output_path, 'w') as f:
-                f.write(f"# Shot List: {shot_list.project_name}\n\n")
-                f.write(f"**Total Duration**: {shot_list.total_duration:.1f}s\n")
-                f.write(f"**Shot Count**: {shot_list.shot_count}\n")
-                f.write(f"**Scene Count**: {shot_list.scene_count}\n\n")
+    # TODO: Review unreachable code - elif format == "markdown":
+    # TODO: Review unreachable code - with open(output_path, 'w') as f:
+    # TODO: Review unreachable code - f.write(f"# Shot List: {shot_list.project_name}\n\n")
+    # TODO: Review unreachable code - f.write(f"**Total Duration**: {shot_list.total_duration:.1f}s\n")
+    # TODO: Review unreachable code - f.write(f"**Shot Count**: {shot_list.shot_count}\n")
+    # TODO: Review unreachable code - f.write(f"**Scene Count**: {shot_list.scene_count}\n\n")
 
-                current_scene = None
-                for shot in shot_list.shots:
-                    if shot.scene_id != current_scene:
-                        current_scene = shot.scene_id
-                        # Find scene if it exists
-                        scene = next((s for s in shot_list.scenes if s.scene_id == current_scene), None)
-                        if scene:
-                            f.write(f"\n## {current_scene} - {scene.scene_type.value}\n\n")
-                            if scene.ai_description:
-                                f.write(f"_{scene.ai_description}_\n\n")
-                        else:
-                            f.write(f"\n## {current_scene}\n\n")
+    # TODO: Review unreachable code - current_scene = None
+    # TODO: Review unreachable code - for shot in shot_list.shots:
+    # TODO: Review unreachable code - if shot.scene_id != current_scene:
+    # TODO: Review unreachable code - current_scene = shot.scene_id
+    # TODO: Review unreachable code - # Find scene if it exists
+    # TODO: Review unreachable code - scene = next((s for s in shot_list.scenes if s.scene_id == current_scene), None)
+    # TODO: Review unreachable code - if scene:
+    # TODO: Review unreachable code - f.write(f"\n## {current_scene} - {scene.scene_type.value}\n\n")
+    # TODO: Review unreachable code - if scene.ai_description:
+    # TODO: Review unreachable code - f.write(f"_{scene.ai_description}_\n\n")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - f.write(f"\n## {current_scene}\n\n")
 
-                    f.write(f"**Shot {shot.shot_number}** - {shot.shot_type} ({shot.duration:.1f}s)\n")
-                    f.write(f"- {shot.description}\n")
-                    if shot.camera_movement:
-                        f.write(f"- Camera: {shot.camera_movement}\n")
-                    if shot.lens:
-                        f.write(f"- Lens: {shot.lens}\n")
-                    for note in shot.notes:
-                        f.write(f"- {note}\n")
-                    f.write("\n")
+    # TODO: Review unreachable code - f.write(f"**Shot {shot.shot_number}** - {shot.shot_type} ({shot.duration:.1f}s)\n")
+    # TODO: Review unreachable code - f.write(f"- {shot.description}\n")
+    # TODO: Review unreachable code - if shot.camera_movement:
+    # TODO: Review unreachable code - f.write(f"- Camera: {shot.camera_movement}\n")
+    # TODO: Review unreachable code - if shot.lens:
+    # TODO: Review unreachable code - f.write(f"- Lens: {shot.lens}\n")
+    # TODO: Review unreachable code - for note in shot.notes:
+    # TODO: Review unreachable code - f.write(f"- {note}\n")
+    # TODO: Review unreachable code - f.write("\n")
 
-        logger.info(f"Exported shot list to {output_path} ({format})")
+    # TODO: Review unreachable code - logger.info(f"Exported shot list to {output_path} ({format})")

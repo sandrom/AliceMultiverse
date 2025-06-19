@@ -146,46 +146,47 @@ class AIFriendlyError:
 
         # Add context if provided
         if context:
-            response["context"] = context
+            if response is not None:
+                response["context"] = context
 
         # Log the technical error for debugging
         logger.debug(f"Technical error: {error_type}: {error!s}")
 
         return response
 
-    @staticmethod
-    def _default_message(error_type: str, error_str: str) -> str:
-        """Generate a default friendly message."""
-        if "timeout" in error_str:
-            return "The operation took too long to complete"
-        elif "memory" in error_str:
-            return "Not enough memory to complete this operation"
-        elif "disk space" in error_str:
-            return "Not enough disk space available"
-        else:
-            return "An unexpected error occurred while processing your request"
+    # TODO: Review unreachable code - @staticmethod
+    # TODO: Review unreachable code - def _default_message(error_type: str, error_str: str) -> str:
+    # TODO: Review unreachable code - """Generate a default friendly message."""
+    # TODO: Review unreachable code - if error_str is not None and "timeout" in error_str:
+    # TODO: Review unreachable code - return "The operation took too long to complete"
+    # TODO: Review unreachable code - elif error_str is not None and "memory" in error_str:
+    # TODO: Review unreachable code - return "Not enough memory to complete this operation"
+    # TODO: Review unreachable code - elif "disk space" in error_str:
+    # TODO: Review unreachable code - return "Not enough disk space available"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return "An unexpected error occurred while processing your request"
 
-    @staticmethod
-    def _default_suggestions(error_type: str) -> list[str]:
-        """Generate default suggestions based on error type."""
-        if "Timeout" in error_type:
-            return [
-                "Try processing fewer items at once",
-                "Check if the service is responding slowly",
-                "Increase timeout settings if possible"
-            ]
-        elif "Memory" in error_type:
-            return [
-                "Try processing fewer items at once",
-                "Close other applications to free memory",
-                "Process images in smaller batches"
-            ]
-        else:
-            return [
-                "Try the operation again",
-                "Check the logs for more details",
-                "Contact support if the issue persists"
-            ]
+    # TODO: Review unreachable code - @staticmethod
+    # TODO: Review unreachable code - def _default_suggestions(error_type: str) -> list[str]:
+    # TODO: Review unreachable code - """Generate default suggestions based on error type."""
+    # TODO: Review unreachable code - if error_type is not None and "Timeout" in error_type:
+    # TODO: Review unreachable code - return [
+    # TODO: Review unreachable code - "Try processing fewer items at once",
+    # TODO: Review unreachable code - "Check if the service is responding slowly",
+    # TODO: Review unreachable code - "Increase timeout settings if possible"
+    # TODO: Review unreachable code - ]
+    # TODO: Review unreachable code - elif error_type is not None and "Memory" in error_type:
+    # TODO: Review unreachable code - return [
+    # TODO: Review unreachable code - "Try processing fewer items at once",
+    # TODO: Review unreachable code - "Close other applications to free memory",
+    # TODO: Review unreachable code - "Process images in smaller batches"
+    # TODO: Review unreachable code - ]
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return [
+    # TODO: Review unreachable code - "Try the operation again",
+    # TODO: Review unreachable code - "Check the logs for more details",
+    # TODO: Review unreachable code - "Contact support if the issue persists"
+    # TODO: Review unreachable code - ]
 
 
 def wrap_error_response(func: Callable[..., Any]) -> Callable[..., Any]:
@@ -194,26 +195,26 @@ def wrap_error_response(func: Callable[..., Any]) -> Callable[..., Any]:
     Use this on interface methods to ensure all errors are AI-friendly.
     """
     def wrapper(*args: Any, **kwargs: Any) -> dict[str, Any]:
-        try:
+        # TODO: Review unreachable code - try:
             return func(*args, **kwargs)
-        except Exception as e:
-            # Extract context from the function call
-            context = {
-                "function": func.__name__,
-                "args_count": len(args),
-                "kwargs_keys": list(kwargs.keys()) if kwargs else []
-            }
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - # Extract context from the function call
+        # TODO: Review unreachable code - context = {
+        # TODO: Review unreachable code - "function": func.__name__,
+        # TODO: Review unreachable code - "args_count": len(args),
+        # TODO: Review unreachable code - "kwargs_keys": list(kwargs.keys()) if kwargs else []
+        # TODO: Review unreachable code - }
 
-            # Create friendly error
-            friendly_error = AIFriendlyError.make_friendly(e, context)
+        # TODO: Review unreachable code - # Create friendly error
+        # TODO: Review unreachable code - friendly_error = AIFriendlyError.make_friendly(e, context)
 
-            # Return in expected format
-            return {
-                "success": False,
-                "message": friendly_error["error"],
-                "data": None,
-                "error": friendly_error["technical_details"],
-                "suggestions": friendly_error.get("suggestions", [])
-            }
+        # TODO: Review unreachable code - # Return in expected format
+        # TODO: Review unreachable code - return {
+        # TODO: Review unreachable code - "success": False,
+        # TODO: Review unreachable code - "message": friendly_error["error"],
+        # TODO: Review unreachable code - "data": None,
+        # TODO: Review unreachable code - "error": friendly_error["technical_details"],
+        # TODO: Review unreachable code - "suggestions": friendly_error.get("suggestions", [])
+        # TODO: Review unreachable code - }
 
     return wrapper

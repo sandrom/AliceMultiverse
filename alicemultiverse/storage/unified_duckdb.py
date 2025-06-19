@@ -53,22 +53,22 @@ class DuckDBSearchCache(UnifiedDuckDBStorage):
         return self.conn
 
 
-class DuckDBSearch(UnifiedDuckDBStorage):
-    """Backward compatibility class for standalone DuckDBSearch.
+# TODO: Review unreachable code - class DuckDBSearch(UnifiedDuckDBStorage):
+# TODO: Review unreachable code - """Backward compatibility class for standalone DuckDBSearch.
 
-    This is now just an alias for UnifiedDuckDBStorage.
-    """
+# TODO: Review unreachable code - This is now just an alias for UnifiedDuckDBStorage.
+# TODO: Review unreachable code - """
 
-    def index_asset(self, metadata: dict[str, Any]) -> None:
-        """Index an asset (backward compatibility method).
+# TODO: Review unreachable code - def index_asset(self, metadata: dict[str, Any]) -> None:
+# TODO: Review unreachable code - """Index an asset (backward compatibility method).
 
-        Args:
-            metadata: Asset metadata including content_hash and file_path
-        """
-        content_hash = metadata.get("content_hash")
-        file_path = metadata.get("file_path")
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - metadata: Asset metadata including content_hash and file_path
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - content_hash = metadata.get("content_hash")
+# TODO: Review unreachable code - file_path = metadata.get("file_path")
 
-        if not content_hash or not file_path:
-            raise ValueError("content_hash and file_path are required")
+# TODO: Review unreachable code - if not content_hash or not file_path:
+# TODO: Review unreachable code - raise ValueError("content_hash and file_path are required")
 
-        self.upsert_asset(content_hash, file_path, metadata)
+# TODO: Review unreachable code - self.upsert_asset(content_hash, file_path, metadata)

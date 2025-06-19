@@ -175,72 +175,72 @@ class StyleTransferWorkflow(WorkflowTemplate):
 
         return steps
 
-    def _build_style_prompt(self, params: dict, approach: dict) -> str:
-        """Build a style transfer prompt."""
-        base_prompt = params.get("style_reference", "artistic style")
+    # TODO: Review unreachable code - def _build_style_prompt(self, params: dict, approach: dict) -> str:
+    # TODO: Review unreachable code - """Build a style transfer prompt."""
+    # TODO: Review unreachable code - base_prompt = params.get("style_reference", "artistic style")
 
-        # Add approach-specific modifiers
-        if approach["name"] == "bold":
-            modifiers = "bold, vibrant, high contrast"
-        elif approach["name"] == "subtle":
-            modifiers = "subtle, refined, delicate"
-        elif approach["name"] == "experimental":
-            modifiers = "experimental, unique, creative interpretation"
-        else:
-            modifiers = "balanced, harmonious"
+    # TODO: Review unreachable code - # Add approach-specific modifiers
+    # TODO: Review unreachable code - if approach is not None and approach["name"] == "bold":
+    # TODO: Review unreachable code - modifiers = "bold, vibrant, high contrast"
+    # TODO: Review unreachable code - elif approach["name"] == "subtle":
+    # TODO: Review unreachable code - modifiers = "subtle, refined, delicate"
+    # TODO: Review unreachable code - elif approach["name"] == "experimental":
+    # TODO: Review unreachable code - modifiers = "experimental, unique, creative interpretation"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - modifiers = "balanced, harmonious"
 
-        # Combine with original prompt if provided
-        if context_prompt := params.get("prompt"):
-            return f"{context_prompt}, in the style of {base_prompt}, {modifiers}"
-        else:
-            return f"Image in the style of {base_prompt}, {modifiers}"
+    # TODO: Review unreachable code - # Combine with original prompt if provided
+    # TODO: Review unreachable code - if context_prompt := params.get("prompt"):
+    # TODO: Review unreachable code - return f"{context_prompt}, in the style of {base_prompt}, {modifiers}"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return f"Image in the style of {base_prompt}, {modifiers}"
 
-    def validate(self, context: WorkflowContext) -> list[str]:
-        """Validate the workflow can execute."""
-        errors = super().validate(context)
-        params = context.initial_params
+    # TODO: Review unreachable code - def validate(self, context: WorkflowContext) -> list[str]:
+    # TODO: Review unreachable code - """Validate the workflow can execute."""
+    # TODO: Review unreachable code - errors = super().validate(context)
+    # TODO: Review unreachable code - params = context.initial_params
 
-        # Check if we have input or will generate
-        if not params.get("input_image") and not context.initial_prompt:
-            errors.append("Either input_image or initial_prompt is required")
+    # TODO: Review unreachable code - # Check if we have input or will generate
+    # TODO: Review unreachable code - if not params.get("input_image") and not context.initial_prompt:
+    # TODO: Review unreachable code - errors.append("Either input_image or initial_prompt is required")
 
-        # Check style reference
-        if not params.get("style_reference"):
-            errors.append("style_reference is required (path or description)")
+    # TODO: Review unreachable code - # Check style reference
+    # TODO: Review unreachable code - if not params.get("style_reference"):
+    # TODO: Review unreachable code - errors.append("style_reference is required (path or description)")
 
-        # Check num_variations
-        num_variations = params.get("num_variations", 3)
-        if num_variations < 1 or num_variations > 5:
-            errors.append(f"num_variations {num_variations} should be between 1 and 5")
+    # TODO: Review unreachable code - # Check num_variations
+    # TODO: Review unreachable code - num_variations = params.get("num_variations", 3)
+    # TODO: Review unreachable code - if num_variations < 1 or num_variations > 5:
+    # TODO: Review unreachable code - errors.append(f"num_variations {num_variations} should be between 1 and 5")
 
-        # Check strength values
-        style_strength = params.get("style_strength", 0.7)
-        if style_strength < 0 or style_strength > 1:
-            errors.append(f"style_strength {style_strength} should be between 0 and 1")
+    # TODO: Review unreachable code - # Check strength values
+    # TODO: Review unreachable code - style_strength = params.get("style_strength", 0.7)
+    # TODO: Review unreachable code - if style_strength < 0 or style_strength > 1:
+    # TODO: Review unreachable code - errors.append(f"style_strength {style_strength} should be between 0 and 1")
 
-        return errors
+    # TODO: Review unreachable code - return errors
 
-    def estimate_cost(self, context: WorkflowContext) -> float:
-        """Estimate total workflow cost."""
-        params = context.initial_params
-        total = 0.0
+    # TODO: Review unreachable code - def estimate_cost(self, context: WorkflowContext) -> float:
+    # TODO: Review unreachable code - """Estimate total workflow cost."""
+    # TODO: Review unreachable code - params = context.initial_params
+    # TODO: Review unreachable code - total = 0.0
 
-        # Base image generation (if needed)
-        if not params.get("input_image"):
-            total += 0.03
+    # TODO: Review unreachable code - # Base image generation (if needed)
+    # TODO: Review unreachable code - if not params.get("input_image"):
+    # TODO: Review unreachable code - total += 0.03
 
-        # Style transfer variations
-        num_variations = params.get("num_variations", 3)
-        if params.get("style_provider") == "firefly":
-            total += 0.06 * num_variations  # Firefly style transfer
-        else:
-            total += 0.03 * num_variations  # Generic img2img
+    # TODO: Review unreachable code - # Style transfer variations
+    # TODO: Review unreachable code - num_variations = params.get("num_variations", 3)
+    # TODO: Review unreachable code - if params.get("style_provider") == "firefly":
+    # TODO: Review unreachable code - total += 0.06 * num_variations  # Firefly style transfer
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - total += 0.03 * num_variations  # Generic img2img
 
-        # Enhancement
-        if params.get("enhance_results", True):
-            total += 0.08 * num_variations  # Enhancement cost
+    # TODO: Review unreachable code - # Enhancement
+    # TODO: Review unreachable code - if params.get("enhance_results", True):
+    # TODO: Review unreachable code - total += 0.08 * num_variations  # Enhancement cost
 
-        return total
+    # TODO: Review unreachable code - return total
 
 
 class ArtisticStyleWorkflow(StyleTransferWorkflow):
@@ -266,25 +266,25 @@ class ArtisticStyleWorkflow(StyleTransferWorkflow):
         return super().define_steps(context)
 
 
-class PhotoStyleWorkflow(StyleTransferWorkflow):
-    """Workflow optimized for photographic style transfer.
+# TODO: Review unreachable code - class PhotoStyleWorkflow(StyleTransferWorkflow):
+# TODO: Review unreachable code - """Workflow optimized for photographic style transfer.
 
-    Maintains photorealism while applying style.
-    """
+# TODO: Review unreachable code - Maintains photorealism while applying style.
+# TODO: Review unreachable code - """
 
-    def __init__(self):
-        super().__init__(name="PhotoStyle")
+# TODO: Review unreachable code - def __init__(self):
+# TODO: Review unreachable code - super().__init__(name="PhotoStyle")
 
-    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
-        """Define photo style steps."""
-        # Set photographic defaults
-        params = context.initial_params
-        params.setdefault("style_provider", "leonardo")
-        params.setdefault("style_model", "photoreal")
-        params.setdefault("num_variations", 3)
-        params.setdefault("style_strength", 0.5)  # Subtler
-        params.setdefault("preserve_content", 0.7)  # Preserve more
-        params.setdefault("enhance_results", True)
-        params.setdefault("enhance_scale", 2)  # Higher quality
+# TODO: Review unreachable code - def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
+# TODO: Review unreachable code - """Define photo style steps."""
+# TODO: Review unreachable code - # Set photographic defaults
+# TODO: Review unreachable code - params = context.initial_params
+# TODO: Review unreachable code - params.setdefault("style_provider", "leonardo")
+# TODO: Review unreachable code - params.setdefault("style_model", "photoreal")
+# TODO: Review unreachable code - params.setdefault("num_variations", 3)
+# TODO: Review unreachable code - params.setdefault("style_strength", 0.5)  # Subtler
+# TODO: Review unreachable code - params.setdefault("preserve_content", 0.7)  # Preserve more
+# TODO: Review unreachable code - params.setdefault("enhance_results", True)
+# TODO: Review unreachable code - params.setdefault("enhance_scale", 2)  # Higher quality
 
-        return super().define_steps(context)
+# TODO: Review unreachable code - return super().define_steps(context)

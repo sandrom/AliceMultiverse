@@ -184,26 +184,26 @@ class WorkflowExecutor:
 
             return result
 
-        except Exception as e:
-            logger.error(f"Workflow {workflow.name} failed: {e}", exc_info=True)
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Workflow {workflow.name} failed: {e}", exc_info=True)
 
-            # Publish failure event
-            await self._publish_workflow_failed(workflow.name, workflow_id, str(e))
+        # TODO: Review unreachable code - # Publish failure event
+        # TODO: Review unreachable code - await self._publish_workflow_failed(workflow.name, workflow_id, str(e))
 
-            return WorkflowResult(
-                workflow_name=workflow.name,
-                status=WorkflowStatus.FAILED,
-                context=context,
-                total_cost=context.total_cost,
-                execution_time=time.time() - context.start_time.timestamp(),
-                completed_steps=0,
-                total_steps=total_steps,
-                errors=[str(e)]
-            )
-        finally:
-            # Cleanup
-            workflow.cleanup(context)
-            self._running_workflows.pop(workflow_id, None)
+        # TODO: Review unreachable code - return WorkflowResult(
+        # TODO: Review unreachable code - workflow_name=workflow.name,
+        # TODO: Review unreachable code - status=WorkflowStatus.FAILED,
+        # TODO: Review unreachable code - context=context,
+        # TODO: Review unreachable code - total_cost=context.total_cost,
+        # TODO: Review unreachable code - execution_time=time.time() - context.start_time.timestamp(),
+        # TODO: Review unreachable code - completed_steps=0,
+        # TODO: Review unreachable code - total_steps=total_steps,
+        # TODO: Review unreachable code - errors=[str(e)]
+        # TODO: Review unreachable code - )
+        # TODO: Review unreachable code - finally:
+        # TODO: Review unreachable code - # Cleanup
+        # TODO: Review unreachable code - workflow.cleanup(context)
+        # TODO: Review unreachable code - self._running_workflows.pop(workflow_id, None)
 
     async def _execute_step(
         self,
@@ -271,11 +271,12 @@ class WorkflowExecutor:
         params.update(context.initial_params)
 
         # Handle input from previous step
-        if "input_from" in params:
+        if params is not None and "input_from" in params:
             input_step = params.pop("input_from")
             prev_result = context.get_previous_result(input_step)
             if prev_result and prev_result.file_path:
-                params["input_image"] = str(prev_result.file_path)
+                if params is not None:
+                    params["input_image"] = str(prev_result.file_path)
 
         # Use prompt from context or parameters
         prompt = params.pop("prompt", context.initial_prompt)
@@ -307,124 +308,124 @@ class WorkflowExecutor:
         # Simple heuristic - could be made configurable
         return "final" in step.name.lower() or "output" in step.name.lower()
 
-    def _get_final_outputs(self, context: WorkflowContext) -> list[Path]:
-        """Get final output files from workflow."""
-        outputs = []
+    # TODO: Review unreachable code - def _get_final_outputs(self, context: WorkflowContext) -> list[Path]:
+    # TODO: Review unreachable code - """Get final output files from workflow."""
+    # TODO: Review unreachable code - outputs = []
 
-        # Get outputs from steps marked as final
-        for step_name, step in context.steps.items():
-            if step.result and step.result.file_path and self._is_final_step(step, context):
-                outputs.append(step.result.file_path)
+    # TODO: Review unreachable code - # Get outputs from steps marked as final
+    # TODO: Review unreachable code - for step_name, step in context.steps.items():
+    # TODO: Review unreachable code - if step.result and step.result.file_path and self._is_final_step(step, context):
+    # TODO: Review unreachable code - outputs.append(step.result.file_path)
 
-        # If no explicit final steps, use last successful step
-        if not outputs:
-            for step_name in reversed(list(context.steps.keys())):
-                step = context.steps[step_name]
-                if step.result and step.result.file_path:
-                    outputs.append(step.result.file_path)
-                    break
+    # TODO: Review unreachable code - # If no explicit final steps, use last successful step
+    # TODO: Review unreachable code - if not outputs:
+    # TODO: Review unreachable code - for step_name in reversed(list(context.steps.keys())):
+    # TODO: Review unreachable code - step = context.steps[step_name]
+    # TODO: Review unreachable code - if step.result and step.result.file_path:
+    # TODO: Review unreachable code - outputs.append(step.result.file_path)
+    # TODO: Review unreachable code - break
 
-        return outputs
+    # TODO: Review unreachable code - return outputs
 
-    async def _estimate_workflow_cost(
-        self,
-        steps: list[WorkflowStep],
-        context: WorkflowContext
-    ) -> float:
-        """Estimate total workflow cost.
+    # TODO: Review unreachable code - async def _estimate_workflow_cost(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - steps: list[WorkflowStep],
+    # TODO: Review unreachable code - context: WorkflowContext
+    # TODO: Review unreachable code - ) -> float:
+    # TODO: Review unreachable code - """Estimate total workflow cost.
 
-        Args:
-            steps: Workflow steps
-            context: Workflow context
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - steps: Workflow steps
+    # TODO: Review unreachable code - context: Workflow context
 
-        Returns:
-            Estimated total cost
-        """
-        total = 0.0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Estimated total cost
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - total = 0.0
 
-        for step in steps:
-            # Skip conditional steps for estimation
-            if step.condition:
-                continue
+    # TODO: Review unreachable code - for step in steps:
+    # TODO: Review unreachable code - # Skip conditional steps for estimation
+    # TODO: Review unreachable code - if step.condition:
+    # TODO: Review unreachable code - continue
 
-            try:
-                # Provider functionality not yet implemented
-                logger.warning(f"Cannot estimate cost for step {step.name} - provider not implemented")
-                # Use a default estimate
-                total += 0.05
-            except Exception as e:
-                logger.warning(f"Could not estimate cost for step {step.name}: {e}")
-                # Use a default estimate
-                total += 0.05
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Provider functionality not yet implemented
+    # TODO: Review unreachable code - logger.warning(f"Cannot estimate cost for step {step.name} - provider not implemented")
+    # TODO: Review unreachable code - # Use a default estimate
+    # TODO: Review unreachable code - total += 0.05
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.warning(f"Could not estimate cost for step {step.name}: {e}")
+    # TODO: Review unreachable code - # Use a default estimate
+    # TODO: Review unreachable code - total += 0.05
 
-        return total
+    # TODO: Review unreachable code - return total
 
-    # Event publishing methods
+    # TODO: Review unreachable code - # Event publishing methods
 
-    async def _publish_workflow_started(
-        self,
-        workflow_name: str,
-        workflow_id: str,
-        total_steps: int
-    ):
-        """Publish workflow started event."""
-        event = WorkflowStartedEvent(
-            workflow_name=workflow_name,
-            workflow_id=workflow_id,
-            total_steps=total_steps
-        )
-        await publish_event(event)
+    # TODO: Review unreachable code - async def _publish_workflow_started(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - workflow_name: str,
+    # TODO: Review unreachable code - workflow_id: str,
+    # TODO: Review unreachable code - total_steps: int
+    # TODO: Review unreachable code - ):
+    # TODO: Review unreachable code - """Publish workflow started event."""
+    # TODO: Review unreachable code - event = WorkflowStartedEvent(
+    # TODO: Review unreachable code - workflow_name=workflow_name,
+    # TODO: Review unreachable code - workflow_id=workflow_id,
+    # TODO: Review unreachable code - total_steps=total_steps
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - await publish_event(event)
 
-    async def _publish_workflow_completed(
-        self,
-        workflow_name: str,
-        workflow_id: str,
-        result: WorkflowResult
-    ):
-        """Publish workflow completed event."""
-        event = WorkflowCompletedEvent(
-            workflow_name=workflow_name,
-            workflow_id=workflow_id,
-            total_cost=result.total_cost,
-            execution_time=result.execution_time,
-            completed_steps=result.completed_steps,
-            total_steps=result.total_steps
-        )
-        await publish_event(event)
+    # TODO: Review unreachable code - async def _publish_workflow_completed(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - workflow_name: str,
+    # TODO: Review unreachable code - workflow_id: str,
+    # TODO: Review unreachable code - result: WorkflowResult
+    # TODO: Review unreachable code - ):
+    # TODO: Review unreachable code - """Publish workflow completed event."""
+    # TODO: Review unreachable code - event = WorkflowCompletedEvent(
+    # TODO: Review unreachable code - workflow_name=workflow_name,
+    # TODO: Review unreachable code - workflow_id=workflow_id,
+    # TODO: Review unreachable code - total_cost=result.total_cost,
+    # TODO: Review unreachable code - execution_time=result.execution_time,
+    # TODO: Review unreachable code - completed_steps=result.completed_steps,
+    # TODO: Review unreachable code - total_steps=result.total_steps
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - await publish_event(event)
 
-    async def _publish_workflow_failed(
-        self,
-        workflow_name: str,
-        workflow_id: str,
-        error: str
-    ):
-        """Publish workflow failed event."""
-        event = WorkflowFailedEvent(
-            workflow_name=workflow_name,
-            workflow_id=workflow_id,
-            error=error
-        )
-        await publish_event(event)
+    # TODO: Review unreachable code - async def _publish_workflow_failed(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - workflow_name: str,
+    # TODO: Review unreachable code - workflow_id: str,
+    # TODO: Review unreachable code - error: str
+    # TODO: Review unreachable code - ):
+    # TODO: Review unreachable code - """Publish workflow failed event."""
+    # TODO: Review unreachable code - event = WorkflowFailedEvent(
+    # TODO: Review unreachable code - workflow_name=workflow_name,
+    # TODO: Review unreachable code - workflow_id=workflow_id,
+    # TODO: Review unreachable code - error=error
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - await publish_event(event)
 
-    async def _publish_step_started(self, workflow_id: str, step_name: str):
-        """Publish step started event."""
-        event = WorkflowStepStartedEvent(
-            workflow_id=workflow_id,
-            step_name=step_name
-        )
-        await publish_event(event)
+    # TODO: Review unreachable code - async def _publish_step_started(self, workflow_id: str, step_name: str):
+    # TODO: Review unreachable code - """Publish step started event."""
+    # TODO: Review unreachable code - event = WorkflowStepStartedEvent(
+    # TODO: Review unreachable code - workflow_id=workflow_id,
+    # TODO: Review unreachable code - step_name=step_name
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - await publish_event(event)
 
-    async def _publish_step_completed(
-        self,
-        workflow_id: str,
-        step_name: str,
-        result: Any
-    ):
-        """Publish step completed event."""
-        event = WorkflowStepCompletedEvent(
-            workflow_id=workflow_id,
-            step_name=step_name,
-            success=result.success if hasattr(result, "success") else True,
-            cost=result.cost if hasattr(result, "cost") else 0.0
-        )
-        await publish_event(event)
+    # TODO: Review unreachable code - async def _publish_step_completed(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - workflow_id: str,
+    # TODO: Review unreachable code - step_name: str,
+    # TODO: Review unreachable code - result: Any
+    # TODO: Review unreachable code - ):
+    # TODO: Review unreachable code - """Publish step completed event."""
+    # TODO: Review unreachable code - event = WorkflowStepCompletedEvent(
+    # TODO: Review unreachable code - workflow_id=workflow_id,
+    # TODO: Review unreachable code - step_name=step_name,
+    # TODO: Review unreachable code - success=result.success if hasattr(result, "success") else True,
+    # TODO: Review unreachable code - cost=result.cost if hasattr(result, "cost") else 0.0
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - await publish_event(event)

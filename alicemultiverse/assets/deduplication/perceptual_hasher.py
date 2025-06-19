@@ -4,7 +4,7 @@ import hashlib
 import logging
 from pathlib import Path
 
-import cv2
+import cv2  # type: ignore
 import imagehash
 import numpy as np
 from PIL import Image
@@ -41,188 +41,188 @@ class PerceptualHasher:
             if path_str in self.cache:
                 return self.cache[path_str]
 
-            # Open image
-            pil_image = Image.open(image_path)
+            # TODO: Review unreachable code - # Open image
+            # TODO: Review unreachable code - pil_image = Image.open(image_path)
 
-            # Convert to RGB if needed
-            if pil_image.mode != 'RGB':
-                pil_image = pil_image.convert('RGB')
+            # TODO: Review unreachable code - # Convert to RGB if needed
+            # TODO: Review unreachable code - if pil_image.mode != 'RGB':
+            # TODO: Review unreachable code - pil_image = pil_image.convert('RGB')
 
-            # Compute different hash types
-            hashes = {
-                'average': str(imagehash.average_hash(pil_image, hash_size=self.hash_size)),
-                'perceptual': str(imagehash.phash(pil_image, hash_size=self.hash_size)),
-                'difference': str(imagehash.dhash(pil_image, hash_size=self.hash_size)),
-                'wavelet': str(imagehash.whash(pil_image, hash_size=self.hash_size)),
-                'color': str(imagehash.colorhash(pil_image, binbits=3))
-            }
+            # TODO: Review unreachable code - # Compute different hash types
+            # TODO: Review unreachable code - hashes = {
+            # TODO: Review unreachable code - 'average': str(imagehash.average_hash(pil_image, hash_size=self.hash_size)),
+            # TODO: Review unreachable code - 'perceptual': str(imagehash.phash(pil_image, hash_size=self.hash_size)),
+            # TODO: Review unreachable code - 'difference': str(imagehash.dhash(pil_image, hash_size=self.hash_size)),
+            # TODO: Review unreachable code - 'wavelet': str(imagehash.whash(pil_image, hash_size=self.hash_size)),
+            # TODO: Review unreachable code - 'color': str(imagehash.colorhash(pil_image, binbits=3))
+            # TODO: Review unreachable code - }
 
-            # Compute MD5 for exact duplicates
-            with open(image_path, 'rb') as f:
-                hashes['md5'] = hashlib.md5(f.read()).hexdigest()
+            # TODO: Review unreachable code - # Compute MD5 for exact duplicates
+            # TODO: Review unreachable code - with open(image_path, 'rb') as f:
+            # TODO: Review unreachable code - hashes['md5'] = hashlib.md5(f.read()).hexdigest()
 
-            # Cache results
-            self.cache[path_str] = hashes
+            # TODO: Review unreachable code - # Cache results
+            # TODO: Review unreachable code - self.cache[path_str] = hashes
 
-            return hashes
+            # TODO: Review unreachable code - return hashes
 
         except Exception as e:
             logger.error(f"Error computing hashes for {image_path}: {e}")
             return {}
 
-    def compute_similarity(self, hash1: dict[str, str], hash2: dict[str, str]) -> float:
-        """
-        Compute similarity score between two hash sets.
+    # TODO: Review unreachable code - def compute_similarity(self, hash1: dict[str, str], hash2: dict[str, str]) -> float:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Compute similarity score between two hash sets.
 
-        Args:
-            hash1: First set of hashes
-            hash2: Second set of hashes
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - hash1: First set of hashes
+    # TODO: Review unreachable code - hash2: Second set of hashes
 
-        Returns:
-            Similarity score (0-1, higher = more similar)
-        """
-        if not hash1 or not hash2:
-            return 0.0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Similarity score (0-1, higher = more similar)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - if not hash1 or not hash2:
+    # TODO: Review unreachable code - return 0.0
 
-        # Check for exact match
-        if hash1.get('md5') == hash2.get('md5'):
-            return 1.0
+    # TODO: Review unreachable code - # Check for exact match
+    # TODO: Review unreachable code - if hash1.get('md5') == hash2.get('md5'):
+    # TODO: Review unreachable code - return 1.0
 
-        scores = []
-        weights = {
-            'average': 0.2,
-            'perceptual': 0.3,
-            'difference': 0.2,
-            'wavelet': 0.2,
-            'color': 0.1
-        }
+    # TODO: Review unreachable code - scores = []
+    # TODO: Review unreachable code - weights = {
+    # TODO: Review unreachable code - 'average': 0.2,
+    # TODO: Review unreachable code - 'perceptual': 0.3,
+    # TODO: Review unreachable code - 'difference': 0.2,
+    # TODO: Review unreachable code - 'wavelet': 0.2,
+    # TODO: Review unreachable code - 'color': 0.1
+    # TODO: Review unreachable code - }
 
-        for algo, weight in weights.items():
-            if algo in hash1 and algo in hash2:
-                # Convert back to hash objects for comparison
-                h1 = imagehash.hex_to_hash(hash1[algo])
-                h2 = imagehash.hex_to_hash(hash2[algo])
+    # TODO: Review unreachable code - for algo, weight in weights.items():
+    # TODO: Review unreachable code - if algo in hash1 and algo in hash2:
+    # TODO: Review unreachable code - # Convert back to hash objects for comparison
+    # TODO: Review unreachable code - h1 = imagehash.hex_to_hash(hash1[algo])
+    # TODO: Review unreachable code - h2 = imagehash.hex_to_hash(hash2[algo])
 
-                # Calculate normalized distance
-                distance = h1 - h2
-                max_distance = len(h1.hash) ** 2 * 4  # Maximum possible distance
-                similarity = 1.0 - (distance / max_distance)
+    # TODO: Review unreachable code - # Calculate normalized distance
+    # TODO: Review unreachable code - distance = h1 - h2
+    # TODO: Review unreachable code - max_distance = len(h1.hash) ** 2 * 4  # Maximum possible distance
+    # TODO: Review unreachable code - similarity = 1.0 - (distance / max_distance)
 
-                scores.append(similarity * weight)
+    # TODO: Review unreachable code - scores.append(similarity * weight)
 
-        return sum(scores) / sum(weights.values()) if scores else 0.0
+    # TODO: Review unreachable code - return sum(scores) / sum(weights.values()) if scores else 0.0
 
-    def find_similar_groups(
-        self,
-        hashes: dict[str, dict[str, str]],
-        threshold: float = 0.85
-    ) -> list[list[str]]:
-        """
-        Group images by similarity.
+    # TODO: Review unreachable code - def find_similar_groups(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - hashes: dict[str, dict[str, str]],
+    # TODO: Review unreachable code - threshold: float = 0.85
+    # TODO: Review unreachable code - ) -> list[list[str]]:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Group images by similarity.
 
-        Args:
-            hashes: Dictionary of image_path -> hashes
-            threshold: Similarity threshold (0-1)
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - hashes: Dictionary of image_path -> hashes
+    # TODO: Review unreachable code - threshold: Similarity threshold (0-1)
 
-        Returns:
-            List of groups, each containing similar image paths
-        """
-        # Convert to list for easier processing
-        paths = list(hashes.keys())
-        n = len(paths)
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of groups, each containing similar image paths
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Convert to list for easier processing
+    # TODO: Review unreachable code - paths = list(hashes.keys())
+    # TODO: Review unreachable code - n = len(paths)
 
-        # Track which images have been grouped
-        grouped = set()
-        groups = []
+    # TODO: Review unreachable code - # Track which images have been grouped
+    # TODO: Review unreachable code - grouped = set()
+    # TODO: Review unreachable code - groups = []
 
-        for i in range(n):
-            if paths[i] in grouped:
-                continue
+    # TODO: Review unreachable code - for i in range(n):
+    # TODO: Review unreachable code - if paths[i] in grouped:
+    # TODO: Review unreachable code - continue
 
-            # Start new group
-            group = [paths[i]]
-            grouped.add(paths[i])
+    # TODO: Review unreachable code - # Start new group
+    # TODO: Review unreachable code - group = [paths[i]]
+    # TODO: Review unreachable code - grouped.add(paths[i])
 
-            # Find similar images
-            for j in range(i + 1, n):
-                if paths[j] in grouped:
-                    continue
+    # TODO: Review unreachable code - # Find similar images
+    # TODO: Review unreachable code - for j in range(i + 1, n):
+    # TODO: Review unreachable code - if paths[j] in grouped:
+    # TODO: Review unreachable code - continue
 
-                similarity = self.compute_similarity(
-                    hashes[paths[i]],
-                    hashes[paths[j]]
-                )
+    # TODO: Review unreachable code - similarity = self.compute_similarity(
+    # TODO: Review unreachable code - hashes[paths[i]],
+    # TODO: Review unreachable code - hashes[paths[j]]
+    # TODO: Review unreachable code - )
 
-                if similarity >= threshold:
-                    group.append(paths[j])
-                    grouped.add(paths[j])
+    # TODO: Review unreachable code - if similarity >= threshold:
+    # TODO: Review unreachable code - group.append(paths[j])
+    # TODO: Review unreachable code - grouped.add(paths[j])
 
-            if len(group) > 1:
-                groups.append(group)
+    # TODO: Review unreachable code - if len(group) > 1:
+    # TODO: Review unreachable code - groups.append(group)
 
-        return groups
+    # TODO: Review unreachable code - return groups
 
-    def compute_visual_features(self, image_path: Path) -> np.ndarray | None:
-        """
-        Compute additional visual features for similarity.
+    # TODO: Review unreachable code - def compute_visual_features(self, image_path: Path) -> np.ndarray | None:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Compute additional visual features for similarity.
 
-        Args:
-            image_path: Path to image
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - image_path: Path to image
 
-        Returns:
-            Feature vector or None if error
-        """
-        try:
-            # Read image
-            img = cv2.imread(str(image_path))
-            if img is None:
-                return None
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Feature vector or None if error
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Read image
+    # TODO: Review unreachable code - img = cv2.imread(str(image_path))
+    # TODO: Review unreachable code - if img is None:
+    # TODO: Review unreachable code - return None
 
-            # Resize to standard size
-            img = cv2.resize(img, (256, 256))
+    # TODO: Review unreachable code - # Resize to standard size
+    # TODO: Review unreachable code - img = cv2.resize(img, (256, 256))
 
-            features = []
+    # TODO: Review unreachable code - features = []
 
-            # Color histogram
-            for i in range(3):  # BGR channels
-                hist = cv2.calcHist([img], [i], None, [32], [0, 256])
-                hist = hist.flatten() / hist.sum()  # Normalize
-                features.extend(hist)
+    # TODO: Review unreachable code - # Color histogram
+    # TODO: Review unreachable code - for i in range(3):  # BGR channels
+    # TODO: Review unreachable code - hist = cv2.calcHist([img], [i], None, [32], [0, 256])
+    # TODO: Review unreachable code - hist = hist.flatten() / hist.sum()  # Normalize
+    # TODO: Review unreachable code - features.extend(hist)
 
-            # Edge density
-            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            edges = cv2.Canny(gray, 100, 200)
-            edge_density = np.sum(edges > 0) / edges.size
-            features.append(edge_density)
+    # TODO: Review unreachable code - # Edge density
+    # TODO: Review unreachable code - gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    # TODO: Review unreachable code - edges = cv2.Canny(gray, 100, 200)
+    # TODO: Review unreachable code - edge_density = np.sum(edges > 0) / edges.size
+    # TODO: Review unreachable code - features.append(edge_density)
 
-            # Texture features (using Laplacian variance)
-            laplacian = cv2.Laplacian(gray, cv2.CV_64F)
-            texture_score = laplacian.var()
-            features.append(texture_score / 1000)  # Normalize
+    # TODO: Review unreachable code - # Texture features (using Laplacian variance)
+    # TODO: Review unreachable code - laplacian = cv2.Laplacian(gray, cv2.CV_64F  # type: ignore)
+    # TODO: Review unreachable code - texture_score = laplacian.var()
+    # TODO: Review unreachable code - features.append(texture_score / 1000)  # Normalize
 
-            # Brightness and contrast
-            brightness = np.mean(gray) / 255
-            contrast = np.std(gray) / 255
-            features.extend([brightness, contrast])
+    # TODO: Review unreachable code - # Brightness and contrast
+    # TODO: Review unreachable code - brightness = np.mean(gray) / 255
+    # TODO: Review unreachable code - contrast = np.std(gray) / 255
+    # TODO: Review unreachable code - features.extend([brightness, contrast])
 
-            return np.array(features, dtype=np.float32)
+    # TODO: Review unreachable code - return np.array(features, dtype=np.float32)
 
-        except Exception as e:
-            logger.error(f"Error computing visual features for {image_path}: {e}")
-            return None
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Error computing visual features for {image_path}: {e}")
+    # TODO: Review unreachable code - return None
 
-    def save_cache(self, cache_path: Path):
-        """Save hash cache to file."""
-        import json
+    # TODO: Review unreachable code - def save_cache(self, cache_path: Path):
+    # TODO: Review unreachable code - """Save hash cache to file."""
+    # TODO: Review unreachable code - import json
 
-        with open(cache_path, 'w') as f:
-            json.dump(self.cache, f, indent=2)
+    # TODO: Review unreachable code - with open(cache_path, 'w') as f:
+    # TODO: Review unreachable code - json.dump(self.cache, f, indent=2)
 
-    def load_cache(self, cache_path: Path):
-        """Load hash cache from file."""
-        import json
+    # TODO: Review unreachable code - def load_cache(self, cache_path: Path):
+    # TODO: Review unreachable code - """Load hash cache from file."""
+    # TODO: Review unreachable code - import json
 
-        if cache_path.exists():
-            with open(cache_path) as f:
-                self.cache = json.load(f)
-                logger.info(f"Loaded {len(self.cache)} cached hashes")
+    # TODO: Review unreachable code - if cache_path.exists():
+    # TODO: Review unreachable code - with open(cache_path) as f:
+    # TODO: Review unreachable code - self.cache = json.load(f)
+    # TODO: Review unreachable code - logger.info(f"Loaded {len(self.cache)} cached hashes")

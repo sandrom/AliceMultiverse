@@ -154,60 +154,60 @@ class VideoProductionWorkflow(WorkflowTemplate):
 
         return steps
 
-    def _get_previous_video_step(self, params: dict) -> str:
-        """Determine the previous video step based on workflow configuration."""
-        if (params.get("add_captions", False) and params.get("enhance_video", False)) or params.get("enhance_video", False):
-            return "enhance_video"
-        elif params.get("add_audio", True):
-            return "merge_audio_video"
-        else:
-            return "generate_video"
+    # TODO: Review unreachable code - def _get_previous_video_step(self, params: dict) -> str:
+    # TODO: Review unreachable code - """Determine the previous video step based on workflow configuration."""
+    # TODO: Review unreachable code - if (params.get("add_captions", False) and params.get("enhance_video", False)) or params.get("enhance_video", False):
+    # TODO: Review unreachable code - return "enhance_video"
+    # TODO: Review unreachable code - elif params.get("add_audio", True):
+    # TODO: Review unreachable code - return "merge_audio_video"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return "generate_video"
 
-    def validate(self, context: WorkflowContext) -> list[str]:
-        """Validate the workflow can execute."""
-        errors = super().validate(context)
-        params = context.initial_params
+    # TODO: Review unreachable code - def validate(self, context: WorkflowContext) -> list[str]:
+    # TODO: Review unreachable code - """Validate the workflow can execute."""
+    # TODO: Review unreachable code - errors = super().validate(context)
+    # TODO: Review unreachable code - params = context.initial_params
 
-        # Check video duration
-        duration = params.get("video_duration", 8)
-        if duration < 1 or duration > 60:
-            errors.append(f"Video duration {duration}s should be between 1 and 60 seconds")
+    # TODO: Review unreachable code - # Check video duration
+    # TODO: Review unreachable code - duration = params.get("video_duration", 8)
+    # TODO: Review unreachable code - if duration < 1 or duration > 60:
+    # TODO: Review unreachable code - errors.append(f"Video duration {duration}s should be between 1 and 60 seconds")
 
-        # Check resolution
-        valid_resolutions = ["480p", "720p", "1080p", "4k"]
-        resolution = params.get("resolution", "1080p")
-        if resolution not in valid_resolutions:
-            errors.append(f"Resolution {resolution} not valid. Choose from: {valid_resolutions}")
+    # TODO: Review unreachable code - # Check resolution
+    # TODO: Review unreachable code - valid_resolutions = ["480p", "720p", "1080p", "4k"]
+    # TODO: Review unreachable code - resolution = params.get("resolution", "1080p")
+    # TODO: Review unreachable code - if resolution not in valid_resolutions:
+    # TODO: Review unreachable code - errors.append(f"Resolution {resolution} not valid. Choose from: {valid_resolutions}")
 
-        return errors
+    # TODO: Review unreachable code - return errors
 
-    def estimate_cost(self, context: WorkflowContext) -> float:
-        """Estimate total workflow cost."""
-        params = context.initial_params
-        total = 0.0
+    # TODO: Review unreachable code - def estimate_cost(self, context: WorkflowContext) -> float:
+    # TODO: Review unreachable code - """Estimate total workflow cost."""
+    # TODO: Review unreachable code - params = context.initial_params
+    # TODO: Review unreachable code - total = 0.0
 
-        # Video generation (most expensive)
-        duration = params.get("video_duration", 8)
-        if params.get("video_provider") == "veo":
-            total += 0.10 + (duration * 0.02)  # Base + per second
-        elif params.get("video_provider") == "kling":
-            total += 0.15 + (duration * 0.01)
-        else:
-            total += 0.20  # Conservative estimate
+    # TODO: Review unreachable code - # Video generation (most expensive)
+    # TODO: Review unreachable code - duration = params.get("video_duration", 8)
+    # TODO: Review unreachable code - if params.get("video_provider") == "veo":
+    # TODO: Review unreachable code - total += 0.10 + (duration * 0.02)  # Base + per second
+    # TODO: Review unreachable code - elif params.get("video_provider") == "kling":
+    # TODO: Review unreachable code - total += 0.15 + (duration * 0.01)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - total += 0.20  # Conservative estimate
 
-        # Audio generation
-        if params.get("add_audio", True):
-            total += 0.05  # mmaudio is relatively cheap
+    # TODO: Review unreachable code - # Audio generation
+    # TODO: Review unreachable code - if params.get("add_audio", True):
+    # TODO: Review unreachable code - total += 0.05  # mmaudio is relatively cheap
 
-        # Enhancement
-        if params.get("enhance_video", False):
-            total += 0.10 + (duration * 0.01)  # Processing cost
+    # TODO: Review unreachable code - # Enhancement
+    # TODO: Review unreachable code - if params.get("enhance_video", False):
+    # TODO: Review unreachable code - total += 0.10 + (duration * 0.01)  # Processing cost
 
-        # Captions
-        if params.get("add_captions", False):
-            total += 0.02  # Transcription cost
+    # TODO: Review unreachable code - # Captions
+    # TODO: Review unreachable code - if params.get("add_captions", False):
+    # TODO: Review unreachable code - total += 0.02  # Transcription cost
 
-        return total
+    # TODO: Review unreachable code - return total
 
 
 class QuickVideoWorkflow(VideoProductionWorkflow):
@@ -233,47 +233,47 @@ class QuickVideoWorkflow(VideoProductionWorkflow):
         return super().define_steps(context)
 
 
-class CinematicVideoWorkflow(VideoProductionWorkflow):
-    """Cinematic video workflow for film-quality results.
+# TODO: Review unreachable code - class CinematicVideoWorkflow(VideoProductionWorkflow):
+# TODO: Review unreachable code - """Cinematic video workflow for film-quality results.
 
-    Uses best settings and full enhancement pipeline.
-    """
+# TODO: Review unreachable code - Uses best settings and full enhancement pipeline.
+# TODO: Review unreachable code - """
 
-    def __init__(self):
-        super().__init__(name="CinematicVideo")
+# TODO: Review unreachable code - def __init__(self):
+# TODO: Review unreachable code - super().__init__(name="CinematicVideo")
 
-    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
-        """Define cinematic video steps."""
-        # Override defaults for quality
-        params = context.initial_params
-        params.setdefault("video_provider", "kling")  # High quality
-        params.setdefault("video_model", "kling-2.1-pro")
-        params.setdefault("video_duration", 10)
-        params.setdefault("resolution", "1080p")
-        params.setdefault("fps", 30)
-        params.setdefault("add_audio", True)
-        params.setdefault("audio_style", "cinematic")
-        params.setdefault("enhance_video", True)
-        params.setdefault("enhancement_type", "cinematic")
-        params.setdefault("add_captions", False)  # Clean look
+# TODO: Review unreachable code - def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
+# TODO: Review unreachable code - """Define cinematic video steps."""
+# TODO: Review unreachable code - # Override defaults for quality
+# TODO: Review unreachable code - params = context.initial_params
+# TODO: Review unreachable code - params.setdefault("video_provider", "kling")  # High quality
+# TODO: Review unreachable code - params.setdefault("video_model", "kling-2.1-pro")
+# TODO: Review unreachable code - params.setdefault("video_duration", 10)
+# TODO: Review unreachable code - params.setdefault("resolution", "1080p")
+# TODO: Review unreachable code - params.setdefault("fps", 30)
+# TODO: Review unreachable code - params.setdefault("add_audio", True)
+# TODO: Review unreachable code - params.setdefault("audio_style", "cinematic")
+# TODO: Review unreachable code - params.setdefault("enhance_video", True)
+# TODO: Review unreachable code - params.setdefault("enhancement_type", "cinematic")
+# TODO: Review unreachable code - params.setdefault("add_captions", False)  # Clean look
 
-        # Add color grading step
-        steps = super().define_steps(context)
+# TODO: Review unreachable code - # Add color grading step
+# TODO: Review unreachable code - steps = super().define_steps(context)
 
-        # Insert color grading before final output
-        color_step = WorkflowStep(
-            name="color_grade",
-            provider="local",
-            operation="color_grade",
-            parameters={
-                "input_from": "enhance_video",
-                "lut": params.get("color_lut", "cinematic_warm"),
-                "intensity": params.get("color_intensity", 0.7),
-            },
-            condition="enhance_video.success"
-        )
+# TODO: Review unreachable code - # Insert color grading before final output
+# TODO: Review unreachable code - color_step = WorkflowStep(
+# TODO: Review unreachable code - name="color_grade",
+# TODO: Review unreachable code - provider="local",
+# TODO: Review unreachable code - operation="color_grade",
+# TODO: Review unreachable code - parameters={
+# TODO: Review unreachable code - "input_from": "enhance_video",
+# TODO: Review unreachable code - "lut": params.get("color_lut", "cinematic_warm"),
+# TODO: Review unreachable code - "intensity": params.get("color_intensity", 0.7),
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - condition="enhance_video.success"
+# TODO: Review unreachable code - )
 
-        # Insert before final output
-        steps.insert(-1, color_step)
+# TODO: Review unreachable code - # Insert before final output
+# TODO: Review unreachable code - steps.insert(-1, color_step)
 
-        return steps
+# TODO: Review unreachable code - return steps

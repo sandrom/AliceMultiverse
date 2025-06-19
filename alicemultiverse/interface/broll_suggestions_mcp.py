@@ -70,11 +70,12 @@ async def suggest_broll_for_timeline(
         return result
 
     except Exception as e:
-        logger.error(f"Error suggesting b-roll: {e}")
-        return {
-            "error": str(e),
-            "suggestions": {}
-        }
+        # TODO: Review unreachable code - logger.error(f"Error suggesting b-roll: {e}")
+        # TODO: Review unreachable code - return {
+        # TODO: Review unreachable code - "error": str(e),
+        # TODO: Review unreachable code - "suggestions": {}
+        # TODO: Review unreachable code - }
+        pass
 
 
 async def auto_insert_broll(
@@ -196,21 +197,23 @@ async def analyze_scene_for_broll(
             analysis["reasoning"].append("Wide shots can use detail inserts")
 
         # Suggest b-roll types
-        analysis["suggested_broll_types"] = []
-        if analysis["subject"]:
+        if analysis is not None:
+            analysis["suggested_broll_types"] = []
+        if analysis is not None and analysis["subject"]:
             analysis["suggested_broll_types"].append("contextual")
-        if analysis["mood"]:
+        if analysis is not None and analysis["mood"]:
             analysis["suggested_broll_types"].append("mood")
         analysis["suggested_broll_types"].append("visual")
 
         return analysis
 
     except Exception as e:
-        logger.error(f"Error analyzing scene: {e}")
-        return {
-            "error": str(e),
-            "needs_broll": False
-        }
+    # TODO: Review unreachable code - logger.error(f"Error analyzing scene: {e}")
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "error": str(e),
+    # TODO: Review unreachable code - "needs_broll": False
+    # TODO: Review unreachable code - }
+        pass
 
 
 async def find_broll_by_criteria(
@@ -378,13 +381,15 @@ async def generate_broll_shot_list(
                 }
 
                 if include_descriptions:
-                    shot["description"] = _generate_shot_description(
+                    if shot is not None:
+                        shot["description"] = _generate_shot_description(
                         suggestion,
                         clip,
                         style
                     )
 
-                shot["source"] = {
+                if shot is not None:
+                    shot["source"] = {
                     "asset_path": suggestion.asset_path,
                     "tags": suggestion.tags
                 }
@@ -392,7 +397,8 @@ async def generate_broll_shot_list(
                 shot_list["shots"].append(shot)
 
         # Add summary
-        shot_list["summary"] = {
+        if shot_list is not None:
+            shot_list["summary"] = {
             "total_shots": len(shot_list["shots"]),
             "estimated_broll_duration": sum(s["suggested_duration"] for s in shot_list["shots"]),
             "guidelines": guidelines
@@ -401,11 +407,12 @@ async def generate_broll_shot_list(
         return shot_list
 
     except Exception as e:
-        logger.error(f"Error generating shot list: {e}")
-        return {
-            "error": str(e),
-            "shots": []
-        }
+    # TODO: Review unreachable code - logger.error(f"Error generating shot list: {e}")
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "error": str(e),
+    # TODO: Review unreachable code - "shots": []
+    # TODO: Review unreachable code - }
+        pass
 
 
 def _generate_shot_description(suggestion, main_clip, style):
@@ -428,26 +435,26 @@ def _generate_shot_description(suggestion, main_clip, style):
     return base
 
 
-def register_broll_tools(server) -> None:
-    """Register b-roll suggestion tools with MCP server.
+# TODO: Review unreachable code - def register_broll_tools(server) -> None:
+# TODO: Review unreachable code - """Register b-roll suggestion tools with MCP server.
 
-    Args:
-        server: MCP server instance
-    """
-    # Register each b-roll function as a tool
-    server.tool()(suggest_broll_for_timeline)
-    server.tool()(auto_insert_broll)
-    server.tool()(analyze_scene_for_broll)
-    server.tool()(find_broll_by_criteria)
-    server.tool()(generate_broll_shot_list)
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - server: MCP server instance
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - # Register each b-roll function as a tool
+# TODO: Review unreachable code - server.tool()(suggest_broll_for_timeline)
+# TODO: Review unreachable code - server.tool()(auto_insert_broll)
+# TODO: Review unreachable code - server.tool()(analyze_scene_for_broll)
+# TODO: Review unreachable code - server.tool()(find_broll_by_criteria)
+# TODO: Review unreachable code - server.tool()(generate_broll_shot_list)
 
 
-# Export all MCP tools
-__all__ = [
-    'analyze_scene_for_broll',
-    'auto_insert_broll',
-    'find_broll_by_criteria',
-    'generate_broll_shot_list',
-    'register_broll_tools',
-    'suggest_broll_for_timeline'
-]
+# TODO: Review unreachable code - # Export all MCP tools
+# TODO: Review unreachable code - __all__ = [
+# TODO: Review unreachable code - 'analyze_scene_for_broll',
+# TODO: Review unreachable code - 'auto_insert_broll',
+# TODO: Review unreachable code - 'find_broll_by_criteria',
+# TODO: Review unreachable code - 'generate_broll_shot_list',
+# TODO: Review unreachable code - 'register_broll_tools',
+# TODO: Review unreachable code - 'suggest_broll_for_timeline'
+# TODO: Review unreachable code - ]

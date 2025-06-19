@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import cv2
+import cv2  # type: ignore
 import numpy as np
 from scipy import signal
 
@@ -184,8 +184,8 @@ class VisualRhythmAnalyzer:
         num_elements = min(len(np.unique(labels)) - 1, 20)  # Cap at 20
 
         # Movement potential from directional edges
-        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)
-        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)
+        sobelx = cv2.Sobel(gray, cv2.CV_64F  # type: ignore, 1, 0, ksize=3)
+        sobely = cv2.Sobel(gray, cv2.CV_64F  # type: ignore, 0, 1, ksize=3)
         movement = np.mean(np.sqrt(sobelx**2 + sobely**2)) / 255.0
 
         return VisualComplexity(
@@ -212,7 +212,7 @@ class VisualRhythmAnalyzer:
 
         # Motion energy (from blur detection)
         blur_score = cv2.Laplacian(
-            cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), cv2.CV_64F
+            cv2.cvtColor(img, cv2.COLOR_BGR2GRAY), cv2.CV_64F  # type: ignore
         ).var()
         motion_energy = 1.0 - min(blur_score / 1000, 1.0)  # Inverse blur
 
@@ -269,143 +269,143 @@ class VisualRhythmAnalyzer:
         texture_score = high_freq_energy / (total_energy + 1e-6)
         return min(texture_score * 10, 1.0)
 
-    def _suggest_pacing(
-        self,
-        complexities: list[VisualComplexity],
-        energies: list[EnergyProfile],
-        target_duration: float | None,
-        music_bpm: float | None
-    ) -> list[PacingSuggestion]:
-        """Suggest pacing for each shot."""
-        suggestions = []
+    # TODO: Review unreachable code - def _suggest_pacing(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - complexities: list[VisualComplexity],
+    # TODO: Review unreachable code - energies: list[EnergyProfile],
+    # TODO: Review unreachable code - target_duration: float | None,
+    # TODO: Review unreachable code - music_bpm: float | None
+    # TODO: Review unreachable code - ) -> list[PacingSuggestion]:
+    # TODO: Review unreachable code - """Suggest pacing for each shot."""
+    # TODO: Review unreachable code - suggestions = []
 
-        # Calculate beat duration if BPM provided
-        beat_duration = 60.0 / music_bpm if music_bpm else None
+    # TODO: Review unreachable code - # Calculate beat duration if BPM provided
+    # TODO: Review unreachable code - beat_duration = 60.0 / music_bpm if music_bpm else None
 
-        # Base durations on complexity
-        base_durations = []
-        for complexity, energy in zip(complexities, energies, strict=False):
-            # More complex shots need more time
-            complexity_factor = 1.0 + (complexity.overall_complexity * self.complexity_multiplier)
+    # TODO: Review unreachable code - # Base durations on complexity
+    # TODO: Review unreachable code - base_durations = []
+    # TODO: Review unreachable code - for complexity, energy in zip(complexities, energies, strict=False):
+    # TODO: Review unreachable code - # More complex shots need more time
+    # TODO: Review unreachable code - complexity_factor = 1.0 + (complexity.overall_complexity * self.complexity_multiplier)
 
-            # High energy shots can be shorter
-            energy_factor = 1.0 - (energy.total_energy * 0.3)
+    # TODO: Review unreachable code - # High energy shots can be shorter
+    # TODO: Review unreachable code - energy_factor = 1.0 - (energy.total_energy * 0.3)
 
-            duration = self.base_duration * complexity_factor * energy_factor
+    # TODO: Review unreachable code - duration = self.base_duration * complexity_factor * energy_factor
 
-            # Snap to beat grid if BPM provided
-            if beat_duration:
-                beats = max(1, round(duration / beat_duration))
-                duration = beats * beat_duration
+    # TODO: Review unreachable code - # Snap to beat grid if BPM provided
+    # TODO: Review unreachable code - if beat_duration:
+    # TODO: Review unreachable code - beats = max(1, round(duration / beat_duration))
+    # TODO: Review unreachable code - duration = beats * beat_duration
 
-            base_durations.append(duration)
+    # TODO: Review unreachable code - base_durations.append(duration)
 
-        # Adjust to target duration if provided
-        if target_duration:
-            current_total = sum(base_durations)
-            scale_factor = target_duration / current_total
-            base_durations = [d * scale_factor for d in base_durations]
+    # TODO: Review unreachable code - # Adjust to target duration if provided
+    # TODO: Review unreachable code - if target_duration:
+    # TODO: Review unreachable code - current_total = sum(base_durations)
+    # TODO: Review unreachable code - scale_factor = target_duration / current_total
+    # TODO: Review unreachable code - base_durations = [d * scale_factor for d in base_durations]
 
-        # Create suggestions
-        for i, (duration, complexity, energy) in enumerate(
-            zip(base_durations, complexities, energies, strict=False)
-        ):
-            # Determine cut style
-            if duration < 1.0:
-                cut_style = "quick"
-                reasoning = "High energy, low complexity - quick cut"
-            elif duration < 2.5:
-                cut_style = "standard"
-                reasoning = "Balanced complexity and energy"
-            elif duration < 4.0:
-                cut_style = "long"
-                reasoning = "Complex shot needs time to read"
-            else:
-                cut_style = "hold"
-                reasoning = "Very complex or establishing shot"
+    # TODO: Review unreachable code - # Create suggestions
+    # TODO: Review unreachable code - for i, (duration, complexity, energy) in enumerate(
+    # TODO: Review unreachable code - zip(base_durations, complexities, energies, strict=False)
+    # TODO: Review unreachable code - ):
+    # TODO: Review unreachable code - # Determine cut style
+    # TODO: Review unreachable code - if duration < 1.0:
+    # TODO: Review unreachable code - cut_style = "quick"
+    # TODO: Review unreachable code - reasoning = "High energy, low complexity - quick cut"
+    # TODO: Review unreachable code - elif duration < 2.5:
+    # TODO: Review unreachable code - cut_style = "standard"
+    # TODO: Review unreachable code - reasoning = "Balanced complexity and energy"
+    # TODO: Review unreachable code - elif duration < 4.0:
+    # TODO: Review unreachable code - cut_style = "long"
+    # TODO: Review unreachable code - reasoning = "Complex shot needs time to read"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - cut_style = "hold"
+    # TODO: Review unreachable code - reasoning = "Very complex or establishing shot"
 
-            suggestion = PacingSuggestion(
-                hold_duration=duration,
-                complexity_score=complexity.overall_complexity,
-                energy_score=energy.total_energy,
-                cut_style=cut_style,
-                reasoning=reasoning
-            )
-            suggestions.append(suggestion)
+    # TODO: Review unreachable code - suggestion = PacingSuggestion(
+    # TODO: Review unreachable code - hold_duration=duration,
+    # TODO: Review unreachable code - complexity_score=complexity.overall_complexity,
+    # TODO: Review unreachable code - energy_score=energy.total_energy,
+    # TODO: Review unreachable code - cut_style=cut_style,
+    # TODO: Review unreachable code - reasoning=reasoning
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - suggestions.append(suggestion)
 
-        return suggestions
+    # TODO: Review unreachable code - return suggestions
 
-    def _create_rhythm_curve(
-        self,
-        pacing: list[PacingSuggestion]
-    ) -> list[float]:
-        """Create normalized rhythm curve from pacing."""
-        if not pacing:
-            return []
+    # TODO: Review unreachable code - def _create_rhythm_curve(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - pacing: list[PacingSuggestion]
+    # TODO: Review unreachable code - ) -> list[float]:
+    # TODO: Review unreachable code - """Create normalized rhythm curve from pacing."""
+    # TODO: Review unreachable code - if not pacing:
+    # TODO: Review unreachable code - return []
 
-        # Convert durations to rhythm values (inverse)
-        rhythm_values = [1.0 / p.hold_duration for p in pacing]
+    # TODO: Review unreachable code - # Convert durations to rhythm values (inverse)
+    # TODO: Review unreachable code - rhythm_values = [1.0 / p.hold_duration for p in pacing]
 
-        # Normalize to 0-1
-        min_rhythm = min(rhythm_values)
-        max_rhythm = max(rhythm_values)
-        range_rhythm = max_rhythm - min_rhythm
+    # TODO: Review unreachable code - # Normalize to 0-1
+    # TODO: Review unreachable code - min_rhythm = min(rhythm_values)
+    # TODO: Review unreachable code - max_rhythm = max(rhythm_values)
+    # TODO: Review unreachable code - range_rhythm = max_rhythm - min_rhythm
 
-        if range_rhythm > 0:
-            normalized = [(r - min_rhythm) / range_rhythm for r in rhythm_values]
-        else:
-            normalized = [0.5] * len(rhythm_values)
+    # TODO: Review unreachable code - if range_rhythm > 0:
+    # TODO: Review unreachable code - normalized = [(r - min_rhythm) / range_rhythm for r in rhythm_values]
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - normalized = [0.5] * len(rhythm_values)
 
-        # Smooth the curve
-        if len(normalized) > 3:
-            window = signal.windows.hann(3)
-            smoothed = signal.convolve(normalized, window, mode='same')
-            smoothed /= np.sum(window)
-            return smoothed.tolist()
+    # TODO: Review unreachable code - # Smooth the curve
+    # TODO: Review unreachable code - if len(normalized) > 3:
+    # TODO: Review unreachable code - window = signal.windows.hann(3)
+    # TODO: Review unreachable code - smoothed = signal.convolve(normalized, window, mode='same')
+    # TODO: Review unreachable code - smoothed /= np.sum(window)
+    # TODO: Review unreachable code - return smoothed.tolist()
 
-        return normalized
+    # TODO: Review unreachable code - return normalized
 
-    def _calculate_balance(
-        self,
-        pacing: list[PacingSuggestion],
-        energies: list[EnergyProfile]
-    ) -> float:
-        """Calculate rhythm balance score."""
-        if len(pacing) < 2:
-            return 1.0
+    # TODO: Review unreachable code - def _calculate_balance(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - pacing: list[PacingSuggestion],
+    # TODO: Review unreachable code - energies: list[EnergyProfile]
+    # TODO: Review unreachable code - ) -> float:
+    # TODO: Review unreachable code - """Calculate rhythm balance score."""
+    # TODO: Review unreachable code - if len(pacing) < 2:
+    # TODO: Review unreachable code - return 1.0
 
-        # Check pacing variety
-        durations = [p.hold_duration for p in pacing]
-        duration_std = np.std(durations)
-        duration_mean = np.mean(durations)
-        pacing_variety = min(duration_std / duration_mean, 1.0) if duration_mean > 0 else 0
+    # TODO: Review unreachable code - # Check pacing variety
+    # TODO: Review unreachable code - durations = [p.hold_duration for p in pacing]
+    # TODO: Review unreachable code - duration_std = np.std(durations)
+    # TODO: Review unreachable code - duration_mean = np.mean(durations)
+    # TODO: Review unreachable code - pacing_variety = min(duration_std / duration_mean, 1.0) if duration_mean > 0 else 0
 
-        # Check energy distribution
-        energy_values = [e.total_energy for e in energies]
-        energy_std = np.std(energy_values)
-        energy_variety = min(energy_std * 2, 1.0)
+    # TODO: Review unreachable code - # Check energy distribution
+    # TODO: Review unreachable code - energy_values = [e.total_energy for e in energies]
+    # TODO: Review unreachable code - energy_std = np.std(energy_values)
+    # TODO: Review unreachable code - energy_variety = min(energy_std * 2, 1.0)
 
-        # Check for rhythm patterns (alternating fast/slow)
-        rhythm_changes = 0
-        for i in range(1, len(durations)):
-            if (durations[i] > duration_mean) != (durations[i-1] > duration_mean):
-                rhythm_changes += 1
+    # TODO: Review unreachable code - # Check for rhythm patterns (alternating fast/slow)
+    # TODO: Review unreachable code - rhythm_changes = 0
+    # TODO: Review unreachable code - for i in range(1, len(durations)):
+    # TODO: Review unreachable code - if (durations[i] > duration_mean) != (durations[i-1] > duration_mean):
+    # TODO: Review unreachable code - rhythm_changes += 1
 
-        pattern_score = rhythm_changes / (len(durations) - 1)
+    # TODO: Review unreachable code - pattern_score = rhythm_changes / (len(durations) - 1)
 
-        # Combine scores
-        balance = (
-            pacing_variety * 0.3 +
-            energy_variety * 0.3 +
-            pattern_score * 0.4
-        )
+    # TODO: Review unreachable code - # Combine scores
+    # TODO: Review unreachable code - balance = (
+    # TODO: Review unreachable code - pacing_variety * 0.3 +
+    # TODO: Review unreachable code - energy_variety * 0.3 +
+    # TODO: Review unreachable code - pattern_score * 0.4
+    # TODO: Review unreachable code - )
 
-        return balance
+    # TODO: Review unreachable code - return balance
 
-    def _energy_curve(self, value: float) -> float:
-        """Apply energy curve transformation."""
-        # S-curve for more dramatic energy differences
-        return 1 / (1 + np.exp(-10 * (value - 0.5)))
+    # TODO: Review unreachable code - def _energy_curve(self, value: float) -> float:
+    # TODO: Review unreachable code - """Apply energy curve transformation."""
+    # TODO: Review unreachable code - # S-curve for more dramatic energy differences
+    # TODO: Review unreachable code - return 1 / (1 + np.exp(-10 * (value - 0.5)))
 
 
 def match_rhythm_to_music(

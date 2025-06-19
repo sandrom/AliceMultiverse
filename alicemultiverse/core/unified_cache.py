@@ -109,42 +109,42 @@ class UnifiedCache:
             track_cache_access(False)
             return None
 
-        # Try embedded metadata first (self-contained assets)
-        if media_path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
-            try:
-                with track_operation("cache.extract_embedded"):
-                    embedded = self.embedder.extract_metadata(media_path)
-                if embedded:
-                    # Check various possible locations for our metadata
-                    if "alice_metadata" in embedded:
-                        logger.debug(f"Loaded alice_metadata from image: {media_path.name}")
-                        track_cache_access(True)
-                        return embedded["alice_metadata"]
-                    elif "metadata" in embedded:
-                        logger.debug(f"Loaded metadata from image: {media_path.name}")
-                        track_cache_access(True)
-                        return embedded["metadata"]
-                    elif any(key.startswith("claude_") for key in embedded):
-                        # This is the format the embedder extracts
-                        logger.debug(f"Loaded embedded metadata from image: {media_path.name}")
-                        track_cache_access(True)
-                        return embedded
-            except Exception as e:
-                logger.debug(f"Could not extract embedded metadata: {e}")
+        # TODO: Review unreachable code - # Try embedded metadata first (self-contained assets)
+        # TODO: Review unreachable code - if media_path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - with track_operation("cache.extract_embedded"):
+        # TODO: Review unreachable code - embedded = self.embedder.extract_metadata(media_path)
+        # TODO: Review unreachable code - if embedded:
+        # TODO: Review unreachable code - # Check various possible locations for our metadata
+        # TODO: Review unreachable code - if embedded is not None and "alice_metadata" in embedded:
+        # TODO: Review unreachable code - logger.debug(f"Loaded alice_metadata from image: {media_path.name}")
+        # TODO: Review unreachable code - track_cache_access(True)
+        # TODO: Review unreachable code - return embedded["alice_metadata"]
+        # TODO: Review unreachable code - elif embedded is not None and "metadata" in embedded:
+        # TODO: Review unreachable code - logger.debug(f"Loaded metadata from image: {media_path.name}")
+        # TODO: Review unreachable code - track_cache_access(True)
+        # TODO: Review unreachable code - return embedded["metadata"]
+        # TODO: Review unreachable code - elif any(key.startswith("claude_") for key in embedded):
+        # TODO: Review unreachable code - # This is the format the embedder extracts
+        # TODO: Review unreachable code - logger.debug(f"Loaded embedded metadata from image: {media_path.name}")
+        # TODO: Review unreachable code - track_cache_access(True)
+        # TODO: Review unreachable code - return embedded
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.debug(f"Could not extract embedded metadata: {e}")
 
-        # Fall back to cache
-        with track_operation("cache.load_file"):
-            result = self.cache.load(media_path)
+        # TODO: Review unreachable code - # Fall back to cache
+        # TODO: Review unreachable code - with track_operation("cache.load_file"):
+        # TODO: Review unreachable code - result = self.cache.load(media_path)
 
-        # Track cache hit/miss
-        if result is not None:
-            self.cache.cache_hits += 1
-            track_cache_access(True)
-        else:
-            self.cache.cache_misses += 1
-            track_cache_access(False)
+        # TODO: Review unreachable code - # Track cache hit/miss
+        # TODO: Review unreachable code - if result is not None:
+        # TODO: Review unreachable code - self.cache.cache_hits += 1
+        # TODO: Review unreachable code - track_cache_access(True)
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - self.cache.cache_misses += 1
+        # TODO: Review unreachable code - track_cache_access(False)
 
-        return result
+        # TODO: Review unreachable code - return result
 
     def save(self, media_path: Path, analysis: AnalysisResult, analysis_time: float) -> None:
         """Save metadata for a media file (backward compatible).
@@ -180,7 +180,8 @@ class UnifiedCache:
             if media_path.suffix.lower() in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
                 # The embedder expects the metadata directly, not wrapped
                 metadata_to_embed = dict(analysis)
-                metadata_to_embed["analysis_time"] = analysis_time
+                if metadata_to_embed is not None:
+                    metadata_to_embed["analysis_time"] = analysis_time
                 metadata_to_embed["cached_at"] = datetime.now().isoformat()
 
                 success = self.embedder.embed_metadata(media_path, metadata_to_embed)
@@ -206,24 +207,24 @@ class UnifiedCache:
         if not basic:
             return None
 
-        # Check if already enhanced
-        if "enhanced_metadata" in basic:
-            return basic["enhanced_metadata"]
+        # TODO: Review unreachable code - # Check if already enhanced
+        # TODO: Review unreachable code - if basic is not None and "enhanced_metadata" in basic:
+        # TODO: Review unreachable code - return basic["enhanced_metadata"]
 
-        # Generate enhanced metadata
-        content_hash = self.cache.get_content_hash(media_path)
-        # Extract just the analysis from the full metadata structure
-        analysis = basic.get("analysis", basic) if isinstance(basic, dict) else basic
-        enhanced = self.extractor.extract_metadata(
-            file_path=media_path,
-            analysis=analysis,
-            project_id=self.project_id,
-            content_hash=content_hash,
-        )
+        # TODO: Review unreachable code - # Generate enhanced metadata
+        # TODO: Review unreachable code - content_hash = self.cache.get_content_hash(media_path)
+        # TODO: Review unreachable code - # Extract just the analysis from the full metadata structure
+        # TODO: Review unreachable code - analysis = basic.get("analysis", basic) if isinstance(basic, dict) else basic
+        # TODO: Review unreachable code - enhanced = self.extractor.extract_metadata(
+        # TODO: Review unreachable code - file_path=media_path,
+        # TODO: Review unreachable code - analysis=analysis,
+        # TODO: Review unreachable code - project_id=self.project_id,
+        # TODO: Review unreachable code - content_hash=content_hash,
+        # TODO: Review unreachable code - )
 
-        # Store it
-        self.metadata_index[content_hash] = enhanced
-        return enhanced
+        # TODO: Review unreachable code - # Store it
+        # TODO: Review unreachable code - self.metadata_index[content_hash] = enhanced
+        # TODO: Review unreachable code - return enhanced
 
     def save_enhanced(
         self,
@@ -243,7 +244,8 @@ class UnifiedCache:
         # Merge enhanced metadata into analysis
         if enhanced_metadata:
             analysis = dict(analysis)
-            analysis["enhanced_metadata"] = enhanced_metadata
+            if analysis is not None:
+                analysis["enhanced_metadata"] = enhanced_metadata
 
             # Update index
             content_hash = self.cache.get_content_hash(media_path)
@@ -277,18 +279,18 @@ class UnifiedCache:
         if not self.enable_understanding or not self.understanding_analyzer:
             return None
 
-        try:
-            result = await self.understanding_analyzer.analyze(
-                media_path,
-                provider=self.understanding_provider,
-                generate_prompt=True,
-                extract_tags=True,
-                detailed=False
-            )
-            return result
-        except Exception as e:
-            logger.error(f"Understanding analysis failed for {media_path}: {e}")
-            return None
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - result = await self.understanding_analyzer.analyze(
+        # TODO: Review unreachable code - media_path,
+        # TODO: Review unreachable code - provider=self.understanding_provider,
+        # TODO: Review unreachable code - generate_prompt=True,
+        # TODO: Review unreachable code - extract_tags=True,
+        # TODO: Review unreachable code - detailed=False
+        # TODO: Review unreachable code - )
+        # TODO: Review unreachable code - return result
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Understanding analysis failed for {media_path}: {e}")
+        # TODO: Review unreachable code - return None
 
     def _merge_understanding_into_analysis(
         self,
@@ -311,7 +313,8 @@ class UnifiedCache:
             analysis = dict(analysis)
 
         # Add understanding data
-        analysis["understanding"] = {
+        if analysis is not None:
+            analysis["understanding"] = {
             "description": understanding.description,
             "tags": understanding.tags,
             "positive_prompt": understanding.generated_prompt,  # Use generated_prompt
@@ -324,203 +327,204 @@ class UnifiedCache:
         }
 
         # Update cache version
-        analysis["version"] = self.cache_version
+        if analysis is not None:
+            analysis["version"] = self.cache_version
 
         return analysis
 
-    # ===== Quality Scoring Interface =====
+    # TODO: Review unreachable code - # ===== Quality Scoring Interface =====
 
-    def calculate_quality(self, media_path: Path) -> dict[str, Any] | None:
-        """Calculate quality scores for a media file.
+    # TODO: Review unreachable code - def calculate_quality(self, media_path: Path) -> dict[str, Any] | None:
+    # TODO: Review unreachable code - """Calculate quality scores for a media file.
 
-        Args:
-            media_path: Path to the media file
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - media_path: Path to the media file
 
-        Returns:
-            Quality analysis results
-        """
-        # Get existing metadata
-        metadata = self.load(media_path)
-        if not metadata:
-            return None
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Quality analysis results
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Get existing metadata
+    # TODO: Review unreachable code - metadata = self.load(media_path)
+    # TODO: Review unreachable code - if not metadata:
+    # TODO: Review unreachable code - return None
 
-        # Extract raw scores
-        analysis = metadata.get("analysis", {})
-        analysis.get("brisque_score")
-        analysis.get("sightengine_results")
-        analysis.get("claude_results")
+    # TODO: Review unreachable code - # Extract raw scores
+    # TODO: Review unreachable code - analysis = metadata.get("analysis", {})
+    # TODO: Review unreachable code - analysis.get("brisque_score")
+    # TODO: Review unreachable code - analysis.get("sightengine_results")
+    # TODO: Review unreachable code - analysis.get("claude_results")
 
-        # Calculate merged quality
-        # Quality assessment removed - return default
-        return {"overall_score": 0.5, "star_rating": 3}
+    # TODO: Review unreachable code - # Calculate merged quality
+    # TODO: Review unreachable code - # Quality assessment removed - return default
+    # TODO: Review unreachable code - return {"overall_score": 0.5, "star_rating": 3}
 
-    # ===== Search Interface =====
+    # TODO: Review unreachable code - # ===== Search Interface =====
 
-    def search_by_tags(self, tags: list[str], tag_type: str | None = None) -> list[AssetMetadata]:
-        """Search for assets by tags.
+    # TODO: Review unreachable code - def search_by_tags(self, tags: list[str], tag_type: str | None = None) -> list[AssetMetadata]:
+    # TODO: Review unreachable code - """Search for assets by tags.
 
-        Args:
-            tags: Tags to search for
-            tag_type: Optional tag type filter (style, mood, subject, etc.)
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - tags: Tags to search for
+    # TODO: Review unreachable code - tag_type: Optional tag type filter (style, mood, subject, etc.)
 
-        Returns:
-            List of matching assets
-        """
-        results = []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of matching assets
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - results = []
 
-        for asset in self.metadata_index.values():
-            # AssetMetadata is a TypedDict, access as dict
-            asset_tags = asset.get("tags", {})
+    # TODO: Review unreachable code - for asset in self.metadata_index.values():
+    # TODO: Review unreachable code - # AssetMetadata is a TypedDict, access as dict
+    # TODO: Review unreachable code - asset_tags = asset.get("tags", {})
 
-            # Check each tag type
-            for t_type, t_list in asset_tags.items():
-                if tag_type and t_type != tag_type:
-                    continue
+    # TODO: Review unreachable code - # Check each tag type
+    # TODO: Review unreachable code - for t_type, t_list in asset_tags.items():
+    # TODO: Review unreachable code - if tag_type and t_type != tag_type:
+    # TODO: Review unreachable code - continue
 
-                if any(tag in t_list for tag in tags):
-                    results.append(asset)
-                    break
+    # TODO: Review unreachable code - if any(tag in t_list for tag in tags):
+    # TODO: Review unreachable code - results.append(asset)
+    # TODO: Review unreachable code - break
 
-        return results
+    # TODO: Review unreachable code - return results
 
-    def search_by_quality(self, min_stars: int = 1, max_stars: int = 5) -> list[AssetMetadata]:
-        """Search for assets by quality rating.
+    # TODO: Review unreachable code - def search_by_quality(self, min_stars: int = 1, max_stars: int = 5) -> list[AssetMetadata]:
+    # TODO: Review unreachable code - """Search for assets by quality rating.
 
-        Args:
-            min_stars: Minimum star rating (inclusive)
-            max_stars: Maximum star rating (inclusive)
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - min_stars: Minimum star rating (inclusive)
+    # TODO: Review unreachable code - max_stars: Maximum star rating (inclusive)
 
-        Returns:
-            List of matching assets
-        """
-        results = []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of matching assets
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - results = []
 
-        for asset in self.metadata_index.values():
-            # AssetMetadata is a TypedDict, access as dict
-            quality = asset.get("quality", {})
-            rating = quality.get("star_rating", 0)
-            if min_stars <= rating <= max_stars:
-                results.append(asset)
+    # TODO: Review unreachable code - for asset in self.metadata_index.values():
+    # TODO: Review unreachable code - # AssetMetadata is a TypedDict, access as dict
+    # TODO: Review unreachable code - quality = asset.get("quality", {})
+    # TODO: Review unreachable code - rating = quality.get("star_rating", 0)
+    # TODO: Review unreachable code - if min_stars <= rating <= max_stars:
+    # TODO: Review unreachable code - results.append(asset)
 
-        return results
+    # TODO: Review unreachable code - return results
 
-    # ===== Utility Methods =====
+    # TODO: Review unreachable code - # ===== Utility Methods =====
 
-    def rebuild_from_images(self, image_dir: Path) -> int:
-        """Rebuild cache from embedded image metadata.
+    # TODO: Review unreachable code - def rebuild_from_images(self, image_dir: Path) -> int:
+    # TODO: Review unreachable code - """Rebuild cache from embedded image metadata.
 
-        Args:
-            image_dir: Directory containing images
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - image_dir: Directory containing images
 
-        Returns:
-            Number of images processed
-        """
-        count = 0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Number of images processed
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - count = 0
 
-        for img_path in image_dir.rglob("*"):
-            if img_path.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
-                continue
+    # TODO: Review unreachable code - for img_path in image_dir.rglob("*"):
+    # TODO: Review unreachable code - if img_path.suffix.lower() not in {".png", ".jpg", ".jpeg", ".webp", ".heic", ".heif"}:
+    # TODO: Review unreachable code - continue
 
-            # Extract embedded metadata
-            metadata = self.embedder.extract_metadata(img_path)
-            if metadata and "alice_metadata" in metadata:
-                # Save to cache
-                analysis = metadata["alice_metadata"]
-                analysis_time = metadata.get("analysis_time", 0.0)
-                self.cache.save(img_path, analysis, analysis_time)
-                count += 1
+    # TODO: Review unreachable code - # Extract embedded metadata
+    # TODO: Review unreachable code - metadata = self.embedder.extract_metadata(img_path)
+    # TODO: Review unreachable code - if metadata and "alice_metadata" in metadata:
+    # TODO: Review unreachable code - # Save to cache
+    # TODO: Review unreachable code - analysis = metadata["alice_metadata"]
+    # TODO: Review unreachable code - analysis_time = metadata.get("analysis_time", 0.0)
+    # TODO: Review unreachable code - self.cache.save(img_path, analysis, analysis_time)
+    # TODO: Review unreachable code - count += 1
 
-        logger.info(f"Rebuilt cache from {count} images")
-        return count
+    # TODO: Review unreachable code - logger.info(f"Rebuilt cache from {count} images")
+    # TODO: Review unreachable code - return count
 
-    def get_stats(self) -> dict[str, Any]:
-        """Get cache statistics.
+    # TODO: Review unreachable code - def get_stats(self) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Get cache statistics.
 
-        Returns:
-            Cache performance statistics
-        """
-        stats = {
-            "cache_hits": self.cache_hits,
-            "cache_misses": self.cache_misses,
-            "hit_rate": self.cache_hits / (self.cache_hits + self.cache_misses) if (self.cache_hits + self.cache_misses) > 0 else 0,
-            "analysis_time_saved": self.analysis_time_saved,
-            "indexed_assets": len(self.metadata_index),
-            "project_id": self.project_id
-        }
-        return stats
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Cache performance statistics
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - stats = {
+    # TODO: Review unreachable code - "cache_hits": self.cache_hits,
+    # TODO: Review unreachable code - "cache_misses": self.cache_misses,
+    # TODO: Review unreachable code - "hit_rate": self.cache_hits / (self.cache_hits + self.cache_misses) if (self.cache_hits + self.cache_misses) > 0 else 0,
+    # TODO: Review unreachable code - "analysis_time_saved": self.analysis_time_saved,
+    # TODO: Review unreachable code - "indexed_assets": len(self.metadata_index),
+    # TODO: Review unreachable code - "project_id": self.project_id
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - return stats
 
-    def get_content_hash(self, file_path: Path) -> str:
-        """Get content hash for a file.
+    # TODO: Review unreachable code - def get_content_hash(self, file_path: Path) -> str:
+    # TODO: Review unreachable code - """Get content hash for a file.
 
-        Args:
-            file_path: Path to file
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - file_path: Path to file
 
-        Returns:
-            SHA256 hash of file content
-        """
-        hasher = hashlib.sha256()
-        with open(file_path, "rb") as f:
-            for chunk in iter(lambda: f.read(8192), b""):
-                hasher.update(chunk)
-        return hasher.hexdigest()
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - SHA256 hash of file content
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - hasher = hashlib.sha256()
+    # TODO: Review unreachable code - with open(file_path, "rb") as f:
+    # TODO: Review unreachable code - for chunk in iter(lambda: f.read(8192), b""):
+    # TODO: Review unreachable code - hasher.update(chunk)
+    # TODO: Review unreachable code - return hasher.hexdigest()
 
-    def save(self, media_path: Path, analysis: Any, analysis_time: float) -> None:
-        """Save analysis to cache (for backward compatibility).
+    # TODO: Review unreachable code - def save(self, media_path: Path, analysis: Any, analysis_time: float) -> None:
+    # TODO: Review unreachable code - """Save analysis to cache (for backward compatibility).
 
-        Args:
-            media_path: Path to media file
-            analysis: Analysis result
-            analysis_time: Time taken for analysis
-        """
-        # Get cache file path
-        content_hash = self.get_content_hash(media_path)
-        cache_file = self.cache_dir / f"{content_hash}.json"
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - media_path: Path to media file
+    # TODO: Review unreachable code - analysis: Analysis result
+    # TODO: Review unreachable code - analysis_time: Time taken for analysis
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Get cache file path
+    # TODO: Review unreachable code - content_hash = self.get_content_hash(media_path)
+    # TODO: Review unreachable code - cache_file = self.cache_dir / f"{content_hash}.json"
 
-        # Create cache metadata
-        metadata = {
-            "version": "1.0",
-            "content_hash": content_hash,
-            "original_path": str(media_path),
-            "file_name": media_path.name,
-            "file_size": media_path.stat().st_size if media_path.exists() else 0,
-            "last_modified": media_path.stat().st_mtime if media_path.exists() else 0,
-            "analysis": analysis,
-            "analysis_time": analysis_time,
-            "cached_at": datetime.now().isoformat()
-        }
+    # TODO: Review unreachable code - # Create cache metadata
+    # TODO: Review unreachable code - metadata = {
+    # TODO: Review unreachable code - "version": "1.0",
+    # TODO: Review unreachable code - "content_hash": content_hash,
+    # TODO: Review unreachable code - "original_path": str(media_path),
+    # TODO: Review unreachable code - "file_name": media_path.name,
+    # TODO: Review unreachable code - "file_size": media_path.stat().st_size if media_path.exists() else 0,
+    # TODO: Review unreachable code - "last_modified": media_path.stat().st_mtime if media_path.exists() else 0,
+    # TODO: Review unreachable code - "analysis": analysis,
+    # TODO: Review unreachable code - "analysis_time": analysis_time,
+    # TODO: Review unreachable code - "cached_at": datetime.now().isoformat()
+    # TODO: Review unreachable code - }
 
-        # Save to cache file
-        cache_file.parent.mkdir(parents=True, exist_ok=True)
-        with open(cache_file, 'w') as f:
-            json.dump(metadata, f, indent=2, default=str)
+    # TODO: Review unreachable code - # Save to cache file
+    # TODO: Review unreachable code - cache_file.parent.mkdir(parents=True, exist_ok=True)
+    # TODO: Review unreachable code - with open(cache_file, 'w') as f:
+    # TODO: Review unreachable code - json.dump(metadata, f, indent=2, default=str)
 
-    # ===== Private Methods =====
+    # TODO: Review unreachable code - # ===== Private Methods =====
 
-    def _load_metadata_index(self) -> None:
-        """Load metadata index from cache."""
-        logger.info("Loading metadata index...")
+    # TODO: Review unreachable code - def _load_metadata_index(self) -> None:
+    # TODO: Review unreachable code - """Load metadata index from cache."""
+    # TODO: Review unreachable code - logger.info("Loading metadata index...")
 
-        cache_dir = self.source_root / ".metadata"
-        if not cache_dir.exists():
-            return
+    # TODO: Review unreachable code - cache_dir = self.source_root / ".metadata"
+    # TODO: Review unreachable code - if not cache_dir.exists():
+    # TODO: Review unreachable code - return
 
-        loaded = 0
-        for cache_file in cache_dir.rglob("*.json"):
-            try:
-                # Load directly from JSON file
-                with open(cache_file) as f:
-                    metadata = json.load(f)
+    # TODO: Review unreachable code - loaded = 0
+    # TODO: Review unreachable code - for cache_file in cache_dir.rglob("*.json"):
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Load directly from JSON file
+    # TODO: Review unreachable code - with open(cache_file) as f:
+    # TODO: Review unreachable code - metadata = json.load(f)
 
-                if metadata and "enhanced_metadata" in metadata:
-                    enhanced = metadata["enhanced_metadata"]
-                    content_hash = cache_file.stem
-                    self.metadata_index[content_hash] = enhanced
-                    loaded += 1
+    # TODO: Review unreachable code - if metadata and "enhanced_metadata" in metadata:
+    # TODO: Review unreachable code - enhanced = metadata["enhanced_metadata"]
+    # TODO: Review unreachable code - content_hash = cache_file.stem
+    # TODO: Review unreachable code - self.metadata_index[content_hash] = enhanced
+    # TODO: Review unreachable code - loaded += 1
 
-            except Exception as e:
-                logger.debug(f"Skipping invalid cache file {cache_file}: {e}")
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.debug(f"Skipping invalid cache file {cache_file}: {e}")
 
-        logger.info(f"Loaded {loaded} enhanced metadata entries")
+    # TODO: Review unreachable code - logger.info(f"Loaded {loaded} enhanced metadata entries")
 
 
 # Backward compatibility aliases
@@ -536,6 +540,6 @@ def get_file_hash(file_path: Path) -> str:
     return hasher.hexdigest()
 
 
-def get_content_hash(file_path: Path) -> str:
-    """Get content hash for a file (backward compatible)."""
-    return get_file_hash(file_path)
+# TODO: Review unreachable code - def get_content_hash(file_path: Path) -> str:
+# TODO: Review unreachable code - """Get content hash for a file (backward compatible)."""
+# TODO: Review unreachable code - return get_file_hash(file_path)

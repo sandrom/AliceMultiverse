@@ -69,7 +69,7 @@ class ProjectPromptStorage:
         if prompt.id in existing_ids:
             # Update existing
             for i, p in enumerate(prompts_data["prompts"]):
-                if p["id"] == prompt.id:
+                if p is not None and p["id"] == prompt.id:
                     prompts_data["prompts"][i] = prompt_dict
                     break
         else:
@@ -96,251 +96,251 @@ class ProjectPromptStorage:
 
         return individual_file
 
-    def load_from_project(self, project_path: Path) -> list[Prompt]:
-        """Load all prompts from a project directory.
+    # TODO: Review unreachable code - def load_from_project(self, project_path: Path) -> list[Prompt]:
+    # TODO: Review unreachable code - """Load all prompts from a project directory.
 
-        Args:
-            project_path: Path to the project directory
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - project_path: Path to the project directory
 
-        Returns:
-            List of prompts found in the project
-        """
-        prompts_dir = project_path / self.PROMPTS_DIR
-        if not prompts_dir.exists():
-            return []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of prompts found in the project
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - prompts_dir = project_path / self.PROMPTS_DIR
+    # TODO: Review unreachable code - if not prompts_dir.exists():
+    # TODO: Review unreachable code - return []
 
-        # Try loading from YAML first, then JSON
-        yaml_file = prompts_dir / self.PROMPTS_FILE_YAML
-        json_file = prompts_dir / self.PROMPTS_FILE_JSON
+    # TODO: Review unreachable code - # Try loading from YAML first, then JSON
+    # TODO: Review unreachable code - yaml_file = prompts_dir / self.PROMPTS_FILE_YAML
+    # TODO: Review unreachable code - json_file = prompts_dir / self.PROMPTS_FILE_JSON
 
-        prompts_data = None
-        if yaml_file.exists():
-            with open(yaml_file) as f:
-                prompts_data = yaml.safe_load(f)
-        elif json_file.exists():
-            with open(json_file) as f:
-                prompts_data = json.load(f)
-        else:
-            return []
+    # TODO: Review unreachable code - prompts_data = None
+    # TODO: Review unreachable code - if yaml_file.exists():
+    # TODO: Review unreachable code - with open(yaml_file) as f:
+    # TODO: Review unreachable code - prompts_data = yaml.safe_load(f)
+    # TODO: Review unreachable code - elif json_file.exists():
+    # TODO: Review unreachable code - with open(json_file) as f:
+    # TODO: Review unreachable code - prompts_data = json.load(f)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return []
 
-        prompts = []
-        for prompt_dict in prompts_data.get("prompts", []):
-            prompt = self._dict_to_prompt(prompt_dict)
-            prompts.append(prompt)
+    # TODO: Review unreachable code - prompts = []
+    # TODO: Review unreachable code - for prompt_dict in prompts_data.get("prompts", []):
+    # TODO: Review unreachable code - prompt = self._dict_to_prompt(prompt_dict)
+    # TODO: Review unreachable code - prompts.append(prompt)
 
-        logger.info(f"Loaded {len(prompts)} prompts from project {project_path.name}")
-        return prompts
+    # TODO: Review unreachable code - logger.info(f"Loaded {len(prompts)} prompts from project {project_path.name}")
+    # TODO: Review unreachable code - return prompts
 
-    def sync_project_to_index(self, project_path: Path) -> int:
-        """Sync prompts from a project to the central index.
+    # TODO: Review unreachable code - def sync_project_to_index(self, project_path: Path) -> int:
+    # TODO: Review unreachable code - """Sync prompts from a project to the central index.
 
-        Args:
-            project_path: Path to the project directory
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - project_path: Path to the project directory
 
-        Returns:
-            Number of prompts synced
-        """
-        prompts = self.load_from_project(project_path)
-        synced = 0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Number of prompts synced
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - prompts = self.load_from_project(project_path)
+    # TODO: Review unreachable code - synced = 0
 
-        for prompt in prompts:
-            # Check if prompt exists in index
-            existing = self.service.get_prompt(prompt.id)
-            if existing:
-                # Update if project version is newer
-                if prompt.updated_at > existing.updated_at:
-                    self.service.update_prompt(prompt)
-                    synced += 1
-            else:
-                # Add new prompt to index
-                self.service.db.add_prompt(prompt)
-                synced += 1
+    # TODO: Review unreachable code - for prompt in prompts:
+    # TODO: Review unreachable code - # Check if prompt exists in index
+    # TODO: Review unreachable code - existing = self.service.get_prompt(prompt.id)
+    # TODO: Review unreachable code - if existing:
+    # TODO: Review unreachable code - # Update if project version is newer
+    # TODO: Review unreachable code - if prompt.updated_at > existing.updated_at:
+    # TODO: Review unreachable code - self.service.update_prompt(prompt)
+    # TODO: Review unreachable code - synced += 1
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Add new prompt to index
+    # TODO: Review unreachable code - self.service.db.add_prompt(prompt)
+    # TODO: Review unreachable code - synced += 1
 
-        logger.info(f"Synced {synced} prompts from project {project_path.name}")
-        return synced
+    # TODO: Review unreachable code - logger.info(f"Synced {synced} prompts from project {project_path.name}")
+    # TODO: Review unreachable code - return synced
 
-    def sync_index_to_project(self, project_name: str, project_path: Path) -> int:
-        """Sync prompts from the index to a project.
+    # TODO: Review unreachable code - def sync_index_to_project(self, project_name: str, project_path: Path) -> int:
+    # TODO: Review unreachable code - """Sync prompts from the index to a project.
 
-        Args:
-            project_name: Name of the project to filter by
-            project_path: Path to the project directory
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - project_name: Name of the project to filter by
+    # TODO: Review unreachable code - project_path: Path to the project directory
 
-        Returns:
-            Number of prompts synced
-        """
-        # Find all prompts for this project
-        prompts = self.service.search_prompts(project=project_name)
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Number of prompts synced
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Find all prompts for this project
+    # TODO: Review unreachable code - prompts = self.service.search_prompts(project=project_name)
 
-        synced = 0
-        for prompt in prompts:
-            self.save_to_project(prompt, project_path)
-            synced += 1
+    # TODO: Review unreachable code - synced = 0
+    # TODO: Review unreachable code - for prompt in prompts:
+    # TODO: Review unreachable code - self.save_to_project(prompt, project_path)
+    # TODO: Review unreachable code - synced += 1
 
-        logger.info(f"Synced {synced} prompts to project {project_path.name}")
-        return synced
+    # TODO: Review unreachable code - logger.info(f"Synced {synced} prompts to project {project_path.name}")
+    # TODO: Review unreachable code - return synced
 
-    def discover_project_prompts(self, base_paths: list[Path]) -> dict[str, list[Prompt]]:
-        """Discover all prompts in project directories.
+    # TODO: Review unreachable code - def discover_project_prompts(self, base_paths: list[Path]) -> dict[str, list[Prompt]]:
+    # TODO: Review unreachable code - """Discover all prompts in project directories.
 
-        Args:
-            base_paths: List of base paths to search for projects
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - base_paths: List of base paths to search for projects
 
-        Returns:
-            Dictionary mapping project names to their prompts
-        """
-        project_prompts = {}
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Dictionary mapping project names to their prompts
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - project_prompts = {}
 
-        for base_path in base_paths:
-            if not base_path.exists():
-                continue
+    # TODO: Review unreachable code - for base_path in base_paths:
+    # TODO: Review unreachable code - if not base_path.exists():
+    # TODO: Review unreachable code - continue
 
-            # Look for project directories with prompts
-            for project_dir in base_path.iterdir():
-                if not project_dir.is_dir():
-                    continue
+    # TODO: Review unreachable code - # Look for project directories with prompts
+    # TODO: Review unreachable code - for project_dir in base_path.iterdir():
+    # TODO: Review unreachable code - if not project_dir.is_dir():
+    # TODO: Review unreachable code - continue
 
-                prompts_dir = project_dir / self.PROMPTS_DIR
-                if prompts_dir.exists():
-                    prompts = self.load_from_project(project_dir)
-                    if prompts:
-                        project_prompts[project_dir.name] = prompts
+    # TODO: Review unreachable code - prompts_dir = project_dir / self.PROMPTS_DIR
+    # TODO: Review unreachable code - if prompts_dir.exists():
+    # TODO: Review unreachable code - prompts = self.load_from_project(project_dir)
+    # TODO: Review unreachable code - if prompts:
+    # TODO: Review unreachable code - project_prompts[project_dir.name] = prompts
 
-        return project_prompts
+    # TODO: Review unreachable code - return project_prompts
 
-    def export_project_prompts(self, project_path: Path, output_path: Path) -> None:
-        """Export all prompts from a project to a standalone file.
+    # TODO: Review unreachable code - def export_project_prompts(self, project_path: Path, output_path: Path) -> None:
+    # TODO: Review unreachable code - """Export all prompts from a project to a standalone file.
 
-        Args:
-            project_path: Path to the project directory
-            output_path: Path for the export file
-        """
-        prompts = self.load_from_project(project_path)
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - project_path: Path to the project directory
+    # TODO: Review unreachable code - output_path: Path for the export file
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - prompts = self.load_from_project(project_path)
 
-        export_data = {
-            "project": project_path.name,
-            "exported_at": datetime.now().isoformat(),
-            "prompt_count": len(prompts),
-            "prompts": [self._prompt_to_dict(p) for p in prompts]
-        }
+    # TODO: Review unreachable code - export_data = {
+    # TODO: Review unreachable code - "project": project_path.name,
+    # TODO: Review unreachable code - "exported_at": datetime.now().isoformat(),
+    # TODO: Review unreachable code - "prompt_count": len(prompts),
+    # TODO: Review unreachable code - "prompts": [self._prompt_to_dict(p) for p in prompts]
+    # TODO: Review unreachable code - }
 
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'w') as f:
-            json.dump(export_data, f, indent=2)
+    # TODO: Review unreachable code - output_path.parent.mkdir(parents=True, exist_ok=True)
+    # TODO: Review unreachable code - with open(output_path, 'w') as f:
+    # TODO: Review unreachable code - json.dump(export_data, f, indent=2)
 
-        logger.info(f"Exported {len(prompts)} prompts from {project_path.name} to {output_path}")
+    # TODO: Review unreachable code - logger.info(f"Exported {len(prompts)} prompts from {project_path.name} to {output_path}")
 
-    def create_prompt_template(self, project_path: Path, template_name: str = "example") -> Path:
-        """Create a prompt template file in the project.
+    # TODO: Review unreachable code - def create_prompt_template(self, project_path: Path, template_name: str = "example") -> Path:
+    # TODO: Review unreachable code - """Create a prompt template file in the project.
 
-        Args:
-            project_path: Path to the project directory
-            template_name: Name for the template
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - project_path: Path to the project directory
+    # TODO: Review unreachable code - template_name: Name for the template
 
-        Returns:
-            Path to the created template file
-        """
-        templates_dir = project_path / self.PROMPTS_DIR / "templates"
-        templates_dir.mkdir(parents=True, exist_ok=True)
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Path to the created template file
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - templates_dir = project_path / self.PROMPTS_DIR / "templates"
+    # TODO: Review unreachable code - templates_dir.mkdir(parents=True, exist_ok=True)
 
-        template_file = templates_dir / f"{template_name}.yaml"
+    # TODO: Review unreachable code - template_file = templates_dir / f"{template_name}.yaml"
 
-        if template_name == "example":
-            # Create a comprehensive example
-            PromptYAMLFormatter.create_example_prompt_yaml(template_file)
-        else:
-            # Create a basic template
-            template = f"""# {template_name} Prompt Template
-# Edit this template for your project's prompts
+    # TODO: Review unreachable code - if template_name == "example":
+    # TODO: Review unreachable code - # Create a comprehensive example
+    # TODO: Review unreachable code - PromptYAMLFormatter.create_example_prompt_yaml(template_file)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Create a basic template
+    # TODO: Review unreachable code - template = f"""# {template_name} Prompt Template
+# TODO: Review unreachable code - # Edit this template for your project's prompts
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - prompt: "Your prompt text here with {{variable}} placeholders"
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - category: image_generation  # or video_generation, music_generation, etc.
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - providers:
+# TODO: Review unreachable code -   - midjourney
+# TODO: Review unreachable code -   - flux
+# TODO: Review unreachable code -   - stable_diffusion
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - description: "What this prompt creates"
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - tags:
+# TODO: Review unreachable code -   - {template_name}
+# TODO: Review unreachable code -   - your_tags_here
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - style: your_style  # e.g., photorealistic, anime, abstract
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - project: {project_path.name}
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - context:
+# TODO: Review unreachable code -   # Add any parameters or settings
+# TODO: Review unreachable code -   aspect_ratio: "16:9"
+# TODO: Review unreachable code -   quality: "high"
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - notes: |
+# TODO: Review unreachable code -   Add usage notes, tips, and variations here.
+# TODO: Review unreachable code -   This is a multiline field for detailed information.
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - # Variables for template substitution
+# TODO: Review unreachable code - variables:
+# TODO: Review unreachable code -   variable: "Description of what this variable represents"
+# TODO: Review unreachable code - # TODO: Review unreachable code - """
 
-prompt: "Your prompt text here with {{variable}} placeholders"
-
-category: image_generation  # or video_generation, music_generation, etc.
-
-providers:
-  - midjourney
-  - flux
-  - stable_diffusion
-
-description: "What this prompt creates"
-
-tags:
-  - {template_name}
-  - your_tags_here
-
-style: your_style  # e.g., photorealistic, anime, abstract
-
-project: {project_path.name}
-
-context:
-  # Add any parameters or settings
-  aspect_ratio: "16:9"
-  quality: "high"
-
-notes: |
-  Add usage notes, tips, and variations here.
-  This is a multiline field for detailed information.
-
-# Variables for template substitution
-variables:
-  variable: "Description of what this variable represents"
-"""
-
-            with open(template_file, 'w') as f:
-                f.write(template)
+            # TODO: Review unreachable code - with open(template_file, 'w') as f:
+            # TODO: Review unreachable code -     f.write(template)
 
         logger.info(f"Created prompt template {template_name} in {project_path.name}")
         return template_file
 
-    def initialize_project_prompts(self, project_path: Path) -> None:
-        """Initialize prompt storage in a project with examples and templates."""
-        prompts_dir = project_path / self.PROMPTS_DIR
-        prompts_dir.mkdir(parents=True, exist_ok=True)
+    # TODO: Review unreachable code - def initialize_project_prompts(self, project_path: Path) -> None:
+    # TODO: Review unreachable code - """Initialize prompt storage in a project with examples and templates."""
+    # TODO: Review unreachable code - prompts_dir = project_path / self.PROMPTS_DIR
+    # TODO: Review unreachable code - prompts_dir.mkdir(parents=True, exist_ok=True)
 
-        # Create initial structure
-        readme_file = prompts_dir / "README.md"
-        if not readme_file.exists():
-            readme_content = f"""# Project Prompts
-
-This directory contains AI prompts used in the {project_path.name} project.
-
-## Structure
-
-- `prompts.yaml` - Main collection of all project prompts
-- `*.yaml` - Individual prompt files (one per prompt)
-- `templates/` - Prompt templates and examples
-- `exports/` - Exported prompt collections
-
-## Usage
-
-Prompts are automatically synced with Alice's central prompt database.
-
-### Adding a new prompt
-```bash
-alice prompts add -t "your prompt" -c image_generation -p midjourney --project {project_path.name}
-```
-
-### Syncing with central database
-```bash
-# Pull prompts from central database
-alice prompts project {project_path} --sync-from-index
-
-# Push prompts to central database
-alice prompts project {project_path} --sync-to-index
-```
-
-### Viewing project prompts
-```bash
-alice prompts project {project_path}
-```
-
-## Format
-
-Prompts are stored in YAML format for easy reading and editing.
-See `templates/example.yaml` for the full format specification.
-"""
-            with open(readme_file, 'w') as f:
-                f.write(readme_content)
+    # TODO: Review unreachable code - # Create initial structure
+    # TODO: Review unreachable code - readme_file = prompts_dir / "README.md"
+    # TODO: Review unreachable code - if not readme_file.exists():
+    # TODO: Review unreachable code - readme_content = f"""# Project Prompts
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - This directory contains AI prompts used in the {project_path.name} project.
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - ## Structure
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - - `prompts.yaml` - Main collection of all project prompts
+# TODO: Review unreachable code - - `*.yaml` - Individual prompt files (one per prompt)
+# TODO: Review unreachable code - - `templates/` - Prompt templates and examples
+# TODO: Review unreachable code - - `exports/` - Exported prompt collections
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - ## Usage
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - Prompts are automatically synced with Alice's central prompt database.
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - ### Adding a new prompt
+# TODO: Review unreachable code - ```bash
+# TODO: Review unreachable code - alice prompts add -t "your prompt" -c image_generation -p midjourney --project {project_path.name}
+# TODO: Review unreachable code - ```
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - ### Syncing with central database
+# TODO: Review unreachable code - ```bash
+# TODO: Review unreachable code - # Pull prompts from central database
+# TODO: Review unreachable code - alice prompts project {project_path} --sync-from-index
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - # Push prompts to central database
+# TODO: Review unreachable code - alice prompts project {project_path} --sync-to-index
+# TODO: Review unreachable code - ```
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - ### Viewing project prompts
+# TODO: Review unreachable code - ```bash
+# TODO: Review unreachable code - alice prompts project {project_path}
+# TODO: Review unreachable code - ```
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - ## Format
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - Prompts are stored in YAML format for easy reading and editing.
+# TODO: Review unreachable code - See `templates/example.yaml` for the full format specification.
+# TODO: Review unreachable code - """
+            # TODO: Review unreachable code - with open(readme_file, 'w') as f:
+            # TODO: Review unreachable code -     f.write(readme_content)
 
         # Create example template
         self.create_prompt_template(project_path, "example")

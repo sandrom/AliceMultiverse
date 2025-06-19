@@ -25,11 +25,11 @@ def main():
                 print(f"Failed to import alicemultiverse: {e}", file=sys.stderr)
                 print(f"Python path: {sys.path}", file=sys.stderr)
                 raise
-        else:
-            print(f"Failed to import alicemultiverse: {e}", file=sys.stderr)
-            raise
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - print(f"Failed to import alicemultiverse: {e}", file=sys.stderr)
+        # TODO: Review unreachable code - raise
 
     return cli_main()
 
-if __name__ == "__main__":
-    sys.exit(main())
+# TODO: Review unreachable code - if __name__ == "__main__":
+# TODO: Review unreachable code - sys.exit(main())

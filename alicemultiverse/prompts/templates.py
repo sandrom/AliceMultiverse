@@ -55,12 +55,12 @@ class PromptTemplate:
         if missing:
             raise ValueError(f"Missing required variables: {', '.join(missing)}")
 
-        # Substitute variables
-        for var, value in kwargs.items():
-            pattern = f"{{{var}}}"
-            text = text.replace(pattern, str(value))
+        # TODO: Review unreachable code - # Substitute variables
+        # TODO: Review unreachable code - for var, value in kwargs.items():
+        # TODO: Review unreachable code - pattern = f"{{{var}}}"
+        # TODO: Review unreachable code - text = text.replace(pattern, str(value))
 
-        return text
+        # TODO: Review unreachable code - return text
 
     def to_prompt(self, **kwargs) -> Prompt:
         """Create a Prompt instance from this template.
@@ -210,12 +210,12 @@ class TemplateManager:
         if name in self._templates:
             return self._templates[name]
 
-        # Try loading from file
-        template_file = self.templates_dir / f"{name}.yaml"
-        if template_file.exists():
-            return self.load_template(template_file)
+        # TODO: Review unreachable code - # Try loading from file
+        # TODO: Review unreachable code - template_file = self.templates_dir / f"{name}.yaml"
+        # TODO: Review unreachable code - if template_file.exists():
+        # TODO: Review unreachable code - return self.load_template(template_file)
 
-        return None
+        # TODO: Review unreachable code - return None
 
     def list_templates(self) -> list[str]:
         """List all available template names."""
@@ -230,122 +230,122 @@ class TemplateManager:
 
         return sorted(templates)
 
-    def save_template(self, template: PromptTemplate, overwrite: bool = False) -> Path:
-        """Save a template to file."""
-        file_path = self.templates_dir / f"{template.name}.yaml"
+    # TODO: Review unreachable code - def save_template(self, template: PromptTemplate, overwrite: bool = False) -> Path:
+    # TODO: Review unreachable code - """Save a template to file."""
+    # TODO: Review unreachable code - file_path = self.templates_dir / f"{template.name}.yaml"
 
-        if file_path.exists() and not overwrite:
-            raise ValueError(f"Template '{template.name}' already exists")
+    # TODO: Review unreachable code - if file_path.exists() and not overwrite:
+    # TODO: Review unreachable code - raise ValueError(f"Template '{template.name}' already exists")
 
-        data = {
-            "name": template.name,
-            "template": template.template_text,
-            "category": template.category.value,
-            "providers": [p.value for p in template.providers],
-            "variables": template.variables,
-            "default_values": template.default_values,
-            "tags": template.tags,
-            "style": template.style,
-            "context": template.context,
-            "examples": template.examples,
-            "notes": template.notes
-        }
+    # TODO: Review unreachable code - data = {
+    # TODO: Review unreachable code - "name": template.name,
+    # TODO: Review unreachable code - "template": template.template_text,
+    # TODO: Review unreachable code - "category": template.category.value,
+    # TODO: Review unreachable code - "providers": [p.value for p in template.providers],
+    # TODO: Review unreachable code - "variables": template.variables,
+    # TODO: Review unreachable code - "default_values": template.default_values,
+    # TODO: Review unreachable code - "tags": template.tags,
+    # TODO: Review unreachable code - "style": template.style,
+    # TODO: Review unreachable code - "context": template.context,
+    # TODO: Review unreachable code - "examples": template.examples,
+    # TODO: Review unreachable code - "notes": template.notes
+    # TODO: Review unreachable code - }
 
-        # Remove None values
-        data = {k: v for k, v in data.items() if v is not None}
+    # TODO: Review unreachable code - # Remove None values
+    # TODO: Review unreachable code - data = {k: v for k, v in data.items() if v is not None}
 
-        with open(file_path, 'w') as f:
-            yaml.dump(data, f, default_flow_style=False, sort_keys=False)
+    # TODO: Review unreachable code - with open(file_path, 'w') as f:
+    # TODO: Review unreachable code - yaml.dump(data, f, default_flow_style=False, sort_keys=False)
 
-        # Cache it
-        self._templates[template.name] = template
+    # TODO: Review unreachable code - # Cache it
+    # TODO: Review unreachable code - self._templates[template.name] = template
 
-        logger.info(f"Saved template '{template.name}' to {file_path}")
-        return file_path
+    # TODO: Review unreachable code - logger.info(f"Saved template '{template.name}' to {file_path}")
+    # TODO: Review unreachable code - return file_path
 
-    def load_template(self, file_path: Path) -> PromptTemplate:
-        """Load a template from file."""
-        with open(file_path) as f:
-            data = yaml.safe_load(f)
+    # TODO: Review unreachable code - def load_template(self, file_path: Path) -> PromptTemplate:
+    # TODO: Review unreachable code - """Load a template from file."""
+    # TODO: Review unreachable code - with open(file_path) as f:
+    # TODO: Review unreachable code - data = yaml.safe_load(f)
 
-        # Convert string values to enums
-        category = PromptCategory(data["category"])
-        providers = [ProviderType(p) for p in data["providers"]]
+    # TODO: Review unreachable code - # Convert string values to enums
+    # TODO: Review unreachable code - category = PromptCategory(data["category"])
+    # TODO: Review unreachable code - providers = [ProviderType(p) for p in data["providers"]]
 
-        template = PromptTemplate(
-            name=data["name"],
-            template_text=data["template"],
-            category=category,
-            providers=providers,
-            variables=data["variables"],
-            default_values=data.get("default_values"),
-            tags=data.get("tags"),
-            style=data.get("style"),
-            context=data.get("context"),
-            examples=data.get("examples"),
-            notes=data.get("notes")
-        )
+    # TODO: Review unreachable code - template = PromptTemplate(
+    # TODO: Review unreachable code - name=data["name"],
+    # TODO: Review unreachable code - template_text=data["template"],
+    # TODO: Review unreachable code - category=category,
+    # TODO: Review unreachable code - providers=providers,
+    # TODO: Review unreachable code - variables=data["variables"],
+    # TODO: Review unreachable code - default_values=data.get("default_values"),
+    # TODO: Review unreachable code - tags=data.get("tags"),
+    # TODO: Review unreachable code - style=data.get("style"),
+    # TODO: Review unreachable code - context=data.get("context"),
+    # TODO: Review unreachable code - examples=data.get("examples"),
+    # TODO: Review unreachable code - notes=data.get("notes")
+    # TODO: Review unreachable code - )
 
-        # Cache it
-        self._templates[template.name] = template
+    # TODO: Review unreachable code - # Cache it
+    # TODO: Review unreachable code - self._templates[template.name] = template
 
-        return template
+    # TODO: Review unreachable code - return template
 
-    def create_from_prompt(self, prompt: Prompt, template_name: str,
-                          variables: list[str] | None = None) -> PromptTemplate:
-        """Create a template from an existing prompt.
+    # TODO: Review unreachable code - def create_from_prompt(self, prompt: Prompt, template_name: str,
+    # TODO: Review unreachable code - variables: list[str] | None = None) -> PromptTemplate:
+    # TODO: Review unreachable code - """Create a template from an existing prompt.
 
-        Args:
-            prompt: Source prompt
-            template_name: Name for the template
-            variables: List of variable names to extract
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - prompt: Source prompt
+    # TODO: Review unreachable code - template_name: Name for the template
+    # TODO: Review unreachable code - variables: List of variable names to extract
 
-        Returns:
-            Created template
-        """
-        text = prompt.text
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Created template
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - text = prompt.text
 
-        if variables is None:
-            # Try to auto-detect variables (words in curly braces)
-            variables = re.findall(r'\{(\w+)\}', text)
-            if not variables:
-                # Create generic variables
-                variables = ["subject", "style", "mood"]
-                text = f"{{{variables[0]}}} in {{{variables[1]}}} style with {{{variables[2]}}} mood"
+    # TODO: Review unreachable code - if variables is None:
+    # TODO: Review unreachable code - # Try to auto-detect variables (words in curly braces)
+    # TODO: Review unreachable code - variables = re.findall(r'\{(\w+)\}', text)
+    # TODO: Review unreachable code - if not variables:
+    # TODO: Review unreachable code - # Create generic variables
+    # TODO: Review unreachable code - variables = ["subject", "style", "mood"]
+    # TODO: Review unreachable code - text = f"{{{variables[0]}}} in {{{variables[1]}}} style with {{{variables[2]}}} mood"
 
-        # Create variable descriptions
-        variable_desc = {var: f"Description for {var}" for var in variables}
+    # TODO: Review unreachable code - # Create variable descriptions
+    # TODO: Review unreachable code - variable_desc = {var: f"Description for {var}" for var in variables}
 
-        template = PromptTemplate(
-            name=template_name,
-            template_text=text,
-            category=prompt.category,
-            providers=prompt.providers,
-            variables=variable_desc,
-            tags=prompt.tags,
-            style=prompt.style,
-            context=prompt.context,
-            notes=f"Template created from prompt: {prompt.id}"
-        )
+    # TODO: Review unreachable code - template = PromptTemplate(
+    # TODO: Review unreachable code - name=template_name,
+    # TODO: Review unreachable code - template_text=text,
+    # TODO: Review unreachable code - category=prompt.category,
+    # TODO: Review unreachable code - providers=prompt.providers,
+    # TODO: Review unreachable code - variables=variable_desc,
+    # TODO: Review unreachable code - tags=prompt.tags,
+    # TODO: Review unreachable code - style=prompt.style,
+    # TODO: Review unreachable code - context=prompt.context,
+    # TODO: Review unreachable code - notes=f"Template created from prompt: {prompt.id}"
+    # TODO: Review unreachable code - )
 
-        return template
+    # TODO: Review unreachable code - return template
 
-    def render_all_examples(self, template_name: str) -> list[str]:
-        """Render all examples for a template."""
-        template = self.get_template(template_name)
-        if not template or not template.examples:
-            return []
+    # TODO: Review unreachable code - def render_all_examples(self, template_name: str) -> list[str]:
+    # TODO: Review unreachable code - """Render all examples for a template."""
+    # TODO: Review unreachable code - template = self.get_template(template_name)
+    # TODO: Review unreachable code - if not template or not template.examples:
+    # TODO: Review unreachable code - return []
 
-        results = []
-        for example in template.examples:
-            if "variables" in example:
-                try:
-                    rendered = template.render(**example["variables"])
-                    results.append(rendered)
-                except Exception as e:
-                    logger.warning(f"Failed to render example: {e}")
+    # TODO: Review unreachable code - results = []
+    # TODO: Review unreachable code - for example in template.examples:
+    # TODO: Review unreachable code - if example is not None and "variables" in example:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - rendered = template.render(**example["variables"])
+    # TODO: Review unreachable code - results.append(rendered)
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.warning(f"Failed to render example: {e}")
 
-        return results
+    # TODO: Review unreachable code - return results
 
 
 def create_template_from_variations(prompts: list[Prompt],
@@ -365,28 +365,28 @@ def create_template_from_variations(prompts: list[Prompt],
     if not prompts:
         raise ValueError("No prompts provided")
 
-    # Find common tokens
-    tokenized = [p.text.split() for p in prompts]
-    common_tokens = set(tokenized[0])
+    # TODO: Review unreachable code - # Find common tokens
+    # TODO: Review unreachable code - tokenized = [p.text.split() for p in prompts]
+    # TODO: Review unreachable code - common_tokens = set(tokenized[0])
 
-    for tokens in tokenized[1:]:
-        common_tokens &= set(tokens)
+    # TODO: Review unreachable code - for tokens in tokenized[1:]:
+    # TODO: Review unreachable code - common_tokens &= set(tokens)
 
-    # TODO: Implement more sophisticated pattern detection
-    # For now, create a simple template
-    base_prompt = prompts[0]
+    # TODO: Review unreachable code - # TODO: Implement more sophisticated pattern detection
+    # TODO: Review unreachable code - # For now, create a simple template
+    # TODO: Review unreachable code - base_prompt = prompts[0]
 
-    template = PromptTemplate(
-        name=template_name,
-        template_text="{subject} with {variation}",
-        category=base_prompt.category,
-        providers=list(set(p for prompt in prompts for p in prompt.providers)),
-        variables={
-            "subject": "Main subject or concept",
-            "variation": "Variation or modification"
-        },
-        tags=list(set(tag for prompt in prompts for tag in prompt.tags)),
-        notes=f"Template created from {len(prompts)} prompt variations"
-    )
+    # TODO: Review unreachable code - template = PromptTemplate(
+    # TODO: Review unreachable code - name=template_name,
+    # TODO: Review unreachable code - template_text="{subject} with {variation}",
+    # TODO: Review unreachable code - category=base_prompt.category,
+    # TODO: Review unreachable code - providers=list(set(p for prompt in prompts for p in prompt.providers)),
+    # TODO: Review unreachable code - variables={
+    # TODO: Review unreachable code - "subject": "Main subject or concept",
+    # TODO: Review unreachable code - "variation": "Variation or modification"
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - tags=list(set(tag for prompt in prompts for tag in prompt.tags)),
+    # TODO: Review unreachable code - notes=f"Template created from {len(prompts)} prompt variations"
+    # TODO: Review unreachable code - )
 
-    return template
+    # TODO: Review unreachable code - return template

@@ -67,155 +67,155 @@ class ParallelProcessor:
         
         return results
     
-    def extract_metadata_parallel(
-        self,
-        file_paths: List[Path]
-    ) -> Dict[Path, Dict[str, Any]]:
-        """Extract metadata from multiple files in parallel.
+    # TODO: Review unreachable code - def extract_metadata_parallel(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - file_paths: List[Path]
+    # TODO: Review unreachable code - ) -> Dict[Path, Dict[str, Any]]:
+    # TODO: Review unreachable code - """Extract metadata from multiple files in parallel.
         
-        Args:
-            file_paths: List of file paths
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - file_paths: List of file paths
             
-        Returns:
-            Dictionary mapping file paths to metadata
-        """
-        def extract_with_hash(file_path: Path) -> Dict[str, Any]:
-            """Extract metadata and compute hash."""
-            try:
-                # Extract basic metadata
-                metadata = self._extract_file_metadata(file_path)
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Dictionary mapping file paths to metadata
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - def extract_with_hash(file_path: Path) -> Dict[str, Any]:
+    # TODO: Review unreachable code - """Extract metadata and compute hash."""
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Extract basic metadata
+    # TODO: Review unreachable code - metadata = self._extract_file_metadata(file_path)
                 
-                return metadata
-            except Exception as e:
-                logger.error(f"Failed to extract metadata from {file_path}: {e}")
-                return {}
+    # TODO: Review unreachable code - return metadata
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to extract metadata from {file_path}: {e}")
+    # TODO: Review unreachable code - return {}
         
-        results = self.process_files_parallel(file_paths, extract_with_hash)
-        return {path: metadata for path, metadata in results if metadata}
+    # TODO: Review unreachable code - results = self.process_files_parallel(file_paths, extract_with_hash)
+    # TODO: Review unreachable code - return {path: metadata for path, metadata in results if metadata}
     
-    def _extract_file_metadata(self, file_path: Path) -> Dict[str, Any]:
-        """Extract basic metadata from a file."""
-        try:
-            stat = file_path.stat()
+    # TODO: Review unreachable code - def _extract_file_metadata(self, file_path: Path) -> Dict[str, Any]:
+    # TODO: Review unreachable code - """Extract basic metadata from a file."""
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - stat = file_path.stat()
             
-            # Compute content hash
-            with open(file_path, 'rb') as f:
-                content_hash = hashlib.sha256(f.read()).hexdigest()
+    # TODO: Review unreachable code - # Compute content hash
+    # TODO: Review unreachable code - with open(file_path, 'rb') as f:
+    # TODO: Review unreachable code - content_hash = hashlib.sha256(f.read()).hexdigest()
             
-            return {
-                'content_hash': content_hash,
-                'size': stat.st_size,
-                'modified': stat.st_mtime,
-                'exists': True,
-            }
-        except Exception as e:
-            return {
-                'exists': False,
-                'error': str(e)
-            }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'content_hash': content_hash,
+    # TODO: Review unreachable code - 'size': stat.st_size,
+    # TODO: Review unreachable code - 'modified': stat.st_mtime,
+    # TODO: Review unreachable code - 'exists': True,
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'exists': False,
+    # TODO: Review unreachable code - 'error': str(e)
+    # TODO: Review unreachable code - }
     
-    def analyze_files_parallel(
-        self,
-        file_paths: List[Path],
-        analyzer_func: Callable[[Path], AnalysisResult]
-    ) -> Dict[Path, AnalysisResult]:
-        """Analyze multiple files in parallel.
+    # TODO: Review unreachable code - def analyze_files_parallel(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - file_paths: List[Path],
+    # TODO: Review unreachable code - analyzer_func: Callable[[Path], AnalysisResult]
+    # TODO: Review unreachable code - ) -> Dict[Path, AnalysisResult]:
+    # TODO: Review unreachable code - """Analyze multiple files in parallel.
         
-        Args:
-            file_paths: List of file paths
-            analyzer_func: Function to analyze each file
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - file_paths: List of file paths
+    # TODO: Review unreachable code - analyzer_func: Function to analyze each file
             
-        Returns:
-            Dictionary mapping file paths to analysis results
-        """
-        results = self.process_files_parallel(file_paths, analyzer_func)
-        return {path: analysis for path, analysis in results if analysis}
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Dictionary mapping file paths to analysis results
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - results = self.process_files_parallel(file_paths, analyzer_func)
+    # TODO: Review unreachable code - return {path: analysis for path, analysis in results if analysis}
     
-    async def process_files_async(
-        self,
-        file_paths: List[Path],
-        async_process_func: Callable[[Path], Any],
-        max_concurrent: int = 10
-    ) -> List[Tuple[Path, Any]]:
-        """Process files asynchronously with concurrency limit.
+    # TODO: Review unreachable code - async def process_files_async(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - file_paths: List[Path],
+    # TODO: Review unreachable code - async_process_func: Callable[[Path], Any],
+    # TODO: Review unreachable code - max_concurrent: int = 10
+    # TODO: Review unreachable code - ) -> List[Tuple[Path, Any]]:
+    # TODO: Review unreachable code - """Process files asynchronously with concurrency limit.
         
-        Args:
-            file_paths: List of file paths
-            async_process_func: Async function to process each file
-            max_concurrent: Maximum concurrent operations
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - file_paths: List of file paths
+    # TODO: Review unreachable code - async_process_func: Async function to process each file
+    # TODO: Review unreachable code - max_concurrent: Maximum concurrent operations
             
-        Returns:
-            List of (file_path, result) tuples
-        """
-        results = []
-        semaphore = asyncio.Semaphore(max_concurrent)
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of (file_path, result) tuples
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - results = []
+    # TODO: Review unreachable code - semaphore = asyncio.Semaphore(max_concurrent)
         
-        async def process_with_semaphore(path: Path) -> Tuple[Path, Any]:
-            async with semaphore:
-                try:
-                    result = await async_process_func(path)
-                    return (path, result)
-                except Exception as e:
-                    logger.error(f"Error processing {path}: {e}")
-                    return (path, None)
+    # TODO: Review unreachable code - async def process_with_semaphore(path: Path) -> Tuple[Path, Any]:
+    # TODO: Review unreachable code - async with semaphore:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - result = await async_process_func(path)
+    # TODO: Review unreachable code - return (path, result)
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Error processing {path}: {e}")
+    # TODO: Review unreachable code - return (path, None)
         
-        # Process all files concurrently
-        tasks = [process_with_semaphore(path) for path in file_paths]
-        results = await asyncio.gather(*tasks)
+    # TODO: Review unreachable code - # Process all files concurrently
+    # TODO: Review unreachable code - tasks = [process_with_semaphore(path) for path in file_paths]
+    # TODO: Review unreachable code - results = await asyncio.gather(*tasks)
         
-        return results
+    # TODO: Review unreachable code - return results
     
-    def compute_hashes_parallel(
-        self,
-        file_paths: List[Path],
-        hash_types: List[str] = ["sha256"]
-    ) -> Dict[Path, Dict[str, str]]:
-        """Compute multiple hash types for files in parallel.
+    # TODO: Review unreachable code - def compute_hashes_parallel(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - file_paths: List[Path],
+    # TODO: Review unreachable code - hash_types: List[str] = ["sha256"]
+    # TODO: Review unreachable code - ) -> Dict[Path, Dict[str, str]]:
+    # TODO: Review unreachable code - """Compute multiple hash types for files in parallel.
         
-        Args:
-            file_paths: List of file paths
-            hash_types: Types of hashes to compute
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - file_paths: List of file paths
+    # TODO: Review unreachable code - hash_types: Types of hashes to compute
             
-        Returns:
-            Dictionary mapping paths to hash values
-        """
-        def compute_file_hashes(file_path: Path) -> Dict[str, str]:
-            """Compute all requested hashes for a file."""
-            hashes = {}
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Dictionary mapping paths to hash values
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - def compute_file_hashes(file_path: Path) -> Dict[str, str]:
+    # TODO: Review unreachable code - """Compute all requested hashes for a file."""
+    # TODO: Review unreachable code - hashes = {}
             
-            try:
-                # Read file once
-                with open(file_path, 'rb') as f:
-                    content = f.read()
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Read file once
+    # TODO: Review unreachable code - with open(file_path, 'rb') as f:
+    # TODO: Review unreachable code - content = f.read()
                 
-                # Compute each hash type
-                for hash_type in hash_types:
-                    if hash_type == "sha256":
-                        hashes["sha256"] = hashlib.sha256(content).hexdigest()
-                    elif hash_type == "md5":
-                        hashes["md5"] = hashlib.md5(content).hexdigest()
-                    elif hash_type == "sha1":
-                        hashes["sha1"] = hashlib.sha1(content).hexdigest()
+    # TODO: Review unreachable code - # Compute each hash type
+    # TODO: Review unreachable code - for hash_type in hash_types:
+    # TODO: Review unreachable code - if hash_type == "sha256":
+    # TODO: Review unreachable code - hashes["sha256"] = hashlib.sha256(content).hexdigest()
+    # TODO: Review unreachable code - elif hash_type == "md5":
+    # TODO: Review unreachable code - hashes["md5"] = hashlib.md5(content).hexdigest()
+    # TODO: Review unreachable code - elif hash_type == "sha1":
+    # TODO: Review unreachable code - hashes["sha1"] = hashlib.sha1(content).hexdigest()
                     
-            except Exception as e:
-                logger.error(f"Failed to compute hashes for {file_path}: {e}")
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to compute hashes for {file_path}: {e}")
             
-            return hashes
+    # TODO: Review unreachable code - return hashes
         
-        results = self.process_files_parallel(file_paths, compute_file_hashes)
-        return {path: hashes for path, hashes in results if hashes}
+    # TODO: Review unreachable code - results = self.process_files_parallel(file_paths, compute_file_hashes)
+    # TODO: Review unreachable code - return {path: hashes for path, hashes in results if hashes}
     
-    def shutdown(self):
-        """Shutdown the thread pool executor."""
-        self.executor.shutdown(wait=True)
+    # TODO: Review unreachable code - def shutdown(self):
+    # TODO: Review unreachable code - """Shutdown the thread pool executor."""
+    # TODO: Review unreachable code - self.executor.shutdown(wait=True)
     
-    def __enter__(self):
-        """Enter context manager."""
-        return self
+    # TODO: Review unreachable code - def __enter__(self):
+    # TODO: Review unreachable code - """Enter context manager."""
+    # TODO: Review unreachable code - return self
     
-    def __exit__(self, exc_type, exc_val, exc_tb):
-        """Exit context manager."""
-        self.shutdown()
+    # TODO: Review unreachable code - def __exit__(self, exc_type, exc_val, exc_tb):
+    # TODO: Review unreachable code - """Exit context manager."""
+    # TODO: Review unreachable code - self.shutdown()
 
 
 class ParallelBatchProcessor:
@@ -262,8 +262,8 @@ class ParallelBatchProcessor:
         # Combine results if function provided
         if combine_func:
             return combine_func(batch_results)
-        else:
-            return batch_results
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - return batch_results
     
     def _create_batches(self, items: List[Any], batch_size: int) -> List[List[Any]]:
         """Create batches from a list of items."""

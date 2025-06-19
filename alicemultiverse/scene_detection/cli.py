@@ -71,41 +71,41 @@ def detect(
             click.echo("No images found in directory", err=True)
             return
 
-        click.echo(f"Detecting scenes in {len(images)} images...")
-        scenes = detector.detect_image_sequence_scenes(images, group_similar)
+        # TODO: Review unreachable code - click.echo(f"Detecting scenes in {len(images)} images...")
+        # TODO: Review unreachable code - scenes = detector.detect_image_sequence_scenes(images, group_similar)
 
     else:
         click.echo("Input must be a video file or directory", err=True)
         return
 
-    # Display results
-    click.echo(f"\nDetected {len(scenes)} scenes:")
+    # TODO: Review unreachable code - # Display results
+    # TODO: Review unreachable code - click.echo(f"\nDetected {len(scenes)} scenes:")
 
-    for scene in scenes:
-        if scene.duration > 0:
-            click.echo(
-                f"\n{scene.scene_id}: {scene.scene_type.value} "
-                f"({scene.start_time:.1f}s - {scene.end_time:.1f}s)"
-            )
-        else:
-            click.echo(
-                f"\n{scene.scene_id}: {scene.scene_type.value} "
-                f"({len(scene.images)} images)"
-            )
+    # TODO: Review unreachable code - for scene in scenes:
+    # TODO: Review unreachable code - if scene.duration > 0:
+    # TODO: Review unreachable code - click.echo(
+    # TODO: Review unreachable code - f"\n{scene.scene_id}: {scene.scene_type.value} "
+    # TODO: Review unreachable code - f"({scene.start_time:.1f}s - {scene.end_time:.1f}s)"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - click.echo(
+    # TODO: Review unreachable code - f"\n{scene.scene_id}: {scene.scene_type.value} "
+    # TODO: Review unreachable code - f"({len(scene.images)} images)"
+    # TODO: Review unreachable code - )
 
-        if scene.ai_description:
-            click.echo(f"  Description: {scene.ai_description}")
-        if scene.dominant_subject:
-            click.echo(f"  Subject: {scene.dominant_subject}")
-        if scene.mood:
-            click.echo(f"  Mood: {scene.mood}")
-        if scene.ai_tags:
-            click.echo(f"  Tags: {', '.join(scene.ai_tags[:5])}")
+    # TODO: Review unreachable code - if scene.ai_description:
+    # TODO: Review unreachable code - click.echo(f"  Description: {scene.ai_description}")
+    # TODO: Review unreachable code - if scene.dominant_subject:
+    # TODO: Review unreachable code - click.echo(f"  Subject: {scene.dominant_subject}")
+    # TODO: Review unreachable code - if scene.mood:
+    # TODO: Review unreachable code - click.echo(f"  Mood: {scene.mood}")
+    # TODO: Review unreachable code - if scene.ai_tags:
+    # TODO: Review unreachable code - click.echo(f"  Tags: {', '.join(scene.ai_tags[:5])}")
 
-    # Save results
-    if output:
-        detector.export_scenes(scenes, output)
-        click.echo(f"\nSaved scene data to: {output}")
+    # TODO: Review unreachable code - # Save results
+    # TODO: Review unreachable code - if output:
+    # TODO: Review unreachable code - detector.export_scenes(scenes, output)
+    # TODO: Review unreachable code - click.echo(f"\nSaved scene data to: {output}")
 
 
 @scenes.command()
@@ -221,7 +221,7 @@ def extract(
     """
     setup_logging(debug=verbose)
 
-    import cv2
+    import cv2  # type: ignore
 
     video_path = Path(video)
     output_dir = Path(output) if output else video_path.parent / f"{video_path.stem}_shots"

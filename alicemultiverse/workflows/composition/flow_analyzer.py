@@ -167,80 +167,80 @@ class FlowAnalyzer:
 
         return issues, suggestions
 
-    async def _analyze_all_clips(
-        self,
-        timeline: Timeline,
-    ) -> list[ClipAnalysis]:
-        """Analyze all clips in the timeline."""
-        analyses = []
+    # TODO: Review unreachable code - async def _analyze_all_clips(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - timeline: Timeline,
+    # TODO: Review unreachable code - ) -> list[ClipAnalysis]:
+    # TODO: Review unreachable code - """Analyze all clips in the timeline."""
+    # TODO: Review unreachable code - analyses = []
 
-        for i, clip in enumerate(timeline.clips):
-            # Check cache first
-            cache_key = str(clip.asset_path)
-            if cache_key in self.clip_analyses:
-                analyses.append(self.clip_analyses[cache_key])
-                continue
+    # TODO: Review unreachable code - for i, clip in enumerate(timeline.clips):
+    # TODO: Review unreachable code - # Check cache first
+    # TODO: Review unreachable code - cache_key = str(clip.asset_path)
+    # TODO: Review unreachable code - if cache_key in self.clip_analyses:
+    # TODO: Review unreachable code - analyses.append(self.clip_analyses[cache_key])
+    # TODO: Review unreachable code - continue
 
-            # Analyze clip
-            analysis = await self._analyze_clip(clip, i)
-            self.clip_analyses[cache_key] = analysis
-            analyses.append(analysis)
+    # TODO: Review unreachable code - # Analyze clip
+    # TODO: Review unreachable code - analysis = await self._analyze_clip(clip, i)
+    # TODO: Review unreachable code - self.clip_analyses[cache_key] = analysis
+    # TODO: Review unreachable code - analyses.append(analysis)
 
-        return analyses
+    # TODO: Review unreachable code - return analyses
 
-    async def _analyze_clip(
-        self,
-        clip: TimelineClip,
-        clip_index: int,
-    ) -> ClipAnalysis:
-        """Analyze a single clip."""
-        # Get basic metadata
-        metadata = self.metadata_cache.get_metadata(str(clip.asset_path))
+    # TODO: Review unreachable code - async def _analyze_clip(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - clip: TimelineClip,
+    # TODO: Review unreachable code - clip_index: int,
+    # TODO: Review unreachable code - ) -> ClipAnalysis:
+    # TODO: Review unreachable code - """Analyze a single clip."""
+    # TODO: Review unreachable code - # Get basic metadata
+    # TODO: Review unreachable code - metadata = self.metadata_cache.get_metadata(str(clip.asset_path))
 
-        # Default values
-        dominant_colors = [(128, 128, 128)]  # Gray
-        brightness = 0.5
-        contrast = 0.5
-        motion_level = 0.3
-        complexity = 0.5
-        mood_score = 0.0
-        energy_level = 0.5
-        style_vector = np.zeros(128)  # Placeholder embedding
-        semantic_tags = []
+    # TODO: Review unreachable code - # Default values
+    # TODO: Review unreachable code - dominant_colors = [(128, 128, 128)]  # Gray
+    # TODO: Review unreachable code - brightness = 0.5
+    # TODO: Review unreachable code - contrast = 0.5
+    # TODO: Review unreachable code - motion_level = 0.3
+    # TODO: Review unreachable code - complexity = 0.5
+    # TODO: Review unreachable code - mood_score = 0.0
+    # TODO: Review unreachable code - energy_level = 0.5
+    # TODO: Review unreachable code - style_vector = np.zeros(128)  # Placeholder embedding
+    # TODO: Review unreachable code - semantic_tags = []
 
-        if metadata:
-            # Extract from metadata
-            if "dominant_colors" in metadata:
-                dominant_colors = metadata["dominant_colors"]
+    # TODO: Review unreachable code - if metadata:
+    # TODO: Review unreachable code - # Extract from metadata
+    # TODO: Review unreachable code - if metadata is not None and "dominant_colors" in metadata:
+    # TODO: Review unreachable code - dominant_colors = metadata["dominant_colors"]
 
-            if "brightness" in metadata:
-                brightness = metadata["brightness"]
+    # TODO: Review unreachable code - if metadata is not None and "brightness" in metadata:
+    # TODO: Review unreachable code - brightness = metadata["brightness"]
 
-            if "semantic_tags" in metadata:
-                semantic_tags = metadata["semantic_tags"]
+    # TODO: Review unreachable code - if metadata is not None and "semantic_tags" in metadata:
+    # TODO: Review unreachable code - semantic_tags = metadata["semantic_tags"]
 
-                # Infer mood from tags
-                positive_tags = ["happy", "bright", "cheerful", "vibrant"]
-                negative_tags = ["dark", "moody", "somber", "melancholic"]
+    # TODO: Review unreachable code - # Infer mood from tags
+    # TODO: Review unreachable code - positive_tags = ["happy", "bright", "cheerful", "vibrant"]
+    # TODO: Review unreachable code - negative_tags = ["dark", "moody", "somber", "melancholic"]
 
-                mood_score = sum(1 for tag in semantic_tags if tag in positive_tags)
-                mood_score -= sum(1 for tag in semantic_tags if tag in negative_tags)
-                mood_score = max(-1, min(1, mood_score / 3))  # Normalize
+    # TODO: Review unreachable code - mood_score = sum(1 for tag in semantic_tags if tag in positive_tags)
+    # TODO: Review unreachable code - mood_score -= sum(1 for tag in semantic_tags if tag in negative_tags)
+    # TODO: Review unreachable code - mood_score = max(-1, min(1, mood_score / 3))  # Normalize
 
-                # Infer energy from tags
-                high_energy_tags = ["action", "dynamic", "fast", "explosive"]
-                low_energy_tags = ["calm", "peaceful", "still", "quiet"]
+    # TODO: Review unreachable code - # Infer energy from tags
+    # TODO: Review unreachable code - high_energy_tags = ["action", "dynamic", "fast", "explosive"]
+    # TODO: Review unreachable code - low_energy_tags = ["calm", "peaceful", "still", "quiet"]
 
-                energy_level = 0.5
-                energy_level += sum(0.2 for tag in semantic_tags if tag in high_energy_tags)
-                energy_level -= sum(0.2 for tag in semantic_tags if tag in low_energy_tags)
-                energy_level = max(0, min(1, energy_level))
+    # TODO: Review unreachable code - energy_level = 0.5
+    # TODO: Review unreachable code - energy_level += sum(0.2 for tag in semantic_tags if tag in high_energy_tags)
+    # TODO: Review unreachable code - energy_level -= sum(0.2 for tag in semantic_tags if tag in low_energy_tags)
+    # TODO: Review unreachable code - energy_level = max(0, min(1, energy_level))
 
-        # Use vision provider for deeper analysis if available
-        if self.vision_provider and clip.asset_path.suffix.lower() in [".jpg", ".png", ".webp"]:
-            try:
-                # Analyze for motion and complexity
-                custom_instructions = """Analyze this image and provide scores (0-1):
+    # TODO: Review unreachable code - # Use vision provider for deeper analysis if available
+    # TODO: Review unreachable code - if self.vision_provider and clip.asset_path.suffix.lower() in [".jpg", ".png", ".webp"]:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Analyze for motion and complexity
+    # TODO: Review unreachable code - custom_instructions = """Analyze this image and provide scores (0-1):
 1. Motion level: How much movement/action is implied
 2. Visual complexity: How complex/busy vs simple
 3. Overall energy: Dynamic vs calm
@@ -350,377 +350,377 @@ motion=X.X, complexity=X.X, energy=X.X"""
 
         return issues
 
-    def _analyze_continuity(
-        self,
-        timeline: Timeline,
-        analyses: list[ClipAnalysis],
-    ) -> list[FlowIssue]:
-        """Analyze visual continuity between clips."""
-        issues = []
+    # TODO: Review unreachable code - def _analyze_continuity(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - timeline: Timeline,
+    # TODO: Review unreachable code - analyses: list[ClipAnalysis],
+    # TODO: Review unreachable code - ) -> list[FlowIssue]:
+    # TODO: Review unreachable code - """Analyze visual continuity between clips."""
+    # TODO: Review unreachable code - issues = []
 
-        for i in range(len(analyses) - 1):
-            curr = analyses[i]
-            next = analyses[i + 1]
+    # TODO: Review unreachable code - for i in range(len(analyses) - 1):
+    # TODO: Review unreachable code - curr = analyses[i]
+    # TODO: Review unreachable code - next = analyses[i + 1]
 
-            # Check color continuity
-            if curr.dominant_colors and next.dominant_colors:
-                # Calculate color distance
-                color_dist = self._color_distance(
-                    curr.dominant_colors[0],
-                    next.dominant_colors[0]
-                )
+    # TODO: Review unreachable code - # Check color continuity
+    # TODO: Review unreachable code - if curr.dominant_colors and next.dominant_colors:
+    # TODO: Review unreachable code - # Calculate color distance
+    # TODO: Review unreachable code - color_dist = self._color_distance(
+    # TODO: Review unreachable code - curr.dominant_colors[0],
+    # TODO: Review unreachable code - next.dominant_colors[0]
+    # TODO: Review unreachable code - )
 
-                if color_dist > 150:  # Significant color jump
-                    issues.append(FlowIssue(
-                        issue_type=FlowIssueType.COLOR_DISCONTINUITY,
-                        severity=0.5,
-                        start_time=timeline.clips[i].start_time + timeline.clips[i].duration,
-                        end_time=timeline.clips[i+1].start_time,
-                        affected_clips=[i, i+1],
-                        description=f"Large color shift between clips {i+1} and {i+2}",
-                        metrics={"color_distance": color_dist},
-                    ))
+    # TODO: Review unreachable code - if color_dist > 150:  # Significant color jump
+    # TODO: Review unreachable code - issues.append(FlowIssue(
+    # TODO: Review unreachable code - issue_type=FlowIssueType.COLOR_DISCONTINUITY,
+    # TODO: Review unreachable code - severity=0.5,
+    # TODO: Review unreachable code - start_time=timeline.clips[i].start_time + timeline.clips[i].duration,
+    # TODO: Review unreachable code - end_time=timeline.clips[i+1].start_time,
+    # TODO: Review unreachable code - affected_clips=[i, i+1],
+    # TODO: Review unreachable code - description=f"Large color shift between clips {i+1} and {i+2}",
+    # TODO: Review unreachable code - metrics={"color_distance": color_dist},
+    # TODO: Review unreachable code - ))
 
-            # Check brightness continuity
-            brightness_diff = abs(curr.brightness - next.brightness)
-            if brightness_diff > 0.5:
-                issues.append(FlowIssue(
-                    issue_type=FlowIssueType.JARRING_TRANSITION,
-                    severity=0.6,
-                    start_time=timeline.clips[i].start_time + timeline.clips[i].duration,
-                    end_time=timeline.clips[i+1].start_time,
-                    affected_clips=[i, i+1],
-                    description=f"Large brightness change between clips {i+1} and {i+2}",
-                    metrics={"brightness_diff": brightness_diff},
-                ))
+    # TODO: Review unreachable code - # Check brightness continuity
+    # TODO: Review unreachable code - brightness_diff = abs(curr.brightness - next.brightness)
+    # TODO: Review unreachable code - if brightness_diff > 0.5:
+    # TODO: Review unreachable code - issues.append(FlowIssue(
+    # TODO: Review unreachable code - issue_type=FlowIssueType.JARRING_TRANSITION,
+    # TODO: Review unreachable code - severity=0.6,
+    # TODO: Review unreachable code - start_time=timeline.clips[i].start_time + timeline.clips[i].duration,
+    # TODO: Review unreachable code - end_time=timeline.clips[i+1].start_time,
+    # TODO: Review unreachable code - affected_clips=[i, i+1],
+    # TODO: Review unreachable code - description=f"Large brightness change between clips {i+1} and {i+2}",
+    # TODO: Review unreachable code - metrics={"brightness_diff": brightness_diff},
+    # TODO: Review unreachable code - ))
 
-            # Check motion continuity
-            motion_diff = abs(curr.motion_level - next.motion_level)
-            if motion_diff > 0.6:
-                issues.append(FlowIssue(
-                    issue_type=FlowIssueType.MOTION_CONFLICT,
-                    severity=0.5,
-                    start_time=timeline.clips[i].start_time + timeline.clips[i].duration,
-                    end_time=timeline.clips[i+1].start_time,
-                    affected_clips=[i, i+1],
-                    description=f"Motion level conflict between clips {i+1} and {i+2}",
-                    metrics={"motion_diff": motion_diff},
-                ))
+    # TODO: Review unreachable code - # Check motion continuity
+    # TODO: Review unreachable code - motion_diff = abs(curr.motion_level - next.motion_level)
+    # TODO: Review unreachable code - if motion_diff > 0.6:
+    # TODO: Review unreachable code - issues.append(FlowIssue(
+    # TODO: Review unreachable code - issue_type=FlowIssueType.MOTION_CONFLICT,
+    # TODO: Review unreachable code - severity=0.5,
+    # TODO: Review unreachable code - start_time=timeline.clips[i].start_time + timeline.clips[i].duration,
+    # TODO: Review unreachable code - end_time=timeline.clips[i+1].start_time,
+    # TODO: Review unreachable code - affected_clips=[i, i+1],
+    # TODO: Review unreachable code - description=f"Motion level conflict between clips {i+1} and {i+2}",
+    # TODO: Review unreachable code - metrics={"motion_diff": motion_diff},
+    # TODO: Review unreachable code - ))
 
-        return issues
+    # TODO: Review unreachable code - return issues
 
-    def _analyze_energy_flow(
-        self,
-        timeline: Timeline,
-        analyses: list[ClipAnalysis],
-        target_energy: str | None = None,
-    ) -> list[FlowIssue]:
-        """Analyze energy flow throughout timeline."""
-        issues = []
+    # TODO: Review unreachable code - def _analyze_energy_flow(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - timeline: Timeline,
+    # TODO: Review unreachable code - analyses: list[ClipAnalysis],
+    # TODO: Review unreachable code - target_energy: str | None = None,
+    # TODO: Review unreachable code - ) -> list[FlowIssue]:
+    # TODO: Review unreachable code - """Analyze energy flow throughout timeline."""
+    # TODO: Review unreachable code - issues = []
 
-        # Extract energy levels
-        energy_levels = [a.energy_level for a in analyses]
+    # TODO: Review unreachable code - # Extract energy levels
+    # TODO: Review unreachable code - energy_levels = [a.energy_level for a in analyses]
 
-        # Check for energy drops
-        for i in range(1, len(energy_levels)):
-            if energy_levels[i] < energy_levels[i-1] - 0.4:
-                issues.append(FlowIssue(
-                    issue_type=FlowIssueType.ENERGY_DROP,
-                    severity=0.6,
-                    start_time=timeline.clips[i].start_time,
-                    end_time=timeline.clips[i].start_time + timeline.clips[i].duration,
-                    affected_clips=[i-1, i],
-                    description=f"Significant energy drop at clip {i+1}",
-                    metrics={
-                        "prev_energy": energy_levels[i-1],
-                        "curr_energy": energy_levels[i],
-                    },
-                ))
+    # TODO: Review unreachable code - # Check for energy drops
+    # TODO: Review unreachable code - for i in range(1, len(energy_levels)):
+    # TODO: Review unreachable code - if energy_levels[i] < energy_levels[i-1] - 0.4:
+    # TODO: Review unreachable code - issues.append(FlowIssue(
+    # TODO: Review unreachable code - issue_type=FlowIssueType.ENERGY_DROP,
+    # TODO: Review unreachable code - severity=0.6,
+    # TODO: Review unreachable code - start_time=timeline.clips[i].start_time,
+    # TODO: Review unreachable code - end_time=timeline.clips[i].start_time + timeline.clips[i].duration,
+    # TODO: Review unreachable code - affected_clips=[i-1, i],
+    # TODO: Review unreachable code - description=f"Significant energy drop at clip {i+1}",
+    # TODO: Review unreachable code - metrics={
+    # TODO: Review unreachable code - "prev_energy": energy_levels[i-1],
+    # TODO: Review unreachable code - "curr_energy": energy_levels[i],
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - ))
 
-        # Check against target energy curve
-        if target_energy and target_energy in self.ENERGY_CURVES:
-            curve_func = self.ENERGY_CURVES[target_energy]
+    # TODO: Review unreachable code - # Check against target energy curve
+    # TODO: Review unreachable code - if target_energy and target_energy in self.ENERGY_CURVES:
+    # TODO: Review unreachable code - curve_func = self.ENERGY_CURVES[target_energy]
 
-            # Sample expected energy at each clip
-            for i, (clip, analysis) in enumerate(zip(timeline.clips, analyses, strict=False)):
-                # Normalize time position
-                t = (clip.start_time + clip.duration / 2) / timeline.duration
-                expected_energy = curve_func(t)
+    # TODO: Review unreachable code - # Sample expected energy at each clip
+    # TODO: Review unreachable code - for i, (clip, analysis) in enumerate(zip(timeline.clips, analyses, strict=False)):
+    # TODO: Review unreachable code - # Normalize time position
+    # TODO: Review unreachable code - t = (clip.start_time + clip.duration / 2) / timeline.duration
+    # TODO: Review unreachable code - expected_energy = curve_func(t)
 
-                energy_diff = abs(analysis.energy_level - expected_energy)
-                if energy_diff > 0.3:
-                    issues.append(FlowIssue(
-                        issue_type=FlowIssueType.INCONSISTENT_RHYTHM,
-                        severity=0.5 * energy_diff,
-                        start_time=clip.start_time,
-                        end_time=clip.start_time + clip.duration,
-                        affected_clips=[i],
-                        description=f"Clip {i+1} energy doesn't match {target_energy} curve",
-                        metrics={
-                            "actual_energy": analysis.energy_level,
-                            "expected_energy": expected_energy,
-                        },
-                    ))
+    # TODO: Review unreachable code - energy_diff = abs(analysis.energy_level - expected_energy)
+    # TODO: Review unreachable code - if energy_diff > 0.3:
+    # TODO: Review unreachable code - issues.append(FlowIssue(
+    # TODO: Review unreachable code - issue_type=FlowIssueType.INCONSISTENT_RHYTHM,
+    # TODO: Review unreachable code - severity=0.5 * energy_diff,
+    # TODO: Review unreachable code - start_time=clip.start_time,
+    # TODO: Review unreachable code - end_time=clip.start_time + clip.duration,
+    # TODO: Review unreachable code - affected_clips=[i],
+    # TODO: Review unreachable code - description=f"Clip {i+1} energy doesn't match {target_energy} curve",
+    # TODO: Review unreachable code - metrics={
+    # TODO: Review unreachable code - "actual_energy": analysis.energy_level,
+    # TODO: Review unreachable code - "expected_energy": expected_energy,
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - ))
 
-        # Check for missing climax in longer timelines
-        if timeline.duration > 30 and max(energy_levels) < 0.7:
-            issues.append(FlowIssue(
-                issue_type=FlowIssueType.MISSING_CLIMAX,
-                severity=0.7,
-                start_time=0,
-                end_time=timeline.duration,
-                affected_clips=list(range(len(timeline.clips))),
-                description="Timeline lacks a high-energy climax moment",
-                metrics={"max_energy": max(energy_levels)},
-            ))
+    # TODO: Review unreachable code - # Check for missing climax in longer timelines
+    # TODO: Review unreachable code - if timeline.duration > 30 and max(energy_levels) < 0.7:
+    # TODO: Review unreachable code - issues.append(FlowIssue(
+    # TODO: Review unreachable code - issue_type=FlowIssueType.MISSING_CLIMAX,
+    # TODO: Review unreachable code - severity=0.7,
+    # TODO: Review unreachable code - start_time=0,
+    # TODO: Review unreachable code - end_time=timeline.duration,
+    # TODO: Review unreachable code - affected_clips=list(range(len(timeline.clips))),
+    # TODO: Review unreachable code - description="Timeline lacks a high-energy climax moment",
+    # TODO: Review unreachable code - metrics={"max_energy": max(energy_levels)},
+    # TODO: Review unreachable code - ))
 
-        return issues
+    # TODO: Review unreachable code - return issues
 
-    def _analyze_narrative(
-        self,
-        timeline: Timeline,
-        analyses: list[ClipAnalysis],
-    ) -> list[FlowIssue]:
-        """Analyze narrative flow and coherence."""
-        issues = []
+    # TODO: Review unreachable code - def _analyze_narrative(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - timeline: Timeline,
+    # TODO: Review unreachable code - analyses: list[ClipAnalysis],
+    # TODO: Review unreachable code - ) -> list[FlowIssue]:
+    # TODO: Review unreachable code - """Analyze narrative flow and coherence."""
+    # TODO: Review unreachable code - issues = []
 
-        # Check for repetitive sequences
-        for i in range(len(analyses) - 2):
-            # Compare semantic similarity
-            if analyses[i].semantic_tags and analyses[i+2].semantic_tags:
-                overlap = set(analyses[i].semantic_tags) & set(analyses[i+2].semantic_tags)
-                if len(overlap) > len(analyses[i].semantic_tags) * 0.8:
-                    issues.append(FlowIssue(
-                        issue_type=FlowIssueType.REPETITIVE_SEQUENCE,
-                        severity=0.4,
-                        start_time=timeline.clips[i].start_time,
-                        end_time=timeline.clips[i+2].start_time + timeline.clips[i+2].duration,
-                        affected_clips=[i, i+2],
-                        description=f"Clips {i+1} and {i+3} are too similar",
-                        metrics={"tag_overlap": len(overlap)},
-                    ))
+    # TODO: Review unreachable code - # Check for repetitive sequences
+    # TODO: Review unreachable code - for i in range(len(analyses) - 2):
+    # TODO: Review unreachable code - # Compare semantic similarity
+    # TODO: Review unreachable code - if analyses[i].semantic_tags and analyses[i+2].semantic_tags:
+    # TODO: Review unreachable code - overlap = set(analyses[i].semantic_tags) & set(analyses[i+2].semantic_tags)
+    # TODO: Review unreachable code - if len(overlap) > len(analyses[i].semantic_tags) * 0.8:
+    # TODO: Review unreachable code - issues.append(FlowIssue(
+    # TODO: Review unreachable code - issue_type=FlowIssueType.REPETITIVE_SEQUENCE,
+    # TODO: Review unreachable code - severity=0.4,
+    # TODO: Review unreachable code - start_time=timeline.clips[i].start_time,
+    # TODO: Review unreachable code - end_time=timeline.clips[i+2].start_time + timeline.clips[i+2].duration,
+    # TODO: Review unreachable code - affected_clips=[i, i+2],
+    # TODO: Review unreachable code - description=f"Clips {i+1} and {i+3} are too similar",
+    # TODO: Review unreachable code - metrics={"tag_overlap": len(overlap)},
+    # TODO: Review unreachable code - ))
 
-        # Check for style consistency
-        if len(analyses) > 3:
-            # Simple style check based on tags
-            style_tags = ["realistic", "abstract", "cartoon", "artistic", "photographic"]
-            clip_styles = []
+    # TODO: Review unreachable code - # Check for style consistency
+    # TODO: Review unreachable code - if len(analyses) > 3:
+    # TODO: Review unreachable code - # Simple style check based on tags
+    # TODO: Review unreachable code - style_tags = ["realistic", "abstract", "cartoon", "artistic", "photographic"]
+    # TODO: Review unreachable code - clip_styles = []
 
-            for analysis in analyses:
-                found_styles = [tag for tag in analysis.semantic_tags if tag in style_tags]
-                clip_styles.append(found_styles[0] if found_styles else "unknown")
+    # TODO: Review unreachable code - for analysis in analyses:
+    # TODO: Review unreachable code - found_styles = [tag for tag in analysis.semantic_tags if tag in style_tags]
+    # TODO: Review unreachable code - clip_styles.append(found_styles[0] if found_styles else "unknown")
 
-            # Find style changes
-            for i in range(1, len(clip_styles)):
-                if clip_styles[i] != "unknown" and clip_styles[i-1] != "unknown":
-                    if clip_styles[i] != clip_styles[i-1]:
-                        issues.append(FlowIssue(
-                            issue_type=FlowIssueType.STYLE_MISMATCH,
-                            severity=0.5,
-                            start_time=timeline.clips[i].start_time,
-                            end_time=timeline.clips[i].start_time + timeline.clips[i].duration,
-                            affected_clips=[i-1, i],
-                            description=f"Style change from {clip_styles[i-1]} to {clip_styles[i]}",
-                            metrics={},
-                        ))
+    # TODO: Review unreachable code - # Find style changes
+    # TODO: Review unreachable code - for i in range(1, len(clip_styles)):
+    # TODO: Review unreachable code - if clip_styles[i] != "unknown" and clip_styles[i-1] != "unknown":
+    # TODO: Review unreachable code - if clip_styles[i] != clip_styles[i-1]:
+    # TODO: Review unreachable code - issues.append(FlowIssue(
+    # TODO: Review unreachable code - issue_type=FlowIssueType.STYLE_MISMATCH,
+    # TODO: Review unreachable code - severity=0.5,
+    # TODO: Review unreachable code - start_time=timeline.clips[i].start_time,
+    # TODO: Review unreachable code - end_time=timeline.clips[i].start_time + timeline.clips[i].duration,
+    # TODO: Review unreachable code - affected_clips=[i-1, i],
+    # TODO: Review unreachable code - description=f"Style change from {clip_styles[i-1]} to {clip_styles[i]}",
+    # TODO: Review unreachable code - metrics={},
+    # TODO: Review unreachable code - ))
 
-        return issues
+    # TODO: Review unreachable code - return issues
 
-    def _generate_suggestions(
-        self,
-        timeline: Timeline,
-        issues: list[FlowIssue],
-        analyses: list[ClipAnalysis],
-    ) -> list[FlowSuggestion]:
-        """Generate suggestions based on detected issues."""
-        suggestions = []
+    # TODO: Review unreachable code - def _generate_suggestions(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - timeline: Timeline,
+    # TODO: Review unreachable code - issues: list[FlowIssue],
+    # TODO: Review unreachable code - analyses: list[ClipAnalysis],
+    # TODO: Review unreachable code - ) -> list[FlowSuggestion]:
+    # TODO: Review unreachable code - """Generate suggestions based on detected issues."""
+    # TODO: Review unreachable code - suggestions = []
 
-        # Group issues by type
-        issue_groups = {}
-        for issue in issues:
-            if issue.issue_type not in issue_groups:
-                issue_groups[issue.issue_type] = []
-            issue_groups[issue.issue_type].append(issue)
+    # TODO: Review unreachable code - # Group issues by type
+    # TODO: Review unreachable code - issue_groups = {}
+    # TODO: Review unreachable code - for issue in issues:
+    # TODO: Review unreachable code - if issue.issue_type not in issue_groups:
+    # TODO: Review unreachable code - issue_groups[issue.issue_type] = []
+    # TODO: Review unreachable code - issue_groups[issue.issue_type].append(issue)
 
-        # Generate suggestions for pacing issues
-        if FlowIssueType.PACING_TOO_FAST in issue_groups:
-            for issue in issue_groups[FlowIssueType.PACING_TOO_FAST]:
-                suggestions.append(FlowSuggestion(
-                    suggestion_type=SuggestionType.ADJUST_DURATION,
-                    priority=issue.severity,
-                    target_clips=issue.affected_clips,
-                    description=f"Extend clip {issue.affected_clips[0]+1} to at least {issue.metrics['min_duration']:.1f}s",
-                    parameters={
-                        "new_duration": issue.metrics["min_duration"],
-                        "method": "slow_motion",
-                    },
-                    expected_improvement=0.3,
-                ))
+    # TODO: Review unreachable code - # Generate suggestions for pacing issues
+    # TODO: Review unreachable code - if FlowIssueType.PACING_TOO_FAST in issue_groups:
+    # TODO: Review unreachable code - for issue in issue_groups[FlowIssueType.PACING_TOO_FAST]:
+    # TODO: Review unreachable code - suggestions.append(FlowSuggestion(
+    # TODO: Review unreachable code - suggestion_type=SuggestionType.ADJUST_DURATION,
+    # TODO: Review unreachable code - priority=issue.severity,
+    # TODO: Review unreachable code - target_clips=issue.affected_clips,
+    # TODO: Review unreachable code - description=f"Extend clip {issue.affected_clips[0]+1} to at least {issue.metrics['min_duration']:.1f}s",
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "new_duration": issue.metrics["min_duration"],
+    # TODO: Review unreachable code - "method": "slow_motion",
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - expected_improvement=0.3,
+    # TODO: Review unreachable code - ))
 
-        if FlowIssueType.PACING_TOO_SLOW in issue_groups:
-            for issue in issue_groups[FlowIssueType.PACING_TOO_SLOW]:
-                suggestions.append(FlowSuggestion(
-                    suggestion_type=SuggestionType.ADJUST_DURATION,
-                    priority=issue.severity,
-                    target_clips=issue.affected_clips,
-                    description=f"Shorten clip {issue.affected_clips[0]+1} to {issue.metrics['max_duration']:.1f}s",
-                    parameters={
-                        "new_duration": issue.metrics["max_duration"],
-                        "method": "trim",
-                    },
-                    expected_improvement=0.2,
-                ))
+    # TODO: Review unreachable code - if FlowIssueType.PACING_TOO_SLOW in issue_groups:
+    # TODO: Review unreachable code - for issue in issue_groups[FlowIssueType.PACING_TOO_SLOW]:
+    # TODO: Review unreachable code - suggestions.append(FlowSuggestion(
+    # TODO: Review unreachable code - suggestion_type=SuggestionType.ADJUST_DURATION,
+    # TODO: Review unreachable code - priority=issue.severity,
+    # TODO: Review unreachable code - target_clips=issue.affected_clips,
+    # TODO: Review unreachable code - description=f"Shorten clip {issue.affected_clips[0]+1} to {issue.metrics['max_duration']:.1f}s",
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "new_duration": issue.metrics["max_duration"],
+    # TODO: Review unreachable code - "method": "trim",
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - expected_improvement=0.2,
+    # TODO: Review unreachable code - ))
 
-        # Generate suggestions for continuity issues
-        if FlowIssueType.COLOR_DISCONTINUITY in issue_groups:
-            for issue in issue_groups[FlowIssueType.COLOR_DISCONTINUITY]:
-                suggestions.append(FlowSuggestion(
-                    suggestion_type=SuggestionType.ADD_TRANSITION,
-                    priority=issue.severity * 0.8,
-                    target_clips=issue.affected_clips,
-                    description=f"Add color fade transition between clips {issue.affected_clips[0]+1} and {issue.affected_clips[1]+1}",
-                    parameters={
-                        "transition_type": "cross_fade",
-                        "duration": 1.0,
-                    },
-                    expected_improvement=0.4,
-                ))
+    # TODO: Review unreachable code - # Generate suggestions for continuity issues
+    # TODO: Review unreachable code - if FlowIssueType.COLOR_DISCONTINUITY in issue_groups:
+    # TODO: Review unreachable code - for issue in issue_groups[FlowIssueType.COLOR_DISCONTINUITY]:
+    # TODO: Review unreachable code - suggestions.append(FlowSuggestion(
+    # TODO: Review unreachable code - suggestion_type=SuggestionType.ADD_TRANSITION,
+    # TODO: Review unreachable code - priority=issue.severity * 0.8,
+    # TODO: Review unreachable code - target_clips=issue.affected_clips,
+    # TODO: Review unreachable code - description=f"Add color fade transition between clips {issue.affected_clips[0]+1} and {issue.affected_clips[1]+1}",
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "transition_type": "cross_fade",
+    # TODO: Review unreachable code - "duration": 1.0,
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - expected_improvement=0.4,
+    # TODO: Review unreachable code - ))
 
-        if FlowIssueType.JARRING_TRANSITION in issue_groups:
-            for issue in issue_groups[FlowIssueType.JARRING_TRANSITION]:
-                suggestions.append(FlowSuggestion(
-                    suggestion_type=SuggestionType.ADD_EFFECT,
-                    priority=issue.severity,
-                    target_clips=[issue.affected_clips[0]],
-                    description=f"Add fade-out to clip {issue.affected_clips[0]+1}",
-                    parameters={
-                        "effect": "brightness_fade",
-                        "duration": 0.5,
-                    },
-                    expected_improvement=0.3,
-                ))
+    # TODO: Review unreachable code - if FlowIssueType.JARRING_TRANSITION in issue_groups:
+    # TODO: Review unreachable code - for issue in issue_groups[FlowIssueType.JARRING_TRANSITION]:
+    # TODO: Review unreachable code - suggestions.append(FlowSuggestion(
+    # TODO: Review unreachable code - suggestion_type=SuggestionType.ADD_EFFECT,
+    # TODO: Review unreachable code - priority=issue.severity,
+    # TODO: Review unreachable code - target_clips=[issue.affected_clips[0]],
+    # TODO: Review unreachable code - description=f"Add fade-out to clip {issue.affected_clips[0]+1}",
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "effect": "brightness_fade",
+    # TODO: Review unreachable code - "duration": 0.5,
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - expected_improvement=0.3,
+    # TODO: Review unreachable code - ))
 
-        # Generate suggestions for energy flow
-        if FlowIssueType.ENERGY_DROP in issue_groups:
-            for issue in issue_groups[FlowIssueType.ENERGY_DROP]:
-                # Suggest reordering if possible
-                if issue.affected_clips[1] < len(timeline.clips) - 1:
-                    suggestions.append(FlowSuggestion(
-                        suggestion_type=SuggestionType.REORDER_CLIPS,
-                        priority=issue.severity * 0.9,
-                        target_clips=issue.affected_clips,
-                        description=f"Move high-energy clip after clip {issue.affected_clips[1]+1}",
-                        parameters={
-                            "move_to": issue.affected_clips[1] + 1,
-                        },
-                        expected_improvement=0.5,
-                    ))
+    # TODO: Review unreachable code - # Generate suggestions for energy flow
+    # TODO: Review unreachable code - if FlowIssueType.ENERGY_DROP in issue_groups:
+    # TODO: Review unreachable code - for issue in issue_groups[FlowIssueType.ENERGY_DROP]:
+    # TODO: Review unreachable code - # Suggest reordering if possible
+    # TODO: Review unreachable code - if issue.affected_clips[1] < len(timeline.clips) - 1:
+    # TODO: Review unreachable code - suggestions.append(FlowSuggestion(
+    # TODO: Review unreachable code - suggestion_type=SuggestionType.REORDER_CLIPS,
+    # TODO: Review unreachable code - priority=issue.severity * 0.9,
+    # TODO: Review unreachable code - target_clips=issue.affected_clips,
+    # TODO: Review unreachable code - description=f"Move high-energy clip after clip {issue.affected_clips[1]+1}",
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "move_to": issue.affected_clips[1] + 1,
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - expected_improvement=0.5,
+    # TODO: Review unreachable code - ))
 
-        if FlowIssueType.MISSING_CLIMAX in issue_groups:
-            # Find potential climax position (around 70-80% through)
-            climax_time = timeline.duration * 0.75
-            climax_clip = 0
-            for i, clip in enumerate(timeline.clips):
-                if clip.start_time <= climax_time <= clip.start_time + clip.duration:
-                    climax_clip = i
-                    break
+    # TODO: Review unreachable code - if FlowIssueType.MISSING_CLIMAX in issue_groups:
+    # TODO: Review unreachable code - # Find potential climax position (around 70-80% through)
+    # TODO: Review unreachable code - climax_time = timeline.duration * 0.75
+    # TODO: Review unreachable code - climax_clip = 0
+    # TODO: Review unreachable code - for i, clip in enumerate(timeline.clips):
+    # TODO: Review unreachable code - if clip.start_time <= climax_time <= clip.start_time + clip.duration:
+    # TODO: Review unreachable code - climax_clip = i
+    # TODO: Review unreachable code - break
 
-            suggestions.append(FlowSuggestion(
-                suggestion_type=SuggestionType.INSERT_CLIP,
-                priority=0.8,
-                target_clips=[climax_clip],
-                description=f"Insert high-energy clip at position {climax_clip+1} for climax",
-                parameters={
-                    "clip_type": "high_energy",
-                    "duration": 3.0,
-                },
-                expected_improvement=0.6,
-            ))
+    # TODO: Review unreachable code - suggestions.append(FlowSuggestion(
+    # TODO: Review unreachable code - suggestion_type=SuggestionType.INSERT_CLIP,
+    # TODO: Review unreachable code - priority=0.8,
+    # TODO: Review unreachable code - target_clips=[climax_clip],
+    # TODO: Review unreachable code - description=f"Insert high-energy clip at position {climax_clip+1} for climax",
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "clip_type": "high_energy",
+    # TODO: Review unreachable code - "duration": 3.0,
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - expected_improvement=0.6,
+    # TODO: Review unreachable code - ))
 
-        # Generate suggestions for narrative issues
-        if FlowIssueType.REPETITIVE_SEQUENCE in issue_groups:
-            for issue in issue_groups[FlowIssueType.REPETITIVE_SEQUENCE]:
-                suggestions.append(FlowSuggestion(
-                    suggestion_type=SuggestionType.REMOVE_CLIP,
-                    priority=issue.severity * 0.7,
-                    target_clips=[issue.affected_clips[1]],
-                    description=f"Remove repetitive clip {issue.affected_clips[1]+1}",
-                    parameters={},
-                    expected_improvement=0.3,
-                ))
+    # TODO: Review unreachable code - # Generate suggestions for narrative issues
+    # TODO: Review unreachable code - if FlowIssueType.REPETITIVE_SEQUENCE in issue_groups:
+    # TODO: Review unreachable code - for issue in issue_groups[FlowIssueType.REPETITIVE_SEQUENCE]:
+    # TODO: Review unreachable code - suggestions.append(FlowSuggestion(
+    # TODO: Review unreachable code - suggestion_type=SuggestionType.REMOVE_CLIP,
+    # TODO: Review unreachable code - priority=issue.severity * 0.7,
+    # TODO: Review unreachable code - target_clips=[issue.affected_clips[1]],
+    # TODO: Review unreachable code - description=f"Remove repetitive clip {issue.affected_clips[1]+1}",
+    # TODO: Review unreachable code - parameters={},
+    # TODO: Review unreachable code - expected_improvement=0.3,
+    # TODO: Review unreachable code - ))
 
-        return suggestions
+    # TODO: Review unreachable code - return suggestions
 
-    def _color_distance(
-        self,
-        color1: tuple[int, int, int],
-        color2: tuple[int, int, int],
-    ) -> float:
-        """Calculate Euclidean distance between colors."""
-        return np.sqrt(sum((c1 - c2) ** 2 for c1, c2 in zip(color1, color2, strict=False)))
+    # TODO: Review unreachable code - def _color_distance(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - color1: tuple[int, int, int],
+    # TODO: Review unreachable code - color2: tuple[int, int, int],
+    # TODO: Review unreachable code - ) -> float:
+    # TODO: Review unreachable code - """Calculate Euclidean distance between colors."""
+    # TODO: Review unreachable code - return np.sqrt(sum((c1 - c2) ** 2 for c1, c2 in zip(color1, color2, strict=False)))
 
-    def generate_flow_report(
-        self,
-        issues: list[FlowIssue],
-        suggestions: list[FlowSuggestion],
-    ) -> dict[str, Any]:
-        """Generate a comprehensive flow analysis report."""
-        report = {
-            "summary": {
-                "total_issues": len(issues),
-                "critical_issues": sum(1 for i in issues if i.severity > 0.7),
-                "total_suggestions": len(suggestions),
-                "high_priority_suggestions": sum(1 for s in suggestions if s.priority > 0.7),
-            },
-            "issues_by_type": {},
-            "suggestions_by_type": {},
-            "timeline_health_score": 0.0,
-        }
+    # TODO: Review unreachable code - def generate_flow_report(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - issues: list[FlowIssue],
+    # TODO: Review unreachable code - suggestions: list[FlowSuggestion],
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Generate a comprehensive flow analysis report."""
+    # TODO: Review unreachable code - report = {
+    # TODO: Review unreachable code - "summary": {
+    # TODO: Review unreachable code - "total_issues": len(issues),
+    # TODO: Review unreachable code - "critical_issues": sum(1 for i in issues if i.severity > 0.7),
+    # TODO: Review unreachable code - "total_suggestions": len(suggestions),
+    # TODO: Review unreachable code - "high_priority_suggestions": sum(1 for s in suggestions if s.priority > 0.7),
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - "issues_by_type": {},
+    # TODO: Review unreachable code - "suggestions_by_type": {},
+    # TODO: Review unreachable code - "timeline_health_score": 0.0,
+    # TODO: Review unreachable code - }
 
-        # Group issues by type
-        for issue in issues:
-            issue_type = issue.issue_type.value
-            if issue_type not in report["issues_by_type"]:
-                report["issues_by_type"][issue_type] = {
-                    "count": 0,
-                    "avg_severity": 0.0,
-                    "instances": [],
-                }
+    # TODO: Review unreachable code - # Group issues by type
+    # TODO: Review unreachable code - for issue in issues:
+    # TODO: Review unreachable code - issue_type = issue.issue_type.value
+    # TODO: Review unreachable code - if issue_type not in report["issues_by_type"]:
+    # TODO: Review unreachable code - report["issues_by_type"][issue_type] = {
+    # TODO: Review unreachable code - "count": 0,
+    # TODO: Review unreachable code - "avg_severity": 0.0,
+    # TODO: Review unreachable code - "instances": [],
+    # TODO: Review unreachable code - }
 
-            report["issues_by_type"][issue_type]["count"] += 1
-            report["issues_by_type"][issue_type]["instances"].append({
-                "clips": issue.affected_clips,
-                "severity": issue.severity,
-                "description": issue.description,
-            })
+    # TODO: Review unreachable code - report["issues_by_type"][issue_type]["count"] += 1
+    # TODO: Review unreachable code - report["issues_by_type"][issue_type]["instances"].append({
+    # TODO: Review unreachable code - "clips": issue.affected_clips,
+    # TODO: Review unreachable code - "severity": issue.severity,
+    # TODO: Review unreachable code - "description": issue.description,
+    # TODO: Review unreachable code - })
 
-        # Calculate average severities
-        for issue_type, data in report["issues_by_type"].items():
-            if data["count"] > 0:
-                avg_severity = sum(
-                    inst["severity"] for inst in data["instances"]
-                ) / data["count"]
-                data["avg_severity"] = avg_severity
+    # TODO: Review unreachable code - # Calculate average severities
+    # TODO: Review unreachable code - for issue_type, data in report["issues_by_type"].items():
+    # TODO: Review unreachable code - if data is not None and data["count"] > 0:
+    # TODO: Review unreachable code - avg_severity = sum(
+    # TODO: Review unreachable code - inst["severity"] for inst in data["instances"]
+    # TODO: Review unreachable code - ) / data["count"]
+    # TODO: Review unreachable code - data["avg_severity"] = avg_severity
 
-        # Group suggestions by type
-        for suggestion in suggestions:
-            sug_type = suggestion.suggestion_type.value
-            if sug_type not in report["suggestions_by_type"]:
-                report["suggestions_by_type"][sug_type] = {
-                    "count": 0,
-                    "avg_priority": 0.0,
-                    "total_improvement": 0.0,
-                }
+    # TODO: Review unreachable code - # Group suggestions by type
+    # TODO: Review unreachable code - for suggestion in suggestions:
+    # TODO: Review unreachable code - sug_type = suggestion.suggestion_type.value
+    # TODO: Review unreachable code - if sug_type not in report["suggestions_by_type"]:
+    # TODO: Review unreachable code - report["suggestions_by_type"][sug_type] = {
+    # TODO: Review unreachable code - "count": 0,
+    # TODO: Review unreachable code - "avg_priority": 0.0,
+    # TODO: Review unreachable code - "total_improvement": 0.0,
+    # TODO: Review unreachable code - }
 
-            report["suggestions_by_type"][sug_type]["count"] += 1
-            report["suggestions_by_type"][sug_type]["total_improvement"] += suggestion.expected_improvement
+    # TODO: Review unreachable code - report["suggestions_by_type"][sug_type]["count"] += 1
+    # TODO: Review unreachable code - report["suggestions_by_type"][sug_type]["total_improvement"] += suggestion.expected_improvement
 
-        # Calculate timeline health score (0-100)
-        if issues:
-            total_severity = sum(i.severity for i in issues)
-            avg_severity = total_severity / len(issues)
-            report["timeline_health_score"] = max(0, (1 - avg_severity) * 100)
-        else:
-            report["timeline_health_score"] = 100.0
+    # TODO: Review unreachable code - # Calculate timeline health score (0-100)
+    # TODO: Review unreachable code - if issues:
+    # TODO: Review unreachable code - total_severity = sum(i.severity for i in issues)
+    # TODO: Review unreachable code - avg_severity = total_severity / len(issues)
+    # TODO: Review unreachable code - report["timeline_health_score"] = max(0, (1 - avg_severity) * 100)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - report["timeline_health_score"] = 100.0
 
-        return report
+    # TODO: Review unreachable code - return report

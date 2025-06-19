@@ -1,5 +1,5 @@
 """Watch mode functionality for media organizer."""
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import signal
 import time
@@ -65,64 +65,64 @@ class WatchModeMixin:
         self._log_statistics()
         return True
 
-    def _signal_handler(self, signum, frame):
-        """Handle interrupt signal."""
-        _ = signum, frame  # Unused but required by signal interface
-        self.stop_watching = True
+    # TODO: Review unreachable code - def _signal_handler(self, signum, frame):
+    # TODO: Review unreachable code - """Handle interrupt signal."""
+    # TODO: Review unreachable code - _ = signum, frame  # Unused but required by signal interface
+    # TODO: Review unreachable code - self.stop_watching = True
 
-    def _organize_once(self) -> bool:
-        """Organize files once and return."""
-        logger.info(f"Organizing files from {self.source_dir} to {self.output_dir}")
+    # TODO: Review unreachable code - def _organize_once(self) -> bool:
+    # TODO: Review unreachable code - """Organize files once and return."""
+    # TODO: Review unreachable code - logger.info(f"Organizing files from {self.source_dir} to {self.output_dir}")
 
-        if not self.source_dir.exists():
-            logger.error(f"Source directory does not exist: {self.source_dir}")
-            return False
+    # TODO: Review unreachable code - if not self.source_dir.exists():
+    # TODO: Review unreachable code - logger.error(f"Source directory does not exist: {self.source_dir}")
+    # TODO: Review unreachable code - return False
 
-        # Find all media files
-        media_files = self._find_media_files()
-        if not media_files:
-            logger.info("No media files found to organize")
-            return True
+    # TODO: Review unreachable code - # Find all media files
+    # TODO: Review unreachable code - media_files = self._find_media_files()
+    # TODO: Review unreachable code - if not media_files:
+    # TODO: Review unreachable code - logger.info("No media files found to organize")
+    # TODO: Review unreachable code - return True
 
-        logger.info(f"Found {len(media_files)} media files to process")
+    # TODO: Review unreachable code - logger.info(f"Found {len(media_files)} media files to process")
 
-        # Process files with progress bar
-        with tqdm(total=len(media_files), desc="Organizing files") as pbar:
-            for media_file in media_files:
-                result = self._process_file(media_file)
-                self._update_statistics(result)
-                pbar.update(1)
+    # TODO: Review unreachable code - # Process files with progress bar
+    # TODO: Review unreachable code - with tqdm(total=len(media_files), desc="Organizing files") as pbar:
+    # TODO: Review unreachable code - for media_file in media_files:
+    # TODO: Review unreachable code - result = self._process_file(media_file)
+    # TODO: Review unreachable code - self._update_statistics(result)
+    # TODO: Review unreachable code - pbar.update(1)
 
-        # Clean up duplicates in organized folder
-        if self.output_dir.exists():
-            self._cleanup_duplicates()
+    # TODO: Review unreachable code - # Clean up duplicates in organized folder
+    # TODO: Review unreachable code - if self.output_dir.exists():
+    # TODO: Review unreachable code - self._cleanup_duplicates()
 
-        # Log statistics
-        self._log_statistics()
+    # TODO: Review unreachable code - # Log statistics
+    # TODO: Review unreachable code - self._log_statistics()
 
-        # Log cache statistics
-        self._log_cache_statistics()
+    # TODO: Review unreachable code - # Log cache statistics
+    # TODO: Review unreachable code - self._log_cache_statistics()
 
-        return True
+    # TODO: Review unreachable code - return True
 
-    def organize(self) -> bool:
-        """Main entry point for organizing media files.
+    # TODO: Review unreachable code - def organize(self) -> bool:
+    # TODO: Review unreachable code - """Main entry point for organizing media files.
 
-        Returns:
-            True if successful, False otherwise
-        """
-        try:
-            # Show cost warnings if understanding is enabled
-            if self.metadata_cache.enable_understanding:
-                self._show_cost_warning()
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - True if successful, False otherwise
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Show cost warnings if understanding is enabled
+    # TODO: Review unreachable code - if self.metadata_cache.enable_understanding:
+    # TODO: Review unreachable code - self._show_cost_warning()
 
-            if self.watch_mode:
-                return self._watch_and_organize()
-            else:
-                return self._organize_once()
-        except KeyboardInterrupt:
-            logger.info("\nOrganization cancelled by user")
-            raise  # Re-raise to let CLI handle the exit code
-        except Exception as e:
-            logger.error(f"Organization failed: {e}")
-            return False
+    # TODO: Review unreachable code - if self.watch_mode:
+    # TODO: Review unreachable code - return self._watch_and_organize()
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return self._organize_once()
+    # TODO: Review unreachable code - except KeyboardInterrupt:
+    # TODO: Review unreachable code - logger.info("\nOrganization cancelled by user")
+    # TODO: Review unreachable code - raise  # Re-raise to let CLI handle the exit code
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Organization failed: {e}")
+    # TODO: Review unreachable code - return False

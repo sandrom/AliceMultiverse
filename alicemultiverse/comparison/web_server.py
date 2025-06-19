@@ -63,137 +63,137 @@ async def root():
     return index_path.read_text()
 
 
-@app.get("/comparison/next")
-async def get_next_comparison() -> ComparisonResponse | None:
-    """Get the next pair of images to compare."""
-    comparison = comparison_manager.get_next_comparison()
+# TODO: Review unreachable code - @app.get("/comparison/next")
+# TODO: Review unreachable code - async def get_next_comparison() -> ComparisonResponse | None:
+# TODO: Review unreachable code - """Get the next pair of images to compare."""
+# TODO: Review unreachable code - comparison = comparison_manager.get_next_comparison()
 
-    if not comparison:
-        return None
+# TODO: Review unreachable code - if not comparison:
+# TODO: Review unreachable code - return None
 
-    # Store in pending comparisons
-    pending_comparisons[comparison.id] = comparison
+# TODO: Review unreachable code - # Store in pending comparisons
+# TODO: Review unreachable code - pending_comparisons[comparison.id] = comparison
 
-    # Clean up old pending comparisons (keep last 100)
-    if len(pending_comparisons) > 100:
-        oldest_ids = list(pending_comparisons.keys())[:-100]
-        for old_id in oldest_ids:
-            del pending_comparisons[old_id]
+# TODO: Review unreachable code - # Clean up old pending comparisons (keep last 100)
+# TODO: Review unreachable code - if len(pending_comparisons) > 100:
+# TODO: Review unreachable code - oldest_ids = list(pending_comparisons.keys())[:-100]
+# TODO: Review unreachable code - for old_id in oldest_ids:
+# TODO: Review unreachable code - del pending_comparisons[old_id]
 
-    return ComparisonResponse(
-        id=comparison.id,
-        asset_a={
-            "id": comparison.asset_a.id,
-            "path": comparison.asset_a.path,
-        },
-        asset_b={
-            "id": comparison.asset_b.id,
-            "path": comparison.asset_b.path,
-        }
-    )
-
-
-@app.post("/comparison/vote")
-async def submit_vote(vote: VoteRequest):
-    """Submit a comparison vote."""
-    # Validate winner
-    if vote.winner not in ["a", "b", "tie"]:
-        raise HTTPException(status_code=400, detail="Invalid winner")
-
-    # Validate strength
-    strength = None
-    if vote.winner != "tie":
-        if not vote.strength:
-            raise HTTPException(status_code=400, detail="Strength required for non-tie votes")
-        try:
-            strength = ComparisonStrength(vote.strength)
-        except ValueError:
-            raise HTTPException(status_code=400, detail="Invalid strength value")
-
-    # Get the comparison from pending
-    comparison = pending_comparisons.get(vote.comparison_id)
-    if not comparison:
-        raise HTTPException(status_code=404, detail="Comparison not found or expired")
-
-    # Update with vote results
-    comparison.winner = vote.winner
-    comparison.strength = strength
-
-    # Remove from pending
-    del pending_comparisons[vote.comparison_id]
-
-    try:
-        comparison_manager.record_comparison(comparison)
-        return {"status": "success"}
-    except Exception as e:
-        logger.error(f"Error recording comparison: {e}")
-        raise HTTPException(status_code=500, detail="Failed to record vote")
+# TODO: Review unreachable code - return ComparisonResponse(
+# TODO: Review unreachable code - id=comparison.id,
+# TODO: Review unreachable code - asset_a={
+# TODO: Review unreachable code - "id": comparison.asset_a.id,
+# TODO: Review unreachable code - "path": comparison.asset_a.path,
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - asset_b={
+# TODO: Review unreachable code - "id": comparison.asset_b.id,
+# TODO: Review unreachable code - "path": comparison.asset_b.path,
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - )
 
 
-@app.get("/comparison/stats")
-async def get_stats() -> list[StatsResponse]:
-    """Get current model rankings."""
-    ratings = comparison_manager.get_ratings()
+# TODO: Review unreachable code - @app.post("/comparison/vote")
+# TODO: Review unreachable code - async def submit_vote(vote: VoteRequest):
+# TODO: Review unreachable code - """Submit a comparison vote."""
+# TODO: Review unreachable code - # Validate winner
+# TODO: Review unreachable code - if vote.winner not in ["a", "b", "tie"]:
+# TODO: Review unreachable code - raise HTTPException(status_code=400, detail="Invalid winner")
 
-    return [
-        StatsResponse(
-            model=r.model,
-            rating=r.rating,
-            comparison_count=r.comparison_count,
-            win_count=r.win_count,
-            loss_count=r.loss_count,
-            tie_count=r.tie_count,
-            win_rate=r.win_rate
-        )
-        for r in ratings
-    ]
+# TODO: Review unreachable code - # Validate strength
+# TODO: Review unreachable code - strength = None
+# TODO: Review unreachable code - if vote.winner != "tie":
+# TODO: Review unreachable code - if not vote.strength:
+# TODO: Review unreachable code - raise HTTPException(status_code=400, detail="Strength required for non-tie votes")
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - strength = ComparisonStrength(vote.strength)
+# TODO: Review unreachable code - except ValueError:
+# TODO: Review unreachable code - raise HTTPException(status_code=400, detail="Invalid strength value")
 
+# TODO: Review unreachable code - # Get the comparison from pending
+# TODO: Review unreachable code - comparison = pending_comparisons.get(vote.comparison_id)
+# TODO: Review unreachable code - if not comparison:
+# TODO: Review unreachable code - raise HTTPException(status_code=404, detail="Comparison not found or expired")
 
-@app.get("/static/images/{path:path}")
-async def serve_image(path: str):
-    """Serve images from the organized directory."""
-    # Try configured path first
-    possible_dirs = []
-    if hasattr(config, 'paths') and hasattr(config.paths, 'organized'):
-        possible_dirs.append(Path(config.paths.organized))
+# TODO: Review unreachable code - # Update with vote results
+# TODO: Review unreachable code - comparison.winner = vote.winner
+# TODO: Review unreachable code - comparison.strength = strength
 
-    # Add fallback locations
-    possible_dirs.extend([
-        Path("organized"),
-        Path.home() / "Pictures" / "AI" / "organized",
-    ])
+# TODO: Review unreachable code - # Remove from pending
+# TODO: Review unreachable code - del pending_comparisons[vote.comparison_id]
 
-    # Also check if path is already absolute
-    if Path(path).is_absolute() and Path(path).exists():
-        return FileResponse(path)
-
-    # Try each possible directory
-    for base_dir in possible_dirs:
-        image_path = base_dir / path
-        if image_path.exists():
-            return FileResponse(image_path)
-
-    raise HTTPException(status_code=404, detail="Image not found")
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - comparison_manager.record_comparison(comparison)
+# TODO: Review unreachable code - return {"status": "success"}
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Error recording comparison: {e}")
+# TODO: Review unreachable code - raise HTTPException(status_code=500, detail="Failed to record vote")
 
 
-def populate_test_data():
-    """Populate test data from organized directories."""
-    from .populate import populate_default_directories
+# TODO: Review unreachable code - @app.get("/comparison/stats")
+# TODO: Review unreachable code - async def get_stats() -> list[StatsResponse]:
+# TODO: Review unreachable code - """Get current model rankings."""
+# TODO: Review unreachable code - ratings = comparison_manager.get_ratings()
 
-    logger.info("Populating comparison system with assets...")
-    count = populate_default_directories(comparison_manager, limit=1000, config=config)
-    logger.info(f"Populated with {count} assets")
+# TODO: Review unreachable code - return [
+# TODO: Review unreachable code - StatsResponse(
+# TODO: Review unreachable code - model=r.model,
+# TODO: Review unreachable code - rating=r.rating,
+# TODO: Review unreachable code - comparison_count=r.comparison_count,
+# TODO: Review unreachable code - win_count=r.win_count,
+# TODO: Review unreachable code - loss_count=r.loss_count,
+# TODO: Review unreachable code - tie_count=r.tie_count,
+# TODO: Review unreachable code - win_rate=r.win_rate
+# TODO: Review unreachable code - )
+# TODO: Review unreachable code - for r in ratings
+# TODO: Review unreachable code - ]
 
 
-def run_server(host: str = "0.0.0.0", port: int = 8000):
-    """Run the web server."""
-    # Populate test data in development
-    if os.getenv("ALICE_ENV") == "development":
-        populate_test_data()
+# TODO: Review unreachable code - @app.get("/static/images/{path:path}")
+# TODO: Review unreachable code - async def serve_image(path: str):
+# TODO: Review unreachable code - """Serve images from the organized directory."""
+# TODO: Review unreachable code - # Try configured path first
+# TODO: Review unreachable code - possible_dirs = []
+# TODO: Review unreachable code - if hasattr(config, 'paths') and hasattr(config.paths, 'organized'):
+# TODO: Review unreachable code - possible_dirs.append(Path(config.paths.organized))
 
-    logger.info(f"Starting comparison server on {host}:{port}")
-    uvicorn.run(app, host=host, port=port)
+# TODO: Review unreachable code - # Add fallback locations
+# TODO: Review unreachable code - possible_dirs.extend([
+# TODO: Review unreachable code - Path("organized"),
+# TODO: Review unreachable code - Path.home() / "Pictures" / "AI" / "organized",
+# TODO: Review unreachable code - ])
+
+# TODO: Review unreachable code - # Also check if path is already absolute
+# TODO: Review unreachable code - if Path(path).is_absolute() and Path(path).exists():
+# TODO: Review unreachable code - return FileResponse(path)
+
+# TODO: Review unreachable code - # Try each possible directory
+# TODO: Review unreachable code - for base_dir in possible_dirs:
+# TODO: Review unreachable code - image_path = base_dir / path
+# TODO: Review unreachable code - if image_path.exists():
+# TODO: Review unreachable code - return FileResponse(image_path)
+
+# TODO: Review unreachable code - raise HTTPException(status_code=404, detail="Image not found")
 
 
-if __name__ == "__main__":
-    run_server()
+# TODO: Review unreachable code - def populate_test_data():
+# TODO: Review unreachable code - """Populate test data from organized directories."""
+# TODO: Review unreachable code - from .populate import populate_default_directories
+
+# TODO: Review unreachable code - logger.info("Populating comparison system with assets...")
+# TODO: Review unreachable code - count = populate_default_directories(comparison_manager, limit=1000, config=config)
+# TODO: Review unreachable code - logger.info(f"Populated with {count} assets")
+
+
+# TODO: Review unreachable code - def run_server(host: str = "0.0.0.0", port: int = 8000):
+# TODO: Review unreachable code - """Run the web server."""
+# TODO: Review unreachable code - # Populate test data in development
+# TODO: Review unreachable code - if os.getenv("ALICE_ENV") == "development":
+# TODO: Review unreachable code - populate_test_data()
+
+# TODO: Review unreachable code - logger.info(f"Starting comparison server on {host}:{port}")
+# TODO: Review unreachable code - uvicorn.run(app, host=host, port=port)
+
+
+# TODO: Review unreachable code - if __name__ == "__main__":
+# TODO: Review unreachable code - run_server()

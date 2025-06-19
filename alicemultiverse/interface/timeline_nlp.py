@@ -98,384 +98,384 @@ class TimelineNLPProcessor:
                 section_map[keyword.lower()] = section
         return section_map
 
-    def parse_command(self, command: str, timeline: Timeline) -> list[TimelineEdit]:
-        """Parse a natural language command into timeline edits.
-
-        Args:
-            command: Natural language command
-            timeline: Current timeline to edit
-
-        Returns:
-            List of parsed timeline edits
-        """
-        command = command.lower().strip()
-        edits = []
-
-        # Try to match pace change patterns
-        for pattern, action in self.PACE_PATTERNS:
-            match = re.search(pattern, command)
-            if match:
-                if len(match.groups()) == 2:
-                    section = self._normalize_section(match.group(1))
-                    modifier = match.group(2)
-                else:
-                    section = self._normalize_section(match.group(2) if len(match.groups()) > 1 else "all")
-                    modifier = match.group(1) if match.groups() else action
-
-                edits.append(TimelineEdit(
-                    intent=EditIntent.PACE_CHANGE,
-                    target_section=section,
-                    parameters={
-                        "action": action,
-                        "modifier": modifier,
-                        "factor": 1.5 if "faster" in modifier or "punchier" in modifier else 0.7
-                    },
-                    confidence=0.9
-                ))
-
-        # Try pause patterns
-        for pattern, action in self.PAUSE_PATTERNS:
-            match = re.search(pattern, command)
-            if match:
-                section = self._normalize_section(match.group(1))
-                position = "after"  # Default
-
-                if "before" in command:
-                    position = "before"
-
-                edits.append(TimelineEdit(
-                    intent=EditIntent.ADD_PAUSE,
-                    target_section=section,
-                    parameters={
-                        "action": action,
-                        "position": position,
-                        "duration": 1.0  # Default pause duration
-                    },
-                    confidence=0.85
-                ))
-
-        # Try sync patterns
-        for pattern, action in self.SYNC_PATTERNS:
-            match = re.search(pattern, command)
-            if match:
-                section = None
-                if match.groups():
-                    section = self._normalize_section(match.group(1))
-
-                edits.append(TimelineEdit(
-                    intent=EditIntent.SYNC_ADJUST,
-                    target_section=section,
-                    parameters={
-                        "action": action,
-                        "target": "beat"
-                    },
-                    confidence=0.9
-                ))
-
-        # Try energy patterns
-        for pattern, action in self.ENERGY_PATTERNS:
-            match = re.search(pattern, command)
-            if match:
-                section = self._normalize_section(match.group(1))
-
-                edits.append(TimelineEdit(
-                    intent=EditIntent.ENERGY_ADJUST,
-                    target_section=section,
-                    parameters={
-                        "action": action,
-                        "intensity": 1.5 if "increase" in action else 0.7
-                    },
-                    confidence=0.8
-                ))
-
-        # If no specific patterns matched, try generic interpretations
-        if not edits:
-            edits = self._parse_generic_command(command, timeline)
-
-        return edits
-
-    def _normalize_section(self, section_text: str) -> str:
-        """Normalize section name from text."""
-        section_text = section_text.lower().strip()
-
-        # Check section map
-        if section_text in self.section_map:
-            return self.section_map[section_text]
-
-        # Check if it's a direct section name
-        for section in self.SECTION_KEYWORDS:
-            if section_text == section:
-                return section
-
-        # Default to the text itself
-        return section_text
-
-    def _parse_generic_command(self, command: str, timeline: Timeline) -> list[TimelineEdit]:
-        """Parse generic commands that don't match specific patterns."""
-        edits = []
-
-        # Check for transition requests
-        if any(word in command for word in ["transition", "dissolve", "fade", "cut"]):
-            transition_type = "cut"
-            if "dissolve" in command:
-                transition_type = "dissolve"
-            elif "fade" in command:
-                transition_type = "fade"
-
-            edits.append(TimelineEdit(
-                intent=EditIntent.TRANSITION_CHANGE,
-                parameters={
-                    "transition_type": transition_type,
-                    "apply_to": "all" if "all" in command else "selected"
-                },
-                confidence=0.7
-            ))
-
-        # Check for removal requests
-        if any(word in command for word in ["remove", "delete", "cut out", "take out"]):
-            edits.append(TimelineEdit(
-                intent=EditIntent.REMOVE_CLIPS,
-                parameters={
-                    "target": "selected"  # Would need UI selection
-                },
-                confidence=0.6
-            ))
-
-        # Check for duplication
-        if any(word in command for word in ["duplicate", "repeat", "copy", "double"]):
-            edits.append(TimelineEdit(
-                intent=EditIntent.DUPLICATE,
-                parameters={
-                    "target": "selected"
-                },
-                confidence=0.7
-            ))
-
-        return edits
-
-    def apply_edits(self, timeline: Timeline, edits: list[TimelineEdit]) -> Timeline:
-        """Apply parsed edits to a timeline.
-
-        Args:
-            timeline: Timeline to modify
-            edits: List of edits to apply
-
-        Returns:
-            Modified timeline
-        """
-        import copy
-        modified_timeline = copy.deepcopy(timeline)
-
-        for edit in edits:
-            try:
-                if edit.intent == EditIntent.PACE_CHANGE:
-                    modified_timeline = self._apply_pace_change(modified_timeline, edit)
-                elif edit.intent == EditIntent.ADD_PAUSE:
-                    modified_timeline = self._apply_pause(modified_timeline, edit)
-                elif edit.intent == EditIntent.SYNC_ADJUST:
-                    modified_timeline = self._apply_sync_adjust(modified_timeline, edit)
-                elif edit.intent == EditIntent.ENERGY_ADJUST:
-                    modified_timeline = self._apply_energy_adjust(modified_timeline, edit)
-                elif edit.intent == EditIntent.TRANSITION_CHANGE:
-                    modified_timeline = self._apply_transition_change(modified_timeline, edit)
-                else:
-                    logger.warning(f"Unhandled edit intent: {edit.intent}")
-            except Exception as e:
-                logger.error(f"Failed to apply edit {edit.intent}: {e}")
-
-        return modified_timeline
-
-    def _apply_pace_change(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
-        """Apply pace change to timeline."""
-        factor = edit.parameters.get("factor", 1.0)
-        target_clips = self._get_target_clips(timeline, edit)
-
-        for clip_idx in target_clips:
-            if 0 <= clip_idx < len(timeline.clips):
-                clip = timeline.clips[clip_idx]
-                # Adjust duration
-                new_duration = clip.duration / factor
-
-                # Ensure minimum duration
-                new_duration = max(0.5, new_duration)
-
-                # Update clip
-                clip.duration = new_duration
-
-                # Adjust subsequent clip positions
-                if clip_idx < len(timeline.clips) - 1:
-                    time_diff = clip.duration - (clip.end_time - clip.start_time)
-                    for i in range(clip_idx + 1, len(timeline.clips)):
-                        timeline.clips[i].start_time += time_diff
-
-        # Update timeline duration
-        if timeline.clips:
-            timeline.duration = timeline.clips[-1].end_time
-
-        return timeline
-
-    def _apply_pause(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
-        """Add pause to timeline."""
-        pause_duration = edit.parameters.get("duration", 1.0)
-        position = edit.parameters.get("position", "after")
-
-        # Find target position
-        target_clips = self._get_target_clips(timeline, edit)
-
-        if target_clips and timeline.clips:
-            if position == "after":
-                # Add pause after the last target clip
-                insert_after = max(target_clips)
-                if insert_after < len(timeline.clips) - 1:
-                    # Shift subsequent clips
-                    for i in range(insert_after + 1, len(timeline.clips)):
-                        timeline.clips[i].start_time += pause_duration
-            else:  # before
-                # Add pause before the first target clip
-                insert_before = min(target_clips)
-                if insert_before >= 0:
-                    # Shift target and subsequent clips
-                    for i in range(insert_before, len(timeline.clips)):
-                        timeline.clips[i].start_time += pause_duration
-
-        # Update timeline duration
-        if timeline.clips:
-            timeline.duration = timeline.clips[-1].end_time
-
-        return timeline
-
-    def _apply_sync_adjust(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
-        """Adjust clips to sync with beats."""
-        # This would require beat information from markers
-        if not timeline.markers:
-            logger.warning("No beat markers found in timeline")
-            return timeline
-
-        # Get beat markers
-        beat_markers = [m for m in timeline.markers if m.get("type") == "beat"]
-        if not beat_markers:
-            logger.warning("No beat markers found")
-            return timeline
-
-        beat_times = [m["time"] for m in beat_markers]
-        target_clips = self._get_target_clips(timeline, edit)
-
-        for clip_idx in target_clips:
-            if 0 <= clip_idx < len(timeline.clips):
-                clip = timeline.clips[clip_idx]
-
-                # Find nearest beat to clip start
-                nearest_beat = min(beat_times, key=lambda b: abs(b - clip.start_time))
-
-                # Adjust clip to start on beat
-                time_shift = nearest_beat - clip.start_time
-                clip.start_time = nearest_beat
-
-                # Shift subsequent clips
-                for i in range(clip_idx + 1, len(timeline.clips)):
-                    timeline.clips[i].start_time += time_shift
-
-        return timeline
-
-    def _apply_energy_adjust(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
-        """Adjust energy/intensity of section."""
-        intensity = edit.parameters.get("intensity", 1.0)
-        target_clips = self._get_target_clips(timeline, edit)
-
-        # Energy adjustment through pace and transitions
-        for clip_idx in target_clips:
-            if 0 <= clip_idx < len(timeline.clips):
-                clip = timeline.clips[clip_idx]
-
-                if intensity > 1.0:  # Increase energy
-                    # Shorter clips, faster transitions
-                    clip.duration = clip.duration / 1.2
-                    if clip.transition_out:
-                        clip.transition_out_duration = max(0.2, clip.transition_out_duration * 0.7)
-                else:  # Decrease energy
-                    # Longer clips, slower transitions
-                    clip.duration = clip.duration * 1.2
-                    if clip.transition_out:
-                        clip.transition_out_duration = min(2.0, clip.transition_out_duration * 1.3)
-
-        return timeline
-
-    def _apply_transition_change(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
-        """Change transitions in timeline."""
-        transition_type = edit.parameters.get("transition_type", "cut")
-        apply_to = edit.parameters.get("apply_to", "all")
-
-        if apply_to == "all":
-            for i, clip in enumerate(timeline.clips):
-                if i < len(timeline.clips) - 1:  # Not the last clip
-                    clip.transition_out = transition_type
-                    clip.transition_out_duration = 0.5 if transition_type != "cut" else 0.0
-                if i > 0:  # Not the first clip
-                    clip.transition_in = transition_type
-                    clip.transition_in_duration = 0.5 if transition_type != "cut" else 0.0
-
-        return timeline
-
-    def _get_target_clips(self, timeline: Timeline, edit: TimelineEdit) -> list[int]:
-        """Get indices of clips to target based on edit."""
-        if edit.target_clips:
-            return edit.target_clips
-
-        if edit.target_section:
-            # Map section names to clip ranges
-            # This is simplified - in reality would need marker-based section detection
-            total_clips = len(timeline.clips)
-
-            if edit.target_section == "intro":
-                # First 20% of clips
-                return list(range(int(total_clips * 0.2)))
-            elif edit.target_section == "outro":
-                # Last 20% of clips
-                return list(range(int(total_clips * 0.8), total_clips))
-            elif edit.target_section == "all":
-                return list(range(total_clips))
-            else:
-                # Middle sections - would need proper section detection
-                return list(range(int(total_clips * 0.2), int(total_clips * 0.8)))
-
-        # Default to all clips
-        return list(range(len(timeline.clips)))
-
-    def suggest_edits(self, timeline: Timeline) -> list[str]:
-        """Suggest possible edits for the timeline.
-
-        Args:
-            timeline: Timeline to analyze
-
-        Returns:
-            List of suggested edit commands
-        """
-        suggestions = []
-
-        # Analyze timeline characteristics
-        avg_clip_duration = sum(c.duration for c in timeline.clips) / len(timeline.clips) if timeline.clips else 0
-        has_transitions = any(c.transition_in or c.transition_out for c in timeline.clips)
-        has_beat_markers = any(m.get("type") == "beat" for m in timeline.markers)
-
-        # Suggest based on analysis
-        if avg_clip_duration > 5.0:
-            suggestions.append("Make the cuts faster for more energy")
-            suggestions.append("Speed up the intro to grab attention")
-        elif avg_clip_duration < 1.0:
-            suggestions.append("Add breathing room after intense sections")
-            suggestions.append("Slow down the pace for dramatic effect")
-
-        if not has_transitions:
-            suggestions.append("Add dissolve transitions for smoother flow")
-
-        if has_beat_markers and not all(c.beat_aligned for c in timeline.clips):
-            suggestions.append("Sync all cuts to the beat")
-            suggestions.append("Match cuts to the rhythm")
-
-        if len(timeline.clips) > 20:
-            suggestions.append("Tighten the edit by removing weaker shots")
-
-        return suggestions
+    # TODO: Review unreachable code - def parse_command(self, command: str, timeline: Timeline) -> list[TimelineEdit]:
+    # TODO: Review unreachable code - """Parse a natural language command into timeline edits.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - command: Natural language command
+    # TODO: Review unreachable code - timeline: Current timeline to edit
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of parsed timeline edits
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - command = command.lower().strip()
+    # TODO: Review unreachable code - edits = []
+
+    # TODO: Review unreachable code - # Try to match pace change patterns
+    # TODO: Review unreachable code - for pattern, action in self.PACE_PATTERNS:
+    # TODO: Review unreachable code - match = re.search(pattern, command)
+    # TODO: Review unreachable code - if match:
+    # TODO: Review unreachable code - if len(match.groups()) == 2:
+    # TODO: Review unreachable code - section = self._normalize_section(match.group(1))
+    # TODO: Review unreachable code - modifier = match.group(2)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - section = self._normalize_section(match.group(2) if len(match.groups()) > 1 else "all")
+    # TODO: Review unreachable code - modifier = match.group(1) if match.groups() else action
+
+    # TODO: Review unreachable code - edits.append(TimelineEdit(
+    # TODO: Review unreachable code - intent=EditIntent.PACE_CHANGE,
+    # TODO: Review unreachable code - target_section=section,
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "action": action,
+    # TODO: Review unreachable code - "modifier": modifier,
+    # TODO: Review unreachable code - "factor": 1.5 if "faster" in modifier or "punchier" in modifier else 0.7
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - confidence=0.9
+    # TODO: Review unreachable code - ))
+
+    # TODO: Review unreachable code - # Try pause patterns
+    # TODO: Review unreachable code - for pattern, action in self.PAUSE_PATTERNS:
+    # TODO: Review unreachable code - match = re.search(pattern, command)
+    # TODO: Review unreachable code - if match:
+    # TODO: Review unreachable code - section = self._normalize_section(match.group(1))
+    # TODO: Review unreachable code - position = "after"  # Default
+
+    # TODO: Review unreachable code - if command is not None and "before" in command:
+    # TODO: Review unreachable code - position = "before"
+
+    # TODO: Review unreachable code - edits.append(TimelineEdit(
+    # TODO: Review unreachable code - intent=EditIntent.ADD_PAUSE,
+    # TODO: Review unreachable code - target_section=section,
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "action": action,
+    # TODO: Review unreachable code - "position": position,
+    # TODO: Review unreachable code - "duration": 1.0  # Default pause duration
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - confidence=0.85
+    # TODO: Review unreachable code - ))
+
+    # TODO: Review unreachable code - # Try sync patterns
+    # TODO: Review unreachable code - for pattern, action in self.SYNC_PATTERNS:
+    # TODO: Review unreachable code - match = re.search(pattern, command)
+    # TODO: Review unreachable code - if match:
+    # TODO: Review unreachable code - section = None
+    # TODO: Review unreachable code - if match.groups():
+    # TODO: Review unreachable code - section = self._normalize_section(match.group(1))
+
+    # TODO: Review unreachable code - edits.append(TimelineEdit(
+    # TODO: Review unreachable code - intent=EditIntent.SYNC_ADJUST,
+    # TODO: Review unreachable code - target_section=section,
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "action": action,
+    # TODO: Review unreachable code - "target": "beat"
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - confidence=0.9
+    # TODO: Review unreachable code - ))
+
+    # TODO: Review unreachable code - # Try energy patterns
+    # TODO: Review unreachable code - for pattern, action in self.ENERGY_PATTERNS:
+    # TODO: Review unreachable code - match = re.search(pattern, command)
+    # TODO: Review unreachable code - if match:
+    # TODO: Review unreachable code - section = self._normalize_section(match.group(1))
+
+    # TODO: Review unreachable code - edits.append(TimelineEdit(
+    # TODO: Review unreachable code - intent=EditIntent.ENERGY_ADJUST,
+    # TODO: Review unreachable code - target_section=section,
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "action": action,
+    # TODO: Review unreachable code - "intensity": 1.5 if "increase" in action else 0.7
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - confidence=0.8
+    # TODO: Review unreachable code - ))
+
+    # TODO: Review unreachable code - # If no specific patterns matched, try generic interpretations
+    # TODO: Review unreachable code - if not edits:
+    # TODO: Review unreachable code - edits = self._parse_generic_command(command, timeline)
+
+    # TODO: Review unreachable code - return edits
+
+    # TODO: Review unreachable code - def _normalize_section(self, section_text: str) -> str:
+    # TODO: Review unreachable code - """Normalize section name from text."""
+    # TODO: Review unreachable code - section_text = section_text.lower().strip()
+
+    # TODO: Review unreachable code - # Check section map
+    # TODO: Review unreachable code - if section_text in self.section_map:
+    # TODO: Review unreachable code - return self.section_map[section_text]
+
+    # TODO: Review unreachable code - # Check if it's a direct section name
+    # TODO: Review unreachable code - for section in self.SECTION_KEYWORDS:
+    # TODO: Review unreachable code - if section_text == section:
+    # TODO: Review unreachable code - return section
+
+    # TODO: Review unreachable code - # Default to the text itself
+    # TODO: Review unreachable code - return section_text
+
+    # TODO: Review unreachable code - def _parse_generic_command(self, command: str, timeline: Timeline) -> list[TimelineEdit]:
+    # TODO: Review unreachable code - """Parse generic commands that don't match specific patterns."""
+    # TODO: Review unreachable code - edits = []
+
+    # TODO: Review unreachable code - # Check for transition requests
+    # TODO: Review unreachable code - if any(word in command for word in ["transition", "dissolve", "fade", "cut"]):
+    # TODO: Review unreachable code - transition_type = "cut"
+    # TODO: Review unreachable code - if command is not None and "dissolve" in command:
+    # TODO: Review unreachable code - transition_type = "dissolve"
+    # TODO: Review unreachable code - elif command is not None and "fade" in command:
+    # TODO: Review unreachable code - transition_type = "fade"
+
+    # TODO: Review unreachable code - edits.append(TimelineEdit(
+    # TODO: Review unreachable code - intent=EditIntent.TRANSITION_CHANGE,
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "transition_type": transition_type,
+    # TODO: Review unreachable code - "apply_to": "all" if comm is not None and "all" in command else "selected"
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - confidence=0.7
+    # TODO: Review unreachable code - ))
+
+    # TODO: Review unreachable code - # Check for removal requests
+    # TODO: Review unreachable code - if any(word in command for word in ["remove", "delete", "cut out", "take out"]):
+    # TODO: Review unreachable code - edits.append(TimelineEdit(
+    # TODO: Review unreachable code - intent=EditIntent.REMOVE_CLIPS,
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "target": "selected"  # Would need UI selection
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - confidence=0.6
+    # TODO: Review unreachable code - ))
+
+    # TODO: Review unreachable code - # Check for duplication
+    # TODO: Review unreachable code - if any(word in command for word in ["duplicate", "repeat", "copy", "double"]):
+    # TODO: Review unreachable code - edits.append(TimelineEdit(
+    # TODO: Review unreachable code - intent=EditIntent.DUPLICATE,
+    # TODO: Review unreachable code - parameters={
+    # TODO: Review unreachable code - "target": "selected"
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - confidence=0.7
+    # TODO: Review unreachable code - ))
+
+    # TODO: Review unreachable code - return edits
+
+    # TODO: Review unreachable code - def apply_edits(self, timeline: Timeline, edits: list[TimelineEdit]) -> Timeline:
+    # TODO: Review unreachable code - """Apply parsed edits to a timeline.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - timeline: Timeline to modify
+    # TODO: Review unreachable code - edits: List of edits to apply
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Modified timeline
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - import copy
+    # TODO: Review unreachable code - modified_timeline = copy.deepcopy(timeline)
+
+    # TODO: Review unreachable code - for edit in edits:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - if edit.intent == EditIntent.PACE_CHANGE:
+    # TODO: Review unreachable code - modified_timeline = self._apply_pace_change(modified_timeline, edit)
+    # TODO: Review unreachable code - elif edit.intent == EditIntent.ADD_PAUSE:
+    # TODO: Review unreachable code - modified_timeline = self._apply_pause(modified_timeline, edit)
+    # TODO: Review unreachable code - elif edit.intent == EditIntent.SYNC_ADJUST:
+    # TODO: Review unreachable code - modified_timeline = self._apply_sync_adjust(modified_timeline, edit)
+    # TODO: Review unreachable code - elif edit.intent == EditIntent.ENERGY_ADJUST:
+    # TODO: Review unreachable code - modified_timeline = self._apply_energy_adjust(modified_timeline, edit)
+    # TODO: Review unreachable code - elif edit.intent == EditIntent.TRANSITION_CHANGE:
+    # TODO: Review unreachable code - modified_timeline = self._apply_transition_change(modified_timeline, edit)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - logger.warning(f"Unhandled edit intent: {edit.intent}")
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to apply edit {edit.intent}: {e}")
+
+    # TODO: Review unreachable code - return modified_timeline
+
+    # TODO: Review unreachable code - def _apply_pace_change(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
+    # TODO: Review unreachable code - """Apply pace change to timeline."""
+    # TODO: Review unreachable code - factor = edit.parameters.get("factor", 1.0)
+    # TODO: Review unreachable code - target_clips = self._get_target_clips(timeline, edit)
+
+    # TODO: Review unreachable code - for clip_idx in target_clips:
+    # TODO: Review unreachable code - if 0 <= clip_idx < len(timeline.clips):
+    # TODO: Review unreachable code - clip = timeline.clips[clip_idx]
+    # TODO: Review unreachable code - # Adjust duration
+    # TODO: Review unreachable code - new_duration = clip.duration / factor
+
+    # TODO: Review unreachable code - # Ensure minimum duration
+    # TODO: Review unreachable code - new_duration = max(0.5, new_duration)
+
+    # TODO: Review unreachable code - # Update clip
+    # TODO: Review unreachable code - clip.duration = new_duration
+
+    # TODO: Review unreachable code - # Adjust subsequent clip positions
+    # TODO: Review unreachable code - if clip_idx < len(timeline.clips) - 1:
+    # TODO: Review unreachable code - time_diff = clip.duration - (clip.end_time - clip.start_time)
+    # TODO: Review unreachable code - for i in range(clip_idx + 1, len(timeline.clips)):
+    # TODO: Review unreachable code - timeline.clips[i].start_time += time_diff
+
+    # TODO: Review unreachable code - # Update timeline duration
+    # TODO: Review unreachable code - if timeline.clips:
+    # TODO: Review unreachable code - timeline.duration = timeline.clips[-1].end_time
+
+    # TODO: Review unreachable code - return timeline
+
+    # TODO: Review unreachable code - def _apply_pause(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
+    # TODO: Review unreachable code - """Add pause to timeline."""
+    # TODO: Review unreachable code - pause_duration = edit.parameters.get("duration", 1.0)
+    # TODO: Review unreachable code - position = edit.parameters.get("position", "after")
+
+    # TODO: Review unreachable code - # Find target position
+    # TODO: Review unreachable code - target_clips = self._get_target_clips(timeline, edit)
+
+    # TODO: Review unreachable code - if target_clips and timeline.clips:
+    # TODO: Review unreachable code - if position == "after":
+    # TODO: Review unreachable code - # Add pause after the last target clip
+    # TODO: Review unreachable code - insert_after = max(target_clips)
+    # TODO: Review unreachable code - if insert_after < len(timeline.clips) - 1:
+    # TODO: Review unreachable code - # Shift subsequent clips
+    # TODO: Review unreachable code - for i in range(insert_after + 1, len(timeline.clips)):
+    # TODO: Review unreachable code - timeline.clips[i].start_time += pause_duration
+    # TODO: Review unreachable code - else:  # before
+    # TODO: Review unreachable code - # Add pause before the first target clip
+    # TODO: Review unreachable code - insert_before = min(target_clips)
+    # TODO: Review unreachable code - if insert_before >= 0:
+    # TODO: Review unreachable code - # Shift target and subsequent clips
+    # TODO: Review unreachable code - for i in range(insert_before, len(timeline.clips)):
+    # TODO: Review unreachable code - timeline.clips[i].start_time += pause_duration
+
+    # TODO: Review unreachable code - # Update timeline duration
+    # TODO: Review unreachable code - if timeline.clips:
+    # TODO: Review unreachable code - timeline.duration = timeline.clips[-1].end_time
+
+    # TODO: Review unreachable code - return timeline
+
+    # TODO: Review unreachable code - def _apply_sync_adjust(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
+    # TODO: Review unreachable code - """Adjust clips to sync with beats."""
+    # TODO: Review unreachable code - # This would require beat information from markers
+    # TODO: Review unreachable code - if not timeline.markers:
+    # TODO: Review unreachable code - logger.warning("No beat markers found in timeline")
+    # TODO: Review unreachable code - return timeline
+
+    # TODO: Review unreachable code - # Get beat markers
+    # TODO: Review unreachable code - beat_markers = [m for m in timeline.markers if m.get("type") == "beat"]
+    # TODO: Review unreachable code - if not beat_markers:
+    # TODO: Review unreachable code - logger.warning("No beat markers found")
+    # TODO: Review unreachable code - return timeline
+
+    # TODO: Review unreachable code - beat_times = [m["time"] for m in beat_markers]
+    # TODO: Review unreachable code - target_clips = self._get_target_clips(timeline, edit)
+
+    # TODO: Review unreachable code - for clip_idx in target_clips:
+    # TODO: Review unreachable code - if 0 <= clip_idx < len(timeline.clips):
+    # TODO: Review unreachable code - clip = timeline.clips[clip_idx]
+
+    # TODO: Review unreachable code - # Find nearest beat to clip start
+    # TODO: Review unreachable code - nearest_beat = min(beat_times, key=lambda b: abs(b - clip.start_time))
+
+    # TODO: Review unreachable code - # Adjust clip to start on beat
+    # TODO: Review unreachable code - time_shift = nearest_beat - clip.start_time
+    # TODO: Review unreachable code - clip.start_time = nearest_beat
+
+    # TODO: Review unreachable code - # Shift subsequent clips
+    # TODO: Review unreachable code - for i in range(clip_idx + 1, len(timeline.clips)):
+    # TODO: Review unreachable code - timeline.clips[i].start_time += time_shift
+
+    # TODO: Review unreachable code - return timeline
+
+    # TODO: Review unreachable code - def _apply_energy_adjust(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
+    # TODO: Review unreachable code - """Adjust energy/intensity of section."""
+    # TODO: Review unreachable code - intensity = edit.parameters.get("intensity", 1.0)
+    # TODO: Review unreachable code - target_clips = self._get_target_clips(timeline, edit)
+
+    # TODO: Review unreachable code - # Energy adjustment through pace and transitions
+    # TODO: Review unreachable code - for clip_idx in target_clips:
+    # TODO: Review unreachable code - if 0 <= clip_idx < len(timeline.clips):
+    # TODO: Review unreachable code - clip = timeline.clips[clip_idx]
+
+    # TODO: Review unreachable code - if intensity > 1.0:  # Increase energy
+    # TODO: Review unreachable code - # Shorter clips, faster transitions
+    # TODO: Review unreachable code - clip.duration = clip.duration / 1.2
+    # TODO: Review unreachable code - if clip.transition_out:
+    # TODO: Review unreachable code - clip.transition_out_duration = max(0.2, clip.transition_out_duration * 0.7)
+    # TODO: Review unreachable code - else:  # Decrease energy
+    # TODO: Review unreachable code - # Longer clips, slower transitions
+    # TODO: Review unreachable code - clip.duration = clip.duration * 1.2
+    # TODO: Review unreachable code - if clip.transition_out:
+    # TODO: Review unreachable code - clip.transition_out_duration = min(2.0, clip.transition_out_duration * 1.3)
+
+    # TODO: Review unreachable code - return timeline
+
+    # TODO: Review unreachable code - def _apply_transition_change(self, timeline: Timeline, edit: TimelineEdit) -> Timeline:
+    # TODO: Review unreachable code - """Change transitions in timeline."""
+    # TODO: Review unreachable code - transition_type = edit.parameters.get("transition_type", "cut")
+    # TODO: Review unreachable code - apply_to = edit.parameters.get("apply_to", "all")
+
+    # TODO: Review unreachable code - if apply_to == "all":
+    # TODO: Review unreachable code - for i, clip in enumerate(timeline.clips):
+    # TODO: Review unreachable code - if i < len(timeline.clips) - 1:  # Not the last clip
+    # TODO: Review unreachable code - clip.transition_out = transition_type
+    # TODO: Review unreachable code - clip.transition_out_duration = 0.5 if transition_type != "cut" else 0.0
+    # TODO: Review unreachable code - if i > 0:  # Not the first clip
+    # TODO: Review unreachable code - clip.transition_in = transition_type
+    # TODO: Review unreachable code - clip.transition_in_duration = 0.5 if transition_type != "cut" else 0.0
+
+    # TODO: Review unreachable code - return timeline
+
+    # TODO: Review unreachable code - def _get_target_clips(self, timeline: Timeline, edit: TimelineEdit) -> list[int]:
+    # TODO: Review unreachable code - """Get indices of clips to target based on edit."""
+    # TODO: Review unreachable code - if edit.target_clips:
+    # TODO: Review unreachable code - return edit.target_clips
+
+    # TODO: Review unreachable code - if edit.target_section:
+    # TODO: Review unreachable code - # Map section names to clip ranges
+    # TODO: Review unreachable code - # This is simplified - in reality would need marker-based section detection
+    # TODO: Review unreachable code - total_clips = len(timeline.clips)
+
+    # TODO: Review unreachable code - if edit.target_section == "intro":
+    # TODO: Review unreachable code - # First 20% of clips
+    # TODO: Review unreachable code - return list(range(int(total_clips * 0.2)))
+    # TODO: Review unreachable code - elif edit.target_section == "outro":
+    # TODO: Review unreachable code - # Last 20% of clips
+    # TODO: Review unreachable code - return list(range(int(total_clips * 0.8), total_clips))
+    # TODO: Review unreachable code - elif edit.target_section == "all":
+    # TODO: Review unreachable code - return list(range(total_clips))
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Middle sections - would need proper section detection
+    # TODO: Review unreachable code - return list(range(int(total_clips * 0.2), int(total_clips * 0.8)))
+
+    # TODO: Review unreachable code - # Default to all clips
+    # TODO: Review unreachable code - return list(range(len(timeline.clips)))
+
+    # TODO: Review unreachable code - def suggest_edits(self, timeline: Timeline) -> list[str]:
+    # TODO: Review unreachable code - """Suggest possible edits for the timeline.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - timeline: Timeline to analyze
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of suggested edit commands
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - suggestions = []
+
+    # TODO: Review unreachable code - # Analyze timeline characteristics
+    # TODO: Review unreachable code - avg_clip_duration = sum(c.duration for c in timeline.clips) / len(timeline.clips) if timeline.clips else 0
+    # TODO: Review unreachable code - has_transitions = any(c.transition_in or c.transition_out for c in timeline.clips)
+    # TODO: Review unreachable code - has_beat_markers = any(m.get("type") == "beat" for m in timeline.markers)
+
+    # TODO: Review unreachable code - # Suggest based on analysis
+    # TODO: Review unreachable code - if avg_clip_duration > 5.0:
+    # TODO: Review unreachable code - suggestions.append("Make the cuts faster for more energy")
+    # TODO: Review unreachable code - suggestions.append("Speed up the intro to grab attention")
+    # TODO: Review unreachable code - elif avg_clip_duration < 1.0:
+    # TODO: Review unreachable code - suggestions.append("Add breathing room after intense sections")
+    # TODO: Review unreachable code - suggestions.append("Slow down the pace for dramatic effect")
+
+    # TODO: Review unreachable code - if not has_transitions:
+    # TODO: Review unreachable code - suggestions.append("Add dissolve transitions for smoother flow")
+
+    # TODO: Review unreachable code - if has_beat_markers and not all(c.beat_aligned for c in timeline.clips):
+    # TODO: Review unreachable code - suggestions.append("Sync all cuts to the beat")
+    # TODO: Review unreachable code - suggestions.append("Match cuts to the rhythm")
+
+    # TODO: Review unreachable code - if len(timeline.clips) > 20:
+    # TODO: Review unreachable code - suggestions.append("Tighten the edit by removing weaker shots")
+
+    # TODO: Review unreachable code - return suggestions
 
 
 def create_nlp_processor() -> TimelineNLPProcessor:

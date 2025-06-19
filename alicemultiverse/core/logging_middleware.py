@@ -36,45 +36,45 @@ class StructuredLoggingMiddleware(BaseHTTPMiddleware):
             request_id=request_id
         )
 
-        try:
+        # TODO: Review unreachable code - try:
             # Process request
-            response = await call_next(request)
+        response = await call_next(request)
 
             # Calculate duration
-            duration = time.time() - start_time
+        duration = time.time() - start_time
 
             # Log response
-            logger.info(
-                "Request completed",
-                method=request.method,
-                path=request.url.path,
-                status_code=response.status_code,
-                duration_ms=round(duration * 1000, 2),
-                correlation_id=correlation_id,
-                request_id=request_id
-            )
+        logger.info(
+            "Request completed",
+            method=request.method,
+            path=request.url.path,
+            status_code=response.status_code,
+            duration_ms=round(duration * 1000, 2),
+            correlation_id=correlation_id,
+            request_id=request_id
+        )
 
             # Add correlation ID to response headers
-            response.headers['X-Correlation-ID'] = correlation_id
-            response.headers['X-Request-ID'] = request_id
+        response.headers['X-Correlation-ID'] = correlation_id
+        response.headers['X-Request-ID'] = request_id
 
-            return response
+        return response
 
-        except Exception as e:
-            # Calculate duration
-            duration = time.time() - start_time
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - # Calculate duration
+        # TODO: Review unreachable code - duration = time.time() - start_time
 
-            # Log error
-            logger.error(
-                "Request failed",
-                method=request.method,
-                path=request.url.path,
-                error=str(e),
-                duration_ms=round(duration * 1000, 2),
-                correlation_id=correlation_id,
-                request_id=request_id,
-                exc_info=True
-            )
+        # TODO: Review unreachable code - # Log error
+        # TODO: Review unreachable code - logger.error(
+        # TODO: Review unreachable code - "Request failed",
+        # TODO: Review unreachable code - method=request.method,
+        # TODO: Review unreachable code - path=request.url.path,
+        # TODO: Review unreachable code - error=str(e),
+        # TODO: Review unreachable code - duration_ms=round(duration * 1000, 2),
+        # TODO: Review unreachable code - correlation_id=correlation_id,
+        # TODO: Review unreachable code - request_id=request_id,
+        # TODO: Review unreachable code - exc_info=True
+        # TODO: Review unreachable code - )
 
-            # Re-raise the exception
-            raise
+        # TODO: Review unreachable code - # Re-raise the exception
+        # TODO: Review unreachable code - raise

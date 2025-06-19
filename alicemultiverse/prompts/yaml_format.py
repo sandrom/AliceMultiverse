@@ -70,52 +70,52 @@ class PromptYAMLFormatter:
 
         return data
 
-    @staticmethod
-    def save_readable_prompt(prompt: Prompt, file_path: Path) -> None:
-        """Save a single prompt in readable YAML format."""
-        data = PromptYAMLFormatter.prompt_to_readable_dict(prompt)
+    # TODO: Review unreachable code - @staticmethod
+    # TODO: Review unreachable code - def save_readable_prompt(prompt: Prompt, file_path: Path) -> None:
+    # TODO: Review unreachable code - """Save a single prompt in readable YAML format."""
+    # TODO: Review unreachable code - data = PromptYAMLFormatter.prompt_to_readable_dict(prompt)
 
-        with open(file_path, 'w') as f:
-            yaml.dump(data, f, default_flow_style=False, sort_keys=False,
-                     allow_unicode=True, width=100)
+    # TODO: Review unreachable code - with open(file_path, 'w') as f:
+    # TODO: Review unreachable code - yaml.dump(data, f, default_flow_style=False, sort_keys=False,
+    # TODO: Review unreachable code - allow_unicode=True, width=100)
 
-    @staticmethod
-    def save_prompt_collection(prompts: list[Prompt], file_path: Path,
-                              title: str = "Prompt Collection") -> None:
-        """Save multiple prompts in a well-organized YAML file."""
-        # Group prompts by category
-        by_category = {}
-        for prompt in prompts:
-            cat = prompt.category.value
-            if cat not in by_category:
-                by_category[cat] = []
-            by_category[cat].append(prompt)
+    # TODO: Review unreachable code - @staticmethod
+    # TODO: Review unreachable code - def save_prompt_collection(prompts: list[Prompt], file_path: Path,
+    # TODO: Review unreachable code - title: str = "Prompt Collection") -> None:
+    # TODO: Review unreachable code - """Save multiple prompts in a well-organized YAML file."""
+    # TODO: Review unreachable code - # Group prompts by category
+    # TODO: Review unreachable code - by_category = {}
+    # TODO: Review unreachable code - for prompt in prompts:
+    # TODO: Review unreachable code - cat = prompt.category.value
+    # TODO: Review unreachable code - if cat not in by_category:
+    # TODO: Review unreachable code - by_category[cat] = []
+    # TODO: Review unreachable code - by_category[cat].append(prompt)
 
-        # Create the collection structure
-        collection = {
-            'title': title,
-            'generated_at': datetime.now().isoformat(),
-            'total_prompts': len(prompts),
-            'prompts_by_category': {}
-        }
+    # TODO: Review unreachable code - # Create the collection structure
+    # TODO: Review unreachable code - collection = {
+    # TODO: Review unreachable code - 'title': title,
+    # TODO: Review unreachable code - 'generated_at': datetime.now().isoformat(),
+    # TODO: Review unreachable code - 'total_prompts': len(prompts),
+    # TODO: Review unreachable code - 'prompts_by_category': {}
+    # TODO: Review unreachable code - }
 
-        # Add prompts organized by category
-        for category, category_prompts in sorted(by_category.items()):
-            collection['prompts_by_category'][category] = [
-                PromptYAMLFormatter.prompt_to_readable_dict(p)
-                for p in sorted(category_prompts,
-                              key=lambda x: (x.effectiveness_rating or 0),
-                              reverse=True)
-            ]
+    # TODO: Review unreachable code - # Add prompts organized by category
+    # TODO: Review unreachable code - for category, category_prompts in sorted(by_category.items()):
+    # TODO: Review unreachable code - collection['prompts_by_category'][category] = [
+    # TODO: Review unreachable code - PromptYAMLFormatter.prompt_to_readable_dict(p)
+    # TODO: Review unreachable code - for p in sorted(category_prompts,
+    # TODO: Review unreachable code - key=lambda x: (x.effectiveness_rating or 0),
+    # TODO: Review unreachable code - reverse=True)
+    # TODO: Review unreachable code - ]
 
-        with open(file_path, 'w') as f:
-            yaml.dump(collection, f, default_flow_style=False, sort_keys=False,
-                     allow_unicode=True, width=100)
+    # TODO: Review unreachable code - with open(file_path, 'w') as f:
+    # TODO: Review unreachable code - yaml.dump(collection, f, default_flow_style=False, sort_keys=False,
+    # TODO: Review unreachable code - allow_unicode=True, width=100)
 
-    @staticmethod
-    def create_example_prompt_yaml(file_path: Path) -> None:
-        """Create an example YAML file showing the format."""
-        example = """# Example Prompt Format
+    # TODO: Review unreachable code - @staticmethod
+    # TODO: Review unreachable code - def create_example_prompt_yaml(file_path: Path) -> None:
+    # TODO: Review unreachable code - """Create an example YAML file showing the format."""
+    # TODO: Review unreachable code - example = """# Example Prompt Format
 # This file shows how to structure prompts in YAML
 
 prompt: "A serene Japanese garden with cherry blossoms in full bloom, koi pond reflecting the sky, traditional wooden bridge, soft morning light, photorealistic, 8k"

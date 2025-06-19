@@ -64,125 +64,125 @@ class AssetDiscovery:
 
         return None
 
-    def track_asset(
-        self,
-        file_path: Path,
-        content_hash: str | None = None,
-        metadata: dict | None = None,
-        **kwargs,
-    ) -> str:
-        """Track an asset in the system.
+    # TODO: Review unreachable code - def track_asset(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - file_path: Path,
+    # TODO: Review unreachable code - content_hash: str | None = None,
+    # TODO: Review unreachable code - metadata: dict | None = None,
+    # TODO: Review unreachable code - **kwargs,
+    # TODO: Review unreachable code - ) -> str:
+    # TODO: Review unreachable code - """Track an asset in the system.
 
-        PostgreSQL removed - this method only calculates hash.
+    # TODO: Review unreachable code - PostgreSQL removed - this method only calculates hash.
 
-        Args:
-            file_path: Path to the asset file
-            content_hash: Optional pre-calculated content hash
-            metadata: Optional metadata
-            **kwargs: Additional asset attributes
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - file_path: Path to the asset file
+    # TODO: Review unreachable code - content_hash: Optional pre-calculated content hash
+    # TODO: Review unreachable code - metadata: Optional metadata
+    # TODO: Review unreachable code - **kwargs: Additional asset attributes
 
-        Returns:
-            Content hash
-        """
-        if not file_path.exists():
-            raise FileNotFoundError(f"File not found: {file_path}")
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Content hash
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - if not file_path.exists():
+    # TODO: Review unreachable code - raise FileNotFoundError(f"File not found: {file_path}")
 
-        # Calculate content hash if not provided
-        if not content_hash:
-            content_hash = calculate_content_hash(file_path)
+    # TODO: Review unreachable code - # Calculate content hash if not provided
+    # TODO: Review unreachable code - if not content_hash:
+    # TODO: Review unreachable code - content_hash = calculate_content_hash(file_path)
 
-        logger.info(f"Tracked asset: {content_hash} at {file_path}")
-        logger.debug("Database tracking skipped - PostgreSQL removed")
+    # TODO: Review unreachable code - logger.info(f"Tracked asset: {content_hash} at {file_path}")
+    # TODO: Review unreachable code - logger.debug("Database tracking skipped - PostgreSQL removed")
 
-        return content_hash
+    # TODO: Review unreachable code - return content_hash
 
-    def update_asset_location(self, content_hash: str, new_path: Path) -> bool:
-        """Update asset location.
+    # TODO: Review unreachable code - def update_asset_location(self, content_hash: str, new_path: Path) -> bool:
+    # TODO: Review unreachable code - """Update asset location.
 
-        PostgreSQL removed - this method is non-functional.
+    # TODO: Review unreachable code - PostgreSQL removed - this method is non-functional.
 
-        Args:
-            content_hash: Content hash of the asset
-            new_path: New file path
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - content_hash: Content hash of the asset
+    # TODO: Review unreachable code - new_path: New file path
 
-        Returns:
-            False (database not available)
-        """
-        logger.warning(f"Cannot update asset location for {content_hash} - PostgreSQL removed")
-        return False
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - False (database not available)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - logger.warning(f"Cannot update asset location for {content_hash} - PostgreSQL removed")
+    # TODO: Review unreachable code - return False
 
-    def find_duplicates(self) -> dict[str, list[Path]]:
-        """Find duplicate assets by content hash.
+    # TODO: Review unreachable code - def find_duplicates(self) -> dict[str, list[Path]]:
+    # TODO: Review unreachable code - """Find duplicate assets by content hash.
 
-        Searches filesystem only since database is not available.
+    # TODO: Review unreachable code - Searches filesystem only since database is not available.
 
-        Returns:
-            Dict mapping content hash to list of file paths
-        """
-        duplicates = {}
-        seen_hashes = {}
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Dict mapping content hash to list of file paths
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - duplicates = {}
+    # TODO: Review unreachable code - seen_hashes = {}
 
-        for search_path in self.search_paths:
-            for ext in IMAGE_EXTENSIONS | VIDEO_EXTENSIONS:
-                for file_path in search_path.rglob(f"*{ext}"):
-                    try:
-                        content_hash = get_or_calculate_content_hash(file_path)
-                        if content_hash in seen_hashes:
-                            if content_hash not in duplicates:
-                                duplicates[content_hash] = [seen_hashes[content_hash]]
-                            duplicates[content_hash].append(file_path)
-                        else:
-                            seen_hashes[content_hash] = file_path
-                    except Exception as e:
-                        logger.debug(f"Error processing {file_path}: {e}")
+    # TODO: Review unreachable code - for search_path in self.search_paths:
+    # TODO: Review unreachable code - for ext in IMAGE_EXTENSIONS | VIDEO_EXTENSIONS:
+    # TODO: Review unreachable code - for file_path in search_path.rglob(f"*{ext}"):
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - content_hash = get_or_calculate_content_hash(file_path)
+    # TODO: Review unreachable code - if content_hash in seen_hashes:
+    # TODO: Review unreachable code - if content_hash not in duplicates:
+    # TODO: Review unreachable code - duplicates[content_hash] = [seen_hashes[content_hash]]
+    # TODO: Review unreachable code - duplicates[content_hash].append(file_path)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - seen_hashes[content_hash] = file_path
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.debug(f"Error processing {file_path}: {e}")
 
-        return duplicates
+    # TODO: Review unreachable code - return duplicates
 
-    def find_moved_assets(self) -> list:
-        """Find assets that may have been moved.
+    # TODO: Review unreachable code - def find_moved_assets(self) -> list:
+    # TODO: Review unreachable code - """Find assets that may have been moved.
 
-        PostgreSQL removed - this method is non-functional.
+    # TODO: Review unreachable code - PostgreSQL removed - this method is non-functional.
 
-        Returns:
-            Empty list (database not available)
-        """
-        logger.warning("Cannot find moved assets - PostgreSQL removed")
-        return []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Empty list (database not available)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - logger.warning("Cannot find moved assets - PostgreSQL removed")
+    # TODO: Review unreachable code - return []
 
-    def scan_directory(self, directory: Path, recursive: bool = True) -> int:
-        """Scan directory for new assets.
+    # TODO: Review unreachable code - def scan_directory(self, directory: Path, recursive: bool = True) -> int:
+    # TODO: Review unreachable code - """Scan directory for new assets.
 
-        PostgreSQL removed - this method only counts files.
+    # TODO: Review unreachable code - PostgreSQL removed - this method only counts files.
 
-        Args:
-            directory: Directory to scan
-            recursive: Whether to scan recursively
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - directory: Directory to scan
+    # TODO: Review unreachable code - recursive: Whether to scan recursively
 
-        Returns:
-            Number of media files found
-        """
-        if not directory.exists():
-            logger.warning(f"Directory does not exist: {directory}")
-            return 0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Number of media files found
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - if not directory.exists():
+    # TODO: Review unreachable code - logger.warning(f"Directory does not exist: {directory}")
+    # TODO: Review unreachable code - return 0
 
-        count = 0
-        pattern = "**/*" if recursive else "*"
+    # TODO: Review unreachable code - count = 0
+    # TODO: Review unreachable code - pattern = "**/*" if recursive else "*"
 
-        for ext in IMAGE_EXTENSIONS | VIDEO_EXTENSIONS:
-            for file_path in directory.glob(f"{pattern}{ext}"):
-                if file_path.is_file():
-                    count += 1
+    # TODO: Review unreachable code - for ext in IMAGE_EXTENSIONS | VIDEO_EXTENSIONS:
+    # TODO: Review unreachable code - for file_path in directory.glob(f"{pattern}{ext}"):
+    # TODO: Review unreachable code - if file_path.is_file():
+    # TODO: Review unreachable code - count += 1
 
-        logger.info(f"Found {count} media files in {directory}")
-        return count
+    # TODO: Review unreachable code - logger.info(f"Found {count} media files in {directory}")
+    # TODO: Review unreachable code - return count
 
-    def get_asset_history(self, content_hash: str) -> list[dict]:
-        """Get location history for an asset.
+    # TODO: Review unreachable code - def get_asset_history(self, content_hash: str) -> list[dict]:
+    # TODO: Review unreachable code - """Get location history for an asset.
 
-        PostgreSQL removed - this method is non-functional.
+    # TODO: Review unreachable code - PostgreSQL removed - this method is non-functional.
 
-        Returns:
-            Empty list (database not available)
-        """
-        logger.warning(f"Cannot get asset history for {content_hash} - PostgreSQL removed")
-        return []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Empty list (database not available)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - logger.warning(f"Cannot get asset history for {content_hash} - PostgreSQL removed")
+    # TODO: Review unreachable code - return []

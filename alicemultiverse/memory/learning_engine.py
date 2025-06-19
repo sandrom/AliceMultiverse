@@ -115,486 +115,486 @@ class StyleLearningEngine:
         logger.info(f"Detected {len(patterns)} patterns")
         return patterns
 
-    def generate_insights(self) -> list[LearningInsight]:
-        """Generate actionable insights from patterns.
-
-        Returns:
-            List of learning insights
-        """
-        insights = []
-
-        # Style convergence insights
-        insights.extend(self._generate_convergence_insights())
-
-        # Improvement opportunity insights
-        insights.extend(self._generate_improvement_insights())
-
-        # Time-based insights
-        insights.extend(self._generate_temporal_insights())
-
-        # Workflow optimization insights
-        if self.preference_tracker:
-            insights.extend(self._generate_workflow_insights())
-
-        # Store insights
-        self.insights.extend(insights)
-
-        # Sort by priority
-        priority_order = {"high": 0, "medium": 1, "low": 2}
-        insights.sort(key=lambda i: priority_order.get(i.priority, 1))
-
-        logger.info(f"Generated {len(insights)} insights")
-        return insights
-
-    def predict_preferences(
-        self,
-        context: dict[str, Any],
-        preference_types: list[PreferenceType] | None = None
-    ) -> dict[PreferenceType, list[tuple[Any, float]]]:
-        """Predict likely preferences based on context and history.
-
-        Args:
-            context: Current context
-            preference_types: Types to predict
-
-        Returns:
-            Predictions with confidence scores
-        """
-        predictions = {}
-        types_to_predict = preference_types or list(PreferenceType)
-
-        for pref_type in types_to_predict:
-            # Get historical preferences
-            history = self.style_memory.profile.preferences.get(pref_type, [])
-
-            if not history:
-                continue
-
-            # Score each preference
-            scored_prefs = []
-
-            for pref in history:
-                score = self._score_preference_likelihood(pref, context)
-                if score > self.min_confidence:
-                    scored_prefs.append((pref.value, score))
-
-            # Sort by score
-            scored_prefs.sort(key=lambda x: x[1], reverse=True)
-
-            # Take top predictions
-            predictions[pref_type] = scored_prefs[:5]
-
-        return predictions
-
-    def suggest_combinations(
-        self,
-        base_preferences: list[str],
-        context: dict[str, Any] | None = None
-    ) -> list[dict[str, Any]]:
-        """Suggest preference combinations based on learning.
-
-        Args:
-            base_preferences: Starting preferences
-            context: Optional context
-
-        Returns:
-            List of combination suggestions with scores
-        """
-        suggestions = []
-
-        # Get co-occurrence patterns
-        relevant_patterns = []
-        for pattern in self.patterns.values():
-            if pattern.pattern_type == "cooccurrence":
-                # Check if any base preference is in pattern
-                if any(bp in pattern.preferences for bp in base_preferences):
-                    relevant_patterns.append(pattern)
-
-        # Generate suggestions from patterns
-        for pattern in relevant_patterns:
-            # Get preferences not in base
-            additional = [
-                p for p in pattern.preferences
-                if p not in base_preferences
-            ]
-
-            if additional:
-                suggestion = {
-                    "combination": base_preferences + additional,
-                    "confidence": pattern.confidence,
-                    "success_rate": pattern.success_rate,
-                    "frequency": pattern.frequency,
-                    "reason": f"Frequently used together ({pattern.frequency} times)"
-                }
-                suggestions.append(suggestion)
-
-        # Sort by confidence * success_rate
-        suggestions.sort(
-            key=lambda s: s["confidence"] * s["success_rate"],
-            reverse=True
-        )
-
-        return suggestions[:10]
-
-    def reinforce_pattern(self, preference_ids: list[str], successful: bool):
-        """Reinforce or weaken a pattern based on outcome.
-
-        Args:
-            preference_ids: Preferences used
-            successful: Whether outcome was successful
-        """
-        ",".join(sorted(preference_ids))
-
-        # Find matching patterns
-        for pattern in self.patterns.values():
-            if sorted(pattern.preferences) == sorted(preference_ids):
-                pattern.last_seen = datetime.now()
-                pattern.reinforcement_count += 1
-
-                # Update success rate
-                if successful:
-                    # Weighted update towards success
-                    pattern.success_rate = (
-                        pattern.success_rate * 0.9 + 1.0 * 0.1
-                    )
-                else:
-                    # Weighted update towards failure
-                    pattern.success_rate = (
-                        pattern.success_rate * 0.9 + 0.0 * 0.1
-                    )
-
-                # Update confidence based on consistency
-                pattern.confidence = min(
-                    1.0,
-                    pattern.confidence + 0.05 if successful else pattern.confidence - 0.02
-                )
-
-    def _analyze_cooccurrence(self) -> list[StylePattern]:
-        """Analyze co-occurrence patterns."""
-        patterns = []
-
-        # Get co-occurrence data from style memory
-        cooccurrence = self.style_memory.patterns.get("co_occurrence", {})
-
-        # Find strong co-occurrences
-        analyzed_pairs = set()
-
-        for pref1, related in cooccurrence.items():
-            for pref2, count in related.items():
-                # Avoid duplicates
-                pair = tuple(sorted([pref1, pref2]))
-                if pair in analyzed_pairs:
-                    continue
-                analyzed_pairs.add(pair)
-
-                if count >= self.min_pattern_frequency:
-                    # Calculate success rate for this combination
-                    combo_key = ",".join(sorted([pref1, pref2]))
-                    success_data = self.style_memory.patterns.get(
-                        "success_patterns", {}
-                    ).get(combo_key, {"success": 0, "total": 0})
-
-                    success_rate = (
-                        success_data["success"] / success_data["total"]
-                        if success_data["total"] > 0 else 0.5
-                    )
-
-                    if success_rate > 0.6:  # Only keep successful patterns
-                        pattern = StylePattern(
-                            pattern_id=f"cooccur_{pair[0]}_{pair[1]}",
-                            pattern_type="cooccurrence",
-                            preferences=list(pair),
-                            frequency=count,
-                            success_rate=success_rate,
-                            confidence=min(1.0, count / 10)  # Confidence grows with usage
-                        )
-                        patterns.append(pattern)
-
-        return patterns
-
-    def _analyze_temporal_patterns(self) -> list[StylePattern]:
-        """Analyze time-based patterns."""
-        patterns = []
-
-        # Analyze time-of-day preferences
-        time_prefs = self.style_memory.profile.time_of_day_preferences
-
-        for hour, pref_ids in time_prefs.items():
-            if len(pref_ids) >= self.min_pattern_frequency:
-                # Count most common preferences for this hour
-                pref_counter = Counter(pref_ids)
-
-                for pref_id, count in pref_counter.most_common(3):
-                    if count >= self.min_pattern_frequency:
-                        pattern = StylePattern(
-                            pattern_id=f"temporal_hour{hour}_{pref_id}",
-                            pattern_type="temporal",
-                            preferences=[pref_id],
-                            frequency=count,
-                            success_rate=0.7,  # Default, could calculate from history
-                            confidence=min(1.0, count / 10),
-                            time_patterns={"hour": hour}
-                        )
-                        patterns.append(pattern)
-
-        return patterns
-
-    def _analyze_project_patterns(self) -> list[StylePattern]:
-        """Analyze project-specific patterns."""
-        patterns = []
-
-        # Group preferences by project
-        project_prefs = defaultdict(list)
-
-        for pref in self.style_memory.all_preferences.values():
-            for project, count in pref.project_associations.items():
-                if count >= self.min_pattern_frequency:
-                    project_prefs[project].append((pref.preference_id, count))
-
-        # Find patterns per project
-        for project, prefs in project_prefs.items():
-            # Sort by count
-            prefs.sort(key=lambda x: x[1], reverse=True)
-
-            # Take top preferences
-            top_prefs = [p[0] for p in prefs[:5]]
-
-            if len(top_prefs) >= 2:
-                pattern = StylePattern(
-                    pattern_id=f"project_{project}_style",
-                    pattern_type="project",
-                    preferences=top_prefs,
-                    frequency=sum(p[1] for p in prefs[:5]),
-                    success_rate=0.8,  # Projects tend to have consistent styles
-                    confidence=0.8,
-                    projects=[project]
-                )
-                patterns.append(pattern)
-
-        return patterns
-
-    def _analyze_evolution_patterns(self) -> list[StylePattern]:
-        """Analyze style evolution over time."""
-        patterns = []
-
-        # Get evolution data
-        evolution = self.style_memory.get_style_evolution(
-            time_range=self.learning_window
-        )
-
-        if len(evolution) < 2:
-            return patterns
-
-        # Look for trends
-        for i in range(1, len(evolution)):
-            prev_week = evolution[i-1]
-            curr_week = evolution[i]
-
-            # Check for significant changes
-            if (curr_week["average_score"] - prev_week["average_score"]) > 0.1:
-                # Improving trend
-                new_prefs = [
-                    val["value"] for val in curr_week["top_values"]
-                    if val not in prev_week["top_values"]
-                ]
-
-                if new_prefs:
-                    pattern = StylePattern(
-                        pattern_id=f"evolution_{curr_week['week']}",
-                        pattern_type="evolution",
-                        preferences=new_prefs,
-                        frequency=curr_week["new_preferences"],
-                        success_rate=curr_week["average_score"],
-                        confidence=0.7,
-                        time_patterns={"week": curr_week["week"]}
-                    )
-                    patterns.append(pattern)
-
-        return patterns
-
-    def _generate_convergence_insights(self) -> list[LearningInsight]:
-        """Generate insights about style convergence."""
-        insights = []
-
-        # Check if preferences are converging
-        recent_prefs = []
-        for pref in self.style_memory.all_preferences.values():
-            if (datetime.now() - pref.last_used).days <= 7:
-                recent_prefs.append(pref)
-
-        if len(recent_prefs) >= 10:
-            # Cluster preferences by type
-            type_clusters = defaultdict(list)
-            for pref in recent_prefs:
-                type_clusters[pref.preference_type].append(pref)
-
-            for pref_type, prefs in type_clusters.items():
-                if len(prefs) >= 5:
-                    # Check if converging to few values
-                    unique_values = set(p.value for p in prefs)
-
-                    if len(unique_values) <= 3:
-                        top_values = Counter(p.value for p in prefs).most_common(3)
-
-                        insight = LearningInsight(
-                            insight_type="style_convergence",
-                            title=f"Converging {pref_type.value} preferences",
-                            description=(
-                                f"Your {pref_type.value} choices are converging to "
-                                f"{len(unique_values)} main options"
-                            ),
-                            confidence=0.8,
-                            evidence=[
-                                {"value": val, "count": count}
-                                for val, count in top_values
-                            ],
-                            affected_preferences=[p.preference_id for p in prefs],
-                            recommendations=[
-                                f"Consider setting '{top_values[0][0]}' as default",
-                                "Create templates with these preferred values"
-                            ],
-                            priority="medium"
-                        )
-                        insights.append(insight)
-
-        return insights
-
-    def _generate_improvement_insights(self) -> list[LearningInsight]:
-        """Generate insights about improvement opportunities."""
-        insights = []
-
-        # Find low success rate patterns
-        for pattern in self.patterns.values():
-            if pattern.success_rate < 0.5 and pattern.frequency >= 5:
-                insight = LearningInsight(
-                    insight_type="improvement_opportunity",
-                    title=f"Low success pattern: {pattern.pattern_type}",
-                    description=(
-                        f"This combination has only {pattern.success_rate:.0%} "
-                        f"success rate despite being used {pattern.frequency} times"
-                    ),
-                    confidence=0.9,
-                    evidence=[{
-                        "pattern": pattern.preferences,
-                        "success_rate": pattern.success_rate,
-                        "frequency": pattern.frequency
-                    }],
-                    affected_preferences=pattern.preferences,
-                    recommendations=[
-                        "Review why this combination fails",
-                        "Try alternative combinations",
-                        "Adjust parameters when using together"
-                    ],
-                    priority="high"
-                )
-                insights.append(insight)
-
-        return insights
-
-    def _generate_temporal_insights(self) -> list[LearningInsight]:
-        """Generate time-based insights."""
-        insights = []
-
-        # Analyze productivity by time
-        time_patterns = defaultdict(list)
-
-        for pattern in self.patterns.values():
-            if pattern.pattern_type == "temporal":
-                hour = pattern.time_patterns.get("hour")
-                if hour is not None:
-                    time_patterns[hour].append(pattern)
-
-        # Find most productive times
-        productive_hours = []
-        for hour, patterns in time_patterns.items():
-            avg_success = np.mean([p.success_rate for p in patterns])
-            if avg_success > 0.75:
-                productive_hours.append((hour, avg_success))
-
-        if productive_hours:
-            productive_hours.sort(key=lambda x: x[1], reverse=True)
-
-            insight = LearningInsight(
-                insight_type="temporal_optimization",
-                title="Most productive creative hours",
-                description=(
-                    f"You achieve best results during hours: "
-                    f"{', '.join(str(h[0]) for h in productive_hours[:3])}"
-                ),
-                confidence=0.85,
-                evidence=[{
-                    "hour": hour,
-                    "success_rate": rate
-                } for hour, rate in productive_hours[:5]],
-                recommendations=[
-                    "Schedule important work during these hours",
-                    "Save routine tasks for other times"
-                ],
-                priority="medium"
-            )
-            insights.append(insight)
-
-        return insights
-
-    def _generate_workflow_insights(self) -> list[LearningInsight]:
-        """Generate workflow-specific insights."""
-        if not self.preference_tracker:
-            return []
-
-        insights = []
-
-        # Get improvement areas
-        improvements = self.preference_tracker.get_improvement_areas()
-
-        for improvement in improvements[:3]:  # Top 3
-            insight = LearningInsight(
-                insight_type="workflow_optimization",
-                title=f"Workflow improvement: {improvement['area']}",
-                description=improvement['issue'],
-                confidence=0.9,
-                evidence=[improvement],
-                recommendations=[improvement['suggestion']],
-                priority="high" if improvement['count'] > 10 else "medium"
-            )
-            insights.append(insight)
-
-        return insights
-
-    def _score_preference_likelihood(
-        self,
-        preference: StylePreference,
-        context: dict[str, Any]
-    ) -> float:
-        """Score how likely a preference is given context.
-
-        Args:
-            preference: Preference to score
-            context: Current context
-
-        Returns:
-            Likelihood score (0-1)
-        """
-        score = preference.preference_score  # Base score
-
-        # Boost for matching project
-        if "project" in context:
-            if context["project"] in preference.project_associations:
-                project_uses = preference.project_associations[context["project"]]
-                score *= (1 + min(0.5, project_uses / 10))
-
-        # Boost for matching time
-        if "hour" in context:
-            hour = context["hour"]
-            hour_prefs = self.style_memory.profile.time_of_day_preferences.get(hour, [])
-            if preference.preference_id in hour_prefs:
-                score *= 1.3
-
-        # Boost for recent usage
-        days_since_use = (datetime.now() - preference.last_used).days
-        recency_boost = 1.0 / (1.0 + days_since_use / 7)
-        score *= (0.7 + 0.3 * recency_boost)
-
-        # Boost for high confidence
-        score *= (0.5 + 0.5 * preference.confidence)
-
-        return min(1.0, score)
+    # TODO: Review unreachable code - def generate_insights(self) -> list[LearningInsight]:
+    # TODO: Review unreachable code - """Generate actionable insights from patterns.
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of learning insights
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - insights = []
+
+    # TODO: Review unreachable code - # Style convergence insights
+    # TODO: Review unreachable code - insights.extend(self._generate_convergence_insights())
+
+    # TODO: Review unreachable code - # Improvement opportunity insights
+    # TODO: Review unreachable code - insights.extend(self._generate_improvement_insights())
+
+    # TODO: Review unreachable code - # Time-based insights
+    # TODO: Review unreachable code - insights.extend(self._generate_temporal_insights())
+
+    # TODO: Review unreachable code - # Workflow optimization insights
+    # TODO: Review unreachable code - if self.preference_tracker:
+    # TODO: Review unreachable code - insights.extend(self._generate_workflow_insights())
+
+    # TODO: Review unreachable code - # Store insights
+    # TODO: Review unreachable code - self.insights.extend(insights)
+
+    # TODO: Review unreachable code - # Sort by priority
+    # TODO: Review unreachable code - priority_order = {"high": 0, "medium": 1, "low": 2}
+    # TODO: Review unreachable code - insights.sort(key=lambda i: priority_order.get(i.priority, 1))
+
+    # TODO: Review unreachable code - logger.info(f"Generated {len(insights)} insights")
+    # TODO: Review unreachable code - return insights
+
+    # TODO: Review unreachable code - def predict_preferences(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - context: dict[str, Any],
+    # TODO: Review unreachable code - preference_types: list[PreferenceType] | None = None
+    # TODO: Review unreachable code - ) -> dict[PreferenceType, list[tuple[Any, float]]]:
+    # TODO: Review unreachable code - """Predict likely preferences based on context and history.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - context: Current context
+    # TODO: Review unreachable code - preference_types: Types to predict
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Predictions with confidence scores
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - predictions = {}
+    # TODO: Review unreachable code - types_to_predict = preference_types or list(PreferenceType)
+
+    # TODO: Review unreachable code - for pref_type in types_to_predict:
+    # TODO: Review unreachable code - # Get historical preferences
+    # TODO: Review unreachable code - history = self.style_memory.profile.preferences.get(pref_type, [])
+
+    # TODO: Review unreachable code - if not history:
+    # TODO: Review unreachable code - continue
+
+    # TODO: Review unreachable code - # Score each preference
+    # TODO: Review unreachable code - scored_prefs = []
+
+    # TODO: Review unreachable code - for pref in history:
+    # TODO: Review unreachable code - score = self._score_preference_likelihood(pref, context)
+    # TODO: Review unreachable code - if score > self.min_confidence:
+    # TODO: Review unreachable code - scored_prefs.append((pref.value, score))
+
+    # TODO: Review unreachable code - # Sort by score
+    # TODO: Review unreachable code - scored_prefs.sort(key=lambda x: x[1], reverse=True)
+
+    # TODO: Review unreachable code - # Take top predictions
+    # TODO: Review unreachable code - predictions[pref_type] = scored_prefs[:5]
+
+    # TODO: Review unreachable code - return predictions
+
+    # TODO: Review unreachable code - def suggest_combinations(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - base_preferences: list[str],
+    # TODO: Review unreachable code - context: dict[str, Any] | None = None
+    # TODO: Review unreachable code - ) -> list[dict[str, Any]]:
+    # TODO: Review unreachable code - """Suggest preference combinations based on learning.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - base_preferences: Starting preferences
+    # TODO: Review unreachable code - context: Optional context
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of combination suggestions with scores
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - suggestions = []
+
+    # TODO: Review unreachable code - # Get co-occurrence patterns
+    # TODO: Review unreachable code - relevant_patterns = []
+    # TODO: Review unreachable code - for pattern in self.patterns.values():
+    # TODO: Review unreachable code - if pattern.pattern_type == "cooccurrence":
+    # TODO: Review unreachable code - # Check if any base preference is in pattern
+    # TODO: Review unreachable code - if any(bp in pattern.preferences for bp in base_preferences):
+    # TODO: Review unreachable code - relevant_patterns.append(pattern)
+
+    # TODO: Review unreachable code - # Generate suggestions from patterns
+    # TODO: Review unreachable code - for pattern in relevant_patterns:
+    # TODO: Review unreachable code - # Get preferences not in base
+    # TODO: Review unreachable code - additional = [
+    # TODO: Review unreachable code - p for p in pattern.preferences
+    # TODO: Review unreachable code - if p not in base_preferences
+    # TODO: Review unreachable code - ]
+
+    # TODO: Review unreachable code - if additional:
+    # TODO: Review unreachable code - suggestion = {
+    # TODO: Review unreachable code - "combination": base_preferences + additional,
+    # TODO: Review unreachable code - "confidence": pattern.confidence,
+    # TODO: Review unreachable code - "success_rate": pattern.success_rate,
+    # TODO: Review unreachable code - "frequency": pattern.frequency,
+    # TODO: Review unreachable code - "reason": f"Frequently used together ({pattern.frequency} times)"
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - suggestions.append(suggestion)
+
+    # TODO: Review unreachable code - # Sort by confidence * success_rate
+    # TODO: Review unreachable code - suggestions.sort(
+    # TODO: Review unreachable code - key=lambda s: s["confidence"] * s["success_rate"],
+    # TODO: Review unreachable code - reverse=True
+    # TODO: Review unreachable code - )
+
+    # TODO: Review unreachable code - return suggestions[:10]
+
+    # TODO: Review unreachable code - def reinforce_pattern(self, preference_ids: list[str], successful: bool):
+    # TODO: Review unreachable code - """Reinforce or weaken a pattern based on outcome.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - preference_ids: Preferences used
+    # TODO: Review unreachable code - successful: Whether outcome was successful
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - ",".join(sorted(preference_ids))
+
+    # TODO: Review unreachable code - # Find matching patterns
+    # TODO: Review unreachable code - for pattern in self.patterns.values():
+    # TODO: Review unreachable code - if sorted(pattern.preferences) == sorted(preference_ids):
+    # TODO: Review unreachable code - pattern.last_seen = datetime.now()
+    # TODO: Review unreachable code - pattern.reinforcement_count += 1
+
+    # TODO: Review unreachable code - # Update success rate
+    # TODO: Review unreachable code - if successful:
+    # TODO: Review unreachable code - # Weighted update towards success
+    # TODO: Review unreachable code - pattern.success_rate = (
+    # TODO: Review unreachable code - pattern.success_rate * 0.9 + 1.0 * 0.1
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Weighted update towards failure
+    # TODO: Review unreachable code - pattern.success_rate = (
+    # TODO: Review unreachable code - pattern.success_rate * 0.9 + 0.0 * 0.1
+    # TODO: Review unreachable code - )
+
+    # TODO: Review unreachable code - # Update confidence based on consistency
+    # TODO: Review unreachable code - pattern.confidence = min(
+    # TODO: Review unreachable code - 1.0,
+    # TODO: Review unreachable code - pattern.confidence + 0.05 if successful else pattern.confidence - 0.02
+    # TODO: Review unreachable code - )
+
+    # TODO: Review unreachable code - def _analyze_cooccurrence(self) -> list[StylePattern]:
+    # TODO: Review unreachable code - """Analyze co-occurrence patterns."""
+    # TODO: Review unreachable code - patterns = []
+
+    # TODO: Review unreachable code - # Get co-occurrence data from style memory
+    # TODO: Review unreachable code - cooccurrence = self.style_memory.patterns.get("co_occurrence", {})
+
+    # TODO: Review unreachable code - # Find strong co-occurrences
+    # TODO: Review unreachable code - analyzed_pairs = set()
+
+    # TODO: Review unreachable code - for pref1, related in cooccurrence.items():
+    # TODO: Review unreachable code - for pref2, count in related.items():
+    # TODO: Review unreachable code - # Avoid duplicates
+    # TODO: Review unreachable code - pair = tuple(sorted([pref1, pref2]))
+    # TODO: Review unreachable code - if pair in analyzed_pairs:
+    # TODO: Review unreachable code - continue
+    # TODO: Review unreachable code - analyzed_pairs.add(pair)
+
+    # TODO: Review unreachable code - if count >= self.min_pattern_frequency:
+    # TODO: Review unreachable code - # Calculate success rate for this combination
+    # TODO: Review unreachable code - combo_key = ",".join(sorted([pref1, pref2]))
+    # TODO: Review unreachable code - success_data = self.style_memory.patterns.get(
+    # TODO: Review unreachable code - "success_patterns", {}
+    # TODO: Review unreachable code - ).get(combo_key, {"success": 0, "total": 0})
+
+    # TODO: Review unreachable code - success_rate = (
+    # TODO: Review unreachable code - success_data["success"] / success_data["total"]
+    # TODO: Review unreachable code - if success_data is not None and success_data["total"] > 0 else 0.5
+    # TODO: Review unreachable code - )
+
+    # TODO: Review unreachable code - if success_rate > 0.6:  # Only keep successful patterns
+    # TODO: Review unreachable code - pattern = StylePattern(
+    # TODO: Review unreachable code - pattern_id=f"cooccur_{pair[0]}_{pair[1]}",
+    # TODO: Review unreachable code - pattern_type="cooccurrence",
+    # TODO: Review unreachable code - preferences=list(pair),
+    # TODO: Review unreachable code - frequency=count,
+    # TODO: Review unreachable code - success_rate=success_rate,
+    # TODO: Review unreachable code - confidence=min(1.0, count / 10)  # Confidence grows with usage
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - patterns.append(pattern)
+
+    # TODO: Review unreachable code - return patterns
+
+    # TODO: Review unreachable code - def _analyze_temporal_patterns(self) -> list[StylePattern]:
+    # TODO: Review unreachable code - """Analyze time-based patterns."""
+    # TODO: Review unreachable code - patterns = []
+
+    # TODO: Review unreachable code - # Analyze time-of-day preferences
+    # TODO: Review unreachable code - time_prefs = self.style_memory.profile.time_of_day_preferences
+
+    # TODO: Review unreachable code - for hour, pref_ids in time_prefs.items():
+    # TODO: Review unreachable code - if len(pref_ids) >= self.min_pattern_frequency:
+    # TODO: Review unreachable code - # Count most common preferences for this hour
+    # TODO: Review unreachable code - pref_counter = Counter(pref_ids)
+
+    # TODO: Review unreachable code - for pref_id, count in pref_counter.most_common(3):
+    # TODO: Review unreachable code - if count >= self.min_pattern_frequency:
+    # TODO: Review unreachable code - pattern = StylePattern(
+    # TODO: Review unreachable code - pattern_id=f"temporal_hour{hour}_{pref_id}",
+    # TODO: Review unreachable code - pattern_type="temporal",
+    # TODO: Review unreachable code - preferences=[pref_id],
+    # TODO: Review unreachable code - frequency=count,
+    # TODO: Review unreachable code - success_rate=0.7,  # Default, could calculate from history
+    # TODO: Review unreachable code - confidence=min(1.0, count / 10),
+    # TODO: Review unreachable code - time_patterns={"hour": hour}
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - patterns.append(pattern)
+
+    # TODO: Review unreachable code - return patterns
+
+    # TODO: Review unreachable code - def _analyze_project_patterns(self) -> list[StylePattern]:
+    # TODO: Review unreachable code - """Analyze project-specific patterns."""
+    # TODO: Review unreachable code - patterns = []
+
+    # TODO: Review unreachable code - # Group preferences by project
+    # TODO: Review unreachable code - project_prefs = defaultdict(list)
+
+    # TODO: Review unreachable code - for pref in self.style_memory.all_preferences.values():
+    # TODO: Review unreachable code - for project, count in pref.project_associations.items():
+    # TODO: Review unreachable code - if count >= self.min_pattern_frequency:
+    # TODO: Review unreachable code - project_prefs[project].append((pref.preference_id, count))
+
+    # TODO: Review unreachable code - # Find patterns per project
+    # TODO: Review unreachable code - for project, prefs in project_prefs.items():
+    # TODO: Review unreachable code - # Sort by count
+    # TODO: Review unreachable code - prefs.sort(key=lambda x: x[1], reverse=True)
+
+    # TODO: Review unreachable code - # Take top preferences
+    # TODO: Review unreachable code - top_prefs = [p[0] for p in prefs[:5]]
+
+    # TODO: Review unreachable code - if len(top_prefs) >= 2:
+    # TODO: Review unreachable code - pattern = StylePattern(
+    # TODO: Review unreachable code - pattern_id=f"project_{project}_style",
+    # TODO: Review unreachable code - pattern_type="project",
+    # TODO: Review unreachable code - preferences=top_prefs,
+    # TODO: Review unreachable code - frequency=sum(p[1] for p in prefs[:5]),
+    # TODO: Review unreachable code - success_rate=0.8,  # Projects tend to have consistent styles
+    # TODO: Review unreachable code - confidence=0.8,
+    # TODO: Review unreachable code - projects=[project]
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - patterns.append(pattern)
+
+    # TODO: Review unreachable code - return patterns
+
+    # TODO: Review unreachable code - def _analyze_evolution_patterns(self) -> list[StylePattern]:
+    # TODO: Review unreachable code - """Analyze style evolution over time."""
+    # TODO: Review unreachable code - patterns = []
+
+    # TODO: Review unreachable code - # Get evolution data
+    # TODO: Review unreachable code - evolution = self.style_memory.get_style_evolution(
+    # TODO: Review unreachable code - time_range=self.learning_window
+    # TODO: Review unreachable code - )
+
+    # TODO: Review unreachable code - if len(evolution) < 2:
+    # TODO: Review unreachable code - return patterns
+
+    # TODO: Review unreachable code - # Look for trends
+    # TODO: Review unreachable code - for i in range(1, len(evolution)):
+    # TODO: Review unreachable code - prev_week = evolution[i-1]
+    # TODO: Review unreachable code - curr_week = evolution[i]
+
+    # TODO: Review unreachable code - # Check for significant changes
+    # TODO: Review unreachable code - if (curr_week["average_score"] - prev_week["average_score"]) > 0.1:
+    # TODO: Review unreachable code - # Improving trend
+    # TODO: Review unreachable code - new_prefs = [
+    # TODO: Review unreachable code - val["value"] for val in curr_week["top_values"]
+    # TODO: Review unreachable code - if val not in prev_week["top_values"]
+    # TODO: Review unreachable code - ]
+
+    # TODO: Review unreachable code - if new_prefs:
+    # TODO: Review unreachable code - pattern = StylePattern(
+    # TODO: Review unreachable code - pattern_id=f"evolution_{curr_week['week']}",
+    # TODO: Review unreachable code - pattern_type="evolution",
+    # TODO: Review unreachable code - preferences=new_prefs,
+    # TODO: Review unreachable code - frequency=curr_week["new_preferences"],
+    # TODO: Review unreachable code - success_rate=curr_week["average_score"],
+    # TODO: Review unreachable code - confidence=0.7,
+    # TODO: Review unreachable code - time_patterns={"week": curr_week["week"]}
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - patterns.append(pattern)
+
+    # TODO: Review unreachable code - return patterns
+
+    # TODO: Review unreachable code - def _generate_convergence_insights(self) -> list[LearningInsight]:
+    # TODO: Review unreachable code - """Generate insights about style convergence."""
+    # TODO: Review unreachable code - insights = []
+
+    # TODO: Review unreachable code - # Check if preferences are converging
+    # TODO: Review unreachable code - recent_prefs = []
+    # TODO: Review unreachable code - for pref in self.style_memory.all_preferences.values():
+    # TODO: Review unreachable code - if (datetime.now() - pref.last_used).days <= 7:
+    # TODO: Review unreachable code - recent_prefs.append(pref)
+
+    # TODO: Review unreachable code - if len(recent_prefs) >= 10:
+    # TODO: Review unreachable code - # Cluster preferences by type
+    # TODO: Review unreachable code - type_clusters = defaultdict(list)
+    # TODO: Review unreachable code - for pref in recent_prefs:
+    # TODO: Review unreachable code - type_clusters[pref.preference_type].append(pref)
+
+    # TODO: Review unreachable code - for pref_type, prefs in type_clusters.items():
+    # TODO: Review unreachable code - if len(prefs) >= 5:
+    # TODO: Review unreachable code - # Check if converging to few values
+    # TODO: Review unreachable code - unique_values = set(p.value for p in prefs)
+
+    # TODO: Review unreachable code - if len(unique_values) <= 3:
+    # TODO: Review unreachable code - top_values = Counter(p.value for p in prefs).most_common(3)
+
+    # TODO: Review unreachable code - insight = LearningInsight(
+    # TODO: Review unreachable code - insight_type="style_convergence",
+    # TODO: Review unreachable code - title=f"Converging {pref_type.value} preferences",
+    # TODO: Review unreachable code - description=(
+    # TODO: Review unreachable code - f"Your {pref_type.value} choices are converging to "
+    # TODO: Review unreachable code - f"{len(unique_values)} main options"
+    # TODO: Review unreachable code - ),
+    # TODO: Review unreachable code - confidence=0.8,
+    # TODO: Review unreachable code - evidence=[
+    # TODO: Review unreachable code - {"value": val, "count": count}
+    # TODO: Review unreachable code - for val, count in top_values
+    # TODO: Review unreachable code - ],
+    # TODO: Review unreachable code - affected_preferences=[p.preference_id for p in prefs],
+    # TODO: Review unreachable code - recommendations=[
+    # TODO: Review unreachable code - f"Consider setting '{top_values[0][0]}' as default",
+    # TODO: Review unreachable code - "Create templates with these preferred values"
+    # TODO: Review unreachable code - ],
+    # TODO: Review unreachable code - priority="medium"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - insights.append(insight)
+
+    # TODO: Review unreachable code - return insights
+
+    # TODO: Review unreachable code - def _generate_improvement_insights(self) -> list[LearningInsight]:
+    # TODO: Review unreachable code - """Generate insights about improvement opportunities."""
+    # TODO: Review unreachable code - insights = []
+
+    # TODO: Review unreachable code - # Find low success rate patterns
+    # TODO: Review unreachable code - for pattern in self.patterns.values():
+    # TODO: Review unreachable code - if pattern.success_rate < 0.5 and pattern.frequency >= 5:
+    # TODO: Review unreachable code - insight = LearningInsight(
+    # TODO: Review unreachable code - insight_type="improvement_opportunity",
+    # TODO: Review unreachable code - title=f"Low success pattern: {pattern.pattern_type}",
+    # TODO: Review unreachable code - description=(
+    # TODO: Review unreachable code - f"This combination has only {pattern.success_rate:.0%} "
+    # TODO: Review unreachable code - f"success rate despite being used {pattern.frequency} times"
+    # TODO: Review unreachable code - ),
+    # TODO: Review unreachable code - confidence=0.9,
+    # TODO: Review unreachable code - evidence=[{
+    # TODO: Review unreachable code - "pattern": pattern.preferences,
+    # TODO: Review unreachable code - "success_rate": pattern.success_rate,
+    # TODO: Review unreachable code - "frequency": pattern.frequency
+    # TODO: Review unreachable code - }],
+    # TODO: Review unreachable code - affected_preferences=pattern.preferences,
+    # TODO: Review unreachable code - recommendations=[
+    # TODO: Review unreachable code - "Review why this combination fails",
+    # TODO: Review unreachable code - "Try alternative combinations",
+    # TODO: Review unreachable code - "Adjust parameters when using together"
+    # TODO: Review unreachable code - ],
+    # TODO: Review unreachable code - priority="high"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - insights.append(insight)
+
+    # TODO: Review unreachable code - return insights
+
+    # TODO: Review unreachable code - def _generate_temporal_insights(self) -> list[LearningInsight]:
+    # TODO: Review unreachable code - """Generate time-based insights."""
+    # TODO: Review unreachable code - insights = []
+
+    # TODO: Review unreachable code - # Analyze productivity by time
+    # TODO: Review unreachable code - time_patterns = defaultdict(list)
+
+    # TODO: Review unreachable code - for pattern in self.patterns.values():
+    # TODO: Review unreachable code - if pattern.pattern_type == "temporal":
+    # TODO: Review unreachable code - hour = pattern.time_patterns.get("hour")
+    # TODO: Review unreachable code - if hour is not None:
+    # TODO: Review unreachable code - time_patterns[hour].append(pattern)
+
+    # TODO: Review unreachable code - # Find most productive times
+    # TODO: Review unreachable code - productive_hours = []
+    # TODO: Review unreachable code - for hour, patterns in time_patterns.items():
+    # TODO: Review unreachable code - avg_success = np.mean([p.success_rate for p in patterns])
+    # TODO: Review unreachable code - if avg_success > 0.75:
+    # TODO: Review unreachable code - productive_hours.append((hour, avg_success))
+
+    # TODO: Review unreachable code - if productive_hours:
+    # TODO: Review unreachable code - productive_hours.sort(key=lambda x: x[1], reverse=True)
+
+    # TODO: Review unreachable code - insight = LearningInsight(
+    # TODO: Review unreachable code - insight_type="temporal_optimization",
+    # TODO: Review unreachable code - title="Most productive creative hours",
+    # TODO: Review unreachable code - description=(
+    # TODO: Review unreachable code - f"You achieve best results during hours: "
+    # TODO: Review unreachable code - f"{', '.join(str(h[0]) for h in productive_hours[:3])}"
+    # TODO: Review unreachable code - ),
+    # TODO: Review unreachable code - confidence=0.85,
+    # TODO: Review unreachable code - evidence=[{
+    # TODO: Review unreachable code - "hour": hour,
+    # TODO: Review unreachable code - "success_rate": rate
+    # TODO: Review unreachable code - } for hour, rate in productive_hours[:5]],
+    # TODO: Review unreachable code - recommendations=[
+    # TODO: Review unreachable code - "Schedule important work during these hours",
+    # TODO: Review unreachable code - "Save routine tasks for other times"
+    # TODO: Review unreachable code - ],
+    # TODO: Review unreachable code - priority="medium"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - insights.append(insight)
+
+    # TODO: Review unreachable code - return insights
+
+    # TODO: Review unreachable code - def _generate_workflow_insights(self) -> list[LearningInsight]:
+    # TODO: Review unreachable code - """Generate workflow-specific insights."""
+    # TODO: Review unreachable code - if not self.preference_tracker:
+    # TODO: Review unreachable code - return []
+
+    # TODO: Review unreachable code - insights = []
+
+    # TODO: Review unreachable code - # Get improvement areas
+    # TODO: Review unreachable code - improvements = self.preference_tracker.get_improvement_areas()
+
+    # TODO: Review unreachable code - for improvement in improvements[:3]:  # Top 3
+    # TODO: Review unreachable code - insight = LearningInsight(
+    # TODO: Review unreachable code - insight_type="workflow_optimization",
+    # TODO: Review unreachable code - title=f"Workflow improvement: {improvement['area']}",
+    # TODO: Review unreachable code - description=improvement['issue'],
+    # TODO: Review unreachable code - confidence=0.9,
+    # TODO: Review unreachable code - evidence=[improvement],
+    # TODO: Review unreachable code - recommendations=[improvement['suggestion']],
+    # TODO: Review unreachable code - priority="high" if improvement['count'] > 10 else "medium"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - insights.append(insight)
+
+    # TODO: Review unreachable code - return insights
+
+    # TODO: Review unreachable code - def _score_preference_likelihood(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - preference: StylePreference,
+    # TODO: Review unreachable code - context: dict[str, Any]
+    # TODO: Review unreachable code - ) -> float:
+    # TODO: Review unreachable code - """Score how likely a preference is given context.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - preference: Preference to score
+    # TODO: Review unreachable code - context: Current context
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Likelihood score (0-1)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - score = preference.preference_score  # Base score
+
+    # TODO: Review unreachable code - # Boost for matching project
+    # TODO: Review unreachable code - if context is not None and "project" in context:
+    # TODO: Review unreachable code - if context is not None and context["project"] in preference.project_associations:
+    # TODO: Review unreachable code - project_uses = preference.project_associations[context["project"]]
+    # TODO: Review unreachable code - score *= (1 + min(0.5, project_uses / 10))
+
+    # TODO: Review unreachable code - # Boost for matching time
+    # TODO: Review unreachable code - if context is not None and "hour" in context:
+    # TODO: Review unreachable code - hour = context["hour"]
+    # TODO: Review unreachable code - hour_prefs = self.style_memory.profile.time_of_day_preferences.get(hour, [])
+    # TODO: Review unreachable code - if preference.preference_id in hour_prefs:
+    # TODO: Review unreachable code - score *= 1.3
+
+    # TODO: Review unreachable code - # Boost for recent usage
+    # TODO: Review unreachable code - days_since_use = (datetime.now() - preference.last_used).days
+    # TODO: Review unreachable code - recency_boost = 1.0 / (1.0 + days_since_use / 7)
+    # TODO: Review unreachable code - score *= (0.7 + 0.3 * recency_boost)
+
+    # TODO: Review unreachable code - # Boost for high confidence
+    # TODO: Review unreachable code - score *= (0.5 + 0.5 * preference.confidence)
+
+    # TODO: Review unreachable code - return min(1.0, score)

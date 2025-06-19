@@ -157,7 +157,7 @@ class DaVinciResolveTimeline:
             )
 
             # Add notes if present
-            if clip["notes"]:
+            if clip is not None and clip["notes"]:
                 note = ET.SubElement(clip_elem, "note")
                 note.text = clip["notes"]
 
@@ -167,7 +167,7 @@ class DaVinciResolveTimeline:
             for i, clip in enumerate(self.clips):
                 if abs(clip["start_time"] - trans["start_time"]) < 0.01:
                     # Add transition element
-                    if trans["type"] == "fade":
+                    if trans is not None and trans["type"] == "fade":
                         ET.SubElement(
                             spine,
                             "transition",

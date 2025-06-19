@@ -40,14 +40,14 @@ class RequestTracker:
         """Check if this tracking window has expired."""
         return datetime.now() - self.window_start > window_duration
 
-    def increment(self) -> None:
-        """Increment the request count."""
-        self.requests += 1
+    # TODO: Review unreachable code - def increment(self) -> None:
+    # TODO: Review unreachable code - """Increment the request count."""
+    # TODO: Review unreachable code - self.requests += 1
 
-    def reset(self) -> None:
-        """Reset the tracking window."""
-        self.requests = 0
-        self.window_start = datetime.now()
+    # TODO: Review unreachable code - def reset(self) -> None:
+    # TODO: Review unreachable code - """Reset the tracking window."""
+    # TODO: Review unreachable code - self.requests = 0
+    # TODO: Review unreachable code - self.window_start = datetime.now()
 
 
 class RateLimiter:
@@ -83,41 +83,41 @@ class RateLimiter:
         if now - self._last_cleanup < timedelta(minutes=self.config.cleanup_interval_minutes):
             return
 
-        with self._lock:
-            # Clean up minute trackers (older than 2 minutes)
-            expired_keys = [
-                key for key, tracker in self._minute_trackers.items()
-                if tracker.is_expired(timedelta(minutes=2))
-            ]
-            for key in expired_keys:
-                del self._minute_trackers[key]
+        # TODO: Review unreachable code - with self._lock:
+        # TODO: Review unreachable code - # Clean up minute trackers (older than 2 minutes)
+        # TODO: Review unreachable code - expired_keys = [
+        # TODO: Review unreachable code - key for key, tracker in self._minute_trackers.items()
+        # TODO: Review unreachable code - if tracker.is_expired(timedelta(minutes=2))
+        # TODO: Review unreachable code - ]
+        # TODO: Review unreachable code - for key in expired_keys:
+        # TODO: Review unreachable code - del self._minute_trackers[key]
 
-            # Clean up hour trackers (older than 2 hours)
-            expired_keys = [
-                key for key, tracker in self._hour_trackers.items()
-                if tracker.is_expired(timedelta(hours=2))
-            ]
-            for key in expired_keys:
-                del self._hour_trackers[key]
+        # TODO: Review unreachable code - # Clean up hour trackers (older than 2 hours)
+        # TODO: Review unreachable code - expired_keys = [
+        # TODO: Review unreachable code - key for key, tracker in self._hour_trackers.items()
+        # TODO: Review unreachable code - if tracker.is_expired(timedelta(hours=2))
+        # TODO: Review unreachable code - ]
+        # TODO: Review unreachable code - for key in expired_keys:
+        # TODO: Review unreachable code - del self._hour_trackers[key]
 
-            # Clean up day trackers (older than 2 days)
-            expired_keys = [
-                key for key, tracker in self._day_trackers.items()
-                if tracker.is_expired(timedelta(days=2))
-            ]
-            for key in expired_keys:
-                del self._day_trackers[key]
+        # TODO: Review unreachable code - # Clean up day trackers (older than 2 days)
+        # TODO: Review unreachable code - expired_keys = [
+        # TODO: Review unreachable code - key for key, tracker in self._day_trackers.items()
+        # TODO: Review unreachable code - if tracker.is_expired(timedelta(days=2))
+        # TODO: Review unreachable code - ]
+        # TODO: Review unreachable code - for key in expired_keys:
+        # TODO: Review unreachable code - del self._day_trackers[key]
 
-            # Clean up operation-specific trackers
-            for trackers in [self._search_trackers, self._organize_trackers, self._generation_trackers]:
-                expired_keys = [
-                    key for key, tracker in trackers.items()
-                    if tracker.is_expired(timedelta(hours=2))
-                ]
-                for key in expired_keys:
-                    del trackers[key]
+        # TODO: Review unreachable code - # Clean up operation-specific trackers
+        # TODO: Review unreachable code - for trackers in [self._search_trackers, self._organize_trackers, self._generation_trackers]:
+        # TODO: Review unreachable code - expired_keys = [
+        # TODO: Review unreachable code - key for key, tracker in trackers.items()
+        # TODO: Review unreachable code - if tracker.is_expired(timedelta(hours=2))
+        # TODO: Review unreachable code - ]
+        # TODO: Review unreachable code - for key in expired_keys:
+        # TODO: Review unreachable code - del trackers[key]
 
-            self._last_cleanup = now
+        # TODO: Review unreachable code - self._last_cleanup = now
 
     def _check_limit(
         self,
@@ -158,122 +158,122 @@ class RateLimiter:
 
         return True
 
-    def check_request(self, client_id: str, operation: str | None = None) -> None:
-        """Check if a request is allowed under rate limits.
+    # TODO: Review unreachable code - def check_request(self, client_id: str, operation: str | None = None) -> None:
+    # TODO: Review unreachable code - """Check if a request is allowed under rate limits.
 
-        Args:
-            client_id: Client identifier (e.g., IP address, API key)
-            operation: Specific operation being performed
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - client_id: Client identifier (e.g., IP address, API key)
+    # TODO: Review unreachable code - operation: Specific operation being performed
 
-        Raises:
-            ValidationError: If rate limit exceeded
-        """
-        # Periodic cleanup
-        self._cleanup_old_entries()
+    # TODO: Review unreachable code - Raises:
+    # TODO: Review unreachable code - ValidationError: If rate limit exceeded
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Periodic cleanup
+    # TODO: Review unreachable code - self._cleanup_old_entries()
 
-        with self._lock:
-            # Check general rate limits
-            self._check_limit(
-                client_id,
-                self._minute_trackers[client_id],
-                self.config.requests_per_minute,
-                timedelta(minutes=1),
-                "requests per minute"
-            )
-            self._minute_trackers[client_id].increment()
+    # TODO: Review unreachable code - with self._lock:
+    # TODO: Review unreachable code - # Check general rate limits
+    # TODO: Review unreachable code - self._check_limit(
+    # TODO: Review unreachable code - client_id,
+    # TODO: Review unreachable code - self._minute_trackers[client_id],
+    # TODO: Review unreachable code - self.config.requests_per_minute,
+    # TODO: Review unreachable code - timedelta(minutes=1),
+    # TODO: Review unreachable code - "requests per minute"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - self._minute_trackers[client_id].increment()
 
-            self._check_limit(
-                client_id,
-                self._hour_trackers[client_id],
-                self.config.requests_per_hour,
-                timedelta(hours=1),
-                "requests per hour"
-            )
-            self._hour_trackers[client_id].increment()
+    # TODO: Review unreachable code - self._check_limit(
+    # TODO: Review unreachable code - client_id,
+    # TODO: Review unreachable code - self._hour_trackers[client_id],
+    # TODO: Review unreachable code - self.config.requests_per_hour,
+    # TODO: Review unreachable code - timedelta(hours=1),
+    # TODO: Review unreachable code - "requests per hour"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - self._hour_trackers[client_id].increment()
 
-            self._check_limit(
-                client_id,
-                self._day_trackers[client_id],
-                self.config.requests_per_day,
-                timedelta(days=1),
-                "requests per day"
-            )
-            self._day_trackers[client_id].increment()
+    # TODO: Review unreachable code - self._check_limit(
+    # TODO: Review unreachable code - client_id,
+    # TODO: Review unreachable code - self._day_trackers[client_id],
+    # TODO: Review unreachable code - self.config.requests_per_day,
+    # TODO: Review unreachable code - timedelta(days=1),
+    # TODO: Review unreachable code - "requests per day"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - self._day_trackers[client_id].increment()
 
-            # Check operation-specific limits
-            if operation == "search":
-                self._check_limit(
-                    client_id,
-                    self._search_trackers[client_id],
-                    self.config.search_per_minute,
-                    timedelta(minutes=1),
-                    "searches per minute"
-                )
-                self._search_trackers[client_id].increment()
+    # TODO: Review unreachable code - # Check operation-specific limits
+    # TODO: Review unreachable code - if operation == "search":
+    # TODO: Review unreachable code - self._check_limit(
+    # TODO: Review unreachable code - client_id,
+    # TODO: Review unreachable code - self._search_trackers[client_id],
+    # TODO: Review unreachable code - self.config.search_per_minute,
+    # TODO: Review unreachable code - timedelta(minutes=1),
+    # TODO: Review unreachable code - "searches per minute"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - self._search_trackers[client_id].increment()
 
-            elif operation == "organize":
-                self._check_limit(
-                    client_id,
-                    self._organize_trackers[client_id],
-                    self.config.organize_per_hour,
-                    timedelta(hours=1),
-                    "organize operations per hour"
-                )
-                self._organize_trackers[client_id].increment()
+    # TODO: Review unreachable code - elif operation == "organize":
+    # TODO: Review unreachable code - self._check_limit(
+    # TODO: Review unreachable code - client_id,
+    # TODO: Review unreachable code - self._organize_trackers[client_id],
+    # TODO: Review unreachable code - self.config.organize_per_hour,
+    # TODO: Review unreachable code - timedelta(hours=1),
+    # TODO: Review unreachable code - "organize operations per hour"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - self._organize_trackers[client_id].increment()
 
-            elif operation == "generate":
-                self._check_limit(
-                    client_id,
-                    self._generation_trackers[client_id],
-                    self.config.generation_per_hour,
-                    timedelta(hours=1),
-                    "generations per hour"
-                )
-                self._generation_trackers[client_id].increment()
+    # TODO: Review unreachable code - elif operation == "generate":
+    # TODO: Review unreachable code - self._check_limit(
+    # TODO: Review unreachable code - client_id,
+    # TODO: Review unreachable code - self._generation_trackers[client_id],
+    # TODO: Review unreachable code - self.config.generation_per_hour,
+    # TODO: Review unreachable code - timedelta(hours=1),
+    # TODO: Review unreachable code - "generations per hour"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - self._generation_trackers[client_id].increment()
 
-    def get_remaining_quota(self, client_id: str) -> dict[str, int]:
-        """Get remaining quota for a client.
+    # TODO: Review unreachable code - def get_remaining_quota(self, client_id: str) -> dict[str, int]:
+    # TODO: Review unreachable code - """Get remaining quota for a client.
 
-        Args:
-            client_id: Client identifier
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - client_id: Client identifier
 
-        Returns:
-            Dictionary of remaining quotas by time window
-        """
-        with self._lock:
-            minute_tracker = self._minute_trackers[client_id]
-            hour_tracker = self._hour_trackers[client_id]
-            day_tracker = self._day_trackers[client_id]
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Dictionary of remaining quotas by time window
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - with self._lock:
+    # TODO: Review unreachable code - minute_tracker = self._minute_trackers[client_id]
+    # TODO: Review unreachable code - hour_tracker = self._hour_trackers[client_id]
+    # TODO: Review unreachable code - day_tracker = self._day_trackers[client_id]
 
-            # Reset expired windows
-            if minute_tracker.is_expired(timedelta(minutes=1)):
-                minute_tracker.reset()
-            if hour_tracker.is_expired(timedelta(hours=1)):
-                hour_tracker.reset()
-            if day_tracker.is_expired(timedelta(days=1)):
-                day_tracker.reset()
+    # TODO: Review unreachable code - # Reset expired windows
+    # TODO: Review unreachable code - if minute_tracker.is_expired(timedelta(minutes=1)):
+    # TODO: Review unreachable code - minute_tracker.reset()
+    # TODO: Review unreachable code - if hour_tracker.is_expired(timedelta(hours=1)):
+    # TODO: Review unreachable code - hour_tracker.reset()
+    # TODO: Review unreachable code - if day_tracker.is_expired(timedelta(days=1)):
+    # TODO: Review unreachable code - day_tracker.reset()
 
-            return {
-                "requests_per_minute": max(0, self.config.requests_per_minute - minute_tracker.requests),
-                "requests_per_hour": max(0, self.config.requests_per_hour - hour_tracker.requests),
-                "requests_per_day": max(0, self.config.requests_per_day - day_tracker.requests),
-            }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "requests_per_minute": max(0, self.config.requests_per_minute - minute_tracker.requests),
+    # TODO: Review unreachable code - "requests_per_hour": max(0, self.config.requests_per_hour - hour_tracker.requests),
+    # TODO: Review unreachable code - "requests_per_day": max(0, self.config.requests_per_day - day_tracker.requests),
+    # TODO: Review unreachable code - }
 
-    def reset_client(self, client_id: str) -> None:
-        """Reset all rate limit tracking for a client.
+    # TODO: Review unreachable code - def reset_client(self, client_id: str) -> None:
+    # TODO: Review unreachable code - """Reset all rate limit tracking for a client.
 
-        Args:
-            client_id: Client identifier
-        """
-        with self._lock:
-            # Remove all tracking entries for this client
-            for trackers in [
-                self._minute_trackers,
-                self._hour_trackers,
-                self._day_trackers,
-                self._search_trackers,
-                self._organize_trackers,
-                self._generation_trackers,
-            ]:
-                if client_id in trackers:
-                    del trackers[client_id]
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - client_id: Client identifier
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - with self._lock:
+    # TODO: Review unreachable code - # Remove all tracking entries for this client
+    # TODO: Review unreachable code - for trackers in [
+    # TODO: Review unreachable code - self._minute_trackers,
+    # TODO: Review unreachable code - self._hour_trackers,
+    # TODO: Review unreachable code - self._day_trackers,
+    # TODO: Review unreachable code - self._search_trackers,
+    # TODO: Review unreachable code - self._organize_trackers,
+    # TODO: Review unreachable code - self._generation_trackers,
+    # TODO: Review unreachable code - ]:
+    # TODO: Review unreachable code - if client_id in trackers:
+    # TODO: Review unreachable code - del trackers[client_id]

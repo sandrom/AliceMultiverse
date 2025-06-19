@@ -86,278 +86,278 @@ class DuplicateFinder:
 
         return exact_count, similar_count
 
-    def _find_exact_duplicates(self, image_files: list[Path]):
-        """Find exact duplicates using file hashes."""
-        logger.info("Phase 1: Finding exact duplicates...")
+    # TODO: Review unreachable code - def _find_exact_duplicates(self, image_files: list[Path]):
+    # TODO: Review unreachable code - """Find exact duplicates using file hashes."""
+    # TODO: Review unreachable code - logger.info("Phase 1: Finding exact duplicates...")
 
-        self.exact_duplicates.clear()
-        hash_to_files = defaultdict(list)
+    # TODO: Review unreachable code - self.exact_duplicates.clear()
+    # TODO: Review unreachable code - hash_to_files = defaultdict(list)
 
-        for img_path in image_files:
-            try:
-                file_hash = self.file_handler.get_file_hash(img_path)
-                hash_to_files[file_hash].append(img_path)
-            except Exception as e:
-                logger.error(f"Error hashing {img_path}: {e}")
+    # TODO: Review unreachable code - for img_path in image_files:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - file_hash = self.file_handler.get_file_hash(img_path)
+    # TODO: Review unreachable code - hash_to_files[file_hash].append(img_path)
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Error hashing {img_path}: {e}")
 
-        # Keep only groups with duplicates
-        for file_hash, files in hash_to_files.items():
-            if len(files) > 1:
-                self.exact_duplicates[file_hash] = sorted(files)
+    # TODO: Review unreachable code - # Keep only groups with duplicates
+    # TODO: Review unreachable code - for file_hash, files in hash_to_files.items():
+    # TODO: Review unreachable code - if len(files) > 1:
+    # TODO: Review unreachable code - self.exact_duplicates[file_hash] = sorted(files)
 
-    def _find_similar_images(self, image_files: list[Path]):
-        """Find similar images using perceptual hashing."""
-        logger.info("Phase 2: Finding similar images...")
+    # TODO: Review unreachable code - def _find_similar_images(self, image_files: list[Path]):
+    # TODO: Review unreachable code - """Find similar images using perceptual hashing."""
+    # TODO: Review unreachable code - logger.info("Phase 2: Finding similar images...")
 
-        self.similar_groups.clear()
+    # TODO: Review unreachable code - self.similar_groups.clear()
 
-        # Skip files already marked as exact duplicates
-        exact_dup_files = set()
-        for files in self.exact_duplicates.values():
-            exact_dup_files.update(files[1:])  # Keep first as master
+    # TODO: Review unreachable code - # Skip files already marked as exact duplicates
+    # TODO: Review unreachable code - exact_dup_files = set()
+    # TODO: Review unreachable code - for files in self.exact_duplicates.values():
+    # TODO: Review unreachable code - exact_dup_files.update(files[1:])  # Keep first as master
 
-        # Compute perceptual hashes for remaining files
-        hashes = {}
-        for img_path in image_files:
-            if img_path not in exact_dup_files:
-                img_hashes = self.hasher.compute_hashes(img_path)
-                if img_hashes:
-                    hashes[str(img_path)] = img_hashes
+    # TODO: Review unreachable code - # Compute perceptual hashes for remaining files
+    # TODO: Review unreachable code - hashes = {}
+    # TODO: Review unreachable code - for img_path in image_files:
+    # TODO: Review unreachable code - if img_path not in exact_dup_files:
+    # TODO: Review unreachable code - img_hashes = self.hasher.compute_hashes(img_path)
+    # TODO: Review unreachable code - if img_hashes:
+    # TODO: Review unreachable code - hashes[str(img_path)] = img_hashes
 
-        # Find similar groups
-        groups = self.hasher.find_similar_groups(hashes, self.similarity_threshold)
+    # TODO: Review unreachable code - # Find similar groups
+    # TODO: Review unreachable code - groups = self.hasher.find_similar_groups(hashes, self.similarity_threshold)
 
-        # Convert to DuplicateGroup objects
-        for group_paths in groups:
-            paths = [Path(p) for p in group_paths]
+    # TODO: Review unreachable code - # Convert to DuplicateGroup objects
+    # TODO: Review unreachable code - for group_paths in groups:
+    # TODO: Review unreachable code - paths = [Path(p) for p in group_paths]
 
-            # Choose master (prefer organized files, then largest)
-            master = self._choose_master(paths)
-            duplicates = [p for p in paths if p != master]
+    # TODO: Review unreachable code - # Choose master (prefer organized files, then largest)
+    # TODO: Review unreachable code - master = self._choose_master(paths)
+    # TODO: Review unreachable code - duplicates = [p for p in paths if p != master]
 
-            # Calculate similarity scores
-            master_hash = hashes[str(master)]
-            similarity_scores = {}
-            for dup in duplicates:
-                score = self.hasher.compute_similarity(
-                    master_hash,
-                    hashes[str(dup)]
-                )
-                similarity_scores[str(dup)] = score
+    # TODO: Review unreachable code - # Calculate similarity scores
+    # TODO: Review unreachable code - master_hash = hashes[str(master)]
+    # TODO: Review unreachable code - similarity_scores = {}
+    # TODO: Review unreachable code - for dup in duplicates:
+    # TODO: Review unreachable code - score = self.hasher.compute_similarity(
+    # TODO: Review unreachable code - master_hash,
+    # TODO: Review unreachable code - hashes[str(dup)]
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - similarity_scores[str(dup)] = score
 
-            # Calculate sizes
-            total_size = sum(p.stat().st_size for p in paths)
-            potential_savings = sum(p.stat().st_size for p in duplicates)
+    # TODO: Review unreachable code - # Calculate sizes
+    # TODO: Review unreachable code - total_size = sum(p.stat().st_size for p in paths)
+    # TODO: Review unreachable code - potential_savings = sum(p.stat().st_size for p in duplicates)
 
-            group = DuplicateGroup(
-                master=master,
-                duplicates=duplicates,
-                similarity_scores=similarity_scores,
-                total_size=total_size,
-                potential_savings=potential_savings,
-                group_type='similar'
-            )
+    # TODO: Review unreachable code - group = DuplicateGroup(
+    # TODO: Review unreachable code - master=master,
+    # TODO: Review unreachable code - duplicates=duplicates,
+    # TODO: Review unreachable code - similarity_scores=similarity_scores,
+    # TODO: Review unreachable code - total_size=total_size,
+    # TODO: Review unreachable code - potential_savings=potential_savings,
+    # TODO: Review unreachable code - group_type='similar'
+    # TODO: Review unreachable code - )
 
-            self.similar_groups.append(group)
+    # TODO: Review unreachable code - self.similar_groups.append(group)
 
-    def _choose_master(self, paths: list[Path]) -> Path:
-        """Choose the master file from a group."""
-        # Scoring system for choosing master
-        scores = {}
+    # TODO: Review unreachable code - def _choose_master(self, paths: list[Path]) -> Path:
+    # TODO: Review unreachable code - """Choose the master file from a group."""
+    # TODO: Review unreachable code - # Scoring system for choosing master
+    # TODO: Review unreachable code - scores = {}
 
-        for path in paths:
-            score = 0
+    # TODO: Review unreachable code - for path in paths:
+    # TODO: Review unreachable code - score = 0
 
-            # Prefer files in organized directories
-            if 'organized' in str(path):
-                score += 100
+    # TODO: Review unreachable code - # Prefer files in organized directories
+    # TODO: Review unreachable code - if 'organized' in str(path):
+    # TODO: Review unreachable code - score += 100
 
-            # Prefer files with metadata
-            if path.with_suffix('.json').exists():
-                score += 50
+    # TODO: Review unreachable code - # Prefer files with metadata
+    # TODO: Review unreachable code - if path.with_suffix('.json').exists():
+    # TODO: Review unreachable code - score += 50
 
-            # Prefer larger files (likely higher quality)
-            try:
-                size = path.stat().st_size
-                score += size / 1_000_000  # MB as score
-            except (OSError, AttributeError):
-                pass
+    # TODO: Review unreachable code - # Prefer larger files (likely higher quality)
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - size = path.stat().st_size
+    # TODO: Review unreachable code - score += size / 1_000_000  # MB as score
+    # TODO: Review unreachable code - except (OSError, AttributeError):
+    # TODO: Review unreachable code - pass
 
-            # Prefer files with better names (no IMG_ prefix)
-            if not path.name.startswith('IMG_'):
-                score += 10
+    # TODO: Review unreachable code - # Prefer files with better names (no IMG_ prefix)
+    # TODO: Review unreachable code - if not path.name.startswith('IMG_'):
+    # TODO: Review unreachable code - score += 10
 
-            scores[path] = score
+    # TODO: Review unreachable code - scores[path] = score
 
-        # Return path with highest score
-        return max(scores.items(), key=lambda x: x[1])[0]
+    # TODO: Review unreachable code - # Return path with highest score
+    # TODO: Review unreachable code - return max(scores.items(), key=lambda x: x[1])[0]
 
-    def get_duplicate_report(self) -> dict:
-        """Generate comprehensive duplicate report."""
-        report = {
-            'scan_time': datetime.now().isoformat(),
-            'exact_duplicates': {
-                'count': len(self.exact_duplicates),
-                'total_files': sum(len(g) for g in self.exact_duplicates.values()),
-                'groups': []
-            },
-            'similar_images': {
-                'count': len(self.similar_groups),
-                'total_files': sum(len(g.duplicates) + 1 for g in self.similar_groups),
-                'groups': []
-            },
-            'potential_savings': 0
-        }
+    # TODO: Review unreachable code - def get_duplicate_report(self) -> dict:
+    # TODO: Review unreachable code - """Generate comprehensive duplicate report."""
+    # TODO: Review unreachable code - report = {
+    # TODO: Review unreachable code - 'scan_time': datetime.now().isoformat(),
+    # TODO: Review unreachable code - 'exact_duplicates': {
+    # TODO: Review unreachable code - 'count': len(self.exact_duplicates),
+    # TODO: Review unreachable code - 'total_files': sum(len(g) for g in self.exact_duplicates.values()),
+    # TODO: Review unreachable code - 'groups': []
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - 'similar_images': {
+    # TODO: Review unreachable code - 'count': len(self.similar_groups),
+    # TODO: Review unreachable code - 'total_files': sum(len(g.duplicates) + 1 for g in self.similar_groups),
+    # TODO: Review unreachable code - 'groups': []
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - 'potential_savings': 0
+    # TODO: Review unreachable code - }
 
-        # Add exact duplicate groups
-        for file_hash, files in self.exact_duplicates.items():
-            master = files[0]
-            duplicates = files[1:]
+    # TODO: Review unreachable code - # Add exact duplicate groups
+    # TODO: Review unreachable code - for file_hash, files in self.exact_duplicates.items():
+    # TODO: Review unreachable code - master = files[0]
+    # TODO: Review unreachable code - duplicates = files[1:]
 
-            total_size = sum(f.stat().st_size for f in files)
-            savings = sum(f.stat().st_size for f in duplicates)
+    # TODO: Review unreachable code - total_size = sum(f.stat().st_size for f in files)
+    # TODO: Review unreachable code - savings = sum(f.stat().st_size for f in duplicates)
 
-            report['exact_duplicates']['groups'].append({
-                'master': str(master),
-                'duplicates': [str(f) for f in duplicates],
-                'total_size': total_size,
-                'potential_savings': savings,
-                'hash': file_hash[:8] + '...'
-            })
+    # TODO: Review unreachable code - report['exact_duplicates']['groups'].append({
+    # TODO: Review unreachable code - 'master': str(master),
+    # TODO: Review unreachable code - 'duplicates': [str(f) for f in duplicates],
+    # TODO: Review unreachable code - 'total_size': total_size,
+    # TODO: Review unreachable code - 'potential_savings': savings,
+    # TODO: Review unreachable code - 'hash': file_hash[:8] + '...'
+    # TODO: Review unreachable code - })
 
-            report['potential_savings'] += savings
+    # TODO: Review unreachable code - report['potential_savings'] += savings
 
-        # Add similar image groups
-        for group in self.similar_groups:
-            report['similar_images']['groups'].append({
-                'master': str(group.master),
-                'duplicates': [str(f) for f in group.duplicates],
-                'similarity_scores': group.similarity_scores,
-                'total_size': group.total_size,
-                'potential_savings': group.potential_savings
-            })
+    # TODO: Review unreachable code - # Add similar image groups
+    # TODO: Review unreachable code - for group in self.similar_groups:
+    # TODO: Review unreachable code - report['similar_images']['groups'].append({
+    # TODO: Review unreachable code - 'master': str(group.master),
+    # TODO: Review unreachable code - 'duplicates': [str(f) for f in group.duplicates],
+    # TODO: Review unreachable code - 'similarity_scores': group.similarity_scores,
+    # TODO: Review unreachable code - 'total_size': group.total_size,
+    # TODO: Review unreachable code - 'potential_savings': group.potential_savings
+    # TODO: Review unreachable code - })
 
-            report['potential_savings'] += group.potential_savings
+    # TODO: Review unreachable code - report['potential_savings'] += group.potential_savings
 
-        return report
+    # TODO: Review unreachable code - return report
 
-    def remove_duplicates(
-        self,
-        dry_run: bool = True,
-        backup_dir: Path | None = None,
-        remove_similar: bool = False
-    ) -> dict[str, int]:
-        """
-        Remove duplicate files.
+    # TODO: Review unreachable code - def remove_duplicates(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - dry_run: bool = True,
+    # TODO: Review unreachable code - backup_dir: Path | None = None,
+    # TODO: Review unreachable code - remove_similar: bool = False
+    # TODO: Review unreachable code - ) -> dict[str, int]:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Remove duplicate files.
 
-        Args:
-            dry_run: If True, only report what would be removed
-            backup_dir: If provided, move files here instead of deleting
-            remove_similar: If True, also remove similar (not just exact)
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - dry_run: If True, only report what would be removed
+    # TODO: Review unreachable code - backup_dir: If provided, move files here instead of deleting
+    # TODO: Review unreachable code - remove_similar: If True, also remove similar (not just exact)
 
-        Returns:
-            Statistics about removed files
-        """
-        stats = {
-            'exact_removed': 0,
-            'similar_removed': 0,
-            'space_freed': 0,
-            'errors': 0
-        }
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Statistics about removed files
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - stats = {
+    # TODO: Review unreachable code - 'exact_removed': 0,
+    # TODO: Review unreachable code - 'similar_removed': 0,
+    # TODO: Review unreachable code - 'space_freed': 0,
+    # TODO: Review unreachable code - 'errors': 0
+    # TODO: Review unreachable code - }
 
-        # Process exact duplicates
-        for files in self.exact_duplicates.values():
-            master = files[0]
-            duplicates = files[1:]
+    # TODO: Review unreachable code - # Process exact duplicates
+    # TODO: Review unreachable code - for files in self.exact_duplicates.values():
+    # TODO: Review unreachable code - master = files[0]
+    # TODO: Review unreachable code - duplicates = files[1:]
 
-            for dup in duplicates:
-                try:
-                    if dry_run:
-                        logger.info(f"Would remove: {dup} (duplicate of {master})")
-                    else:
-                        if backup_dir:
-                            # Move to backup
-                            backup_path = backup_dir / dup.name
-                            backup_path.parent.mkdir(parents=True, exist_ok=True)
-                            shutil.move(str(dup), str(backup_path))
-                            logger.info(f"Moved to backup: {dup}")
-                        else:
-                            # Delete
-                            dup.unlink()
-                            logger.info(f"Removed: {dup}")
+    # TODO: Review unreachable code - for dup in duplicates:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - if dry_run:
+    # TODO: Review unreachable code - logger.info(f"Would remove: {dup} (duplicate of {master})")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - if backup_dir:
+    # TODO: Review unreachable code - # Move to backup
+    # TODO: Review unreachable code - backup_path = backup_dir / dup.name
+    # TODO: Review unreachable code - backup_path.parent.mkdir(parents=True, exist_ok=True)
+    # TODO: Review unreachable code - shutil.move(str(dup), str(backup_path))
+    # TODO: Review unreachable code - logger.info(f"Moved to backup: {dup}")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Delete
+    # TODO: Review unreachable code - dup.unlink()
+    # TODO: Review unreachable code - logger.info(f"Removed: {dup}")
 
-                    stats['exact_removed'] += 1
-                    stats['space_freed'] += dup.stat().st_size
+    # TODO: Review unreachable code - stats['exact_removed'] += 1
+    # TODO: Review unreachable code - stats['space_freed'] += dup.stat().st_size
 
-                except Exception as e:
-                    logger.error(f"Error removing {dup}: {e}")
-                    stats['errors'] += 1
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Error removing {dup}: {e}")
+    # TODO: Review unreachable code - stats['errors'] += 1
 
-        # Process similar images if requested
-        if remove_similar:
-            for group in self.similar_groups:
-                for dup in group.duplicates:
-                    try:
-                        if dry_run:
-                            logger.info(
-                                f"Would remove: {dup} "
-                                f"(similar to {group.master}, "
-                                f"score: {group.similarity_scores.get(str(dup), 0):.2f})"
-                            )
-                        else:
-                            if backup_dir:
-                                backup_path = backup_dir / dup.name
-                                backup_path.parent.mkdir(parents=True, exist_ok=True)
-                                shutil.move(str(dup), str(backup_path))
-                                logger.info(f"Moved to backup: {dup}")
-                            else:
-                                dup.unlink()
-                                logger.info(f"Removed: {dup}")
+    # TODO: Review unreachable code - # Process similar images if requested
+    # TODO: Review unreachable code - if remove_similar:
+    # TODO: Review unreachable code - for group in self.similar_groups:
+    # TODO: Review unreachable code - for dup in group.duplicates:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - if dry_run:
+    # TODO: Review unreachable code - logger.info(
+    # TODO: Review unreachable code - f"Would remove: {dup} "
+    # TODO: Review unreachable code - f"(similar to {group.master}, "
+    # TODO: Review unreachable code - f"score: {group.similarity_scores.get(str(dup), 0):.2f})"
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - if backup_dir:
+    # TODO: Review unreachable code - backup_path = backup_dir / dup.name
+    # TODO: Review unreachable code - backup_path.parent.mkdir(parents=True, exist_ok=True)
+    # TODO: Review unreachable code - shutil.move(str(dup), str(backup_path))
+    # TODO: Review unreachable code - logger.info(f"Moved to backup: {dup}")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - dup.unlink()
+    # TODO: Review unreachable code - logger.info(f"Removed: {dup}")
 
-                        stats['similar_removed'] += 1
-                        stats['space_freed'] += dup.stat().st_size
+    # TODO: Review unreachable code - stats['similar_removed'] += 1
+    # TODO: Review unreachable code - stats['space_freed'] += dup.stat().st_size
 
-                    except Exception as e:
-                        logger.error(f"Error removing {dup}: {e}")
-                        stats['errors'] += 1
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Error removing {dup}: {e}")
+    # TODO: Review unreachable code - stats['errors'] += 1
 
-        return stats
+    # TODO: Review unreachable code - return stats
 
-    def create_hardlinks(self, dry_run: bool = True) -> dict[str, int]:
-        """
-        Replace duplicates with hardlinks to save space.
+    # TODO: Review unreachable code - def create_hardlinks(self, dry_run: bool = True) -> dict[str, int]:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Replace duplicates with hardlinks to save space.
 
-        Args:
-            dry_run: If True, only report what would be done
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - dry_run: If True, only report what would be done
 
-        Returns:
-            Statistics about created hardlinks
-        """
-        stats = {
-            'hardlinks_created': 0,
-            'space_saved': 0,
-            'errors': 0
-        }
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Statistics about created hardlinks
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - stats = {
+    # TODO: Review unreachable code - 'hardlinks_created': 0,
+    # TODO: Review unreachable code - 'space_saved': 0,
+    # TODO: Review unreachable code - 'errors': 0
+    # TODO: Review unreachable code - }
 
-        for files in self.exact_duplicates.values():
-            master = files[0]
-            duplicates = files[1:]
+    # TODO: Review unreachable code - for files in self.exact_duplicates.values():
+    # TODO: Review unreachable code - master = files[0]
+    # TODO: Review unreachable code - duplicates = files[1:]
 
-            for dup in duplicates:
-                try:
-                    if dry_run:
-                        logger.info(f"Would hardlink: {dup} -> {master}")
-                    else:
-                        # Remove duplicate and create hardlink
-                        dup.unlink()
-                        dup.hardlink_to(master)
-                        logger.info(f"Created hardlink: {dup} -> {master}")
+    # TODO: Review unreachable code - for dup in duplicates:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - if dry_run:
+    # TODO: Review unreachable code - logger.info(f"Would hardlink: {dup} -> {master}")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Remove duplicate and create hardlink
+    # TODO: Review unreachable code - dup.unlink()
+    # TODO: Review unreachable code - dup.hardlink_to(master)
+    # TODO: Review unreachable code - logger.info(f"Created hardlink: {dup} -> {master}")
 
-                    stats['hardlinks_created'] += 1
-                    stats['space_saved'] += dup.stat().st_size
+    # TODO: Review unreachable code - stats['hardlinks_created'] += 1
+    # TODO: Review unreachable code - stats['space_saved'] += dup.stat().st_size
 
-                except Exception as e:
-                    logger.error(f"Error creating hardlink for {dup}: {e}")
-                    stats['errors'] += 1
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Error creating hardlink for {dup}: {e}")
+    # TODO: Review unreachable code - stats['errors'] += 1
 
-        return stats
+    # TODO: Review unreachable code - return stats

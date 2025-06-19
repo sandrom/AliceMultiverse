@@ -141,238 +141,238 @@ class AutoMigrationService:
 
         return migrations
 
-    async def execute_migrations(
-        self,
-        migrations: dict[str, list[dict]],
-        move_files: bool = False,
-        show_progress: bool = True,
-        max_concurrent: int = 5
-    ) -> dict[str, Any]:
-        """Execute the migration plan.
+    # TODO: Review unreachable code - async def execute_migrations(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - migrations: dict[str, list[dict]],
+    # TODO: Review unreachable code - move_files: bool = False,
+    # TODO: Review unreachable code - show_progress: bool = True,
+    # TODO: Review unreachable code - max_concurrent: int = 5
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Execute the migration plan.
 
-        Args:
-            migrations: Migration plan from analyze_migrations
-            move_files: If True, move files; if False, copy them
-            show_progress: Show progress bars
-            max_concurrent: Maximum concurrent transfers
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - migrations: Migration plan from analyze_migrations
+    # TODO: Review unreachable code - move_files: If True, move files; if False, copy them
+    # TODO: Review unreachable code - show_progress: Show progress bars
+    # TODO: Review unreachable code - max_concurrent: Maximum concurrent transfers
 
-        Returns:
-            Migration statistics
-        """
-        stats = {
-            'files_migrated': 0,
-            'files_failed': 0,
-            'bytes_transferred': 0,
-            'errors': []
-        }
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Migration statistics
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - stats = {
+    # TODO: Review unreachable code - 'files_migrated': 0,
+    # TODO: Review unreachable code - 'files_failed': 0,
+    # TODO: Review unreachable code - 'bytes_transferred': 0,
+    # TODO: Review unreachable code - 'errors': []
+    # TODO: Review unreachable code - }
 
-        if not migrations:
-            logger.info("No migrations to execute")
-            return stats
+    # TODO: Review unreachable code - if not migrations:
+    # TODO: Review unreachable code - logger.info("No migrations to execute")
+    # TODO: Review unreachable code - return stats
 
-        total_migrations = sum(len(plans) for plans in migrations.values())
-        logger.info(f"Executing {total_migrations} migrations")
+    # TODO: Review unreachable code - total_migrations = sum(len(plans) for plans in migrations.values())
+    # TODO: Review unreachable code - logger.info(f"Executing {total_migrations} migrations")
 
-        if show_progress:
-            progress = tqdm(total=total_migrations, desc="Migrating files")
+    # TODO: Review unreachable code - if show_progress:
+    # TODO: Review unreachable code - progress = tqdm(total=total_migrations, desc="Migrating files")
 
-        # Create semaphore for concurrent transfers
-        semaphore = asyncio.Semaphore(max_concurrent)
+    # TODO: Review unreachable code - # Create semaphore for concurrent transfers
+    # TODO: Review unreachable code - semaphore = asyncio.Semaphore(max_concurrent)
 
-        async def migrate_file(migration_plan: dict):
-            """Migrate a single file."""
-            async with semaphore:
-                try:
-                    content_hash = migration_plan['content_hash']
-                    target_location = migration_plan['target_location']
-                    current_locations = migration_plan['current_locations']
+    # TODO: Review unreachable code - async def migrate_file(migration_plan: dict):
+    # TODO: Review unreachable code - """Migrate a single file."""
+    # TODO: Review unreachable code - async with semaphore:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - content_hash = migration_plan['content_hash']
+    # TODO: Review unreachable code - target_location = migration_plan['target_location']
+    # TODO: Review unreachable code - current_locations = migration_plan['current_locations']
 
-                    # Find source location with highest priority
-                    source_location = None
-                    source_path = None
+    # TODO: Review unreachable code - # Find source location with highest priority
+    # TODO: Review unreachable code - source_location = None
+    # TODO: Review unreachable code - source_path = None
 
-                    for loc in current_locations:
-                        if loc['location_status'] == 'active':
-                            source_path = loc['file_path']
-                            source_location = self.registry.get_location_by_id(
-                                loc['location_id']
-                            )
-                            break
+    # TODO: Review unreachable code - for loc in current_locations:
+    # TODO: Review unreachable code - if loc['location_status'] == 'active':
+    # TODO: Review unreachable code - source_path = loc['file_path']
+    # TODO: Review unreachable code - source_location = self.registry.get_location_by_id(
+    # TODO: Review unreachable code - loc['location_id']
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - break
 
-                    if not source_location or not source_path:
-                        raise ValueError("No active source location found")
+    # TODO: Review unreachable code - if not source_location or not source_path:
+    # TODO: Review unreachable code - raise ValueError("No active source location found")
 
-                    # Perform transfer
-                    await self.scanner._transfer_file(
-                        source_path,
-                        content_hash,
-                        target_location,
-                        move=move_files
-                    )
+    # TODO: Review unreachable code - # Perform transfer
+    # TODO: Review unreachable code - await self.scanner._transfer_file(
+    # TODO: Review unreachable code - source_path,
+    # TODO: Review unreachable code - content_hash,
+    # TODO: Review unreachable code - target_location,
+    # TODO: Review unreachable code - move=move_files
+    # TODO: Review unreachable code - )
 
-                    # Update stats
-                    file_size = migration_plan['file_info'].get('file_size', 0)
-                    stats['files_migrated'] += 1
-                    stats['bytes_transferred'] += file_size
+    # TODO: Review unreachable code - # Update stats
+    # TODO: Review unreachable code - file_size = migration_plan['file_info'].get('file_size', 0)
+    # TODO: Review unreachable code - stats['files_migrated'] += 1
+    # TODO: Review unreachable code - stats['bytes_transferred'] += file_size
 
-                    # If moving, remove from source location
-                    if move_files:
-                        self.registry.remove_file_from_location(
-                            content_hash,
-                            source_location.location_id
-                        )
+    # TODO: Review unreachable code - # If moving, remove from source location
+    # TODO: Review unreachable code - if move_files:
+    # TODO: Review unreachable code - self.registry.remove_file_from_location(
+    # TODO: Review unreachable code - content_hash,
+    # TODO: Review unreachable code - source_location.location_id
+    # TODO: Review unreachable code - )
 
-                    logger.info(
-                        f"Migrated {Path(source_path).name} to {target_location.name}"
-                    )
+    # TODO: Review unreachable code - logger.info(
+    # TODO: Review unreachable code - f"Migrated {Path(source_path).name} to {target_location.name}"
+    # TODO: Review unreachable code - )
 
-                except Exception as e:
-                    logger.error(f"Failed to migrate {content_hash}: {e}")
-                    stats['files_failed'] += 1
-                    stats['errors'].append({
-                        'content_hash': content_hash,
-                        'error': str(e)
-                    })
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to migrate {content_hash}: {e}")
+    # TODO: Review unreachable code - stats['files_failed'] += 1
+    # TODO: Review unreachable code - stats['errors'].append({
+    # TODO: Review unreachable code - 'content_hash': content_hash,
+    # TODO: Review unreachable code - 'error': str(e)
+    # TODO: Review unreachable code - })
 
-                finally:
-                    if show_progress:
-                        progress.update(1)
+    # TODO: Review unreachable code - finally:
+    # TODO: Review unreachable code - if show_progress:
+    # TODO: Review unreachable code - progress.update(1)
 
-        # Execute migrations concurrently
-        tasks = []
-        for content_hash, plans in migrations.items():
-            for plan in plans:
-                tasks.append(migrate_file(plan))
+    # TODO: Review unreachable code - # Execute migrations concurrently
+    # TODO: Review unreachable code - tasks = []
+    # TODO: Review unreachable code - for content_hash, plans in migrations.items():
+    # TODO: Review unreachable code - for plan in plans:
+    # TODO: Review unreachable code - tasks.append(migrate_file(plan))
 
-        await asyncio.gather(*tasks, return_exceptions=True)
+    # TODO: Review unreachable code - await asyncio.gather(*tasks, return_exceptions=True)
 
-        if show_progress:
-            progress.close()
+    # TODO: Review unreachable code - if show_progress:
+    # TODO: Review unreachable code - progress.close()
 
-        logger.info(
-            f"Migration complete: {stats['files_migrated']} succeeded, "
-            f"{stats['files_failed']} failed, "
-            f"{stats['bytes_transferred'] / (1024**3):.2f} GB transferred"
-        )
+    # TODO: Review unreachable code - logger.info(
+    # TODO: Review unreachable code - f"Migration complete: {stats['files_migrated']} succeeded, "
+    # TODO: Review unreachable code - f"{stats['files_failed']} failed, "
+    # TODO: Review unreachable code - f"{stats['bytes_transferred'] / (1024**3):.2f} GB transferred"
+    # TODO: Review unreachable code - )
 
-        return stats
+    # TODO: Review unreachable code - return stats
 
-    async def run_auto_migration(
-        self,
-        dry_run: bool = False,
-        move_files: bool = False,
-        show_progress: bool = True
-    ) -> dict[str, Any]:
-        """Run complete auto-migration process.
+    # TODO: Review unreachable code - async def run_auto_migration(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - dry_run: bool = False,
+    # TODO: Review unreachable code - move_files: bool = False,
+    # TODO: Review unreachable code - show_progress: bool = True
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Run complete auto-migration process.
 
-        Args:
-            dry_run: If True, only analyze without making changes
-            move_files: If True, move files; if False, copy them
-            show_progress: Show progress bars
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - dry_run: If True, only analyze without making changes
+    # TODO: Review unreachable code - move_files: If True, move files; if False, copy them
+    # TODO: Review unreachable code - show_progress: Show progress bars
 
-        Returns:
-            Migration results
-        """
-        # First, analyze what needs to be migrated
-        migrations = await self.analyze_migrations(
-            dry_run=dry_run,
-            show_progress=show_progress
-        )
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Migration results
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # First, analyze what needs to be migrated
+    # TODO: Review unreachable code - migrations = await self.analyze_migrations(
+    # TODO: Review unreachable code - dry_run=dry_run,
+    # TODO: Review unreachable code - show_progress=show_progress
+    # TODO: Review unreachable code - )
 
-        results = {
-            'analysis': {
-                'files_to_migrate': len(migrations),
-                'migrations': []
-            },
-            'execution': None
-        }
+    # TODO: Review unreachable code - results = {
+    # TODO: Review unreachable code - 'analysis': {
+    # TODO: Review unreachable code - 'files_to_migrate': len(migrations),
+    # TODO: Review unreachable code - 'migrations': []
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - 'execution': None
+    # TODO: Review unreachable code - }
 
-        # Prepare summary of migrations
-        for content_hash, plans in migrations.items():
-            for plan in plans:
-                migration_summary = {
-                    'file': Path(plan['file_info'].get('path', '')).name,
-                    'size': plan['file_info'].get('file_size', 0),
-                    'from': [loc['location_name'] for loc in plan['current_locations']],
-                    'to': plan['target_location'].name,
-                    'reason': plan['reason']
-                }
-                results['analysis']['migrations'].append(migration_summary)
+    # TODO: Review unreachable code - # Prepare summary of migrations
+    # TODO: Review unreachable code - for content_hash, plans in migrations.items():
+    # TODO: Review unreachable code - for plan in plans:
+    # TODO: Review unreachable code - migration_summary = {
+    # TODO: Review unreachable code - 'file': Path(plan['file_info'].get('path', '')).name,
+    # TODO: Review unreachable code - 'size': plan['file_info'].get('file_size', 0),
+    # TODO: Review unreachable code - 'from': [loc['location_name'] for loc in plan['current_locations']],
+    # TODO: Review unreachable code - 'to': plan['target_location'].name,
+    # TODO: Review unreachable code - 'reason': plan['reason']
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - results['analysis']['migrations'].append(migration_summary)
 
-        if not dry_run and migrations:
-            # Execute the migrations
-            execution_stats = await self.execute_migrations(
-                migrations,
-                move_files=move_files,
-                show_progress=show_progress
-            )
-            results['execution'] = execution_stats
+    # TODO: Review unreachable code - if not dry_run and migrations:
+    # TODO: Review unreachable code - # Execute the migrations
+    # TODO: Review unreachable code - execution_stats = await self.execute_migrations(
+    # TODO: Review unreachable code - migrations,
+    # TODO: Review unreachable code - move_files=move_files,
+    # TODO: Review unreachable code - show_progress=show_progress
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - results['execution'] = execution_stats
 
-        return results
+    # TODO: Review unreachable code - return results
 
-    def _prepare_metadata(self, asset: dict) -> dict:
-        """Prepare metadata for rule evaluation.
+    # TODO: Review unreachable code - def _prepare_metadata(self, asset: dict) -> dict:
+    # TODO: Review unreachable code - """Prepare metadata for rule evaluation.
 
-        Args:
-            asset: Asset information from cache
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - asset: Asset information from cache
 
-        Returns:
-            Metadata dictionary for rule evaluation
-        """
-        metadata = asset.get('metadata', {})
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Metadata dictionary for rule evaluation
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - metadata = asset.get('metadata', {})
 
-        # Calculate age in days
-        # For testing, use path to get file age
-        age_days = 0
-        path = asset.get('path', '')
-        if path and Path(path).exists():
-            try:
-                import os
-                stat = os.stat(path)
-                file_date = datetime.fromtimestamp(stat.st_mtime)
-                age_days = (datetime.now() - file_date).days
-            except (OSError, IOError):
-                pass
+    # TODO: Review unreachable code - # Calculate age in days
+    # TODO: Review unreachable code - # For testing, use path to get file age
+    # TODO: Review unreachable code - age_days = 0
+    # TODO: Review unreachable code - path = asset.get('path', '')
+    # TODO: Review unreachable code - if path and Path(path).exists():
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - import os
+    # TODO: Review unreachable code - stat = os.stat(path)
+    # TODO: Review unreachable code - file_date = datetime.fromtimestamp(stat.st_mtime)
+    # TODO: Review unreachable code - age_days = (datetime.now() - file_date).days
+    # TODO: Review unreachable code - except (OSError, IOError):
+    # TODO: Review unreachable code - pass
 
-        # Build metadata for rule evaluation
-        return {
-            'age_days': age_days,
-            'file_size': asset.get('file_size', 0),
-            'file_type': metadata.get('media_type', 'unknown'),
-            'tags': metadata.get('tags', []),
-            'quality_stars': 0  # Quality system removed - default to 0
-        }
+    # TODO: Review unreachable code - # Build metadata for rule evaluation
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'age_days': age_days,
+    # TODO: Review unreachable code - 'file_size': asset.get('file_size', 0),
+    # TODO: Review unreachable code - 'file_type': metadata.get('media_type', 'unknown'),
+    # TODO: Review unreachable code - 'tags': metadata.get('tags', []),
+    # TODO: Review unreachable code - 'quality_stars': 0  # Quality system removed - default to 0
+    # TODO: Review unreachable code - }
 
-    def _get_migration_reason(
-        self,
-        metadata: dict,
-        target_location: StorageLocation
-    ) -> str:
-        """Get human-readable reason for migration.
+    # TODO: Review unreachable code - def _get_migration_reason(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - metadata: dict,
+    # TODO: Review unreachable code - target_location: StorageLocation
+    # TODO: Review unreachable code - ) -> str:
+    # TODO: Review unreachable code - """Get human-readable reason for migration.
 
-        Args:
-            metadata: File metadata
-            target_location: Target storage location
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - metadata: File metadata
+    # TODO: Review unreachable code - target_location: Target storage location
 
-        Returns:
-            Reason string
-        """
-        reasons = []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Reason string
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - reasons = []
 
-        for rule in target_location.rules:
-            if rule.max_age_days and metadata['age_days'] <= rule.max_age_days:
-                reasons.append(f"File age ({metadata['age_days']} days) within limit")
+    # TODO: Review unreachable code - for rule in target_location.rules:
+    # TODO: Review unreachable code - if rule.max_age_days and metadata['age_days'] <= rule.max_age_days:
+    # TODO: Review unreachable code - reasons.append(f"File age ({metadata['age_days']} days) within limit")
 
-            if rule.min_age_days and metadata['age_days'] >= rule.min_age_days:
-                reasons.append(f"File age ({metadata['age_days']} days) exceeds minimum")
+    # TODO: Review unreachable code - if rule.min_age_days and metadata['age_days'] >= rule.min_age_days:
+    # TODO: Review unreachable code - reasons.append(f"File age ({metadata['age_days']} days) exceeds minimum")
 
-            if rule.min_quality_stars and metadata['quality_stars'] >= rule.min_quality_stars:
-                reasons.append(f"Quality rating ({metadata['quality_stars']}) meets threshold")
+    # TODO: Review unreachable code - if rule.min_quality_stars and metadata['quality_stars'] >= rule.min_quality_stars:
+    # TODO: Review unreachable code - reasons.append(f"Quality rating ({metadata['quality_stars']}) meets threshold")
 
-            if rule.include_types and metadata['file_type'] in rule.include_types:
-                reasons.append(f"File type ({metadata['file_type']}) is included")
+    # TODO: Review unreachable code - if rule.include_types and metadata['file_type'] in rule.include_types:
+    # TODO: Review unreachable code - reasons.append(f"File type ({metadata['file_type']}) is included")
 
-        return "; ".join(reasons) if reasons else "Matches storage rules"
+    # TODO: Review unreachable code - return "; ".join(reasons) if reasons else "Matches storage rules"
 
 
 class MigrationScheduler:

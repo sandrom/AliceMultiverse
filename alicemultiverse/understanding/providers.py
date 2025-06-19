@@ -36,43 +36,43 @@ class AnthropicImageAnalyzer(ImageAnalyzer):
     def name(self) -> str:
         return "anthropic"
 
-    @property
-    def supports_batch(self) -> bool:
-        return False
+    # TODO: Review unreachable code - @property
+    # TODO: Review unreachable code - def supports_batch(self) -> bool:
+    # TODO: Review unreachable code - return False
 
-    async def analyze(
-        self,
-        image_path: Path,
-        generate_prompt: bool = True,
-        extract_tags: bool = True,
-        detailed: bool = False,
-        custom_instructions: str | None = None
-    ) -> ImageAnalysisResult:
-        """Analyze image using Claude."""
-        # Read and encode image
-        with open(image_path, "rb") as f:
-            image_data = base64.b64encode(f.read()).decode()
+    # TODO: Review unreachable code - async def analyze(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - image_path: Path,
+    # TODO: Review unreachable code - generate_prompt: bool = True,
+    # TODO: Review unreachable code - extract_tags: bool = True,
+    # TODO: Review unreachable code - detailed: bool = False,
+    # TODO: Review unreachable code - custom_instructions: str | None = None
+    # TODO: Review unreachable code - ) -> ImageAnalysisResult:
+    # TODO: Review unreachable code - """Analyze image using Claude."""
+    # TODO: Review unreachable code - # Read and encode image
+    # TODO: Review unreachable code - with open(image_path, "rb") as f:
+    # TODO: Review unreachable code - image_data = base64.b64encode(f.read()).decode()
 
-        # Determine media type
-        suffix = image_path.suffix.lower()
-        media_type = "image/jpeg"
-        if suffix == ".png":
-            media_type = "image/png"
-        elif suffix == ".webp":
-            media_type = "image/webp"
-        elif suffix == ".gif":
-            media_type = "image/gif"
+    # TODO: Review unreachable code - # Determine media type
+    # TODO: Review unreachable code - suffix = image_path.suffix.lower()
+    # TODO: Review unreachable code - media_type = "image/jpeg"
+    # TODO: Review unreachable code - if suffix == ".png":
+    # TODO: Review unreachable code - media_type = "image/png"
+    # TODO: Review unreachable code - elif suffix == ".webp":
+    # TODO: Review unreachable code - media_type = "image/webp"
+    # TODO: Review unreachable code - elif suffix == ".gif":
+    # TODO: Review unreachable code - media_type = "image/gif"
 
-        # Build the prompt
-        prompt_parts = []
+    # TODO: Review unreachable code - # Build the prompt
+    # TODO: Review unreachable code - prompt_parts = []
 
-        if detailed:
-            prompt_parts.append("Provide a detailed analysis of this image.")
-        else:
-            prompt_parts.append("Analyze this image.")
+    # TODO: Review unreachable code - if detailed:
+    # TODO: Review unreachable code - prompt_parts.append("Provide a detailed analysis of this image.")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - prompt_parts.append("Analyze this image.")
 
-        if extract_tags:
-            prompt_parts.append("""
+    # TODO: Review unreachable code - if extract_tags:
+    # TODO: Review unreachable code - prompt_parts.append("""
 Extract semantic tags in the following categories:
 - style: artistic style, rendering style, visual style
 - mood: emotional tone, atmosphere, feeling
@@ -87,16 +87,10 @@ Extract semantic tags in the following categories:
 - genre: type of image (portrait, landscape, etc)
 
 Format tags as JSON: {"category": ["tag1", "tag2"]}
-""")
+# TODO: Review unreachable code - """)
 
         if generate_prompt:
-            prompt_parts.append("""
-Generate a detailed prompt that could recreate this image.
-Also suggest a negative prompt for what to avoid.
-Format as:
-PROMPT: <positive prompt>
-NEGATIVE: <negative prompt>
-""")
+            prompt_parts.append("Generate a detailed prompt that could recreate this image. Also suggest a negative prompt for what to avoid. Format as: PROMPT: <positive prompt> NEGATIVE: <negative prompt>")
 
         if custom_instructions:
             prompt_parts.append(f"\nAdditional instructions: {custom_instructions}")
@@ -142,9 +136,9 @@ NEGATIVE: <negative prompt>
                     error_text = await response.text()
                     raise Exception(f"Anthropic API error: {response.status} - {error_text}")
 
-                data = await response.json()
-                content = data["content"][0]["text"]
-                usage = data.get("usage", {})
+                # TODO: Review unreachable code - data = await response.json()
+                # TODO: Review unreachable code - content = data["content"][0]["text"]
+                # TODO: Review unreachable code - usage = data.get("usage", {})
 
         # Parse the response
         result = ImageAnalysisResult(
@@ -188,19 +182,19 @@ NEGATIVE: <negative prompt>
 
         return result
 
-    def estimate_cost(self, detailed: bool = False) -> float:
-        """Estimate cost based on average tokens."""
-        # Rough estimates
-        avg_input_tokens = 1500  # Image + prompt
-        avg_output_tokens = 500 if detailed else 300
+    # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
+    # TODO: Review unreachable code - """Estimate cost based on average tokens."""
+    # TODO: Review unreachable code - # Rough estimates
+    # TODO: Review unreachable code - avg_input_tokens = 1500  # Image + prompt
+    # TODO: Review unreachable code - avg_output_tokens = 500 if detailed else 300
 
-        if self.model in self.PRICING:
-            pricing = self.PRICING[self.model]
-            return (
-                (avg_input_tokens * pricing["input"] / 1_000_000) +
-                (avg_output_tokens * pricing["output"] / 1_000_000)
-            )
-        return 0.01  # Default estimate
+    # TODO: Review unreachable code - if self.model in self.PRICING:
+    # TODO: Review unreachable code - pricing = self.PRICING[self.model]
+    # TODO: Review unreachable code - return (
+    # TODO: Review unreachable code - (avg_input_tokens * pricing["input"] / 1_000_000) +
+    # TODO: Review unreachable code - (avg_output_tokens * pricing["output"] / 1_000_000)
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - return 0.01  # Default estimate
 
 
 class OpenAIImageAnalyzer(ImageAnalyzer):
@@ -226,34 +220,34 @@ class OpenAIImageAnalyzer(ImageAnalyzer):
     def name(self) -> str:
         return "openai"
 
-    @property
-    def supports_batch(self) -> bool:
-        return True  # Via batch API
+    # TODO: Review unreachable code - @property
+    # TODO: Review unreachable code - def supports_batch(self) -> bool:
+    # TODO: Review unreachable code - return True  # Via batch API
 
-    async def analyze(
-        self,
-        image_path: Path,
-        generate_prompt: bool = True,
-        extract_tags: bool = True,
-        detailed: bool = False,
-        custom_instructions: str | None = None
-    ) -> ImageAnalysisResult:
-        """Analyze image using GPT-4 Vision."""
-        # Read and encode image
-        with open(image_path, "rb") as f:
-            image_data = base64.b64encode(f.read()).decode()
+    # TODO: Review unreachable code - async def analyze(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - image_path: Path,
+    # TODO: Review unreachable code - generate_prompt: bool = True,
+    # TODO: Review unreachable code - extract_tags: bool = True,
+    # TODO: Review unreachable code - detailed: bool = False,
+    # TODO: Review unreachable code - custom_instructions: str | None = None
+    # TODO: Review unreachable code - ) -> ImageAnalysisResult:
+    # TODO: Review unreachable code - """Analyze image using GPT-4 Vision."""
+    # TODO: Review unreachable code - # Read and encode image
+    # TODO: Review unreachable code - with open(image_path, "rb") as f:
+    # TODO: Review unreachable code - image_data = base64.b64encode(f.read()).decode()
 
-        # Build the prompt
-        system_prompt = "You are an expert at analyzing images and extracting detailed information."
+    # TODO: Review unreachable code - # Build the prompt
+    # TODO: Review unreachable code - system_prompt = "You are an expert at analyzing images and extracting detailed information."
 
-        user_prompt_parts = []
-        if detailed:
-            user_prompt_parts.append("Provide a comprehensive analysis of this image.")
-        else:
-            user_prompt_parts.append("Analyze this image concisely.")
+    # TODO: Review unreachable code - user_prompt_parts = []
+    # TODO: Review unreachable code - if detailed:
+    # TODO: Review unreachable code - user_prompt_parts.append("Provide a comprehensive analysis of this image.")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - user_prompt_parts.append("Analyze this image concisely.")
 
-        if extract_tags:
-            user_prompt_parts.append("""
+    # TODO: Review unreachable code - if extract_tags:
+    # TODO: Review unreachable code - user_prompt_parts.append("""
 Extract semantic tags and return them as a JSON object with these categories:
 style, mood, subject, color, technical, fashion, hair, pose, setting,
 camera, art_movement, emotion, composition, texture, weather, action,
@@ -318,9 +312,9 @@ NEGATIVE: <negative prompt>
                     error_text = await response.text()
                     raise Exception(f"OpenAI API error: {response.status} - {error_text}")
 
-                data = await response.json()
-                content = data["choices"][0]["message"]["content"]
-                usage = data.get("usage", {})
+                # TODO: Review unreachable code - data = await response.json()
+                # TODO: Review unreachable code - content = data["choices"][0]["message"]["content"]
+                # TODO: Review unreachable code - usage = data.get("usage", {})
 
         # Parse response
         result = ImageAnalysisResult(
@@ -367,18 +361,18 @@ NEGATIVE: <negative prompt>
 
         return result
 
-    def estimate_cost(self, detailed: bool = False) -> float:
-        """Estimate cost."""
-        avg_tokens = 2000 if detailed else 1000
+    # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
+    # TODO: Review unreachable code - """Estimate cost."""
+    # TODO: Review unreachable code - avg_tokens = 2000 if detailed else 1000
 
-        if self.model in self.PRICING:
-            # Assume 70% input, 30% output
-            pricing = self.PRICING[self.model]
-            return (
-                (avg_tokens * 0.7 * pricing["input"] / 1_000_000) +
-                (avg_tokens * 0.3 * pricing["output"] / 1_000_000)
-            )
-        return 0.001
+    # TODO: Review unreachable code - if self.model in self.PRICING:
+    # TODO: Review unreachable code - # Assume 70% input, 30% output
+    # TODO: Review unreachable code - pricing = self.PRICING[self.model]
+    # TODO: Review unreachable code - return (
+    # TODO: Review unreachable code - (avg_tokens * 0.7 * pricing["input"] / 1_000_000) +
+    # TODO: Review unreachable code - (avg_tokens * 0.3 * pricing["output"] / 1_000_000)
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - return 0.001
 
 
 class GoogleAIImageAnalyzer(ImageAnalyzer):
@@ -404,40 +398,40 @@ class GoogleAIImageAnalyzer(ImageAnalyzer):
     def name(self) -> str:
         return "google"
 
-    @property
-    def supports_batch(self) -> bool:
-        return False
+    # TODO: Review unreachable code - @property
+    # TODO: Review unreachable code - def supports_batch(self) -> bool:
+    # TODO: Review unreachable code - return False
 
-    async def analyze(
-        self,
-        image_path: Path,
-        generate_prompt: bool = True,
-        extract_tags: bool = True,
-        detailed: bool = False,
-        custom_instructions: str | None = None
-    ) -> ImageAnalysisResult:
-        """Analyze image using Gemini."""
-        # Read and encode image
-        with open(image_path, "rb") as f:
-            image_data = base64.b64encode(f.read()).decode()
+    # TODO: Review unreachable code - async def analyze(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - image_path: Path,
+    # TODO: Review unreachable code - generate_prompt: bool = True,
+    # TODO: Review unreachable code - extract_tags: bool = True,
+    # TODO: Review unreachable code - detailed: bool = False,
+    # TODO: Review unreachable code - custom_instructions: str | None = None
+    # TODO: Review unreachable code - ) -> ImageAnalysisResult:
+    # TODO: Review unreachable code - """Analyze image using Gemini."""
+    # TODO: Review unreachable code - # Read and encode image
+    # TODO: Review unreachable code - with open(image_path, "rb") as f:
+    # TODO: Review unreachable code - image_data = base64.b64encode(f.read()).decode()
 
-        # Determine MIME type
-        suffix = image_path.suffix.lower()
-        mime_type = "image/jpeg"
-        if suffix == ".png":
-            mime_type = "image/png"
-        elif suffix == ".webp":
-            mime_type = "image/webp"
+    # TODO: Review unreachable code - # Determine MIME type
+    # TODO: Review unreachable code - suffix = image_path.suffix.lower()
+    # TODO: Review unreachable code - mime_type = "image/jpeg"
+    # TODO: Review unreachable code - if suffix == ".png":
+    # TODO: Review unreachable code - mime_type = "image/png"
+    # TODO: Review unreachable code - elif suffix == ".webp":
+    # TODO: Review unreachable code - mime_type = "image/webp"
 
-        # Build prompt
-        prompt_parts = []
-        if detailed:
-            prompt_parts.append("Provide a detailed, comprehensive analysis of this image.")
-        else:
-            prompt_parts.append("Analyze this image.")
+    # TODO: Review unreachable code - # Build prompt
+    # TODO: Review unreachable code - prompt_parts = []
+    # TODO: Review unreachable code - if detailed:
+    # TODO: Review unreachable code - prompt_parts.append("Provide a detailed, comprehensive analysis of this image.")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - prompt_parts.append("Analyze this image.")
 
-        if extract_tags:
-            prompt_parts.append("""
+    # TODO: Review unreachable code - if extract_tags:
+    # TODO: Review unreachable code - prompt_parts.append("""
 Extract semantic tags in JSON format with these categories:
 {
   "style": ["artistic style tags"],
@@ -500,9 +494,9 @@ NEGATIVE: Things to avoid""")
                     error_text = await response.text()
                     raise Exception(f"Google AI API error: {response.status} - {error_text}")
 
-                data = await response.json()
-                content = data["candidates"][0]["content"]["parts"][0]["text"]
-                usage_metadata = data.get("usageMetadata", {})
+                # TODO: Review unreachable code - data = await response.json()
+                # TODO: Review unreachable code - content = data["candidates"][0]["content"]["parts"][0]["text"]
+                # TODO: Review unreachable code - usage_metadata = data.get("usageMetadata", {})
 
         # Parse response
         result = ImageAnalysisResult(
@@ -544,15 +538,15 @@ NEGATIVE: Things to avoid""")
 
         return result
 
-    def estimate_cost(self, detailed: bool = False) -> float:
-        """Estimate cost."""
-        avg_tokens = 2000 if detailed else 1000
+    # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
+    # TODO: Review unreachable code - """Estimate cost."""
+    # TODO: Review unreachable code - avg_tokens = 2000 if detailed else 1000
 
-        if self.model in self.PRICING:
-            pricing = self.PRICING[self.model]
-            # Note: This doesn't account for free tier
-            return avg_tokens * pricing["cost_per_million"] / 1_000_000
-        return 0.0001
+    # TODO: Review unreachable code - if self.model in self.PRICING:
+    # TODO: Review unreachable code - pricing = self.PRICING[self.model]
+    # TODO: Review unreachable code - # Note: This doesn't account for free tier
+    # TODO: Review unreachable code - return avg_tokens * pricing["cost_per_million"] / 1_000_000
+    # TODO: Review unreachable code - return 0.0001
 
 
 class DeepSeekImageAnalyzer(ImageAnalyzer):
@@ -577,32 +571,32 @@ class DeepSeekImageAnalyzer(ImageAnalyzer):
     def name(self) -> str:
         return "deepseek"
 
-    @property
-    def supports_batch(self) -> bool:
-        return False
+    # TODO: Review unreachable code - @property
+    # TODO: Review unreachable code - def supports_batch(self) -> bool:
+    # TODO: Review unreachable code - return False
 
-    async def analyze(
-        self,
-        image_path: Path,
-        generate_prompt: bool = True,
-        extract_tags: bool = True,
-        detailed: bool = False,
-        custom_instructions: str | None = None
-    ) -> ImageAnalysisResult:
-        """Analyze image using DeepSeek."""
-        # Read and encode image
-        with open(image_path, "rb") as f:
-            image_data = base64.b64encode(f.read()).decode()
+    # TODO: Review unreachable code - async def analyze(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - image_path: Path,
+    # TODO: Review unreachable code - generate_prompt: bool = True,
+    # TODO: Review unreachable code - extract_tags: bool = True,
+    # TODO: Review unreachable code - detailed: bool = False,
+    # TODO: Review unreachable code - custom_instructions: str | None = None
+    # TODO: Review unreachable code - ) -> ImageAnalysisResult:
+    # TODO: Review unreachable code - """Analyze image using DeepSeek."""
+    # TODO: Review unreachable code - # Read and encode image
+    # TODO: Review unreachable code - with open(image_path, "rb") as f:
+    # TODO: Review unreachable code - image_data = base64.b64encode(f.read()).decode()
 
-        # Build prompt
-        prompt_parts = []
-        if detailed:
-            prompt_parts.append("Analyze this image in detail, describing all important aspects.")
-        else:
-            prompt_parts.append("Analyze this image concisely.")
+    # TODO: Review unreachable code - # Build prompt
+    # TODO: Review unreachable code - prompt_parts = []
+    # TODO: Review unreachable code - if detailed:
+    # TODO: Review unreachable code - prompt_parts.append("Analyze this image in detail, describing all important aspects.")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - prompt_parts.append("Analyze this image concisely.")
 
-        if extract_tags:
-            prompt_parts.append("""
+    # TODO: Review unreachable code - if extract_tags:
+    # TODO: Review unreachable code - prompt_parts.append("""
 Extract semantic tags as a JSON object:
 {
   "style": ["visual/artistic style"],
@@ -667,9 +661,9 @@ NEGATIVE: Elements to avoid""")
                     error_text = await response.text()
                     raise Exception(f"DeepSeek API error: {response.status} - {error_text}")
 
-                data = await response.json()
-                content = data["choices"][0]["message"]["content"]
-                usage = data.get("usage", {})
+                # TODO: Review unreachable code - data = await response.json()
+                # TODO: Review unreachable code - content = data["choices"][0]["message"]["content"]
+                # TODO: Review unreachable code - usage = data.get("usage", {})
 
         # Parse response
         result = ImageAnalysisResult(
@@ -712,15 +706,15 @@ NEGATIVE: Elements to avoid""")
 
         return result
 
-    def estimate_cost(self, detailed: bool = False) -> float:
-        """Estimate cost - DeepSeek is very affordable."""
-        avg_input_tokens = 1000  # Image + prompt
-        avg_output_tokens = 500 if detailed else 300
+    # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
+    # TODO: Review unreachable code - """Estimate cost - DeepSeek is very affordable."""
+    # TODO: Review unreachable code - avg_input_tokens = 1000  # Image + prompt
+    # TODO: Review unreachable code - avg_output_tokens = 500 if detailed else 300
 
-        if self.model in self.PRICING:
-            pricing = self.PRICING[self.model]
-            return (
-                (avg_input_tokens * pricing["input"] / 1_000_000) +
-                (avg_output_tokens * pricing["output"] / 1_000_000)
-            )
-        return 0.0005  # Very low default
+    # TODO: Review unreachable code - if self.model in self.PRICING:
+    # TODO: Review unreachable code - pricing = self.PRICING[self.model]
+    # TODO: Review unreachable code - return (
+    # TODO: Review unreachable code - (avg_input_tokens * pricing["input"] / 1_000_000) +
+    # TODO: Review unreachable code - (avg_output_tokens * pricing["output"] / 1_000_000)
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - return 0.0005  # Very low default

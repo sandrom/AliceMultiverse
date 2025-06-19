@@ -41,641 +41,643 @@ async def create_story_arc_video(
     Returns:
         Workflow execution results with timeline
     """
-    try:
+    # TODO: Review unreachable code - try:
         # Create template
-        template = StoryArcTemplate()
+    template = StoryArcTemplate()
 
         # Prepare parameters
-        params = {
-            "images": images,
-            "structure": structure,
-            "duration": duration,
-            "narrative_tags": narrative_tags or {},
-            "emotion_curve": emotion_curve,
-            "export_formats": export_formats or ["edl", "xml"]
-        }
+    params = {
+        "images": images,
+        "structure": structure,
+        "duration": duration,
+        "narrative_tags": narrative_tags or {},
+        "emotion_curve": emotion_curve,
+        "export_formats": export_formats or ["edl", "xml"]
+    }
 
-        if music_file:
+    if music_file:
+        if params is not None:
             params["music_file"] = music_file
 
-        if voiceover_markers:
+    if voiceover_markers:
+        if params is not None:
             params["voiceover_markers"] = True
 
         # Create context and executor
-        context = WorkflowContext(
-            workflow_id=f"story_arc_{structure}",
-            initial_params=params
-        )
+    context = WorkflowContext(
+        workflow_id=f"story_arc_{structure}",
+        initial_params=params
+    )
 
-        executor = WorkflowExecutor()
+    executor = WorkflowExecutor()
 
         # Execute workflow
-        result = await executor.execute_workflow(template, context)
+    result = await executor.execute_workflow(template, context)
 
         # Extract key results
-        if result.success:
-            timeline = result.results.get("generate_timeline", {})
-            return {
-                "success": True,
-                "timeline": timeline.get("timeline", {}),
-                "exports": timeline.get("exports", {}),
-                "summary": timeline.get("summary", {}),
-                "structure": structure,
-                "duration": duration
-            }
-        else:
-            return {
-                "success": False,
-                "error": result.error or "Workflow failed",
-                "failed_step": result.failed_step
-            }
+    if result.success:
+        timeline = result.results.get("generate_timeline", {})
+        return {
+            "success": True,
+            "timeline": timeline.get("timeline", {}),
+            "exports": timeline.get("exports", {}),
+            "summary": timeline.get("summary", {}),
+            "structure": structure,
+            "duration": duration
+        }
+    else:
+        return {
+            "success": False,
+            "error": result.error or "Workflow failed",
+            "failed_step": result.failed_step
+        }
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         logger.error(f"Failed to create story arc video: {e}")
         return {"success": False, "error": str(e)}
 
 
-async def create_documentary_video(
-    images: list[str],
-    duration: float = 120.0,
-    narrative_tags: dict[str, list[str]] | None = None,
-    music_file: str | None = None,
-    voiceover_markers: bool = True,
-    export_formats: list[str] | None = None
-) -> dict[str, Any]:
-    """Create a documentary-style video.
+# TODO: Review unreachable code - async def create_documentary_video(
+# TODO: Review unreachable code - images: list[str],
+# TODO: Review unreachable code - duration: float = 120.0,
+# TODO: Review unreachable code - narrative_tags: dict[str, list[str]] | None = None,
+# TODO: Review unreachable code - music_file: str | None = None,
+# TODO: Review unreachable code - voiceover_markers: bool = True,
+# TODO: Review unreachable code - export_formats: list[str] | None = None
+# TODO: Review unreachable code - ) -> dict[str, Any]:
+# TODO: Review unreachable code - """Create a documentary-style video.
 
-    Args:
-        images: List of image paths
-        duration: Target video duration in seconds
-        narrative_tags: Tags describing evidence/testimony per image
-        music_file: Optional background music
-        voiceover_markers: Add markers for narration (default True)
-        export_formats: Export formats
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - images: List of image paths
+# TODO: Review unreachable code - duration: Target video duration in seconds
+# TODO: Review unreachable code - narrative_tags: Tags describing evidence/testimony per image
+# TODO: Review unreachable code - music_file: Optional background music
+# TODO: Review unreachable code - voiceover_markers: Add markers for narration (default True)
+# TODO: Review unreachable code - export_formats: Export formats
 
-    Returns:
-        Workflow execution results
-    """
-    try:
-        template = DocumentaryStoryTemplate()
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Workflow execution results
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - template = DocumentaryStoryTemplate()
 
-        params = {
-            "images": images,
-            "structure": "three_act",  # Documentary uses simplified structure
-            "duration": duration,
-            "narrative_tags": narrative_tags or {},
-            "emotion_curve": "gentle",  # Documentaries are more measured
-            "voiceover_markers": voiceover_markers,
-            "export_formats": export_formats or ["edl", "xml"]
-        }
+# TODO: Review unreachable code - params = {
+# TODO: Review unreachable code - "images": images,
+# TODO: Review unreachable code - "structure": "three_act",  # Documentary uses simplified structure
+# TODO: Review unreachable code - "duration": duration,
+# TODO: Review unreachable code - "narrative_tags": narrative_tags or {},
+# TODO: Review unreachable code - "emotion_curve": "gentle",  # Documentaries are more measured
+# TODO: Review unreachable code - "voiceover_markers": voiceover_markers,
+# TODO: Review unreachable code - "export_formats": export_formats or ["edl", "xml"]
+# TODO: Review unreachable code - }
 
-        if music_file:
-            params["music_file"] = music_file
+# TODO: Review unreachable code - if music_file:
+# TODO: Review unreachable code - params["music_file"] = music_file
 
-        context = WorkflowContext(
-            workflow_id="documentary",
-            initial_params=params
-        )
+# TODO: Review unreachable code - context = WorkflowContext(
+# TODO: Review unreachable code - workflow_id="documentary",
+# TODO: Review unreachable code - initial_params=params
+# TODO: Review unreachable code - )
 
-        executor = WorkflowExecutor()
-        result = await executor.execute_workflow(template, context)
+# TODO: Review unreachable code - executor = WorkflowExecutor()
+# TODO: Review unreachable code - result = await executor.execute_workflow(template, context)
 
-        if result.success:
-            timeline = result.results.get("generate_timeline", {})
-            return {
-                "success": True,
-                "timeline": timeline.get("timeline", {}),
-                "exports": timeline.get("exports", {}),
-                "type": "documentary"
-            }
-        else:
-            return {
-                "success": False,
-                "error": result.error or "Workflow failed"
-            }
+# TODO: Review unreachable code - if result.success:
+# TODO: Review unreachable code - timeline = result.results.get("generate_timeline", {})
+# TODO: Review unreachable code - return {
+# TODO: Review unreachable code - "success": True,
+# TODO: Review unreachable code - "timeline": timeline.get("timeline", {}),
+# TODO: Review unreachable code - "exports": timeline.get("exports", {}),
+# TODO: Review unreachable code - "type": "documentary"
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - return {
+# TODO: Review unreachable code - "success": False,
+# TODO: Review unreachable code - "error": result.error or "Workflow failed"
+# TODO: Review unreachable code - }
 
-    except Exception as e:
-        logger.error(f"Failed to create documentary video: {e}")
-        return {"success": False, "error": str(e)}
-
-
-async def create_social_media_video(
-    platform: str,
-    images: list[str],
-    music_file: str | None = None,
-    caption: str | None = None,
-    hashtags: list[str] | None = None,
-    style: str = "trending",
-    duration: float | None = None,
-    auto_optimize: bool = True
-) -> dict[str, Any]:
-    """Create a social media optimized video.
-
-    Args:
-        platform: Target platform (instagram_reel, tiktok, youtube_shorts, etc.)
-        images: List of image paths
-        music_file: Optional music track
-        caption: Post caption/description
-        hashtags: List of hashtags
-        style: Content style (trending, educational, entertaining)
-        duration: Optional duration (uses platform optimal if not set)
-        auto_optimize: Automatically optimize for engagement
-
-    Returns:
-        Workflow execution results with platform export
-    """
-    try:
-        # Select appropriate template
-        if platform == "instagram_reel":
-            template = InstagramReelTemplate()
-        elif platform == "tiktok":
-            template = TikTokTemplate()
-        elif platform == "linkedin_video":
-            template = LinkedInVideoTemplate()
-        else:
-            template = SocialMediaTemplate()
-
-        params = {
-            "platform": platform,
-            "images": images,
-            "style": style,
-            "auto_optimize": auto_optimize
-        }
-
-        if music_file:
-            params["music_file"] = music_file
-
-        if caption:
-            params["caption"] = caption
-
-        if hashtags:
-            params["hashtags"] = hashtags
-
-        if duration:
-            params["duration"] = duration
-
-        context = WorkflowContext(
-            workflow_id=f"social_{platform}",
-            initial_params=params
-        )
-
-        executor = WorkflowExecutor()
-        result = await executor.execute_workflow(template, context)
-
-        if result.success:
-            export = result.results.get("export_platform", {})
-            return {
-                "success": True,
-                "export": export,
-                "platform": platform,
-                "optimizations": result.results.get("analyze_content", {}).get("optimizations", []),
-                "preview": export.get("preview", {})
-            }
-        else:
-            return {
-                "success": False,
-                "error": result.error or "Workflow failed"
-            }
-
-    except Exception as e:
-        logger.error(f"Failed to create social media video: {e}")
-        return {"success": False, "error": str(e)}
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Failed to create documentary video: {e}")
+# TODO: Review unreachable code - return {"success": False, "error": str(e)}
 
 
-async def create_instagram_reel(
-    images: list[str],
-    music_file: str,
-    caption: str | None = None,
-    hashtags: list[str] | None = None,
-    effects: list[str] | None = None,
-    duration: float = 15.0
-) -> dict[str, Any]:
-    """Create an Instagram Reel with optimizations.
+# TODO: Review unreachable code - async def create_social_media_video(
+# TODO: Review unreachable code - platform: str,
+# TODO: Review unreachable code - images: list[str],
+# TODO: Review unreachable code - music_file: str | None = None,
+# TODO: Review unreachable code - caption: str | None = None,
+# TODO: Review unreachable code - hashtags: list[str] | None = None,
+# TODO: Review unreachable code - style: str = "trending",
+# TODO: Review unreachable code - duration: float | None = None,
+# TODO: Review unreachable code - auto_optimize: bool = True
+# TODO: Review unreachable code - ) -> dict[str, Any]:
+# TODO: Review unreachable code - """Create a social media optimized video.
 
-    Args:
-        images: List of image paths
-        music_file: Music track (required for Reels)
-        caption: Reel caption
-        hashtags: Hashtags for discovery
-        effects: Instagram effects to apply
-        duration: Reel duration (max 90 seconds)
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - platform: Target platform (instagram_reel, tiktok, youtube_shorts, etc.)
+# TODO: Review unreachable code - images: List of image paths
+# TODO: Review unreachable code - music_file: Optional music track
+# TODO: Review unreachable code - caption: Post caption/description
+# TODO: Review unreachable code - hashtags: List of hashtags
+# TODO: Review unreachable code - style: Content style (trending, educational, entertaining)
+# TODO: Review unreachable code - duration: Optional duration (uses platform optimal if not set)
+# TODO: Review unreachable code - auto_optimize: Automatically optimize for engagement
 
-    Returns:
-        Reel export with Instagram features
-    """
-    params = {
-        "effects": effects or ["zoom", "transition"],
-        "stickers": [],
-        "duration": min(duration, 90)  # Max 90 seconds
-    }
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Workflow execution results with platform export
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - # Select appropriate template
+# TODO: Review unreachable code - if platform == "instagram_reel":
+# TODO: Review unreachable code - template = InstagramReelTemplate()
+# TODO: Review unreachable code - elif platform == "tiktok":
+# TODO: Review unreachable code - template = TikTokTemplate()
+# TODO: Review unreachable code - elif platform == "linkedin_video":
+# TODO: Review unreachable code - template = LinkedInVideoTemplate()
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - template = SocialMediaTemplate()
 
-    return await create_social_media_video(
-        platform="instagram_reel",
-        images=images,
-        music_file=music_file,
-        caption=caption,
-        hashtags=hashtags,
-        style="trending",
-        **params
-    )
+# TODO: Review unreachable code - params = {
+# TODO: Review unreachable code - "platform": platform,
+# TODO: Review unreachable code - "images": images,
+# TODO: Review unreachable code - "style": style,
+# TODO: Review unreachable code - "auto_optimize": auto_optimize
+# TODO: Review unreachable code - }
 
+# TODO: Review unreachable code - if music_file:
+# TODO: Review unreachable code - params["music_file"] = music_file
 
-async def create_tiktok_video(
-    images: list[str],
-    music_file: str | None = None,
-    caption: str | None = None,
-    hashtags: list[str] | None = None,
-    challenges: list[str] | None = None,
-    duet_ready: bool = False,
-    duration: float = 30.0
-) -> dict[str, Any]:
-    """Create a TikTok video with trend integration.
+# TODO: Review unreachable code - if caption:
+# TODO: Review unreachable code - params["caption"] = caption
 
-    Args:
-        images: List of image paths
-        music_file: Optional trending sound
-        caption: Video caption
-        hashtags: Trending hashtags
-        challenges: Hashtag challenges to join
-        duet_ready: Prepare for duet format
-        duration: Video duration (max 180 seconds)
+# TODO: Review unreachable code - if hashtags:
+# TODO: Review unreachable code - params["hashtags"] = hashtags
 
-    Returns:
-        TikTok optimized export
-    """
-    params = {
-        "challenges": challenges or [],
-        "duet_ready": duet_ready,
-        "duration": min(duration, 180)  # Max 3 minutes
-    }
+# TODO: Review unreachable code - if duration:
+# TODO: Review unreachable code - params["duration"] = duration
 
-    return await create_social_media_video(
-        platform="tiktok",
-        images=images,
-        music_file=music_file,
-        caption=caption,
-        hashtags=hashtags,
-        style="trending",
-        **params
-    )
+# TODO: Review unreachable code - context = WorkflowContext(
+# TODO: Review unreachable code - workflow_id=f"social_{platform}",
+# TODO: Review unreachable code - initial_params=params
+# TODO: Review unreachable code - )
 
+# TODO: Review unreachable code - executor = WorkflowExecutor()
+# TODO: Review unreachable code - result = await executor.execute_workflow(template, context)
 
-async def get_platform_specifications(
-    platform: str | None = None
-) -> dict[str, Any]:
-    """Get specifications for social media platforms.
+# TODO: Review unreachable code - if result.success:
+# TODO: Review unreachable code - export = result.results.get("export_platform", {})
+# TODO: Review unreachable code - return {
+# TODO: Review unreachable code - "success": True,
+# TODO: Review unreachable code - "export": export,
+# TODO: Review unreachable code - "platform": platform,
+# TODO: Review unreachable code - "optimizations": result.results.get("analyze_content", {}).get("optimizations", []),
+# TODO: Review unreachable code - "preview": export.get("preview", {})
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - return {
+# TODO: Review unreachable code - "success": False,
+# TODO: Review unreachable code - "error": result.error or "Workflow failed"
+# TODO: Review unreachable code - }
 
-    Args:
-        platform: Specific platform or None for all
-
-    Returns:
-        Platform specifications
-    """
-    from .social_media import PLATFORM_SPECS, SocialPlatform
-
-    if platform:
-        try:
-            platform_enum = SocialPlatform(platform)
-            spec = PLATFORM_SPECS.get(platform_enum)
-
-            if spec:
-                return {
-                    "platform": platform,
-                    "spec": {
-                        "name": spec.name,
-                        "aspect_ratio": spec.aspect_ratio,
-                        "max_duration": spec.max_duration,
-                        "optimal_duration": spec.optimal_duration,
-                        "fps": spec.fps,
-                        "max_file_size_mb": spec.max_file_size_mb,
-                        "safe_zones": spec.safe_zones,
-                        "features": spec.features,
-                        "audio_required": spec.audio_required
-                    }
-                }
-            else:
-                return {"error": f"No specifications for {platform}"}
-
-        except ValueError:
-            return {"error": f"Unknown platform: {platform}"}
-    else:
-        # Return all platforms
-        all_specs = {}
-        for platform_enum, spec in PLATFORM_SPECS.items():
-            all_specs[platform_enum.value] = {
-                "name": spec.name,
-                "aspect_ratio": spec.aspect_ratio,
-                "optimal_duration": spec.optimal_duration,
-                "features": spec.features
-            }
-
-        return {"platforms": all_specs}
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Failed to create social media video: {e}")
+# TODO: Review unreachable code - return {"success": False, "error": str(e)}
 
 
-async def suggest_story_structure(
-    images: list[str],
-    theme: str | None = None
-) -> dict[str, Any]:
-    """Suggest appropriate story structure based on content.
+# TODO: Review unreachable code - async def create_instagram_reel(
+# TODO: Review unreachable code - images: list[str],
+# TODO: Review unreachable code - music_file: str,
+# TODO: Review unreachable code - caption: str | None = None,
+# TODO: Review unreachable code - hashtags: list[str] | None = None,
+# TODO: Review unreachable code - effects: list[str] | None = None,
+# TODO: Review unreachable code - duration: float = 15.0
+# TODO: Review unreachable code - ) -> dict[str, Any]:
+# TODO: Review unreachable code - """Create an Instagram Reel with optimizations.
 
-    Args:
-        images: List of image paths
-        theme: Optional theme hint
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - images: List of image paths
+# TODO: Review unreachable code - music_file: Music track (required for Reels)
+# TODO: Review unreachable code - caption: Reel caption
+# TODO: Review unreachable code - hashtags: Hashtags for discovery
+# TODO: Review unreachable code - effects: Instagram effects to apply
+# TODO: Review unreachable code - duration: Reel duration (max 90 seconds)
 
-    Returns:
-        Structure suggestions with reasoning
-    """
-    suggestions = []
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Reel export with Instagram features
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - params = {
+# TODO: Review unreachable code - "effects": effects or ["zoom", "transition"],
+# TODO: Review unreachable code - "stickers": [],
+# TODO: Review unreachable code - "duration": min(duration, 90)  # Max 90 seconds
+# TODO: Review unreachable code - }
 
-    image_count = len(images)
-
-    # Three act for most narratives
-    if image_count >= 6:
-        suggestions.append({
-            "structure": "three_act",
-            "reason": "Classic structure works well for most stories",
-            "image_distribution": "25% setup, 50% confrontation, 25% resolution"
-        })
-
-    # Five act for complex narratives
-    if image_count >= 15:
-        suggestions.append({
-            "structure": "five_act",
-            "reason": "Complex narrative with multiple turning points",
-            "image_distribution": "More nuanced pacing with climax emphasis"
-        })
-
-    # Hero's journey for adventure themes
-    if theme and "adventure" in theme.lower():
-        suggestions.append({
-            "structure": "heros_journey",
-            "reason": "Perfect for adventure and transformation stories",
-            "image_distribution": "50% dedicated to trials and challenges"
-        })
-
-    # Circular for reflective pieces
-    if theme and any(word in theme.lower() for word in ["reflect", "journey", "growth"]):
-        suggestions.append({
-            "structure": "circular",
-            "reason": "Shows transformation by returning to beginning",
-            "image_distribution": "Balanced with transformation emphasis"
-        })
-
-    return {
-        "suggestions": suggestions,
-        "image_count": image_count,
-        "recommended": suggestions[0] if suggestions else None
-    }
+# TODO: Review unreachable code - return await create_social_media_video(
+# TODO: Review unreachable code - platform="instagram_reel",
+# TODO: Review unreachable code - images=images,
+# TODO: Review unreachable code - music_file=music_file,
+# TODO: Review unreachable code - caption=caption,
+# TODO: Review unreachable code - hashtags=hashtags,
+# TODO: Review unreachable code - style="trending",
+# TODO: Review unreachable code - **params
+# TODO: Review unreachable code - )
 
 
-# Tool definitions for MCP registration
-TEMPLATE_TOOLS = [
-    {
-        "name": "create_story_arc_video",
-        "description": "Create a narrative-driven video with story structure",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "images": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of image paths"
-                },
-                "structure": {
-                    "type": "string",
-                    "description": "Story structure type",
-                    "enum": ["three_act", "five_act", "heros_journey", "kishoten", "circular"],
-                    "default": "three_act"
-                },
-                "duration": {
-                    "type": "number",
-                    "description": "Target duration in seconds",
-                    "default": 60.0
-                },
-                "narrative_tags": {
-                    "type": "object",
-                    "description": "Story elements per image"
-                },
-                "emotion_curve": {
-                    "type": "string",
-                    "description": "Emotional progression",
-                    "default": "standard"
-                },
-                "music_file": {
-                    "type": "string",
-                    "description": "Optional music file"
-                },
-                "voiceover_markers": {
-                    "type": "boolean",
-                    "description": "Add voiceover timing markers",
-                    "default": False
-                },
-                "export_formats": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Export formats (edl, xml, json)"
-                }
-            },
-            "required": ["images"]
-        }
-    },
-    {
-        "name": "create_documentary_video",
-        "description": "Create a documentary-style video",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "images": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of image paths"
-                },
-                "duration": {
-                    "type": "number",
-                    "description": "Target duration in seconds",
-                    "default": 120.0
-                },
-                "narrative_tags": {
-                    "type": "object",
-                    "description": "Evidence/testimony tags"
-                },
-                "music_file": {
-                    "type": "string",
-                    "description": "Optional background music"
-                },
-                "voiceover_markers": {
-                    "type": "boolean",
-                    "description": "Add narration markers",
-                    "default": True
-                },
-                "export_formats": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Export formats"
-                }
-            },
-            "required": ["images"]
-        }
-    },
-    {
-        "name": "create_social_media_video",
-        "description": "Create a social media optimized video",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "platform": {
-                    "type": "string",
-                    "description": "Target platform",
-                    "enum": ["instagram_reel", "instagram_story", "tiktok", "youtube_shorts", "twitter_video", "linkedin_video"]
-                },
-                "images": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of image paths"
-                },
-                "music_file": {
-                    "type": "string",
-                    "description": "Optional music track"
-                },
-                "caption": {
-                    "type": "string",
-                    "description": "Post caption"
-                },
-                "hashtags": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Hashtags"
-                },
-                "style": {
-                    "type": "string",
-                    "description": "Content style",
-                    "enum": ["trending", "educational", "entertaining", "aesthetic", "tutorial"],
-                    "default": "trending"
-                },
-                "duration": {
-                    "type": "number",
-                    "description": "Duration (uses platform optimal if not set)"
-                },
-                "auto_optimize": {
-                    "type": "boolean",
-                    "description": "Auto-optimize for engagement",
-                    "default": True
-                }
-            },
-            "required": ["platform", "images"]
-        }
-    },
-    {
-        "name": "create_instagram_reel",
-        "description": "Create an Instagram Reel with optimizations",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "images": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of image paths"
-                },
-                "music_file": {
-                    "type": "string",
-                    "description": "Music track (required)"
-                },
-                "caption": {
-                    "type": "string",
-                    "description": "Reel caption"
-                },
-                "hashtags": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Hashtags"
-                },
-                "effects": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Effects to apply"
-                },
-                "duration": {
-                    "type": "number",
-                    "description": "Duration (max 90 seconds)",
-                    "default": 15.0
-                }
-            },
-            "required": ["images", "music_file"]
-        }
-    },
-    {
-        "name": "create_tiktok_video",
-        "description": "Create a TikTok video with trend integration",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "images": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of image paths"
-                },
-                "music_file": {
-                    "type": "string",
-                    "description": "Trending sound"
-                },
-                "caption": {
-                    "type": "string",
-                    "description": "Video caption"
-                },
-                "hashtags": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Hashtags"
-                },
-                "challenges": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "Challenges to join"
-                },
-                "duet_ready": {
-                    "type": "boolean",
-                    "description": "Prepare for duet",
-                    "default": False
-                },
-                "duration": {
-                    "type": "number",
-                    "description": "Duration (max 180 seconds)",
-                    "default": 30.0
-                }
-            },
-            "required": ["images"]
-        }
-    },
-    {
-        "name": "get_platform_specifications",
-        "description": "Get social media platform specifications",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "platform": {
-                    "type": "string",
-                    "description": "Platform name or None for all"
-                }
-            }
-        }
-    },
-    {
-        "name": "suggest_story_structure",
-        "description": "Suggest story structure based on content",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "images": {
-                    "type": "array",
-                    "items": {"type": "string"},
-                    "description": "List of image paths"
-                },
-                "theme": {
-                    "type": "string",
-                    "description": "Optional theme hint"
-                }
-            },
-            "required": ["images"]
-        }
-    }
-]
+# TODO: Review unreachable code - async def create_tiktok_video(
+# TODO: Review unreachable code - images: list[str],
+# TODO: Review unreachable code - music_file: str | None = None,
+# TODO: Review unreachable code - caption: str | None = None,
+# TODO: Review unreachable code - hashtags: list[str] | None = None,
+# TODO: Review unreachable code - challenges: list[str] | None = None,
+# TODO: Review unreachable code - duet_ready: bool = False,
+# TODO: Review unreachable code - duration: float = 30.0
+# TODO: Review unreachable code - ) -> dict[str, Any]:
+# TODO: Review unreachable code - """Create a TikTok video with trend integration.
+
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - images: List of image paths
+# TODO: Review unreachable code - music_file: Optional trending sound
+# TODO: Review unreachable code - caption: Video caption
+# TODO: Review unreachable code - hashtags: Trending hashtags
+# TODO: Review unreachable code - challenges: Hashtag challenges to join
+# TODO: Review unreachable code - duet_ready: Prepare for duet format
+# TODO: Review unreachable code - duration: Video duration (max 180 seconds)
+
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - TikTok optimized export
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - params = {
+# TODO: Review unreachable code - "challenges": challenges or [],
+# TODO: Review unreachable code - "duet_ready": duet_ready,
+# TODO: Review unreachable code - "duration": min(duration, 180)  # Max 3 minutes
+# TODO: Review unreachable code - }
+
+# TODO: Review unreachable code - return await create_social_media_video(
+# TODO: Review unreachable code - platform="tiktok",
+# TODO: Review unreachable code - images=images,
+# TODO: Review unreachable code - music_file=music_file,
+# TODO: Review unreachable code - caption=caption,
+# TODO: Review unreachable code - hashtags=hashtags,
+# TODO: Review unreachable code - style="trending",
+# TODO: Review unreachable code - **params
+# TODO: Review unreachable code - )
+
+
+# TODO: Review unreachable code - async def get_platform_specifications(
+# TODO: Review unreachable code - platform: str | None = None
+# TODO: Review unreachable code - ) -> dict[str, Any]:
+# TODO: Review unreachable code - """Get specifications for social media platforms.
+
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - platform: Specific platform or None for all
+
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Platform specifications
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - from .social_media import PLATFORM_SPECS, SocialPlatform
+
+# TODO: Review unreachable code - if platform:
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - platform_enum = SocialPlatform(platform)
+# TODO: Review unreachable code - spec = PLATFORM_SPECS.get(platform_enum)
+
+# TODO: Review unreachable code - if spec:
+# TODO: Review unreachable code - return {
+# TODO: Review unreachable code - "platform": platform,
+# TODO: Review unreachable code - "spec": {
+# TODO: Review unreachable code - "name": spec.name,
+# TODO: Review unreachable code - "aspect_ratio": spec.aspect_ratio,
+# TODO: Review unreachable code - "max_duration": spec.max_duration,
+# TODO: Review unreachable code - "optimal_duration": spec.optimal_duration,
+# TODO: Review unreachable code - "fps": spec.fps,
+# TODO: Review unreachable code - "max_file_size_mb": spec.max_file_size_mb,
+# TODO: Review unreachable code - "safe_zones": spec.safe_zones,
+# TODO: Review unreachable code - "features": spec.features,
+# TODO: Review unreachable code - "audio_required": spec.audio_required
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - return {"error": f"No specifications for {platform}"}
+
+# TODO: Review unreachable code - except ValueError:
+# TODO: Review unreachable code - return {"error": f"Unknown platform: {platform}"}
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - # Return all platforms
+# TODO: Review unreachable code - all_specs = {}
+# TODO: Review unreachable code - for platform_enum, spec in PLATFORM_SPECS.items():
+# TODO: Review unreachable code - all_specs[platform_enum.value] = {
+# TODO: Review unreachable code - "name": spec.name,
+# TODO: Review unreachable code - "aspect_ratio": spec.aspect_ratio,
+# TODO: Review unreachable code - "optimal_duration": spec.optimal_duration,
+# TODO: Review unreachable code - "features": spec.features
+# TODO: Review unreachable code - }
+
+# TODO: Review unreachable code - return {"platforms": all_specs}
+
+
+# TODO: Review unreachable code - async def suggest_story_structure(
+# TODO: Review unreachable code - images: list[str],
+# TODO: Review unreachable code - theme: str | None = None
+# TODO: Review unreachable code - ) -> dict[str, Any]:
+# TODO: Review unreachable code - """Suggest appropriate story structure based on content.
+
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - images: List of image paths
+# TODO: Review unreachable code - theme: Optional theme hint
+
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Structure suggestions with reasoning
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - suggestions = []
+
+# TODO: Review unreachable code - image_count = len(images)
+
+# TODO: Review unreachable code - # Three act for most narratives
+# TODO: Review unreachable code - if image_count >= 6:
+# TODO: Review unreachable code - suggestions.append({
+# TODO: Review unreachable code - "structure": "three_act",
+# TODO: Review unreachable code - "reason": "Classic structure works well for most stories",
+# TODO: Review unreachable code - "image_distribution": "25% setup, 50% confrontation, 25% resolution"
+# TODO: Review unreachable code - })
+
+# TODO: Review unreachable code - # Five act for complex narratives
+# TODO: Review unreachable code - if image_count >= 15:
+# TODO: Review unreachable code - suggestions.append({
+# TODO: Review unreachable code - "structure": "five_act",
+# TODO: Review unreachable code - "reason": "Complex narrative with multiple turning points",
+# TODO: Review unreachable code - "image_distribution": "More nuanced pacing with climax emphasis"
+# TODO: Review unreachable code - })
+
+# TODO: Review unreachable code - # Hero's journey for adventure themes
+# TODO: Review unreachable code - if theme and "adventure" in theme.lower():
+# TODO: Review unreachable code - suggestions.append({
+# TODO: Review unreachable code - "structure": "heros_journey",
+# TODO: Review unreachable code - "reason": "Perfect for adventure and transformation stories",
+# TODO: Review unreachable code - "image_distribution": "50% dedicated to trials and challenges"
+# TODO: Review unreachable code - })
+
+# TODO: Review unreachable code - # Circular for reflective pieces
+# TODO: Review unreachable code - if theme and any(word in theme.lower() for word in ["reflect", "journey", "growth"]):
+# TODO: Review unreachable code - suggestions.append({
+# TODO: Review unreachable code - "structure": "circular",
+# TODO: Review unreachable code - "reason": "Shows transformation by returning to beginning",
+# TODO: Review unreachable code - "image_distribution": "Balanced with transformation emphasis"
+# TODO: Review unreachable code - })
+
+# TODO: Review unreachable code - return {
+# TODO: Review unreachable code - "suggestions": suggestions,
+# TODO: Review unreachable code - "image_count": image_count,
+# TODO: Review unreachable code - "recommended": suggestions[0] if suggestions else None
+# TODO: Review unreachable code - }
+
+
+# TODO: Review unreachable code - # Tool definitions for MCP registration
+# TODO: Review unreachable code - TEMPLATE_TOOLS = [
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "create_story_arc_video",
+# TODO: Review unreachable code - "description": "Create a narrative-driven video with story structure",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "images": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "List of image paths"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "structure": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Story structure type",
+# TODO: Review unreachable code - "enum": ["three_act", "five_act", "heros_journey", "kishoten", "circular"],
+# TODO: Review unreachable code - "default": "three_act"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "duration": {
+# TODO: Review unreachable code - "type": "number",
+# TODO: Review unreachable code - "description": "Target duration in seconds",
+# TODO: Review unreachable code - "default": 60.0
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "narrative_tags": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "description": "Story elements per image"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "emotion_curve": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Emotional progression",
+# TODO: Review unreachable code - "default": "standard"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "music_file": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Optional music file"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "voiceover_markers": {
+# TODO: Review unreachable code - "type": "boolean",
+# TODO: Review unreachable code - "description": "Add voiceover timing markers",
+# TODO: Review unreachable code - "default": False
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "export_formats": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "Export formats (edl, xml, json)"
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["images"]
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "create_documentary_video",
+# TODO: Review unreachable code - "description": "Create a documentary-style video",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "images": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "List of image paths"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "duration": {
+# TODO: Review unreachable code - "type": "number",
+# TODO: Review unreachable code - "description": "Target duration in seconds",
+# TODO: Review unreachable code - "default": 120.0
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "narrative_tags": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "description": "Evidence/testimony tags"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "music_file": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Optional background music"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "voiceover_markers": {
+# TODO: Review unreachable code - "type": "boolean",
+# TODO: Review unreachable code - "description": "Add narration markers",
+# TODO: Review unreachable code - "default": True
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "export_formats": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "Export formats"
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["images"]
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "create_social_media_video",
+# TODO: Review unreachable code - "description": "Create a social media optimized video",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "platform": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Target platform",
+# TODO: Review unreachable code - "enum": ["instagram_reel", "instagram_story", "tiktok", "youtube_shorts", "twitter_video", "linkedin_video"]
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "images": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "List of image paths"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "music_file": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Optional music track"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "caption": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Post caption"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "hashtags": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "Hashtags"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "style": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Content style",
+# TODO: Review unreachable code - "enum": ["trending", "educational", "entertaining", "aesthetic", "tutorial"],
+# TODO: Review unreachable code - "default": "trending"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "duration": {
+# TODO: Review unreachable code - "type": "number",
+# TODO: Review unreachable code - "description": "Duration (uses platform optimal if not set)"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "auto_optimize": {
+# TODO: Review unreachable code - "type": "boolean",
+# TODO: Review unreachable code - "description": "Auto-optimize for engagement",
+# TODO: Review unreachable code - "default": True
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["platform", "images"]
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "create_instagram_reel",
+# TODO: Review unreachable code - "description": "Create an Instagram Reel with optimizations",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "images": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "List of image paths"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "music_file": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Music track (required)"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "caption": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Reel caption"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "hashtags": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "Hashtags"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "effects": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "Effects to apply"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "duration": {
+# TODO: Review unreachable code - "type": "number",
+# TODO: Review unreachable code - "description": "Duration (max 90 seconds)",
+# TODO: Review unreachable code - "default": 15.0
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["images", "music_file"]
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "create_tiktok_video",
+# TODO: Review unreachable code - "description": "Create a TikTok video with trend integration",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "images": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "List of image paths"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "music_file": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Trending sound"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "caption": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Video caption"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "hashtags": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "Hashtags"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "challenges": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "Challenges to join"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "duet_ready": {
+# TODO: Review unreachable code - "type": "boolean",
+# TODO: Review unreachable code - "description": "Prepare for duet",
+# TODO: Review unreachable code - "default": False
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "duration": {
+# TODO: Review unreachable code - "type": "number",
+# TODO: Review unreachable code - "description": "Duration (max 180 seconds)",
+# TODO: Review unreachable code - "default": 30.0
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["images"]
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "get_platform_specifications",
+# TODO: Review unreachable code - "description": "Get social media platform specifications",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "platform": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Platform name or None for all"
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code - "name": "suggest_story_structure",
+# TODO: Review unreachable code - "description": "Suggest story structure based on content",
+# TODO: Review unreachable code - "input_schema": {
+# TODO: Review unreachable code - "type": "object",
+# TODO: Review unreachable code - "properties": {
+# TODO: Review unreachable code - "images": {
+# TODO: Review unreachable code - "type": "array",
+# TODO: Review unreachable code - "items": {"type": "string"},
+# TODO: Review unreachable code - "description": "List of image paths"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "theme": {
+# TODO: Review unreachable code - "type": "string",
+# TODO: Review unreachable code - "description": "Optional theme hint"
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "required": ["images"]
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - ]

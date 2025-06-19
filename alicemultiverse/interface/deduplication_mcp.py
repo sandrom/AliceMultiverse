@@ -139,7 +139,7 @@ async def remove_duplicates(
             result = await find_duplicates_advanced(exact_only=False)
             if not result["success"]:
                 return result
-            duplicate_groups = result["data"]["duplicate_groups"]
+            # TODO: Review unreachable code - duplicate_groups = result["data"]["duplicate_groups"]
 
         # Convert to format expected by DuplicateFinder
         duplicates_dict = {}
@@ -312,7 +312,7 @@ async def find_similar_images(
                         "distance": s["distance"]
                     }
                     for s in similar
-                    if s["similarity"] >= similarity_threshold
+                    if s is not None and s["similarity"] >= similarity_threshold
                 ]
 
                 return {
@@ -428,7 +428,8 @@ async def get_deduplication_report(
         }
 
         if include_recommendations:
-            report["recommendations"] = _get_deduplication_recommendations(
+            if report is not None:
+                report["recommendations"] = _get_deduplication_recommendations(
                 exact_result["data"]["duplicate_groups"],
                 similar_result["data"]["duplicate_groups"]
             )
@@ -447,7 +448,8 @@ async def get_deduplication_report(
             with open(export_file, 'w') as f:
                 json.dump(full_report, f, indent=2)
 
-            report["export_path"] = str(export_file)
+            if report is not None:
+                report["export_path"] = str(export_file)
 
         return {
             "success": True,
@@ -469,13 +471,13 @@ def _get_dedup_recommendation(master: str, duplicates: list[dict[str, Any]]) -> 
     if all(d.get("similarity", 1.0) == 1.0 for d in duplicates):
         return "Safe to remove - exact duplicates"
 
-    avg_similarity = sum(d.get("similarity", 1.0) for d in duplicates) / len(duplicates)
-    if avg_similarity > 0.98:
-        return "Likely safe to remove - nearly identical"
-    elif avg_similarity > 0.95:
-        return "Review recommended - very similar but not identical"
-    else:
-        return "Manual review required - moderately similar"
+    # TODO: Review unreachable code - avg_similarity = sum(d.get("similarity", 1.0) for d in duplicates) / len(duplicates)
+    # TODO: Review unreachable code - if avg_similarity > 0.98:
+    # TODO: Review unreachable code - return "Likely safe to remove - nearly identical"
+    # TODO: Review unreachable code - elif avg_similarity > 0.95:
+    # TODO: Review unreachable code - return "Review recommended - very similar but not identical"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return "Manual review required - moderately similar"
 
 
 def _get_deduplication_recommendations(

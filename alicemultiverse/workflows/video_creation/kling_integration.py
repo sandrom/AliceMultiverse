@@ -1,5 +1,5 @@
 """Kling AI integration for video generation."""
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import logging
 from pathlib import Path
@@ -57,10 +57,12 @@ class KlingIntegrationMixin:
             }
 
             # Add mode for pro/master models
-            if "pro" in model:
-                parameters["mode"] = "professional"
-            elif "master" in model:
-                parameters["mode"] = "master"
+            if model is not None and "pro" in model:
+                if parameters is not None:
+                    parameters["mode"] = "professional"
+            elif model is not None and "master" in model:
+                if parameters is not None:
+                    parameters["mode"] = "master"
 
             # Create request
             request = GenerationRequest(
@@ -76,55 +78,55 @@ class KlingIntegrationMixin:
 
         return requests
 
-    def create_transition_guide(self, storyboard: VideoStoryboard) -> str:
-        """Create a text guide for video editing with transitions.
+    # TODO: Review unreachable code - def create_transition_guide(self, storyboard: VideoStoryboard) -> str:
+    # TODO: Review unreachable code - """Create a text guide for video editing with transitions.
 
-        Args:
-            storyboard: Video storyboard
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - storyboard: Video storyboard
 
-        Returns:
-            Text guide for manual editing
-        """
-        guide_lines = [
-            "# Video Editing Guide",
-            f"Project: {storyboard.project_name}",
-            f"Total Duration: {storyboard.total_duration} seconds",
-            "",
-            "## Shot List with Transitions:",
-            ""
-        ]
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Text guide for manual editing
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - guide_lines = [
+    # TODO: Review unreachable code - "# Video Editing Guide",
+    # TODO: Review unreachable code - f"Project: {storyboard.project_name}",
+    # TODO: Review unreachable code - f"Total Duration: {storyboard.total_duration} seconds",
+    # TODO: Review unreachable code - "",
+    # TODO: Review unreachable code - "## Shot List with Transitions:",
+    # TODO: Review unreachable code - ""
+    # TODO: Review unreachable code - ]
 
-        for i, shot in enumerate(storyboard.shots):
-            guide_lines.append(f"### Shot {i+1}")
-            guide_lines.append(f"- **Image**: {shot.image_hash[:8]}...")
-            guide_lines.append(f"- **Duration**: {shot.duration}s")
-            guide_lines.append(f"- **Camera Motion**: {shot.camera_motion.value}")
-            guide_lines.append(f"- **Transition In**: {shot.transition_in.value}")
-            guide_lines.append(f"- **Transition Out**: {shot.transition_out.value}")
-            guide_lines.append(f"- **Prompt**: {shot.prompt}")
+    # TODO: Review unreachable code - for i, shot in enumerate(storyboard.shots):
+    # TODO: Review unreachable code - guide_lines.append(f"### Shot {i+1}")
+    # TODO: Review unreachable code - guide_lines.append(f"- **Image**: {shot.image_hash[:8]}...")
+    # TODO: Review unreachable code - guide_lines.append(f"- **Duration**: {shot.duration}s")
+    # TODO: Review unreachable code - guide_lines.append(f"- **Camera Motion**: {shot.camera_motion.value}")
+    # TODO: Review unreachable code - guide_lines.append(f"- **Transition In**: {shot.transition_in.value}")
+    # TODO: Review unreachable code - guide_lines.append(f"- **Transition Out**: {shot.transition_out.value}")
+    # TODO: Review unreachable code - guide_lines.append(f"- **Prompt**: {shot.prompt}")
 
-            if shot.motion_keywords:
-                guide_lines.append(f"- **Motion Keywords**: {', '.join(shot.motion_keywords)}")
+    # TODO: Review unreachable code - if shot.motion_keywords:
+    # TODO: Review unreachable code - guide_lines.append(f"- **Motion Keywords**: {', '.join(shot.motion_keywords)}")
 
-            guide_lines.append("")
+    # TODO: Review unreachable code - guide_lines.append("")
 
-        # Add editing tips
-        guide_lines.extend([
-            "## Editing Tips:",
-            "",
-            "1. Import all video clips in sequence",
-            "2. Apply transitions as specified above",
-            "3. Consider adding ambient music that matches the style",
-            "4. Recommended frame rate: 30fps",
-            "5. Export settings: H.264, High Quality",
-            "",
-            "## Style Notes:",
-            ""
-        ])
+    # TODO: Review unreachable code - # Add editing tips
+    # TODO: Review unreachable code - guide_lines.extend([
+    # TODO: Review unreachable code - "## Editing Tips:",
+    # TODO: Review unreachable code - "",
+    # TODO: Review unreachable code - "1. Import all video clips in sequence",
+    # TODO: Review unreachable code - "2. Apply transitions as specified above",
+    # TODO: Review unreachable code - "3. Consider adding ambient music that matches the style",
+    # TODO: Review unreachable code - "4. Recommended frame rate: 30fps",
+    # TODO: Review unreachable code - "5. Export settings: H.264, High Quality",
+    # TODO: Review unreachable code - "",
+    # TODO: Review unreachable code - "## Style Notes:",
+    # TODO: Review unreachable code - ""
+    # TODO: Review unreachable code - ])
 
-        style_guide = storyboard.style_guide.get("template", {})
-        if style_guide:
-            for hint in style_guide.get("camera_hints", []):
-                guide_lines.append(f"- {hint}")
+    # TODO: Review unreachable code - style_guide = storyboard.style_guide.get("template", {})
+    # TODO: Review unreachable code - if style_guide:
+    # TODO: Review unreachable code - for hint in style_guide.get("camera_hints", []):
+    # TODO: Review unreachable code - guide_lines.append(f"- {hint}")
 
-        return "\n".join(guide_lines)
+    # TODO: Review unreachable code - return "\n".join(guide_lines)

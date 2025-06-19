@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import cv2
+import cv2  # type: ignore
 import numpy as np
 from PIL import Image
 from sklearn.cluster import KMeans
@@ -171,292 +171,292 @@ class ColorFlowAnalyzer:
             cap.release()
             if ret:
                 return cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-            else:
-                raise ValueError(f"Could not read video: {path}")
+            # TODO: Review unreachable code - else:
+            # TODO: Review unreachable code - raise ValueError(f"Could not read video: {path}")
         else:
             # Load image
             img = Image.open(path).convert('RGB')
             return np.array(img)
 
-    def _extract_color_palette(self, image: np.ndarray) -> ColorPalette:
-        """Extract dominant colors and color properties from image."""
-        # Reshape image to list of pixels
-        pixels = image.reshape(-1, 3)
+    # TODO: Review unreachable code - def _extract_color_palette(self, image: np.ndarray) -> ColorPalette:
+    # TODO: Review unreachable code - """Extract dominant colors and color properties from image."""
+    # TODO: Review unreachable code - # Reshape image to list of pixels
+    # TODO: Review unreachable code - pixels = image.reshape(-1, 3)
 
-        # Use K-means to find dominant colors
-        kmeans = KMeans(n_clusters=self.n_colors, random_state=42)
-        kmeans.fit(pixels)
+    # TODO: Review unreachable code - # Use K-means to find dominant colors
+    # TODO: Review unreachable code - kmeans = KMeans(n_clusters=self.n_colors, random_state=42)
+    # TODO: Review unreachable code - kmeans.fit(pixels)
 
-        # Get colors and their weights
-        colors = kmeans.cluster_centers_.astype(int)
-        labels = kmeans.labels_
-        weights = [np.sum(labels == i) / len(labels) for i in range(self.n_colors)]
+    # TODO: Review unreachable code - # Get colors and their weights
+    # TODO: Review unreachable code - colors = kmeans.cluster_centers_.astype(int)
+    # TODO: Review unreachable code - labels = kmeans.labels_
+    # TODO: Review unreachable code - weights = [np.sum(labels == i) / len(labels) for i in range(self.n_colors)]
 
-        # Sort by weight
-        sorted_indices = np.argsort(weights)[::-1]
-        dominant_colors = [tuple(colors[i]) for i in sorted_indices]
-        color_weights = [weights[i] for i in sorted_indices]
+    # TODO: Review unreachable code - # Sort by weight
+    # TODO: Review unreachable code - sorted_indices = np.argsort(weights)[::-1]
+    # TODO: Review unreachable code - dominant_colors = [tuple(colors[i]) for i in sorted_indices]
+    # TODO: Review unreachable code - color_weights = [weights[i] for i in sorted_indices]
 
-        # Calculate average properties
-        avg_brightness = self._calculate_average_brightness(image)
-        avg_saturation = self._calculate_average_saturation(image)
-        color_temp = self._calculate_color_temperature(dominant_colors, color_weights)
+    # TODO: Review unreachable code - # Calculate average properties
+    # TODO: Review unreachable code - avg_brightness = self._calculate_average_brightness(image)
+    # TODO: Review unreachable code - avg_saturation = self._calculate_average_saturation(image)
+    # TODO: Review unreachable code - color_temp = self._calculate_color_temperature(dominant_colors, color_weights)
 
-        return ColorPalette(
-            dominant_colors=dominant_colors,
-            color_weights=color_weights,
-            average_brightness=avg_brightness,
-            average_saturation=avg_saturation,
-            color_temperature=color_temp
-        )
+    # TODO: Review unreachable code - return ColorPalette(
+    # TODO: Review unreachable code - dominant_colors=dominant_colors,
+    # TODO: Review unreachable code - color_weights=color_weights,
+    # TODO: Review unreachable code - average_brightness=avg_brightness,
+    # TODO: Review unreachable code - average_saturation=avg_saturation,
+    # TODO: Review unreachable code - color_temperature=color_temp
+    # TODO: Review unreachable code - )
 
-    def _analyze_lighting(self, image: np.ndarray) -> LightingInfo:
-        """Analyze lighting direction and properties."""
-        # Convert to grayscale for lighting analysis
-        gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+    # TODO: Review unreachable code - def _analyze_lighting(self, image: np.ndarray) -> LightingInfo:
+    # TODO: Review unreachable code - """Analyze lighting direction and properties."""
+    # TODO: Review unreachable code - # Convert to grayscale for lighting analysis
+    # TODO: Review unreachable code - gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
 
-        # Apply Sobel filters to detect gradients
-        sobel_x = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=5)
-        sobel_y = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=5)
+    # TODO: Review unreachable code - # Apply Sobel filters to detect gradients
+    # TODO: Review unreachable code - sobel_x = cv2.Sobel(gray, cv2.CV_64F  # type: ignore, 1, 0, ksize=5)
+    # TODO: Review unreachable code - sobel_y = cv2.Sobel(gray, cv2.CV_64F  # type: ignore, 0, 1, ksize=5)
 
-        # Calculate average gradient direction
-        avg_grad_x = np.mean(sobel_x)
-        avg_grad_y = np.mean(sobel_y)
+    # TODO: Review unreachable code - # Calculate average gradient direction
+    # TODO: Review unreachable code - avg_grad_x = np.mean(sobel_x)
+    # TODO: Review unreachable code - avg_grad_y = np.mean(sobel_y)
 
-        # Normalize direction vector
-        magnitude = np.sqrt(avg_grad_x**2 + avg_grad_y**2)
-        if magnitude > 0:
-            direction = (avg_grad_x / magnitude, avg_grad_y / magnitude)
-        else:
-            direction = (0.0, 0.0)
+    # TODO: Review unreachable code - # Normalize direction vector
+    # TODO: Review unreachable code - magnitude = np.sqrt(avg_grad_x**2 + avg_grad_y**2)
+    # TODO: Review unreachable code - if magnitude > 0:
+    # TODO: Review unreachable code - direction = (avg_grad_x / magnitude, avg_grad_y / magnitude)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - direction = (0.0, 0.0)
 
-        # Calculate intensity (average brightness of top 20% pixels)
-        bright_threshold = np.percentile(gray, 80)
-        intensity = np.mean(gray[gray > bright_threshold]) / 255.0
+    # TODO: Review unreachable code - # Calculate intensity (average brightness of top 20% pixels)
+    # TODO: Review unreachable code - bright_threshold = np.percentile(gray, 80)
+    # TODO: Review unreachable code - intensity = np.mean(gray[gray > bright_threshold]) / 255.0
 
-        # Determine lighting type
-        std_dev = np.std(gray)
-        if std_dev < 30:
-            light_type = 'ambient'
-        elif std_dev > 70:
-            light_type = 'directional'
-        else:
-            light_type = 'mixed'
+    # TODO: Review unreachable code - # Determine lighting type
+    # TODO: Review unreachable code - std_dev = np.std(gray)
+    # TODO: Review unreachable code - if std_dev < 30:
+    # TODO: Review unreachable code - light_type = 'ambient'
+    # TODO: Review unreachable code - elif std_dev > 70:
+    # TODO: Review unreachable code - light_type = 'directional'
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - light_type = 'mixed'
 
-        # Calculate shadow density
-        dark_threshold = np.percentile(gray, 20)
-        shadow_pixels = gray[gray < dark_threshold]
-        shadow_density = len(shadow_pixels) / gray.size if gray.size > 0 else 0.0
+    # TODO: Review unreachable code - # Calculate shadow density
+    # TODO: Review unreachable code - dark_threshold = np.percentile(gray, 20)
+    # TODO: Review unreachable code - shadow_pixels = gray[gray < dark_threshold]
+    # TODO: Review unreachable code - shadow_density = len(shadow_pixels) / gray.size if gray.size > 0 else 0.0
 
-        return LightingInfo(
-            direction=direction,
-            intensity=intensity,
-            type=light_type,
-            shadow_density=shadow_density
-        )
+    # TODO: Review unreachable code - return LightingInfo(
+    # TODO: Review unreachable code - direction=direction,
+    # TODO: Review unreachable code - intensity=intensity,
+    # TODO: Review unreachable code - type=light_type,
+    # TODO: Review unreachable code - shadow_density=shadow_density
+    # TODO: Review unreachable code - )
 
-    def _create_gradient_transition(self, palette1: ColorPalette, palette2: ColorPalette,
-                                  lighting1: LightingInfo, lighting2: LightingInfo,
-                                  duration: int) -> GradientTransition:
-        """Create gradient transition based on color and lighting analysis."""
-        # Use top 3 colors from each palette
-        start_colors = palette1.dominant_colors[:3]
-        end_colors = palette2.dominant_colors[:3]
+    # TODO: Review unreachable code - def _create_gradient_transition(self, palette1: ColorPalette, palette2: ColorPalette,
+    # TODO: Review unreachable code - lighting1: LightingInfo, lighting2: LightingInfo,
+    # TODO: Review unreachable code - duration: int) -> GradientTransition:
+    # TODO: Review unreachable code - """Create gradient transition based on color and lighting analysis."""
+    # TODO: Review unreachable code - # Use top 3 colors from each palette
+    # TODO: Review unreachable code - start_colors = palette1.dominant_colors[:3]
+    # TODO: Review unreachable code - end_colors = palette2.dominant_colors[:3]
 
-        # Determine transition type based on lighting
-        if lighting1.type == 'directional' and lighting2.type == 'directional':
-            # Use diagonal transition aligned with average lighting direction
-            (
-                (lighting1.direction[0] + lighting2.direction[0]) / 2,
-                (lighting1.direction[1] + lighting2.direction[1]) / 2
-            )
-            transition_type = 'diagonal'
-        elif abs(palette1.average_brightness - palette2.average_brightness) > 0.3:
-            # Use radial transition for significant brightness changes
-            transition_type = 'radial'
-        else:
-            # Default to linear transition
-            transition_type = 'linear'
+    # TODO: Review unreachable code - # Determine transition type based on lighting
+    # TODO: Review unreachable code - if lighting1.type == 'directional' and lighting2.type == 'directional':
+    # TODO: Review unreachable code - # Use diagonal transition aligned with average lighting direction
+    # TODO: Review unreachable code - (
+    # TODO: Review unreachable code - (lighting1.direction[0] + lighting2.direction[0]) / 2,
+    # TODO: Review unreachable code - (lighting1.direction[1] + lighting2.direction[1]) / 2
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - transition_type = 'diagonal'
+    # TODO: Review unreachable code - elif abs(palette1.average_brightness - palette2.average_brightness) > 0.3:
+    # TODO: Review unreachable code - # Use radial transition for significant brightness changes
+    # TODO: Review unreachable code - transition_type = 'radial'
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Default to linear transition
+    # TODO: Review unreachable code - transition_type = 'linear'
 
-        # Determine blend curve based on color temperature difference
-        temp_diff = abs(palette1.color_temperature - palette2.color_temperature)
-        if temp_diff > 0.3:
-            blend_curve = 'ease-in-out'
-        else:
-            blend_curve = 'linear'
+    # TODO: Review unreachable code - # Determine blend curve based on color temperature difference
+    # TODO: Review unreachable code - temp_diff = abs(palette1.color_temperature - palette2.color_temperature)
+    # TODO: Review unreachable code - if temp_diff > 0.3:
+    # TODO: Review unreachable code - blend_curve = 'ease-in-out'
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - blend_curve = 'linear'
 
-        # Create basic mask data (can be enhanced with actual masking)
-        mask_data = self._create_transition_mask(transition_type, (1920, 1080))
+    # TODO: Review unreachable code - # Create basic mask data (can be enhanced with actual masking)
+    # TODO: Review unreachable code - mask_data = self._create_transition_mask(transition_type, (1920, 1080))
 
-        return GradientTransition(
-            start_colors=start_colors,
-            end_colors=end_colors,
-            duration_frames=duration,
-            transition_type=transition_type,
-            blend_curve=blend_curve,
-            mask_data=mask_data
-        )
+    # TODO: Review unreachable code - return GradientTransition(
+    # TODO: Review unreachable code - start_colors=start_colors,
+    # TODO: Review unreachable code - end_colors=end_colors,
+    # TODO: Review unreachable code - duration_frames=duration,
+    # TODO: Review unreachable code - transition_type=transition_type,
+    # TODO: Review unreachable code - blend_curve=blend_curve,
+    # TODO: Review unreachable code - mask_data=mask_data
+    # TODO: Review unreachable code - )
 
-    def _create_transition_mask(self, transition_type: str,
-                               size: tuple[int, int]) -> np.ndarray:
-        """Create transition mask for advanced effects."""
-        width, height = size
-        mask = np.zeros((height, width), dtype=np.float32)
+    # TODO: Review unreachable code - def _create_transition_mask(self, transition_type: str,
+    # TODO: Review unreachable code - size: tuple[int, int]) -> np.ndarray:
+    # TODO: Review unreachable code - """Create transition mask for advanced effects."""
+    # TODO: Review unreachable code - width, height = size
+    # TODO: Review unreachable code - mask = np.zeros((height, width), dtype=np.float32)
 
-        if transition_type == 'linear':
-            # Horizontal gradient
-            for x in range(width):
-                mask[:, x] = x / width
+    # TODO: Review unreachable code - if transition_type == 'linear':
+    # TODO: Review unreachable code - # Horizontal gradient
+    # TODO: Review unreachable code - for x in range(width):
+    # TODO: Review unreachable code - mask[:, x] = x / width
 
-        elif transition_type == 'radial':
-            # Radial gradient from center
-            center_x, center_y = width // 2, height // 2
-            max_dist = np.sqrt(center_x**2 + center_y**2)
+    # TODO: Review unreachable code - elif transition_type == 'radial':
+    # TODO: Review unreachable code - # Radial gradient from center
+    # TODO: Review unreachable code - center_x, center_y = width // 2, height // 2
+    # TODO: Review unreachable code - max_dist = np.sqrt(center_x**2 + center_y**2)
 
-            for y in range(height):
-                for x in range(width):
-                    dist = np.sqrt((x - center_x)**2 + (y - center_y)**2)
-                    mask[y, x] = min(dist / max_dist, 1.0)
+    # TODO: Review unreachable code - for y in range(height):
+    # TODO: Review unreachable code - for x in range(width):
+    # TODO: Review unreachable code - dist = np.sqrt((x - center_x)**2 + (y - center_y)**2)
+    # TODO: Review unreachable code - mask[y, x] = min(dist / max_dist, 1.0)
 
-        elif transition_type == 'diagonal':
-            # Diagonal gradient
-            for y in range(height):
-                for x in range(width):
-                    mask[y, x] = (x + y) / (width + height)
+    # TODO: Review unreachable code - elif transition_type == 'diagonal':
+    # TODO: Review unreachable code - # Diagonal gradient
+    # TODO: Review unreachable code - for y in range(height):
+    # TODO: Review unreachable code - for x in range(width):
+    # TODO: Review unreachable code - mask[y, x] = (x + y) / (width + height)
 
-        return mask
+    # TODO: Review unreachable code - return mask
 
-    def _calculate_compatibility(self, palette1: ColorPalette, palette2: ColorPalette,
-                               lighting1: LightingInfo, lighting2: LightingInfo) -> float:
-        """Calculate compatibility score between two shots."""
-        # Color similarity
-        color_sim = self._calculate_color_similarity(palette1, palette2)
+    # TODO: Review unreachable code - def _calculate_compatibility(self, palette1: ColorPalette, palette2: ColorPalette,
+    # TODO: Review unreachable code - lighting1: LightingInfo, lighting2: LightingInfo) -> float:
+    # TODO: Review unreachable code - """Calculate compatibility score between two shots."""
+    # TODO: Review unreachable code - # Color similarity
+    # TODO: Review unreachable code - color_sim = self._calculate_color_similarity(palette1, palette2)
 
-        # Brightness compatibility
-        brightness_diff = abs(palette1.average_brightness - palette2.average_brightness)
-        brightness_score = 1.0 - brightness_diff
+    # TODO: Review unreachable code - # Brightness compatibility
+    # TODO: Review unreachable code - brightness_diff = abs(palette1.average_brightness - palette2.average_brightness)
+    # TODO: Review unreachable code - brightness_score = 1.0 - brightness_diff
 
-        # Saturation compatibility
-        saturation_diff = abs(palette1.average_saturation - palette2.average_saturation)
-        saturation_score = 1.0 - saturation_diff
+    # TODO: Review unreachable code - # Saturation compatibility
+    # TODO: Review unreachable code - saturation_diff = abs(palette1.average_saturation - palette2.average_saturation)
+    # TODO: Review unreachable code - saturation_score = 1.0 - saturation_diff
 
-        # Lighting compatibility
-        lighting_score = self._calculate_lighting_compatibility(lighting1, lighting2)
+    # TODO: Review unreachable code - # Lighting compatibility
+    # TODO: Review unreachable code - lighting_score = self._calculate_lighting_compatibility(lighting1, lighting2)
 
-        # Weighted average
-        weights = [0.4, 0.2, 0.2, 0.2]  # color, brightness, saturation, lighting
-        scores = [color_sim, brightness_score, saturation_score, lighting_score]
+    # TODO: Review unreachable code - # Weighted average
+    # TODO: Review unreachable code - weights = [0.4, 0.2, 0.2, 0.2]  # color, brightness, saturation, lighting
+    # TODO: Review unreachable code - scores = [color_sim, brightness_score, saturation_score, lighting_score]
 
-        return sum(w * s for w, s in zip(weights, scores, strict=False))
+    # TODO: Review unreachable code - return sum(w * s for w, s in zip(weights, scores, strict=False))
 
-    def _calculate_color_similarity(self, palette1: ColorPalette,
-                                  palette2: ColorPalette) -> float:
-        """Calculate similarity between color palettes."""
-        similarities = []
+    # TODO: Review unreachable code - def _calculate_color_similarity(self, palette1: ColorPalette,
+    # TODO: Review unreachable code - palette2: ColorPalette) -> float:
+    # TODO: Review unreachable code - """Calculate similarity between color palettes."""
+    # TODO: Review unreachable code - similarities = []
 
-        # Compare each color in palette1 with closest in palette2
-        for i, color1 in enumerate(palette1.dominant_colors[:3]):
-            min_dist = float('inf')
-            for color2 in palette2.dominant_colors[:3]:
-                dist = self._color_distance(color1, color2)
-                min_dist = min(min_dist, dist)
+    # TODO: Review unreachable code - # Compare each color in palette1 with closest in palette2
+    # TODO: Review unreachable code - for i, color1 in enumerate(palette1.dominant_colors[:3]):
+    # TODO: Review unreachable code - min_dist = float('inf')
+    # TODO: Review unreachable code - for color2 in palette2.dominant_colors[:3]:
+    # TODO: Review unreachable code - dist = self._color_distance(color1, color2)
+    # TODO: Review unreachable code - min_dist = min(min_dist, dist)
 
-            # Weight by color prominence
-            weight = palette1.color_weights[i]
-            similarities.append((1.0 - min_dist / 441.67) * weight)  # 441.67 = max RGB distance
+    # TODO: Review unreachable code - # Weight by color prominence
+    # TODO: Review unreachable code - weight = palette1.color_weights[i]
+    # TODO: Review unreachable code - similarities.append((1.0 - min_dist / 441.67) * weight)  # 441.67 = max RGB distance
 
-        return sum(similarities) / sum(palette1.color_weights[:3])
+    # TODO: Review unreachable code - return sum(similarities) / sum(palette1.color_weights[:3])
 
-    def _color_distance(self, color1: tuple[int, int, int],
-                       color2: tuple[int, int, int]) -> float:
-        """Calculate Euclidean distance between two RGB colors."""
-        return np.sqrt(sum((c1 - c2) ** 2 for c1, c2 in zip(color1, color2, strict=False)))
+    # TODO: Review unreachable code - def _color_distance(self, color1: tuple[int, int, int],
+    # TODO: Review unreachable code - color2: tuple[int, int, int]) -> float:
+    # TODO: Review unreachable code - """Calculate Euclidean distance between two RGB colors."""
+    # TODO: Review unreachable code - return np.sqrt(sum((c1 - c2) ** 2 for c1, c2 in zip(color1, color2, strict=False)))
 
-    def _calculate_lighting_compatibility(self, lighting1: LightingInfo,
-                                        lighting2: LightingInfo) -> float:
-        """Calculate compatibility between lighting conditions."""
-        # Direction similarity (dot product of normalized vectors)
-        direction_sim = (lighting1.direction[0] * lighting2.direction[0] +
-                        lighting1.direction[1] * lighting2.direction[1])
-        direction_score = (direction_sim + 1) / 2  # Normalize to 0-1
+    # TODO: Review unreachable code - def _calculate_lighting_compatibility(self, lighting1: LightingInfo,
+    # TODO: Review unreachable code - lighting2: LightingInfo) -> float:
+    # TODO: Review unreachable code - """Calculate compatibility between lighting conditions."""
+    # TODO: Review unreachable code - # Direction similarity (dot product of normalized vectors)
+    # TODO: Review unreachable code - direction_sim = (lighting1.direction[0] * lighting2.direction[0] +
+    # TODO: Review unreachable code - lighting1.direction[1] * lighting2.direction[1])
+    # TODO: Review unreachable code - direction_score = (direction_sim + 1) / 2  # Normalize to 0-1
 
-        # Intensity compatibility
-        intensity_diff = abs(lighting1.intensity - lighting2.intensity)
-        intensity_score = 1.0 - intensity_diff
+    # TODO: Review unreachable code - # Intensity compatibility
+    # TODO: Review unreachable code - intensity_diff = abs(lighting1.intensity - lighting2.intensity)
+    # TODO: Review unreachable code - intensity_score = 1.0 - intensity_diff
 
-        # Type compatibility
-        type_score = 1.0 if lighting1.type == lighting2.type else 0.5
+    # TODO: Review unreachable code - # Type compatibility
+    # TODO: Review unreachable code - type_score = 1.0 if lighting1.type == lighting2.type else 0.5
 
-        # Shadow density compatibility
-        shadow_diff = abs(lighting1.shadow_density - lighting2.shadow_density)
-        shadow_score = 1.0 - shadow_diff
+    # TODO: Review unreachable code - # Shadow density compatibility
+    # TODO: Review unreachable code - shadow_diff = abs(lighting1.shadow_density - lighting2.shadow_density)
+    # TODO: Review unreachable code - shadow_score = 1.0 - shadow_diff
 
-        # Weighted average
-        return (direction_score * 0.3 + intensity_score * 0.3 +
-                type_score * 0.2 + shadow_score * 0.2)
+    # TODO: Review unreachable code - # Weighted average
+    # TODO: Review unreachable code - return (direction_score * 0.3 + intensity_score * 0.3 +
+    # TODO: Review unreachable code - type_score * 0.2 + shadow_score * 0.2)
 
-    def _suggest_effects(self, palette1: ColorPalette, palette2: ColorPalette,
-                        lighting1: LightingInfo, lighting2: LightingInfo) -> list[str]:
-        """Suggest transition effects based on analysis."""
-        effects = []
+    # TODO: Review unreachable code - def _suggest_effects(self, palette1: ColorPalette, palette2: ColorPalette,
+    # TODO: Review unreachable code - lighting1: LightingInfo, lighting2: LightingInfo) -> list[str]:
+    # TODO: Review unreachable code - """Suggest transition effects based on analysis."""
+    # TODO: Review unreachable code - effects = []
 
-        # Color-based suggestions
-        temp_diff = abs(palette1.color_temperature - palette2.color_temperature)
-        if temp_diff > 0.5:
-            effects.append('color_temperature_shift')
+    # TODO: Review unreachable code - # Color-based suggestions
+    # TODO: Review unreachable code - temp_diff = abs(palette1.color_temperature - palette2.color_temperature)
+    # TODO: Review unreachable code - if temp_diff > 0.5:
+    # TODO: Review unreachable code - effects.append('color_temperature_shift')
 
-        brightness_diff = abs(palette1.average_brightness - palette2.average_brightness)
-        if brightness_diff > 0.3:
-            effects.append('exposure_ramp')
+    # TODO: Review unreachable code - brightness_diff = abs(palette1.average_brightness - palette2.average_brightness)
+    # TODO: Review unreachable code - if brightness_diff > 0.3:
+    # TODO: Review unreachable code - effects.append('exposure_ramp')
 
-        saturation_diff = abs(palette1.average_saturation - palette2.average_saturation)
-        if saturation_diff > 0.3:
-            effects.append('saturation_blend')
+    # TODO: Review unreachable code - saturation_diff = abs(palette1.average_saturation - palette2.average_saturation)
+    # TODO: Review unreachable code - if saturation_diff > 0.3:
+    # TODO: Review unreachable code - effects.append('saturation_blend')
 
-        # Lighting-based suggestions
-        if lighting1.type != lighting2.type:
-            effects.append('lighting_transition')
+    # TODO: Review unreachable code - # Lighting-based suggestions
+    # TODO: Review unreachable code - if lighting1.type != lighting2.type:
+    # TODO: Review unreachable code - effects.append('lighting_transition')
 
-        if abs(lighting1.shadow_density - lighting2.shadow_density) > 0.3:
-            effects.append('shadow_morph')
+    # TODO: Review unreachable code - if abs(lighting1.shadow_density - lighting2.shadow_density) > 0.3:
+    # TODO: Review unreachable code - effects.append('shadow_morph')
 
-        # Direction-based suggestions
-        direction_diff = np.arccos(np.clip(
-            lighting1.direction[0] * lighting2.direction[0] +
-            lighting1.direction[1] * lighting2.direction[1], -1, 1
-        ))
-        if direction_diff > np.pi / 4:  # More than 45 degrees
-            effects.append('light_sweep')
+    # TODO: Review unreachable code - # Direction-based suggestions
+    # TODO: Review unreachable code - direction_diff = np.arccos(np.clip(
+    # TODO: Review unreachable code - lighting1.direction[0] * lighting2.direction[0] +
+    # TODO: Review unreachable code - lighting1.direction[1] * lighting2.direction[1], -1, 1
+    # TODO: Review unreachable code - ))
+    # TODO: Review unreachable code - if direction_diff > np.pi / 4:  # More than 45 degrees
+    # TODO: Review unreachable code - effects.append('light_sweep')
 
-        # Always suggest these for smooth transitions
-        effects.extend(['gradient_wipe', 'color_match'])
+    # TODO: Review unreachable code - # Always suggest these for smooth transitions
+    # TODO: Review unreachable code - effects.extend(['gradient_wipe', 'color_match'])
 
-        return list(set(effects))  # Remove duplicates
+    # TODO: Review unreachable code - return list(set(effects))  # Remove duplicates
 
-    def _calculate_average_brightness(self, image: np.ndarray) -> float:
-        """Calculate average brightness (0.0 to 1.0)."""
-        # Convert to HSV and get V channel
-        hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-        return np.mean(hsv[:, :, 2]) / 255.0
+    # TODO: Review unreachable code - def _calculate_average_brightness(self, image: np.ndarray) -> float:
+    # TODO: Review unreachable code - """Calculate average brightness (0.0 to 1.0)."""
+    # TODO: Review unreachable code - # Convert to HSV and get V channel
+    # TODO: Review unreachable code - hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    # TODO: Review unreachable code - return np.mean(hsv[:, :, 2]) / 255.0
 
-    def _calculate_average_saturation(self, image: np.ndarray) -> float:
-        """Calculate average saturation (0.0 to 1.0)."""
-        # Convert to HSV and get S channel
-        hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
-        return np.mean(hsv[:, :, 1]) / 255.0
+    # TODO: Review unreachable code - def _calculate_average_saturation(self, image: np.ndarray) -> float:
+    # TODO: Review unreachable code - """Calculate average saturation (0.0 to 1.0)."""
+    # TODO: Review unreachable code - # Convert to HSV and get S channel
+    # TODO: Review unreachable code - hsv = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+    # TODO: Review unreachable code - return np.mean(hsv[:, :, 1]) / 255.0
 
-    def _calculate_color_temperature(self, colors: list[tuple[int, int, int]],
-                                   weights: list[float]) -> float:
-        """Calculate color temperature (0.0=cool to 1.0=warm)."""
-        warm_score = 0.0
+    # TODO: Review unreachable code - def _calculate_color_temperature(self, colors: list[tuple[int, int, int]],
+    # TODO: Review unreachable code - weights: list[float]) -> float:
+    # TODO: Review unreachable code - """Calculate color temperature (0.0=cool to 1.0=warm)."""
+    # TODO: Review unreachable code - warm_score = 0.0
 
-        for color, weight in zip(colors, weights, strict=False):
-            r, g, b = color
-            # Simple warm/cool calculation based on R-B difference
-            warmth = (r - b) / 255.0  # -1 to 1
-            warm_score += (warmth + 1) / 2 * weight  # Normalize to 0-1
+    # TODO: Review unreachable code - for color, weight in zip(colors, weights, strict=False):
+    # TODO: Review unreachable code - r, g, b = color
+    # TODO: Review unreachable code - # Simple warm/cool calculation based on R-B difference
+    # TODO: Review unreachable code - warmth = (r - b) / 255.0  # -1 to 1
+    # TODO: Review unreachable code - warm_score += (warmth + 1) / 2 * weight  # Normalize to 0-1
 
-        return warm_score
+    # TODO: Review unreachable code - return warm_score
 
 
 def export_analysis_for_editor(analysis: ColorFlowAnalysis, output_path: str,
@@ -649,91 +649,91 @@ def _generate_keyframes(analysis: ColorFlowAnalysis) -> list[dict[str, Any]]:
     return keyframes
 
 
-def _generate_color_match_lut(analysis: ColorFlowAnalysis, output_path: str) -> None:
-    """Generate a color matching LUT file."""
-    # Simple 3D LUT generation (17x17x17)
-    size = 17
-    lut = []
+# TODO: Review unreachable code - def _generate_color_match_lut(analysis: ColorFlowAnalysis, output_path: str) -> None:
+# TODO: Review unreachable code - """Generate a color matching LUT file."""
+# TODO: Review unreachable code - # Simple 3D LUT generation (17x17x17)
+# TODO: Review unreachable code - size = 17
+# TODO: Review unreachable code - lut = []
 
-    # Header
-    lut.append('TITLE "Color Flow Match"')
-    lut.append(f'LUT_3D_SIZE {size}')
-    lut.append('')
+# TODO: Review unreachable code - # Header
+# TODO: Review unreachable code - lut.append('TITLE "Color Flow Match"')
+# TODO: Review unreachable code - lut.append(f'LUT_3D_SIZE {size}')
+# TODO: Review unreachable code - lut.append('')
 
-    # Generate LUT values
-    for b in range(size):
-        for g in range(size):
-            for r in range(size):
-                # Normalize to 0-1
-                nr, ng, nb = r/(size-1), g/(size-1), b/(size-1)
+# TODO: Review unreachable code - # Generate LUT values
+# TODO: Review unreachable code - for b in range(size):
+# TODO: Review unreachable code - for g in range(size):
+# TODO: Review unreachable code - for r in range(size):
+# TODO: Review unreachable code - # Normalize to 0-1
+# TODO: Review unreachable code - nr, ng, nb = r/(size-1), g/(size-1), b/(size-1)
 
-                # Apply color shift based on palette analysis
-                # This is a simplified version - real implementation would be more sophisticated
-                shifted_r = nr * 0.9 + 0.1 * (analysis.shot2_palette.dominant_colors[0][0] / 255)
-                shifted_g = ng * 0.9 + 0.1 * (analysis.shot2_palette.dominant_colors[0][1] / 255)
-                shifted_b = nb * 0.9 + 0.1 * (analysis.shot2_palette.dominant_colors[0][2] / 255)
+# TODO: Review unreachable code - # Apply color shift based on palette analysis
+# TODO: Review unreachable code - # This is a simplified version - real implementation would be more sophisticated
+# TODO: Review unreachable code - shifted_r = nr * 0.9 + 0.1 * (analysis.shot2_palette.dominant_colors[0][0] / 255)
+# TODO: Review unreachable code - shifted_g = ng * 0.9 + 0.1 * (analysis.shot2_palette.dominant_colors[0][1] / 255)
+# TODO: Review unreachable code - shifted_b = nb * 0.9 + 0.1 * (analysis.shot2_palette.dominant_colors[0][2] / 255)
 
-                # Clamp values
-                shifted_r = max(0, min(1, shifted_r))
-                shifted_g = max(0, min(1, shifted_g))
-                shifted_b = max(0, min(1, shifted_b))
+# TODO: Review unreachable code - # Clamp values
+# TODO: Review unreachable code - shifted_r = max(0, min(1, shifted_r))
+# TODO: Review unreachable code - shifted_g = max(0, min(1, shifted_g))
+# TODO: Review unreachable code - shifted_b = max(0, min(1, shifted_b))
 
-                lut.append(f'{shifted_r:.6f} {shifted_g:.6f} {shifted_b:.6f}')
+# TODO: Review unreachable code - lut.append(f'{shifted_r:.6f} {shifted_g:.6f} {shifted_b:.6f}')
 
-    # Write LUT file
-    with open(output_path, 'w') as f:
-        f.write('\n'.join(lut))
+# TODO: Review unreachable code - # Write LUT file
+# TODO: Review unreachable code - with open(output_path, 'w') as f:
+# TODO: Review unreachable code - f.write('\n'.join(lut))
 
 
-# Convenience function for batch processing
-def analyze_sequence(shot_paths: list[str], transition_duration: int = 30,
-                    export_path: str | None = None,
-                    editor: str = 'resolve') -> list[ColorFlowAnalysis]:
-    """
-    Analyze color flow for a sequence of shots.
+# TODO: Review unreachable code - # Convenience function for batch processing
+# TODO: Review unreachable code - def analyze_sequence(shot_paths: list[str], transition_duration: int = 30,
+# TODO: Review unreachable code - export_path: str | None = None,
+# TODO: Review unreachable code - editor: str = 'resolve') -> list[ColorFlowAnalysis]:
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - Analyze color flow for a sequence of shots.
 
-    Args:
-        shot_paths: List of paths to shots in sequence
-        transition_duration: Duration of each transition in frames
-        export_path: Optional path to export analysis
-        editor: Target editor for export
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - shot_paths: List of paths to shots in sequence
+# TODO: Review unreachable code - transition_duration: Duration of each transition in frames
+# TODO: Review unreachable code - export_path: Optional path to export analysis
+# TODO: Review unreachable code - editor: Target editor for export
 
-    Returns:
-        List of color flow analyses for each consecutive pair
-    """
-    analyzer = ColorFlowAnalyzer()
-    analyses = []
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - List of color flow analyses for each consecutive pair
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - analyzer = ColorFlowAnalyzer()
+# TODO: Review unreachable code - analyses = []
 
-    for i in range(len(shot_paths) - 1):
-        analysis = analyzer.analyze_shot_pair(
-            shot_paths[i],
-            shot_paths[i + 1],
-            transition_duration
-        )
-        analyses.append(analysis)
+# TODO: Review unreachable code - for i in range(len(shot_paths) - 1):
+# TODO: Review unreachable code - analysis = analyzer.analyze_shot_pair(
+# TODO: Review unreachable code - shot_paths[i],
+# TODO: Review unreachable code - shot_paths[i + 1],
+# TODO: Review unreachable code - transition_duration
+# TODO: Review unreachable code - )
+# TODO: Review unreachable code - analyses.append(analysis)
 
-    if export_path:
-        # Export all analyses
-        export_data = {
-            'sequence': [a.to_dict() for a in analyses],
-            'metadata': {
-                'shot_count': len(shot_paths),
-                'transition_count': len(analyses),
-                'total_duration': sum(a.gradient_transition.duration_frames for a in analyses)
-            }
-        }
+# TODO: Review unreachable code - if export_path:
+# TODO: Review unreachable code - # Export all analyses
+# TODO: Review unreachable code - export_data = {
+# TODO: Review unreachable code - 'sequence': [a.to_dict() for a in analyses],
+# TODO: Review unreachable code - 'metadata': {
+# TODO: Review unreachable code - 'shot_count': len(shot_paths),
+# TODO: Review unreachable code - 'transition_count': len(analyses),
+# TODO: Review unreachable code - 'total_duration': sum(a.gradient_transition.duration_frames for a in analyses)
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - }
 
-        if editor == 'resolve':
-            # Special handling for Resolve
-            base_path = Path(export_path).with_suffix('')
-            for i, analysis in enumerate(analyses):
-                export_analysis_for_editor(
-                    analysis,
-                    f'{base_path}_transition_{i+1}.json',
-                    editor
-                )
-        else:
-            with open(export_path, 'w') as f:
-                json.dump(export_data, f, indent=2)
+# TODO: Review unreachable code - if editor == 'resolve':
+# TODO: Review unreachable code - # Special handling for Resolve
+# TODO: Review unreachable code - base_path = Path(export_path).with_suffix('')
+# TODO: Review unreachable code - for i, analysis in enumerate(analyses):
+# TODO: Review unreachable code - export_analysis_for_editor(
+# TODO: Review unreachable code - analysis,
+# TODO: Review unreachable code - f'{base_path}_transition_{i+1}.json',
+# TODO: Review unreachable code - editor
+# TODO: Review unreachable code - )
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - with open(export_path, 'w') as f:
+# TODO: Review unreachable code - json.dump(export_data, f, indent=2)
 
-    return analyses
+# TODO: Review unreachable code - return analyses

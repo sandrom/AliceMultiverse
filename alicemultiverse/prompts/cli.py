@@ -116,50 +116,50 @@ def search(query: str | None, category: str | None, provider: str | None,
         click.echo(f"Exported {len(results)} prompts to {export}")
         return
 
-    if not results:
-        click.echo("No prompts found matching criteria.")
-        return
+    # TODO: Review unreachable code - if not results:
+    # TODO: Review unreachable code - click.echo("No prompts found matching criteria.")
+    # TODO: Review unreachable code - return
 
-    # Display results in table format
-    table_data = []
-    for prompt in results:
-        # Truncate text for display
-        text_preview = prompt.text[:50] + "..." if len(prompt.text) > 50 else prompt.text
+    # TODO: Review unreachable code - # Display results in table format
+    # TODO: Review unreachable code - table_data = []
+    # TODO: Review unreachable code - for prompt in results:
+    # TODO: Review unreachable code - # Truncate text for display
+    # TODO: Review unreachable code - text_preview = prompt.text[:50] + "..." if len(prompt.text) > 50 else prompt.text
 
-        providers_str = ", ".join([p.value for p in prompt.providers[:2]])
-        if len(prompt.providers) > 2:
-            providers_str += f" +{len(prompt.providers) - 2}"
+    # TODO: Review unreachable code - providers_str = ", ".join([p.value for p in prompt.providers[:2]])
+    # TODO: Review unreachable code - if len(prompt.providers) > 2:
+    # TODO: Review unreachable code - providers_str += f" +{len(prompt.providers) - 2}"
 
-        tags_str = ", ".join(prompt.tags[:3])
-        if len(prompt.tags) > 3:
-            tags_str += f" +{len(prompt.tags) - 3}"
+    # TODO: Review unreachable code - tags_str = ", ".join(prompt.tags[:3])
+    # TODO: Review unreachable code - if len(prompt.tags) > 3:
+    # TODO: Review unreachable code - tags_str += f" +{len(prompt.tags) - 3}"
 
-        effectiveness = f"{prompt.effectiveness_rating:.1f}" if prompt.effectiveness_rating else "-"
-        success_rate = f"{prompt.success_rate() * 100:.0f}%" if prompt.use_count > 0 else "-"
+    # TODO: Review unreachable code - effectiveness = f"{prompt.effectiveness_rating:.1f}" if prompt.effectiveness_rating else "-"
+    # TODO: Review unreachable code - success_rate = f"{prompt.success_rate() * 100:.0f}%" if prompt.use_count > 0 else "-"
 
-        table_data.append([
-            prompt.id[:8],
-            text_preview,
-            prompt.category.value,
-            providers_str,
-            effectiveness,
-            success_rate,
-            prompt.use_count,
-            tags_str
-        ])
+    # TODO: Review unreachable code - table_data.append([
+    # TODO: Review unreachable code - prompt.id[:8],
+    # TODO: Review unreachable code - text_preview,
+    # TODO: Review unreachable code - prompt.category.value,
+    # TODO: Review unreachable code - providers_str,
+    # TODO: Review unreachable code - effectiveness,
+    # TODO: Review unreachable code - success_rate,
+    # TODO: Review unreachable code - prompt.use_count,
+    # TODO: Review unreachable code - tags_str
+    # TODO: Review unreachable code - ])
 
-    headers = ["ID", "Prompt", "Category", "Providers", "Rating", "Success", "Uses", "Tags"]
+    # TODO: Review unreachable code - headers = ["ID", "Prompt", "Category", "Providers", "Rating", "Success", "Uses", "Tags"]
 
-    if tabulate:
-        click.echo(tabulate(table_data, headers=headers, tablefmt="simple"))
-    else:
-        # Fallback to simple display
-        click.echo(" | ".join(headers))
-        click.echo("-" * 80)
-        for row in table_data:
-            click.echo(" | ".join(str(col) for col in row))
+    # TODO: Review unreachable code - if tabulate:
+    # TODO: Review unreachable code - click.echo(tabulate(table_data, headers=headers, tablefmt="simple"))
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Fallback to simple display
+    # TODO: Review unreachable code - click.echo(" | ".join(headers))
+    # TODO: Review unreachable code - click.echo("-" * 80)
+    # TODO: Review unreachable code - for row in table_data:
+    # TODO: Review unreachable code - click.echo(" | ".join(str(col) for col in row))
 
-    click.echo(f"\nFound {len(results)} prompts")
+    # TODO: Review unreachable code - click.echo(f"\nFound {len(results)} prompts")
 
 
 @prompts_cli.command()
@@ -175,72 +175,72 @@ def show(prompt_id: str):
         if len(matches) == 0:
             click.echo(f"No prompt found with ID starting with '{prompt_id}'")
             return
-        elif len(matches) > 1:
-            click.echo(f"Multiple prompts found starting with '{prompt_id}':")
-            for p in matches[:5]:
-                click.echo(f"  {p.id}: {p.text[:50]}...")
-            return
-        prompt = matches[0]
+        # TODO: Review unreachable code - elif len(matches) > 1:
+        # TODO: Review unreachable code - click.echo(f"Multiple prompts found starting with '{prompt_id}':")
+        # TODO: Review unreachable code - for p in matches[:5]:
+        # TODO: Review unreachable code - click.echo(f"  {p.id}: {p.text[:50]}...")
+        # TODO: Review unreachable code - return
+        # TODO: Review unreachable code - prompt = matches[0]
     else:
         prompt = service.get_prompt(prompt_id)
         if not prompt:
             click.echo(f"Prompt not found: {prompt_id}")
             return
 
-    # Display prompt details
-    click.echo(f"\n{'='*60}")
-    click.echo(f"ID: {prompt.id}")
-    click.echo(f"Created: {prompt.created_at.strftime('%Y-%m-%d %H:%M')}")
-    click.echo(f"Updated: {prompt.updated_at.strftime('%Y-%m-%d %H:%M')}")
-    click.echo(f"\nCategory: {prompt.category.value}")
-    click.echo(f"Providers: {', '.join([p.value for p in prompt.providers])}")
+    # TODO: Review unreachable code - # Display prompt details
+    # TODO: Review unreachable code - click.echo(f"\n{'='*60}")
+    # TODO: Review unreachable code - click.echo(f"ID: {prompt.id}")
+    # TODO: Review unreachable code - click.echo(f"Created: {prompt.created_at.strftime('%Y-%m-%d %H:%M')}")
+    # TODO: Review unreachable code - click.echo(f"Updated: {prompt.updated_at.strftime('%Y-%m-%d %H:%M')}")
+    # TODO: Review unreachable code - click.echo(f"\nCategory: {prompt.category.value}")
+    # TODO: Review unreachable code - click.echo(f"Providers: {', '.join([p.value for p in prompt.providers])}")
 
-    if prompt.project:
-        click.echo(f"Project: {prompt.project}")
-    if prompt.style:
-        click.echo(f"Style: {prompt.style}")
-    if prompt.tags:
-        click.echo(f"Tags: {', '.join(prompt.tags)}")
+    # TODO: Review unreachable code - if prompt.project:
+    # TODO: Review unreachable code - click.echo(f"Project: {prompt.project}")
+    # TODO: Review unreachable code - if prompt.style:
+    # TODO: Review unreachable code - click.echo(f"Style: {prompt.style}")
+    # TODO: Review unreachable code - if prompt.tags:
+    # TODO: Review unreachable code - click.echo(f"Tags: {', '.join(prompt.tags)}")
 
-    click.echo("\n--- PROMPT TEXT ---")
-    click.echo(prompt.text)
+    # TODO: Review unreachable code - click.echo("\n--- PROMPT TEXT ---")
+    # TODO: Review unreachable code - click.echo(prompt.text)
 
-    if prompt.description:
-        click.echo("\n--- DESCRIPTION ---")
-        click.echo(prompt.description)
+    # TODO: Review unreachable code - if prompt.description:
+    # TODO: Review unreachable code - click.echo("\n--- DESCRIPTION ---")
+    # TODO: Review unreachable code - click.echo(prompt.description)
 
-    if prompt.notes:
-        click.echo("\n--- NOTES ---")
-        click.echo(prompt.notes)
+    # TODO: Review unreachable code - if prompt.notes:
+    # TODO: Review unreachable code - click.echo("\n--- NOTES ---")
+    # TODO: Review unreachable code - click.echo(prompt.notes)
 
-    if prompt.context:
-        click.echo("\n--- CONTEXT ---")
-        for key, value in prompt.context.items():
-            click.echo(f"  {key}: {value}")
+    # TODO: Review unreachable code - if prompt.context:
+    # TODO: Review unreachable code - click.echo("\n--- CONTEXT ---")
+    # TODO: Review unreachable code - for key, value in prompt.context.items():
+    # TODO: Review unreachable code - click.echo(f"  {key}: {value}")
 
-    click.echo("\n--- STATISTICS ---")
-    click.echo(f"Uses: {prompt.use_count}")
-    click.echo(f"Successes: {prompt.success_count}")
-    click.echo(f"Success Rate: {prompt.success_rate() * 100:.1f}%")
-    if prompt.effectiveness_rating:
-        click.echo(f"Effectiveness Rating: {prompt.effectiveness_rating}/10")
+    # TODO: Review unreachable code - click.echo("\n--- STATISTICS ---")
+    # TODO: Review unreachable code - click.echo(f"Uses: {prompt.use_count}")
+    # TODO: Review unreachable code - click.echo(f"Successes: {prompt.success_count}")
+    # TODO: Review unreachable code - click.echo(f"Success Rate: {prompt.success_rate() * 100:.1f}%")
+    # TODO: Review unreachable code - if prompt.effectiveness_rating:
+    # TODO: Review unreachable code - click.echo(f"Effectiveness Rating: {prompt.effectiveness_rating}/10")
 
-    # Show recent usage
-    usage_history = service.get_usage_history(prompt.id, limit=5)
-    if usage_history:
-        click.echo("\n--- RECENT USAGE ---")
-        for usage in usage_history:
-            status = "✅" if usage.success else "❌"
-            click.echo(f"{status} {usage.timestamp.strftime('%Y-%m-%d %H:%M')} - {usage.provider.value}")
-            if usage.notes:
-                click.echo(f"   Notes: {usage.notes}")
+    # TODO: Review unreachable code - # Show recent usage
+    # TODO: Review unreachable code - usage_history = service.get_usage_history(prompt.id, limit=5)
+    # TODO: Review unreachable code - if usage_history:
+    # TODO: Review unreachable code - click.echo("\n--- RECENT USAGE ---")
+    # TODO: Review unreachable code - for usage in usage_history:
+    # TODO: Review unreachable code - status = "✅" if usage.success else "❌"
+    # TODO: Review unreachable code - click.echo(f"{status} {usage.timestamp.strftime('%Y-%m-%d %H:%M')} - {usage.provider.value}")
+    # TODO: Review unreachable code - if usage.notes:
+    # TODO: Review unreachable code - click.echo(f"   Notes: {usage.notes}")
 
-    # Show similar prompts
-    similar = service.find_similar(prompt.id, limit=3)
-    if similar:
-        click.echo("\n--- SIMILAR PROMPTS ---")
-        for sim in similar:
-            click.echo(f"• {sim.id[:8]}: {sim.text[:60]}...")
+    # TODO: Review unreachable code - # Show similar prompts
+    # TODO: Review unreachable code - similar = service.find_similar(prompt.id, limit=3)
+    # TODO: Review unreachable code - if similar:
+    # TODO: Review unreachable code - click.echo("\n--- SIMILAR PROMPTS ---")
+    # TODO: Review unreachable code - for sim in similar:
+    # TODO: Review unreachable code - click.echo(f"• {sim.id[:8]}: {sim.text[:60]}...")
 
 
 @prompts_cli.command()
@@ -264,12 +264,12 @@ def use(prompt_id: str, provider: str, success: bool, **kwargs):
         if len(matches) == 0:
             click.echo(f"No prompt found with ID starting with '{prompt_id}'")
             return
-        elif len(matches) > 1:
-            click.echo(f"Multiple prompts found starting with '{prompt_id}':")
-            for p in matches[:5]:
-                click.echo(f"  {p.id}: {p.text[:50]}...")
-            return
-        prompt_id = matches[0].id
+        # TODO: Review unreachable code - elif len(matches) > 1:
+        # TODO: Review unreachable code - click.echo(f"Multiple prompts found starting with '{prompt_id}':")
+        # TODO: Review unreachable code - for p in matches[:5]:
+        # TODO: Review unreachable code - click.echo(f"  {p.id}: {p.text[:50]}...")
+        # TODO: Review unreachable code - return
+        # TODO: Review unreachable code - prompt_id = matches[0].id
 
     service.record_usage(
         prompt_id=prompt_id,
@@ -305,55 +305,55 @@ def update(prompt_id: str, rating: float | None, add_tag: list[str],
         if len(matches) == 0:
             click.echo(f"No prompt found with ID starting with '{prompt_id}'")
             return
-        elif len(matches) > 1:
-            click.echo(f"Multiple prompts found starting with '{prompt_id}':")
-            for p in matches[:5]:
-                click.echo(f"  {p.id}: {p.text[:50]}...")
-            return
-        prompt = matches[0]
+        # TODO: Review unreachable code - elif len(matches) > 1:
+        # TODO: Review unreachable code - click.echo(f"Multiple prompts found starting with '{prompt_id}':")
+        # TODO: Review unreachable code - for p in matches[:5]:
+        # TODO: Review unreachable code - click.echo(f"  {p.id}: {p.text[:50]}...")
+        # TODO: Review unreachable code - return
+        # TODO: Review unreachable code - prompt = matches[0]
     else:
         prompt = service.get_prompt(prompt_id)
         if not prompt:
             click.echo(f"Prompt not found: {prompt_id}")
             return
 
-    # Apply updates
-    updated = False
+    # TODO: Review unreachable code - # Apply updates
+    # TODO: Review unreachable code - updated = False
 
-    if rating is not None:
-        prompt.effectiveness_rating = rating
-        updated = True
-        click.echo(f"Set effectiveness rating to {rating}/10")
+    # TODO: Review unreachable code - if rating is not None:
+    # TODO: Review unreachable code - prompt.effectiveness_rating = rating
+    # TODO: Review unreachable code - updated = True
+    # TODO: Review unreachable code - click.echo(f"Set effectiveness rating to {rating}/10")
 
-    if add_tag:
-        for tag in add_tag:
-            if tag not in prompt.tags:
-                prompt.tags.append(tag)
-                updated = True
-        click.echo(f"Added tags: {', '.join(add_tag)}")
+    # TODO: Review unreachable code - if add_tag:
+    # TODO: Review unreachable code - for tag in add_tag:
+    # TODO: Review unreachable code - if tag not in prompt.tags:
+    # TODO: Review unreachable code - prompt.tags.append(tag)
+    # TODO: Review unreachable code - updated = True
+    # TODO: Review unreachable code - click.echo(f"Added tags: {', '.join(add_tag)}")
 
-    if remove_tag:
-        for tag in remove_tag:
-            if tag in prompt.tags:
-                prompt.tags.remove(tag)
-                updated = True
-        click.echo(f"Removed tags: {', '.join(remove_tag)}")
+    # TODO: Review unreachable code - if remove_tag:
+    # TODO: Review unreachable code - for tag in remove_tag:
+    # TODO: Review unreachable code - if tag in prompt.tags:
+    # TODO: Review unreachable code - prompt.tags.remove(tag)
+    # TODO: Review unreachable code - updated = True
+    # TODO: Review unreachable code - click.echo(f"Removed tags: {', '.join(remove_tag)}")
 
-    if notes is not None:
-        prompt.notes = notes
-        updated = True
-        click.echo("Updated notes")
+    # TODO: Review unreachable code - if notes is not None:
+    # TODO: Review unreachable code - prompt.notes = notes
+    # TODO: Review unreachable code - updated = True
+    # TODO: Review unreachable code - click.echo("Updated notes")
 
-    if description is not None:
-        prompt.description = description
-        updated = True
-        click.echo("Updated description")
+    # TODO: Review unreachable code - if description is not None:
+    # TODO: Review unreachable code - prompt.description = description
+    # TODO: Review unreachable code - updated = True
+    # TODO: Review unreachable code - click.echo("Updated description")
 
-    if updated:
-        service.update_prompt(prompt)
-        click.echo(f"✅ Updated prompt {prompt.id[:8]}")
-    else:
-        click.echo("No changes made")
+    # TODO: Review unreachable code - if updated:
+    # TODO: Review unreachable code - service.update_prompt(prompt)
+    # TODO: Review unreachable code - click.echo(f"✅ Updated prompt {prompt.id[:8]}")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - click.echo("No changes made")
 
 
 @prompts_cli.command()
@@ -388,20 +388,20 @@ def effective(category: str | None, provider: str | None,
         click.echo("No effective prompts found with the given criteria.")
         return
 
-    click.echo(f"\n🌟 TOP {len(prompts)} MOST EFFECTIVE PROMPTS")
-    click.echo("="*80)
+    # TODO: Review unreachable code - click.echo(f"\n🌟 TOP {len(prompts)} MOST EFFECTIVE PROMPTS")
+    # TODO: Review unreachable code - click.echo("="*80)
 
-    for i, prompt in enumerate(prompts, 1):
-        click.echo(f"\n#{i}. {prompt.category.value.upper()} - {prompt.id[:8]}")
-        click.echo(f"Providers: {', '.join([p.value for p in prompt.providers])}")
-        click.echo(f"Success Rate: {prompt.success_rate() * 100:.1f}% ({prompt.success_count}/{prompt.use_count} uses)")
-        if prompt.effectiveness_rating:
-            click.echo(f"Rating: {prompt.effectiveness_rating}/10")
-        if prompt.tags:
-            click.echo(f"Tags: {', '.join(prompt.tags[:5])}")
-        click.echo(f"\nPrompt: {prompt.text[:150]}...")
-        if prompt.description:
-            click.echo(f"Good for: {prompt.description}")
+    # TODO: Review unreachable code - for i, prompt in enumerate(prompts, 1):
+    # TODO: Review unreachable code - click.echo(f"\n#{i}. {prompt.category.value.upper()} - {prompt.id[:8]}")
+    # TODO: Review unreachable code - click.echo(f"Providers: {', '.join([p.value for p in prompt.providers])}")
+    # TODO: Review unreachable code - click.echo(f"Success Rate: {prompt.success_rate() * 100:.1f}% ({prompt.success_count}/{prompt.use_count} uses)")
+    # TODO: Review unreachable code - if prompt.effectiveness_rating:
+    # TODO: Review unreachable code - click.echo(f"Rating: {prompt.effectiveness_rating}/10")
+    # TODO: Review unreachable code - if prompt.tags:
+    # TODO: Review unreachable code - click.echo(f"Tags: {', '.join(prompt.tags[:5])}")
+    # TODO: Review unreachable code - click.echo(f"\nPrompt: {prompt.text[:150]}...")
+    # TODO: Review unreachable code - if prompt.description:
+    # TODO: Review unreachable code - click.echo(f"Good for: {prompt.description}")
 
 
 @prompts_cli.command()
@@ -461,16 +461,16 @@ def project(project_path: Path, sync_to_index: bool, sync_from_index: bool, proj
             click.echo(f"No prompts found in project {project_path.name}")
             return
 
-        click.echo(f"\n📁 Project: {project_path.name}")
-        click.echo(f"Found {len(prompts)} prompts")
-        click.echo("-" * 60)
+        # TODO: Review unreachable code - click.echo(f"\n📁 Project: {project_path.name}")
+        # TODO: Review unreachable code - click.echo(f"Found {len(prompts)} prompts")
+        # TODO: Review unreachable code - click.echo("-" * 60)
 
-        for prompt in prompts[:10]:  # Show first 10
-            providers = ", ".join([p.value for p in prompt.providers[:2]])
-            click.echo(f"\n• {prompt.id[:8]}: {prompt.text[:60]}...")
-            click.echo(f"  Category: {prompt.category.value}, Providers: {providers}")
-            if prompt.tags:
-                click.echo(f"  Tags: {', '.join(prompt.tags[:5])}")
+        # TODO: Review unreachable code - for prompt in prompts[:10]:  # Show first 10
+        # TODO: Review unreachable code - providers = ", ".join([p.value for p in prompt.providers[:2]])
+        # TODO: Review unreachable code - click.echo(f"\n• {prompt.id[:8]}: {prompt.text[:60]}...")
+        # TODO: Review unreachable code - click.echo(f"  Category: {prompt.category.value}, Providers: {providers}")
+        # TODO: Review unreachable code - if prompt.tags:
+        # TODO: Review unreachable code - click.echo(f"  Tags: {', '.join(prompt.tags[:5])}")
 
 
 @prompts_cli.command()
@@ -493,41 +493,41 @@ def discover(base_paths: list[Path], sync_all: bool):
             click.echo("No base paths specified and none configured")
             return
 
-    # Discover prompts
-    project_prompts = storage.discover_project_prompts(list(base_paths))
+    # TODO: Review unreachable code - # Discover prompts
+    # TODO: Review unreachable code - project_prompts = storage.discover_project_prompts(list(base_paths))
 
-    if not project_prompts:
-        click.echo("No project prompts found")
-        return
+    # TODO: Review unreachable code - if not project_prompts:
+    # TODO: Review unreachable code - click.echo("No project prompts found")
+    # TODO: Review unreachable code - return
 
-    total_prompts = sum(len(prompts) for prompts in project_prompts.values())
-    click.echo(f"\n🔍 Discovered {total_prompts} prompts across {len(project_prompts)} projects")
-    click.echo("=" * 60)
+    # TODO: Review unreachable code - total_prompts = sum(len(prompts) for prompts in project_prompts.values())
+    # TODO: Review unreachable code - click.echo(f"\n🔍 Discovered {total_prompts} prompts across {len(project_prompts)} projects")
+    # TODO: Review unreachable code - click.echo("=" * 60)
 
-    for project_name, prompts in project_prompts.items():
-        click.echo(f"\n📁 {project_name}: {len(prompts)} prompts")
+    # TODO: Review unreachable code - for project_name, prompts in project_prompts.items():
+    # TODO: Review unreachable code - click.echo(f"\n📁 {project_name}: {len(prompts)} prompts")
 
-        # Group by category
-        by_category = {}
-        for prompt in prompts:
-            cat = prompt.category.value
-            if cat not in by_category:
-                by_category[cat] = 0
-            by_category[cat] += 1
+    # TODO: Review unreachable code - # Group by category
+    # TODO: Review unreachable code - by_category = {}
+    # TODO: Review unreachable code - for prompt in prompts:
+    # TODO: Review unreachable code - cat = prompt.category.value
+    # TODO: Review unreachable code - if cat not in by_category:
+    # TODO: Review unreachable code - by_category[cat] = 0
+    # TODO: Review unreachable code - by_category[cat] += 1
 
-        for cat, count in by_category.items():
-            click.echo(f"  - {cat}: {count}")
+    # TODO: Review unreachable code - for cat, count in by_category.items():
+    # TODO: Review unreachable code - click.echo(f"  - {cat}: {count}")
 
-    if sync_all:
-        click.echo("\n🔄 Syncing all discovered prompts to index...")
-        total_synced = 0
-        for base_path in base_paths:
-            for project_dir in base_path.iterdir():
-                if project_dir.is_dir() and project_dir.name in project_prompts:
-                    synced = storage.sync_project_to_index(project_dir)
-                    total_synced += synced
+    # TODO: Review unreachable code - if sync_all:
+    # TODO: Review unreachable code - click.echo("\n🔄 Syncing all discovered prompts to index...")
+    # TODO: Review unreachable code - total_synced = 0
+    # TODO: Review unreachable code - for base_path in base_paths:
+    # TODO: Review unreachable code - for project_dir in base_path.iterdir():
+    # TODO: Review unreachable code - if project_dir.is_dir() and project_dir.name in project_prompts:
+    # TODO: Review unreachable code - synced = storage.sync_project_to_index(project_dir)
+    # TODO: Review unreachable code - total_synced += synced
 
-        click.echo(f"✅ Synced {total_synced} prompts to central index")
+    # TODO: Review unreachable code - click.echo(f"✅ Synced {total_synced} prompts to central index")
 
 
 @prompts_cli.command()
@@ -571,16 +571,16 @@ def template(list_templates: bool, show: str | None, render: str | None,
             click.echo("No templates found")
             return
 
-        click.echo("\n📋 Available Templates:")
-        click.echo("=" * 40)
-        for name in templates:
-            template = manager.get_template(name)
-            if template:
-                click.echo(f"\n• {name}")
-                click.echo(f"  Category: {template.category.value}")
-                click.echo(f"  Providers: {', '.join([p.value for p in template.providers])}")
-                if template.variables:
-                    click.echo(f"  Variables: {', '.join(template.variables.keys())}")
+        # TODO: Review unreachable code - click.echo("\n📋 Available Templates:")
+        # TODO: Review unreachable code - click.echo("=" * 40)
+        # TODO: Review unreachable code - for name in templates:
+        # TODO: Review unreachable code - template = manager.get_template(name)
+        # TODO: Review unreachable code - if template:
+        # TODO: Review unreachable code - click.echo(f"\n• {name}")
+        # TODO: Review unreachable code - click.echo(f"  Category: {template.category.value}")
+        # TODO: Review unreachable code - click.echo(f"  Providers: {', '.join([p.value for p in template.providers])}")
+        # TODO: Review unreachable code - if template.variables:
+        # TODO: Review unreachable code - click.echo(f"  Variables: {', '.join(template.variables.keys())}")
 
     elif show:
         template = manager.get_template(show)
@@ -588,29 +588,29 @@ def template(list_templates: bool, show: str | None, render: str | None,
             click.echo(f"Template '{show}' not found")
             return
 
-        click.echo(f"\n📋 Template: {template.name}")
-        click.echo("=" * 60)
-        click.echo(f"Template: {template.template_text}")
-        click.echo(f"Category: {template.category.value}")
-        click.echo(f"Providers: {', '.join([p.value for p in template.providers])}")
+        # TODO: Review unreachable code - click.echo(f"\n📋 Template: {template.name}")
+        # TODO: Review unreachable code - click.echo("=" * 60)
+        # TODO: Review unreachable code - click.echo(f"Template: {template.template_text}")
+        # TODO: Review unreachable code - click.echo(f"Category: {template.category.value}")
+        # TODO: Review unreachable code - click.echo(f"Providers: {', '.join([p.value for p in template.providers])}")
 
-        if template.variables:
-            click.echo("\nVariables:")
-            for var, desc in template.variables.items():
-                default = ""
-                if template.default_values and var in template.default_values:
-                    default = f" (default: {template.default_values[var]})"
-                click.echo(f"  - {var}: {desc}{default}")
+        # TODO: Review unreachable code - if template.variables:
+        # TODO: Review unreachable code - click.echo("\nVariables:")
+        # TODO: Review unreachable code - for var, desc in template.variables.items():
+        # TODO: Review unreachable code - default = ""
+        # TODO: Review unreachable code - if template.default_values and var in template.default_values:
+        # TODO: Review unreachable code - default = f" (default: {template.default_values[var]})"
+        # TODO: Review unreachable code - click.echo(f"  - {var}: {desc}{default}")
 
-        if template.examples:
-            click.echo("\nExamples:")
-            for i, example in enumerate(template.examples, 1):
-                click.echo(f"\n  Example {i}:")
-                if "variables" in example:
-                    for var, val in example["variables"].items():
-                        click.echo(f"    {var}: {val}")
-                if "result" in example:
-                    click.echo(f"    → {example['result']}")
+        # TODO: Review unreachable code - if template.examples:
+        # TODO: Review unreachable code - click.echo("\nExamples:")
+        # TODO: Review unreachable code - for i, example in enumerate(template.examples, 1):
+        # TODO: Review unreachable code - click.echo(f"\n  Example {i}:")
+        # TODO: Review unreachable code - if example is not None and "variables" in example:
+        # TODO: Review unreachable code - for var, val in example["variables"].items():
+        # TODO: Review unreachable code - click.echo(f"    {var}: {val}")
+        # TODO: Review unreachable code - if example is not None and "result" in example:
+        # TODO: Review unreachable code - click.echo(f"    → {example['result']}")
 
     elif render:
         template = manager.get_template(render)
@@ -618,46 +618,46 @@ def template(list_templates: bool, show: str | None, render: str | None,
             click.echo(f"Template '{render}' not found")
             return
 
-        # Collect variable values
-        values = {}
-        click.echo(f"\nRendering template: {render}")
-        click.echo("Enter variable values (press Enter for defaults):\n")
+        # TODO: Review unreachable code - # Collect variable values
+        # TODO: Review unreachable code - values = {}
+        # TODO: Review unreachable code - click.echo(f"\nRendering template: {render}")
+        # TODO: Review unreachable code - click.echo("Enter variable values (press Enter for defaults):\n")
 
-        for var, desc in template.variables.items():
-            default = ""
-            if template.default_values and var in template.default_values:
-                default = template.default_values[var]
-                prompt_text = f"{var} ({desc}) [{default}]: "
-            else:
-                prompt_text = f"{var} ({desc}): "
+        # TODO: Review unreachable code - for var, desc in template.variables.items():
+        # TODO: Review unreachable code - default = ""
+        # TODO: Review unreachable code - if template.default_values and var in template.default_values:
+        # TODO: Review unreachable code - default = template.default_values[var]
+        # TODO: Review unreachable code - prompt_text = f"{var} ({desc}) [{default}]: "
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - prompt_text = f"{var} ({desc}): "
 
-            value = click.prompt(prompt_text, default=default, show_default=False)
-            values[var] = value
+        # TODO: Review unreachable code - value = click.prompt(prompt_text, default=default, show_default=False)
+        # TODO: Review unreachable code - values[var] = value
 
-        # Render
-        try:
-            rendered = template.render(**values)
-            click.echo("\n✅ Rendered prompt:")
-            click.echo("-" * 60)
-            click.echo(rendered)
-            click.echo("-" * 60)
+        # TODO: Review unreachable code - # Render
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - rendered = template.render(**values)
+        # TODO: Review unreachable code - click.echo("\n✅ Rendered prompt:")
+        # TODO: Review unreachable code - click.echo("-" * 60)
+        # TODO: Review unreachable code - click.echo(rendered)
+        # TODO: Review unreachable code - click.echo("-" * 60)
 
-            # Optionally save
-            if save or click.confirm("\nSave this prompt?"):
-                service = PromptService()
-                prompt = template.to_prompt(**values)
+        # TODO: Review unreachable code - # Optionally save
+        # TODO: Review unreachable code - if save or click.confirm("\nSave this prompt?"):
+        # TODO: Review unreachable code - service = PromptService()
+        # TODO: Review unreachable code - prompt = template.to_prompt(**values)
 
-                # Additional metadata
-                if project := click.prompt("Project name", default=""):
-                    prompt.project = project
-                if tags := click.prompt("Additional tags (comma-separated)", default=""):
-                    prompt.tags.extend([t.strip() for t in tags.split(",")])
+        # TODO: Review unreachable code - # Additional metadata
+        # TODO: Review unreachable code - if project := click.prompt("Project name", default=""):
+        # TODO: Review unreachable code - prompt.project = project
+        # TODO: Review unreachable code - if tags := click.prompt("Additional tags (comma-separated)", default=""):
+        # TODO: Review unreachable code - prompt.tags.extend([t.strip() for t in tags.split(",")])
 
-                service.db.add_prompt(prompt)
-                click.echo(f"✅ Saved as prompt {prompt.id}")
+        # TODO: Review unreachable code - service.db.add_prompt(prompt)
+        # TODO: Review unreachable code - click.echo(f"✅ Saved as prompt {prompt.id}")
 
-        except ValueError as e:
-            click.echo(f"❌ Error: {e}")
+        # TODO: Review unreachable code - except ValueError as e:
+        # TODO: Review unreachable code - click.echo(f"❌ Error: {e}")
 
     elif create:
         # Interactive template creation
@@ -707,32 +707,32 @@ def template(list_templates: bool, show: str | None, render: str | None,
             if not matches:
                 click.echo(f"No prompt found starting with '{from_prompt}'")
                 return
-            prompt = matches[0]
+            # TODO: Review unreachable code - prompt = matches[0]
         else:
             prompt = service.get_prompt(from_prompt)
             if not prompt:
                 click.echo(f"Prompt not found: {from_prompt}")
                 return
 
-        template_name = click.prompt("Template name")
+        # TODO: Review unreachable code - template_name = click.prompt("Template name")
 
-        # Auto-detect or ask for variables
-        import re
-        detected_vars = re.findall(r'\{(\w+)\}', prompt.text)
+        # TODO: Review unreachable code - # Auto-detect or ask for variables
+        # TODO: Review unreachable code - import re
+        # TODO: Review unreachable code - detected_vars = re.findall(r'\{(\w+)\}', prompt.text)
 
-        if detected_vars:
-            click.echo(f"Detected variables: {', '.join(detected_vars)}")
-            use_detected = click.confirm("Use these variables?", default=True)
-            if use_detected:
-                variables = detected_vars
-            else:
-                var_str = click.prompt("Enter variable names (comma-separated)")
-                variables = [v.strip() for v in var_str.split(",")]
-        else:
-            var_str = click.prompt("Enter variable names (comma-separated)", default="")
-            variables = [v.strip() for v in var_str.split(",")] if var_str else None
+        # TODO: Review unreachable code - if detected_vars:
+        # TODO: Review unreachable code - click.echo(f"Detected variables: {', '.join(detected_vars)}")
+        # TODO: Review unreachable code - use_detected = click.confirm("Use these variables?", default=True)
+        # TODO: Review unreachable code - if use_detected:
+        # TODO: Review unreachable code - variables = detected_vars
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - var_str = click.prompt("Enter variable names (comma-separated)")
+        # TODO: Review unreachable code - variables = [v.strip() for v in var_str.split(",")]
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - var_str = click.prompt("Enter variable names (comma-separated)", default="")
+        # TODO: Review unreachable code - variables = [v.strip() for v in var_str.split(",")] if var_str else None
 
-        template = manager.create_from_prompt(prompt, template_name, variables)
-        path = manager.save_template(template)
+        # TODO: Review unreachable code - template = manager.create_from_prompt(prompt, template_name, variables)
+        # TODO: Review unreachable code - path = manager.save_template(template)
 
-        click.echo(f"✅ Created template from prompt: {path}")
+        # TODO: Review unreachable code - click.echo(f"✅ Created template from prompt: {path}")

@@ -95,12 +95,12 @@ class Scene:
         """Check if this is a single image scene."""
         return self.start_time == self.end_time
 
-    @property
-    def frame_count(self) -> int:
-        """Get number of frames in scene."""
-        if self.start_frame is not None and self.end_frame is not None:
-            return self.end_frame - self.start_frame + 1
-        return len(self.images)
+    # TODO: Review unreachable code - @property
+    # TODO: Review unreachable code - def frame_count(self) -> int:
+    # TODO: Review unreachable code - """Get number of frames in scene."""
+    # TODO: Review unreachable code - if self.start_frame is not None and self.end_frame is not None:
+    # TODO: Review unreachable code - return self.end_frame - self.start_frame + 1
+    # TODO: Review unreachable code - return int(len(self.images))
 
 
 @dataclass
@@ -167,35 +167,35 @@ class ShotList:
         """Get all shots for a specific scene."""
         return [shot for shot in self.shots if shot.scene_id == scene_id]
 
-    def export_to_dict(self) -> dict[str, Any]:
-        """Export shot list to dictionary format."""
-        return {
-            "project_name": self.project_name,
-            "total_duration": self.total_duration,
-            "shot_count": self.shot_count,
-            "scene_count": self.scene_count,
-            "average_shot_duration": self.average_shot_duration,
-            "shots": [
-                {
-                    "number": shot.shot_number,
-                    "scene": shot.scene_id,
-                    "type": shot.shot_type,
-                    "duration": shot.duration,
-                    "description": shot.description,
-                    "camera_angle": shot.camera_angle,
-                    "camera_movement": shot.camera_movement,
-                    "notes": shot.notes,
-                }
-                for shot in self.shots
-            ],
-            "scenes": [
-                {
-                    "id": scene.scene_id,
-                    "type": scene.scene_type.value,
-                    "duration": scene.duration,
-                    "description": scene.ai_description,
-                    "mood": scene.mood,
-                }
-                for scene in self.scenes
-            ],
-        }
+    # TODO: Review unreachable code - def export_to_dict(self) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Export shot list to dictionary format."""
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "project_name": self.project_name,
+    # TODO: Review unreachable code - "total_duration": self.total_duration,
+    # TODO: Review unreachable code - "shot_count": self.shot_count,
+    # TODO: Review unreachable code - "scene_count": self.scene_count,
+    # TODO: Review unreachable code - "average_shot_duration": self.average_shot_duration,
+    # TODO: Review unreachable code - "shots": [
+    # TODO: Review unreachable code - {
+    # TODO: Review unreachable code - "number": shot.shot_number,
+    # TODO: Review unreachable code - "scene": shot.scene_id,
+    # TODO: Review unreachable code - "type": shot.shot_type,
+    # TODO: Review unreachable code - "duration": shot.duration,
+    # TODO: Review unreachable code - "description": shot.description,
+    # TODO: Review unreachable code - "camera_angle": shot.camera_angle,
+    # TODO: Review unreachable code - "camera_movement": shot.camera_movement,
+    # TODO: Review unreachable code - "notes": shot.notes,
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - for shot in self.shots
+    # TODO: Review unreachable code - ],
+    # TODO: Review unreachable code - "scenes": [
+    # TODO: Review unreachable code - {
+    # TODO: Review unreachable code - "id": scene.scene_id,
+    # TODO: Review unreachable code - "type": scene.scene_type.value,
+    # TODO: Review unreachable code - "duration": scene.duration,
+    # TODO: Review unreachable code - "description": scene.ai_description,
+    # TODO: Review unreachable code - "mood": scene.mood,
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - for scene in self.scenes
+    # TODO: Review unreachable code - ],
+    # TODO: Review unreachable code - }

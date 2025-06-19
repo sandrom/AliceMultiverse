@@ -23,177 +23,177 @@ def get_prompt_integration() -> PromptProviderIntegration:
     return _prompt_integration
 
 
-def track_prompt_usage(provider_name: str, project: str | None = None):
-    """Decorator to automatically track prompt usage in provider methods.
+# TODO: Review unreachable code - def track_prompt_usage(provider_name: str, project: str | None = None):
+# TODO: Review unreachable code - """Decorator to automatically track prompt usage in provider methods.
 
-    Usage:
-        @track_prompt_usage("midjourney")
-        def generate(self, prompt: str, **kwargs) -> GenerationResult:
-            ...
-    """
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
-            start_time = time.time()
-            result = None
-            prompt_text = None
+# TODO: Review unreachable code - Usage:
+# TODO: Review unreachable code - @track_prompt_usage("midjourney")
+# TODO: Review unreachable code - def generate(self, prompt: str, **kwargs) -> GenerationResult:
+# TODO: Review unreachable code - ...
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - def decorator(func: Callable) -> Callable:
+# TODO: Review unreachable code - @wraps(func)
+# TODO: Review unreachable code - def wrapper(*args, **kwargs) -> Any:
+# TODO: Review unreachable code - start_time = time.time()
+# TODO: Review unreachable code - result = None
+# TODO: Review unreachable code - prompt_text = None
 
-            try:
-                # Extract prompt from arguments
-                # Handle both positional and keyword arguments
-                if len(args) > 1 and isinstance(args[1], str):
-                    prompt_text = args[1]
-                elif "prompt" in kwargs:
-                    prompt_text = kwargs["prompt"]
-                elif "text" in kwargs:
-                    prompt_text = kwargs["text"]
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - # Extract prompt from arguments
+# TODO: Review unreachable code - # Handle both positional and keyword arguments
+# TODO: Review unreachable code - if len(args) > 1 and isinstance(args[1], str):
+# TODO: Review unreachable code - prompt_text = args[1]
+# TODO: Review unreachable code - elif kwargs is not None and "prompt" in kwargs:
+# TODO: Review unreachable code - prompt_text = kwargs["prompt"]
+# TODO: Review unreachable code - elif kwargs is not None and "text" in kwargs:
+# TODO: Review unreachable code - prompt_text = kwargs["text"]
 
-                # Call the original function
-                result = func(*args, **kwargs)
+# TODO: Review unreachable code - # Call the original function
+# TODO: Review unreachable code - result = func(*args, **kwargs)
 
-                # Track if we have a prompt and result
-                if prompt_text and isinstance(result, GenerationResult):
-                    duration = time.time() - start_time
-                    integration = get_prompt_integration()
+# TODO: Review unreachable code - # Track if we have a prompt and result
+# TODO: Review unreachable code - if prompt_text and isinstance(result, GenerationResult):
+# TODO: Review unreachable code - duration = time.time() - start_time
+# TODO: Review unreachable code - integration = get_prompt_integration()
 
-                    # Extract project from kwargs or result metadata
-                    actual_project = project
-                    if not actual_project:
-                        actual_project = kwargs.get("project") or \
-                                       result.metadata.get("project")
+# TODO: Review unreachable code - # Extract project from kwargs or result metadata
+# TODO: Review unreachable code - actual_project = project
+# TODO: Review unreachable code - if not actual_project:
+# TODO: Review unreachable code - actual_project = kwargs.get("project") or \
+# TODO: Review unreachable code - result.metadata.get("project")
 
-                    integration.track_generation(
-                        provider=provider_name,
-                        prompt_text=prompt_text,
-                        result=result,
-                        cost=result.cost,
-                        duration=duration,
-                        project=actual_project
-                    )
+# TODO: Review unreachable code - integration.track_generation(
+# TODO: Review unreachable code - provider=provider_name,
+# TODO: Review unreachable code - prompt_text=prompt_text,
+# TODO: Review unreachable code - result=result,
+# TODO: Review unreachable code - cost=result.cost,
+# TODO: Review unreachable code - duration=duration,
+# TODO: Review unreachable code - project=actual_project
+# TODO: Review unreachable code - )
 
-                return result
+# TODO: Review unreachable code - return result
 
-            except Exception as e:
-                logger.error(f"Error in prompt tracking: {e}")
-                # Don't break the original function
-                if result is None:
-                    result = func(*args, **kwargs)
-                return result
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Error in prompt tracking: {e}")
+# TODO: Review unreachable code - # Don't break the original function
+# TODO: Review unreachable code - if result is None:
+# TODO: Review unreachable code - result = func(*args, **kwargs)
+# TODO: Review unreachable code - return result
 
-        return wrapper
-    return decorator
-
-
-def track_prompt_from_metadata(provider_name: str):
-    """Decorator for providers that store prompts in metadata.
-
-    Usage:
-        @track_prompt_from_metadata("leonardo")
-        def generate_from_config(self, config: Dict) -> GenerationResult:
-            ...
-    """
-    def decorator(func: Callable) -> Callable:
-        @wraps(func)
-        def wrapper(*args, **kwargs) -> Any:
-            start_time = time.time()
-
-            try:
-                # Call the original function
-                result = func(*args, **kwargs)
-
-                # Track if we have a result with metadata
-                if isinstance(result, GenerationResult) and result.metadata:
-                    integration = get_prompt_integration()
-                    prompt_text = integration.extract_prompt_from_metadata(result.metadata)
-
-                    if prompt_text:
-                        duration = time.time() - start_time
-                        project = result.metadata.get("project")
-
-                        integration.track_generation(
-                            provider=provider_name,
-                            prompt_text=prompt_text,
-                            result=result,
-                            cost=result.cost,
-                            duration=duration,
-                            project=project
-                        )
-
-                return result
-
-            except Exception as e:
-                logger.error(f"Error in metadata prompt tracking: {e}")
-                return result if 'result' in locals() else func(*args, **kwargs)
-
-        return wrapper
-    return decorator
+# TODO: Review unreachable code - return wrapper
+# TODO: Review unreachable code - return decorator
 
 
-class PromptTrackingMixin:
-    """Mixin class for providers to add prompt tracking capabilities."""
+# TODO: Review unreachable code - def track_prompt_from_metadata(provider_name: str):
+# TODO: Review unreachable code - """Decorator for providers that store prompts in metadata.
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self._prompt_integration = get_prompt_integration()
-        self._enable_prompt_tracking = kwargs.get("track_prompts", True)
+# TODO: Review unreachable code - Usage:
+# TODO: Review unreachable code - @track_prompt_from_metadata("leonardo")
+# TODO: Review unreachable code - def generate_from_config(self, config: Dict) -> GenerationResult:
+# TODO: Review unreachable code - ...
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - def decorator(func: Callable) -> Callable:
+# TODO: Review unreachable code - @wraps(func)
+# TODO: Review unreachable code - def wrapper(*args, **kwargs) -> Any:
+# TODO: Review unreachable code - start_time = time.time()
 
-    def track_prompt(self,
-                    prompt: str,
-                    result: GenerationResult,
-                    provider: str | None = None,
-                    **kwargs) -> str | None:
-        """Track a prompt usage.
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - # Call the original function
+# TODO: Review unreachable code - result = func(*args, **kwargs)
 
-        Args:
-            prompt: The prompt text
-            result: Generation result
-            provider: Provider name (defaults to class name)
-            **kwargs: Additional tracking parameters
+# TODO: Review unreachable code - # Track if we have a result with metadata
+# TODO: Review unreachable code - if isinstance(result, GenerationResult) and result.metadata:
+# TODO: Review unreachable code - integration = get_prompt_integration()
+# TODO: Review unreachable code - prompt_text = integration.extract_prompt_from_metadata(result.metadata)
 
-        Returns:
-            Prompt ID if tracked
-        """
-        if not self._enable_prompt_tracking:
-            return None
+# TODO: Review unreachable code - if prompt_text:
+# TODO: Review unreachable code - duration = time.time() - start_time
+# TODO: Review unreachable code - project = result.metadata.get("project")
 
-        try:
-            provider_name = provider or self.__class__.__name__.replace("Provider", "").lower()
+# TODO: Review unreachable code - integration.track_generation(
+# TODO: Review unreachable code - provider=provider_name,
+# TODO: Review unreachable code - prompt_text=prompt_text,
+# TODO: Review unreachable code - result=result,
+# TODO: Review unreachable code - cost=result.cost,
+# TODO: Review unreachable code - duration=duration,
+# TODO: Review unreachable code - project=project
+# TODO: Review unreachable code - )
 
-            return self._prompt_integration.track_generation(
-                provider=provider_name,
-                prompt_text=prompt,
-                result=result,
-                cost=kwargs.get("cost", result.cost),
-                duration=kwargs.get("duration"),
-                project=kwargs.get("project")
-            )
-        except Exception as e:
-            logger.error(f"Failed to track prompt: {e}")
-            return None
+# TODO: Review unreachable code - return result
+
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Error in metadata prompt tracking: {e}")
+# TODO: Review unreachable code - return result if 'result' in locals() else func(*args, **kwargs)
+
+# TODO: Review unreachable code - return wrapper
+# TODO: Review unreachable code - return decorator
 
 
-# Convenience function for manual tracking
-def track_prompt_manually(
-    provider: str,
-    prompt: str,
-    result: GenerationResult,
-    **kwargs
-) -> str | None:
-    """Manually track a prompt usage.
+# TODO: Review unreachable code - class PromptTrackingMixin:
+# TODO: Review unreachable code - """Mixin class for providers to add prompt tracking capabilities."""
 
-    Args:
-        provider: Provider name
-        prompt: Prompt text
-        result: Generation result
-        **kwargs: Additional parameters (cost, duration, project)
+# TODO: Review unreachable code - def __init__(self, *args, **kwargs):
+# TODO: Review unreachable code - super().__init__(*args, **kwargs)
+# TODO: Review unreachable code - self._prompt_integration = get_prompt_integration()
+# TODO: Review unreachable code - self._enable_prompt_tracking = kwargs.get("track_prompts", True)
 
-    Returns:
-        Prompt ID if tracked
-    """
-    integration = get_prompt_integration()
-    return integration.track_generation(
-        provider=provider,
-        prompt_text=prompt,
-        result=result,
-        **kwargs
-    )
+# TODO: Review unreachable code - def track_prompt(self,
+# TODO: Review unreachable code - prompt: str,
+# TODO: Review unreachable code - result: GenerationResult,
+# TODO: Review unreachable code - provider: str | None = None,
+# TODO: Review unreachable code - **kwargs) -> str | None:
+# TODO: Review unreachable code - """Track a prompt usage.
+
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - prompt: The prompt text
+# TODO: Review unreachable code - result: Generation result
+# TODO: Review unreachable code - provider: Provider name (defaults to class name)
+# TODO: Review unreachable code - **kwargs: Additional tracking parameters
+
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Prompt ID if tracked
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - if not self._enable_prompt_tracking:
+# TODO: Review unreachable code - return None
+
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - provider_name = provider or self.__class__.__name__.replace("Provider", "").lower()
+
+# TODO: Review unreachable code - return self._prompt_integration.track_generation(
+# TODO: Review unreachable code - provider=provider_name,
+# TODO: Review unreachable code - prompt_text=prompt,
+# TODO: Review unreachable code - result=result,
+# TODO: Review unreachable code - cost=kwargs.get("cost", result.cost),
+# TODO: Review unreachable code - duration=kwargs.get("duration"),
+# TODO: Review unreachable code - project=kwargs.get("project")
+# TODO: Review unreachable code - )
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Failed to track prompt: {e}")
+# TODO: Review unreachable code - return None
+
+
+# TODO: Review unreachable code - # Convenience function for manual tracking
+# TODO: Review unreachable code - def track_prompt_manually(
+# TODO: Review unreachable code - provider: str,
+# TODO: Review unreachable code - prompt: str,
+# TODO: Review unreachable code - result: GenerationResult,
+# TODO: Review unreachable code - **kwargs
+# TODO: Review unreachable code - ) -> str | None:
+# TODO: Review unreachable code - """Manually track a prompt usage.
+
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - provider: Provider name
+# TODO: Review unreachable code - prompt: Prompt text
+# TODO: Review unreachable code - result: Generation result
+# TODO: Review unreachable code - **kwargs: Additional parameters (cost, duration, project)
+
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Prompt ID if tracked
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - integration = get_prompt_integration()
+# TODO: Review unreachable code - return integration.track_generation(
+# TODO: Review unreachable code - provider=provider,
+# TODO: Review unreachable code - prompt_text=prompt,
+# TODO: Review unreachable code - result=result,
+# TODO: Review unreachable code - **kwargs
+# TODO: Review unreachable code - )

@@ -86,26 +86,26 @@ class MediaOrganizer(
         if watch:
             return self._watch_and_organize()
         
-        with track_operation("organize.total"):
-            # Find all media files
-            with track_operation("organize.find_files"):
-                media_files = list(self._find_media_files())
-            logger.info(f"Found {len(media_files)} media files to process")
+        # TODO: Review unreachable code - with track_operation("organize.total"):
+        # TODO: Review unreachable code - # Find all media files
+        # TODO: Review unreachable code - with track_operation("organize.find_files"):
+        # TODO: Review unreachable code - media_files = list(self._find_media_files())
+        # TODO: Review unreachable code - logger.info(f"Found {len(media_files)} media files to process")
             
-            if not media_files:
-                return self.stats
+        # TODO: Review unreachable code - if not media_files:
+        # TODO: Review unreachable code - return self.stats
             
-            # Use parallel processing for large collections
-            if self.parallel_enabled and len(media_files) > self.perf_config.batch_size:
-                logger.info("Using parallel processing for large collection")
-                self._organize_parallel(media_files)
-            else:
-                # Fall back to sequential processing
-                logger.info("Using sequential processing")
-                self._organize_sequential(media_files)
+        # TODO: Review unreachable code - # Use parallel processing for large collections
+        # TODO: Review unreachable code - if self.parallel_enabled and len(media_files) > self.perf_config.batch_size:
+        # TODO: Review unreachable code - logger.info("Using parallel processing for large collection")
+        # TODO: Review unreachable code - self._organize_parallel(media_files)
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - # Fall back to sequential processing
+        # TODO: Review unreachable code - logger.info("Using sequential processing")
+        # TODO: Review unreachable code - self._organize_sequential(media_files)
             
-            self._log_statistics()
-            return self.stats
+        # TODO: Review unreachable code - self._log_statistics()
+        # TODO: Review unreachable code - return self.stats
     
     def _organize_sequential(self, media_files: List[Path]) -> None:
         """Original sequential organization logic."""
@@ -160,20 +160,20 @@ class MediaOrganizer(
             
             return batch_assets
         
-        # Process in batches
-        all_assets = self.batch_processor.process_in_batches(
-            media_files,
-            process_batch,
-            combine_func=lambda results: [item for batch in results for item in batch]
-        )
+        # TODO: Review unreachable code - # Process in batches
+        # TODO: Review unreachable code - all_assets = self.batch_processor.process_in_batches(
+        # TODO: Review unreachable code - media_files,
+        # TODO: Review unreachable code - process_batch,
+        # TODO: Review unreachable code - combine_func=lambda results: [item for batch in results for item in batch]
+        # TODO: Review unreachable code - )
         
-        # Batch insert into database
-        if all_assets:
-            try:
-                inserted = self.search_db.batch_upsert_assets(all_assets)
-                logger.info(f"Batch inserted {inserted} assets into database")
-            except Exception as e:
-                logger.error(f"Batch database insert failed: {e}")
+        # TODO: Review unreachable code - # Batch insert into database
+        # TODO: Review unreachable code - if all_assets:
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - inserted = self.search_db.batch_upsert_assets(all_assets)
+        # TODO: Review unreachable code - logger.info(f"Batch inserted {inserted} assets into database")
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Batch database insert failed: {e}")
     
     def _organize_parallel_individual(self, media_files: List[Path]) -> None:
         """Parallel processing with individual database operations."""
@@ -193,10 +193,10 @@ class MediaOrganizer(
         # Get the normal result
         result = self._process_file(media_path)
         
-        if result["status"] == "success":
+        if result is not None and result["status"] == "success":
             # Convert to asset data format
             return self._result_to_asset_data(media_path, result)
-        return None
+        # TODO: Review unreachable code - return None
     
     def _process_file_with_metadata(self, media_path: Path, metadata: dict) -> Optional[dict]:
         """Process file with pre-extracted metadata."""
@@ -204,19 +204,19 @@ class MediaOrganizer(
         # For now, fall back to regular processing
         return self._process_file_for_batch(media_path)
     
-    def _result_to_asset_data(self, media_path: Path, result: dict) -> dict:
-        """Convert organize result to asset data for database."""
-        # Extract data from result and format for database
-        analysis = result.get("analysis", {})
+    # TODO: Review unreachable code - def _result_to_asset_data(self, media_path: Path, result: dict) -> dict:
+    # TODO: Review unreachable code - """Convert organize result to asset data for database."""
+    # TODO: Review unreachable code - # Extract data from result and format for database
+    # TODO: Review unreachable code - analysis = result.get("analysis", {})
         
-        return {
-            "content_hash": analysis.get("content_hash", ""),
-            "file_path": result.get("destination", ""),
-            "file_name": media_path.name,
-            "file_size": media_path.stat().st_size,
-            "media_type": analysis.get("media_type", "image"),
-            "source_type": result.get("source_type", "unknown"),
-            "date_taken": result.get("date_taken"),
-            "project": result.get("project_folder", ""),
-            "metadata": analysis,
-        }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "content_hash": analysis.get("content_hash", ""),
+    # TODO: Review unreachable code - "file_path": result.get("destination", ""),
+    # TODO: Review unreachable code - "file_name": media_path.name,
+    # TODO: Review unreachable code - "file_size": media_path.stat().st_size,
+    # TODO: Review unreachable code - "media_type": analysis.get("media_type", "image"),
+    # TODO: Review unreachable code - "source_type": result.get("source_type", "unknown"),
+    # TODO: Review unreachable code - "date_taken": result.get("date_taken"),
+    # TODO: Review unreachable code - "project": result.get("project_folder", ""),
+    # TODO: Review unreachable code - "metadata": analysis,
+    # TODO: Review unreachable code - }

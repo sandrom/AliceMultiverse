@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
-import cv2
+import cv2  # type: ignore
 import numpy as np
 
 logger = logging.getLogger(__name__)
@@ -34,8 +34,8 @@ class Portal:
         """Calculate normalized area of portal."""
         if self.shape_type == "circle":
             return np.pi * (self.size[0] / 2) * (self.size[1] / 2)
-        else:
-            return self.size[0] * self.size[1]
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - return self.size[0] * self.size[1]
 
     @property
     def quality_score(self) -> float:
@@ -155,161 +155,161 @@ class PortalDetector:
 
         return portals[:5]  # Return top 5 portals
 
-    def _detect_circular_portals(
-        self,
-        gray: np.ndarray,
-        img: np.ndarray
-    ) -> list[Portal]:
-        """Detect circular portal shapes."""
-        h, w = gray.shape
-        portals = []
+    # TODO: Review unreachable code - def _detect_circular_portals(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - gray: np.ndarray,
+    # TODO: Review unreachable code - img: np.ndarray
+    # TODO: Review unreachable code - ) -> list[Portal]:
+    # TODO: Review unreachable code - """Detect circular portal shapes."""
+    # TODO: Review unreachable code - h, w = gray.shape
+    # TODO: Review unreachable code - portals = []
 
-        # Apply blur to reduce noise
-        blurred = cv2.GaussianBlur(gray, (9, 9), 2)
+    # TODO: Review unreachable code - # Apply blur to reduce noise
+    # TODO: Review unreachable code - blurred = cv2.GaussianBlur(gray, (9, 9), 2)
 
-        # Detect circles using HoughCircles
-        circles = cv2.HoughCircles(
-            blurred,
-            cv2.HOUGH_GRADIENT,
-            dp=1,
-            minDist=min(h, w) // 8,
-            param1=50,
-            param2=30,
-            minRadius=int(min(h, w) * 0.05),
-            maxRadius=int(min(h, w) * 0.4)
-        )
+    # TODO: Review unreachable code - # Detect circles using HoughCircles
+    # TODO: Review unreachable code - circles = cv2.HoughCircles(
+    # TODO: Review unreachable code - blurred,
+    # TODO: Review unreachable code - cv2.HOUGH_GRADIENT,
+    # TODO: Review unreachable code - dp=1,
+    # TODO: Review unreachable code - minDist=min(h, w) // 8,
+    # TODO: Review unreachable code - param1=50,
+    # TODO: Review unreachable code - param2=30,
+    # TODO: Review unreachable code - minRadius=int(min(h, w) * 0.05),
+    # TODO: Review unreachable code - maxRadius=int(min(h, w) * 0.4)
+    # TODO: Review unreachable code - )
 
-        if circles is not None:
-            circles = np.uint16(np.around(circles))
+    # TODO: Review unreachable code - if circles is not None:
+    # TODO: Review unreachable code - circles = np.uint16(np.around(circles))
 
-            for circle in circles[0]:
-                x, y, r = circle
+    # TODO: Review unreachable code - for circle in circles[0]:
+    # TODO: Review unreachable code - x, y, r = circle
 
-                # Check if area is relatively dark
-                mask = np.zeros(gray.shape, np.uint8)
-                cv2.circle(mask, (x, y), r, 255, -1)
-                mean_val = cv2.mean(gray, mask=mask)[0] / 255.0
+    # TODO: Review unreachable code - # Check if area is relatively dark
+    # TODO: Review unreachable code - mask = np.zeros(gray.shape, np.uint8)
+    # TODO: Review unreachable code - cv2.circle(mask, (x, y), r, 255, -1)
+    # TODO: Review unreachable code - mean_val = cv2.mean(gray, mask=mask)[0] / 255.0
 
-                # Check edge strength
-                edges = cv2.Canny(blurred, 50, 150)
-                edge_mask = cv2.circle(mask.copy(), (x, y), r, 255, 3)
-                edge_strength = np.sum(edges & edge_mask) / (2 * np.pi * r) / 255.0
+    # TODO: Review unreachable code - # Check edge strength
+    # TODO: Review unreachable code - edges = cv2.Canny(blurred, 50, 150)
+    # TODO: Review unreachable code - edge_mask = cv2.circle(mask.copy(), (x, y), r, 255, 3)
+    # TODO: Review unreachable code - edge_strength = np.sum(edges & edge_mask) / (2 * np.pi * r) / 255.0
 
-                if mean_val < self.darkness_threshold or edge_strength > 0.3:
-                    portal = Portal(
-                        shape_type="circle",
-                        center=(x / w, y / h),
-                        size=(2 * r / w, 2 * r / h),
-                        confidence=0.9,
-                        darkness_ratio=1.0 - mean_val,
-                        edge_strength=min(edge_strength * 2, 1.0)
-                    )
-                    portals.append(portal)
+    # TODO: Review unreachable code - if mean_val < self.darkness_threshold or edge_strength > 0.3:
+    # TODO: Review unreachable code - portal = Portal(
+    # TODO: Review unreachable code - shape_type="circle",
+    # TODO: Review unreachable code - center=(x / w, y / h),
+    # TODO: Review unreachable code - size=(2 * r / w, 2 * r / h),
+    # TODO: Review unreachable code - confidence=0.9,
+    # TODO: Review unreachable code - darkness_ratio=1.0 - mean_val,
+    # TODO: Review unreachable code - edge_strength=min(edge_strength * 2, 1.0)
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - portals.append(portal)
 
-        return portals
+    # TODO: Review unreachable code - return portals
 
-    def _detect_rectangular_portals(
-        self,
-        gray: np.ndarray,
-        img: np.ndarray
-    ) -> list[Portal]:
-        """Detect rectangular portal shapes (doors, windows, screens)."""
-        h, w = gray.shape
-        portals = []
+    # TODO: Review unreachable code - def _detect_rectangular_portals(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - gray: np.ndarray,
+    # TODO: Review unreachable code - img: np.ndarray
+    # TODO: Review unreachable code - ) -> list[Portal]:
+    # TODO: Review unreachable code - """Detect rectangular portal shapes (doors, windows, screens)."""
+    # TODO: Review unreachable code - h, w = gray.shape
+    # TODO: Review unreachable code - portals = []
 
-        # Edge detection
-        edges = cv2.Canny(gray, 50, 150)
+    # TODO: Review unreachable code - # Edge detection
+    # TODO: Review unreachable code - edges = cv2.Canny(gray, 50, 150)
 
-        # Find contours
-        contours, _ = cv2.findContours(
-            edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
+    # TODO: Review unreachable code - # Find contours
+    # TODO: Review unreachable code - contours, _ = cv2.findContours(
+    # TODO: Review unreachable code - edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    # TODO: Review unreachable code - )
 
-        for contour in contours:
-            # Approximate contour to polygon
-            perimeter = cv2.arcLength(contour, True)
-            approx = cv2.approxPolyDP(contour, 0.04 * perimeter, True)
+    # TODO: Review unreachable code - for contour in contours:
+    # TODO: Review unreachable code - # Approximate contour to polygon
+    # TODO: Review unreachable code - perimeter = cv2.arcLength(contour, True)
+    # TODO: Review unreachable code - approx = cv2.approxPolyDP(contour, 0.04 * perimeter, True)
 
-            # Check if it's a rectangle (4 vertices)
-            if len(approx) == 4:
-                x, y, w_rect, h_rect = cv2.boundingRect(approx)
+    # TODO: Review unreachable code - # Check if it's a rectangle (4 vertices)
+    # TODO: Review unreachable code - if len(approx) == 4:
+    # TODO: Review unreachable code - x, y, w_rect, h_rect = cv2.boundingRect(approx)
 
-                # Check size constraints
-                area_ratio = (w_rect * h_rect) / (w * h)
-                if self.min_portal_size < area_ratio < self.max_portal_size:
-                    # Check darkness
-                    roi = gray[y:y+h_rect, x:x+w_rect]
-                    mean_val = np.mean(roi) / 255.0
+    # TODO: Review unreachable code - # Check size constraints
+    # TODO: Review unreachable code - area_ratio = (w_rect * h_rect) / (w * h)
+    # TODO: Review unreachable code - if self.min_portal_size < area_ratio < self.max_portal_size:
+    # TODO: Review unreachable code - # Check darkness
+    # TODO: Review unreachable code - roi = gray[y:y+h_rect, x:x+w_rect]
+    # TODO: Review unreachable code - mean_val = np.mean(roi) / 255.0
 
-                    # Check if it's roughly rectangular (not too skewed)
-                    aspect_ratio = w_rect / h_rect
-                    if 0.3 < aspect_ratio < 3.0:
-                        # Calculate edge strength
-                        edge_roi = edges[y:y+h_rect, x:x+w_rect]
-                        edge_density = np.sum(edge_roi > 0) / (w_rect * h_rect)
+    # TODO: Review unreachable code - # Check if it's roughly rectangular (not too skewed)
+    # TODO: Review unreachable code - aspect_ratio = w_rect / h_rect
+    # TODO: Review unreachable code - if 0.3 < aspect_ratio < 3.0:
+    # TODO: Review unreachable code - # Calculate edge strength
+    # TODO: Review unreachable code - edge_roi = edges[y:y+h_rect, x:x+w_rect]
+    # TODO: Review unreachable code - edge_density = np.sum(edge_roi > 0) / (w_rect * h_rect)
 
-                        portal = Portal(
-                            shape_type="rectangle",
-                            center=((x + w_rect/2) / w, (y + h_rect/2) / h),
-                            size=(w_rect / w, h_rect / h),
-                            confidence=0.8,
-                            darkness_ratio=1.0 - mean_val,
-                            edge_strength=min(edge_density * 10, 1.0)
-                        )
+    # TODO: Review unreachable code - portal = Portal(
+    # TODO: Review unreachable code - shape_type="rectangle",
+    # TODO: Review unreachable code - center=((x + w_rect/2) / w, (y + h_rect/2) / h),
+    # TODO: Review unreachable code - size=(w_rect / w, h_rect / h),
+    # TODO: Review unreachable code - confidence=0.8,
+    # TODO: Review unreachable code - darkness_ratio=1.0 - mean_val,
+    # TODO: Review unreachable code - edge_strength=min(edge_density * 10, 1.0)
+    # TODO: Review unreachable code - )
 
-                        if portal.quality_score > 0.3:
-                            portals.append(portal)
+    # TODO: Review unreachable code - if portal.quality_score > 0.3:
+    # TODO: Review unreachable code - portals.append(portal)
 
-        return portals
+    # TODO: Review unreachable code - return portals
 
-    def _detect_arch_portals(
-        self,
-        gray: np.ndarray,
-        img: np.ndarray
-    ) -> list[Portal]:
-        """Detect arch-shaped portals."""
-        h, w = gray.shape
-        portals = []
+    # TODO: Review unreachable code - def _detect_arch_portals(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - gray: np.ndarray,
+    # TODO: Review unreachable code - img: np.ndarray
+    # TODO: Review unreachable code - ) -> list[Portal]:
+    # TODO: Review unreachable code - """Detect arch-shaped portals."""
+    # TODO: Review unreachable code - h, w = gray.shape
+    # TODO: Review unreachable code - portals = []
 
-        # Use ellipse detection for arches
-        edges = cv2.Canny(gray, 50, 150)
-        contours, _ = cv2.findContours(
-            edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
-        )
+    # TODO: Review unreachable code - # Use ellipse detection for arches
+    # TODO: Review unreachable code - edges = cv2.Canny(gray, 50, 150)
+    # TODO: Review unreachable code - contours, _ = cv2.findContours(
+    # TODO: Review unreachable code - edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE
+    # TODO: Review unreachable code - )
 
-        for contour in contours:
-            if len(contour) >= 5:  # Need at least 5 points for ellipse
-                try:
-                    ellipse = cv2.fitEllipse(contour)
-                    (x, y), (w_ellipse, h_ellipse), angle = ellipse
+    # TODO: Review unreachable code - for contour in contours:
+    # TODO: Review unreachable code - if len(contour) >= 5:  # Need at least 5 points for ellipse
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - ellipse = cv2.fitEllipse(contour)
+    # TODO: Review unreachable code - (x, y), (w_ellipse, h_ellipse), angle = ellipse
 
-                    # Check if it's arch-like (wider than tall, not too angled)
-                    if (w_ellipse > h_ellipse and
-                        abs(angle - 90) < 45 and
-                        self.min_portal_size < (w_ellipse * h_ellipse) / (w * h) < self.max_portal_size):
+    # TODO: Review unreachable code - # Check if it's arch-like (wider than tall, not too angled)
+    # TODO: Review unreachable code - if (w_ellipse > h_ellipse and
+    # TODO: Review unreachable code - abs(angle - 90) < 45 and
+    # TODO: Review unreachable code - self.min_portal_size < (w_ellipse * h_ellipse) / (w * h) < self.max_portal_size):
 
-                        # Create mask for darkness check
-                        mask = np.zeros(gray.shape, np.uint8)
-                        cv2.ellipse(mask, ellipse, 255, -1)
-                        mean_val = cv2.mean(gray, mask=mask)[0] / 255.0
+    # TODO: Review unreachable code - # Create mask for darkness check
+    # TODO: Review unreachable code - mask = np.zeros(gray.shape, np.uint8)
+    # TODO: Review unreachable code - cv2.ellipse(mask, ellipse, 255, -1)
+    # TODO: Review unreachable code - mean_val = cv2.mean(gray, mask=mask)[0] / 255.0
 
-                        portal = Portal(
-                            shape_type="arch",
-                            center=(x / w, y / h),
-                            size=(w_ellipse / w, h_ellipse / h),
-                            confidence=0.7,
-                            darkness_ratio=1.0 - mean_val,
-                            edge_strength=0.6  # Moderate edge strength for arches
-                        )
+    # TODO: Review unreachable code - portal = Portal(
+    # TODO: Review unreachable code - shape_type="arch",
+    # TODO: Review unreachable code - center=(x / w, y / h),
+    # TODO: Review unreachable code - size=(w_ellipse / w, h_ellipse / h),
+    # TODO: Review unreachable code - confidence=0.7,
+    # TODO: Review unreachable code - darkness_ratio=1.0 - mean_val,
+    # TODO: Review unreachable code - edge_strength=0.6  # Moderate edge strength for arches
+    # TODO: Review unreachable code - )
 
-                        if portal.quality_score > 0.3:
-                            portals.append(portal)
+    # TODO: Review unreachable code - if portal.quality_score > 0.3:
+    # TODO: Review unreachable code - portals.append(portal)
 
-                except cv2.error:
-                    # Skip if ellipse fitting fails
-                    continue
+    # TODO: Review unreachable code - except cv2.error:
+    # TODO: Review unreachable code - # Skip if ellipse fitting fails
+    # TODO: Review unreachable code - continue
 
-        return portals
+    # TODO: Review unreachable code - return portals
 
 
 class PortalEffectGenerator:
@@ -405,61 +405,61 @@ class PortalEffectGenerator:
 
         return sorted(matches, key=lambda m: m.overall_score, reverse=True)
 
-    def _generate_transition_mask(
-        self,
-        portal: Portal,
-        image_shape: tuple[int, int]
-    ) -> np.ndarray:
-        """Generate mask for portal transition."""
-        h, w = image_shape
-        mask = np.zeros((h, w), dtype=np.float32)
+    # TODO: Review unreachable code - def _generate_transition_mask(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - portal: Portal,
+    # TODO: Review unreachable code - image_shape: tuple[int, int]
+    # TODO: Review unreachable code - ) -> np.ndarray:
+    # TODO: Review unreachable code - """Generate mask for portal transition."""
+    # TODO: Review unreachable code - h, w = image_shape
+    # TODO: Review unreachable code - mask = np.zeros((h, w), dtype=np.float32)
 
-        center_x = int(portal.center[0] * w)
-        center_y = int(portal.center[1] * h)
+    # TODO: Review unreachable code - center_x = int(portal.center[0] * w)
+    # TODO: Review unreachable code - center_y = int(portal.center[1] * h)
 
-        if portal.shape_type == "circle":
-            radius = int(portal.size[0] * w / 2)
-            cv2.circle(mask, (center_x, center_y), radius, 1.0, -1)
-            # Add gradient fade
-            for r in range(radius, int(radius * 1.3)):
-                alpha = 1.0 - (r - radius) / (radius * 0.3)
-                cv2.circle(mask, (center_x, center_y), r, alpha, 1)
+    # TODO: Review unreachable code - if portal.shape_type == "circle":
+    # TODO: Review unreachable code - radius = int(portal.size[0] * w / 2)
+    # TODO: Review unreachable code - cv2.circle(mask, (center_x, center_y), radius, 1.0, -1)
+    # TODO: Review unreachable code - # Add gradient fade
+    # TODO: Review unreachable code - for r in range(radius, int(radius * 1.3)):
+    # TODO: Review unreachable code - alpha = 1.0 - (r - radius) / (radius * 0.3)
+    # TODO: Review unreachable code - cv2.circle(mask, (center_x, center_y), r, alpha, 1)
 
-        elif portal.shape_type == "rectangle":
-            width = int(portal.size[0] * w)
-            height = int(portal.size[1] * h)
-            x1 = center_x - width // 2
-            y1 = center_y - height // 2
-            x2 = x1 + width
-            y2 = y1 + height
-            cv2.rectangle(mask, (x1, y1), (x2, y2), 1.0, -1)
+    # TODO: Review unreachable code - elif portal.shape_type == "rectangle":
+    # TODO: Review unreachable code - width = int(portal.size[0] * w)
+    # TODO: Review unreachable code - height = int(portal.size[1] * h)
+    # TODO: Review unreachable code - x1 = center_x - width // 2
+    # TODO: Review unreachable code - y1 = center_y - height // 2
+    # TODO: Review unreachable code - x2 = x1 + width
+    # TODO: Review unreachable code - y2 = y1 + height
+    # TODO: Review unreachable code - cv2.rectangle(mask, (x1, y1), (x2, y2), 1.0, -1)
 
-        elif portal.shape_type == "arch":
-            # Approximate arch with ellipse
-            width = int(portal.size[0] * w)
-            height = int(portal.size[1] * h)
-            cv2.ellipse(
-                mask,
-                (center_x, center_y),
-                (width // 2, height // 2),
-                0, 180, 360, 1.0, -1
-            )
+    # TODO: Review unreachable code - elif portal.shape_type == "arch":
+    # TODO: Review unreachable code - # Approximate arch with ellipse
+    # TODO: Review unreachable code - width = int(portal.size[0] * w)
+    # TODO: Review unreachable code - height = int(portal.size[1] * h)
+    # TODO: Review unreachable code - cv2.ellipse(
+    # TODO: Review unreachable code - mask,
+    # TODO: Review unreachable code - (center_x, center_y),
+    # TODO: Review unreachable code - (width // 2, height // 2),
+    # TODO: Review unreachable code - 0, 180, 360, 1.0, -1
+    # TODO: Review unreachable code - )
 
-        # Apply Gaussian blur for smooth edges
-        mask = cv2.GaussianBlur(mask, (21, 21), 10)
+    # TODO: Review unreachable code - # Apply Gaussian blur for smooth edges
+    # TODO: Review unreachable code - mask = cv2.GaussianBlur(mask, (21, 21), 10)
 
-        return mask
+    # TODO: Review unreachable code - return mask
 
-    def _recommend_effect(self, match: PortalMatch) -> str:
-        """Recommend transition effect based on portal match."""
-        if match.alignment_score > 0.9 and match.size_compatibility > 0.8:
-            return "direct_portal"  # Perfect alignment
-        elif match.portal1.shape_type == "circle" and match.portal2.shape_type == "circle":
-            return "zoom_spiral"  # Circular zoom with rotation
-        elif match.transition_type == "zoom_through":
-            return "zoom_blur"  # Fast zoom with motion blur
-        else:
-            return "portal_wipe"  # Masked wipe transition
+    # TODO: Review unreachable code - def _recommend_effect(self, match: PortalMatch) -> str:
+    # TODO: Review unreachable code - """Recommend transition effect based on portal match."""
+    # TODO: Review unreachable code - if match.alignment_score > 0.9 and match.size_compatibility > 0.8:
+    # TODO: Review unreachable code - return "direct_portal"  # Perfect alignment
+    # TODO: Review unreachable code - elif match.portal1.shape_type == "circle" and match.portal2.shape_type == "circle":
+    # TODO: Review unreachable code - return "zoom_spiral"  # Circular zoom with rotation
+    # TODO: Review unreachable code - elif match.transition_type == "zoom_through":
+    # TODO: Review unreachable code - return "zoom_blur"  # Fast zoom with motion blur
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return "portal_wipe"  # Masked wipe transition
 
 
 def export_portal_effect(

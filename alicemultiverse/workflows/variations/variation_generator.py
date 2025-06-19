@@ -284,397 +284,397 @@ class VariationGenerator:
 
         return requests
 
-    def _select_variation_types(self, base_content: ContentBase) -> list[VariationType]:
-        """Select appropriate variation types for content."""
-        # Analyze content to determine suitable variations
-        prompt_lower = base_content.original_prompt.lower()
+    # TODO: Review unreachable code - def _select_variation_types(self, base_content: ContentBase) -> list[VariationType]:
+    # TODO: Review unreachable code - """Select appropriate variation types for content."""
+    # TODO: Review unreachable code - # Analyze content to determine suitable variations
+    # TODO: Review unreachable code - prompt_lower = base_content.original_prompt.lower()
 
-        suitable_types = []
+    # TODO: Review unreachable code - suitable_types = []
 
-        # Always try style and mood
-        suitable_types.extend([VariationType.STYLE, VariationType.MOOD])
+    # TODO: Review unreachable code - # Always try style and mood
+    # TODO: Review unreachable code - suitable_types.extend([VariationType.STYLE, VariationType.MOOD])
 
-        # Add color if not already specified
-        if not any(color in prompt_lower for color in ["color", "black and white", "monochrome"]):
-            suitable_types.append(VariationType.COLOR)
+    # TODO: Review unreachable code - # Add color if not already specified
+    # TODO: Review unreachable code - if not any(color in prompt_lower for color in ["color", "black and white", "monochrome"]):
+    # TODO: Review unreachable code - suitable_types.append(VariationType.COLOR)
 
-        # Add composition for scenes
-        if any(word in prompt_lower for word in ["scene", "landscape", "view", "shot"]):
-            suitable_types.append(VariationType.COMPOSITION)
+    # TODO: Review unreachable code - # Add composition for scenes
+    # TODO: Review unreachable code - if any(word in prompt_lower for word in ["scene", "landscape", "view", "shot"]):
+    # TODO: Review unreachable code - suitable_types.append(VariationType.COMPOSITION)
 
-        # Add time variations for outdoor scenes
-        if any(word in prompt_lower for word in ["outdoor", "landscape", "city", "nature"]):
-            suitable_types.append(VariationType.TIME_OF_DAY)
+    # TODO: Review unreachable code - # Add time variations for outdoor scenes
+    # TODO: Review unreachable code - if any(word in prompt_lower for word in ["outdoor", "landscape", "city", "nature"]):
+    # TODO: Review unreachable code - suitable_types.append(VariationType.TIME_OF_DAY)
 
-        # Add camera for dynamic content
-        if base_content.provider in ["runway", "luma", "pika"]:
-            suitable_types.append(VariationType.CAMERA)
+    # TODO: Review unreachable code - # Add camera for dynamic content
+    # TODO: Review unreachable code - if base_content.provider in ["runway", "luma", "pika"]:
+    # TODO: Review unreachable code - suitable_types.append(VariationType.CAMERA)
 
-        return suitable_types
+    # TODO: Review unreachable code - return suitable_types
 
-    async def _select_variations(
-        self,
-        base_content: ContentBase,
-        variation_types: list[VariationType],
-        strategy: VariationStrategy,
-        max_variations: int,
-    ) -> list[VariationTemplate]:
-        """Select specific variations based on strategy."""
-        selected = []
+    # TODO: Review unreachable code - async def _select_variations(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - base_content: ContentBase,
+    # TODO: Review unreachable code - variation_types: list[VariationType],
+    # TODO: Review unreachable code - strategy: VariationStrategy,
+    # TODO: Review unreachable code - max_variations: int,
+    # TODO: Review unreachable code - ) -> list[VariationTemplate]:
+    # TODO: Review unreachable code - """Select specific variations based on strategy."""
+    # TODO: Review unreachable code - selected = []
 
-        if strategy == VariationStrategy.SYSTEMATIC:
-            # Try all variations systematically
-            for var_type in variation_types:
-                if var_type in self.templates:
-                    templates = list(self.templates[var_type].values())
-                    selected.extend(templates[:max_variations // len(variation_types)])
+    # TODO: Review unreachable code - if strategy == VariationStrategy.SYSTEMATIC:
+    # TODO: Review unreachable code - # Try all variations systematically
+    # TODO: Review unreachable code - for var_type in variation_types:
+    # TODO: Review unreachable code - if var_type in self.templates:
+    # TODO: Review unreachable code - templates = list(self.templates[var_type].values())
+    # TODO: Review unreachable code - selected.extend(templates[:max_variations // len(variation_types)])
 
-        elif strategy == VariationStrategy.PERFORMANCE_BASED:
-            # Select based on past performance
-            for var_type in variation_types:
-                if var_type in self.templates:
-                    # Sort by success rate and performance
-                    templates = sorted(
-                        self.templates[var_type].values(),
-                        key=lambda t: (t.success_rate * 0.7 + t.performance_score * 0.3),
-                        reverse=True
-                    )
-                    selected.extend(templates[:max_variations // len(variation_types)])
+    # TODO: Review unreachable code - elif strategy == VariationStrategy.PERFORMANCE_BASED:
+    # TODO: Review unreachable code - # Select based on past performance
+    # TODO: Review unreachable code - for var_type in variation_types:
+    # TODO: Review unreachable code - if var_type in self.templates:
+    # TODO: Review unreachable code - # Sort by success rate and performance
+    # TODO: Review unreachable code - templates = sorted(
+    # TODO: Review unreachable code - self.templates[var_type].values(),
+    # TODO: Review unreachable code - key=lambda t: (t.success_rate * 0.7 + t.performance_score * 0.3),
+    # TODO: Review unreachable code - reverse=True
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - selected.extend(templates[:max_variations // len(variation_types)])
 
-        elif strategy == VariationStrategy.EXPLORATION:
-            # Try less-used variations
-            for var_type in variation_types:
-                if var_type in self.templates:
-                    # Sort by usage count (ascending)
-                    templates = sorted(
-                        self.templates[var_type].values(),
-                        key=lambda t: t.usage_count
-                    )
-                    selected.extend(templates[:max_variations // len(variation_types)])
+    # TODO: Review unreachable code - elif strategy == VariationStrategy.EXPLORATION:
+    # TODO: Review unreachable code - # Try less-used variations
+    # TODO: Review unreachable code - for var_type in variation_types:
+    # TODO: Review unreachable code - if var_type in self.templates:
+    # TODO: Review unreachable code - # Sort by usage count (ascending)
+    # TODO: Review unreachable code - templates = sorted(
+    # TODO: Review unreachable code - self.templates[var_type].values(),
+    # TODO: Review unreachable code - key=lambda t: t.usage_count
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - selected.extend(templates[:max_variations // len(variation_types)])
 
-        elif strategy == VariationStrategy.OPTIMIZATION:
-            # Refine successful patterns
-            if self.style_memory:
-                # Get user preferences
-                for var_type in variation_types:
-                    if var_type in self.templates:
-                        # Match templates to preferences
-                        pref_type = self._variation_to_preference_type(var_type)
-                        if pref_type:
-                            preferences = await self.style_memory.get_top_preferences(
-                                pref_type, limit=3
-                            )
-                            for pref in preferences:
-                                # Find matching template
-                                for template in self.templates[var_type].values():
-                                    if pref.value in template.name:
-                                        selected.append(template)
-                                        break
+    # TODO: Review unreachable code - elif strategy == VariationStrategy.OPTIMIZATION:
+    # TODO: Review unreachable code - # Refine successful patterns
+    # TODO: Review unreachable code - if self.style_memory:
+    # TODO: Review unreachable code - # Get user preferences
+    # TODO: Review unreachable code - for var_type in variation_types:
+    # TODO: Review unreachable code - if var_type in self.templates:
+    # TODO: Review unreachable code - # Match templates to preferences
+    # TODO: Review unreachable code - pref_type = self._variation_to_preference_type(var_type)
+    # TODO: Review unreachable code - if pref_type:
+    # TODO: Review unreachable code - preferences = await self.style_memory.get_top_preferences(
+    # TODO: Review unreachable code - pref_type, limit=3
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - for pref in preferences:
+    # TODO: Review unreachable code - # Find matching template
+    # TODO: Review unreachable code - for template in self.templates[var_type].values():
+    # TODO: Review unreachable code - if pref.value in template.name:
+    # TODO: Review unreachable code - selected.append(template)
+    # TODO: Review unreachable code - break
 
-        elif strategy == VariationStrategy.A_B_TESTING:
-            # Select pairs for comparison
-            for var_type in variation_types[:max_variations // 2]:
-                if var_type in self.templates:
-                    templates = list(self.templates[var_type].values())
-                    if len(templates) >= 2:
-                        # Select contrasting pairs
-                        selected.extend([templates[0], templates[-1]])
+    # TODO: Review unreachable code - elif strategy == VariationStrategy.A_B_TESTING:
+    # TODO: Review unreachable code - # Select pairs for comparison
+    # TODO: Review unreachable code - for var_type in variation_types[:max_variations // 2]:
+    # TODO: Review unreachable code - if var_type in self.templates:
+    # TODO: Review unreachable code - templates = list(self.templates[var_type].values())
+    # TODO: Review unreachable code - if len(templates) >= 2:
+    # TODO: Review unreachable code - # Select contrasting pairs
+    # TODO: Review unreachable code - selected.extend([templates[0], templates[-1]])
 
-        return selected[:max_variations]
+    # TODO: Review unreachable code - return selected[:max_variations]
 
-    def _variation_to_preference_type(self, var_type: VariationType) -> PreferenceType | None:
-        """Convert variation type to preference type."""
-        mapping = {
-            VariationType.STYLE: PreferenceType.STYLE,
-            VariationType.MOOD: PreferenceType.MOOD,
-            VariationType.COLOR: PreferenceType.COLOR_PALETTE,
-            VariationType.COMPOSITION: PreferenceType.COMPOSITION,
-            VariationType.CAMERA: PreferenceType.CAMERA_ANGLE,
-        }
-        return mapping.get(var_type)
+    # TODO: Review unreachable code - def _variation_to_preference_type(self, var_type: VariationType) -> PreferenceType | None:
+    # TODO: Review unreachable code - """Convert variation type to preference type."""
+    # TODO: Review unreachable code - mapping = {
+    # TODO: Review unreachable code - VariationType.STYLE: PreferenceType.STYLE,
+    # TODO: Review unreachable code - VariationType.MOOD: PreferenceType.MOOD,
+    # TODO: Review unreachable code - VariationType.COLOR: PreferenceType.COLOR_PALETTE,
+    # TODO: Review unreachable code - VariationType.COMPOSITION: PreferenceType.COMPOSITION,
+    # TODO: Review unreachable code - VariationType.CAMERA: PreferenceType.CAMERA_ANGLE,
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - return mapping.get(var_type) or 0
 
-    def _create_variation_request(
-        self,
-        base_content: ContentBase,
-        variation: VariationTemplate,
-    ) -> GenerationRequest:
-        """Create a generation request for a variation."""
-        # Start with original prompt
-        modified_prompt = base_content.original_prompt
+    # TODO: Review unreachable code - def _create_variation_request(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - base_content: ContentBase,
+    # TODO: Review unreachable code - variation: VariationTemplate,
+    # TODO: Review unreachable code - ) -> GenerationRequest:
+    # TODO: Review unreachable code - """Create a generation request for a variation."""
+    # TODO: Review unreachable code - # Start with original prompt
+    # TODO: Review unreachable code - modified_prompt = base_content.original_prompt
 
-        # Apply variation modifiers
-        modifier_text = ", ".join(variation.modifiers.values())
-        modified_prompt = f"{modified_prompt}, {modifier_text}"
+    # TODO: Review unreachable code - # Apply variation modifiers
+    # TODO: Review unreachable code - modifier_text = ", ".join(variation.modifiers.values())
+    # TODO: Review unreachable code - modified_prompt = f"{modified_prompt}, {modifier_text}"
 
-        # Copy and update parameters
-        modified_params = base_content.original_parameters.copy()
+    # TODO: Review unreachable code - # Copy and update parameters
+    # TODO: Review unreachable code - modified_params = base_content.original_parameters.copy()
 
-        # Add variation metadata
-        modified_params["variation_id"] = variation.variation_id
-        modified_params["variation_type"] = variation.variation_type.value
-        modified_params["base_content_id"] = base_content.content_id
+    # TODO: Review unreachable code - # Add variation metadata
+    # TODO: Review unreachable code - modified_params["variation_id"] = variation.variation_id
+    # TODO: Review unreachable code - modified_params["variation_type"] = variation.variation_type.value
+    # TODO: Review unreachable code - modified_params["base_content_id"] = base_content.content_id
 
-        # Create output path
-        base_path = Path(base_content.output_path)
-        variation_path = base_path.parent / f"{base_path.stem}_{variation.name}{base_path.suffix}"
+    # TODO: Review unreachable code - # Create output path
+    # TODO: Review unreachable code - base_path = Path(base_content.output_path)
+    # TODO: Review unreachable code - variation_path = base_path.parent / f"{base_path.stem}_{variation.name}{base_path.suffix}"
 
-        return GenerationRequest(
-            prompt=modified_prompt,
-            model=base_content.model,
-            output_path=variation_path,
-            parameters=modified_params,
-        )
+    # TODO: Review unreachable code - return GenerationRequest(
+    # TODO: Review unreachable code - prompt=modified_prompt,
+    # TODO: Review unreachable code - model=base_content.model,
+    # TODO: Review unreachable code - output_path=variation_path,
+    # TODO: Review unreachable code - parameters=modified_params,
+    # TODO: Review unreachable code - )
 
-    async def analyze_variation_success(
-        self,
-        result: VariationResult,
-        metrics: dict[str, float],
-    ):
-        """Analyze and record variation success.
+    # TODO: Review unreachable code - async def analyze_variation_success(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - result: VariationResult,
+    # TODO: Review unreachable code - metrics: dict[str, float],
+    # TODO: Review unreachable code - ):
+    # TODO: Review unreachable code - """Analyze and record variation success.
 
-        Args:
-            result: Variation generation result
-            metrics: Performance metrics (views, engagement, etc.)
-        """
-        # Update performance metrics
-        result.performance_metrics = metrics
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - result: Variation generation result
+    # TODO: Review unreachable code - metrics: Performance metrics (views, engagement, etc.)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Update performance metrics
+    # TODO: Review unreachable code - result.performance_metrics = metrics
 
-        # Calculate success score (0-1)
-        success_score = self._calculate_success_score(metrics)
+    # TODO: Review unreachable code - # Calculate success score (0-1)
+    # TODO: Review unreachable code - success_score = self._calculate_success_score(metrics)
 
-        # Update template statistics
-        for var_type, templates in self.templates.items():
-            for name, template in templates.items():
-                if template.variation_id == result.variation_id:
-                    template.usage_count += 1
-                    template.last_used = datetime.now()
+    # TODO: Review unreachable code - # Update template statistics
+    # TODO: Review unreachable code - for var_type, templates in self.templates.items():
+    # TODO: Review unreachable code - for name, template in templates.items():
+    # TODO: Review unreachable code - if template.variation_id == result.variation_id:
+    # TODO: Review unreachable code - template.usage_count += 1
+    # TODO: Review unreachable code - template.last_used = datetime.now()
 
-                    # Update success rate (moving average)
-                    if template.usage_count == 1:
-                        template.success_rate = success_score
-                    else:
-                        template.success_rate = (
-                            template.success_rate * (template.usage_count - 1) + success_score
-                        ) / template.usage_count
+    # TODO: Review unreachable code - # Update success rate (moving average)
+    # TODO: Review unreachable code - if template.usage_count == 1:
+    # TODO: Review unreachable code - template.success_rate = success_score
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - template.success_rate = (
+    # TODO: Review unreachable code - template.success_rate * (template.usage_count - 1) + success_score
+    # TODO: Review unreachable code - ) / template.usage_count
 
-                    # Update performance score
-                    template.performance_score = max(
-                        template.performance_score,
-                        success_score
-                    )
-                    break
+    # TODO: Review unreachable code - # Update performance score
+    # TODO: Review unreachable code - template.performance_score = max(
+    # TODO: Review unreachable code - template.performance_score,
+    # TODO: Review unreachable code - success_score
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - break
 
-        # Store successful variation
-        if success_score > 0.7:  # Threshold for "successful"
-            if result.base_content_id not in self.successful_variations:
-                self.successful_variations[result.base_content_id] = []
-            self.successful_variations[result.base_content_id].append(result)
+    # TODO: Review unreachable code - # Store successful variation
+    # TODO: Review unreachable code - if success_score > 0.7:  # Threshold for "successful"
+    # TODO: Review unreachable code - if result.base_content_id not in self.successful_variations:
+    # TODO: Review unreachable code - self.successful_variations[result.base_content_id] = []
+    # TODO: Review unreachable code - self.successful_variations[result.base_content_id].append(result)
 
-        # Save to cache
-        self._save_templates()
-        self._save_successful_variations()
+    # TODO: Review unreachable code - # Save to cache
+    # TODO: Review unreachable code - self._save_templates()
+    # TODO: Review unreachable code - self._save_successful_variations()
 
-        # Update style memory if available
-        if self.style_memory and success_score > 0.8:
-            await self._update_style_memory(result)
+    # TODO: Review unreachable code - # Update style memory if available
+    # TODO: Review unreachable code - if self.style_memory and success_score > 0.8:
+    # TODO: Review unreachable code - await self._update_style_memory(result)
 
-    def _calculate_success_score(self, metrics: dict[str, float]) -> float:
-        """Calculate success score from metrics."""
-        # Weighted scoring based on different metrics
-        weights = {
-            "engagement_rate": 0.3,
-            "view_duration": 0.2,
-            "likes": 0.2,
-            "shares": 0.15,
-            "comments": 0.15,
-        }
+    # TODO: Review unreachable code - def _calculate_success_score(self, metrics: dict[str, float]) -> float:
+    # TODO: Review unreachable code - """Calculate success score from metrics."""
+    # TODO: Review unreachable code - # Weighted scoring based on different metrics
+    # TODO: Review unreachable code - weights = {
+    # TODO: Review unreachable code - "engagement_rate": 0.3,
+    # TODO: Review unreachable code - "view_duration": 0.2,
+    # TODO: Review unreachable code - "likes": 0.2,
+    # TODO: Review unreachable code - "shares": 0.15,
+    # TODO: Review unreachable code - "comments": 0.15,
+    # TODO: Review unreachable code - }
 
-        score = 0.0
-        total_weight = 0.0
+    # TODO: Review unreachable code - score = 0.0
+    # TODO: Review unreachable code - total_weight = 0.0
 
-        for metric, weight in weights.items():
-            if metric in metrics:
-                # Normalize metric (assume 0-1 range)
-                value = min(1.0, metrics[metric])
-                score += value * weight
-                total_weight += weight
+    # TODO: Review unreachable code - for metric, weight in weights.items():
+    # TODO: Review unreachable code - if metric in metrics:
+    # TODO: Review unreachable code - # Normalize metric (assume 0-1 range)
+    # TODO: Review unreachable code - value = min(1.0, metrics[metric])
+    # TODO: Review unreachable code - score += value * weight
+    # TODO: Review unreachable code - total_weight += weight
 
-        if total_weight > 0:
-            return score / total_weight
-        return 0.0
+    # TODO: Review unreachable code - if total_weight > 0:
+    # TODO: Review unreachable code - return float(score) / float(total_weight)
+    # TODO: Review unreachable code - return 0.0
 
-    async def _update_style_memory(self, result: VariationResult):
-        """Update style memory with successful variation."""
-        if not self.style_memory:
-            return
+    # TODO: Review unreachable code - async def _update_style_memory(self, result: VariationResult):
+    # TODO: Review unreachable code - """Update style memory with successful variation."""
+    # TODO: Review unreachable code - if not self.style_memory:
+    # TODO: Review unreachable code - return
 
-        # Extract style elements from variation
-        pref_type = self._variation_to_preference_type(result.variation_type)
-        if pref_type:
-            # Find the template name
-            template_name = None
-            for templates in self.templates[result.variation_type].values():
-                if templates.variation_id == result.variation_id:
-                    template_name = templates.name
-                    break
+    # TODO: Review unreachable code - # Extract style elements from variation
+    # TODO: Review unreachable code - pref_type = self._variation_to_preference_type(result.variation_type)
+    # TODO: Review unreachable code - if pref_type:
+    # TODO: Review unreachable code - # Find the template name
+    # TODO: Review unreachable code - template_name = None
+    # TODO: Review unreachable code - for templates in self.templates[result.variation_type].values():
+    # TODO: Review unreachable code - if templates.variation_id == result.variation_id:
+    # TODO: Review unreachable code - template_name = templates.name
+    # TODO: Review unreachable code - break
 
-            if template_name:
-                await self.style_memory.record_preference(
-                    preference_type=pref_type,
-                    value=template_name,
-                    context={
-                        "variation_id": result.variation_id,
-                        "performance_score": self._calculate_success_score(
-                            result.performance_metrics
-                        ),
-                    },
-                    strength=0.8,
-                )
+    # TODO: Review unreachable code - if template_name:
+    # TODO: Review unreachable code - await self.style_memory.record_preference(
+    # TODO: Review unreachable code - preference_type=pref_type,
+    # TODO: Review unreachable code - value=template_name,
+    # TODO: Review unreachable code - context={
+    # TODO: Review unreachable code - "variation_id": result.variation_id,
+    # TODO: Review unreachable code - "performance_score": self._calculate_success_score(
+    # TODO: Review unreachable code - result.performance_metrics
+    # TODO: Review unreachable code - ),
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - strength=0.8,
+    # TODO: Review unreachable code - )
 
-    def _save_templates(self):
-        """Save custom templates to cache."""
-        custom_data = {}
+    # TODO: Review unreachable code - def _save_templates(self):
+    # TODO: Review unreachable code - """Save custom templates to cache."""
+    # TODO: Review unreachable code - custom_data = {}
 
-        for var_type, templates in self.templates.items():
-            custom_data[var_type.value] = {}
-            for name, template in templates.items():
-                # Only save templates that have been used
-                if template.usage_count > 0:
-                    custom_data[var_type.value][name] = {
-                        "variation_id": template.variation_id,
-                        "description": template.description,
-                        "modifiers": template.modifiers,
-                        "success_rate": template.success_rate,
-                        "usage_count": template.usage_count,
-                        "performance_score": template.performance_score,
-                    }
+    # TODO: Review unreachable code - for var_type, templates in self.templates.items():
+    # TODO: Review unreachable code - custom_data[var_type.value] = {}
+    # TODO: Review unreachable code - for name, template in templates.items():
+    # TODO: Review unreachable code - # Only save templates that have been used
+    # TODO: Review unreachable code - if template.usage_count > 0:
+    # TODO: Review unreachable code - custom_data[var_type.value][name] = {
+    # TODO: Review unreachable code - "variation_id": template.variation_id,
+    # TODO: Review unreachable code - "description": template.description,
+    # TODO: Review unreachable code - "modifiers": template.modifiers,
+    # TODO: Review unreachable code - "success_rate": template.success_rate,
+    # TODO: Review unreachable code - "usage_count": template.usage_count,
+    # TODO: Review unreachable code - "performance_score": template.performance_score,
+    # TODO: Review unreachable code - }
 
-        with open(self.cache_dir / "custom_templates.json", "w") as f:
-            json.dump(custom_data, f, indent=2)
+    # TODO: Review unreachable code - with open(self.cache_dir / "custom_templates.json", "w") as f:
+    # TODO: Review unreachable code - json.dump(custom_data, f, indent=2)
 
-    def _save_successful_variations(self):
-        """Save successful variations to cache."""
-        data = {}
+    # TODO: Review unreachable code - def _save_successful_variations(self):
+    # TODO: Review unreachable code - """Save successful variations to cache."""
+    # TODO: Review unreachable code - data = {}
 
-        for content_id, variations in self.successful_variations.items():
-            data[content_id] = []
-            for var in variations:
-                data[content_id].append({
-                    "variation_id": var.variation_id,
-                    "base_content_id": var.base_content_id,
-                    "variation_type": var.variation_type.value,
-                    "modified_prompt": var.modified_prompt,
-                    "modified_parameters": var.modified_parameters,
-                    "output_path": str(var.output_path),
-                    "generation_time": var.generation_time,
-                    "cost": var.cost,
-                    "success": var.success,
-                    "performance_metrics": var.performance_metrics,
-                })
+    # TODO: Review unreachable code - for content_id, variations in self.successful_variations.items():
+    # TODO: Review unreachable code - data[content_id] = []
+    # TODO: Review unreachable code - for var in variations:
+    # TODO: Review unreachable code - data[content_id].append({
+    # TODO: Review unreachable code - "variation_id": var.variation_id,
+    # TODO: Review unreachable code - "base_content_id": var.base_content_id,
+    # TODO: Review unreachable code - "variation_type": var.variation_type.value,
+    # TODO: Review unreachable code - "modified_prompt": var.modified_prompt,
+    # TODO: Review unreachable code - "modified_parameters": var.modified_parameters,
+    # TODO: Review unreachable code - "output_path": str(var.output_path),
+    # TODO: Review unreachable code - "generation_time": var.generation_time,
+    # TODO: Review unreachable code - "cost": var.cost,
+    # TODO: Review unreachable code - "success": var.success,
+    # TODO: Review unreachable code - "performance_metrics": var.performance_metrics,
+    # TODO: Review unreachable code - })
 
-        with open(self.cache_dir / "successful_variations.json", "w") as f:
-            json.dump(data, f, indent=2)
+    # TODO: Review unreachable code - with open(self.cache_dir / "successful_variations.json", "w") as f:
+    # TODO: Review unreachable code - json.dump(data, f, indent=2)
 
-    async def get_recommended_variations(
-        self,
-        content_type: str,
-        limit: int = 5,
-    ) -> list[VariationTemplate]:
-        """Get recommended variations based on past success.
+    # TODO: Review unreachable code - async def get_recommended_variations(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - content_type: str,
+    # TODO: Review unreachable code - limit: int = 5,
+    # TODO: Review unreachable code - ) -> list[VariationTemplate]:
+    # TODO: Review unreachable code - """Get recommended variations based on past success.
 
-        Args:
-            content_type: Type of content (e.g., "video", "image")
-            limit: Maximum recommendations
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - content_type: Type of content (e.g., "video", "image")
+    # TODO: Review unreachable code - limit: Maximum recommendations
 
-        Returns:
-            List of recommended variation templates
-        """
-        recommendations = []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of recommended variation templates
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - recommendations = []
 
-        # Collect all templates with good performance
-        for var_type, templates in self.templates.items():
-            for template in templates.values():
-                if template.success_rate > 0.7 and template.usage_count > 2:
-                    recommendations.append(template)
+    # TODO: Review unreachable code - # Collect all templates with good performance
+    # TODO: Review unreachable code - for var_type, templates in self.templates.items():
+    # TODO: Review unreachable code - for template in templates.values():
+    # TODO: Review unreachable code - if template.success_rate > 0.7 and template.usage_count > 2:
+    # TODO: Review unreachable code - recommendations.append(template)
 
-        # Sort by performance
-        recommendations.sort(
-            key=lambda t: t.success_rate * 0.6 + t.performance_score * 0.4,
-            reverse=True
-        )
+    # TODO: Review unreachable code - # Sort by performance
+    # TODO: Review unreachable code - recommendations.sort(
+    # TODO: Review unreachable code - key=lambda t: t.success_rate * 0.6 + t.performance_score * 0.4,
+    # TODO: Review unreachable code - reverse=True
+    # TODO: Review unreachable code - )
 
-        return recommendations[:limit]
+    # TODO: Review unreachable code - return recommendations[:limit]
 
-    def get_variation_report(self) -> dict[str, Any]:
-        """Generate a report on variation performance."""
-        report = {
-            "total_variations_tracked": sum(
-                len(variations) for variations in self.successful_variations.values()
-            ),
-            "variation_types": {},
-            "top_performers": [],
-            "exploration_opportunities": [],
-        }
+    # TODO: Review unreachable code - def get_variation_report(self) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Generate a report on variation performance."""
+    # TODO: Review unreachable code - report = {
+    # TODO: Review unreachable code - "total_variations_tracked": sum(
+    # TODO: Review unreachable code - len(variations) for variations in self.successful_variations.values()
+    # TODO: Review unreachable code - ),
+    # TODO: Review unreachable code - "variation_types": {},
+    # TODO: Review unreachable code - "top_performers": [],
+    # TODO: Review unreachable code - "exploration_opportunities": [],
+    # TODO: Review unreachable code - }
 
-        # Analyze by variation type
-        for var_type, templates in self.templates.items():
-            type_stats = {
-                "total_templates": len(templates),
-                "used_templates": sum(1 for t in templates.values() if t.usage_count > 0),
-                "average_success_rate": 0.0,
-                "top_template": None,
-            }
+    # TODO: Review unreachable code - # Analyze by variation type
+    # TODO: Review unreachable code - for var_type, templates in self.templates.items():
+    # TODO: Review unreachable code - type_stats = {
+    # TODO: Review unreachable code - "total_templates": len(templates),
+    # TODO: Review unreachable code - "used_templates": sum(1 for t in templates.values() if t.usage_count > 0),
+    # TODO: Review unreachable code - "average_success_rate": 0.0,
+    # TODO: Review unreachable code - "top_template": None,
+    # TODO: Review unreachable code - }
 
-            used_templates = [t for t in templates.values() if t.usage_count > 0]
-            if used_templates:
-                type_stats["average_success_rate"] = sum(
-                    t.success_rate for t in used_templates
-                ) / len(used_templates)
+    # TODO: Review unreachable code - used_templates = [t for t in templates.values() if t.usage_count > 0]
+    # TODO: Review unreachable code - if used_templates:
+    # TODO: Review unreachable code - type_stats["average_success_rate"] = sum(
+    # TODO: Review unreachable code - t.success_rate for t in used_templates
+    # TODO: Review unreachable code - ) / len(used_templates)
 
-                top_template = max(used_templates, key=lambda t: t.success_rate)
-                type_stats["top_template"] = {
-                    "name": top_template.name,
-                    "success_rate": top_template.success_rate,
-                    "usage_count": top_template.usage_count,
-                }
+    # TODO: Review unreachable code - top_template = max(used_templates, key=lambda t: t.success_rate)
+    # TODO: Review unreachable code - type_stats["top_template"] = {
+    # TODO: Review unreachable code - "name": top_template.name,
+    # TODO: Review unreachable code - "success_rate": top_template.success_rate,
+    # TODO: Review unreachable code - "usage_count": top_template.usage_count,
+    # TODO: Review unreachable code - }
 
-            report["variation_types"][var_type.value] = type_stats
+    # TODO: Review unreachable code - report["variation_types"][var_type.value] = type_stats
 
-        # Find top performers across all types
-        all_templates = []
-        for templates in self.templates.values():
-            all_templates.extend(templates.values())
+    # TODO: Review unreachable code - # Find top performers across all types
+    # TODO: Review unreachable code - all_templates = []
+    # TODO: Review unreachable code - for templates in self.templates.values():
+    # TODO: Review unreachable code - all_templates.extend(templates.values())
 
-        top_performers = sorted(
-            [t for t in all_templates if t.usage_count > 0],
-            key=lambda t: t.success_rate,
-            reverse=True
-        )[:5]
+    # TODO: Review unreachable code - top_performers = sorted(
+    # TODO: Review unreachable code - [t for t in all_templates if t.usage_count > 0],
+    # TODO: Review unreachable code - key=lambda t: t.success_rate,
+    # TODO: Review unreachable code - reverse=True
+    # TODO: Review unreachable code - )[:5]
 
-        report["top_performers"] = [
-            {
-                "variation_id": t.variation_id,
-                "type": t.variation_type.value,
-                "name": t.name,
-                "success_rate": t.success_rate,
-                "usage_count": t.usage_count,
-            }
-            for t in top_performers
-        ]
+    # TODO: Review unreachable code - report["top_performers"] = [
+    # TODO: Review unreachable code - {
+    # TODO: Review unreachable code - "variation_id": t.variation_id,
+    # TODO: Review unreachable code - "type": t.variation_type.value,
+    # TODO: Review unreachable code - "name": t.name,
+    # TODO: Review unreachable code - "success_rate": t.success_rate,
+    # TODO: Review unreachable code - "usage_count": t.usage_count,
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - for t in top_performers
+    # TODO: Review unreachable code - ]
 
-        # Find exploration opportunities (unused or low-usage templates)
-        unused_templates = [
-            t for t in all_templates if t.usage_count < 2
-        ][:5]
+    # TODO: Review unreachable code - # Find exploration opportunities (unused or low-usage templates)
+    # TODO: Review unreachable code - unused_templates = [
+    # TODO: Review unreachable code - t for t in all_templates if t.usage_count < 2
+    # TODO: Review unreachable code - ][:5]
 
-        report["exploration_opportunities"] = [
-            {
-                "variation_id": t.variation_id,
-                "type": t.variation_type.value,
-                "name": t.name,
-                "description": t.description,
-            }
-            for t in unused_templates
-        ]
+    # TODO: Review unreachable code - report["exploration_opportunities"] = [
+    # TODO: Review unreachable code - {
+    # TODO: Review unreachable code - "variation_id": t.variation_id,
+    # TODO: Review unreachable code - "type": t.variation_type.value,
+    # TODO: Review unreachable code - "name": t.name,
+    # TODO: Review unreachable code - "description": t.description,
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - for t in unused_templates
+    # TODO: Review unreachable code - ]
 
-        return report
+    # TODO: Review unreachable code - return report

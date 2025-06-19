@@ -27,39 +27,39 @@ class OrganizationOperationsMixin:
             if self.initialization_error:
                 raise self.initialization_error
 
-            # Update config based on request
-            if request.get("source_path"):
-                self.config.paths.inbox = request["source_path"]
-            if request.get("quality_assessment"):
-                # Quality assessment deprecated - ignored
-                pass
-            if request.get("understanding"):
-                self.config.processing.understanding = True
-            if request.get("watch_mode"):
-                self.config.processing.watch = True
+            # TODO: Review unreachable code - # Update config based on request
+            # TODO: Review unreachable code - if request.get("source_path"):
+            # TODO: Review unreachable code - self.config.paths.inbox = request["source_path"]
+            # TODO: Review unreachable code - if request.get("quality_assessment"):
+            # TODO: Review unreachable code - # Quality assessment deprecated - ignored
+            # TODO: Review unreachable code - pass
+            # TODO: Review unreachable code - if request.get("understanding"):
+            # TODO: Review unreachable code - self.config.processing.understanding = True
+            # TODO: Review unreachable code - if request.get("watch_mode"):
+            # TODO: Review unreachable code - self.config.processing.watch = True
 
-            # Recreate organizer with updated config
-            self.organizer = EnhancedMediaOrganizer(self.config)
+            # TODO: Review unreachable code - # Recreate organizer with updated config
+            # TODO: Review unreachable code - self.organizer = EnhancedMediaOrganizer(self.config)
 
-            # Run organization
-            success = self.organizer.organize()
+            # TODO: Review unreachable code - # Run organization
+            # TODO: Review unreachable code - success = self.organizer.organize()
 
-            # Get summary
-            summary = self.organizer.get_organization_summary()
+            # TODO: Review unreachable code - # Get summary
+            # TODO: Review unreachable code - summary = self.organizer.get_organization_summary()
 
-            # Persist to database
-            if success:
-                self._persist_organized_assets()
+            # TODO: Review unreachable code - # Persist to database
+            # TODO: Review unreachable code - if success:
+            # TODO: Review unreachable code - self._persist_organized_assets()
 
-            return AliceResponse(
-                success=success,
-                message=summary,
-                data={
-                    "stats": self.organizer.stats,
-                    "metadata_count": len(self.organizer.metadata_cache.get_all_metadata()),
-                },
-                error=None,
-            )
+            # TODO: Review unreachable code - return AliceResponse(
+            # TODO: Review unreachable code - success=success,
+            # TODO: Review unreachable code - message=summary,
+            # TODO: Review unreachable code - data={
+            # TODO: Review unreachable code - "stats": self.organizer.stats,
+            # TODO: Review unreachable code - "metadata_count": len(self.organizer.metadata_cache.get_all_metadata()),
+            # TODO: Review unreachable code - },
+            # TODO: Review unreachable code - error=None,
+            # TODO: Review unreachable code - )
 
         except Exception as e:
             logger.error(f"Organization failed: {e}")
@@ -85,73 +85,73 @@ class OrganizationOperationsMixin:
         try:
             if self.initialization_error:
                 raise self.initialization_error
-            self._ensure_organizer()
+            # TODO: Review unreachable code - self._ensure_organizer()
 
-            success_count = 0
-            tags = request["tags"]
+            # TODO: Review unreachable code - success_count = 0
+            # TODO: Review unreachable code - tags = request["tags"]
 
-            # If we have the asset repository, use it for structured tags
-            if self.asset_repo and isinstance(tags, dict):
-                # New structured format
-                for asset_id in request["asset_ids"]:
-                    asset_success = True
-                    for tag_type, tag_values in tags.items():
-                        for tag_value in tag_values:
-                            if not self.asset_repo.add_tag(
-                                content_hash=asset_id,
-                                tag_type=tag_type,
-                                tag_value=tag_value,
-                                source="ai"
-                            ):
-                                asset_success = False
-                                break
-                        if not asset_success:
-                            break
-                    if asset_success:
-                        success_count += 1
-            else:
-                # Legacy format or no database
-                tag_type = request.get("tag_type", "custom")
-                tag_list = tags if isinstance(tags, list) else []
+            # TODO: Review unreachable code - # If we have the asset repository, use it for structured tags
+            # TODO: Review unreachable code - if self.asset_repo and isinstance(tags, dict):
+            # TODO: Review unreachable code - # New structured format
+            # TODO: Review unreachable code - for asset_id in request["asset_ids"]:
+            # TODO: Review unreachable code - asset_success = True
+            # TODO: Review unreachable code - for tag_type, tag_values in tags.items():
+            # TODO: Review unreachable code - for tag_value in tag_values:
+            # TODO: Review unreachable code - if not self.asset_repo.add_tag(
+            # TODO: Review unreachable code - content_hash=asset_id,
+            # TODO: Review unreachable code - tag_type=tag_type,
+            # TODO: Review unreachable code - tag_value=tag_value,
+            # TODO: Review unreachable code - source="ai"
+            # TODO: Review unreachable code - ):
+            # TODO: Review unreachable code - asset_success = False
+            # TODO: Review unreachable code - break
+            # TODO: Review unreachable code - if not asset_success:
+            # TODO: Review unreachable code - break
+            # TODO: Review unreachable code - if asset_success:
+            # TODO: Review unreachable code - success_count += 1
+            # TODO: Review unreachable code - else:
+            # TODO: Review unreachable code - # Legacy format or no database
+            # TODO: Review unreachable code - tag_type = request.get("tag_type", "custom")
+            # TODO: Review unreachable code - tag_list = tags if isinstance(tags, list) else []
 
-                for asset_id in request["asset_ids"]:
-                    if self.organizer.tag_asset(asset_id, tag_list, tag_type):
-                        success_count += 1
+            # TODO: Review unreachable code - for asset_id in request["asset_ids"]:
+            # TODO: Review unreachable code - if self.organizer.tag_asset(asset_id, tag_list, tag_type):
+            # TODO: Review unreachable code - success_count += 1
 
-            return AliceResponse(
-                success=success_count > 0,
-                message=f"Tagged {success_count}/{len(request['asset_ids'])} assets",
-                data={"tagged_count": success_count},
-                error=None,
-            )
+            # TODO: Review unreachable code - return AliceResponse(
+            # TODO: Review unreachable code - success=success_count > 0,
+            # TODO: Review unreachable code - message=f"Tagged {success_count}/{len(request['asset_ids'])} assets",
+            # TODO: Review unreachable code - data={"tagged_count": success_count},
+            # TODO: Review unreachable code - error=None,
+            # TODO: Review unreachable code - )
 
         except Exception as e:
             logger.error(f"Tagging failed: {e}")
             return AliceResponse(success=False, message="Tagging failed", data=None, error=str(e))
 
-    def group_assets(self, request: GroupRequest) -> AliceResponse:
-        """Group assets together.
+    # TODO: Review unreachable code - def group_assets(self, request: GroupRequest) -> AliceResponse:
+    # TODO: Review unreachable code - """Group assets together.
 
-        Args:
-            request: Grouping request
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - request: Grouping request
 
-        Returns:
-            Response indicating success
-        """
-        try:
-            if self.initialization_error:
-                raise self.initialization_error
-            self._ensure_organizer()
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Response indicating success
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - if self.initialization_error:
+    # TODO: Review unreachable code - raise self.initialization_error
+    # TODO: Review unreachable code - self._ensure_organizer()
 
-            success = self.organizer.group_assets(request["asset_ids"], request["group_name"])
+    # TODO: Review unreachable code - success = self.organizer.group_assets(request["asset_ids"], request["group_name"])
 
-            return AliceResponse(
-                success=success,
-                message=f"Grouped {len(request['asset_ids'])} assets as '{request['group_name']}'",
-                data={"group_name": request["group_name"]},
-                error=None,
-            )
+    # TODO: Review unreachable code - return AliceResponse(
+    # TODO: Review unreachable code - success=success,
+    # TODO: Review unreachable code - message=f"Grouped {len(request['asset_ids'])} assets as '{request['group_name']}'",
+    # TODO: Review unreachable code - data={"group_name": request["group_name"]},
+    # TODO: Review unreachable code - error=None,
+    # TODO: Review unreachable code - )
 
-        except Exception as e:
-            logger.error(f"Grouping failed: {e}")
-            return AliceResponse(success=False, message="Grouping failed", data=None, error=str(e))
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Grouping failed: {e}")
+    # TODO: Review unreachable code - return AliceResponse(success=False, message="Grouping failed", data=None, error=str(e))

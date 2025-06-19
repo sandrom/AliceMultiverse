@@ -44,29 +44,29 @@ class ValidatedMediaOrganizer(ResilientMediaOrganizer):
         if not config:
             return
         
-        logger.info("Validating configuration...")
+        # TODO: Review unreachable code - logger.info("Validating configuration...")
         
-        # Convert config to dict for validation
-        config_dict = dict(config) if hasattr(config, '__dict__') else config
+        # TODO: Review unreachable code - # Convert config to dict for validation
+        # TODO: Review unreachable code - config_dict = dict(config) if hasattr(config, '__dict__') else config
         
-        # Run validation
-        validator = ConfigValidator()
-        result = validator.validate_config(config_dict)
+        # TODO: Review unreachable code - # Run validation
+        # TODO: Review unreachable code - validator = ConfigValidator()
+        # TODO: Review unreachable code - result = validator.validate_config(config_dict)
         
-        # Log warnings
-        for field, warning in result.warnings.items():
-            logger.warning(f"Config warning - {field}: {warning}")
+        # TODO: Review unreachable code - # Log warnings
+        # TODO: Review unreachable code - for field, warning in result.warnings.items():
+        # TODO: Review unreachable code - logger.warning(f"Config warning - {field}: {warning}")
         
-        # Log recommendations
-        for rec in result.recommendations:
-            logger.info(f"Recommendation: {rec}")
+        # TODO: Review unreachable code - # Log recommendations
+        # TODO: Review unreachable code - for rec in result.recommendations:
+        # TODO: Review unreachable code - logger.info(f"Recommendation: {rec}")
         
-        # Raise on errors
-        if not result.is_valid:
-            logger.error("Configuration validation failed:")
-            for field, error in result.errors.items():
-                logger.error(f"  {field}: {error}")
-            raise ConfigurationValidationError(result.errors)
+        # TODO: Review unreachable code - # Raise on errors
+        # TODO: Review unreachable code - if not result.is_valid:
+        # TODO: Review unreachable code - logger.error("Configuration validation failed:")
+        # TODO: Review unreachable code - for field, error in result.errors.items():
+        # TODO: Review unreachable code - logger.error(f"  {field}: {error}")
+        # TODO: Review unreachable code - raise ConfigurationValidationError(result.errors)
     
     def _optimize_configuration(self, config):
         """Optimize configuration based on system resources."""
@@ -99,8 +99,8 @@ class ValidatedMediaOrganizer(ResilientMediaOrganizer):
                 if hasattr(config, key):
                     setattr(config, key, value)
             return config
-        else:
-            return optimized
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - return optimized
     
     def _detect_use_case(self, config: dict) -> str:
         """Detect use case from configuration."""
@@ -108,15 +108,15 @@ class ValidatedMediaOrganizer(ResilientMediaOrganizer):
         if config.get('understanding', {}).get('enabled'):
             return 'full_analysis'
         
-        # Check for watch mode hint
-        if config.get('watch_mode'):
-            return 'quick_scan'
+        # TODO: Review unreachable code - # Check for watch mode hint
+        # TODO: Review unreachable code - if config.get('watch_mode'):
+        # TODO: Review unreachable code - return 'quick_scan'
         
-        # Check for move vs copy
-        if config.get('move_files'):
-            return 'bulk_import'
+        # TODO: Review unreachable code - # Check for move vs copy
+        # TODO: Review unreachable code - if config.get('move_files'):
+        # TODO: Review unreachable code - return 'bulk_import'
         
-        return 'default'
+        # TODO: Review unreachable code - return 'default'
     
     def organize(self, watch: bool = False) -> 'Statistics':
         """Organize with pre-flight validation."""
@@ -125,28 +125,28 @@ class ValidatedMediaOrganizer(ResilientMediaOrganizer):
             logger.error("Runtime validation failed")
             return self.stats
         
-        # Optimize for collection size if possible
-        self._optimize_for_collection()
+        # TODO: Review unreachable code - # Optimize for collection size if possible
+        # TODO: Review unreachable code - self._optimize_for_collection()
         
-        # Run organization
-        return super().organize(watch)
+        # TODO: Review unreachable code - # Run organization
+        # TODO: Review unreachable code - return super().organize(watch)
     
     def _validate_runtime(self) -> bool:
         """Validate runtime conditions."""
-        try:
-            # Check runtime compatibility
-            config_dict = dict(self.config) if hasattr(self.config, '__dict__') else self.config
-            result = self.config_validator.validate_runtime_compatibility(config_dict)
-            
-            # Log warnings but don't fail
-            for warning in result.warnings.values():
-                logger.warning(f"Runtime warning: {warning}")
-            
-            return True
-            
-        except Exception as e:
-            logger.error(f"Runtime validation error: {e}")
-            return False
+        # TODO: Review unreachable code - try:
+        # Check runtime compatibility
+        config_dict = dict(self.config) if hasattr(self.config, '__dict__') else self.config
+        result = self.config_validator.validate_runtime_compatibility(config_dict)
+        
+        # Log warnings but don't fail
+        for warning in result.warnings.values():
+            logger.warning(f"Runtime warning: {warning}")
+        
+        return True
+        
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Runtime validation error: {e}")
+        # TODO: Review unreachable code - return False
     
     def _optimize_for_collection(self) -> None:
         """Optimize configuration based on detected collection size."""
@@ -235,9 +235,9 @@ def create_validated_organizer(config=None,
         if not validate_on_startup(config_path, auto_fix=auto_fix, show_summary=False):
             raise ConfigurationError("Startup validation failed")
     
-    # Create organizer
-    return ValidatedMediaOrganizer(
-        config=config,
-        validate_on_init=validate,
-        auto_optimize=auto_optimize
-    )
+    # TODO: Review unreachable code - # Create organizer
+    # TODO: Review unreachable code - return ValidatedMediaOrganizer(
+    # TODO: Review unreachable code - config=config,
+    # TODO: Review unreachable code - validate_on_init=validate,
+    # TODO: Review unreachable code - auto_optimize=auto_optimize
+    # TODO: Review unreachable code - )

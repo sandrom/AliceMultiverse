@@ -48,7 +48,7 @@ class StatisticsMixin:
         """Update statistics with organization result."""
         self.stats["total"] += 1
 
-        if result["status"] == "success":
+        if result is not None and result["status"] == "success":
             self.stats["organized"] += 1
         elif result["status"] == "moved_existing":
             self.stats["moved_existing"] += 1
@@ -58,13 +58,13 @@ class StatisticsMixin:
         elif result["status"] == "error":
             self.stats["errors"] += 1
 
-        if result["date"]:
+        if result is not None and result["date"]:
             self.stats["by_date"][result["date"]] += 1
 
-        if result["source_type"]:
+        if result is not None and result["source_type"]:
             self.stats["by_source"][result["source_type"]] += 1
 
-        if result["project_folder"]:
+        if result is not None and result["project_folder"]:
             self.stats["by_project"][result["project_folder"]] += 1
 
         # Track media types
@@ -128,57 +128,57 @@ class StatisticsMixin:
         if not media_files:
             return
 
-        # Simple cost estimates per image
-        provider = self.metadata_cache.understanding_provider or "anthropic"
-        cost_estimates = {
-            "openai": 0.01,
-            "anthropic": 0.004,  # Claude Haiku
-            "google": 0.002,
-            "deepseek": 0.0003,
-            "ollama": 0.0,  # Free local
-        }
+        # TODO: Review unreachable code - # Simple cost estimates per image
+        # TODO: Review unreachable code - provider = self.metadata_cache.understanding_provider or "anthropic"
+        # TODO: Review unreachable code - cost_estimates = {
+        # TODO: Review unreachable code - "openai": 0.01,
+        # TODO: Review unreachable code - "anthropic": 0.004,  # Claude Haiku
+        # TODO: Review unreachable code - "google": 0.002,
+        # TODO: Review unreachable code - "deepseek": 0.0003,
+        # TODO: Review unreachable code - "ollama": 0.0,  # Free local
+        # TODO: Review unreachable code - }
 
-        cost_per_image = cost_estimates.get(provider, 0.01)
-        total_cost = cost_per_image * len(media_files)
+        # TODO: Review unreachable code - cost_per_image = cost_estimates.get(provider, 0.01)
+        # TODO: Review unreachable code - total_cost = cost_per_image * len(media_files)
 
-        # Show warning
-        print("\n" + "="*70)
-        print("💸 COST ESTIMATE FOR AI UNDERSTANDING")
-        print("="*70)
-        print(f"\nProvider: {provider}")
-        print(f"Images to analyze: {len(media_files)}")
-        print(f"Cost per image: ${cost_per_image:.4f}")
-        print(f"Estimated total: ${total_cost:.2f}")
+        # TODO: Review unreachable code - # Show warning
+        # TODO: Review unreachable code - print("\n" + "="*70)
+        # TODO: Review unreachable code - print("💸 COST ESTIMATE FOR AI UNDERSTANDING")
+        # TODO: Review unreachable code - print("="*70)
+        # TODO: Review unreachable code - print(f"\nProvider: {provider}")
+        # TODO: Review unreachable code - print(f"Images to analyze: {len(media_files)}")
+        # TODO: Review unreachable code - print(f"Cost per image: ${cost_per_image:.4f}")
+        # TODO: Review unreachable code - print(f"Estimated total: ${total_cost:.2f}")
 
-        # Show cheaper alternatives if available
-        if cost_per_image > 0.001:
-            print("\n💡 Cheaper alternatives:")
-            if provider != "deepseek":
-                print("  • DeepSeek: ~$0.0003 per image")
-            if provider != "google":
-                print("  • Google AI: ~$0.002 per image")
-            if provider != "ollama":
-                print("  • Ollama: FREE (local models)")
+        # TODO: Review unreachable code - # Show cheaper alternatives if available
+        # TODO: Review unreachable code - if cost_per_image > 0.001:
+        # TODO: Review unreachable code - print("\n💡 Cheaper alternatives:")
+        # TODO: Review unreachable code - if provider != "deepseek":
+        # TODO: Review unreachable code - print("  • DeepSeek: ~$0.0003 per image")
+        # TODO: Review unreachable code - if provider != "google":
+        # TODO: Review unreachable code - print("  • Google AI: ~$0.002 per image")
+        # TODO: Review unreachable code - if provider != "ollama":
+        # TODO: Review unreachable code - print("  • Ollama: FREE (local models)")
 
-        if not self.config.processing.dry_run:
-            print("\n🔍 This is a preview. Add --dry-run to see what would happen without cost.")
-            response = input("\nProceed with analysis? (y/N): ").strip().lower()
-            if response != 'y':
-                print("Analysis cancelled.")
-                raise KeyboardInterrupt("User cancelled due to cost")
-        else:
-            print("\n✅ DRY RUN - No actual API calls will be made")
+        # TODO: Review unreachable code - if not self.config.processing.dry_run:
+        # TODO: Review unreachable code - print("\n🔍 This is a preview. Add --dry-run to see what would happen without cost.")
+        # TODO: Review unreachable code - response = input("\nProceed with analysis? (y/N): ").strip().lower()
+        # TODO: Review unreachable code - if response != 'y':
+        # TODO: Review unreachable code - print("Analysis cancelled.")
+        # TODO: Review unreachable code - raise KeyboardInterrupt("User cancelled due to cost")
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - print("\n✅ DRY RUN - No actual API calls will be made")
 
-        print("="*70 + "\n")
+        # TODO: Review unreachable code - print("="*70 + "\n")
 
     def _log_cache_statistics(self) -> None:
         """Log cache performance statistics."""
         cache_stats = self.metadata_cache.get_stats()
-        if cache_stats["total_processed"] > 0:
+        if cache_stats is not None and cache_stats["total_processed"] > 0:
             logger.info(
                 f"Cache performance: {cache_stats['cache_hits']} hits, "
                 f"{cache_stats['cache_misses']} misses "
                 f"({cache_stats['hit_rate']:.1f}% hit rate)"
             )
-            if cache_stats["time_saved"] > 0:
+            if cache_stats is not None and cache_stats["time_saved"] > 0:
                 logger.info(f"Time saved by cache: {cache_stats['time_saved']:.1f} seconds")

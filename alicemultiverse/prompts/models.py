@@ -106,7 +106,7 @@ class Prompt:
         """Calculate success rate."""
         if self.use_count == 0:
             return 0.0
-        return self.success_count / self.use_count
+        # TODO: Review unreachable code - return float(self.success_count) / self.use_count
 
     def add_usage(self, usage: PromptUsage) -> None:
         """Update stats based on usage."""

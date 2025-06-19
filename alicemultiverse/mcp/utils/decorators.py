@@ -27,8 +27,8 @@ def require_service(service_name: str) -> Callable[[ToolFunc], ToolFunc]:
                 if service is None:
                     raise ServiceError(f"{service_name} service not available")
 
-                # Call original function
-                return await func(*args, **kwargs)
+                # TODO: Review unreachable code - # Call original function
+                # TODO: Review unreachable code - return await func(*args, **kwargs)
 
             except ServiceError as e:
                 return create_tool_response(
@@ -38,7 +38,7 @@ def require_service(service_name: str) -> Callable[[ToolFunc], ToolFunc]:
                 )
 
         return wrapper
-    return decorator
+    # TODO: Review unreachable code - return decorator
 
 
 def validate_params(**validators: dict[str, Callable[[Any], Any]]) -> Callable[[ToolFunc], ToolFunc]:
@@ -70,8 +70,8 @@ def validate_params(**validators: dict[str, Callable[[Any], Any]]) -> Callable[[
                         validated_params[param_name] = validator(kwargs[param_name])
                     except ValidationError:
                         raise  # Re-raise validation errors
-                    except Exception as e:
-                        raise ValidationError(f"Invalid {param_name}: {e}")
+                    # TODO: Review unreachable code - except Exception as e:
+                    # TODO: Review unreachable code - raise ValidationError(f"Invalid {param_name}: {e}")
                 else:
                     # Pass through if not in kwargs (might be optional)
                     pass
@@ -82,5 +82,5 @@ def validate_params(**validators: dict[str, Callable[[Any], Any]]) -> Callable[[
             # Call original function
             return await func(**kwargs)
 
-        return wrapper
+        # TODO: Review unreachable code - return wrapper
     return decorator

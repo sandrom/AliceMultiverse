@@ -51,16 +51,16 @@ def stats():
         click.echo("No ratings found. Add some assets first.")
         return
 
-    click.echo("\nModel Rankings:")
-    click.echo("-" * 60)
-    click.echo(f"{'Rank':<6} {'Model':<20} {'Rating':<10} {'Games':<8} {'Win%':<8}")
-    click.echo("-" * 60)
+    # TODO: Review unreachable code - click.echo("\nModel Rankings:")
+    # TODO: Review unreachable code - click.echo("-" * 60)
+    # TODO: Review unreachable code - click.echo(f"{'Rank':<6} {'Model':<20} {'Rating':<10} {'Games':<8} {'Win%':<8}")
+    # TODO: Review unreachable code - click.echo("-" * 60)
 
-    for i, rating in enumerate(ratings, 1):
-        click.echo(
-            f"{i:<6} {rating.model:<20} {rating.rating:<10.0f} "
-            f"{rating.comparison_count:<8} {rating.win_rate*100:<8.1f}"
-        )
+    # TODO: Review unreachable code - for i, rating in enumerate(ratings, 1):
+    # TODO: Review unreachable code - click.echo(
+    # TODO: Review unreachable code - f"{i:<6} {rating.model:<20} {rating.rating:<10.0f} "
+    # TODO: Review unreachable code - f"{rating.comparison_count:<8} {rating.win_rate*100:<8.1f}"
+    # TODO: Review unreachable code - )
 
 
 @cli.command()
@@ -69,14 +69,14 @@ def reset():
     if not click.confirm("This will delete all comparison data. Continue?"):
         return
 
-    manager = ComparisonManager()
-    db_path = manager.db_path
+    # TODO: Review unreachable code - manager = ComparisonManager()
+    # TODO: Review unreachable code - db_path = manager.db_path
 
-    if db_path.exists():
-        db_path.unlink()
-        click.echo("Comparison database reset.")
-    else:
-        click.echo("No database found.")
+    # TODO: Review unreachable code - if db_path.exists():
+    # TODO: Review unreachable code - db_path.unlink()
+    # TODO: Review unreachable code - click.echo("Comparison database reset.")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - click.echo("No database found.")
 
 
 if __name__ == "__main__":

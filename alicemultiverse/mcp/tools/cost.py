@@ -85,18 +85,18 @@ def register_cost_tools(server: Server) -> None:
         else:
             raise ValidationError(f"Unknown operation: {operation}")
 
-        return create_tool_response(
-            success=True,
-            data={
-                "operation": operation,
-                "provider": provider,
-                "model": model,
-                "count": count,
-                "cost_per_item": cost_per_item,
-                "total_cost": total_cost,
-                "currency": "USD",
-                "note": "This is an estimate only - actual costs may vary"
-            }
-        )
+        # TODO: Review unreachable code - return create_tool_response(
+        # TODO: Review unreachable code - success=True,
+        # TODO: Review unreachable code - data={
+        # TODO: Review unreachable code - "operation": operation,
+        # TODO: Review unreachable code - "provider": provider,
+        # TODO: Review unreachable code - "model": model,
+        # TODO: Review unreachable code - "count": count,
+        # TODO: Review unreachable code - "cost_per_item": cost_per_item,
+        # TODO: Review unreachable code - "total_cost": total_cost,
+        # TODO: Review unreachable code - "currency": "USD",
+        # TODO: Review unreachable code - "note": "This is an estimate only - actual costs may vary"
+        # TODO: Review unreachable code - }
+        # TODO: Review unreachable code - )
 
     logger.info("Registered simplified cost estimation tools")

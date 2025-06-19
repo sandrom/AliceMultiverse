@@ -111,51 +111,51 @@ class ImageEnhancementWorkflow(WorkflowTemplate):
 
         return steps
 
-    def validate(self, context: WorkflowContext) -> list[str]:
-        """Validate the workflow can execute."""
-        errors = super().validate(context)
-        params = context.initial_params
+    # TODO: Review unreachable code - def validate(self, context: WorkflowContext) -> list[str]:
+    # TODO: Review unreachable code - """Validate the workflow can execute."""
+    # TODO: Review unreachable code - errors = super().validate(context)
+    # TODO: Review unreachable code - params = context.initial_params
 
-        # Check upscale scale is reasonable
-        upscale_scale = params.get("upscale_scale", 2)
-        if upscale_scale < 1 or upscale_scale > 4:
-            errors.append(f"Upscale scale {upscale_scale} should be between 1 and 4")
+    # TODO: Review unreachable code - # Check upscale scale is reasonable
+    # TODO: Review unreachable code - upscale_scale = params.get("upscale_scale", 2)
+    # TODO: Review unreachable code - if upscale_scale < 1 or upscale_scale > 4:
+    # TODO: Review unreachable code - errors.append(f"Upscale scale {upscale_scale} should be between 1 and 4")
 
-        # Check variation count is reasonable
-        if params.get("generate_variations", False):
-            variation_count = params.get("variation_count", 3)
-            if variation_count < 1 or variation_count > 10:
-                errors.append(f"Variation count {variation_count} should be between 1 and 10")
+    # TODO: Review unreachable code - # Check variation count is reasonable
+    # TODO: Review unreachable code - if params.get("generate_variations", False):
+    # TODO: Review unreachable code - variation_count = params.get("variation_count", 3)
+    # TODO: Review unreachable code - if variation_count < 1 or variation_count > 10:
+    # TODO: Review unreachable code - errors.append(f"Variation count {variation_count} should be between 1 and 10")
 
-        return errors
+    # TODO: Review unreachable code - return errors
 
-    def estimate_cost(self, context: WorkflowContext) -> float:
-        """Estimate total workflow cost."""
-        params = context.initial_params
-        total = 0.0
+    # TODO: Review unreachable code - def estimate_cost(self, context: WorkflowContext) -> float:
+    # TODO: Review unreachable code - """Estimate total workflow cost."""
+    # TODO: Review unreachable code - params = context.initial_params
+    # TODO: Review unreachable code - total = 0.0
 
-        # Initial generation
-        if params.get("initial_provider") == "leonardo":
-            total += 0.02  # ~$0.02 for Phoenix
-        elif params.get("initial_provider") == "firefly":
-            total += 0.04  # Adobe Firefly is slightly more
-        else:
-            total += 0.03  # Average estimate
+    # TODO: Review unreachable code - # Initial generation
+    # TODO: Review unreachable code - if params.get("initial_provider") == "leonardo":
+    # TODO: Review unreachable code - total += 0.02  # ~$0.02 for Phoenix
+    # TODO: Review unreachable code - elif params.get("initial_provider") == "firefly":
+    # TODO: Review unreachable code - total += 0.04  # Adobe Firefly is slightly more
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - total += 0.03  # Average estimate
 
-        # Upscaling (typically more expensive)
-        upscale_scale = params.get("upscale_scale", 2)
-        if params.get("upscale_provider") == "magnific":
-            # Magnific pricing scales with output size
-            total += 0.05 * (upscale_scale / 2)  # Base $0.05 for 2x
-        else:
-            total += 0.04
+    # TODO: Review unreachable code - # Upscaling (typically more expensive)
+    # TODO: Review unreachable code - upscale_scale = params.get("upscale_scale", 2)
+    # TODO: Review unreachable code - if params.get("upscale_provider") == "magnific":
+    # TODO: Review unreachable code - # Magnific pricing scales with output size
+    # TODO: Review unreachable code - total += 0.05 * (upscale_scale / 2)  # Base $0.05 for 2x
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - total += 0.04
 
-        # Variations
-        if params.get("generate_variations", False):
-            variation_count = params.get("variation_count", 3)
-            total += 0.02 * variation_count  # Similar to initial generation
+    # TODO: Review unreachable code - # Variations
+    # TODO: Review unreachable code - if params.get("generate_variations", False):
+    # TODO: Review unreachable code - variation_count = params.get("variation_count", 3)
+    # TODO: Review unreachable code - total += 0.02 * variation_count  # Similar to initial generation
 
-        return total
+    # TODO: Review unreachable code - return total
 
 
 class QuickEnhanceWorkflow(ImageEnhancementWorkflow):
@@ -180,49 +180,49 @@ class QuickEnhanceWorkflow(ImageEnhancementWorkflow):
         return super().define_steps(context)
 
 
-class PremiumEnhanceWorkflow(ImageEnhancementWorkflow):
-    """Premium enhancement workflow for maximum quality.
+# TODO: Review unreachable code - class PremiumEnhanceWorkflow(ImageEnhancementWorkflow):
+# TODO: Review unreachable code - """Premium enhancement workflow for maximum quality.
 
-    Uses best models and includes variations.
-    """
+# TODO: Review unreachable code - Uses best models and includes variations.
+# TODO: Review unreachable code - """
 
-    def __init__(self):
-        super().__init__(name="PremiumEnhance")
+# TODO: Review unreachable code - def __init__(self):
+# TODO: Review unreachable code - super().__init__(name="PremiumEnhance")
 
-    def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
-        """Define premium enhancement steps."""
-        # Override defaults for quality
-        params = context.initial_params
-        params.setdefault("initial_provider", "firefly")  # High quality
-        params.setdefault("initial_model", "firefly-v3")
-        params.setdefault("upscale_provider", "magnific")
-        params.setdefault("upscale_scale", 3)  # Higher scale
-        params.setdefault("generate_variations", True)
-        params.setdefault("variation_count", 5)
-        params.setdefault("upscale_creativity", 0.4)
-        params.setdefault("upscale_hdr", 0.7)  # More HDR
+# TODO: Review unreachable code - def define_steps(self, context: WorkflowContext) -> list[WorkflowStep]:
+# TODO: Review unreachable code - """Define premium enhancement steps."""
+# TODO: Review unreachable code - # Override defaults for quality
+# TODO: Review unreachable code - params = context.initial_params
+# TODO: Review unreachable code - params.setdefault("initial_provider", "firefly")  # High quality
+# TODO: Review unreachable code - params.setdefault("initial_model", "firefly-v3")
+# TODO: Review unreachable code - params.setdefault("upscale_provider", "magnific")
+# TODO: Review unreachable code - params.setdefault("upscale_scale", 3)  # Higher scale
+# TODO: Review unreachable code - params.setdefault("generate_variations", True)
+# TODO: Review unreachable code - params.setdefault("variation_count", 5)
+# TODO: Review unreachable code - params.setdefault("upscale_creativity", 0.4)
+# TODO: Review unreachable code - params.setdefault("upscale_hdr", 0.7)  # More HDR
 
-        # Add extra quality step
-        steps = super().define_steps(context)
+# TODO: Review unreachable code - # Add extra quality step
+# TODO: Review unreachable code - steps = super().define_steps(context)
 
-        # Insert quality assessment after upscaling
-        quality_step = WorkflowStep(
-            name="quality_check",
-            provider="local",
-            operation="assess_quality",
-            parameters={
-                "input_from": "upscale",
-                "min_quality_score": 80,
-                "retry_if_low": True,
-            },
-            condition="upscale.success"
-        )
+# TODO: Review unreachable code - # Insert quality assessment after upscaling
+# TODO: Review unreachable code - quality_step = WorkflowStep(
+# TODO: Review unreachable code - name="quality_check",
+# TODO: Review unreachable code - provider="local",
+# TODO: Review unreachable code - operation="assess_quality",
+# TODO: Review unreachable code - parameters={
+# TODO: Review unreachable code - "input_from": "upscale",
+# TODO: Review unreachable code - "min_quality_score": 80,
+# TODO: Review unreachable code - "retry_if_low": True,
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - condition="upscale.success"
+# TODO: Review unreachable code - )
 
-        # Insert before variations
-        insert_index = next(
-            (i for i, s in enumerate(steps) if s.name.startswith("variation")),
-            len(steps) - 1
-        )
-        steps.insert(insert_index, quality_step)
+# TODO: Review unreachable code - # Insert before variations
+# TODO: Review unreachable code - insert_index = next(
+# TODO: Review unreachable code - (i for i, s in enumerate(steps) if s.name.startswith("variation")),
+# TODO: Review unreachable code - len(steps) - 1
+# TODO: Review unreachable code - )
+# TODO: Review unreachable code - steps.insert(insert_index, quality_step)
 
-        return steps
+# TODO: Review unreachable code - return steps

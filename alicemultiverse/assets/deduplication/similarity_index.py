@@ -97,42 +97,42 @@ class SimilarityIndex:
             logger.warning("No valid features extracted")
             return 0
 
-        # Convert to numpy array
-        feature_matrix = np.vstack(features_list).astype('float32')
+        # TODO: Review unreachable code - # Convert to numpy array
+        # TODO: Review unreachable code - feature_matrix = np.vstack(features_list).astype('float32')
 
-        # Normalize features
-        feature_matrix = normalize(feature_matrix, axis=1)
+        # TODO: Review unreachable code - # Normalize features
+        # TODO: Review unreachable code - feature_matrix = normalize(feature_matrix, axis=1)
 
-        # Set dimension
-        self.dimension = feature_matrix.shape[1]
+        # TODO: Review unreachable code - # Set dimension
+        # TODO: Review unreachable code - self.dimension = feature_matrix.shape[1]
 
-        # Create index
-        if self.index_type == "Flat":
-            self.index = faiss.IndexFlatL2(self.dimension)
-        elif self.index_type == "IVF":
-            quantizer = faiss.IndexFlatL2(self.dimension)
-            self.index = faiss.IndexIVFFlat(
-                quantizer, self.dimension, self.nlist
-            )
-            # Train index
-            self.index.train(feature_matrix)
-        elif self.index_type == "HNSW":
-            self.index = faiss.IndexHNSWFlat(self.dimension, 32)
-        else:
-            raise ValueError(f"Unknown index type: {self.index_type}")
+        # TODO: Review unreachable code - # Create index
+        # TODO: Review unreachable code - if self.index_type == "Flat":
+        # TODO: Review unreachable code - self.index = faiss.IndexFlatL2(self.dimension)
+        # TODO: Review unreachable code - elif self.index_type == "IVF":
+        # TODO: Review unreachable code - quantizer = faiss.IndexFlatL2(self.dimension)
+        # TODO: Review unreachable code - self.index = faiss.IndexIVFFlat(
+        # TODO: Review unreachable code - quantizer, self.dimension, self.nlist
+        # TODO: Review unreachable code - )
+        # TODO: Review unreachable code - # Train index
+        # TODO: Review unreachable code - self.index.train(feature_matrix)
+        # TODO: Review unreachable code - elif self.index_type == "HNSW":
+        # TODO: Review unreachable code - self.index = faiss.IndexHNSWFlat(self.dimension, 32)
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - raise ValueError(f"Unknown index type: {self.index_type}")
 
-        # Add vectors to index
-        self.index.add(feature_matrix)
-        self.paths = valid_paths
+        # TODO: Review unreachable code - # Add vectors to index
+        # TODO: Review unreachable code - self.index.add(feature_matrix)
+        # TODO: Review unreachable code - self.paths = valid_paths
 
-        # Save cache
-        if cache_dir:
-            cache_dir.mkdir(parents=True, exist_ok=True)
-            with open(cache_file, 'wb') as f:
-                pickle.dump(self.features, f)
+        # TODO: Review unreachable code - # Save cache
+        # TODO: Review unreachable code - if cache_dir:
+        # TODO: Review unreachable code - cache_dir.mkdir(parents=True, exist_ok=True)
+        # TODO: Review unreachable code - with open(cache_file, 'wb') as f:
+        # TODO: Review unreachable code - pickle.dump(self.features, f)
 
-        logger.info(f"Indexed {len(valid_paths)} images")
-        return len(valid_paths)
+        # TODO: Review unreachable code - logger.info(f"Indexed {len(valid_paths)} images")
+        # TODO: Review unreachable code - return int(len(valid_paths))
 
     def _compute_features(self, image_path: Path) -> np.ndarray | None:
         """Compute feature vector for an image."""
@@ -141,29 +141,29 @@ class SimilarityIndex:
         if not hashes:
             return None
 
-        # Get visual features
-        visual_features = self.hasher.compute_visual_features(image_path)
-        if visual_features is None:
-            return None
+        # TODO: Review unreachable code - # Get visual features
+        # TODO: Review unreachable code - visual_features = self.hasher.compute_visual_features(image_path)
+        # TODO: Review unreachable code - if visual_features is None:
+        # TODO: Review unreachable code - return None
 
-        # Combine hash bits and visual features
-        hash_features = []
+        # TODO: Review unreachable code - # Combine hash bits and visual features
+        # TODO: Review unreachable code - hash_features = []
 
-        # Convert hashes to binary features
-        for algo in ['average', 'perceptual', 'difference', 'wavelet']:
-            if algo in hashes:
-                hash_str = hashes[algo]
-                # Convert hex to binary
-                hash_bits = bin(int(hash_str, 16))[2:].zfill(self.hasher.hash_size ** 2)
-                hash_features.extend([float(b) for b in hash_bits])
+        # TODO: Review unreachable code - # Convert hashes to binary features
+        # TODO: Review unreachable code - for algo in ['average', 'perceptual', 'difference', 'wavelet']:
+        # TODO: Review unreachable code - if algo in hashes:
+        # TODO: Review unreachable code - hash_str = hashes[algo]
+        # TODO: Review unreachable code - # Convert hex to binary
+        # TODO: Review unreachable code - hash_bits = bin(int(hash_str, 16))[2:].zfill(self.hasher.hash_size ** 2)
+        # TODO: Review unreachable code - hash_features.extend([float(b) for b in hash_bits])
 
-        # Combine all features
-        all_features = np.concatenate([
-            np.array(hash_features),
-            visual_features
-        ])
+        # TODO: Review unreachable code - # Combine all features
+        # TODO: Review unreachable code - all_features = np.concatenate([
+        # TODO: Review unreachable code - np.array(hash_features),
+        # TODO: Review unreachable code - visual_features
+        # TODO: Review unreachable code - ])
 
-        return all_features
+        # TODO: Review unreachable code - return all_features
 
     def search(
         self,
@@ -186,40 +186,40 @@ class SimilarityIndex:
             logger.warning("Index is empty")
             return []
 
-        # Compute query features
-        features = self._compute_features(query_path)
-        if features is None:
-            logger.warning(f"Could not extract features from {query_path}")
-            return []
+        # TODO: Review unreachable code - # Compute query features
+        # TODO: Review unreachable code - features = self._compute_features(query_path)
+        # TODO: Review unreachable code - if features is None:
+        # TODO: Review unreachable code - logger.warning(f"Could not extract features from {query_path}")
+        # TODO: Review unreachable code - return []
 
-        # Normalize
-        features = normalize(features.reshape(1, -1), axis=1).astype('float32')
+        # TODO: Review unreachable code - # Normalize
+        # TODO: Review unreachable code - features = normalize(features.reshape(1, -1), axis=1).astype('float32')
 
-        # Search
-        distances, indices = self.index.search(features, min(k + 1, self.index.ntotal))
+        # TODO: Review unreachable code - # Search
+        # TODO: Review unreachable code - distances, indices = self.index.search(features, min(k + 1, self.index.ntotal))
 
-        # Convert to results
-        results = []
-        query_str = str(query_path)
+        # TODO: Review unreachable code - # Convert to results
+        # TODO: Review unreachable code - results = []
+        # TODO: Review unreachable code - query_str = str(query_path)
 
-        for dist, idx in zip(distances[0], indices[0], strict=False):
-            if idx >= 0 and idx < len(self.paths):
-                path_str = self.paths[idx]
+        # TODO: Review unreachable code - for dist, idx in zip(distances[0], indices[0], strict=False):
+        # TODO: Review unreachable code - if idx >= 0 and idx < len(self.paths):
+        # TODO: Review unreachable code - path_str = self.paths[idx]
 
-                # Skip self if requested
-                if not include_self and path_str == query_str:
-                    continue
+        # TODO: Review unreachable code - # Skip self if requested
+        # TODO: Review unreachable code - if not include_self and path_str == query_str:
+        # TODO: Review unreachable code - continue
 
-                # Convert distance to similarity (inverse)
-                similarity = 1.0 / (1.0 + dist)
+        # TODO: Review unreachable code - # Convert distance to similarity (inverse)
+        # TODO: Review unreachable code - similarity = 1.0 / (1.0 + dist)
 
-                results.append(SimilarImage(
-                    path=Path(path_str),
-                    similarity=similarity,
-                    distance=float(dist)
-                ))
+        # TODO: Review unreachable code - results.append(SimilarImage(
+        # TODO: Review unreachable code - path=Path(path_str),
+        # TODO: Review unreachable code - similarity=similarity,
+        # TODO: Review unreachable code - distance=float(dist)
+        # TODO: Review unreachable code - ))
 
-        return results[:k]
+        # TODO: Review unreachable code - return results[:k]
 
     def search_batch(
         self,
@@ -243,90 +243,90 @@ class SimilarityIndex:
 
         return results
 
-    def find_clusters(
-        self,
-        min_cluster_size: int = 3,
-        max_distance: float = 0.5
-    ) -> list[list[str]]:
-        """
-        Find clusters of similar images.
+    # TODO: Review unreachable code - def find_clusters(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - min_cluster_size: int = 3,
+    # TODO: Review unreachable code - max_distance: float = 0.5
+    # TODO: Review unreachable code - ) -> list[list[str]]:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Find clusters of similar images.
 
-        Args:
-            min_cluster_size: Minimum images per cluster
-            max_distance: Maximum distance within cluster
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - min_cluster_size: Minimum images per cluster
+    # TODO: Review unreachable code - max_distance: Maximum distance within cluster
 
-        Returns:
-            List of clusters (each cluster is a list of paths)
-        """
-        if self.index is None or self.index.ntotal == 0:
-            return []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of clusters (each cluster is a list of paths)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - if self.index is None or self.index.ntotal == 0:
+    # TODO: Review unreachable code - return []
 
-        # Use DBSCAN for clustering
-        from sklearn.cluster import DBSCAN
+    # TODO: Review unreachable code - # Use DBSCAN for clustering
+    # TODO: Review unreachable code - from sklearn.cluster import DBSCAN
 
-        # Get all features
-        n_images = len(self.paths)
-        features = np.zeros((n_images, self.dimension), dtype='float32')
+    # TODO: Review unreachable code - # Get all features
+    # TODO: Review unreachable code - n_images = len(self.paths)
+    # TODO: Review unreachable code - features = np.zeros((n_images, self.dimension), dtype='float32')
 
-        for i, path in enumerate(self.paths):
-            if path in self.features:
-                features[i] = self.features[path]
+    # TODO: Review unreachable code - for i, path in enumerate(self.paths):
+    # TODO: Review unreachable code - if path in self.features:
+    # TODO: Review unreachable code - features[i] = self.features[path]
 
-        # Normalize
-        features = normalize(features, axis=1)
+    # TODO: Review unreachable code - # Normalize
+    # TODO: Review unreachable code - features = normalize(features, axis=1)
 
-        # Cluster
-        clustering = DBSCAN(eps=max_distance, min_samples=min_cluster_size)
-        labels = clustering.fit_predict(features)
+    # TODO: Review unreachable code - # Cluster
+    # TODO: Review unreachable code - clustering = DBSCAN(eps=max_distance, min_samples=min_cluster_size)
+    # TODO: Review unreachable code - labels = clustering.fit_predict(features)
 
-        # Group by cluster
-        clusters = {}
-        for i, label in enumerate(labels):
-            if label >= 0:  # -1 means noise
-                if label not in clusters:
-                    clusters[label] = []
-                clusters[label].append(self.paths[i])
+    # TODO: Review unreachable code - # Group by cluster
+    # TODO: Review unreachable code - clusters = {}
+    # TODO: Review unreachable code - for i, label in enumerate(labels):
+    # TODO: Review unreachable code - if label >= 0:  # -1 means noise
+    # TODO: Review unreachable code - if label not in clusters:
+    # TODO: Review unreachable code - clusters[label] = []
+    # TODO: Review unreachable code - clusters[label].append(self.paths[i])
 
-        return list(clusters.values())
+    # TODO: Review unreachable code - return list(clusters.values())
 
-    def save_index(self, index_path: Path):
-        """Save index to disk."""
-        if self.index is None:
-            logger.warning("No index to save")
-            return
+    # TODO: Review unreachable code - def save_index(self, index_path: Path):
+    # TODO: Review unreachable code - """Save index to disk."""
+    # TODO: Review unreachable code - if self.index is None:
+    # TODO: Review unreachable code - logger.warning("No index to save")
+    # TODO: Review unreachable code - return
 
-        # Save FAISS index
-        faiss.write_index(self.index, str(index_path.with_suffix('.faiss')))
+    # TODO: Review unreachable code - # Save FAISS index
+    # TODO: Review unreachable code - faiss.write_index(self.index, str(index_path.with_suffix('.faiss')))
 
-        # Save metadata
-        metadata = {
-            'paths': self.paths,
-            'dimension': self.dimension,
-            'index_type': self.index_type,
-            'nlist': self.nlist
-        }
+    # TODO: Review unreachable code - # Save metadata
+    # TODO: Review unreachable code - metadata = {
+    # TODO: Review unreachable code - 'paths': self.paths,
+    # TODO: Review unreachable code - 'dimension': self.dimension,
+    # TODO: Review unreachable code - 'index_type': self.index_type,
+    # TODO: Review unreachable code - 'nlist': self.nlist
+    # TODO: Review unreachable code - }
 
-        with open(index_path.with_suffix('.json'), 'w') as f:
-            json.dump(metadata, f, indent=2)
+    # TODO: Review unreachable code - with open(index_path.with_suffix('.json'), 'w') as f:
+    # TODO: Review unreachable code - json.dump(metadata, f, indent=2)
 
-        logger.info(f"Saved index to {index_path}")
+    # TODO: Review unreachable code - logger.info(f"Saved index to {index_path}")
 
-    def load_index(self, index_path: Path):
-        """Load index from disk."""
-        # Load FAISS index
-        faiss_path = index_path.with_suffix('.faiss')
-        if not faiss_path.exists():
-            raise FileNotFoundError(f"Index file not found: {faiss_path}")
+    # TODO: Review unreachable code - def load_index(self, index_path: Path):
+    # TODO: Review unreachable code - """Load index from disk."""
+    # TODO: Review unreachable code - # Load FAISS index
+    # TODO: Review unreachable code - faiss_path = index_path.with_suffix('.faiss')
+    # TODO: Review unreachable code - if not faiss_path.exists():
+    # TODO: Review unreachable code - raise FileNotFoundError(f"Index file not found: {faiss_path}")
 
-        self.index = faiss.read_index(str(faiss_path))
+    # TODO: Review unreachable code - self.index = faiss.read_index(str(faiss_path))
 
-        # Load metadata
-        with open(index_path.with_suffix('.json')) as f:
-            metadata = json.load(f)
+    # TODO: Review unreachable code - # Load metadata
+    # TODO: Review unreachable code - with open(index_path.with_suffix('.json')) as f:
+    # TODO: Review unreachable code - metadata = json.load(f)
 
-        self.paths = metadata['paths']
-        self.dimension = metadata['dimension']
-        self.index_type = metadata['index_type']
-        self.nlist = metadata.get('nlist', 100)
+    # TODO: Review unreachable code - self.paths = metadata['paths']
+    # TODO: Review unreachable code - self.dimension = metadata['dimension']
+    # TODO: Review unreachable code - self.index_type = metadata['index_type']
+    # TODO: Review unreachable code - self.nlist = metadata.get('nlist', 100)
 
-        logger.info(f"Loaded index with {len(self.paths)} images")
+    # TODO: Review unreachable code - logger.info(f"Loaded index with {len(self.paths)} images")

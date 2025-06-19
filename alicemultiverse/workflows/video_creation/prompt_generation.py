@@ -132,69 +132,69 @@ class PromptGenerationMixin:
 
         return storyboard
 
-    def _generate_shot_prompt(self, analysis: dict[str, Any], style_template: dict[str, Any]) -> str:
-        """Generate a video prompt for a single shot."""
-        # Start with style prefix
-        prompt_parts = [style_template["prefix"]]
+    # TODO: Review unreachable code - def _generate_shot_prompt(self, analysis: dict[str, Any], style_template: dict[str, Any]) -> str:
+    # TODO: Review unreachable code - """Generate a video prompt for a single shot."""
+    # TODO: Review unreachable code - # Start with style prefix
+    # TODO: Review unreachable code - prompt_parts = [style_template["prefix"]]
 
-        # Add descriptive elements from tags
-        key_tags = analysis["tags"][:5]  # Use top 5 tags
-        if key_tags:
-            prompt_parts.append(", ".join(key_tags))
+    # TODO: Review unreachable code - # Add descriptive elements from tags
+    # TODO: Review unreachable code - key_tags = analysis["tags"][:5]  # Use top 5 tags
+    # TODO: Review unreachable code - if key_tags:
+    # TODO: Review unreachable code - prompt_parts.append(", ".join(key_tags))
 
-        # Add composition hints
-        comp = analysis["composition"]
-        if comp["has_character"]:
-            prompt_parts.append("with character in focus")
-        elif comp["is_landscape"]:
-            prompt_parts.append("sweeping landscape view")
+    # TODO: Review unreachable code - # Add composition hints
+    # TODO: Review unreachable code - comp = analysis["composition"]
+    # TODO: Review unreachable code - if comp is not None and comp["has_character"]:
+    # TODO: Review unreachable code - prompt_parts.append("with character in focus")
+    # TODO: Review unreachable code - elif comp["is_landscape"]:
+    # TODO: Review unreachable code - prompt_parts.append("sweeping landscape view")
 
-        # Add motion description
-        motion = analysis["suggested_motion"]
-        if motion != CameraMotion.STATIC:
-            motion_desc = motion.value.replace("_", " ")
-            prompt_parts.append(f"camera {motion_desc}")
+    # TODO: Review unreachable code - # Add motion description
+    # TODO: Review unreachable code - motion = analysis["suggested_motion"]
+    # TODO: Review unreachable code - if motion != CameraMotion.STATIC:
+    # TODO: Review unreachable code - motion_desc = motion.value.replace("_", " ")
+    # TODO: Review unreachable code - prompt_parts.append(f"camera {motion_desc}")
 
-        # Add style-specific camera hints
-        if style_template["camera_hints"]:
-            prompt_parts.append(style_template["camera_hints"][0])
+    # TODO: Review unreachable code - # Add style-specific camera hints
+    # TODO: Review unreachable code - if style_template is not None and style_template["camera_hints"]:
+    # TODO: Review unreachable code - prompt_parts.append(style_template["camera_hints"][0])
 
-        # Add motion keywords if present
-        if analysis["motion_keywords"]:
-            prompt_parts.append(f"featuring {', '.join(analysis['motion_keywords'][:2])}")
+    # TODO: Review unreachable code - # Add motion keywords if present
+    # TODO: Review unreachable code - if analysis is not None and analysis["motion_keywords"]:
+    # TODO: Review unreachable code - prompt_parts.append(f"featuring {', '.join(analysis['motion_keywords'][:2])}")
 
-        return ", ".join(prompt_parts)
+    # TODO: Review unreachable code - return ", ".join(prompt_parts)
 
-    async def _enhance_prompt_with_ai(
-        self,
-        base_prompt: str,
-        analysis: dict[str, Any],
-        style_template: dict[str, Any]
-    ) -> str:
-        """Use AI to enhance the video prompt."""
-        if not self.understanding_provider:
-            return base_prompt
+    # TODO: Review unreachable code - async def _enhance_prompt_with_ai(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - base_prompt: str,
+    # TODO: Review unreachable code - analysis: dict[str, Any],
+    # TODO: Review unreachable code - style_template: dict[str, Any]
+    # TODO: Review unreachable code - ) -> str:
+    # TODO: Review unreachable code - """Use AI to enhance the video prompt."""
+    # TODO: Review unreachable code - if not self.understanding_provider:
+    # TODO: Review unreachable code - return base_prompt
 
-        # Create enhancement prompt
-        enhancement_prompt = f"""
-        Enhance this video generation prompt for Kling AI:
+    # TODO: Review unreachable code - # Create enhancement prompt
+    # TODO: Review unreachable code - enhancement_prompt = f"""
+    # TODO: Review unreachable code - Enhance this video generation prompt for Kling AI:
 
-        Base prompt: {base_prompt}
-        Style: {style_template.get('prefix', 'cinematic')}
-        Camera motion: {analysis['suggested_motion'].value}
+    # TODO: Review unreachable code - Base prompt: {base_prompt}
+    # TODO: Review unreachable code - Style: {style_template.get('prefix', 'cinematic')}
+    # TODO: Review unreachable code - Camera motion: {analysis['suggested_motion'].value}
 
-        Make it more cinematic and specific for video generation.
-        Keep it under 100 words. Focus on movement and atmosphere.
-        """
+    # TODO: Review unreachable code - Make it more cinematic and specific for video generation.
+    # TODO: Review unreachable code - Keep it under 100 words. Focus on movement and atmosphere.
+    # TODO: Review unreachable code - """
 
-        try:
-            # Use understanding provider to enhance
-            # This is a simplified version - you might want to add proper API integration
-            enhanced = await self.understanding_provider.analyze_with_prompt(
-                analysis["file_path"],
-                enhancement_prompt
-            )
-            return enhanced.get("description", base_prompt)
-        except Exception as e:
-            logger.warning(f"Failed to enhance prompt with AI: {e}")
-            return base_prompt
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Use understanding provider to enhance
+    # TODO: Review unreachable code - # This is a simplified version - you might want to add proper API integration
+    # TODO: Review unreachable code - enhanced = await self.understanding_provider.analyze_with_prompt(
+    # TODO: Review unreachable code - analysis["file_path"],
+    # TODO: Review unreachable code - enhancement_prompt
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - return enhanced.get("description", base_prompt) or 0
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.warning(f"Failed to enhance prompt with AI: {e}")
+    # TODO: Review unreachable code - return base_prompt

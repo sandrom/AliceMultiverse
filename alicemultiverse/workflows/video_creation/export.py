@@ -1,5 +1,5 @@
 """Export functionality for video creation workflow."""
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import logging
 from pathlib import Path
@@ -85,45 +85,45 @@ class ExportMixin:
 
         return output_path
 
-    def create_flux_kontext_requests(
-        self,
-        storyboard: VideoStoryboard,
-        frames_per_shot: int = 2
-    ) -> dict[str, list[dict]]:
-        """Create Flux Kontext requests for keyframe preparation.
+    # TODO: Review unreachable code - def create_flux_kontext_requests(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - storyboard: VideoStoryboard,
+    # TODO: Review unreachable code - frames_per_shot: int = 2
+    # TODO: Review unreachable code - ) -> dict[str, list[dict]]:
+    # TODO: Review unreachable code - """Create Flux Kontext requests for keyframe preparation.
 
-        Args:
-            storyboard: Video storyboard
-            frames_per_shot: Number of keyframes per shot
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - storyboard: Video storyboard
+    # TODO: Review unreachable code - frames_per_shot: Number of keyframes per shot
 
-        Returns:
-            Dictionary mapping shot indices to Flux requests
-        """
-        flux_requests = {}
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Dictionary mapping shot indices to Flux requests
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - flux_requests = {}
 
-        for i, shot in enumerate(storyboard.shots):
-            requests = []
+    # TODO: Review unreachable code - for i, shot in enumerate(storyboard.shots):
+    # TODO: Review unreachable code - requests = []
 
-            # Create keyframe at start and end of motion
-            for frame_pos in ["start", "end"]:
-                prompt = shot.prompt
+    # TODO: Review unreachable code - # Create keyframe at start and end of motion
+    # TODO: Review unreachable code - for frame_pos in ["start", "end"]:
+    # TODO: Review unreachable code - prompt = shot.prompt
 
-                # Modify prompt based on frame position
-                if frame_pos == "start":
-                    prompt = f"{prompt}, at the beginning of {shot.camera_motion.value} motion"
-                else:
-                    prompt = f"{prompt}, at the end of {shot.camera_motion.value} motion"
+    # TODO: Review unreachable code - # Modify prompt based on frame position
+    # TODO: Review unreachable code - if frame_pos == "start":
+    # TODO: Review unreachable code - prompt = f"{prompt}, at the beginning of {shot.camera_motion.value} motion"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - prompt = f"{prompt}, at the end of {shot.camera_motion.value} motion"
 
-                request = {
-                    "prompt": prompt,
-                    "model": "flux-kontext",
-                    "reference_image": shot.image_hash,
-                    "frame_position": frame_pos,
-                    "camera_motion": shot.camera_motion.value
-                }
+    # TODO: Review unreachable code - request = {
+    # TODO: Review unreachable code - "prompt": prompt,
+    # TODO: Review unreachable code - "model": "flux-kontext",
+    # TODO: Review unreachable code - "reference_image": shot.image_hash,
+    # TODO: Review unreachable code - "frame_position": frame_pos,
+    # TODO: Review unreachable code - "camera_motion": shot.camera_motion.value
+    # TODO: Review unreachable code - }
 
-                requests.append(request)
+    # TODO: Review unreachable code - requests.append(request)
 
-            flux_requests[str(i)] = requests
+    # TODO: Review unreachable code - flux_requests[str(i)] = requests
 
-        return flux_requests
+    # TODO: Review unreachable code - return flux_requests

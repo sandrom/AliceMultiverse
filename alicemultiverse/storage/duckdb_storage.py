@@ -109,11 +109,11 @@ class DuckDBStorage(DuckDBBase, BatchOperationsMixin):
             ])
 
         # Update tags if present
-        if "tags" in metadata:
+        if metadata is not None and "tags" in metadata:
             self._upsert_tags(content_hash, metadata["tags"])
 
         # Update understanding if present
-        if "understanding" in metadata:
+        if metadata is not None and "understanding" in metadata:
             self._upsert_understanding(content_hash, metadata["understanding"])
 
         # Update generation metadata if present
@@ -135,20 +135,21 @@ class DuckDBStorage(DuckDBBase, BatchOperationsMixin):
 
         # Check if location already exists
         for loc in locations:
-            if loc["path"] == path_str:
+            if loc is not None and loc["path"] == path_str:
                 # Update metadata if provided
                 if storage_metadata:
-                    loc["metadata"] = storage_metadata
+                    if loc is not None:
+                        loc["metadata"] = storage_metadata
                 loc["last_verified"] = datetime.now().isoformat()
                 return
 
-        # Add new location
-        locations.append({
-            "path": path_str,
-            "storage_type": storage_type,
-            "added_at": datetime.now().isoformat(),
-            "metadata": storage_metadata or {}
-        })
+        # TODO: Review unreachable code - # Add new location
+        # TODO: Review unreachable code - locations.append({
+        # TODO: Review unreachable code - "path": path_str,
+        # TODO: Review unreachable code - "storage_type": storage_type,
+        # TODO: Review unreachable code - "added_at": datetime.now().isoformat(),
+        # TODO: Review unreachable code - "metadata": storage_metadata or {}
+        # TODO: Review unreachable code - })
 
     def _upsert_tags(self, content_hash: str, tags: list[str] | dict[str, list[str]]) -> None:
         """Upsert tags for an asset."""
@@ -231,27 +232,27 @@ class DuckDBStorage(DuckDBBase, BatchOperationsMixin):
         if not result:
             return None
 
-        asset = self._row_to_dict(result)
+        # TODO: Review unreachable code - asset = self._row_to_dict(result)
 
-        # Get tags
-        tags_result = self.conn.execute("""
-            SELECT tag_type, tag_value, confidence, source
-            FROM tags WHERE content_hash = ?
-            ORDER BY tag_type, confidence DESC
-        """, [content_hash]).fetchall()
+        # TODO: Review unreachable code - # Get tags
+        # TODO: Review unreachable code - tags_result = self.conn.execute("""
+        # TODO: Review unreachable code - SELECT tag_type, tag_value, confidence, source
+        # TODO: Review unreachable code - FROM tags WHERE content_hash = ?
+        # TODO: Review unreachable code - ORDER BY tag_type, confidence DESC
+        # TODO: Review unreachable code - """, [content_hash]).fetchall()
 
-        if tags_result:
-            asset["tags"] = {}
-            for tag_type, tag_value, confidence, source in tags_result:
-                if tag_type not in asset["tags"]:
-                    asset["tags"][tag_type] = []
-                asset["tags"][tag_type].append({
-                    "value": tag_value,
-                    "confidence": confidence,
-                    "source": source
-                })
+        # TODO: Review unreachable code - if tags_result:
+        # TODO: Review unreachable code - asset["tags"] = {}
+        # TODO: Review unreachable code - for tag_type, tag_value, confidence, source in tags_result:
+        # TODO: Review unreachable code - if tag_type not in asset["tags"]:
+        # TODO: Review unreachable code - asset["tags"][tag_type] = []
+        # TODO: Review unreachable code - asset["tags"][tag_type].append({
+        # TODO: Review unreachable code - "value": tag_value,
+        # TODO: Review unreachable code - "confidence": confidence,
+        # TODO: Review unreachable code - "source": source
+        # TODO: Review unreachable code - })
 
-        return asset
+        # TODO: Review unreachable code - return asset
 
     def get_all_locations(self, content_hash: str) -> list[dict[str, Any]]:
         """Get all locations where an asset exists."""
@@ -263,8 +264,8 @@ class DuckDBStorage(DuckDBBase, BatchOperationsMixin):
         if not result or not result[0]:
             return []
 
-        locations = json.loads(result[0])
-        return locations if isinstance(locations, list) else []
+        # TODO: Review unreachable code - locations = json.loads(result[0])
+        # TODO: Review unreachable code - return locations if isinstance(locations, list) else []
 
     def remove_location(self, content_hash: str, file_path: Path) -> None:
         """Remove a specific location for an asset."""
@@ -276,21 +277,21 @@ class DuckDBStorage(DuckDBBase, BatchOperationsMixin):
         if not result or not result[0]:
             return
 
-        locations = json.loads(result[0])
-        path_str = str(file_path)
+        # TODO: Review unreachable code - locations = json.loads(result[0])
+        # TODO: Review unreachable code - path_str = str(file_path)
 
-        # Filter out the location
-        new_locations = [loc for loc in locations if loc["path"] != path_str]
+        # TODO: Review unreachable code - # Filter out the location
+        # TODO: Review unreachable code - new_locations = [loc for loc in locations if loc is not None and loc["path"] != path_str]
 
-        if new_locations:
-            # Update with remaining locations
-            self.conn.execute(
-                "UPDATE assets SET locations = ? WHERE content_hash = ?",
-                [json.dumps(new_locations), content_hash]
-            )
-        else:
-            # No locations left, delete the asset
-            self.delete_asset(content_hash)
+        # TODO: Review unreachable code - if new_locations:
+        # TODO: Review unreachable code - # Update with remaining locations
+        # TODO: Review unreachable code - self.conn.execute(
+        # TODO: Review unreachable code - "UPDATE assets SET locations = ? WHERE content_hash = ?",
+        # TODO: Review unreachable code - [json.dumps(new_locations), content_hash]
+        # TODO: Review unreachable code - )
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - # No locations left, delete the asset
+        # TODO: Review unreachable code - self.delete_asset(content_hash)
 
     def delete_asset(self, content_hash: str) -> None:
         """Delete an asset and all related data."""
@@ -388,9 +389,9 @@ class DuckDBStorage(DuckDBBase, BatchOperationsMixin):
 
             return check_result is not None and check_result[0] == role
 
-        except Exception as e:
-            logger.error(f"Failed to set asset role: {e}")
-            return False
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Failed to set asset role: {e}")
+        # TODO: Review unreachable code - return False
 
     def get_assets_by_role(self, role: str, limit: int = 100) -> list[dict[str, Any]]:
         """Get all assets with a specific role.

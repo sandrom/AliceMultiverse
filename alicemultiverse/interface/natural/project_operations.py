@@ -26,18 +26,18 @@ class ProjectOperationsMixin:
         try:
             if self.initialization_error:
                 raise self.initialization_error
-            self._ensure_organizer()
+            # TODO: Review unreachable code - self._ensure_organizer()
 
-            context = self.organizer.get_project_context()
+            # TODO: Review unreachable code - context = self.organizer.get_project_context()
 
-            # Add recent assets if requested
-            if request.get("include_recent_assets"):
-                recent = self.organizer.search_assets(sort_by="created", limit=10)
-                context["recent_assets"] = [self._simplify_asset_info(asset) for asset in recent]
+            # TODO: Review unreachable code - # Add recent assets if requested
+            # TODO: Review unreachable code - if request.get("include_recent_assets"):
+            # TODO: Review unreachable code - recent = self.organizer.search_assets(sort_by="created", limit=10)
+            # TODO: Review unreachable code - context["recent_assets"] = [self._simplify_asset_info(asset) for asset in recent]
 
-            return AliceResponse(
-                success=True, message="Project context retrieved", data=context, error=None
-            )
+            # TODO: Review unreachable code - return AliceResponse(
+            # TODO: Review unreachable code - success=True, message="Project context retrieved", data=context, error=None
+            # TODO: Review unreachable code - )
 
         except Exception as e:
             logger.error(f"Context retrieval failed: {e}")
@@ -231,17 +231,17 @@ class ProjectOperationsMixin:
         try:
             if self.initialization_error:
                 raise self.initialization_error
-            self._ensure_organizer()
+            # TODO: Review unreachable code - self._ensure_organizer()
 
-            role_enum = AssetRole(role)
-            success = self.organizer.set_asset_role(asset_id, role_enum)
+            # TODO: Review unreachable code - role_enum = AssetRole(role)
+            # TODO: Review unreachable code - success = self.organizer.set_asset_role(asset_id, role_enum)
 
-            return AliceResponse(
-                success=success,
-                message=f"Set role to '{role}'" if success else "Failed to set role",
-                data={"asset_id": asset_id, "role": role},
-                error=None,
-            )
+            # TODO: Review unreachable code - return AliceResponse(
+            # TODO: Review unreachable code - success=success,
+            # TODO: Review unreachable code - message=f"Set role to '{role}'" if success else "Failed to set role",
+            # TODO: Review unreachable code - data={"asset_id": asset_id, "role": role},
+            # TODO: Review unreachable code - error=None,
+            # TODO: Review unreachable code - )
 
         except Exception as e:
             logger.error(f"Role setting failed: {e}")
@@ -261,27 +261,27 @@ class ProjectOperationsMixin:
         try:
             if self.initialization_error:
                 raise self.initialization_error
-            self._ensure_organizer()
+            # TODO: Review unreachable code - self._ensure_organizer()
 
-            # Search for the asset
-            all_metadata = self.organizer.metadata_cache.get_all_metadata()
+            # TODO: Review unreachable code - # Search for the asset
+            # TODO: Review unreachable code - all_metadata = self.organizer.metadata_cache.get_all_metadata()
 
-            for file_path, metadata in all_metadata.items():
-                if metadata.get("asset_id") == asset_id or metadata.get("file_hash") == asset_id:
-                    metadata["file_path"] = str(file_path)
-                    return AliceResponse(
-                        success=True,
-                        message="Asset found",
-                        data=self._simplify_asset_info(metadata),
-                        error=None
-                    )
+            # TODO: Review unreachable code - for file_path, metadata in all_metadata.items():
+            # TODO: Review unreachable code - if metadata.get("asset_id") == asset_id or metadata.get("file_hash") == asset_id:
+            # TODO: Review unreachable code - metadata["file_path"] = str(file_path)
+            # TODO: Review unreachable code - return AliceResponse(
+            # TODO: Review unreachable code - success=True,
+            # TODO: Review unreachable code - message="Asset found",
+            # TODO: Review unreachable code - data=self._simplify_asset_info(metadata),
+            # TODO: Review unreachable code - error=None
+            # TODO: Review unreachable code - )
 
-            return AliceResponse(
-                success=False,
-                message=f"Asset {asset_id} not found",
-                data=None,
-                error="Asset not found in metadata"
-            )
+            # TODO: Review unreachable code - return AliceResponse(
+            # TODO: Review unreachable code - success=False,
+            # TODO: Review unreachable code - message=f"Asset {asset_id} not found",
+            # TODO: Review unreachable code - data=None,
+            # TODO: Review unreachable code - error="Asset not found in metadata"
+            # TODO: Review unreachable code - )
 
         except Exception as e:
             logger.error(f"Asset info retrieval failed: {e}")

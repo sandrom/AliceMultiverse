@@ -63,8 +63,10 @@ def run_organizer(
         return organizer.organize()
 
     except KeyboardInterrupt:
-        # Let KeyboardInterrupt propagate to CLI for proper exit code
+        # TODO: Review unreachable code - # Let KeyboardInterrupt propagate to CLI for proper exit code
+        # TODO: Review unreachable code - raise
         raise
     except Exception as e:
-        logger.error(f"Organizer failed: {e}")
-        return False
+        # TODO: Review unreachable code - logger.error(f"Organizer failed: {e}")
+        # TODO: Review unreachable code - return False
+        raise

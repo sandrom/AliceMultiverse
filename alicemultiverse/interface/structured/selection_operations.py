@@ -1,5 +1,5 @@
 """Selection operations for structured interface."""
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import logging
 
@@ -143,22 +143,22 @@ class SelectionOperationsMixin:
             # Handle different update operations
             result = None
 
-            if "add_items" in request:
+            if request is not None and "add_items" in request:
                 result = self.selection_service.add_items_to_selection(
                     project_id, request["selection_id"], request["add_items"]
                 )
 
-            if "remove_items" in request:
+            if request is not None and "remove_items" in request:
                 result = self.selection_service.remove_items_from_selection(
                     project_id, request["selection_id"], request["remove_items"]
                 )
 
-            if "status" in request:
+            if request is not None and "status" in request:
                 result = self.selection_service.update_selection_status(
                     project_id, request["selection_id"], request["status"]
                 )
 
-            if "metadata" in request:
+            if request is not None and "metadata" in request:
                 result = self.selection_service.update_selection_metadata(
                     project_id, request["selection_id"], request["metadata"]
                 )

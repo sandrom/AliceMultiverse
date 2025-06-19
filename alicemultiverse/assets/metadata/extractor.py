@@ -86,7 +86,7 @@ class MetadataExtractor:
         )
 
         # Extract generation parameters from EXIF/metadata
-        if analysis["media_type"] == MediaType.IMAGE:
+        if analysis is not None and analysis["media_type"] == MediaType.IMAGE:
             self._extract_image_metadata(file_path, metadata)
 
         # Extract semantic tags from filename and prompt
@@ -97,217 +97,217 @@ class MetadataExtractor:
 
         return metadata
 
-    def _get_mime_type(self, file_path: Path, media_type: MediaType) -> str:
-        """Get MIME type for file."""
-        ext = file_path.suffix.lower()
-        mime_map = {
-            ".jpg": "image/jpeg",
-            ".jpeg": "image/jpeg",
-            ".png": "image/png",
-            ".mp4": "video/mp4",
-            ".mov": "video/quicktime",
-        }
-        return mime_map.get(ext, "application/octet-stream")
+    # TODO: Review unreachable code - def _get_mime_type(self, file_path: Path, media_type: MediaType) -> str:
+    # TODO: Review unreachable code - """Get MIME type for file."""
+    # TODO: Review unreachable code - ext = file_path.suffix.lower()
+    # TODO: Review unreachable code - mime_map = {
+    # TODO: Review unreachable code - ".jpg": "image/jpeg",
+    # TODO: Review unreachable code - ".jpeg": "image/jpeg",
+    # TODO: Review unreachable code - ".png": "image/png",
+    # TODO: Review unreachable code - ".mp4": "video/mp4",
+    # TODO: Review unreachable code - ".mov": "video/quicktime",
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - return mime_map.get(ext, "application/octet-stream") or 0
 
-    def _extract_image_metadata(self, file_path: Path, metadata: AssetMetadata) -> None:
-        """Extract metadata from image EXIF and embedded data."""
-        try:
-            with Image.open(file_path) as img:
-                # Get EXIF data
-                exif_data = img.getexif()
-                if exif_data:
-                    exif_dict = {}
-                    for tag_id, value in exif_data.items():
-                        tag = TAGS.get(tag_id, tag_id)
-                        exif_dict[tag] = value
+    # TODO: Review unreachable code - def _extract_image_metadata(self, file_path: Path, metadata: AssetMetadata) -> None:
+    # TODO: Review unreachable code - """Extract metadata from image EXIF and embedded data."""
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - with Image.open(file_path) as img:
+    # TODO: Review unreachable code - # Get EXIF data
+    # TODO: Review unreachable code - exif_data = img.getexif()
+    # TODO: Review unreachable code - if exif_data:
+    # TODO: Review unreachable code - exif_dict = {}
+    # TODO: Review unreachable code - for tag_id, value in exif_data.items():
+    # TODO: Review unreachable code - tag = TAGS.get(tag_id, tag_id)
+    # TODO: Review unreachable code - exif_dict[tag] = value
 
-                    # Look for AI generation data in EXIF
-                    if "ImageDescription" in exif_dict:
-                        desc = str(exif_dict["ImageDescription"])
-                        metadata["prompt"] = self._extract_prompt(desc)
-                        metadata["generation_params"].update(self._parse_generation_params(desc))
+    # TODO: Review unreachable code - # Look for AI generation data in EXIF
+    # TODO: Review unreachable code - if exif_dict is not None and "ImageDescription" in exif_dict:
+    # TODO: Review unreachable code - desc = str(exif_dict["ImageDescription"])
+    # TODO: Review unreachable code - metadata["prompt"] = self._extract_prompt(desc)
+    # TODO: Review unreachable code - metadata["generation_params"].update(self._parse_generation_params(desc))
 
-                    # Software tag often contains AI tool info
-                    if "Software" in exif_dict:
-                        software = str(exif_dict["Software"]).lower()
-                        if "stable diffusion" in software:
-                            metadata["source_type"] = "stablediffusion"
-                        elif "midjourney" in software:
-                            metadata["source_type"] = "midjourney"
+    # TODO: Review unreachable code - # Software tag often contains AI tool info
+    # TODO: Review unreachable code - if exif_dict is not None and "Software" in exif_dict:
+    # TODO: Review unreachable code - software = str(exif_dict["Software"]).lower()
+    # TODO: Review unreachable code - if "stable diffusion" in software:
+    # TODO: Review unreachable code - metadata["source_type"] = "stablediffusion"
+    # TODO: Review unreachable code - elif software is not None and "midjourney" in software:
+    # TODO: Review unreachable code - metadata["source_type"] = "midjourney"
 
-                # Check for PNG metadata
-                if hasattr(img, "info"):
-                    png_info = img.info
+    # TODO: Review unreachable code - # Check for PNG metadata
+    # TODO: Review unreachable code - if hasattr(img, "info"):
+    # TODO: Review unreachable code - png_info = img.info
 
-                    # Common AI metadata fields in PNG
-                    if "parameters" in png_info:
-                        params = png_info["parameters"]
-                        metadata["prompt"] = self._extract_prompt(params)
-                        metadata["generation_params"].update(self._parse_generation_params(params))
+    # TODO: Review unreachable code - # Common AI metadata fields in PNG
+    # TODO: Review unreachable code - if png_info is not None and "parameters" in png_info:
+    # TODO: Review unreachable code - params = png_info["parameters"]
+    # TODO: Review unreachable code - metadata["prompt"] = self._extract_prompt(params)
+    # TODO: Review unreachable code - metadata["generation_params"].update(self._parse_generation_params(params))
 
-                    # Look for specific AI tool metadata
-                    for key, value in png_info.items():
-                        if "prompt" in key.lower():
-                            metadata["prompt"] = str(value)
-                        elif "seed" in key.lower():
-                            try:
-                                metadata["seed"] = int(value)
-                            except Exception:
-                                pass
-                        elif "model" in key.lower():
-                            metadata["model"] = str(value)
+    # TODO: Review unreachable code - # Look for specific AI tool metadata
+    # TODO: Review unreachable code - for key, value in png_info.items():
+    # TODO: Review unreachable code - if "prompt" in key.lower():
+    # TODO: Review unreachable code - metadata["prompt"] = str(value)
+    # TODO: Review unreachable code - elif "seed" in key.lower():
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - metadata["seed"] = int(value)
+    # TODO: Review unreachable code - except Exception:
+    # TODO: Review unreachable code - pass
+    # TODO: Review unreachable code - elif "model" in key.lower():
+    # TODO: Review unreachable code - metadata["model"] = str(value)
 
-                # Extract dominant colors
-                if img.mode != "RGBA":
-                    img_rgb = img.convert("RGB")
-                    colors = img_rgb.getcolors(maxcolors=100000)
-                    if colors:
-                        # Simple color analysis - can be enhanced
-                        metadata["color_tags"] = self._analyze_colors(colors)
+    # TODO: Review unreachable code - # Extract dominant colors
+    # TODO: Review unreachable code - if img.mode != "RGBA":
+    # TODO: Review unreachable code - img_rgb = img.convert("RGB")
+    # TODO: Review unreachable code - colors = img_rgb.getcolors(maxcolors=100000)
+    # TODO: Review unreachable code - if colors:
+    # TODO: Review unreachable code - # Simple color analysis - can be enhanced
+    # TODO: Review unreachable code - metadata["color_tags"] = self._analyze_colors(colors)
 
-        except Exception as e:
-            logger.warning(f"Failed to extract image metadata from {file_path}: {e}")
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.warning(f"Failed to extract image metadata from {file_path}: {e}")
 
-    def _extract_prompt(self, text: str) -> str | None:
-        """Extract prompt from generation parameters text."""
-        # Common patterns for prompts
-        patterns = [
-            r"Prompt:\s*([^\n]+)",
-            r'prompt"?:\s*"?([^"\n]+)',
-            r"^([^,\n]{20,})",  # First long text before comma
-        ]
+    # TODO: Review unreachable code - def _extract_prompt(self, text: str) -> str | None:
+    # TODO: Review unreachable code - """Extract prompt from generation parameters text."""
+    # TODO: Review unreachable code - # Common patterns for prompts
+    # TODO: Review unreachable code - patterns = [
+    # TODO: Review unreachable code - r"Prompt:\s*([^\n]+)",
+    # TODO: Review unreachable code - r'prompt"?:\s*"?([^"\n]+)',
+    # TODO: Review unreachable code - r"^([^,\n]{20,})",  # First long text before comma
+    # TODO: Review unreachable code - ]
 
-        for pattern in patterns:
-            match = re.search(pattern, text, re.I | re.M)
-            if match:
-                return match.group(1).strip()
+    # TODO: Review unreachable code - for pattern in patterns:
+    # TODO: Review unreachable code - match = re.search(pattern, text, re.I | re.M)
+    # TODO: Review unreachable code - if match:
+    # TODO: Review unreachable code - return match.group(1).strip()
 
-        return None
+    # TODO: Review unreachable code - return None
 
-    def _parse_generation_params(self, text: str) -> dict[str, Any]:
-        """Parse generation parameters from text."""
-        params = {}
+    # TODO: Review unreachable code - def _parse_generation_params(self, text: str) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Parse generation parameters from text."""
+    # TODO: Review unreachable code - params = {}
 
-        # Common parameter patterns
-        param_patterns = {
-            "steps": r"(?:steps|sampling steps)[:\s]+(\d+)",
-            "cfg_scale": r"(?:cfg scale|guidance scale)[:\s]+([\d.]+)",
-            "sampler": r"(?:sampler|sampling method)[:\s]+([^\s,]+)",
-            "model": r"(?:model|checkpoint)[:\s]+([^\s,]+)",
-            "seed": r"seed[:\s]+(\d+)",
-            "size": r"size[:\s]+(\d+x\d+)",
-        }
+    # TODO: Review unreachable code - # Common parameter patterns
+    # TODO: Review unreachable code - param_patterns = {
+    # TODO: Review unreachable code - "steps": r"(?:steps|sampling steps)[:\s]+(\d+)",
+    # TODO: Review unreachable code - "cfg_scale": r"(?:cfg scale|guidance scale)[:\s]+([\d.]+)",
+    # TODO: Review unreachable code - "sampler": r"(?:sampler|sampling method)[:\s]+([^\s,]+)",
+    # TODO: Review unreachable code - "model": r"(?:model|checkpoint)[:\s]+([^\s,]+)",
+    # TODO: Review unreachable code - "seed": r"seed[:\s]+(\d+)",
+    # TODO: Review unreachable code - "size": r"size[:\s]+(\d+x\d+)",
+    # TODO: Review unreachable code - }
 
-        for param, pattern in param_patterns.items():
-            match = re.search(pattern, text, re.I)
-            if match:
-                value = match.group(1)
-                # Convert to appropriate type
-                if param in ["steps", "seed"]:
-                    try:
-                        value = int(value)
-                    except Exception:
-                        pass
-                elif param == "cfg_scale":
-                    try:
-                        value = float(value)
-                    except Exception:
-                        pass
-                params[param] = value
+    # TODO: Review unreachable code - for param, pattern in param_patterns.items():
+    # TODO: Review unreachable code - match = re.search(pattern, text, re.I)
+    # TODO: Review unreachable code - if match:
+    # TODO: Review unreachable code - value = match.group(1)
+    # TODO: Review unreachable code - # Convert to appropriate type
+    # TODO: Review unreachable code - if param in ["steps", "seed"]:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - value = int(value)
+    # TODO: Review unreachable code - except Exception:
+    # TODO: Review unreachable code - pass
+    # TODO: Review unreachable code - elif param == "cfg_scale":
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - value = float(value)
+    # TODO: Review unreachable code - except Exception:
+    # TODO: Review unreachable code - pass
+    # TODO: Review unreachable code - params[param] = value
 
-        return params
+    # TODO: Review unreachable code - return params
 
-    def _extract_semantic_tags(self, file_path: Path, metadata: AssetMetadata) -> None:
-        """Extract semantic tags from filename and prompt."""
-        filename = file_path.stem.lower()
-        prompt = (metadata.get("prompt") or "").lower()
-        combined_text = f"{filename} {prompt}"
+    # TODO: Review unreachable code - def _extract_semantic_tags(self, file_path: Path, metadata: AssetMetadata) -> None:
+    # TODO: Review unreachable code - """Extract semantic tags from filename and prompt."""
+    # TODO: Review unreachable code - filename = file_path.stem.lower()
+    # TODO: Review unreachable code - prompt = (metadata.get("prompt") or "").lower()
+    # TODO: Review unreachable code - combined_text = f"{filename} {prompt}"
 
-        # Extract style tags
-        for style in STYLE_VOCABULARY:
-            if style in combined_text:
-                metadata["style_tags"].append(style)
+    # TODO: Review unreachable code - # Extract style tags
+    # TODO: Review unreachable code - for style in STYLE_VOCABULARY:
+    # TODO: Review unreachable code - if style in combined_text:
+    # TODO: Review unreachable code - metadata["style_tags"].append(style)
 
-        # Extract mood tags
-        for mood in MOOD_VOCABULARY:
-            if mood in combined_text:
-                metadata["mood_tags"].append(mood)
+    # TODO: Review unreachable code - # Extract mood tags
+    # TODO: Review unreachable code - for mood in MOOD_VOCABULARY:
+    # TODO: Review unreachable code - if mood in combined_text:
+    # TODO: Review unreachable code - metadata["mood_tags"].append(mood)
 
-        # Extract subject tags from common patterns
-        subject_patterns = [
-            (r"portrait", "portrait"),
-            (r"landscape", "landscape"),
-            (r"character", "character"),
-            (r"face", "face"),
-            (r"person|people|man|woman", "person"),
-            (r"building|architecture", "architecture"),
-            (r"nature|forest|mountain|ocean", "nature"),
-            (r"city|urban", "urban"),
-            (r"abstract", "abstract"),
-        ]
+    # TODO: Review unreachable code - # Extract subject tags from common patterns
+    # TODO: Review unreachable code - subject_patterns = [
+    # TODO: Review unreachable code - (r"portrait", "portrait"),
+    # TODO: Review unreachable code - (r"landscape", "landscape"),
+    # TODO: Review unreachable code - (r"character", "character"),
+    # TODO: Review unreachable code - (r"face", "face"),
+    # TODO: Review unreachable code - (r"person|people|man|woman", "person"),
+    # TODO: Review unreachable code - (r"building|architecture", "architecture"),
+    # TODO: Review unreachable code - (r"nature|forest|mountain|ocean", "nature"),
+    # TODO: Review unreachable code - (r"city|urban", "urban"),
+    # TODO: Review unreachable code - (r"abstract", "abstract"),
+    # TODO: Review unreachable code - ]
 
-        for pattern, tag in subject_patterns:
-            if re.search(pattern, combined_text):
-                if tag not in metadata["subject_tags"]:
-                    metadata["subject_tags"].append(tag)
+    # TODO: Review unreachable code - for pattern, tag in subject_patterns:
+    # TODO: Review unreachable code - if re.search(pattern, combined_text):
+    # TODO: Review unreachable code - if tag not in metadata["subject_tags"]:
+    # TODO: Review unreachable code - metadata["subject_tags"].append(tag)
 
-        # Technical tags based on parameters
-        if metadata["generation_params"]:
-            params = metadata["generation_params"]
-            if params.get("steps", 0) > 100:
-                metadata["technical_tags"].append("high-quality")
-            if params.get("cfg_scale", 0) > 15:
-                metadata["technical_tags"].append("high-guidance")
+    # TODO: Review unreachable code - # Technical tags based on parameters
+    # TODO: Review unreachable code - if metadata is not None and metadata["generation_params"]:
+    # TODO: Review unreachable code - params = metadata["generation_params"]
+    # TODO: Review unreachable code - if params.get("steps", 0) > 100:
+    # TODO: Review unreachable code - metadata["technical_tags"].append("high-quality")
+    # TODO: Review unreachable code - if params.get("cfg_scale", 0) > 15:
+    # TODO: Review unreachable code - metadata["technical_tags"].append("high-guidance")
 
-    def _analyze_colors(self, colors: list[tuple]) -> list[str]:
-        """Analyze color distribution and return color tags."""
-        # This is a simplified version - could be enhanced with proper color analysis
-        color_tags = []
+    # TODO: Review unreachable code - def _analyze_colors(self, colors: list[tuple]) -> list[str]:
+    # TODO: Review unreachable code - """Analyze color distribution and return color tags."""
+    # TODO: Review unreachable code - # This is a simplified version - could be enhanced with proper color analysis
+    # TODO: Review unreachable code - color_tags = []
 
-        # Count pixels by basic color ranges
-        color_counts = {"red": 0, "green": 0, "blue": 0, "black": 0, "white": 0, "gray": 0}
+    # TODO: Review unreachable code - # Count pixels by basic color ranges
+    # TODO: Review unreachable code - color_counts = {"red": 0, "green": 0, "blue": 0, "black": 0, "white": 0, "gray": 0}
 
-        total_pixels = sum(count for count, _ in colors)
+    # TODO: Review unreachable code - total_pixels = sum(count for count, _ in colors)
 
-        for count, (r, g, b) in colors:
-            # Classify color
-            if r < 50 and g < 50 and b < 50:
-                color_counts["black"] += count
-            elif r > 200 and g > 200 and b > 200:
-                color_counts["white"] += count
-            elif abs(r - g) < 30 and abs(g - b) < 30:
-                color_counts["gray"] += count
-            elif r > max(g, b) + 50:
-                color_counts["red"] += count
-            elif g > max(r, b) + 50:
-                color_counts["green"] += count
-            elif b > max(r, g) + 50:
-                color_counts["blue"] += count
+    # TODO: Review unreachable code - for count, (r, g, b) in colors:
+    # TODO: Review unreachable code - # Classify color
+    # TODO: Review unreachable code - if r < 50 and g < 50 and b < 50:
+    # TODO: Review unreachable code - color_counts["black"] += count
+    # TODO: Review unreachable code - elif r > 200 and g > 200 and b > 200:
+    # TODO: Review unreachable code - color_counts["white"] += count
+    # TODO: Review unreachable code - elif abs(r - g) < 30 and abs(g - b) < 30:
+    # TODO: Review unreachable code - color_counts["gray"] += count
+    # TODO: Review unreachable code - elif r > max(g, b) + 50:
+    # TODO: Review unreachable code - color_counts["red"] += count
+    # TODO: Review unreachable code - elif g > max(r, b) + 50:
+    # TODO: Review unreachable code - color_counts["green"] += count
+    # TODO: Review unreachable code - elif b > max(r, g) + 50:
+    # TODO: Review unreachable code - color_counts["blue"] += count
 
-        # Add dominant colors as tags
-        for color, count in color_counts.items():
-            if count / total_pixels > 0.2:  # More than 20% of image
-                color_tags.append(color)
+    # TODO: Review unreachable code - # Add dominant colors as tags
+    # TODO: Review unreachable code - for color, count in color_counts.items():
+    # TODO: Review unreachable code - if count / total_pixels > 0.2:  # More than 20% of image
+    # TODO: Review unreachable code - color_tags.append(color)
 
-        return color_tags
+    # TODO: Review unreachable code - return color_tags
 
-    def _detect_asset_role(self, file_path: Path, metadata: AssetMetadata) -> None:
-        """Detect asset role from filename patterns."""
-        filename = file_path.stem.lower()
+    # TODO: Review unreachable code - def _detect_asset_role(self, file_path: Path, metadata: AssetMetadata) -> None:
+    # TODO: Review unreachable code - """Detect asset role from filename patterns."""
+    # TODO: Review unreachable code - filename = file_path.stem.lower()
 
-        role_patterns = {
-            AssetRole.HERO: [r"hero", r"main", r"featured", r"final"],
-            AssetRole.B_ROLL: [r"b-?roll", r"secondary", r"background"],
-            AssetRole.REFERENCE: [r"ref", r"reference", r"inspiration"],
-            AssetRole.TEST: [r"test", r"experiment", r"trial"],
-            AssetRole.FINAL: [r"final", r"approved", r"done"],
-            AssetRole.ARCHIVED: [r"archive", r"old", r"deprecated"],
-        }
+    # TODO: Review unreachable code - role_patterns = {
+    # TODO: Review unreachable code - AssetRole.HERO: [r"hero", r"main", r"featured", r"final"],
+    # TODO: Review unreachable code - AssetRole.B_ROLL: [r"b-?roll", r"secondary", r"background"],
+    # TODO: Review unreachable code - AssetRole.REFERENCE: [r"ref", r"reference", r"inspiration"],
+    # TODO: Review unreachable code - AssetRole.TEST: [r"test", r"experiment", r"trial"],
+    # TODO: Review unreachable code - AssetRole.FINAL: [r"final", r"approved", r"done"],
+    # TODO: Review unreachable code - AssetRole.ARCHIVED: [r"archive", r"old", r"deprecated"],
+    # TODO: Review unreachable code - }
 
-        for role, patterns in role_patterns.items():
-            for pattern in patterns:
-                if re.search(pattern, filename):
-                    metadata["role"] = role
-                    return
+    # TODO: Review unreachable code - for role, patterns in role_patterns.items():
+    # TODO: Review unreachable code - for pattern in patterns:
+    # TODO: Review unreachable code - if re.search(pattern, filename):
+    # TODO: Review unreachable code - metadata["role"] = role
+    # TODO: Review unreachable code - return
 
-        # Default is already set to WIP
+    # TODO: Review unreachable code - # Default is already set to WIP

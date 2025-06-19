@@ -63,106 +63,106 @@ def register_core_tools(server) -> None:
         result = alice.search(request)
         return result.model_dump()
 
-    @server.tool()
-    async def organize_media(
-        source_path: str | None = None,
-        output_path: str | None = None,
-        quality_assessment: bool = False,
-        auto_tag: bool = True,
-        understanding: bool = True
-    ) -> dict[str, Any]:
-        """
-        Organize AI-generated media files into a structured directory layout.
+    # TODO: Review unreachable code - @server.tool()
+    # TODO: Review unreachable code - async def organize_media(
+    # TODO: Review unreachable code - source_path: str | None = None,
+    # TODO: Review unreachable code - output_path: str | None = None,
+    # TODO: Review unreachable code - quality_assessment: bool = False,
+    # TODO: Review unreachable code - auto_tag: bool = True,
+    # TODO: Review unreachable code - understanding: bool = True
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Organize AI-generated media files into a structured directory layout.
 
-        Parameters:
-        - source_path: Source directory (uses configured inbox if not specified)
-        - output_path: Output directory (uses configured organized if not specified)
-        - quality_assessment: Enable quality assessment
-        - auto_tag: Enable automatic tagging
-        - understanding: Enable AI-powered image understanding
+    # TODO: Review unreachable code - Parameters:
+    # TODO: Review unreachable code - - source_path: Source directory (uses configured inbox if not specified)
+    # TODO: Review unreachable code - - output_path: Output directory (uses configured organized if not specified)
+    # TODO: Review unreachable code - - quality_assessment: Enable quality assessment
+    # TODO: Review unreachable code - - auto_tag: Enable automatic tagging
+    # TODO: Review unreachable code - - understanding: Enable AI-powered image understanding
 
-        Returns dictionary with:
-        - processed: Number of files processed
-        - organized: Number of files organized
-        - errors: Any errors encountered
-        """
-        request = OrganizeRequest(
-            source_path=source_path,
-            quality_assessment=quality_assessment,
-            understanding=understanding
-        )
+    # TODO: Review unreachable code - Returns dictionary with:
+    # TODO: Review unreachable code - - processed: Number of files processed
+    # TODO: Review unreachable code - - organized: Number of files organized
+    # TODO: Review unreachable code - - errors: Any errors encountered
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - request = OrganizeRequest(
+    # TODO: Review unreachable code - source_path=source_path,
+    # TODO: Review unreachable code - quality_assessment=quality_assessment,
+    # TODO: Review unreachable code - understanding=understanding
+    # TODO: Review unreachable code - )
 
-        result = alice.organize(request)
-        return result.model_dump()
+    # TODO: Review unreachable code - result = alice.organize(request)
+    # TODO: Review unreachable code - return result.model_dump()
 
-    @server.tool()
-    async def update_tags(
-        asset_ids: list[str],
-        add_tags: list[str] | None = None,
-        remove_tags: list[str] | None = None,
-        set_tags: list[str] | None = None
-    ) -> dict[str, Any]:
-        """
-        Update tags for one or more assets.
+    # TODO: Review unreachable code - @server.tool()
+    # TODO: Review unreachable code - async def update_tags(
+    # TODO: Review unreachable code - asset_ids: list[str],
+    # TODO: Review unreachable code - add_tags: list[str] | None = None,
+    # TODO: Review unreachable code - remove_tags: list[str] | None = None,
+    # TODO: Review unreachable code - set_tags: list[str] | None = None
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Update tags for one or more assets.
 
-        Parameters:
-        - asset_ids: List of asset content hashes
-        - add_tags: Tags to add
-        - remove_tags: Tags to remove
-        - set_tags: Replace all tags with these (overrides add/remove)
+    # TODO: Review unreachable code - Parameters:
+    # TODO: Review unreachable code - - asset_ids: List of asset content hashes
+    # TODO: Review unreachable code - - add_tags: Tags to add
+    # TODO: Review unreachable code - - remove_tags: Tags to remove
+    # TODO: Review unreachable code - - set_tags: Replace all tags with these (overrides add/remove)
 
-        Returns success status and updated asset count.
-        """
-        request = TagRequest(
-            asset_ids=asset_ids,
-            add_tags=add_tags,
-            remove_tags=remove_tags,
-            set_tags=set_tags
-        )
+    # TODO: Review unreachable code - Returns success status and updated asset count.
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - request = TagRequest(
+    # TODO: Review unreachable code - asset_ids=asset_ids,
+    # TODO: Review unreachable code - add_tags=add_tags,
+    # TODO: Review unreachable code - remove_tags=remove_tags,
+    # TODO: Review unreachable code - set_tags=set_tags
+    # TODO: Review unreachable code - )
 
-        result = alice.update_tags(request)
-        return result.model_dump()
+    # TODO: Review unreachable code - result = alice.update_tags(request)
+    # TODO: Review unreachable code - return result.model_dump()
 
-    @server.tool()
-    async def get_asset_details(asset_id: str) -> dict[str, Any]:
-        """
-        Get detailed information about a specific asset.
+    # TODO: Review unreachable code - @server.tool()
+    # TODO: Review unreachable code - async def get_asset_details(asset_id: str) -> dict[str, Any]:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Get detailed information about a specific asset.
 
-        Parameters:
-        - asset_id: Asset content hash
+    # TODO: Review unreachable code - Parameters:
+    # TODO: Review unreachable code - - asset_id: Asset content hash
 
-        Returns complete asset metadata including:
-        - Basic info (path, size, type)
-        - AI generation details
-        - Tags and quality ratings
-        - Understanding/analysis results
-        """
-        result = alice.get_asset(asset_id)
-        return result.model_dump()
+    # TODO: Review unreachable code - Returns complete asset metadata including:
+    # TODO: Review unreachable code - - Basic info (path, size, type)
+    # TODO: Review unreachable code - - AI generation details
+    # TODO: Review unreachable code - - Tags and quality ratings
+    # TODO: Review unreachable code - - Understanding/analysis results
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - result = alice.get_asset(asset_id)
+    # TODO: Review unreachable code - return result.model_dump()
 
-    @server.tool()
-    async def soft_delete_assets(
-        asset_ids: list[str],
-        category: str = "general",
-        reason: str | None = None
-    ) -> dict[str, Any]:
-        """
-        Soft delete assets by moving them to sorted-out folder.
+    # TODO: Review unreachable code - @server.tool()
+    # TODO: Review unreachable code - async def soft_delete_assets(
+    # TODO: Review unreachable code - asset_ids: list[str],
+    # TODO: Review unreachable code - category: str = "general",
+    # TODO: Review unreachable code - reason: str | None = None
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - Soft delete assets by moving them to sorted-out folder.
 
-        Parameters:
-        - asset_ids: List of asset content hashes to delete
-        - category: Category for organization (e.g., "duplicates", "low_quality")
-        - reason: Optional reason for deletion
+    # TODO: Review unreachable code - Parameters:
+    # TODO: Review unreachable code - - asset_ids: List of asset content hashes to delete
+    # TODO: Review unreachable code - - category: Category for organization (e.g., "duplicates", "low_quality")
+    # TODO: Review unreachable code - - reason: Optional reason for deletion
 
-        Returns status and moved file count.
-        """
-        from ...interface.models import SoftDeleteRequest
+    # TODO: Review unreachable code - Returns status and moved file count.
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - from ...interface.models import SoftDeleteRequest
 
-        request = SoftDeleteRequest(
-            asset_ids=asset_ids,
-            category=category,
-            reason=reason
-        )
+    # TODO: Review unreachable code - request = SoftDeleteRequest(
+    # TODO: Review unreachable code - asset_ids=asset_ids,
+    # TODO: Review unreachable code - category=category,
+    # TODO: Review unreachable code - reason=reason
+    # TODO: Review unreachable code - )
 
-        result = alice.soft_delete(request)
-        return result.model_dump()
+    # TODO: Review unreachable code - result = alice.soft_delete(request)
+    # TODO: Review unreachable code - return result.model_dump()

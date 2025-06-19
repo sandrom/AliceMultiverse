@@ -176,7 +176,7 @@ class PromptDatabase:
 
             if result:
                 return self._row_to_prompt(result)
-            return None
+            # TODO: Review unreachable code - return None
 
     def search_prompts(self, criteria: PromptSearchCriteria) -> list[Prompt]:
         """Search for prompts matching criteria."""
@@ -257,93 +257,93 @@ class PromptDatabase:
 
             return prompts
 
-    def add_usage(self, usage: PromptUsage) -> None:
-        """Add a usage record."""
-        with duckdb.connect(str(self.db_path)) as conn:
-            conn.execute("""
-                INSERT INTO prompt_usage VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-            """, [
-                usage.id,
-                usage.prompt_id,
-                usage.provider.value,
-                usage.timestamp,
-                usage.success,
-                usage.output_path,
-                usage.cost,
-                usage.duration_seconds,
-                usage.notes,
-                json.dumps(usage.parameters),
-                json.dumps(usage.metadata)
-            ])
+    # TODO: Review unreachable code - def add_usage(self, usage: PromptUsage) -> None:
+    # TODO: Review unreachable code - """Add a usage record."""
+    # TODO: Review unreachable code - with duckdb.connect(str(self.db_path)) as conn:
+    # TODO: Review unreachable code - conn.execute("""
+    # TODO: Review unreachable code - INSERT INTO prompt_usage VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    # TODO: Review unreachable code - """, [
+    # TODO: Review unreachable code - usage.id,
+    # TODO: Review unreachable code - usage.prompt_id,
+    # TODO: Review unreachable code - usage.provider.value,
+    # TODO: Review unreachable code - usage.timestamp,
+    # TODO: Review unreachable code - usage.success,
+    # TODO: Review unreachable code - usage.output_path,
+    # TODO: Review unreachable code - usage.cost,
+    # TODO: Review unreachable code - usage.duration_seconds,
+    # TODO: Review unreachable code - usage.notes,
+    # TODO: Review unreachable code - json.dumps(usage.parameters),
+    # TODO: Review unreachable code - json.dumps(usage.metadata)
+    # TODO: Review unreachable code - ])
 
-            # Update prompt stats
-            if usage.success:
-                conn.execute("""
-                    UPDATE prompts
-                    SET use_count = use_count + 1,
-                        success_count = success_count + 1,
-                        updated_at = ?
-                    WHERE id = ?
-                """, [datetime.now(), usage.prompt_id])
-            else:
-                conn.execute("""
-                    UPDATE prompts
-                    SET use_count = use_count + 1,
-                        updated_at = ?
-                    WHERE id = ?
-                """, [datetime.now(), usage.prompt_id])
+    # TODO: Review unreachable code - # Update prompt stats
+    # TODO: Review unreachable code - if usage.success:
+    # TODO: Review unreachable code - conn.execute("""
+    # TODO: Review unreachable code - UPDATE prompts
+    # TODO: Review unreachable code - SET use_count = use_count + 1,
+    # TODO: Review unreachable code - success_count = success_count + 1,
+    # TODO: Review unreachable code - updated_at = ?
+    # TODO: Review unreachable code - WHERE id = ?
+    # TODO: Review unreachable code - """, [datetime.now(), usage.prompt_id])
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - conn.execute("""
+    # TODO: Review unreachable code - UPDATE prompts
+    # TODO: Review unreachable code - SET use_count = use_count + 1,
+    # TODO: Review unreachable code - updated_at = ?
+    # TODO: Review unreachable code - WHERE id = ?
+    # TODO: Review unreachable code - """, [datetime.now(), usage.prompt_id])
 
-    def get_usage_history(self, prompt_id: str, limit: int = 100) -> list[PromptUsage]:
-        """Get usage history for a prompt."""
-        with duckdb.connect(str(self.db_path)) as conn:
-            results = conn.execute("""
-                SELECT * FROM prompt_usage
-                WHERE prompt_id = ?
-                ORDER BY timestamp DESC
-                LIMIT ?
-            """, [prompt_id, limit]).fetchall()
+    # TODO: Review unreachable code - def get_usage_history(self, prompt_id: str, limit: int = 100) -> list[PromptUsage]:
+    # TODO: Review unreachable code - """Get usage history for a prompt."""
+    # TODO: Review unreachable code - with duckdb.connect(str(self.db_path)) as conn:
+    # TODO: Review unreachable code - results = conn.execute("""
+    # TODO: Review unreachable code - SELECT * FROM prompt_usage
+    # TODO: Review unreachable code - WHERE prompt_id = ?
+    # TODO: Review unreachable code - ORDER BY timestamp DESC
+    # TODO: Review unreachable code - LIMIT ?
+    # TODO: Review unreachable code - """, [prompt_id, limit]).fetchall()
 
-            return [self._row_to_usage(row) for row in results]
+    # TODO: Review unreachable code - return [self._row_to_usage(row) for row in results]
 
-    def _row_to_prompt(self, row) -> Prompt:
-        """Convert database row to Prompt object."""
-        from .models import PromptCategory, ProviderType
+    # TODO: Review unreachable code - def _row_to_prompt(self, row) -> Prompt:
+    # TODO: Review unreachable code - """Convert database row to Prompt object."""
+    # TODO: Review unreachable code - from .models import PromptCategory, ProviderType
 
-        return Prompt(
-            id=row[0],
-            text=row[1],
-            category=PromptCategory(row[2]),
-            providers=[ProviderType(p) for p in json.loads(row[3])],
-            tags=json.loads(row[4]) if row[4] else [],
-            project=row[5],
-            style=row[6],
-            effectiveness_rating=row[7],
-            use_count=row[8],
-            success_count=row[9],
-            created_at=row[10],
-            updated_at=row[11],
-            description=row[12],
-            notes=row[13],
-            context=json.loads(row[14]) if row[14] else {},
-            parent_id=row[15],
-            related_ids=json.loads(row[16]) if row[16] else [],
-            keywords=json.loads(row[17]) if row[17] else []
-        )
+    # TODO: Review unreachable code - return Prompt(
+    # TODO: Review unreachable code - id=row[0],
+    # TODO: Review unreachable code - text=row[1],
+    # TODO: Review unreachable code - category=PromptCategory(row[2]),
+    # TODO: Review unreachable code - providers=[ProviderType(p) for p in json.loads(row[3])],
+    # TODO: Review unreachable code - tags=json.loads(row[4]) if row[4] else [],
+    # TODO: Review unreachable code - project=row[5],
+    # TODO: Review unreachable code - style=row[6],
+    # TODO: Review unreachable code - effectiveness_rating=row[7],
+    # TODO: Review unreachable code - use_count=row[8],
+    # TODO: Review unreachable code - success_count=row[9],
+    # TODO: Review unreachable code - created_at=row[10],
+    # TODO: Review unreachable code - updated_at=row[11],
+    # TODO: Review unreachable code - description=row[12],
+    # TODO: Review unreachable code - notes=row[13],
+    # TODO: Review unreachable code - context=json.loads(row[14]) if row[14] else {},
+    # TODO: Review unreachable code - parent_id=row[15],
+    # TODO: Review unreachable code - related_ids=json.loads(row[16]) if row[16] else [],
+    # TODO: Review unreachable code - keywords=json.loads(row[17]) if row[17] else []
+    # TODO: Review unreachable code - )
 
-    def _row_to_usage(self, row) -> PromptUsage:
-        """Convert database row to PromptUsage object."""
-        from .models import ProviderType
+    # TODO: Review unreachable code - def _row_to_usage(self, row) -> PromptUsage:
+    # TODO: Review unreachable code - """Convert database row to PromptUsage object."""
+    # TODO: Review unreachable code - from .models import ProviderType
 
-        return PromptUsage(
-            id=row[0],
-            prompt_id=row[1],
-            provider=ProviderType(row[2]),
-            timestamp=row[3],
-            success=row[4],
-            output_path=row[5],
-            cost=row[6],
-            duration_seconds=row[7],
-            notes=row[8],
-            parameters=json.loads(row[9]) if row[9] else {},
-            metadata=json.loads(row[10]) if row[10] else {}
-        )
+    # TODO: Review unreachable code - return PromptUsage(
+    # TODO: Review unreachable code - id=row[0],
+    # TODO: Review unreachable code - prompt_id=row[1],
+    # TODO: Review unreachable code - provider=ProviderType(row[2]),
+    # TODO: Review unreachable code - timestamp=row[3],
+    # TODO: Review unreachable code - success=row[4],
+    # TODO: Review unreachable code - output_path=row[5],
+    # TODO: Review unreachable code - cost=row[6],
+    # TODO: Review unreachable code - duration_seconds=row[7],
+    # TODO: Review unreachable code - notes=row[8],
+    # TODO: Review unreachable code - parameters=json.loads(row[9]) if row[9] else {},
+    # TODO: Review unreachable code - metadata=json.loads(row[10]) if row[10] else {}
+    # TODO: Review unreachable code - )

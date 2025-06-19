@@ -43,70 +43,70 @@ class BatchProgress:
         """Get completion percentage."""
         return (self.processed / self.total_images * 100) if self.total_images > 0 else 0
 
-    @property
-    def elapsed_time(self) -> timedelta:
-        """Get elapsed time."""
-        return datetime.now() - self.start_time
+    # TODO: Review unreachable code - @property
+    # TODO: Review unreachable code - def elapsed_time(self) -> timedelta:
+    # TODO: Review unreachable code - """Get elapsed time."""
+    # TODO: Review unreachable code - return datetime.now() - self.start_time
 
-    @property
-    def estimated_time_remaining(self) -> Optional[timedelta]:
-        """Estimate remaining time based on current rate."""
-        if self.processed == 0:
-            return None
+    # TODO: Review unreachable code - @property
+    # TODO: Review unreachable code - def estimated_time_remaining(self) -> Optional[timedelta]:
+    # TODO: Review unreachable code - """Estimate remaining time based on current rate."""
+    # TODO: Review unreachable code - if self.processed == 0:
+    # TODO: Review unreachable code - return None
 
-        rate = self.processed / self.elapsed_time.total_seconds()
-        remaining = self.total_images - self.processed
+    # TODO: Review unreachable code - rate = self.processed / self.elapsed_time.total_seconds()
+    # TODO: Review unreachable code - remaining = self.total_images - self.processed
 
-        if rate > 0:
-            return timedelta(seconds=remaining / rate)
-        return None
+    # TODO: Review unreachable code - if rate > 0:
+    # TODO: Review unreachable code - return timedelta(seconds=remaining / rate)
+    # TODO: Review unreachable code - return None
 
-    @property
-    def average_cost_per_image(self) -> float:
-        """Get average cost per processed image."""
-        return self.total_cost / self.succeeded if self.succeeded > 0 else 0
+    # TODO: Review unreachable code - @property
+    # TODO: Review unreachable code - def average_cost_per_image(self) -> float:
+    # TODO: Review unreachable code - """Get average cost per processed image."""
+    # TODO: Review unreachable code - return float(self.total_cost) / self.succeeded if self.succeeded > 0 else 0
 
-    def save_checkpoint(self):
-        """Save progress checkpoint for resumption."""
-        if self.checkpoint_file:
-            checkpoint_data = {
-                "processed_hashes": list(self.processed_hashes),
-                "failed_hashes": self.failed_hashes,
-                "total_cost": self.total_cost,
-                "processed": self.processed,
-                "succeeded": self.succeeded,
-                "failed": self.failed,
-                "skipped": self.skipped,
-                "timestamp": datetime.now().isoformat()
-            }
+    # TODO: Review unreachable code - def save_checkpoint(self):
+    # TODO: Review unreachable code - """Save progress checkpoint for resumption."""
+    # TODO: Review unreachable code - if self.checkpoint_file:
+    # TODO: Review unreachable code - checkpoint_data = {
+    # TODO: Review unreachable code - "processed_hashes": list(self.processed_hashes),
+    # TODO: Review unreachable code - "failed_hashes": self.failed_hashes,
+    # TODO: Review unreachable code - "total_cost": self.total_cost,
+    # TODO: Review unreachable code - "processed": self.processed,
+    # TODO: Review unreachable code - "succeeded": self.succeeded,
+    # TODO: Review unreachable code - "failed": self.failed,
+    # TODO: Review unreachable code - "skipped": self.skipped,
+    # TODO: Review unreachable code - "timestamp": datetime.now().isoformat()
+    # TODO: Review unreachable code - }
 
-            with open(self.checkpoint_file, 'w') as f:
-                json.dump(checkpoint_data, f, indent=2)
+    # TODO: Review unreachable code - with open(self.checkpoint_file, 'w') as f:
+    # TODO: Review unreachable code - json.dump(checkpoint_data, f, indent=2)
 
-    @classmethod
-    def load_checkpoint(cls, checkpoint_file: Path, total_images: int) -> 'BatchProgress':
-        """Load progress from checkpoint file."""
-        progress = cls(total_images=total_images, checkpoint_file=checkpoint_file)
+    # TODO: Review unreachable code - @classmethod
+    # TODO: Review unreachable code - def load_checkpoint(cls, checkpoint_file: Path, total_images: int) -> 'BatchProgress':
+    # TODO: Review unreachable code - """Load progress from checkpoint file."""
+    # TODO: Review unreachable code - progress = cls(total_images=total_images, checkpoint_file=checkpoint_file)
 
-        if checkpoint_file.exists():
-            try:
-                with open(checkpoint_file, 'r') as f:
-                    data = json.load(f)
+    # TODO: Review unreachable code - if checkpoint_file.exists():
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - with open(checkpoint_file, 'r') as f:
+    # TODO: Review unreachable code - data = json.load(f)
 
-                progress.processed_hashes = set(data.get("processed_hashes", []))
-                progress.failed_hashes = data.get("failed_hashes", {})
-                progress.total_cost = data.get("total_cost", 0.0)
-                progress.processed = data.get("processed", 0)
-                progress.succeeded = data.get("succeeded", 0)
-                progress.failed = data.get("failed", 0)
-                progress.skipped = data.get("skipped", 0)
+    # TODO: Review unreachable code - progress.processed_hashes = set(data.get("processed_hashes", []))
+    # TODO: Review unreachable code - progress.failed_hashes = data.get("failed_hashes", {})
+    # TODO: Review unreachable code - progress.total_cost = data.get("total_cost", 0.0)
+    # TODO: Review unreachable code - progress.processed = data.get("processed", 0)
+    # TODO: Review unreachable code - progress.succeeded = data.get("succeeded", 0)
+    # TODO: Review unreachable code - progress.failed = data.get("failed", 0)
+    # TODO: Review unreachable code - progress.skipped = data.get("skipped", 0)
 
-                logger.info(f"Resumed from checkpoint: {progress.processed}/{total_images} processed")
+    # TODO: Review unreachable code - logger.info(f"Resumed from checkpoint: {progress.processed}/{total_images} processed")
 
-            except Exception as e:
-                logger.warning(f"Failed to load checkpoint: {e}")
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.warning(f"Failed to load checkpoint: {e}")
 
-        return progress
+    # TODO: Review unreachable code - return progress
 
 
 @dataclass
@@ -150,11 +150,11 @@ class BatchAnalysisRequest:
         if not any([self.image_paths, self.project_id, self.content_hashes]):
             raise ValueError("Must specify either image_paths, project_id, or content_hashes")
 
-        if self.max_concurrent < 1:
-            raise ValueError("max_concurrent must be at least 1")
+        # TODO: Review unreachable code - if self.max_concurrent < 1:
+        # TODO: Review unreachable code - raise ValueError("max_concurrent must be at least 1")
 
-        if self.max_cost is not None and self.max_cost <= 0:
-            raise ValueError("max_cost must be positive")
+        # TODO: Review unreachable code - if self.max_cost is not None and self.max_cost <= 0:
+        # TODO: Review unreachable code - raise ValueError("max_cost must be positive")
 
 
 class BatchAnalyzer:
@@ -235,119 +235,119 @@ class BatchAnalyzer:
         if not images:
             return []
 
-        # Check cost estimate
-        estimated_cost, cost_details = await self.estimate_cost(request)
-        if estimated_cost > request.cost_warning_threshold:
-            logger.warning(f"Estimated cost ${estimated_cost:.2f} exceeds warning threshold")
+        # TODO: Review unreachable code - # Check cost estimate
+        # TODO: Review unreachable code - estimated_cost, cost_details = await self.estimate_cost(request)
+        # TODO: Review unreachable code - if estimated_cost > request.cost_warning_threshold:
+        # TODO: Review unreachable code - logger.warning(f"Estimated cost ${estimated_cost:.2f} exceeds warning threshold")
 
-        if request.max_cost and estimated_cost > request.max_cost:
-            raise ValueError(f"Estimated cost ${estimated_cost:.2f} exceeds maximum ${request.max_cost:.2f}")
+        # TODO: Review unreachable code - if request.max_cost and estimated_cost > request.max_cost:
+        # TODO: Review unreachable code - raise ValueError(f"Estimated cost ${estimated_cost:.2f} exceeds maximum ${request.max_cost:.2f}")
 
-        # Set up progress tracking
-        checkpoint_file = Path(f".batch_analysis_{int(time.time())}.checkpoint")
-        progress = BatchProgress.load_checkpoint(checkpoint_file, len(images)) if request.resume_from_checkpoint else BatchProgress(len(images), checkpoint_file=checkpoint_file)
+        # TODO: Review unreachable code - # Set up progress tracking
+        # TODO: Review unreachable code - checkpoint_file = Path(f".batch_analysis_{int(time.time())}.checkpoint")
+        # TODO: Review unreachable code - progress = BatchProgress.load_checkpoint(checkpoint_file, len(images)) if request.resume_from_checkpoint else BatchProgress(len(images), checkpoint_file=checkpoint_file)
 
-        # Filter out already processed
-        if request.skip_existing:
-            images = [img for img in images if self._get_content_hash(img) not in progress.processed_hashes]
-            progress.skipped = len(progress.processed_hashes)
+        # TODO: Review unreachable code - # Filter out already processed
+        # TODO: Review unreachable code - if request.skip_existing:
+        # TODO: Review unreachable code - images = [img for img in images if self._get_content_hash(img) not in progress.processed_hashes]
+        # TODO: Review unreachable code - progress.skipped = len(progress.processed_hashes)
 
-        # Process images
-        results = []
-        semaphore = asyncio.Semaphore(request.max_concurrent)
+        # TODO: Review unreachable code - # Process images
+        # TODO: Review unreachable code - results = []
+        # TODO: Review unreachable code - semaphore = asyncio.Semaphore(request.max_concurrent)
 
-        async def process_with_retry(image_path: Path) -> Tuple[Path, Optional[ImageAnalysisResult]]:
-            """Process a single image with retry logic."""
-            content_hash = self._get_content_hash(image_path)
+        # TODO: Review unreachable code - async def process_with_retry(image_path: Path) -> Tuple[Path, Optional[ImageAnalysisResult]]:
+        # TODO: Review unreachable code - """Process a single image with retry logic."""
+        # TODO: Review unreachable code - content_hash = self._get_content_hash(image_path)
 
-            # Skip if already processed
-            if content_hash in progress.processed_hashes:
-                return image_path, None
+        # TODO: Review unreachable code - # Skip if already processed
+        # TODO: Review unreachable code - if content_hash in progress.processed_hashes:
+        # TODO: Review unreachable code - return image_path, None
 
-            # Skip if failed and not retrying
-            if content_hash in progress.failed_hashes and not request.reanalyze_failed:
-                return image_path, None
+        # TODO: Review unreachable code - # Skip if failed and not retrying
+        # TODO: Review unreachable code - if content_hash in progress.failed_hashes and not request.reanalyze_failed:
+        # TODO: Review unreachable code - return image_path, None
 
-            async with semaphore:
-                # Rate limiting
-                async with self._rate_limiter:
-                    await asyncio.sleep(request.rate_limit_delay)
+        # TODO: Review unreachable code - async with semaphore:
+        # TODO: Review unreachable code - # Rate limiting
+        # TODO: Review unreachable code - async with self._rate_limiter:
+        # TODO: Review unreachable code - await asyncio.sleep(request.rate_limit_delay)
 
-                # Retry logic
-                last_error = None
-                for attempt in range(request.retry_attempts):
-                    try:
-                        # Check cost limit
-                        if request.max_cost and progress.total_cost >= request.max_cost:
-                            logger.warning("Reached cost limit, stopping batch")
-                            return image_path, None
+        # TODO: Review unreachable code - # Retry logic
+        # TODO: Review unreachable code - last_error = None
+        # TODO: Review unreachable code - for attempt in range(request.retry_attempts):
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - # Check cost limit
+        # TODO: Review unreachable code - if request.max_cost and progress.total_cost >= request.max_cost:
+        # TODO: Review unreachable code - logger.warning("Reached cost limit, stopping batch")
+        # TODO: Review unreachable code - return image_path, None
 
-                        # Analyze image
-                        result = await self.analyzer.analyze(
-                            image_path,
-                            provider=request.provider,
-                            generate_prompt=request.generate_prompt,
-                            extract_tags=request.extract_tags,
-                            detailed=request.detailed,
-                            custom_instructions=request.custom_instructions
-                        )
+        # TODO: Review unreachable code - # Analyze image
+        # TODO: Review unreachable code - result = await self.analyzer.analyze(
+        # TODO: Review unreachable code - image_path,
+        # TODO: Review unreachable code - provider=request.provider,
+        # TODO: Review unreachable code - generate_prompt=request.generate_prompt,
+        # TODO: Review unreachable code - extract_tags=request.extract_tags,
+        # TODO: Review unreachable code - detailed=request.detailed,
+        # TODO: Review unreachable code - custom_instructions=request.custom_instructions
+        # TODO: Review unreachable code - )
 
-                        # Update progress
-                        progress.processed += 1
-                        progress.succeeded += 1
-                        progress.total_cost += result.cost
-                        progress.processed_hashes.add(content_hash)
+        # TODO: Review unreachable code - # Update progress
+        # TODO: Review unreachable code - progress.processed += 1
+        # TODO: Review unreachable code - progress.succeeded += 1
+        # TODO: Review unreachable code - progress.total_cost += result.cost
+        # TODO: Review unreachable code - progress.processed_hashes.add(content_hash)
 
-                        # Database saving removed with PostgreSQL
+        # TODO: Review unreachable code - # Database saving removed with PostgreSQL
 
-                        # Checkpoint periodically
-                        if progress.processed % request.checkpoint_interval == 0:
-                            progress.save_checkpoint()
+        # TODO: Review unreachable code - # Checkpoint periodically
+        # TODO: Review unreachable code - if progress.processed % request.checkpoint_interval == 0:
+        # TODO: Review unreachable code - progress.save_checkpoint()
 
-                        return image_path, result
+        # TODO: Review unreachable code - return image_path, result
 
-                    except Exception as e:
-                        last_error = str(e)
-                        logger.warning(f"Attempt {attempt + 1} failed for {image_path}: {e}")
-                        if attempt < request.retry_attempts - 1:
-                            await asyncio.sleep(request.retry_delay * (attempt + 1))
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - last_error = str(e)
+        # TODO: Review unreachable code - logger.warning(f"Attempt {attempt + 1} failed for {image_path}: {e}")
+        # TODO: Review unreachable code - if attempt < request.retry_attempts - 1:
+        # TODO: Review unreachable code - await asyncio.sleep(request.retry_delay * (attempt + 1))
 
-                # All retries failed
-                progress.processed += 1
-                progress.failed += 1
-                progress.failed_hashes[content_hash] = last_error
-                return image_path, None
+        # TODO: Review unreachable code - # All retries failed
+        # TODO: Review unreachable code - progress.processed += 1
+        # TODO: Review unreachable code - progress.failed += 1
+        # TODO: Review unreachable code - progress.failed_hashes[content_hash] = last_error
+        # TODO: Review unreachable code - return image_path, None
 
-        # Process with progress bar
-        if request.show_progress:
-            tasks = [process_with_retry(img) for img in images]
-            with tqdm(total=len(images), desc="Analyzing images") as pbar:
-                for coro in asyncio.as_completed(tasks):
-                    result = await coro
-                    results.append(result)
-                    pbar.update(1)
-                    pbar.set_postfix({
-                        "succeeded": progress.succeeded,
-                        "failed": progress.failed,
-                        "cost": f"${progress.total_cost:.2f}"
-                    })
-        else:
-            # Process without progress bar
-            tasks = [process_with_retry(img) for img in images]
-            results = await asyncio.gather(*tasks)
+        # TODO: Review unreachable code - # Process with progress bar
+        # TODO: Review unreachable code - if request.show_progress:
+        # TODO: Review unreachable code - tasks = [process_with_retry(img) for img in images]
+        # TODO: Review unreachable code - with tqdm(total=len(images), desc="Analyzing images") as pbar:
+        # TODO: Review unreachable code - for coro in asyncio.as_completed(tasks):
+        # TODO: Review unreachable code - result = await coro
+        # TODO: Review unreachable code - results.append(result)
+        # TODO: Review unreachable code - pbar.update(1)
+        # TODO: Review unreachable code - pbar.set_postfix({
+        # TODO: Review unreachable code - "succeeded": progress.succeeded,
+        # TODO: Review unreachable code - "failed": progress.failed,
+        # TODO: Review unreachable code - "cost": f"${progress.total_cost:.2f}"
+        # TODO: Review unreachable code - })
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - # Process without progress bar
+        # TODO: Review unreachable code - tasks = [process_with_retry(img) for img in images]
+        # TODO: Review unreachable code - results = await asyncio.gather(*tasks)
 
-        # Final checkpoint
-        progress.save_checkpoint()
+        # TODO: Review unreachable code - # Final checkpoint
+        # TODO: Review unreachable code - progress.save_checkpoint()
 
-        # Clean up checkpoint if fully successful
-        if progress.failed == 0 and checkpoint_file.exists():
-            checkpoint_file.unlink()
+        # TODO: Review unreachable code - # Clean up checkpoint if fully successful
+        # TODO: Review unreachable code - if progress.failed == 0 and checkpoint_file.exists():
+        # TODO: Review unreachable code - checkpoint_file.unlink()
 
-        # Log summary
-        logger.info(f"Batch analysis complete: {progress.succeeded} succeeded, "
-                   f"{progress.failed} failed, ${progress.total_cost:.2f} total cost")
+        # TODO: Review unreachable code - # Log summary
+        # TODO: Review unreachable code - logger.info(f"Batch analysis complete: {progress.succeeded} succeeded, "
+        # TODO: Review unreachable code - f"{progress.failed} failed, ${progress.total_cost:.2f} total cost")
 
-        return results
+        # TODO: Review unreachable code - return results
 
     async def _get_images_to_process(self, request: BatchAnalysisRequest) -> List[Path]:
         """Get list of images to process based on request."""
@@ -361,22 +361,22 @@ class BatchAnalyzer:
             logger.warning("Project-based batch analysis not available without PostgreSQL")
             raise ValueError("Project-based batch analysis requires database integration")
 
-        elif request.content_hashes:
-            # PostgreSQL removed - content hash queries not supported
-            logger.warning("Content hash-based batch analysis not available without PostgreSQL")
-            raise ValueError("Content hash-based batch analysis requires database integration")
+        # TODO: Review unreachable code - elif request.content_hashes:
+        # TODO: Review unreachable code - # PostgreSQL removed - content hash queries not supported
+        # TODO: Review unreachable code - logger.warning("Content hash-based batch analysis not available without PostgreSQL")
+        # TODO: Review unreachable code - raise ValueError("Content hash-based batch analysis requires database integration")
 
-        # Filter by media type
-        valid_extensions = {
-            "image": {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"},
-            "video": {".mp4", ".mov", ".avi", ".mkv"}
-        }
+        # TODO: Review unreachable code - # Filter by media type
+        # TODO: Review unreachable code - valid_extensions = {
+        # TODO: Review unreachable code - "image": {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"},
+        # TODO: Review unreachable code - "video": {".mp4", ".mov", ".avi", ".mkv"}
+        # TODO: Review unreachable code - }
 
-        allowed_extensions = set()
-        for media_type in request.media_types:
-            allowed_extensions.update(valid_extensions.get(media_type, set()))
+        # TODO: Review unreachable code - allowed_extensions = set()
+        # TODO: Review unreachable code - for media_type in request.media_types:
+        # TODO: Review unreachable code - allowed_extensions.update(valid_extensions.get(media_type, set()))
 
-        return [img for img in images if img.suffix.lower() in allowed_extensions]
+        # TODO: Review unreachable code - return [img for img in images if img.suffix.lower() in allowed_extensions]
 
     def _get_content_hash(self, image_path: Path) -> str:
         """Get content hash for an image."""

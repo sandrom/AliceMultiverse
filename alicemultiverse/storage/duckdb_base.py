@@ -200,26 +200,26 @@ class DuckDBBase:
         if value is None:
             return None
 
-        if isinstance(value, datetime):
-            return value
+        # TODO: Review unreachable code - if isinstance(value, datetime):
+        # TODO: Review unreachable code - return value
 
-        if isinstance(value, str):
-            # Try common formats
-            formats = [
-                "%Y-%m-%d %H:%M:%S",
-                "%Y-%m-%dT%H:%M:%S",
-                "%Y-%m-%dT%H:%M:%S.%f",
-                "%Y-%m-%dT%H:%M:%SZ",
-                "%Y-%m-%dT%H:%M:%S.%fZ",
-            ]
+        # TODO: Review unreachable code - if isinstance(value, str):
+        # TODO: Review unreachable code - # Try common formats
+        # TODO: Review unreachable code - formats = [
+        # TODO: Review unreachable code - "%Y-%m-%d %H:%M:%S",
+        # TODO: Review unreachable code - "%Y-%m-%dT%H:%M:%S",
+        # TODO: Review unreachable code - "%Y-%m-%dT%H:%M:%S.%f",
+        # TODO: Review unreachable code - "%Y-%m-%dT%H:%M:%SZ",
+        # TODO: Review unreachable code - "%Y-%m-%dT%H:%M:%S.%fZ",
+        # TODO: Review unreachable code - ]
 
-            for fmt in formats:
-                try:
-                    return datetime.strptime(value, fmt)
-                except ValueError:
-                    continue
+        # TODO: Review unreachable code - for fmt in formats:
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - return datetime.strptime(value, fmt)
+        # TODO: Review unreachable code - except ValueError:
+        # TODO: Review unreachable code - continue
 
-        return None
+        # TODO: Review unreachable code - return None
 
     def _row_to_dict(self, row: tuple, columns: list[str] | None = None) -> dict[str, Any]:
         """Convert database row to dictionary.
@@ -231,25 +231,25 @@ class DuckDBBase:
         if not row:
             return {}
 
-        # Get column names
-        if columns is None:
-            columns = [desc[0] for desc in self.conn.description]
+        # TODO: Review unreachable code - # Get column names
+        # TODO: Review unreachable code - if columns is None:
+        # TODO: Review unreachable code - columns = [desc[0] for desc in self.conn.description]
 
-        result = {}
-        for i, col in enumerate(columns):
-            value = row[i]
+        # TODO: Review unreachable code - result = {}
+        # TODO: Review unreachable code - for i, col in enumerate(columns):
+        # TODO: Review unreachable code - value = row[i]
 
-            # Parse JSON columns
-            if col in ["locations", "metadata", "parameters"] and value:
-                try:
-                    value = json.loads(value)
-                except (json.JSONDecodeError, TypeError):
-                    pass
+        # TODO: Review unreachable code - # Parse JSON columns
+        # TODO: Review unreachable code - if col in ["locations", "metadata", "parameters"] and value:
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - value = json.loads(value)
+        # TODO: Review unreachable code - except (json.JSONDecodeError, TypeError):
+        # TODO: Review unreachable code - pass
 
-            # Parse timestamps
-            elif col.endswith("_at") or col.endswith("_date"):
-                value = self._parse_timestamp(value)
+        # TODO: Review unreachable code - # Parse timestamps
+        # TODO: Review unreachable code - elif col.endswith("_at") or col.endswith("_date"):
+        # TODO: Review unreachable code - value = self._parse_timestamp(value)
 
-            result[col] = value
+        # TODO: Review unreachable code - result[col] = value
 
-        return result
+        # TODO: Review unreachable code - return result

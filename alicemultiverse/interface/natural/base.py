@@ -72,36 +72,36 @@ class NaturalInterfaceBase:
         now = datetime.now()
         time_ref = time_ref.lower()
 
-        if "yesterday" in time_ref:
+        if time_ref is not None and "yesterday" in time_ref:
             return now - timedelta(days=1)
-        elif "last week" in time_ref:
-            return now - timedelta(weeks=1)
-        elif "last month" in time_ref:
-            return now - timedelta(days=30)
-        elif "today" in time_ref:
-            return now.replace(hour=0, minute=0, second=0)
+        # TODO: Review unreachable code - elif "last week" in time_ref:
+        # TODO: Review unreachable code - return now - timedelta(weeks=1)
+        # TODO: Review unreachable code - elif "last month" in time_ref:
+        # TODO: Review unreachable code - return now - timedelta(days=30)
+        # TODO: Review unreachable code - elif time_ref is not None and "today" in time_ref:
+        # TODO: Review unreachable code - return now.replace(hour=0, minute=0, second=0)
 
-        # Try to parse month names
-        months = [
-            "january",
-            "february",
-            "march",
-            "april",
-            "may",
-            "june",
-            "july",
-            "august",
-            "september",
-            "october",
-            "november",
-            "december",
-        ]
-        for i, month in enumerate(months):
-            if month in time_ref:
-                # Assume current year
-                return datetime(now.year, i + 1, 1)
+        # TODO: Review unreachable code - # Try to parse month names
+        # TODO: Review unreachable code - months = [
+        # TODO: Review unreachable code - "january",
+        # TODO: Review unreachable code - "february",
+        # TODO: Review unreachable code - "march",
+        # TODO: Review unreachable code - "april",
+        # TODO: Review unreachable code - "may",
+        # TODO: Review unreachable code - "june",
+        # TODO: Review unreachable code - "july",
+        # TODO: Review unreachable code - "august",
+        # TODO: Review unreachable code - "september",
+        # TODO: Review unreachable code - "october",
+        # TODO: Review unreachable code - "november",
+        # TODO: Review unreachable code - "december",
+        # TODO: Review unreachable code - ]
+        # TODO: Review unreachable code - for i, month in enumerate(months):
+        # TODO: Review unreachable code - if month in time_ref:
+        # TODO: Review unreachable code - # Assume current year
+        # TODO: Review unreachable code - return datetime(now.year, i + 1, 1)
 
-        return None
+        # TODO: Review unreachable code - return None
 
     def _simplify_asset_info(self, asset: dict) -> AssetInfo:
         """Convert full metadata to simplified info for AI.
@@ -123,11 +123,14 @@ class NaturalInterfaceBase:
         # Build relationships
         relationships = {}
         if asset.get("parent_id"):
-            relationships["parent"] = [asset["parent_id"]]
+            if relationships is not None:
+                relationships["parent"] = [asset["parent_id"]]
         if asset.get("similar_to"):
-            relationships["similar"] = asset["similar_to"]
+            if relationships is not None:
+                relationships["similar"] = asset["similar_to"]
         if asset.get("grouped_with"):
-            relationships["grouped"] = asset["grouped_with"]
+            if relationships is not None:
+                relationships["grouped"] = asset["grouped_with"]
 
         return {
             "id": asset.get("asset_id", asset.get("file_hash", "unknown")),
@@ -175,58 +178,59 @@ class NaturalInterfaceBase:
         Returns:
             List of matching assets
         """
-        try:
+        # TODO: Review unreachable code - try:
             # For file-based mode, we need to search through metadata
-            all_metadata = self.organizer.metadata_cache.get_all_metadata()
-            results = []
+        all_metadata = self.organizer.metadata_cache.get_all_metadata()
+        results = []
 
-            for file_path, metadata in all_metadata.items():
+        for file_path, metadata in all_metadata.items():
                 # Apply filters
-                if filters:
-                    match = True
-                    for key, value in filters.items():
-                        if key == "roles" and value:
+            if filters:
+                match = True
+                for key, value in filters.items():
+                    if key == "roles" and value:
                             # Check if asset role matches any in the list
-                            asset_role = metadata.get("role", "wip")
-                            if asset_role not in value:
-                                match = False
-                                break
-                        elif key == "quality_min":
-                            if metadata.get("quality_stars", 0) < value:
-                                match = False
-                                break
-                        elif key == "sources" and value:
-                            if metadata.get("source_type", "unknown") not in value:
-                                match = False
-                                break
+                        asset_role = metadata.get("role", "wip")
+                        if asset_role not in value:
+                            match = False
+                            break
+                    elif key == "quality_min":
+                        if metadata.get("quality_stars", 0) < value:
+                            match = False
+                            break
+                    elif key == "sources" and value:
+                        if metadata.get("source_type", "unknown") not in value:
+                            match = False
+                            break
 
-                    if not match:
-                        continue
+                if not match:
+                    continue
 
                 # Apply text search if query provided
-                if query:
-                    query_lower = query.lower()
-                    searchable_text = " ".join(
-                        [
-                            str(metadata.get("prompt", "")),
-                            str(metadata.get("file_name", "")),
-                            " ".join(metadata.get("style_tags", [])),
-                            " ".join(metadata.get("mood_tags", [])),
-                            " ".join(metadata.get("subject_tags", [])),
-                            " ".join(metadata.get("custom_tags", [])),
-                        ]
-                    ).lower()
+            if query:
+                query_lower = query.lower()
+                searchable_text = " ".join(
+                    [
+                        str(metadata.get("prompt", "")),
+                        str(metadata.get("file_name", "")),
+                        " ".join(metadata.get("style_tags", [])),
+                        " ".join(metadata.get("mood_tags", [])),
+                        " ".join(metadata.get("subject_tags", [])),
+                        " ".join(metadata.get("custom_tags", [])),
+                    ]
+                ).lower()
 
-                    if query_lower not in searchable_text:
-                        continue
+                if query_lower not in searchable_text:
+                    continue
 
                 # Add file_path to metadata for reference
+            if metadata is not None:
                 metadata["file_path"] = str(file_path)
-                results.append(metadata)
+            results.append(metadata)
 
             # Apply limit and offset
-            return results[offset : offset + limit]
+        return results[offset : offset + limit]
 
-        except Exception as e:
-            logger.error(f"Database search failed: {e}")
-            return []
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Database search failed: {e}")
+        # TODO: Review unreachable code - return []

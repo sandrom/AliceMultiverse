@@ -142,268 +142,268 @@ class SyncTracker:
         logger.info(f"Found {len(conflicts)} files with sync conflicts")
         return conflicts
 
-    async def resolve_conflict(
-        self,
-        content_hash: str,
-        strategy: ConflictResolution = ConflictResolution.NEWEST_WINS
-    ) -> dict[str, Any]:
-        """Resolve a sync conflict using the specified strategy.
+    # TODO: Review unreachable code - async def resolve_conflict(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - content_hash: str,
+    # TODO: Review unreachable code - strategy: ConflictResolution = ConflictResolution.NEWEST_WINS
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Resolve a sync conflict using the specified strategy.
 
-        Args:
-            content_hash: File content hash
-            strategy: Resolution strategy
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - content_hash: File content hash
+    # TODO: Review unreachable code - strategy: Resolution strategy
 
-        Returns:
-            Resolution result
-        """
-        status = await self.check_sync_status(content_hash)
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Resolution result
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - status = await self.check_sync_status(content_hash)
 
-        if status['status'] != 'conflict':
-            return {
-                'resolved': False,
-                'reason': 'No conflict to resolve'
-            }
+    # TODO: Review unreachable code - if status['status'] != 'conflict':
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'resolved': False,
+    # TODO: Review unreachable code - 'reason': 'No conflict to resolve'
+    # TODO: Review unreachable code - }
 
-        locations = status['locations']
+    # TODO: Review unreachable code - locations = status['locations']
 
-        # Choose winning version based on strategy
-        winner = None
+    # TODO: Review unreachable code - # Choose winning version based on strategy
+    # TODO: Review unreachable code - winner = None
 
-        if strategy == ConflictResolution.NEWEST_WINS:
-            # Sort by last verified time
-            winner = max(locations, key=lambda x: x['last_verified'])
+    # TODO: Review unreachable code - if strategy == ConflictResolution.NEWEST_WINS:
+    # TODO: Review unreachable code - # Sort by last verified time
+    # TODO: Review unreachable code - winner = max(locations, key=lambda x: x['last_verified'])
 
-        elif strategy == ConflictResolution.LARGEST_WINS:
-            # Sort by file size
-            winner = max(locations, key=lambda x: x['file_size'] or 0)
+    # TODO: Review unreachable code - elif strategy == ConflictResolution.LARGEST_WINS:
+    # TODO: Review unreachable code - # Sort by file size
+    # TODO: Review unreachable code - winner = max(locations, key=lambda x: x['file_size'] or 0)
 
-        elif strategy == ConflictResolution.PRIMARY_WINS:
-            # Get location priorities
-            location_priorities = {}
-            for loc in locations:
-                location = self.registry.get_location_by_id(loc['location_id'])
-                if location:
-                    location_priorities[loc['location_id']] = location.priority
+    # TODO: Review unreachable code - elif strategy == ConflictResolution.PRIMARY_WINS:
+    # TODO: Review unreachable code - # Get location priorities
+    # TODO: Review unreachable code - location_priorities = {}
+    # TODO: Review unreachable code - for loc in locations:
+    # TODO: Review unreachable code - location = self.registry.get_location_by_id(loc['location_id'])
+    # TODO: Review unreachable code - if location:
+    # TODO: Review unreachable code - location_priorities[loc['location_id']] = location.priority
 
-            # Choose highest priority
-            winner = max(
-                locations,
-                key=lambda x: location_priorities.get(x['location_id'], 0)
-            )
+    # TODO: Review unreachable code - # Choose highest priority
+    # TODO: Review unreachable code - winner = max(
+    # TODO: Review unreachable code - locations,
+    # TODO: Review unreachable code - key=lambda x: location_priorities.get(x['location_id'], 0)
+    # TODO: Review unreachable code - )
 
-        elif strategy == ConflictResolution.MANUAL:
-            return {
-                'resolved': False,
-                'reason': 'Manual resolution required',
-                'options': locations
-            }
+    # TODO: Review unreachable code - elif strategy == ConflictResolution.MANUAL:
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'resolved': False,
+    # TODO: Review unreachable code - 'reason': 'Manual resolution required',
+    # TODO: Review unreachable code - 'options': locations
+    # TODO: Review unreachable code - }
 
-        if winner:
-            # Mark winner as source of truth
-            result = {
-                'resolved': True,
-                'winner': winner,
-                'strategy': strategy.value,
-                'actions': []
-            }
+    # TODO: Review unreachable code - if winner:
+    # TODO: Review unreachable code - # Mark winner as source of truth
+    # TODO: Review unreachable code - result = {
+    # TODO: Review unreachable code - 'resolved': True,
+    # TODO: Review unreachable code - 'winner': winner,
+    # TODO: Review unreachable code - 'strategy': strategy.value,
+    # TODO: Review unreachable code - 'actions': []
+    # TODO: Review unreachable code - }
 
-            # Plan sync actions for other locations
-            for loc in locations:
-                if loc['location_id'] != winner['location_id']:
-                    result['actions'].append({
-                        'action': 'update',
-                        'source': winner['location_id'],
-                        'target': loc['location_id'],
-                        'file': loc['file_path']
-                    })
+    # TODO: Review unreachable code - # Plan sync actions for other locations
+    # TODO: Review unreachable code - for loc in locations:
+    # TODO: Review unreachable code - if loc['location_id'] != winner['location_id']:
+    # TODO: Review unreachable code - result['actions'].append({
+    # TODO: Review unreachable code - 'action': 'update',
+    # TODO: Review unreachable code - 'source': winner['location_id'],
+    # TODO: Review unreachable code - 'target': loc['location_id'],
+    # TODO: Review unreachable code - 'file': loc['file_path']
+    # TODO: Review unreachable code - })
 
-            return result
+    # TODO: Review unreachable code - return result
 
-        return {
-            'resolved': False,
-            'reason': 'Could not determine winner'
-        }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'resolved': False,
+    # TODO: Review unreachable code - 'reason': 'Could not determine winner'
+    # TODO: Review unreachable code - }
 
-    async def sync_file(
-        self,
-        content_hash: str,
-        source_location_id: str,
-        target_location_id: str,
-        scanner = None  # MultiPathScanner instance
-    ) -> dict[str, Any]:
-        """Sync a file from source to target location.
+    # TODO: Review unreachable code - async def sync_file(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - content_hash: str,
+    # TODO: Review unreachable code - source_location_id: str,
+    # TODO: Review unreachable code - target_location_id: str,
+    # TODO: Review unreachable code - scanner = None  # MultiPathScanner instance
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Sync a file from source to target location.
 
-        Args:
-            content_hash: File content hash
-            source_location_id: Source location ID
-            target_location_id: Target location ID
-            scanner: Optional MultiPathScanner for file transfers
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - content_hash: File content hash
+    # TODO: Review unreachable code - source_location_id: Source location ID
+    # TODO: Review unreachable code - target_location_id: Target location ID
+    # TODO: Review unreachable code - scanner: Optional MultiPathScanner for file transfers
 
-        Returns:
-            Sync result
-        """
-        # Get locations
-        source_location = self.registry.get_location_by_id(source_location_id)
-        target_location = self.registry.get_location_by_id(target_location_id)
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Sync result
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Get locations
+    # TODO: Review unreachable code - source_location = self.registry.get_location_by_id(source_location_id)
+    # TODO: Review unreachable code - target_location = self.registry.get_location_by_id(target_location_id)
 
-        if not source_location or not target_location:
-            return {
-                'success': False,
-                'error': 'Invalid location IDs'
-            }
+    # TODO: Review unreachable code - if not source_location or not target_location:
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'success': False,
+    # TODO: Review unreachable code - 'error': 'Invalid location IDs'
+    # TODO: Review unreachable code - }
 
-        # Get file info
-        file_locations = self.registry.get_file_locations(content_hash)
-        source_file = None
+    # TODO: Review unreachable code - # Get file info
+    # TODO: Review unreachable code - file_locations = self.registry.get_file_locations(content_hash)
+    # TODO: Review unreachable code - source_file = None
 
-        for loc in file_locations:
-            if loc['location_id'] == source_location_id:
-                source_file = loc
-                break
+    # TODO: Review unreachable code - for loc in file_locations:
+    # TODO: Review unreachable code - if loc['location_id'] == source_location_id:
+    # TODO: Review unreachable code - source_file = loc
+    # TODO: Review unreachable code - break
 
-        if not source_file:
-            return {
-                'success': False,
-                'error': 'File not found in source location'
-            }
+    # TODO: Review unreachable code - if not source_file:
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'success': False,
+    # TODO: Review unreachable code - 'error': 'File not found in source location'
+    # TODO: Review unreachable code - }
 
-        # Mark for sync
-        self.registry.mark_file_for_sync(
-            content_hash,
-            source_location_id,
-            target_location_id,
-            action='upload'
-        )
+    # TODO: Review unreachable code - # Mark for sync
+    # TODO: Review unreachable code - self.registry.mark_file_for_sync(
+    # TODO: Review unreachable code - content_hash,
+    # TODO: Review unreachable code - source_location_id,
+    # TODO: Review unreachable code - target_location_id,
+    # TODO: Review unreachable code - action='upload'
+    # TODO: Review unreachable code - )
 
-        # Perform sync if scanner provided
-        if scanner:
-            try:
-                await scanner._transfer_file(
-                    source_file['file_path'],
-                    content_hash,
-                    target_location,
-                    move=False  # Always copy for sync
-                )
+    # TODO: Review unreachable code - # Perform sync if scanner provided
+    # TODO: Review unreachable code - if scanner:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - await scanner._transfer_file(
+    # TODO: Review unreachable code - source_file['file_path'],
+    # TODO: Review unreachable code - content_hash,
+    # TODO: Review unreachable code - target_location,
+    # TODO: Review unreachable code - move=False  # Always copy for sync
+    # TODO: Review unreachable code - )
 
-                return {
-                    'success': True,
-                    'source': source_file['file_path'],
-                    'target': target_location.name
-                }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'success': True,
+    # TODO: Review unreachable code - 'source': source_file['file_path'],
+    # TODO: Review unreachable code - 'target': target_location.name
+    # TODO: Review unreachable code - }
 
-            except Exception as e:
-                logger.error(f"Sync failed: {e}")
-                return {
-                    'success': False,
-                    'error': str(e)
-                }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Sync failed: {e}")
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'success': False,
+    # TODO: Review unreachable code - 'error': str(e)
+    # TODO: Review unreachable code - }
 
-        return {
-            'success': True,
-            'marked_for_sync': True
-        }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'success': True,
+    # TODO: Review unreachable code - 'marked_for_sync': True
+    # TODO: Review unreachable code - }
 
-    def get_sync_queue(self) -> list[dict[str, Any]]:
-        """Get all pending sync operations.
+    # TODO: Review unreachable code - def get_sync_queue(self) -> list[dict[str, Any]]:
+    # TODO: Review unreachable code - """Get all pending sync operations.
 
-        Returns:
-            List of pending syncs
-        """
-        return self.registry.get_pending_syncs()
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of pending syncs
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - return self.registry.get_pending_syncs()
 
-    async def process_sync_queue(
-        self,
-        scanner = None,
-        max_concurrent: int = 5,
-        show_progress: bool = True
-    ) -> dict[str, Any]:
-        """Process all pending sync operations.
+    # TODO: Review unreachable code - async def process_sync_queue(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - scanner = None,
+    # TODO: Review unreachable code - max_concurrent: int = 5,
+    # TODO: Review unreachable code - show_progress: bool = True
+    # TODO: Review unreachable code - ) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Process all pending sync operations.
 
-        Args:
-            scanner: MultiPathScanner for file transfers
-            max_concurrent: Maximum concurrent operations
-            show_progress: Show progress bar
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - scanner: MultiPathScanner for file transfers
+    # TODO: Review unreachable code - max_concurrent: Maximum concurrent operations
+    # TODO: Review unreachable code - show_progress: Show progress bar
 
-        Returns:
-            Processing statistics
-        """
-        pending = self.get_sync_queue()
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Processing statistics
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - pending = self.get_sync_queue()
 
-        if not pending:
-            logger.info("No pending sync operations")
-            return {'processed': 0, 'failed': 0}
+    # TODO: Review unreachable code - if not pending:
+    # TODO: Review unreachable code - logger.info("No pending sync operations")
+    # TODO: Review unreachable code - return {'processed': 0, 'failed': 0}
 
-        logger.info(f"Processing {len(pending)} pending sync operations")
+    # TODO: Review unreachable code - logger.info(f"Processing {len(pending)} pending sync operations")
 
-        stats = {
-            'processed': 0,
-            'failed': 0,
-            'errors': []
-        }
+    # TODO: Review unreachable code - stats = {
+    # TODO: Review unreachable code - 'processed': 0,
+    # TODO: Review unreachable code - 'failed': 0,
+    # TODO: Review unreachable code - 'errors': []
+    # TODO: Review unreachable code - }
 
-        from tqdm import tqdm
-        if show_progress:
-            progress = tqdm(total=len(pending), desc="Processing syncs")
+    # TODO: Review unreachable code - from tqdm import tqdm
+    # TODO: Review unreachable code - if show_progress:
+    # TODO: Review unreachable code - progress = tqdm(total=len(pending), desc="Processing syncs")
 
-        # Create semaphore for concurrency
-        semaphore = asyncio.Semaphore(max_concurrent)
+    # TODO: Review unreachable code - # Create semaphore for concurrency
+    # TODO: Review unreachable code - semaphore = asyncio.Semaphore(max_concurrent)
 
-        async def process_one(sync_item):
-            async with semaphore:
-                try:
-                    # Determine source and target
-                    # This is simplified - real implementation would be more complex
-                    if sync_item['sync_status'] == 'pending_upload':
-                        # Find source location
-                        all_locations = self.registry.get_file_locations(
-                            sync_item['content_hash']
-                        )
+    # TODO: Review unreachable code - async def process_one(sync_item):
+    # TODO: Review unreachable code - async with semaphore:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Determine source and target
+    # TODO: Review unreachable code - # This is simplified - real implementation would be more complex
+    # TODO: Review unreachable code - if sync_item['sync_status'] == 'pending_upload':
+    # TODO: Review unreachable code - # Find source location
+    # TODO: Review unreachable code - all_locations = self.registry.get_file_locations(
+    # TODO: Review unreachable code - sync_item['content_hash']
+    # TODO: Review unreachable code - )
 
-                        source_loc = None
-                        for loc in all_locations:
-                            if loc['sync_status'] == 'synced':
-                                source_loc = loc
-                                break
+    # TODO: Review unreachable code - source_loc = None
+    # TODO: Review unreachable code - for loc in all_locations:
+    # TODO: Review unreachable code - if loc['sync_status'] == 'synced':
+    # TODO: Review unreachable code - source_loc = loc
+    # TODO: Review unreachable code - break
 
-                        if source_loc and scanner:
-                            result = await self.sync_file(
-                                sync_item['content_hash'],
-                                source_loc['location_id'],
-                                sync_item['location_id'],
-                                scanner
-                            )
+    # TODO: Review unreachable code - if source_loc and scanner:
+    # TODO: Review unreachable code - result = await self.sync_file(
+    # TODO: Review unreachable code - sync_item['content_hash'],
+    # TODO: Review unreachable code - source_loc['location_id'],
+    # TODO: Review unreachable code - sync_item['location_id'],
+    # TODO: Review unreachable code - scanner
+    # TODO: Review unreachable code - )
 
-                            if result['success']:
-                                stats['processed'] += 1
-                            else:
-                                stats['failed'] += 1
-                                stats['errors'].append(result)
+    # TODO: Review unreachable code - if result['success']:
+    # TODO: Review unreachable code - stats['processed'] += 1
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - stats['failed'] += 1
+    # TODO: Review unreachable code - stats['errors'].append(result)
 
-                except Exception as e:
-                    logger.error(f"Error processing sync: {e}")
-                    stats['failed'] += 1
-                    stats['errors'].append({
-                        'content_hash': sync_item['content_hash'],
-                        'error': str(e)
-                    })
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Error processing sync: {e}")
+    # TODO: Review unreachable code - stats['failed'] += 1
+    # TODO: Review unreachable code - stats['errors'].append({
+    # TODO: Review unreachable code - 'content_hash': sync_item['content_hash'],
+    # TODO: Review unreachable code - 'error': str(e)
+    # TODO: Review unreachable code - })
 
-                finally:
-                    if show_progress:
-                        progress.update(1)
+    # TODO: Review unreachable code - finally:
+    # TODO: Review unreachable code - if show_progress:
+    # TODO: Review unreachable code - progress.update(1)
 
-        # Process all pending syncs
-        tasks = [process_one(item) for item in pending]
-        await asyncio.gather(*tasks, return_exceptions=True)
+    # TODO: Review unreachable code - # Process all pending syncs
+    # TODO: Review unreachable code - tasks = [process_one(item) for item in pending]
+    # TODO: Review unreachable code - await asyncio.gather(*tasks, return_exceptions=True)
 
-        if show_progress:
-            progress.close()
+    # TODO: Review unreachable code - if show_progress:
+    # TODO: Review unreachable code - progress.close()
 
-        logger.info(
-            f"Sync processing complete: {stats['processed']} succeeded, "
-            f"{stats['failed']} failed"
-        )
+    # TODO: Review unreachable code - logger.info(
+    # TODO: Review unreachable code - f"Sync processing complete: {stats['processed']} succeeded, "
+    # TODO: Review unreachable code - f"{stats['failed']} failed"
+    # TODO: Review unreachable code - )
 
-        return stats
+    # TODO: Review unreachable code - return stats
 
 
 class VersionTracker:

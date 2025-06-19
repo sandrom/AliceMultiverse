@@ -153,12 +153,12 @@ def hamming_distance(hash1: str, hash2: str) -> int:
     if len(hash1) != len(hash2):
         raise ValueError("Hashes must be same length")
 
-    # Convert hex to binary
-    bits1 = bin(int(hash1, 16))[2:].zfill(len(hash1) * 4)
-    bits2 = bin(int(hash2, 16))[2:].zfill(len(hash2) * 4)
+    # TODO: Review unreachable code - # Convert hex to binary
+    # TODO: Review unreachable code - bits1 = bin(int(hash1, 16))[2:].zfill(len(hash1) * 4)
+    # TODO: Review unreachable code - bits2 = bin(int(hash2, 16))[2:].zfill(len(hash2) * 4)
 
-    # Count differing bits
-    return sum(b1 != b2 for b1, b2 in zip(bits1, bits2, strict=False))
+    # TODO: Review unreachable code - # Count differing bits
+    # TODO: Review unreachable code - return sum(b1 != b2 for b1, b2 in zip(bits1, bits2, strict=False))
 
 
 def find_similar_hashes(
@@ -193,50 +193,50 @@ def find_similar_hashes(
     return similar
 
 
-def _dct2d(matrix: np.ndarray) -> np.ndarray:
-    """2D Discrete Cosine Transform.
+# TODO: Review unreachable code - def _dct2d(matrix: np.ndarray) -> np.ndarray:
+# TODO: Review unreachable code - """2D Discrete Cosine Transform.
 
-    Args:
-        matrix: 2D numpy array
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - matrix: 2D numpy array
 
-    Returns:
-        DCT coefficients
-    """
-    # This is a simplified DCT implementation
-    # For production, consider using scipy.fftpack.dct
-    n = matrix.shape[0]
-    dct_matrix = np.zeros_like(matrix)
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - DCT coefficients
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - # This is a simplified DCT implementation
+# TODO: Review unreachable code - # For production, consider using scipy.fftpack.dct
+# TODO: Review unreachable code - n = matrix.shape[0]
+# TODO: Review unreachable code - dct_matrix = np.zeros_like(matrix)
 
-    for i in range(n):
-        for j in range(n):
-            sum_val = 0.0
-            for x in range(n):
-                for y in range(n):
-                    sum_val += matrix[x, y] * np.cos((2*x+1)*i*np.pi/(2*n)) * np.cos((2*y+1)*j*np.pi/(2*n))
+# TODO: Review unreachable code - for i in range(n):
+# TODO: Review unreachable code - for j in range(n):
+# TODO: Review unreachable code - sum_val = 0.0
+# TODO: Review unreachable code - for x in range(n):
+# TODO: Review unreachable code - for y in range(n):
+# TODO: Review unreachable code - sum_val += matrix[x, y] * np.cos((2*x+1)*i*np.pi/(2*n)) * np.cos((2*y+1)*j*np.pi/(2*n))
 
-            # Normalization
-            ci = 1.0 if i == 0 else np.sqrt(2)
-            cj = 1.0 if j == 0 else np.sqrt(2)
-            dct_matrix[i, j] = ci * cj * sum_val * 2 / n
+# TODO: Review unreachable code - # Normalization
+# TODO: Review unreachable code - ci = 1.0 if i == 0 else np.sqrt(2)
+# TODO: Review unreachable code - cj = 1.0 if j == 0 else np.sqrt(2)
+# TODO: Review unreachable code - dct_matrix[i, j] = ci * cj * sum_val * 2 / n
 
-    return dct_matrix
+# TODO: Review unreachable code - return dct_matrix
 
 
-def _bits_to_hex(bits: np.ndarray) -> str:
-    """Convert bit array to hex string.
+# TODO: Review unreachable code - def _bits_to_hex(bits: np.ndarray) -> str:
+# TODO: Review unreachable code - """Convert bit array to hex string.
 
-    Args:
-        bits: Boolean array
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - bits: Boolean array
 
-    Returns:
-        Hex string representation
-    """
-    # Convert boolean array to binary string
-    bit_string = ''.join('1' if b else '0' for b in bits)
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Hex string representation
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - # Convert boolean array to binary string
+# TODO: Review unreachable code - bit_string = ''.join('1' if b else '0' for b in bits)
 
-    # Convert binary to hex
-    hex_value = hex(int(bit_string, 2))[2:]
+# TODO: Review unreachable code - # Convert binary to hex
+# TODO: Review unreachable code - hex_value = hex(int(bit_string, 2))[2:]
 
-    # Pad with zeros if needed
-    expected_length = len(bits) // 4
-    return hex_value.zfill(expected_length)
+# TODO: Review unreachable code - # Pad with zeros if needed
+# TODO: Review unreachable code - expected_length = len(bits) // 4
+# TODO: Review unreachable code - return hex_value.zfill(expected_length)

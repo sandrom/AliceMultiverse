@@ -421,85 +421,85 @@ class ExportAnalytics:
         if not recent_exports:
             return suggestions
 
-        # Check success rate
-        successful = sum(1 for e in recent_exports if e.get("successful", False))
-        success_rate = (successful / len(recent_exports) * 100) if recent_exports else 0
+        # TODO: Review unreachable code - # Check success rate
+        # TODO: Review unreachable code - successful = sum(1 for e in recent_exports if e.get("successful", False))
+        # TODO: Review unreachable code - success_rate = (successful / len(recent_exports) * 100) if recent_exports else 0
 
-        if success_rate < 95:
-            suggestions.append({
-                "category": "reliability",
-                "issue": f"Export success rate is {success_rate:.1f}%",
-                "suggestion": "Review failed exports and improve error handling",
-                "priority": "high"
-            })
+        # TODO: Review unreachable code - if success_rate < 95:
+        # TODO: Review unreachable code - suggestions.append({
+        # TODO: Review unreachable code - "category": "reliability",
+        # TODO: Review unreachable code - "issue": f"Export success rate is {success_rate:.1f}%",
+        # TODO: Review unreachable code - "suggestion": "Review failed exports and improve error handling",
+        # TODO: Review unreachable code - "priority": "high"
+        # TODO: Review unreachable code - })
 
-        # Check iteration count
-        timeline_exports = defaultdict(list)
-        for e in recent_exports:
-            if e.get("timeline_id"):
-                timeline_exports[e["timeline_id"]].append(e)
+        # TODO: Review unreachable code - # Check iteration count
+        # TODO: Review unreachable code - timeline_exports = defaultdict(list)
+        # TODO: Review unreachable code - for e in recent_exports:
+        # TODO: Review unreachable code - if e.get("timeline_id"):
+        # TODO: Review unreachable code - timeline_exports[e["timeline_id"]].append(e)
 
-        high_iteration_timelines = [
-            tid for tid, exports in timeline_exports.items()
-            if len(exports) > 3
-        ]
+        # TODO: Review unreachable code - high_iteration_timelines = [
+        # TODO: Review unreachable code - tid for tid, exports in timeline_exports.items()
+        # TODO: Review unreachable code - if len(exports) > 3
+        # TODO: Review unreachable code - ]
 
-        if len(high_iteration_timelines) > len(timeline_exports) * 0.3:
-            suggestions.append({
-                "category": "efficiency",
-                "issue": "Many timelines require multiple export attempts",
-                "suggestion": "Improve preview accuracy and default settings",
-                "priority": "medium"
-            })
+        # TODO: Review unreachable code - if len(high_iteration_timelines) > len(timeline_exports) * 0.3:
+        # TODO: Review unreachable code - suggestions.append({
+        # TODO: Review unreachable code - "category": "efficiency",
+        # TODO: Review unreachable code - "issue": "Many timelines require multiple export attempts",
+        # TODO: Review unreachable code - "suggestion": "Improve preview accuracy and default settings",
+        # TODO: Review unreachable code - "priority": "medium"
+        # TODO: Review unreachable code - })
 
-        # Check edit patterns
-        high_edit_exports = [
-            e for e in recent_exports
-            if e.get("edit_count", 0) > 5
-        ]
+        # TODO: Review unreachable code - # Check edit patterns
+        # TODO: Review unreachable code - high_edit_exports = [
+        # TODO: Review unreachable code - e for e in recent_exports
+        # TODO: Review unreachable code - if e.get("edit_count", 0) > 5
+        # TODO: Review unreachable code - ]
 
-        if len(high_edit_exports) > len(recent_exports) * 0.2:
-            suggestions.append({
-                "category": "usability",
-                "issue": "Exports require many manual edits",
-                "suggestion": "Analyze common edits and automate them",
-                "priority": "medium"
-            })
+        # TODO: Review unreachable code - if len(high_edit_exports) > len(recent_exports) * 0.2:
+        # TODO: Review unreachable code - suggestions.append({
+        # TODO: Review unreachable code - "category": "usability",
+        # TODO: Review unreachable code - "issue": "Exports require many manual edits",
+        # TODO: Review unreachable code - "suggestion": "Analyze common edits and automate them",
+        # TODO: Review unreachable code - "priority": "medium"
+        # TODO: Review unreachable code - })
 
-        # Check platform adoption
-        platform_stats = defaultdict(lambda: {"total": 0, "published": 0})
-        for e in recent_exports:
-            if e.get("platform"):
-                platform_stats[e["platform"]]["total"] += 1
-                if e.get("published"):
-                    platform_stats[e["platform"]]["published"] += 1
+        # TODO: Review unreachable code - # Check platform adoption
+        # TODO: Review unreachable code - platform_stats = defaultdict(lambda: {"total": 0, "published": 0})
+        # TODO: Review unreachable code - for e in recent_exports:
+        # TODO: Review unreachable code - if e.get("platform"):
+        # TODO: Review unreachable code - platform_stats[e["platform"]]["total"] += 1
+        # TODO: Review unreachable code - if e.get("published"):
+        # TODO: Review unreachable code - platform_stats[e["platform"]]["published"] += 1
 
-        for platform, stats in platform_stats.items():
-            if stats["total"] > 5:
-                adoption_rate = (stats["published"] / stats["total"] * 100)
-                if adoption_rate < 50:
-                    suggestions.append({
-                        "category": "platform_optimization",
-                        "issue": f"{platform} exports have low adoption ({adoption_rate:.0f}%)",
-                        "suggestion": f"Review {platform} export settings and optimizations",
-                        "priority": "low"
-                    })
+        # TODO: Review unreachable code - for platform, stats in platform_stats.items():
+        # TODO: Review unreachable code - if stats is not None and stats["total"] > 5:
+        # TODO: Review unreachable code - adoption_rate = (stats["published"] / stats["total"] * 100)
+        # TODO: Review unreachable code - if adoption_rate < 50:
+        # TODO: Review unreachable code - suggestions.append({
+        # TODO: Review unreachable code - "category": "platform_optimization",
+        # TODO: Review unreachable code - "issue": f"{platform} exports have low adoption ({adoption_rate:.0f}%)",
+        # TODO: Review unreachable code - "suggestion": f"Review {platform} export settings and optimizations",
+        # TODO: Review unreachable code - "priority": "low"
+        # TODO: Review unreachable code - })
 
-        # Check export speed
-        slow_exports = [
-            e for e in recent_exports
-            if e.get("export_speed_mbps", float('inf')) < 10
-        ]
+        # TODO: Review unreachable code - # Check export speed
+        # TODO: Review unreachable code - slow_exports = [
+        # TODO: Review unreachable code - e for e in recent_exports
+        # TODO: Review unreachable code - if e.get("export_speed_mbps", float('inf')) < 10
+        # TODO: Review unreachable code - ]
 
-        if len(slow_exports) > len(recent_exports) * 0.1:
-            suggestions.append({
-                "category": "performance",
-                "issue": "Some exports are running slowly",
-                "suggestion": "Optimize export pipeline and consider caching",
-                "priority": "low"
-            })
+        # TODO: Review unreachable code - if len(slow_exports) > len(recent_exports) * 0.1:
+        # TODO: Review unreachable code - suggestions.append({
+        # TODO: Review unreachable code - "category": "performance",
+        # TODO: Review unreachable code - "issue": "Some exports are running slowly",
+        # TODO: Review unreachable code - "suggestion": "Optimize export pipeline and consider caching",
+        # TODO: Review unreachable code - "priority": "low"
+        # TODO: Review unreachable code - })
 
-        return suggestions
+        # TODO: Review unreachable code - return suggestions
 
     def _filter_exports(
         self,
@@ -525,87 +525,87 @@ class ExportAnalytics:
 
         return exports
 
-    def _update_patterns(self, metrics: ExportMetrics):
-        """Update usage patterns based on new export."""
-        # Update format usage
-        format_key = metrics.format.value
-        self.usage_patterns.setdefault("formats", {})
-        self.usage_patterns["formats"][format_key] = \
-            self.usage_patterns["formats"].get(format_key, 0) + 1
+    # TODO: Review unreachable code - def _update_patterns(self, metrics: ExportMetrics):
+    # TODO: Review unreachable code - """Update usage patterns based on new export."""
+    # TODO: Review unreachable code - # Update format usage
+    # TODO: Review unreachable code - format_key = metrics.format.value
+    # TODO: Review unreachable code - self.usage_patterns.setdefault("formats", {})
+    # TODO: Review unreachable code - self.usage_patterns["formats"][format_key] = \
+    # TODO: Review unreachable code - self.usage_patterns["formats"].get(format_key, 0) + 1
 
-        # Update platform usage
-        if metrics.platform:
-            self.usage_patterns.setdefault("platforms", {})
-            self.usage_patterns["platforms"][metrics.platform] = \
-                self.usage_patterns["platforms"].get(metrics.platform, 0) + 1
+    # TODO: Review unreachable code - # Update platform usage
+    # TODO: Review unreachable code - if metrics.platform:
+    # TODO: Review unreachable code - self.usage_patterns.setdefault("platforms", {})
+    # TODO: Review unreachable code - self.usage_patterns["platforms"][metrics.platform] = \
+    # TODO: Review unreachable code - self.usage_patterns["platforms"].get(metrics.platform, 0) + 1
 
-        # Update time patterns (hour of day)
-        hour = metrics.start_time.hour
-        self.usage_patterns.setdefault("hours", {})
-        self.usage_patterns["hours"][str(hour)] = \
-            self.usage_patterns["hours"].get(str(hour), 0) + 1
+    # TODO: Review unreachable code - # Update time patterns (hour of day)
+    # TODO: Review unreachable code - hour = metrics.start_time.hour
+    # TODO: Review unreachable code - self.usage_patterns.setdefault("hours", {})
+    # TODO: Review unreachable code - self.usage_patterns["hours"][str(hour)] = \
+    # TODO: Review unreachable code - self.usage_patterns["hours"].get(str(hour), 0) + 1
 
-        # Update day patterns
-        day = metrics.start_time.strftime("%A")
-        self.usage_patterns.setdefault("days", {})
-        self.usage_patterns["days"][day] = \
-            self.usage_patterns["days"].get(day, 0) + 1
+    # TODO: Review unreachable code - # Update day patterns
+    # TODO: Review unreachable code - day = metrics.start_time.strftime("%A")
+    # TODO: Review unreachable code - self.usage_patterns.setdefault("days", {})
+    # TODO: Review unreachable code - self.usage_patterns["days"][day] = \
+    # TODO: Review unreachable code - self.usage_patterns["days"].get(day, 0) + 1
 
-    def _metrics_to_dict(self, metrics: ExportMetrics) -> dict[str, Any]:
-        """Convert metrics to dictionary."""
-        data = asdict(metrics)
+    # TODO: Review unreachable code - def _metrics_to_dict(self, metrics: ExportMetrics) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Convert metrics to dictionary."""
+    # TODO: Review unreachable code - data = asdict(metrics)
 
-        # Convert datetime objects
-        for key in ["start_time", "end_time"]:
-            if data.get(key):
-                data[key] = data[key].isoformat()
+    # TODO: Review unreachable code - # Convert datetime objects
+    # TODO: Review unreachable code - for key in ["start_time", "end_time"]:
+    # TODO: Review unreachable code - if data.get(key):
+    # TODO: Review unreachable code - data[key] = data[key].isoformat()
 
-        # Convert enum
-        if data.get("format"):
-            data["format"] = data["format"].value
+    # TODO: Review unreachable code - # Convert enum
+    # TODO: Review unreachable code - if data.get("format"):
+    # TODO: Review unreachable code - data["format"] = data["format"].value
 
-        return data
+    # TODO: Review unreachable code - return data
 
-    def _load_export_history(self) -> list[dict[str, Any]]:
-        """Load export history from disk."""
-        if not self.exports_file.exists():
-            return []
+    # TODO: Review unreachable code - def _load_export_history(self) -> list[dict[str, Any]]:
+    # TODO: Review unreachable code - """Load export history from disk."""
+    # TODO: Review unreachable code - if not self.exports_file.exists():
+    # TODO: Review unreachable code - return []
 
-        try:
-            with open(self.exports_file) as f:
-                return json.load(f)
-        except Exception as e:
-            logger.error(f"Failed to load export history: {e}")
-            return []
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - with open(self.exports_file) as f:
+    # TODO: Review unreachable code - return json.load(f)
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to load export history: {e}")
+    # TODO: Review unreachable code - return []
 
-    def _load_usage_patterns(self) -> dict[str, Any]:
-        """Load usage patterns from disk."""
-        if not self.patterns_file.exists():
-            return {}
+    # TODO: Review unreachable code - def _load_usage_patterns(self) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Load usage patterns from disk."""
+    # TODO: Review unreachable code - if not self.patterns_file.exists():
+    # TODO: Review unreachable code - return {}
 
-        try:
-            with open(self.patterns_file) as f:
-                return json.load(f)
-        except Exception as e:
-            logger.error(f"Failed to load usage patterns: {e}")
-            return {}
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - with open(self.patterns_file) as f:
+    # TODO: Review unreachable code - return json.load(f)
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to load usage patterns: {e}")
+    # TODO: Review unreachable code - return {}
 
-    def _save_export_history(self):
-        """Save export history to disk."""
-        try:
-            # Keep only recent exports (last 500)
-            if len(self.export_history) > 500:
-                self.export_history = self.export_history[-500:]
+    # TODO: Review unreachable code - def _save_export_history(self):
+    # TODO: Review unreachable code - """Save export history to disk."""
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Keep only recent exports (last 500)
+    # TODO: Review unreachable code - if len(self.export_history) > 500:
+    # TODO: Review unreachable code - self.export_history = self.export_history[-500:]
 
-            with open(self.exports_file, 'w') as f:
-                json.dump(self.export_history, f, indent=2)
-        except Exception as e:
-            logger.error(f"Failed to save export history: {e}")
+    # TODO: Review unreachable code - with open(self.exports_file, 'w') as f:
+    # TODO: Review unreachable code - json.dump(self.export_history, f, indent=2)
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to save export history: {e}")
 
-    def _save_patterns(self):
-        """Save usage patterns to disk."""
-        try:
-            with open(self.patterns_file, 'w') as f:
-                json.dump(self.usage_patterns, f, indent=2)
-        except Exception as e:
-            logger.error(f"Failed to save usage patterns: {e}")
+    # TODO: Review unreachable code - def _save_patterns(self):
+    # TODO: Review unreachable code - """Save usage patterns to disk."""
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - with open(self.patterns_file, 'w') as f:
+    # TODO: Review unreachable code - json.dump(self.usage_patterns, f, indent=2)
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to save usage patterns: {e}")

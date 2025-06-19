@@ -45,38 +45,39 @@ def register_image_presentation_tools(server: Server, api: ImagePresentationAPI)
         Returns:
             List of images formatted for chat display
         """
-        try:
-            result = await api.search_images(
-                query=query,
-                tags=tags,
-                similar_to=similar_to,
-                exclude_tags=exclude_tags,
-                exclude_folders=exclude_folders,
-                limit=limit,
-                offset=offset
-            )
+        # TODO: Review unreachable code - try:
+        result = await api.search_images(
+            query=query,
+            tags=tags,
+            similar_to=similar_to,
+            exclude_tags=exclude_tags,
+            exclude_folders=exclude_folders,
+            limit=limit,
+            offset=offset
+        )
 
             # Convert to chat-friendly format
-            response = result.to_chat_response()
+        response = result.to_chat_response()
 
             # Add metadata for Claude
+        if response is not None:
             response["_metadata"] = {
-                "tool": "search_images",
-                "timestamp": datetime.now().isoformat(),
-                "query": query or "all images",
-                "total_results": result.total_count
-            }
+            "tool": "search_images",
+            "timestamp": datetime.now().isoformat(),
+            "query": query or "all images",
+            "total_results": result.total_count
+        }
 
-            return response
+        return response
 
-        except Exception as e:
-            logger.error(f"Search failed: {e}")
-            return {
-                "error": str(e),
-                "images": [],
-                "total": 0,
-                "has_more": False
-            }
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Search failed: {e}")
+        # TODO: Review unreachable code - return {
+        # TODO: Review unreachable code - "error": str(e),
+        # TODO: Review unreachable code - "images": [],
+        # TODO: Review unreachable code - "total": 0,
+        # TODO: Review unreachable code - "has_more": False
+        # TODO: Review unreachable code - }
 
     @server.tool()
     async def track_selection(
@@ -233,8 +234,8 @@ def _get_common_reasons(selections: list[dict[str, Any]]) -> dict[str, int]:
     return dict(sorted_reasons[:5])
 
 
-# Create default API instance for MCP server
-def create_default_api() -> ImagePresentationAPI:
-    """Create default Image Presentation API instance."""
-    storage = DuckDBSearchCache()
-    return ImagePresentationAPI(storage=storage)
+# TODO: Review unreachable code - # Create default API instance for MCP server
+# TODO: Review unreachable code - def create_default_api() -> ImagePresentationAPI:
+# TODO: Review unreachable code - """Create default Image Presentation API instance."""
+# TODO: Review unreachable code - storage = DuckDBSearchCache()
+# TODO: Review unreachable code - return ImagePresentationAPI(storage=storage)

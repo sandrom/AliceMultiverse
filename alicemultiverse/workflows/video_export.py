@@ -47,12 +47,12 @@ class TimelineClip:
         """Get the end time of this clip on the timeline."""
         return self.start_time + self.duration
 
-    @property
-    def source_duration(self) -> float:
-        """Get the source clip duration."""
-        if self.out_point is not None:
-            return self.out_point - self.in_point
-        return self.duration
+    # TODO: Review unreachable code - @property
+    # TODO: Review unreachable code - def source_duration(self) -> float:
+    # TODO: Review unreachable code - """Get the source clip duration."""
+    # TODO: Review unreachable code - if self.out_point is not None:
+    # TODO: Review unreachable code - return self.out_point - self.in_point
+    # TODO: Review unreachable code - return self.duration
 
 
 @dataclass
@@ -126,9 +126,9 @@ class DaVinciResolveExporter:
             logger.info(f"Exported EDL to {output_path}")
             return True
 
-        except Exception as e:
-            logger.error(f"Failed to export EDL: {e}")
-            return False
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Failed to export EDL: {e}")
+        # TODO: Review unreachable code - return False
 
     @staticmethod
     def export_xml(timeline: Timeline, output_path: Path) -> bool:
@@ -220,9 +220,9 @@ class DaVinciResolveExporter:
             logger.info(f"Exported DaVinci Resolve XML to {output_path}")
             return True
 
-        except Exception as e:
-            logger.error(f"Failed to export XML: {e}")
-            return False
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Failed to export XML: {e}")
+        # TODO: Review unreachable code - return False
 
     @staticmethod
     def _seconds_to_timecode(seconds: float, fps: float) -> str:
@@ -235,298 +235,298 @@ class DaVinciResolveExporter:
         return f"{hours:02d}:{minutes:02d}:{secs:02d}:{frames:02d}"
 
 
-class CapCutExporter:
-    """Export timelines for CapCut mobile editor."""
+# TODO: Review unreachable code - class CapCutExporter:
+# TODO: Review unreachable code - """Export timelines for CapCut mobile editor."""
 
-    @staticmethod
-    def export_json(timeline: Timeline, output_path: Path) -> bool:
-        """Export timeline as CapCut-compatible JSON."""
-        try:
-            # CapCut project structure
-            project = {
-                "version": "1.0",
-                "project_name": timeline.name,
-                "create_time": datetime.now().isoformat(),
-                "duration": int(timeline.duration * 1000),  # milliseconds
-                "resolution": {
-                    "width": timeline.resolution[0],
-                    "height": timeline.resolution[1]
-                },
-                "fps": timeline.frame_rate,
-                "tracks": {
-                    "video": [],
-                    "audio": [],
-                    "effect": [],
-                    "text": []
-                },
-                "materials": [],
-                "markers": []
-            }
+# TODO: Review unreachable code - @staticmethod
+# TODO: Review unreachable code - def export_json(timeline: Timeline, output_path: Path) -> bool:
+# TODO: Review unreachable code - """Export timeline as CapCut-compatible JSON."""
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - # CapCut project structure
+# TODO: Review unreachable code - project = {
+# TODO: Review unreachable code - "version": "1.0",
+# TODO: Review unreachable code - "project_name": timeline.name,
+# TODO: Review unreachable code - "create_time": datetime.now().isoformat(),
+# TODO: Review unreachable code - "duration": int(timeline.duration * 1000),  # milliseconds
+# TODO: Review unreachable code - "resolution": {
+# TODO: Review unreachable code - "width": timeline.resolution[0],
+# TODO: Review unreachable code - "height": timeline.resolution[1]
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "fps": timeline.frame_rate,
+# TODO: Review unreachable code - "tracks": {
+# TODO: Review unreachable code - "video": [],
+# TODO: Review unreachable code - "audio": [],
+# TODO: Review unreachable code - "effect": [],
+# TODO: Review unreachable code - "text": []
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "materials": [],
+# TODO: Review unreachable code - "markers": []
+# TODO: Review unreachable code - }
 
-            # Add materials (assets)
-            material_map = {}
-            for i, clip in enumerate(timeline.clips):
-                material_id = hashlib.md5(str(clip.asset_path).encode()).hexdigest()[:8]
-                if material_id not in material_map:
-                    material = {
-                        "id": material_id,
-                        "type": "video",
-                        "path": str(clip.asset_path),
-                        "name": clip.asset_path.name,
-                        "duration": int(clip.duration * 1000)
-                    }
-                    project["materials"].append(material)
-                    material_map[material_id] = material
+# TODO: Review unreachable code - # Add materials (assets)
+# TODO: Review unreachable code - material_map = {}
+# TODO: Review unreachable code - for i, clip in enumerate(timeline.clips):
+# TODO: Review unreachable code - material_id = hashlib.md5(str(clip.asset_path).encode()).hexdigest()[:8]
+# TODO: Review unreachable code - if material_id not in material_map:
+# TODO: Review unreachable code - material = {
+# TODO: Review unreachable code - "id": material_id,
+# TODO: Review unreachable code - "type": "video",
+# TODO: Review unreachable code - "path": str(clip.asset_path),
+# TODO: Review unreachable code - "name": clip.asset_path.name,
+# TODO: Review unreachable code - "duration": int(clip.duration * 1000)
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - project["materials"].append(material)
+# TODO: Review unreachable code - material_map[material_id] = material
 
-            # Add clips to video track
-            for i, clip in enumerate(timeline.clips):
-                material_id = hashlib.md5(str(clip.asset_path).encode()).hexdigest()[:8]
+# TODO: Review unreachable code - # Add clips to video track
+# TODO: Review unreachable code - for i, clip in enumerate(timeline.clips):
+# TODO: Review unreachable code - material_id = hashlib.md5(str(clip.asset_path).encode()).hexdigest()[:8]
 
-                clip_data = {
-                    "id": f"clip_{i}",
-                    "material_id": material_id,
-                    "in_point": int(clip.in_point * 1000),
-                    "out_point": int((clip.out_point or clip.duration) * 1000),
-                    "start_time": int(clip.start_time * 1000),
-                    "duration": int(clip.duration * 1000),
-                    "speed": 1.0,
-                    "volume": 1.0
-                }
+# TODO: Review unreachable code - clip_data = {
+# TODO: Review unreachable code - "id": f"clip_{i}",
+# TODO: Review unreachable code - "material_id": material_id,
+# TODO: Review unreachable code - "in_point": int(clip.in_point * 1000),
+# TODO: Review unreachable code - "out_point": int((clip.out_point or clip.duration) * 1000),
+# TODO: Review unreachable code - "start_time": int(clip.start_time * 1000),
+# TODO: Review unreachable code - "duration": int(clip.duration * 1000),
+# TODO: Review unreachable code - "speed": 1.0,
+# TODO: Review unreachable code - "volume": 1.0
+# TODO: Review unreachable code - }
 
-                # Add transition
-                if clip.transition_in:
-                    clip_data["transition_in"] = {
-                        "type": CapCutExporter._map_transition(clip.transition_in),
-                        "duration": int(clip.transition_in_duration * 1000)
-                    }
+# TODO: Review unreachable code - # Add transition
+# TODO: Review unreachable code - if clip.transition_in:
+# TODO: Review unreachable code - clip_data["transition_in"] = {
+# TODO: Review unreachable code - "type": CapCutExporter._map_transition(clip.transition_in),
+# TODO: Review unreachable code - "duration": int(clip.transition_in_duration * 1000)
+# TODO: Review unreachable code - }
 
-                # Add effects
-                if clip.effects:
-                    clip_data["effects"] = []
-                    for effect in clip.effects:
-                        clip_data["effects"].append({
-                            "type": effect.get("type", "unknown"),
-                            "params": effect.get("params", {})
-                        })
+# TODO: Review unreachable code - # Add effects
+# TODO: Review unreachable code - if clip.effects:
+# TODO: Review unreachable code - clip_data["effects"] = []
+# TODO: Review unreachable code - for effect in clip.effects:
+# TODO: Review unreachable code - clip_data["effects"].append({
+# TODO: Review unreachable code - "type": effect.get("type", "unknown"),
+# TODO: Review unreachable code - "params": effect.get("params", {})
+# TODO: Review unreachable code - })
 
-                # Add beat sync flag
-                if clip.beat_aligned:
-                    clip_data["beat_sync"] = True
-                    if clip.sync_point:
-                        clip_data["sync_point"] = int(clip.sync_point * 1000)
+# TODO: Review unreachable code - # Add beat sync flag
+# TODO: Review unreachable code - if clip.beat_aligned:
+# TODO: Review unreachable code - clip_data["beat_sync"] = True
+# TODO: Review unreachable code - if clip.sync_point:
+# TODO: Review unreachable code - clip_data["sync_point"] = int(clip.sync_point * 1000)
 
-                project["tracks"]["video"].append(clip_data)
+# TODO: Review unreachable code - project["tracks"]["video"].append(clip_data)
 
-            # Add markers
-            for marker in timeline.markers:
-                project["markers"].append({
-                    "time": int(marker["time"] * 1000),
-                    "name": marker.get("name", ""),
-                    "color": marker.get("color", "#FF0000"),
-                    "type": marker.get("type", "beat")
-                })
+# TODO: Review unreachable code - # Add markers
+# TODO: Review unreachable code - for marker in timeline.markers:
+# TODO: Review unreachable code - project["markers"].append({
+# TODO: Review unreachable code - "time": int(marker["time"] * 1000),
+# TODO: Review unreachable code - "name": marker.get("name", ""),
+# TODO: Review unreachable code - "color": marker.get("color", "#FF0000"),
+# TODO: Review unreachable code - "type": marker.get("type", "beat")
+# TODO: Review unreachable code - })
 
-            # Add audio tracks
-            for audio in timeline.audio_tracks:
-                project["tracks"]["audio"].append({
-                    "id": audio.get("id", f"audio_{len(project['tracks']['audio'])}"),
-                    "path": audio.get("path", ""),
-                    "start_time": int(audio.get("start_time", 0) * 1000),
-                    "duration": int(audio.get("duration", timeline.duration) * 1000),
-                    "volume": audio.get("volume", 1.0)
-                })
+# TODO: Review unreachable code - # Add audio tracks
+# TODO: Review unreachable code - for audio in timeline.audio_tracks:
+# TODO: Review unreachable code - project["tracks"]["audio"].append({
+# TODO: Review unreachable code - "id": audio.get("id", f"audio_{len(project['tracks']['audio'])}"),
+# TODO: Review unreachable code - "path": audio.get("path", ""),
+# TODO: Review unreachable code - "start_time": int(audio.get("start_time", 0) * 1000),
+# TODO: Review unreachable code - "duration": int(audio.get("duration", timeline.duration) * 1000),
+# TODO: Review unreachable code - "volume": audio.get("volume", 1.0)
+# TODO: Review unreachable code - })
 
-            # Add suggested transitions based on mood
-            if timeline.metadata.get("mood"):
-                project["suggestions"] = CapCutExporter._get_mood_suggestions(
-                    timeline.metadata["mood"]
-                )
+# TODO: Review unreachable code - # Add suggested transitions based on mood
+# TODO: Review unreachable code - if timeline.metadata.get("mood"):
+# TODO: Review unreachable code - project["suggestions"] = CapCutExporter._get_mood_suggestions(
+# TODO: Review unreachable code - timeline.metadata["mood"]
+# TODO: Review unreachable code - )
 
-            # Write JSON
-            with open(output_path, 'w', encoding='utf-8') as f:
-                json.dump(project, f, indent=2, ensure_ascii=False)
+# TODO: Review unreachable code - # Write JSON
+# TODO: Review unreachable code - with open(output_path, 'w', encoding='utf-8') as f:
+# TODO: Review unreachable code - json.dump(project, f, indent=2, ensure_ascii=False)
 
-            logger.info(f"Exported CapCut JSON to {output_path}")
-            return True
+# TODO: Review unreachable code - logger.info(f"Exported CapCut JSON to {output_path}")
+# TODO: Review unreachable code - return True
 
-        except Exception as e:
-            logger.error(f"Failed to export CapCut JSON: {e}")
-            return False
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Failed to export CapCut JSON: {e}")
+# TODO: Review unreachable code - return False
 
-    @staticmethod
-    def _map_transition(transition_name: str) -> str:
-        """Map generic transition names to CapCut types."""
-        mapping = {
-            "crossfade": "fade",
-            "dissolve": "fade",
-            "wipe": "wipe_right",
-            "slide": "slide_right",
-            "zoom": "zoom_in",
-            "fade": "fade"
-        }
-        return mapping.get(transition_name.lower(), "fade")
+# TODO: Review unreachable code - @staticmethod
+# TODO: Review unreachable code - def _map_transition(transition_name: str) -> str:
+# TODO: Review unreachable code - """Map generic transition names to CapCut types."""
+# TODO: Review unreachable code - mapping = {
+# TODO: Review unreachable code - "crossfade": "fade",
+# TODO: Review unreachable code - "dissolve": "fade",
+# TODO: Review unreachable code - "wipe": "wipe_right",
+# TODO: Review unreachable code - "slide": "slide_right",
+# TODO: Review unreachable code - "zoom": "zoom_in",
+# TODO: Review unreachable code - "fade": "fade"
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - return mapping.get(transition_name.lower(), "fade")
 
-    @staticmethod
-    def _get_mood_suggestions(mood: str) -> dict[str, Any]:
-        """Get editing suggestions based on mood."""
-        suggestions = {
-            "energetic": {
-                "transitions": ["zoom_in", "slide_right", "glitch"],
-                "effects": ["shake", "flash", "speed_ramp"],
-                "pace": "fast"
-            },
-            "calm": {
-                "transitions": ["fade", "dissolve"],
-                "effects": ["blur", "glow"],
-                "pace": "slow"
-            },
-            "dramatic": {
-                "transitions": ["fade_to_black", "cross_blur"],
-                "effects": ["vignette", "contrast_boost"],
-                "pace": "medium"
-            },
-            "upbeat": {
-                "transitions": ["bounce", "spin", "slide"],
-                "effects": ["color_pop", "light_leak"],
-                "pace": "fast"
-            }
-        }
-        return suggestions.get(mood, suggestions["calm"])
-
-
-class ProxyGenerator:
-    """Generate proxy files for smooth editing."""
-
-    @staticmethod
-    async def generate_proxies(
-        timeline: Timeline,
-        output_dir: Path,
-        proxy_resolution: tuple[int, int] = (1280, 720),
-        codec: str = "h264"
-    ) -> dict[str, Path]:
-        """Generate proxy files for all clips in timeline.
-
-        Returns mapping of original path to proxy path.
-        """
-        import asyncio
-
-        proxy_map = {}
-        output_dir.mkdir(parents=True, exist_ok=True)
-
-        for clip in timeline.clips:
-            if clip.asset_path.suffix.lower() in ['.jpg', '.png', '.webp']:
-                # For images, just copy or resize
-                proxy_path = output_dir / f"{clip.asset_path.stem}_proxy.jpg"
-
-                # Use PIL to resize
-                from PIL import Image
-                img = Image.open(clip.asset_path)
-                img.thumbnail(proxy_resolution, Image.Resampling.LANCZOS)
-                img.save(proxy_path, "JPEG", quality=85)
-
-                proxy_map[str(clip.asset_path)] = proxy_path
-                logger.info(f"Created image proxy: {proxy_path}")
-
-            elif clip.asset_path.suffix.lower() in ['.mp4', '.mov', '.avi']:
-                # For video, use ffmpeg to create proxy
-                proxy_path = output_dir / f"{clip.asset_path.stem}_proxy.mp4"
-
-                cmd = [
-                    'ffmpeg', '-i', str(clip.asset_path),
-                    '-vf', f'scale={proxy_resolution[0]}:{proxy_resolution[1]}',
-                    '-c:v', codec,
-                    '-preset', 'fast',
-                    '-crf', '23',
-                    '-c:a', 'aac',
-                    '-b:a', '128k',
-                    '-y',  # Overwrite
-                    str(proxy_path)
-                ]
-
-                try:
-                    process = await asyncio.create_subprocess_exec(
-                        *cmd,
-                        stdout=asyncio.subprocess.DEVNULL,
-                        stderr=asyncio.subprocess.PIPE
-                    )
-                    _, stderr = await process.communicate()
-
-                    if process.returncode == 0:
-                        proxy_map[str(clip.asset_path)] = proxy_path
-                        logger.info(f"Created video proxy: {proxy_path}")
-                    else:
-                        logger.error(f"Failed to create proxy: {stderr.decode()}")
-
-                except Exception as e:
-                    logger.error(f"Proxy generation failed for {clip.asset_path}: {e}")
-
-        return proxy_map
+# TODO: Review unreachable code - @staticmethod
+# TODO: Review unreachable code - def _get_mood_suggestions(mood: str) -> dict[str, Any]:
+# TODO: Review unreachable code - """Get editing suggestions based on mood."""
+# TODO: Review unreachable code - suggestions = {
+# TODO: Review unreachable code - "energetic": {
+# TODO: Review unreachable code - "transitions": ["zoom_in", "slide_right", "glitch"],
+# TODO: Review unreachable code - "effects": ["shake", "flash", "speed_ramp"],
+# TODO: Review unreachable code - "pace": "fast"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "calm": {
+# TODO: Review unreachable code - "transitions": ["fade", "dissolve"],
+# TODO: Review unreachable code - "effects": ["blur", "glow"],
+# TODO: Review unreachable code - "pace": "slow"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "dramatic": {
+# TODO: Review unreachable code - "transitions": ["fade_to_black", "cross_blur"],
+# TODO: Review unreachable code - "effects": ["vignette", "contrast_boost"],
+# TODO: Review unreachable code - "pace": "medium"
+# TODO: Review unreachable code - },
+# TODO: Review unreachable code - "upbeat": {
+# TODO: Review unreachable code - "transitions": ["bounce", "spin", "slide"],
+# TODO: Review unreachable code - "effects": ["color_pop", "light_leak"],
+# TODO: Review unreachable code - "pace": "fast"
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - return suggestions.get(mood, suggestions["calm"]) or 0
 
 
-class VideoExportManager:
-    """Main class for managing video exports."""
+# TODO: Review unreachable code - class ProxyGenerator:
+# TODO: Review unreachable code - """Generate proxy files for smooth editing."""
 
-    def __init__(self):
-        """Initialize export manager."""
-        self.davinci_exporter = DaVinciResolveExporter()
-        self.capcut_exporter = CapCutExporter()
-        self.proxy_generator = ProxyGenerator()
+# TODO: Review unreachable code - @staticmethod
+# TODO: Review unreachable code - async def generate_proxies(
+# TODO: Review unreachable code - timeline: Timeline,
+# TODO: Review unreachable code - output_dir: Path,
+# TODO: Review unreachable code - proxy_resolution: tuple[int, int] = (1280, 720),
+# TODO: Review unreachable code - codec: str = "h264"
+# TODO: Review unreachable code - ) -> dict[str, Path]:
+# TODO: Review unreachable code - """Generate proxy files for all clips in timeline.
 
-    async def export_timeline(
-        self,
-        timeline: Timeline,
-        output_dir: Path,
-        formats: list[str] = ["edl", "xml", "capcut"],
-        generate_proxies: bool = False,
-        proxy_resolution: tuple[int, int] = (1280, 720)
-    ) -> dict[str, Any]:
-        """Export timeline in multiple formats.
+# TODO: Review unreachable code - Returns mapping of original path to proxy path.
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - import asyncio
 
-        Args:
-            timeline: Timeline to export
-            output_dir: Directory for output files
-            formats: List of formats to export ("edl", "xml", "capcut")
-            generate_proxies: Whether to generate proxy files
-            proxy_resolution: Resolution for proxy files
+# TODO: Review unreachable code - proxy_map = {}
+# TODO: Review unreachable code - output_dir.mkdir(parents=True, exist_ok=True)
 
-        Returns:
-            Dictionary with export results and paths
-        """
-        output_dir.mkdir(parents=True, exist_ok=True)
-        results = {
-            "success": True,
-            "exports": {},
-            "proxies": {}
-        }
+# TODO: Review unreachable code - for clip in timeline.clips:
+# TODO: Review unreachable code - if clip.asset_path.suffix.lower() in ['.jpg', '.png', '.webp']:
+# TODO: Review unreachable code - # For images, just copy or resize
+# TODO: Review unreachable code - proxy_path = output_dir / f"{clip.asset_path.stem}_proxy.jpg"
 
-        # Export in requested formats
-        if "edl" in formats:
-            edl_path = output_dir / f"{timeline.name}.edl"
-            if self.davinci_exporter.export_edl(timeline, edl_path):
-                results["exports"]["edl"] = edl_path
-            else:
-                results["success"] = False
+# TODO: Review unreachable code - # Use PIL to resize
+# TODO: Review unreachable code - from PIL import Image
+# TODO: Review unreachable code - img = Image.open(clip.asset_path)
+# TODO: Review unreachable code - img.thumbnail(proxy_resolution, Image.Resampling.LANCZOS)
+# TODO: Review unreachable code - img.save(proxy_path, "JPEG", quality=85)
 
-        if "xml" in formats:
-            xml_path = output_dir / f"{timeline.name}.xml"
-            if self.davinci_exporter.export_xml(timeline, xml_path):
-                results["exports"]["xml"] = xml_path
-            else:
-                results["success"] = False
+# TODO: Review unreachable code - proxy_map[str(clip.asset_path)] = proxy_path
+# TODO: Review unreachable code - logger.info(f"Created image proxy: {proxy_path}")
 
-        if "capcut" in formats:
-            json_path = output_dir / f"{timeline.name}_capcut.json"
-            if self.capcut_exporter.export_json(timeline, json_path):
-                results["exports"]["capcut"] = json_path
-            else:
-                results["success"] = False
+# TODO: Review unreachable code - elif clip.asset_path.suffix.lower() in ['.mp4', '.mov', '.avi']:
+# TODO: Review unreachable code - # For video, use ffmpeg to create proxy
+# TODO: Review unreachable code - proxy_path = output_dir / f"{clip.asset_path.stem}_proxy.mp4"
 
-        # Generate proxies if requested
-        if generate_proxies:
-            proxy_dir = output_dir / "proxies"
-            proxy_map = await self.proxy_generator.generate_proxies(
-                timeline, proxy_dir, proxy_resolution
-            )
-            results["proxies"] = proxy_map
+# TODO: Review unreachable code - cmd = [
+# TODO: Review unreachable code - 'ffmpeg', '-i', str(clip.asset_path),
+# TODO: Review unreachable code - '-vf', f'scale={proxy_resolution[0]}:{proxy_resolution[1]}',
+# TODO: Review unreachable code - '-c:v', codec,
+# TODO: Review unreachable code - '-preset', 'fast',
+# TODO: Review unreachable code - '-crf', '23',
+# TODO: Review unreachable code - '-c:a', 'aac',
+# TODO: Review unreachable code - '-b:a', '128k',
+# TODO: Review unreachable code - '-y',  # Overwrite
+# TODO: Review unreachable code - str(proxy_path)
+# TODO: Review unreachable code - ]
 
-        return results
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - process = await asyncio.create_subprocess_exec(
+# TODO: Review unreachable code - *cmd,
+# TODO: Review unreachable code - stdout=asyncio.subprocess.DEVNULL,
+# TODO: Review unreachable code - stderr=asyncio.subprocess.PIPE
+# TODO: Review unreachable code - )
+# TODO: Review unreachable code - _, stderr = await process.communicate()
+
+# TODO: Review unreachable code - if process.returncode == 0:
+# TODO: Review unreachable code - proxy_map[str(clip.asset_path)] = proxy_path
+# TODO: Review unreachable code - logger.info(f"Created video proxy: {proxy_path}")
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - logger.error(f"Failed to create proxy: {stderr.decode()}")
+
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Proxy generation failed for {clip.asset_path}: {e}")
+
+# TODO: Review unreachable code - return proxy_map
+
+
+# TODO: Review unreachable code - class VideoExportManager:
+# TODO: Review unreachable code - """Main class for managing video exports."""
+
+# TODO: Review unreachable code - def __init__(self):
+# TODO: Review unreachable code - """Initialize export manager."""
+# TODO: Review unreachable code - self.davinci_exporter = DaVinciResolveExporter()
+# TODO: Review unreachable code - self.capcut_exporter = CapCutExporter()
+# TODO: Review unreachable code - self.proxy_generator = ProxyGenerator()
+
+# TODO: Review unreachable code - async def export_timeline(
+# TODO: Review unreachable code - self,
+# TODO: Review unreachable code - timeline: Timeline,
+# TODO: Review unreachable code - output_dir: Path,
+# TODO: Review unreachable code - formats: list[str] = ["edl", "xml", "capcut"],
+# TODO: Review unreachable code - generate_proxies: bool = False,
+# TODO: Review unreachable code - proxy_resolution: tuple[int, int] = (1280, 720)
+# TODO: Review unreachable code - ) -> dict[str, Any]:
+# TODO: Review unreachable code - """Export timeline in multiple formats.
+
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - timeline: Timeline to export
+# TODO: Review unreachable code - output_dir: Directory for output files
+# TODO: Review unreachable code - formats: List of formats to export ("edl", "xml", "capcut")
+# TODO: Review unreachable code - generate_proxies: Whether to generate proxy files
+# TODO: Review unreachable code - proxy_resolution: Resolution for proxy files
+
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Dictionary with export results and paths
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - output_dir.mkdir(parents=True, exist_ok=True)
+# TODO: Review unreachable code - results = {
+# TODO: Review unreachable code - "success": True,
+# TODO: Review unreachable code - "exports": {},
+# TODO: Review unreachable code - "proxies": {}
+# TODO: Review unreachable code - }
+
+# TODO: Review unreachable code - # Export in requested formats
+# TODO: Review unreachable code - if formats is not None and "edl" in formats:
+# TODO: Review unreachable code - edl_path = output_dir / f"{timeline.name}.edl"
+# TODO: Review unreachable code - if self.davinci_exporter.export_edl(timeline, edl_path):
+# TODO: Review unreachable code - results["exports"]["edl"] = edl_path
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - results["success"] = False
+
+# TODO: Review unreachable code - if formats is not None and "xml" in formats:
+# TODO: Review unreachable code - xml_path = output_dir / f"{timeline.name}.xml"
+# TODO: Review unreachable code - if self.davinci_exporter.export_xml(timeline, xml_path):
+# TODO: Review unreachable code - results["exports"]["xml"] = xml_path
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - results["success"] = False
+
+# TODO: Review unreachable code - if formats is not None and "capcut" in formats:
+# TODO: Review unreachable code - json_path = output_dir / f"{timeline.name}_capcut.json"
+# TODO: Review unreachable code - if self.capcut_exporter.export_json(timeline, json_path):
+# TODO: Review unreachable code - results["exports"]["capcut"] = json_path
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - results["success"] = False
+
+# TODO: Review unreachable code - # Generate proxies if requested
+# TODO: Review unreachable code - if generate_proxies:
+# TODO: Review unreachable code - proxy_dir = output_dir / "proxies"
+# TODO: Review unreachable code - proxy_map = await self.proxy_generator.generate_proxies(
+# TODO: Review unreachable code - timeline, proxy_dir, proxy_resolution
+# TODO: Review unreachable code - )
+# TODO: Review unreachable code - results["proxies"] = proxy_map
+
+# TODO: Review unreachable code - return results

@@ -63,10 +63,10 @@ def check_setup_status() -> tuple[bool, str]:
     # Determine status
     if issues:
         return False, "Setup incomplete"
-    elif warnings:
-        return True, "Setup complete with warnings"
-    else:
-        return True, "Ready to organize!"
+    # TODO: Review unreachable code - elif warnings:
+    # TODO: Review unreachable code - return True, "Setup complete with warnings"
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return True, "Ready to organize!"
 
 
 def show_quick_start() -> None:
@@ -107,7 +107,7 @@ Debug Mode (for testing):
 
         # Show warnings if any
         _, status_msg = check_setup_status()
-        if "warnings" in status_msg:
+        if status_msg is not None and "warnings" in status_msg:
             print("\n⚠️  Warnings:")
             key_manager = APIKeyManager()
             if not any(key_manager.get_api_key(p) for p in ["anthropic", "openai", "google", "deepseek"]):
@@ -129,6 +129,6 @@ def show_first_run_prompt() -> bool:
         print("⚡ First-time setup required!\n")
         response = input("Would you like to run the setup wizard now? (Y/n): ").strip().lower()
         return response != 'n'
-    else:
-        show_quick_start()
-        return False
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - show_quick_start()
+    # TODO: Review unreachable code - return False

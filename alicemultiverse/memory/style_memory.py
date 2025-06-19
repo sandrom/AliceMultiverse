@@ -82,14 +82,14 @@ class StylePreference:
         data['last_used'] = self.last_used.isoformat()
         return data
 
-    @classmethod
-    def from_dict(cls, data: dict[str, Any]) -> 'StylePreference':
-        """Create from dictionary."""
-        data = data.copy()
-        data['preference_type'] = PreferenceType(data['preference_type'])
-        data['first_seen'] = datetime.fromisoformat(data['first_seen'])
-        data['last_used'] = datetime.fromisoformat(data['last_used'])
-        return cls(**data)
+    # TODO: Review unreachable code - @classmethod
+    # TODO: Review unreachable code - def from_dict(cls, data: dict[str, Any]) -> 'StylePreference':
+    # TODO: Review unreachable code - """Create from dictionary."""
+    # TODO: Review unreachable code - data = data.copy()
+    # TODO: Review unreachable code - data['preference_type'] = PreferenceType(data['preference_type'])
+    # TODO: Review unreachable code - data['first_seen'] = datetime.fromisoformat(data['first_seen'])
+    # TODO: Review unreachable code - data['last_used'] = datetime.fromisoformat(data['last_used'])
+    # TODO: Review unreachable code - return cls(**data)
 
 
 @dataclass
@@ -129,8 +129,8 @@ class StyleProfile:
                 existing.update_usage()
                 return
 
-        self.preferences[pref_type].append(preference)
-        self.updated_at = datetime.now()
+        # TODO: Review unreachable code - self.preferences[pref_type].append(preference)
+        # TODO: Review unreachable code - self.updated_at = datetime.now()
 
     def get_top_preferences(
         self,
@@ -154,28 +154,28 @@ class StyleProfile:
 
         return prefs[:limit]
 
-    def track_combination(self, preference_ids: list[str], successful: bool = True):
-        """Track preference combinations."""
-        combo = sorted(preference_ids)
+    # TODO: Review unreachable code - def track_combination(self, preference_ids: list[str], successful: bool = True):
+    # TODO: Review unreachable code - """Track preference combinations."""
+    # TODO: Review unreachable code - combo = sorted(preference_ids)
 
-        if successful:
-            # Add to favorites if used multiple times
-            combo_str = ",".join(combo)
-            found = False
+    # TODO: Review unreachable code - if successful:
+    # TODO: Review unreachable code - # Add to favorites if used multiple times
+    # TODO: Review unreachable code - combo_str = ",".join(combo)
+    # TODO: Review unreachable code - found = False
 
-            for fav in self.favorite_combinations:
-                if ",".join(sorted(fav)) == combo_str:
-                    found = True
-                    break
+    # TODO: Review unreachable code - for fav in self.favorite_combinations:
+    # TODO: Review unreachable code - if ",".join(sorted(fav)) == combo_str:
+    # TODO: Review unreachable code - found = True
+    # TODO: Review unreachable code - break
 
-            if not found and len(combo) > 1:
-                self.favorite_combinations.append(combo)
-        else:
-            # Add to avoided if failed
-            if combo not in self.avoided_combinations:
-                self.avoided_combinations.append(combo)
+    # TODO: Review unreachable code - if not found and len(combo) > 1:
+    # TODO: Review unreachable code - self.favorite_combinations.append(combo)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Add to avoided if failed
+    # TODO: Review unreachable code - if combo not in self.avoided_combinations:
+    # TODO: Review unreachable code - self.avoided_combinations.append(combo)
 
-        self.updated_at = datetime.now()
+    # TODO: Review unreachable code - self.updated_at = datetime.now()
 
 
 class StyleMemory:
@@ -266,403 +266,403 @@ class StyleMemory:
         logger.info(f"Tracked style preference: {pref_id}")
         return preference
 
-    def track_workflow_result(
-        self,
-        preference_ids: list[str],
-        successful: bool,
-        quality_score: float | None = None,
-        user_rating: int | None = None
-    ):
-        """Track the result of using certain preferences.
-
-        Args:
-            preference_ids: Preferences used
-            successful: Whether the result was successful
-            quality_score: Objective quality score (0-1)
-            user_rating: User rating (1-5)
-        """
-        # Update individual preferences
-        for pref_id in preference_ids:
-            if pref_id in self.all_preferences:
-                pref = self.all_preferences[pref_id]
-                pref.update_usage(successful=successful)
-
-                # Adjust score based on quality and rating
-                if quality_score is not None:
-                    adjustment = (quality_score - 0.5) * 0.1
-                    pref.preference_score = max(0, min(1, pref.preference_score + adjustment))
-
-                if user_rating is not None:
-                    adjustment = (user_rating - 3) * 0.05
-                    pref.preference_score = max(0, min(1, pref.preference_score + adjustment))
-
-        # Track combinations
-        if len(preference_ids) > 1:
-            self.profile.track_combination(preference_ids, successful)
-
-        # Update patterns
-        self._update_patterns(preference_ids, successful)
-
-        logger.info(f"Tracked workflow result: {len(preference_ids)} preferences, success={successful}")
-
-    def get_preferences_for_context(
-        self,
-        context: dict[str, Any],
-        preference_types: list[PreferenceType] | None = None,
-        limit: int = 5
-    ) -> dict[PreferenceType, list[StylePreference]]:
-        """Get relevant preferences for a given context.
-
-        Args:
-            context: Current context (project, time, mood, etc.)
-            preference_types: Types to consider
-            limit: Max preferences per type
-
-        Returns:
-            Preferences organized by type
-        """
-        results = {}
-        types_to_check = preference_types or list(PreferenceType)
-
-        for pref_type in types_to_check:
-            candidates = []
-
-            # Get all preferences of this type
-            type_prefs = self.profile.preferences.get(pref_type, [])
-
-            for pref in type_prefs:
-                score = pref.preference_score
-
-                # Boost score based on context match
-                if "project" in context and context["project"] in pref.project_associations:
-                    score *= 1.5
-
-                if "time_of_day" in context:
-                    hour = context["time_of_day"]
-                    if pref.preference_id in self.profile.time_of_day_preferences.get(hour, []):
-                        score *= 1.3
-
-                if "tags" in context:
-                    tag_overlap = len(set(context["tags"]) & set(pref.tags))
-                    score *= (1 + tag_overlap * 0.1)
-
-                candidates.append((pref, score))
-
-            # Sort by adjusted score
-            candidates.sort(key=lambda x: x[1], reverse=True)
-
-            # Take top candidates
-            results[pref_type] = [c[0] for c in candidates[:limit]]
-
-        return results
-
-    def suggest_combinations(
-        self,
-        base_preferences: list[str],
-        max_suggestions: int = 5
-    ) -> list[list[str]]:
-        """Suggest preference combinations based on history.
-
-        Args:
-            base_preferences: Starting preferences
-            max_suggestions: Maximum suggestions to return
-
-        Returns:
-            List of suggested combinations
-        """
-        suggestions = []
-        base_set = set(base_preferences)
-
-        # Check favorite combinations
-        for combo in self.profile.favorite_combinations:
-            combo_set = set(combo)
-
-            # If there's overlap, suggest the full combination
-            if base_set & combo_set and combo_set != base_set:
-                suggestions.append(list(combo_set))
-
-        # Check co-occurrence patterns
-        for base_pref in base_preferences:
-            if base_pref in self.patterns.get("co_occurrence", {}):
-                related = self.patterns["co_occurrence"][base_pref]
-
-                for related_pref, count in related.most_common(3):
-                    if related_pref not in base_set:
-                        suggestion = base_preferences + [related_pref]
-                        if suggestion not in suggestions:
-                            suggestions.append(suggestion)
-
-        # Sort by historical success
-        suggestions.sort(key=lambda s: self._score_combination(s), reverse=True)
-
-        return suggestions[:max_suggestions]
-
-    def get_style_evolution(
-        self,
-        time_range: timedelta | None = None,
-        preference_type: PreferenceType | None = None
-    ) -> list[dict[str, Any]]:
-        """Get style evolution over time.
-
-        Args:
-            time_range: Time range to analyze
-            preference_type: Specific type to track
-
-        Returns:
-            Evolution timeline
-        """
-        cutoff = datetime.now() - time_range if time_range else None
-
-        evolution = []
-
-        # Group preferences by time periods
-        time_buckets = defaultdict(list)
-
-        for pref in self.all_preferences.values():
-            if preference_type and pref.preference_type != preference_type:
-                continue
-
-            if cutoff and pref.first_seen < cutoff:
-                continue
-
-            # Bucket by week
-            week = pref.first_seen.isocalendar()[:2]
-            time_buckets[week].append(pref)
-
-        # Analyze each bucket
-        for week, prefs in sorted(time_buckets.items()):
-            week_data = {
-                "week": f"{week[0]}-W{week[1]}",
-                "new_preferences": len(prefs),
-                "top_values": [],
-                "average_score": 0.0
-            }
-
-            # Get top values
-            prefs.sort(key=lambda p: p.preference_score, reverse=True)
-            week_data["top_values"] = [
-                {"type": p.preference_type.value, "value": str(p.value)}
-                for p in prefs[:3]
-            ]
-
-            # Calculate average score
-            if prefs:
-                week_data["average_score"] = sum(p.preference_score for p in prefs) / len(prefs)
-
-            evolution.append(week_data)
-
-        return evolution
-
-    def export_profile(self) -> dict[str, Any]:
-        """Export complete style profile.
-
-        Returns:
-            Complete profile data
-        """
-        return {
-            "profile_id": self.profile.profile_id,
-            "created_at": self.profile.created_at.isoformat(),
-            "updated_at": self.profile.updated_at.isoformat(),
-            "preferences_by_type": {
-                pref_type.value: [
-                    p.to_dict() for p in prefs
-                ]
-                for pref_type, prefs in self.profile.preferences.items()
-            },
-            "favorite_combinations": self.profile.favorite_combinations,
-            "avoided_combinations": self.profile.avoided_combinations,
-            "project_styles": self.profile.project_styles,
-            "statistics": {
-                "total_preferences": len(self.all_preferences),
-                "total_usage": sum(p.usage_count for p in self.all_preferences.values()),
-                "average_confidence": sum(p.confidence for p in self.all_preferences.values()) / len(self.all_preferences) if self.all_preferences else 0
-            }
-        }
-
-    def import_profile(self, profile_data: dict[str, Any]):
-        """Import a style profile.
-
-        Args:
-            profile_data: Profile data to import
-        """
-        # Create new profile
-        self.profile = StyleProfile(
-            profile_id=profile_data["profile_id"],
-            created_at=datetime.fromisoformat(profile_data["created_at"]),
-            updated_at=datetime.fromisoformat(profile_data["updated_at"])
-        )
-
-        # Import preferences
-        self.all_preferences.clear()
-
-        for pref_type_str, prefs_data in profile_data["preferences_by_type"].items():
-            PreferenceType(pref_type_str)
-
-            for pref_data in prefs_data:
-                pref = StylePreference.from_dict(pref_data)
-                self.all_preferences[pref.preference_id] = pref
-                self.profile.add_preference(pref)
-
-        # Import combinations
-        self.profile.favorite_combinations = profile_data.get("favorite_combinations", [])
-        self.profile.avoided_combinations = profile_data.get("avoided_combinations", [])
-        self.profile.project_styles = profile_data.get("project_styles", {})
-
-        # Save
-        self._save_all()
-
-        logger.info(f"Imported style profile with {len(self.all_preferences)} preferences")
-
-    def _update_patterns(self, preference_ids: list[str], successful: bool):
-        """Update co-occurrence and success patterns."""
-        if "co_occurrence" not in self.patterns:
-            self.patterns["co_occurrence"] = {}
-
-        if "success_patterns" not in self.patterns:
-            self.patterns["success_patterns"] = {}
-
-        # Update co-occurrence
-        for i, pref_id in enumerate(preference_ids):
-            if pref_id not in self.patterns["co_occurrence"]:
-                self.patterns["co_occurrence"][pref_id] = Counter()
-
-            for j, other_id in enumerate(preference_ids):
-                if i != j:
-                    self.patterns["co_occurrence"][pref_id][other_id] += 1
-
-        # Update success patterns
-        combo_key = ",".join(sorted(preference_ids))
-        if combo_key not in self.patterns["success_patterns"]:
-            self.patterns["success_patterns"][combo_key] = {"success": 0, "total": 0}
-
-        self.patterns["success_patterns"][combo_key]["total"] += 1
-        if successful:
-            self.patterns["success_patterns"][combo_key]["success"] += 1
-
-    def _score_combination(self, preference_ids: list[str]) -> float:
-        """Score a preference combination based on history."""
-        combo_key = ",".join(sorted(preference_ids))
-
-        if combo_key in self.patterns.get("success_patterns", {}):
-            stats = self.patterns["success_patterns"][combo_key]
-            if stats["total"] > 0:
-                return stats["success"] / stats["total"]
-
-        # Default score based on individual preferences
-        scores = []
-        for pref_id in preference_ids:
-            if pref_id in self.all_preferences:
-                scores.append(self.all_preferences[pref_id].preference_score)
-
-        return sum(scores) / len(scores) if scores else 0.0
-
-    def _load_profile(self) -> StyleProfile:
-        """Load style profile from disk."""
-        if self.profile_file.exists():
-            try:
-                with open(self.profile_file) as f:
-                    data = json.load(f)
-
-                profile = StyleProfile(
-                    profile_id=data["profile_id"],
-                    created_at=datetime.fromisoformat(data["created_at"]),
-                    updated_at=datetime.fromisoformat(data["updated_at"])
-                )
-
-                # Load other fields
-                profile.favorite_combinations = data.get("favorite_combinations", [])
-                profile.avoided_combinations = data.get("avoided_combinations", [])
-                profile.project_styles = data.get("project_styles", {})
-                profile.time_of_day_preferences = {
-                    int(k): v for k, v in data.get("time_of_day_preferences", {}).items()
-                }
-
-                return profile
-
-            except Exception as e:
-                logger.error(f"Failed to load profile: {e}")
-
-        # Create new profile with timestamp-based ID
-        from datetime import datetime
-        profile_id = datetime.now().strftime("%Y%m%d_%H%M%S")
-        return StyleProfile(profile_id=profile_id)
-
-    def _load_preferences(self) -> dict[str, StylePreference]:
-        """Load preferences from disk."""
-        preferences = {}
-
-        if self.preferences_file.exists():
-            try:
-                with open(self.preferences_file) as f:
-                    data = json.load(f)
-
-                for pref_id, pref_data in data.items():
-                    preferences[pref_id] = StylePreference.from_dict(pref_data)
-
-                # Add to profile
-                for pref in preferences.values():
-                    self.profile.add_preference(pref)
-
-            except Exception as e:
-                logger.error(f"Failed to load preferences: {e}")
-
-        return preferences
-
-    def _load_patterns(self) -> dict[str, Any]:
-        """Load patterns from disk."""
-        if self.patterns_file.exists():
-            try:
-                with open(self.patterns_file) as f:
-                    data = json.load(f)
-
-                # Convert Counter objects
-                if "co_occurrence" in data:
-                    for pref_id, counts in data["co_occurrence"].items():
-                        data["co_occurrence"][pref_id] = Counter(counts)
-
-                return data
-
-            except Exception as e:
-                logger.error(f"Failed to load patterns: {e}")
-
-        return {}
-
-    def _save_all(self):
-        """Save all data to disk."""
-        try:
-            # Save profile
-            profile_data = {
-                "profile_id": self.profile.profile_id,
-                "created_at": self.profile.created_at.isoformat(),
-                "updated_at": self.profile.updated_at.isoformat(),
-                "favorite_combinations": self.profile.favorite_combinations,
-                "avoided_combinations": self.profile.avoided_combinations,
-                "project_styles": self.profile.project_styles,
-                "time_of_day_preferences": self.profile.time_of_day_preferences
-            }
-
-            with open(self.profile_file, 'w') as f:
-                json.dump(profile_data, f, indent=2)
-
-            # Save preferences
-            prefs_data = {
-                pref_id: pref.to_dict()
-                for pref_id, pref in self.all_preferences.items()
-            }
-
-            with open(self.preferences_file, 'w') as f:
-                json.dump(prefs_data, f, indent=2)
-
-            # Save patterns (convert Counters to dicts)
-            patterns_data = self.patterns.copy()
-            if "co_occurrence" in patterns_data:
-                patterns_data["co_occurrence"] = {
-                    pref_id: dict(counter)
-                    for pref_id, counter in patterns_data["co_occurrence"].items()
-                }
-
-            with open(self.patterns_file, 'w') as f:
-                json.dump(patterns_data, f, indent=2)
-
-        except Exception as e:
-            logger.error(f"Failed to save style memory: {e}")
+    # TODO: Review unreachable code - def track_workflow_result(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - preference_ids: list[str],
+    # TODO: Review unreachable code - successful: bool,
+    # TODO: Review unreachable code - quality_score: float | None = None,
+    # TODO: Review unreachable code - user_rating: int | None = None
+    # TODO: Review unreachable code - ):
+    # TODO: Review unreachable code - """Track the result of using certain preferences.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - preference_ids: Preferences used
+    # TODO: Review unreachable code - successful: Whether the result was successful
+    # TODO: Review unreachable code - quality_score: Objective quality score (0-1)
+    # TODO: Review unreachable code - user_rating: User rating (1-5)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Update individual preferences
+    # TODO: Review unreachable code - for pref_id in preference_ids:
+    # TODO: Review unreachable code - if pref_id in self.all_preferences:
+    # TODO: Review unreachable code - pref = self.all_preferences[pref_id]
+    # TODO: Review unreachable code - pref.update_usage(successful=successful)
+
+    # TODO: Review unreachable code - # Adjust score based on quality and rating
+    # TODO: Review unreachable code - if quality_score is not None:
+    # TODO: Review unreachable code - adjustment = (quality_score - 0.5) * 0.1
+    # TODO: Review unreachable code - pref.preference_score = max(0, min(1, pref.preference_score + adjustment))
+
+    # TODO: Review unreachable code - if user_rating is not None:
+    # TODO: Review unreachable code - adjustment = (user_rating - 3) * 0.05
+    # TODO: Review unreachable code - pref.preference_score = max(0, min(1, pref.preference_score + adjustment))
+
+    # TODO: Review unreachable code - # Track combinations
+    # TODO: Review unreachable code - if len(preference_ids) > 1:
+    # TODO: Review unreachable code - self.profile.track_combination(preference_ids, successful)
+
+    # TODO: Review unreachable code - # Update patterns
+    # TODO: Review unreachable code - self._update_patterns(preference_ids, successful)
+
+    # TODO: Review unreachable code - logger.info(f"Tracked workflow result: {len(preference_ids)} preferences, success={successful}")
+
+    # TODO: Review unreachable code - def get_preferences_for_context(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - context: dict[str, Any],
+    # TODO: Review unreachable code - preference_types: list[PreferenceType] | None = None,
+    # TODO: Review unreachable code - limit: int = 5
+    # TODO: Review unreachable code - ) -> dict[PreferenceType, list[StylePreference]]:
+    # TODO: Review unreachable code - """Get relevant preferences for a given context.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - context: Current context (project, time, mood, etc.)
+    # TODO: Review unreachable code - preference_types: Types to consider
+    # TODO: Review unreachable code - limit: Max preferences per type
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Preferences organized by type
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - results = {}
+    # TODO: Review unreachable code - types_to_check = preference_types or list(PreferenceType)
+
+    # TODO: Review unreachable code - for pref_type in types_to_check:
+    # TODO: Review unreachable code - candidates = []
+
+    # TODO: Review unreachable code - # Get all preferences of this type
+    # TODO: Review unreachable code - type_prefs = self.profile.preferences.get(pref_type, [])
+
+    # TODO: Review unreachable code - for pref in type_prefs:
+    # TODO: Review unreachable code - score = pref.preference_score
+
+    # TODO: Review unreachable code - # Boost score based on context match
+    # TODO: Review unreachable code - if context is not None and "project" in context and context["project"] in pref.project_associations:
+    # TODO: Review unreachable code - score *= 1.5
+
+    # TODO: Review unreachable code - if context is not None and "time_of_day" in context:
+    # TODO: Review unreachable code - hour = context["time_of_day"]
+    # TODO: Review unreachable code - if pref.preference_id in self.profile.time_of_day_preferences.get(hour, []):
+    # TODO: Review unreachable code - score *= 1.3
+
+    # TODO: Review unreachable code - if context is not None and "tags" in context:
+    # TODO: Review unreachable code - tag_overlap = len(set(context["tags"]) & set(pref.tags))
+    # TODO: Review unreachable code - score *= (1 + tag_overlap * 0.1)
+
+    # TODO: Review unreachable code - candidates.append((pref, score))
+
+    # TODO: Review unreachable code - # Sort by adjusted score
+    # TODO: Review unreachable code - candidates.sort(key=lambda x: x[1], reverse=True)
+
+    # TODO: Review unreachable code - # Take top candidates
+    # TODO: Review unreachable code - results[pref_type] = [c[0] for c in candidates[:limit]]
+
+    # TODO: Review unreachable code - return results
+
+    # TODO: Review unreachable code - def suggest_combinations(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - base_preferences: list[str],
+    # TODO: Review unreachable code - max_suggestions: int = 5
+    # TODO: Review unreachable code - ) -> list[list[str]]:
+    # TODO: Review unreachable code - """Suggest preference combinations based on history.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - base_preferences: Starting preferences
+    # TODO: Review unreachable code - max_suggestions: Maximum suggestions to return
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of suggested combinations
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - suggestions = []
+    # TODO: Review unreachable code - base_set = set(base_preferences)
+
+    # TODO: Review unreachable code - # Check favorite combinations
+    # TODO: Review unreachable code - for combo in self.profile.favorite_combinations:
+    # TODO: Review unreachable code - combo_set = set(combo)
+
+    # TODO: Review unreachable code - # If there's overlap, suggest the full combination
+    # TODO: Review unreachable code - if base_set & combo_set and combo_set != base_set:
+    # TODO: Review unreachable code - suggestions.append(list(combo_set))
+
+    # TODO: Review unreachable code - # Check co-occurrence patterns
+    # TODO: Review unreachable code - for base_pref in base_preferences:
+    # TODO: Review unreachable code - if base_pref in self.patterns.get("co_occurrence", {}):
+    # TODO: Review unreachable code - related = self.patterns["co_occurrence"][base_pref]
+
+    # TODO: Review unreachable code - for related_pref, count in related.most_common(3):
+    # TODO: Review unreachable code - if related_pref not in base_set:
+    # TODO: Review unreachable code - suggestion = base_preferences + [related_pref]
+    # TODO: Review unreachable code - if suggestion not in suggestions:
+    # TODO: Review unreachable code - suggestions.append(suggestion)
+
+    # TODO: Review unreachable code - # Sort by historical success
+    # TODO: Review unreachable code - suggestions.sort(key=lambda s: self._score_combination(s), reverse=True)
+
+    # TODO: Review unreachable code - return suggestions[:max_suggestions]
+
+    # TODO: Review unreachable code - def get_style_evolution(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - time_range: timedelta | None = None,
+    # TODO: Review unreachable code - preference_type: PreferenceType | None = None
+    # TODO: Review unreachable code - ) -> list[dict[str, Any]]:
+    # TODO: Review unreachable code - """Get style evolution over time.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - time_range: Time range to analyze
+    # TODO: Review unreachable code - preference_type: Specific type to track
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Evolution timeline
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - cutoff = datetime.now() - time_range if time_range else None
+
+    # TODO: Review unreachable code - evolution = []
+
+    # TODO: Review unreachable code - # Group preferences by time periods
+    # TODO: Review unreachable code - time_buckets = defaultdict(list)
+
+    # TODO: Review unreachable code - for pref in self.all_preferences.values():
+    # TODO: Review unreachable code - if preference_type and pref.preference_type != preference_type:
+    # TODO: Review unreachable code - continue
+
+    # TODO: Review unreachable code - if cutoff and pref.first_seen < cutoff:
+    # TODO: Review unreachable code - continue
+
+    # TODO: Review unreachable code - # Bucket by week
+    # TODO: Review unreachable code - week = pref.first_seen.isocalendar()[:2]
+    # TODO: Review unreachable code - time_buckets[week].append(pref)
+
+    # TODO: Review unreachable code - # Analyze each bucket
+    # TODO: Review unreachable code - for week, prefs in sorted(time_buckets.items()):
+    # TODO: Review unreachable code - week_data = {
+    # TODO: Review unreachable code - "week": f"{week[0]}-W{week[1]}",
+    # TODO: Review unreachable code - "new_preferences": len(prefs),
+    # TODO: Review unreachable code - "top_values": [],
+    # TODO: Review unreachable code - "average_score": 0.0
+    # TODO: Review unreachable code - }
+
+    # TODO: Review unreachable code - # Get top values
+    # TODO: Review unreachable code - prefs.sort(key=lambda p: p.preference_score, reverse=True)
+    # TODO: Review unreachable code - week_data["top_values"] = [
+    # TODO: Review unreachable code - {"type": p.preference_type.value, "value": str(p.value)}
+    # TODO: Review unreachable code - for p in prefs[:3]
+    # TODO: Review unreachable code - ]
+
+    # TODO: Review unreachable code - # Calculate average score
+    # TODO: Review unreachable code - if prefs:
+    # TODO: Review unreachable code - week_data["average_score"] = sum(p.preference_score for p in prefs) / len(prefs)
+
+    # TODO: Review unreachable code - evolution.append(week_data)
+
+    # TODO: Review unreachable code - return evolution
+
+    # TODO: Review unreachable code - def export_profile(self) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Export complete style profile.
+
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Complete profile data
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "profile_id": self.profile.profile_id,
+    # TODO: Review unreachable code - "created_at": self.profile.created_at.isoformat(),
+    # TODO: Review unreachable code - "updated_at": self.profile.updated_at.isoformat(),
+    # TODO: Review unreachable code - "preferences_by_type": {
+    # TODO: Review unreachable code - pref_type.value: [
+    # TODO: Review unreachable code - p.to_dict() for p in prefs
+    # TODO: Review unreachable code - ]
+    # TODO: Review unreachable code - for pref_type, prefs in self.profile.preferences.items()
+    # TODO: Review unreachable code - },
+    # TODO: Review unreachable code - "favorite_combinations": self.profile.favorite_combinations,
+    # TODO: Review unreachable code - "avoided_combinations": self.profile.avoided_combinations,
+    # TODO: Review unreachable code - "project_styles": self.profile.project_styles,
+    # TODO: Review unreachable code - "statistics": {
+    # TODO: Review unreachable code - "total_preferences": len(self.all_preferences),
+    # TODO: Review unreachable code - "total_usage": sum(p.usage_count for p in self.all_preferences.values()),
+    # TODO: Review unreachable code - "average_confidence": sum(p.confidence for p in self.all_preferences.values()) / len(self.all_preferences) if self.all_preferences else 0
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - }
+
+    # TODO: Review unreachable code - def import_profile(self, profile_data: dict[str, Any]):
+    # TODO: Review unreachable code - """Import a style profile.
+
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - profile_data: Profile data to import
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Create new profile
+    # TODO: Review unreachable code - self.profile = StyleProfile(
+    # TODO: Review unreachable code - profile_id=profile_data["profile_id"],
+    # TODO: Review unreachable code - created_at=datetime.fromisoformat(profile_data["created_at"]),
+    # TODO: Review unreachable code - updated_at=datetime.fromisoformat(profile_data["updated_at"])
+    # TODO: Review unreachable code - )
+
+    # TODO: Review unreachable code - # Import preferences
+    # TODO: Review unreachable code - self.all_preferences.clear()
+
+    # TODO: Review unreachable code - for pref_type_str, prefs_data in profile_data["preferences_by_type"].items():
+    # TODO: Review unreachable code - PreferenceType(pref_type_str)
+
+    # TODO: Review unreachable code - for pref_data in prefs_data:
+    # TODO: Review unreachable code - pref = StylePreference.from_dict(pref_data)
+    # TODO: Review unreachable code - self.all_preferences[pref.preference_id] = pref
+    # TODO: Review unreachable code - self.profile.add_preference(pref)
+
+    # TODO: Review unreachable code - # Import combinations
+    # TODO: Review unreachable code - self.profile.favorite_combinations = profile_data.get("favorite_combinations", [])
+    # TODO: Review unreachable code - self.profile.avoided_combinations = profile_data.get("avoided_combinations", [])
+    # TODO: Review unreachable code - self.profile.project_styles = profile_data.get("project_styles", {})
+
+    # TODO: Review unreachable code - # Save
+    # TODO: Review unreachable code - self._save_all()
+
+    # TODO: Review unreachable code - logger.info(f"Imported style profile with {len(self.all_preferences)} preferences")
+
+    # TODO: Review unreachable code - def _update_patterns(self, preference_ids: list[str], successful: bool):
+    # TODO: Review unreachable code - """Update co-occurrence and success patterns."""
+    # TODO: Review unreachable code - if "co_occurrence" not in self.patterns:
+    # TODO: Review unreachable code - self.patterns["co_occurrence"] = {}
+
+    # TODO: Review unreachable code - if "success_patterns" not in self.patterns:
+    # TODO: Review unreachable code - self.patterns["success_patterns"] = {}
+
+    # TODO: Review unreachable code - # Update co-occurrence
+    # TODO: Review unreachable code - for i, pref_id in enumerate(preference_ids):
+    # TODO: Review unreachable code - if pref_id not in self.patterns["co_occurrence"]:
+    # TODO: Review unreachable code - self.patterns["co_occurrence"][pref_id] = Counter()
+
+    # TODO: Review unreachable code - for j, other_id in enumerate(preference_ids):
+    # TODO: Review unreachable code - if i != j:
+    # TODO: Review unreachable code - self.patterns["co_occurrence"][pref_id][other_id] += 1
+
+    # TODO: Review unreachable code - # Update success patterns
+    # TODO: Review unreachable code - combo_key = ",".join(sorted(preference_ids))
+    # TODO: Review unreachable code - if combo_key not in self.patterns["success_patterns"]:
+    # TODO: Review unreachable code - self.patterns["success_patterns"][combo_key] = {"success": 0, "total": 0}
+
+    # TODO: Review unreachable code - self.patterns["success_patterns"][combo_key]["total"] += 1
+    # TODO: Review unreachable code - if successful:
+    # TODO: Review unreachable code - self.patterns["success_patterns"][combo_key]["success"] += 1
+
+    # TODO: Review unreachable code - def _score_combination(self, preference_ids: list[str]) -> float:
+    # TODO: Review unreachable code - """Score a preference combination based on history."""
+    # TODO: Review unreachable code - combo_key = ",".join(sorted(preference_ids))
+
+    # TODO: Review unreachable code - if combo_key in self.patterns.get("success_patterns", {}):
+    # TODO: Review unreachable code - stats = self.patterns["success_patterns"][combo_key]
+    # TODO: Review unreachable code - if stats is not None and stats["total"] > 0:
+    # TODO: Review unreachable code - return stats["success"] / stats["total"]
+
+    # TODO: Review unreachable code - # Default score based on individual preferences
+    # TODO: Review unreachable code - scores = []
+    # TODO: Review unreachable code - for pref_id in preference_ids:
+    # TODO: Review unreachable code - if pref_id in self.all_preferences:
+    # TODO: Review unreachable code - scores.append(self.all_preferences[pref_id].preference_score)
+
+    # TODO: Review unreachable code - return sum(scores) / len(scores) if scores else 0.0
+
+    # TODO: Review unreachable code - def _load_profile(self) -> StyleProfile:
+    # TODO: Review unreachable code - """Load style profile from disk."""
+    # TODO: Review unreachable code - if self.profile_file.exists():
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - with open(self.profile_file) as f:
+    # TODO: Review unreachable code - data = json.load(f)
+
+    # TODO: Review unreachable code - profile = StyleProfile(
+    # TODO: Review unreachable code - profile_id=data["profile_id"],
+    # TODO: Review unreachable code - created_at=datetime.fromisoformat(data["created_at"]),
+    # TODO: Review unreachable code - updated_at=datetime.fromisoformat(data["updated_at"])
+    # TODO: Review unreachable code - )
+
+    # TODO: Review unreachable code - # Load other fields
+    # TODO: Review unreachable code - profile.favorite_combinations = data.get("favorite_combinations", [])
+    # TODO: Review unreachable code - profile.avoided_combinations = data.get("avoided_combinations", [])
+    # TODO: Review unreachable code - profile.project_styles = data.get("project_styles", {})
+    # TODO: Review unreachable code - profile.time_of_day_preferences = {
+    # TODO: Review unreachable code - int(k): v for k, v in data.get("time_of_day_preferences", {}).items()
+    # TODO: Review unreachable code - }
+
+    # TODO: Review unreachable code - return profile
+
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to load profile: {e}")
+
+    # TODO: Review unreachable code - # Create new profile with timestamp-based ID
+    # TODO: Review unreachable code - from datetime import datetime
+    # TODO: Review unreachable code - profile_id = datetime.now().strftime("%Y%m%d_%H%M%S")
+    # TODO: Review unreachable code - return StyleProfile(profile_id=profile_id)
+
+    # TODO: Review unreachable code - def _load_preferences(self) -> dict[str, StylePreference]:
+    # TODO: Review unreachable code - """Load preferences from disk."""
+    # TODO: Review unreachable code - preferences = {}
+
+    # TODO: Review unreachable code - if self.preferences_file.exists():
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - with open(self.preferences_file) as f:
+    # TODO: Review unreachable code - data = json.load(f)
+
+    # TODO: Review unreachable code - for pref_id, pref_data in data.items():
+    # TODO: Review unreachable code - preferences[pref_id] = StylePreference.from_dict(pref_data)
+
+    # TODO: Review unreachable code - # Add to profile
+    # TODO: Review unreachable code - for pref in preferences.values():
+    # TODO: Review unreachable code - self.profile.add_preference(pref)
+
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to load preferences: {e}")
+
+    # TODO: Review unreachable code - return preferences
+
+    # TODO: Review unreachable code - def _load_patterns(self) -> dict[str, Any]:
+    # TODO: Review unreachable code - """Load patterns from disk."""
+    # TODO: Review unreachable code - if self.patterns_file.exists():
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - with open(self.patterns_file) as f:
+    # TODO: Review unreachable code - data = json.load(f)
+
+    # TODO: Review unreachable code - # Convert Counter objects
+    # TODO: Review unreachable code - if data is not None and "co_occurrence" in data:
+    # TODO: Review unreachable code - for pref_id, counts in data["co_occurrence"].items():
+    # TODO: Review unreachable code - data["co_occurrence"][pref_id] = Counter(counts)
+
+    # TODO: Review unreachable code - return data
+
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to load patterns: {e}")
+
+    # TODO: Review unreachable code - return {}
+
+    # TODO: Review unreachable code - def _save_all(self):
+    # TODO: Review unreachable code - """Save all data to disk."""
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Save profile
+    # TODO: Review unreachable code - profile_data = {
+    # TODO: Review unreachable code - "profile_id": self.profile.profile_id,
+    # TODO: Review unreachable code - "created_at": self.profile.created_at.isoformat(),
+    # TODO: Review unreachable code - "updated_at": self.profile.updated_at.isoformat(),
+    # TODO: Review unreachable code - "favorite_combinations": self.profile.favorite_combinations,
+    # TODO: Review unreachable code - "avoided_combinations": self.profile.avoided_combinations,
+    # TODO: Review unreachable code - "project_styles": self.profile.project_styles,
+    # TODO: Review unreachable code - "time_of_day_preferences": self.profile.time_of_day_preferences
+    # TODO: Review unreachable code - }
+
+    # TODO: Review unreachable code - with open(self.profile_file, 'w') as f:
+    # TODO: Review unreachable code - json.dump(profile_data, f, indent=2)
+
+    # TODO: Review unreachable code - # Save preferences
+    # TODO: Review unreachable code - prefs_data = {
+    # TODO: Review unreachable code - pref_id: pref.to_dict()
+    # TODO: Review unreachable code - for pref_id, pref in self.all_preferences.items()
+    # TODO: Review unreachable code - }
+
+    # TODO: Review unreachable code - with open(self.preferences_file, 'w') as f:
+    # TODO: Review unreachable code - json.dump(prefs_data, f, indent=2)
+
+    # TODO: Review unreachable code - # Save patterns (convert Counters to dicts)
+    # TODO: Review unreachable code - patterns_data = self.patterns.copy()
+    # TODO: Review unreachable code - if patterns_data is not None and "co_occurrence" in patterns_data:
+    # TODO: Review unreachable code - patterns_data["co_occurrence"] = {
+    # TODO: Review unreachable code - pref_id: dict(counter)
+    # TODO: Review unreachable code - for pref_id, counter in patterns_data["co_occurrence"].items()
+    # TODO: Review unreachable code - }
+
+    # TODO: Review unreachable code - with open(self.patterns_file, 'w') as f:
+    # TODO: Review unreachable code - json.dump(patterns_data, f, indent=2)
+
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to save style memory: {e}")

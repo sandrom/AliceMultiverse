@@ -54,212 +54,212 @@ class PromptService:
 
         return prompt
 
-    def update_prompt(self, prompt: Prompt) -> None:
-        """Update an existing prompt."""
-        prompt.updated_at = datetime.now()
-        self.db.update_prompt(prompt)
-        logger.info(f"Updated prompt {prompt.id}")
+    # TODO: Review unreachable code - def update_prompt(self, prompt: Prompt) -> None:
+    # TODO: Review unreachable code - """Update an existing prompt."""
+    # TODO: Review unreachable code - prompt.updated_at = datetime.now()
+    # TODO: Review unreachable code - self.db.update_prompt(prompt)
+    # TODO: Review unreachable code - logger.info(f"Updated prompt {prompt.id}")
 
-    def get_prompt(self, prompt_id: str) -> Prompt | None:
-        """Get a prompt by ID."""
-        return self.db.get_prompt(prompt_id)
+    # TODO: Review unreachable code - def get_prompt(self, prompt_id: str) -> Prompt | None:
+    # TODO: Review unreachable code - """Get a prompt by ID."""
+    # TODO: Review unreachable code - return self.db.get_prompt(prompt_id)
 
-    def search_prompts(
-        self,
-        query: str | None = None,
-        category: PromptCategory | None = None,
-        providers: list[ProviderType] | None = None,
-        tags: list[str] | None = None,
-        project: str | None = None,
-        style: str | None = None,
-        min_effectiveness: float | None = None,
-        min_success_rate: float | None = None,
-        **kwargs
-    ) -> list[Prompt]:
-        """Search for prompts with various criteria."""
-        criteria = PromptSearchCriteria(
-            query=query,
-            category=category,
-            providers=providers,
-            tags=tags,
-            project=project,
-            style=style,
-            min_effectiveness=min_effectiveness,
-            min_success_rate=min_success_rate,
-            **kwargs
-        )
+    # TODO: Review unreachable code - def search_prompts(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - query: str | None = None,
+    # TODO: Review unreachable code - category: PromptCategory | None = None,
+    # TODO: Review unreachable code - providers: list[ProviderType] | None = None,
+    # TODO: Review unreachable code - tags: list[str] | None = None,
+    # TODO: Review unreachable code - project: str | None = None,
+    # TODO: Review unreachable code - style: str | None = None,
+    # TODO: Review unreachable code - min_effectiveness: float | None = None,
+    # TODO: Review unreachable code - min_success_rate: float | None = None,
+    # TODO: Review unreachable code - **kwargs
+    # TODO: Review unreachable code - ) -> list[Prompt]:
+    # TODO: Review unreachable code - """Search for prompts with various criteria."""
+    # TODO: Review unreachable code - criteria = PromptSearchCriteria(
+    # TODO: Review unreachable code - query=query,
+    # TODO: Review unreachable code - category=category,
+    # TODO: Review unreachable code - providers=providers,
+    # TODO: Review unreachable code - tags=tags,
+    # TODO: Review unreachable code - project=project,
+    # TODO: Review unreachable code - style=style,
+    # TODO: Review unreachable code - min_effectiveness=min_effectiveness,
+    # TODO: Review unreachable code - min_success_rate=min_success_rate,
+    # TODO: Review unreachable code - **kwargs
+    # TODO: Review unreachable code - )
 
-        results = self.db.search_prompts(criteria)
-        logger.info(f"Found {len(results)} prompts matching criteria")
+    # TODO: Review unreachable code - results = self.db.search_prompts(criteria)
+    # TODO: Review unreachable code - logger.info(f"Found {len(results)} prompts matching criteria")
 
-        return results
+    # TODO: Review unreachable code - return results
 
-    def find_similar(self, prompt_id: str, limit: int = 10) -> list[Prompt]:
-        """Find prompts similar to the given one."""
-        prompt = self.get_prompt(prompt_id)
-        if not prompt:
-            return []
+    # TODO: Review unreachable code - def find_similar(self, prompt_id: str, limit: int = 10) -> list[Prompt]:
+    # TODO: Review unreachable code - """Find prompts similar to the given one."""
+    # TODO: Review unreachable code - prompt = self.get_prompt(prompt_id)
+    # TODO: Review unreachable code - if not prompt:
+    # TODO: Review unreachable code - return []
 
-        # Search by similar attributes
-        similar = []
+    # TODO: Review unreachable code - # Search by similar attributes
+    # TODO: Review unreachable code - similar = []
 
-        # First, get directly related prompts
-        for related_id in prompt.related_ids:
-            related = self.get_prompt(related_id)
-            if related:
-                similar.append(related)
+    # TODO: Review unreachable code - # First, get directly related prompts
+    # TODO: Review unreachable code - for related_id in prompt.related_ids:
+    # TODO: Review unreachable code - related = self.get_prompt(related_id)
+    # TODO: Review unreachable code - if related:
+    # TODO: Review unreachable code - similar.append(related)
 
-        # Then search by tags and style
-        if prompt.tags or prompt.style:
-            results = self.search_prompts(
-                tags=prompt.tags[:3] if prompt.tags else None,  # Top 3 tags
-                style=prompt.style,
-                category=prompt.category
-            )
-            for result in results:
-                if result.id != prompt_id and result not in similar:
-                    similar.append(result)
+    # TODO: Review unreachable code - # Then search by tags and style
+    # TODO: Review unreachable code - if prompt.tags or prompt.style:
+    # TODO: Review unreachable code - results = self.search_prompts(
+    # TODO: Review unreachable code - tags=prompt.tags[:3] if prompt.tags else None,  # Top 3 tags
+    # TODO: Review unreachable code - style=prompt.style,
+    # TODO: Review unreachable code - category=prompt.category
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - for result in results:
+    # TODO: Review unreachable code - if result.id != prompt_id and result not in similar:
+    # TODO: Review unreachable code - similar.append(result)
 
-        return similar[:limit]
+    # TODO: Review unreachable code - return similar[:limit]
 
-    def record_usage(
-        self,
-        prompt_id: str,
-        provider: ProviderType,
-        success: bool,
-        output_path: str | None = None,
-        cost: float | None = None,
-        duration_seconds: float | None = None,
-        notes: str | None = None,
-        parameters: dict[str, Any] | None = None,
-        metadata: dict[str, Any] | None = None
-    ) -> PromptUsage:
-        """Record usage of a prompt."""
-        usage = PromptUsage(
-            id=hashlib.sha256(f"{prompt_id}:{datetime.now().isoformat()}".encode()).hexdigest()[:16],
-            prompt_id=prompt_id,
-            provider=provider,
-            timestamp=datetime.now(),
-            success=success,
-            output_path=output_path,
-            cost=cost,
-            duration_seconds=duration_seconds,
-            notes=notes,
-            parameters=parameters or {},
-            metadata=metadata or {}
-        )
+    # TODO: Review unreachable code - def record_usage(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - prompt_id: str,
+    # TODO: Review unreachable code - provider: ProviderType,
+    # TODO: Review unreachable code - success: bool,
+    # TODO: Review unreachable code - output_path: str | None = None,
+    # TODO: Review unreachable code - cost: float | None = None,
+    # TODO: Review unreachable code - duration_seconds: float | None = None,
+    # TODO: Review unreachable code - notes: str | None = None,
+    # TODO: Review unreachable code - parameters: dict[str, Any] | None = None,
+    # TODO: Review unreachable code - metadata: dict[str, Any] | None = None
+    # TODO: Review unreachable code - ) -> PromptUsage:
+    # TODO: Review unreachable code - """Record usage of a prompt."""
+    # TODO: Review unreachable code - usage = PromptUsage(
+    # TODO: Review unreachable code - id=hashlib.sha256(f"{prompt_id}:{datetime.now().isoformat()}".encode()).hexdigest()[:16],
+    # TODO: Review unreachable code - prompt_id=prompt_id,
+    # TODO: Review unreachable code - provider=provider,
+    # TODO: Review unreachable code - timestamp=datetime.now(),
+    # TODO: Review unreachable code - success=success,
+    # TODO: Review unreachable code - output_path=output_path,
+    # TODO: Review unreachable code - cost=cost,
+    # TODO: Review unreachable code - duration_seconds=duration_seconds,
+    # TODO: Review unreachable code - notes=notes,
+    # TODO: Review unreachable code - parameters=parameters or {},
+    # TODO: Review unreachable code - metadata=metadata or {}
+    # TODO: Review unreachable code - )
 
-        self.db.add_usage(usage)
-        logger.info(f"Recorded {'successful' if success else 'failed'} usage of prompt {prompt_id}")
+    # TODO: Review unreachable code - self.db.add_usage(usage)
+    # TODO: Review unreachable code - logger.info(f"Recorded {'successful' if success else 'failed'} usage of prompt {prompt_id}")
 
-        return usage
+    # TODO: Review unreachable code - return usage
 
-    def get_usage_history(self, prompt_id: str, limit: int = 100) -> list[PromptUsage]:
-        """Get usage history for a prompt."""
-        return self.db.get_usage_history(prompt_id, limit)
+    # TODO: Review unreachable code - def get_usage_history(self, prompt_id: str, limit: int = 100) -> list[PromptUsage]:
+    # TODO: Review unreachable code - """Get usage history for a prompt."""
+    # TODO: Review unreachable code - return self.db.get_usage_history(prompt_id, limit)
 
-    def get_effective_prompts(
-        self,
-        category: PromptCategory | None = None,
-        provider: ProviderType | None = None,
-        min_success_rate: float = 0.7,
-        min_uses: int = 3,
-        limit: int = 20
-    ) -> list[Prompt]:
-        """Get the most effective prompts."""
-        prompts = self.search_prompts(
-            category=category,
-            providers=[provider] if provider else None,
-            min_success_rate=min_success_rate
-        )
+    # TODO: Review unreachable code - def get_effective_prompts(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - category: PromptCategory | None = None,
+    # TODO: Review unreachable code - provider: ProviderType | None = None,
+    # TODO: Review unreachable code - min_success_rate: float = 0.7,
+    # TODO: Review unreachable code - min_uses: int = 3,
+    # TODO: Review unreachable code - limit: int = 20
+    # TODO: Review unreachable code - ) -> list[Prompt]:
+    # TODO: Review unreachable code - """Get the most effective prompts."""
+    # TODO: Review unreachable code - prompts = self.search_prompts(
+    # TODO: Review unreachable code - category=category,
+    # TODO: Review unreachable code - providers=[provider] if provider else None,
+    # TODO: Review unreachable code - min_success_rate=min_success_rate
+    # TODO: Review unreachable code - )
 
-        # Filter by minimum uses
-        prompts = [p for p in prompts if p.use_count >= min_uses]
+    # TODO: Review unreachable code - # Filter by minimum uses
+    # TODO: Review unreachable code - prompts = [p for p in prompts if p.use_count >= min_uses]
 
-        # Sort by effectiveness and success rate
-        prompts.sort(
-            key=lambda p: (
-                p.effectiveness_rating or 0,
-                p.success_rate(),
-                p.use_count
-            ),
-            reverse=True
-        )
+    # TODO: Review unreachable code - # Sort by effectiveness and success rate
+    # TODO: Review unreachable code - prompts.sort(
+    # TODO: Review unreachable code - key=lambda p: (
+    # TODO: Review unreachable code - p.effectiveness_rating or 0,
+    # TODO: Review unreachable code - p.success_rate(),
+    # TODO: Review unreachable code - p.use_count
+    # TODO: Review unreachable code - ),
+    # TODO: Review unreachable code - reverse=True
+    # TODO: Review unreachable code - )
 
-        return prompts[:limit]
+    # TODO: Review unreachable code - return prompts[:limit]
 
-    def export_prompts(self, output_path: Path, prompts: list[Prompt] | None = None) -> None:
-        """Export prompts to JSON file."""
-        if prompts is None:
-            prompts = self.search_prompts()  # Export all
+    # TODO: Review unreachable code - def export_prompts(self, output_path: Path, prompts: list[Prompt] | None = None) -> None:
+    # TODO: Review unreachable code - """Export prompts to JSON file."""
+    # TODO: Review unreachable code - if prompts is None:
+    # TODO: Review unreachable code - prompts = self.search_prompts()  # Export all
 
-        data = []
-        for prompt in prompts:
-            prompt_data = {
-                "id": prompt.id,
-                "text": prompt.text,
-                "category": prompt.category.value,
-                "providers": [p.value for p in prompt.providers],
-                "tags": prompt.tags,
-                "project": prompt.project,
-                "style": prompt.style,
-                "effectiveness_rating": prompt.effectiveness_rating,
-                "use_count": prompt.use_count,
-                "success_count": prompt.success_count,
-                "success_rate": prompt.success_rate(),
-                "created_at": prompt.created_at.isoformat(),
-                "updated_at": prompt.updated_at.isoformat(),
-                "description": prompt.description,
-                "notes": prompt.notes,
-                "context": prompt.context,
-                "parent_id": prompt.parent_id,
-                "related_ids": prompt.related_ids,
-                "keywords": prompt.keywords
-            }
-            data.append(prompt_data)
+    # TODO: Review unreachable code - data = []
+    # TODO: Review unreachable code - for prompt in prompts:
+    # TODO: Review unreachable code - prompt_data = {
+    # TODO: Review unreachable code - "id": prompt.id,
+    # TODO: Review unreachable code - "text": prompt.text,
+    # TODO: Review unreachable code - "category": prompt.category.value,
+    # TODO: Review unreachable code - "providers": [p.value for p in prompt.providers],
+    # TODO: Review unreachable code - "tags": prompt.tags,
+    # TODO: Review unreachable code - "project": prompt.project,
+    # TODO: Review unreachable code - "style": prompt.style,
+    # TODO: Review unreachable code - "effectiveness_rating": prompt.effectiveness_rating,
+    # TODO: Review unreachable code - "use_count": prompt.use_count,
+    # TODO: Review unreachable code - "success_count": prompt.success_count,
+    # TODO: Review unreachable code - "success_rate": prompt.success_rate(),
+    # TODO: Review unreachable code - "created_at": prompt.created_at.isoformat(),
+    # TODO: Review unreachable code - "updated_at": prompt.updated_at.isoformat(),
+    # TODO: Review unreachable code - "description": prompt.description,
+    # TODO: Review unreachable code - "notes": prompt.notes,
+    # TODO: Review unreachable code - "context": prompt.context,
+    # TODO: Review unreachable code - "parent_id": prompt.parent_id,
+    # TODO: Review unreachable code - "related_ids": prompt.related_ids,
+    # TODO: Review unreachable code - "keywords": prompt.keywords
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - data.append(prompt_data)
 
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(output_path, 'w') as f:
-            json.dump(data, f, indent=2)
+    # TODO: Review unreachable code - output_path.parent.mkdir(parents=True, exist_ok=True)
+    # TODO: Review unreachable code - with open(output_path, 'w') as f:
+    # TODO: Review unreachable code - json.dump(data, f, indent=2)
 
-        logger.info(f"Exported {len(prompts)} prompts to {output_path}")
+    # TODO: Review unreachable code - logger.info(f"Exported {len(prompts)} prompts to {output_path}")
 
-    def import_prompts(self, input_path: Path) -> int:
-        """Import prompts from JSON file."""
-        with open(input_path) as f:
-            data = json.load(f)
+    # TODO: Review unreachable code - def import_prompts(self, input_path: Path) -> int:
+    # TODO: Review unreachable code - """Import prompts from JSON file."""
+    # TODO: Review unreachable code - with open(input_path) as f:
+    # TODO: Review unreachable code - data = json.load(f)
 
-        imported = 0
-        for prompt_data in data:
-            # Check if prompt already exists
-            existing = self.db.get_prompt(prompt_data["id"])
-            if existing:
-                logger.debug(f"Skipping existing prompt {prompt_data['id']}")
-                continue
+    # TODO: Review unreachable code - imported = 0
+    # TODO: Review unreachable code - for prompt_data in data:
+    # TODO: Review unreachable code - # Check if prompt already exists
+    # TODO: Review unreachable code - existing = self.db.get_prompt(prompt_data["id"])
+    # TODO: Review unreachable code - if existing:
+    # TODO: Review unreachable code - logger.debug(f"Skipping existing prompt {prompt_data['id']}")
+    # TODO: Review unreachable code - continue
 
-            prompt = Prompt(
-                id=prompt_data["id"],
-                text=prompt_data["text"],
-                category=PromptCategory(prompt_data["category"]),
-                providers=[ProviderType(p) for p in prompt_data["providers"]],
-                tags=prompt_data.get("tags", []),
-                project=prompt_data.get("project"),
-                style=prompt_data.get("style"),
-                effectiveness_rating=prompt_data.get("effectiveness_rating"),
-                use_count=prompt_data.get("use_count", 0),
-                success_count=prompt_data.get("success_count", 0),
-                created_at=datetime.fromisoformat(prompt_data["created_at"]),
-                updated_at=datetime.fromisoformat(prompt_data["updated_at"]),
-                description=prompt_data.get("description"),
-                notes=prompt_data.get("notes"),
-                context=prompt_data.get("context", {}),
-                parent_id=prompt_data.get("parent_id"),
-                related_ids=prompt_data.get("related_ids", []),
-                keywords=prompt_data.get("keywords", [])
-            )
+    # TODO: Review unreachable code - prompt = Prompt(
+    # TODO: Review unreachable code - id=prompt_data["id"],
+    # TODO: Review unreachable code - text=prompt_data["text"],
+    # TODO: Review unreachable code - category=PromptCategory(prompt_data["category"]),
+    # TODO: Review unreachable code - providers=[ProviderType(p) for p in prompt_data["providers"]],
+    # TODO: Review unreachable code - tags=prompt_data.get("tags", []),
+    # TODO: Review unreachable code - project=prompt_data.get("project"),
+    # TODO: Review unreachable code - style=prompt_data.get("style"),
+    # TODO: Review unreachable code - effectiveness_rating=prompt_data.get("effectiveness_rating"),
+    # TODO: Review unreachable code - use_count=prompt_data.get("use_count", 0),
+    # TODO: Review unreachable code - success_count=prompt_data.get("success_count", 0),
+    # TODO: Review unreachable code - created_at=datetime.fromisoformat(prompt_data["created_at"]),
+    # TODO: Review unreachable code - updated_at=datetime.fromisoformat(prompt_data["updated_at"]),
+    # TODO: Review unreachable code - description=prompt_data.get("description"),
+    # TODO: Review unreachable code - notes=prompt_data.get("notes"),
+    # TODO: Review unreachable code - context=prompt_data.get("context", {}),
+    # TODO: Review unreachable code - parent_id=prompt_data.get("parent_id"),
+    # TODO: Review unreachable code - related_ids=prompt_data.get("related_ids", []),
+    # TODO: Review unreachable code - keywords=prompt_data.get("keywords", [])
+    # TODO: Review unreachable code - )
 
-            self.db.add_prompt(prompt)
-            imported += 1
+    # TODO: Review unreachable code - self.db.add_prompt(prompt)
+    # TODO: Review unreachable code - imported += 1
 
-        logger.info(f"Imported {imported} prompts from {input_path}")
-        return imported
+    # TODO: Review unreachable code - logger.info(f"Imported {imported} prompts from {input_path}")
+    # TODO: Review unreachable code - return imported

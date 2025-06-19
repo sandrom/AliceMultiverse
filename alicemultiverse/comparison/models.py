@@ -48,4 +48,4 @@ class ModelRating:
     def win_rate(self) -> float:
         """Calculate win rate."""
         total = self.win_count + self.loss_count
-        return self.win_count / total if total > 0 else 0.5
+        return float(self.win_count) / total if total > 0 else 0.5

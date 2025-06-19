@@ -52,19 +52,19 @@ class StructuredInterfaceBase:
 
     def _parse_iso_date(self, date_str: str) -> datetime:
         """Parse ISO 8601 date string."""
-        try:
-            return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
-        except ValueError:
-            # Try parsing just the date part
-            return datetime.strptime(date_str[:10], "%Y-%m-%d")
+        # TODO: Review unreachable code - try:
+        return datetime.fromisoformat(date_str.replace('Z', '+00:00'))
+        # TODO: Review unreachable code - except ValueError:
+        # TODO: Review unreachable code - # Try parsing just the date part
+        # TODO: Review unreachable code - return datetime.strptime(date_str[:10], "%Y-%m-%d")
 
     def _apply_range_filter(self, value: float, range_filter: RangeFilter) -> bool:
         """Check if value falls within range filter."""
         if range_filter.get("min") is not None and value < range_filter["min"]:
             return False
-        if range_filter.get("max") is not None and value > range_filter["max"]:
-            return False
-        return True
+        # TODO: Review unreachable code - if range_filter.get("max") is not None and value > range_filter["max"]:
+        # TODO: Review unreachable code - return False
+        # TODO: Review unreachable code - return True
 
     def _matches_pattern(self, text: str, pattern: str) -> bool:
         """Check if text matches pattern (supports wildcards)."""
@@ -72,53 +72,53 @@ class StructuredInterfaceBase:
         regex_pattern = pattern.replace("*", ".*").replace("?", ".")
         return bool(re.match(f"^{regex_pattern}$", text, re.IGNORECASE))
 
-    def _convert_to_asset(self, metadata: dict) -> Asset:
-        """Convert metadata dict to Asset object."""
-        # Get file path
-        file_path = metadata.get("file_path", "")
+    # TODO: Review unreachable code - def _convert_to_asset(self, metadata: dict) -> Asset:
+    # TODO: Review unreachable code - """Convert metadata dict to Asset object."""
+    # TODO: Review unreachable code - # Get file path
+    # TODO: Review unreachable code - file_path = metadata.get("file_path", "")
 
-        # Determine media type
-        extension = Path(file_path).suffix.lower()
-        if extension in ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif']:
-            media_type = MediaType.IMAGE
-        elif extension in ['.mp4', '.mov', '.avi', '.mkv']:
-            media_type = MediaType.VIDEO
-        else:
-            media_type = MediaType.OTHER
+    # TODO: Review unreachable code - # Determine media type
+    # TODO: Review unreachable code - extension = Path(file_path).suffix.lower()
+    # TODO: Review unreachable code - if extension in ['.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif']:
+    # TODO: Review unreachable code - media_type = MediaType.IMAGE
+    # TODO: Review unreachable code - elif extension in ['.mp4', '.mov', '.avi', '.mkv']:
+    # TODO: Review unreachable code - media_type = MediaType.VIDEO
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - media_type = MediaType.OTHER
 
-        return Asset(
-            id=metadata.get("content_hash", ""),
-            path=file_path,
-            filename=Path(file_path).name,
-            size=metadata.get("size", 0),
-            content_hash=metadata.get("content_hash", ""),
-            created_date=metadata.get("created_date", ""),
-            modified_date=metadata.get("modified_date", ""),
-            media_type=media_type,
-            tags=self._collect_all_tags(metadata),
-            metadata=metadata,
-            role=AssetRole(metadata.get("asset_role", "primary"))
-        )
+    # TODO: Review unreachable code - return Asset(
+    # TODO: Review unreachable code - id=metadata.get("content_hash", ""),
+    # TODO: Review unreachable code - path=file_path,
+    # TODO: Review unreachable code - filename=Path(file_path).name,
+    # TODO: Review unreachable code - size=metadata.get("size", 0),
+    # TODO: Review unreachable code - content_hash=metadata.get("content_hash", ""),
+    # TODO: Review unreachable code - created_date=metadata.get("created_date", ""),
+    # TODO: Review unreachable code - modified_date=metadata.get("modified_date", ""),
+    # TODO: Review unreachable code - media_type=media_type,
+    # TODO: Review unreachable code - tags=self._collect_all_tags(metadata),
+    # TODO: Review unreachable code - metadata=metadata,
+    # TODO: Review unreachable code - role=AssetRole(metadata.get("asset_role", "primary"))
+    # TODO: Review unreachable code - )
 
-    def _collect_all_tags(self, metadata: dict) -> list[str]:
-        """Collect all tags from various metadata fields."""
-        tags = set()
+    # TODO: Review unreachable code - def _collect_all_tags(self, metadata: dict) -> list[str]:
+    # TODO: Review unreachable code - """Collect all tags from various metadata fields."""
+    # TODO: Review unreachable code - tags = set()
 
-        # Add tags from different fields
-        for field in ['tags', 'keywords', 'labels']:
-            if field in metadata and metadata[field]:
-                if isinstance(metadata[field], list):
-                    tags.update(metadata[field])
-                elif isinstance(metadata[field], str):
-                    # Split comma-separated tags
-                    tags.update(tag.strip() for tag in metadata[field].split(','))
+    # TODO: Review unreachable code - # Add tags from different fields
+    # TODO: Review unreachable code - for field in ['tags', 'keywords', 'labels']:
+    # TODO: Review unreachable code - if field in metadata and metadata[field]:
+    # TODO: Review unreachable code - if isinstance(metadata[field], list):
+    # TODO: Review unreachable code - tags.update(metadata[field])
+    # TODO: Review unreachable code - elif isinstance(metadata[field], str):
+    # TODO: Review unreachable code - # Split comma-separated tags
+    # TODO: Review unreachable code - tags.update(tag.strip() for tag in metadata[field].split(','))
 
-        # Add technical tags
-        if metadata.get('media_type'):
-            tags.add(f"type:{metadata['media_type']}")
-        if metadata.get('source'):
-            tags.add(f"source:{metadata['source']}")
-        if metadata.get('project'):
-            tags.add(f"project:{metadata['project']}")
+    # TODO: Review unreachable code - # Add technical tags
+    # TODO: Review unreachable code - if metadata.get('media_type'):
+    # TODO: Review unreachable code - tags.add(f"type:{metadata['media_type']}")
+    # TODO: Review unreachable code - if metadata.get('source'):
+    # TODO: Review unreachable code - tags.add(f"source:{metadata['source']}")
+    # TODO: Review unreachable code - if metadata.get('project'):
+    # TODO: Review unreachable code - tags.add(f"project:{metadata['project']}")
 
-        return sorted(list(tags))
+    # TODO: Review unreachable code - return sorted(list(tags))

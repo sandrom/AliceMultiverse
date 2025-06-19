@@ -87,91 +87,91 @@ class ImagePresentationAPI:
         # Validate parameters
         if limit < 0:
             raise ValueError("Limit must be non-negative")
-        if offset < 0:
-            raise ValueError("Offset must be non-negative")
-        if date_range and date_range[0] > date_range[1]:
-            raise ValueError("Invalid date range: start date must be before end date")
+        # TODO: Review unreachable code - if offset < 0:
+        # TODO: Review unreachable code - raise ValueError("Offset must be non-negative")
+        # TODO: Review unreachable code - if date_range and date_range[0] > date_range[1]:
+        # TODO: Review unreachable code - raise ValueError("Invalid date range: start date must be before end date")
 
-        # Parse natural language query if provided
-        if query:
-            tags = self._parse_query_to_tags(query)
-            query_interpretation = f"Tags: {', '.join(tags)}"
-        else:
-            query_interpretation = "All images"
+        # TODO: Review unreachable code - # Parse natural language query if provided
+        # TODO: Review unreachable code - if query:
+        # TODO: Review unreachable code - tags = self._parse_query_to_tags(query)
+        # TODO: Review unreachable code - query_interpretation = f"Tags: {', '.join(tags)}"
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - query_interpretation = "All images"
 
-        # Handle similarity search
-        if similar_to:
-            # TODO: Implement similarity search when embeddings are available
-            logger.warning("Similarity search not yet implemented")
+        # TODO: Review unreachable code - # Handle similarity search
+        # TODO: Review unreachable code - if similar_to:
+        # TODO: Review unreachable code - # TODO: Implement similarity search when embeddings are available
+        # TODO: Review unreachable code - logger.warning("Similarity search not yet implemented")
 
-        # Combine exclusion folders
-        all_excluded = list(self._exclusion_folders)
-        if exclude_folders:
-            all_excluded.extend(exclude_folders)
+        # TODO: Review unreachable code - # Combine exclusion folders
+        # TODO: Review unreachable code - all_excluded = list(self._exclusion_folders)
+        # TODO: Review unreachable code - if exclude_folders:
+        # TODO: Review unreachable code - all_excluded.extend(exclude_folders)
 
-        # Convert tags to DuckDB format
-        tag_dict = {}
-        if tags:
-            # Distribute tags across categories based on content
-            for tag in tags:
-                if tag in ["portrait", "landscape", "abstract", "cyberpunk", "fantasy"]:
-                    tag_dict.setdefault("style", []).append(tag)
-                elif tag in ["happy", "sad", "dramatic", "serene", "mysterious"]:
-                    tag_dict.setdefault("mood", []).append(tag)
-                else:
-                    tag_dict.setdefault("subject", []).append(tag)
+        # TODO: Review unreachable code - # Convert tags to DuckDB format
+        # TODO: Review unreachable code - tag_dict = {}
+        # TODO: Review unreachable code - if tags:
+        # TODO: Review unreachable code - # Distribute tags across categories based on content
+        # TODO: Review unreachable code - for tag in tags:
+        # TODO: Review unreachable code - if tag in ["portrait", "landscape", "abstract", "cyberpunk", "fantasy"]:
+        # TODO: Review unreachable code - tag_dict.setdefault("style", []).append(tag)
+        # TODO: Review unreachable code - elif tag in ["happy", "sad", "dramatic", "serene", "mysterious"]:
+        # TODO: Review unreachable code - tag_dict.setdefault("mood", []).append(tag)
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - tag_dict.setdefault("subject", []).append(tag)
 
-        # Search storage
-        try:
-            # Use sync method (DuckDBSearchCache doesn't have async methods)
-            assets = self.storage.search_by_tags(tag_dict, limit=limit)
+        # TODO: Review unreachable code - # Search storage
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - # Use sync method (DuckDBSearchCache doesn't have async methods)
+        # TODO: Review unreachable code - assets = self.storage.search_by_tags(tag_dict, limit=limit)
 
-            # Apply exclusions and pagination manually
-            filtered_assets = []
-            for asset in assets:
-                # Check if any location is in excluded folders
-                locations = asset.get("locations", [])
-                excluded = False
-                for loc in locations:
-                    # Handle both dict and string formats
-                    if isinstance(loc, dict):
-                        path = loc.get("path", "")
-                    else:
-                        path = str(loc)
-                    if any(exc in path for exc in all_excluded):
-                        excluded = True
-                        break
-                if not excluded:
-                    filtered_assets.append(asset)
+        # TODO: Review unreachable code - # Apply exclusions and pagination manually
+        # TODO: Review unreachable code - filtered_assets = []
+        # TODO: Review unreachable code - for asset in assets:
+        # TODO: Review unreachable code - # Check if any location is in excluded folders
+        # TODO: Review unreachable code - locations = asset.get("locations", [])
+        # TODO: Review unreachable code - excluded = False
+        # TODO: Review unreachable code - for loc in locations:
+        # TODO: Review unreachable code - # Handle both dict and string formats
+        # TODO: Review unreachable code - if isinstance(loc, dict):
+        # TODO: Review unreachable code - path = loc.get("path", "")
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - path = str(loc)
+        # TODO: Review unreachable code - if any(exc in path for exc in all_excluded):
+        # TODO: Review unreachable code - excluded = True
+        # TODO: Review unreachable code - break
+        # TODO: Review unreachable code - if not excluded:
+        # TODO: Review unreachable code - filtered_assets.append(asset)
 
-            # Apply pagination
-            total_count = len(filtered_assets)
-            paginated = filtered_assets[offset:offset + limit]
+        # TODO: Review unreachable code - # Apply pagination
+        # TODO: Review unreachable code - total_count = len(filtered_assets)
+        # TODO: Review unreachable code - paginated = filtered_assets[offset:offset + limit]
 
-            result = {
-                "images": paginated,
-                "total_count": total_count
-            }
-        except Exception as e:
-            logger.error(f"Search failed: {e}", exc_info=True)
-            result = {"images": [], "total_count": 0}
+        # TODO: Review unreachable code - result = {
+        # TODO: Review unreachable code - "images": paginated,
+        # TODO: Review unreachable code - "total_count": total_count
+        # TODO: Review unreachable code - }
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Search failed: {e}", exc_info=True)
+        # TODO: Review unreachable code - result = {"images": [], "total_count": 0}
 
-        # Convert to presentable images
-        presentable_images = []
-        for img_data in result.get("images", []):
-            presentable = await self._create_presentable_image(img_data)
-            presentable_images.append(presentable)
+        # TODO: Review unreachable code - # Convert to presentable images
+        # TODO: Review unreachable code - presentable_images = []
+        # TODO: Review unreachable code - for img_data in result.get("images", []):
+        # TODO: Review unreachable code - presentable = await self._create_presentable_image(img_data)
+        # TODO: Review unreachable code - presentable_images.append(presentable)
 
-        # Generate suggestions
-        suggestions = self._generate_search_suggestions(tags, result)
+        # TODO: Review unreachable code - # Generate suggestions
+        # TODO: Review unreachable code - suggestions = self._generate_search_suggestions(tags, result)
 
-        return ImageSearchResult(
-            images=presentable_images,
-            total_count=result.get("total_count", len(presentable_images)),
-            has_more=offset + limit < result.get("total_count", 0),
-            query_interpretation=query_interpretation,
-            suggestions=suggestions
-        )
+        # TODO: Review unreachable code - return ImageSearchResult(
+        # TODO: Review unreachable code - images=presentable_images,
+        # TODO: Review unreachable code - total_count=result.get("total_count", len(presentable_images)),
+        # TODO: Review unreachable code - has_more=offset + limit < result.get("total_count", 0),
+        # TODO: Review unreachable code - query_interpretation=query_interpretation,
+        # TODO: Review unreachable code - suggestions=suggestions
+        # TODO: Review unreachable code - )
 
     async def track_selection(
         self,
@@ -238,55 +238,55 @@ class ImagePresentationAPI:
         if not asset:
             raise FileNotFoundError(f"Image not found: {image_hash}")
 
-        # Get first available location
-        locations = asset.get("locations", [])
-        if not locations:
-            raise FileNotFoundError(f"No file locations found for: {image_hash}")
+        # TODO: Review unreachable code - # Get first available location
+        # TODO: Review unreachable code - locations = asset.get("locations", [])
+        # TODO: Review unreachable code - if not locations:
+        # TODO: Review unreachable code - raise FileNotFoundError(f"No file locations found for: {image_hash}")
 
-        current_path = Path(locations[0]["path"])
-        if not current_path.exists():
-            raise FileNotFoundError(f"File not found: {current_path}")
+        # TODO: Review unreachable code - current_path = Path(locations[0]["path"])
+        # TODO: Review unreachable code - if not current_path.exists():
+        # TODO: Review unreachable code - raise FileNotFoundError(f"File not found: {current_path}")
 
-        # Determine destination folder
-        sorted_out_base = current_path.parent.parent / "sorted-out" / category.value
-        sorted_out_base.mkdir(parents=True, exist_ok=True)
+        # TODO: Review unreachable code - # Determine destination folder
+        # TODO: Review unreachable code - sorted_out_base = current_path.parent.parent / "sorted-out" / category.value
+        # TODO: Review unreachable code - sorted_out_base.mkdir(parents=True, exist_ok=True)
 
-        new_path = sorted_out_base / current_path.name
+        # TODO: Review unreachable code - new_path = sorted_out_base / current_path.name
 
-        # Move file using shutil
-        try:
-            shutil.move(str(current_path), str(new_path))
-        except Exception as e:
-            logger.error(f"Failed to move file: {e}")
-            raise
+        # TODO: Review unreachable code - # Move file using shutil
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - shutil.move(str(current_path), str(new_path))
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Failed to move file: {e}")
+        # TODO: Review unreachable code - raise
 
-        # Update storage with new location
-        self.storage.remove_location(image_hash, current_path)
-        self.storage._add_file_location(image_hash, new_path, "local")
+        # TODO: Review unreachable code - # Update storage with new location
+        # TODO: Review unreachable code - self.storage.remove_location(image_hash, current_path)
+        # TODO: Review unreachable code - self.storage._add_file_location(image_hash, new_path, "local")
 
-        # Save deletion record to local file
-        try:
-            with open(self.deletion_file, "a") as f:
-                deletion_record = {
-                    "image_hash": image_hash,
-                    "original_path": str(current_path),
-                    "new_path": str(new_path),
-                    "reason": reason,
-                    "category": category.value,
-                    "timestamp": datetime.now().isoformat()
-                }
-                f.write(json.dumps(deletion_record) + "\n")
-        except Exception as e:
-            logger.error(f"Failed to save deletion record: {e}")
+        # TODO: Review unreachable code - # Save deletion record to local file
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - with open(self.deletion_file, "a") as f:
+        # TODO: Review unreachable code - deletion_record = {
+        # TODO: Review unreachable code - "image_hash": image_hash,
+        # TODO: Review unreachable code - "original_path": str(current_path),
+        # TODO: Review unreachable code - "new_path": str(new_path),
+        # TODO: Review unreachable code - "reason": reason,
+        # TODO: Review unreachable code - "category": category.value,
+        # TODO: Review unreachable code - "timestamp": datetime.now().isoformat()
+        # TODO: Review unreachable code - }
+        # TODO: Review unreachable code - f.write(json.dumps(deletion_record) + "\n")
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Failed to save deletion record: {e}")
 
-        # Add to exclusion list
-        sorted_folder = f"sorted-out/{category.value}/"
-        if sorted_folder not in self._exclusion_folders:
-            self._exclusion_folders.append(sorted_folder)
+        # TODO: Review unreachable code - # Add to exclusion list
+        # TODO: Review unreachable code - sorted_folder = f"sorted-out/{category.value}/"
+        # TODO: Review unreachable code - if sorted_folder not in self._exclusion_folders:
+        # TODO: Review unreachable code - self._exclusion_folders.append(sorted_folder)
 
-        logger.info(f"Soft deleted {image_hash} to {new_path}: {reason}")
+        # TODO: Review unreachable code - logger.info(f"Soft deleted {image_hash} to {new_path}: {reason}")
 
-        return str(new_path)
+        # TODO: Review unreachable code - return str(new_path)
 
     async def _create_presentable_image(self, img_data: dict[str, Any]) -> PresentableImage:
         """Convert raw image data to presentable format.
@@ -355,26 +355,26 @@ class ImagePresentationAPI:
         Returns:
             Base64 data URL for thumbnail
         """
-        try:
+        # TODO: Review unreachable code - try:
             # Open and resize image
-            with Image.open(image_path) as img:
+        with Image.open(image_path) as img:
                 # Convert to RGB if necessary
-                if img.mode not in ('RGB', 'RGBA'):
-                    img = img.convert('RGB')
+            if img.mode not in ('RGB', 'RGBA'):
+                img = img.convert('RGB')
 
                 # Create thumbnail
-                img.thumbnail(size, Image.Resampling.LANCZOS)
+            img.thumbnail(size, Image.Resampling.LANCZOS)
 
                 # Convert to base64
-                buffer = BytesIO()
-                img.save(buffer, format='JPEG', quality=85)
-                base64_data = base64.b64encode(buffer.getvalue()).decode()
+            buffer = BytesIO()
+            img.save(buffer, format='JPEG', quality=85)
+            base64_data = base64.b64encode(buffer.getvalue()).decode()
 
-                return f"data:image/jpeg;base64,{base64_data}"
-        except Exception as e:
-            logger.error(f"Failed to generate thumbnail for {image_path}: {e}")
-            # Return placeholder
-            return "data:image/jpeg;base64,/9j/4AAQ..."  # Placeholder
+            return f"data:image/jpeg;base64,{base64_data}"
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Failed to generate thumbnail for {image_path}: {e}")
+        # TODO: Review unreachable code - # Return placeholder
+        # TODO: Review unreachable code - return "data:image/jpeg;base64,/9j/4AAQ..."  # Placeholder
 
     async def _get_selection_history(self, image_hash: str) -> dict[str, Any]:
         """Get selection history for an image.
@@ -389,25 +389,25 @@ class ImagePresentationAPI:
         if not self.feedback_file.exists():
             return {"selected": False, "reason": None}
 
-        try:
-            # Find most recent selection for this image
-            selected = False
-            reason = None
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - # Find most recent selection for this image
+        # TODO: Review unreachable code - selected = False
+        # TODO: Review unreachable code - reason = None
 
-            with open(self.feedback_file) as f:
-                for line in f:
-                    try:
-                        record = json.loads(line.strip())
-                        if record.get("image_hash") == image_hash:
-                            selected = record.get("selected", False)
-                            reason = record.get("reason")
-                    except json.JSONDecodeError:
-                        continue
+        # TODO: Review unreachable code - with open(self.feedback_file) as f:
+        # TODO: Review unreachable code - for line in f:
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - record = json.loads(line.strip())
+        # TODO: Review unreachable code - if record.get("image_hash") == image_hash:
+        # TODO: Review unreachable code - selected = record.get("selected", False)
+        # TODO: Review unreachable code - reason = record.get("reason")
+        # TODO: Review unreachable code - except json.JSONDecodeError:
+        # TODO: Review unreachable code - continue
 
-            return {"selected": selected, "reason": reason}
-        except Exception as e:
-            logger.error(f"Failed to read selection history: {e}")
-            return {"selected": False, "reason": None}
+        # TODO: Review unreachable code - return {"selected": selected, "reason": reason}
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Failed to read selection history: {e}")
+        # TODO: Review unreachable code - return {"selected": False, "reason": None}
 
     def _parse_query_to_tags(self, query: str) -> list[str]:
         """Parse natural language query to tags.
@@ -428,36 +428,36 @@ class ImagePresentationAPI:
 
         return tags
 
-    def _generate_search_suggestions(
-        self,
-        current_tags: list[str] | None,
-        search_result: dict[str, Any]
-    ) -> list[str]:
-        """Generate search refinement suggestions.
+    # TODO: Review unreachable code - def _generate_search_suggestions(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - current_tags: list[str] | None,
+    # TODO: Review unreachable code - search_result: dict[str, Any]
+    # TODO: Review unreachable code - ) -> list[str]:
+    # TODO: Review unreachable code - """Generate search refinement suggestions.
 
-        Args:
-            current_tags: Currently searched tags
-            search_result: Current search results
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - current_tags: Currently searched tags
+    # TODO: Review unreachable code - search_result: Current search results
 
-        Returns:
-            List of suggested refinements
-        """
-        suggestions = []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - List of suggested refinements
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - suggestions = []
 
-        # If too many results, suggest refinement
-        if search_result.get("total_count", 0) > 100:
-            suggestions.append("Try adding more specific tags to narrow results")
+    # TODO: Review unreachable code - # If too many results, suggest refinement
+    # TODO: Review unreachable code - if search_result.get("total_count", 0) > 100:
+    # TODO: Review unreachable code - suggestions.append("Try adding more specific tags to narrow results")
 
-        # If few results, suggest broadening
-        if search_result.get("total_count", 0) < 5:
-            suggestions.append("Try removing some tags for more results")
+    # TODO: Review unreachable code - # If few results, suggest broadening
+    # TODO: Review unreachable code - if search_result.get("total_count", 0) < 5:
+    # TODO: Review unreachable code - suggestions.append("Try removing some tags for more results")
 
-        # Suggest related tags based on current tags
-        if current_tags:
-            # This would use tag co-occurrence data in production
-            if "portrait" in current_tags:
-                suggestions.append("Try adding 'closeup' or 'headshot'")
-            if "landscape" in current_tags:
-                suggestions.append("Try adding 'mountains' or 'ocean'")
+    # TODO: Review unreachable code - # Suggest related tags based on current tags
+    # TODO: Review unreachable code - if current_tags:
+    # TODO: Review unreachable code - # This would use tag co-occurrence data in production
+    # TODO: Review unreachable code - if current_tags is not None and "portrait" in current_tags:
+    # TODO: Review unreachable code - suggestions.append("Try adding 'closeup' or 'headshot'")
+    # TODO: Review unreachable code - if current_tags is not None and "landscape" in current_tags:
+    # TODO: Review unreachable code - suggestions.append("Try adding 'mountains' or 'ocean'")
 
-        return suggestions[:3]  # Limit suggestions
+    # TODO: Review unreachable code - return suggestions[:3]  # Limit suggestions

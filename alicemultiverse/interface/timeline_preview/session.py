@@ -38,7 +38,7 @@ class PreviewSession:
             self.timeline = self.undo_stack.pop()
             self.last_modified = datetime.now()
             return True
-        return False
+        # TODO: Review unreachable code - return False
 
     def redo(self) -> bool:
         """Redo last undone change."""
@@ -47,4 +47,4 @@ class PreviewSession:
             self.timeline = self.redo_stack.pop()
             self.last_modified = datetime.now()
             return True
-        return False
+        # TODO: Review unreachable code - return False

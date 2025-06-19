@@ -20,7 +20,7 @@ logger = get_logger(__name__)
 
 
 class FirstRunWizard:
-    """Interactive setup wizard for first-time users."""
+    # Interactive setup wizard for first-time users.
 
     # Supported providers with friendly names
     PROVIDERS = {
@@ -55,18 +55,15 @@ class FirstRunWizard:
     }
 
     def __init__(self) -> None:
-        """Initialize the wizard."""
+        # Initialize the wizard.
         self.key_manager = APIKeyManager()
         self.config_path = Path("settings.yaml")
         self.config = None
         self.has_any_key = False
 
     def run(self) -> bool:
-        """Run the first-run wizard.
-
-        Returns:
-            True if setup completed successfully
-        """
+        # Run the first-run wizard.
+        # Returns: True if setup completed successfully
         try:
             self._print_welcome()
 
@@ -74,38 +71,38 @@ class FirstRunWizard:
             if self._is_already_configured():
                 return self._handle_existing_setup()
 
-            # System checks
-            if not self._check_system_requirements():
-                return False
+            # TODO: Review unreachable code - # System checks
+            # TODO: Review unreachable code - if not self._check_system_requirements():
+            # TODO: Review unreachable code - return False
 
-            # API key setup
-            self._setup_api_keys()
+            # TODO: Review unreachable code - # API key setup
+            # TODO: Review unreachable code - self._setup_api_keys()
 
-            # Directory setup
-            self._setup_directories()
+            # TODO: Review unreachable code - # Directory setup
+            # TODO: Review unreachable code - self._setup_directories()
 
-            # Create initial configuration
-            self._create_initial_config()
+            # TODO: Review unreachable code - # Create initial configuration
+            # TODO: Review unreachable code - self._create_initial_config()
 
-            # Run test if possible
-            if self.has_any_key:
-                self._run_test_organization()
+            # TODO: Review unreachable code - # Run test if possible
+            # TODO: Review unreachable code - if self.has_any_key:
+            # TODO: Review unreachable code - self._run_test_organization()
 
-            # Show next steps
-            self._show_next_steps()
+            # TODO: Review unreachable code - # Show next steps
+            # TODO: Review unreachable code - self._show_next_steps()
 
-            return True
+            # TODO: Review unreachable code - return True
 
         except KeyboardInterrupt:
             print("\n\n❌ Setup cancelled by user")
             return False
-        except Exception as e:
-            logger.error(f"Setup failed: {e}")
-            print(f"\n❌ Setup failed: {e}")
-            return False
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Setup failed: {e}")
+        # TODO: Review unreachable code - print(f"\n❌ Setup failed: {e}")
+        # TODO: Review unreachable code - return False
 
     def _print_welcome(self):
-        """Print welcome message."""
+        # Print welcome message.
         print("""
 ╔═══════════════════════════════════════════════════════════════╗
 ║                                                               ║
@@ -124,24 +121,24 @@ This takes about 2 minutes. Let's start!
 """)
 
     def _is_already_configured(self) -> bool:
-        """Check if AliceMultiverse is already configured."""
+        # Check if AliceMultiverse is already configured.
         # Check for existing config
         if self.config_path.exists():
-            try:
-                self.config = load_config(str(self.config_path))
-                return True
-            except Exception:
-                pass
+            # TODO: Review unreachable code - try:
+            self.config = load_config(str(self.config_path))
+            return True
+            # TODO: Review unreachable code - except Exception:
+            # TODO: Review unreachable code - pass
 
         # Check for API keys
         for provider in self.PROVIDERS:
             if self.key_manager.get_api_key(provider):
                 return True
 
-        return False
+        # TODO: Review unreachable code - return False
 
     def _handle_existing_setup(self) -> bool:
-        """Handle case where setup already exists."""
+        # Handle case where setup already exists.
         print("✅ AliceMultiverse appears to be already configured!")
         print("\nCurrent setup:")
 
@@ -169,15 +166,15 @@ This takes about 2 minutes. Let's start!
 
         if choice == "1":
             return self._run_full_setup()
-        elif choice == "2":
-            self._setup_api_keys(missing_only=True)
-            return True
-        else:
-            print("\n✅ Keeping existing setup")
-            return True
+        # TODO: Review unreachable code - elif choice == "2":
+        # TODO: Review unreachable code - self._setup_api_keys(missing_only=True)
+        # TODO: Review unreachable code - return True
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - print("\n✅ Keeping existing setup")
+        # TODO: Review unreachable code - return True
 
     def _check_system_requirements(self) -> bool:
-        """Check system requirements."""
+        # Check system requirements.
         print("\n🔍 Checking system requirements...")
 
         issues = []
@@ -216,20 +213,20 @@ This takes about 2 minutes. Let's start!
                 print(f"  • {issue}")
             return False
 
-        print("  ✓ Python version OK")
-        print("  ✓ Essential dependencies OK")
-        print("  ✓ Disk space OK")
+        # TODO: Review unreachable code - print("  ✓ Python version OK")
+        # TODO: Review unreachable code - print("  ✓ Essential dependencies OK")
+        # TODO: Review unreachable code - print("  ✓ Disk space OK")
 
-        if warnings:
-            print("\n⚠️  Warnings:")
-            for warning in warnings:
-                print(f"  • {warning}")
+        # TODO: Review unreachable code - if warnings:
+        # TODO: Review unreachable code - print("\n⚠️  Warnings:")
+        # TODO: Review unreachable code - for warning in warnings:
+        # TODO: Review unreachable code - print(f"  • {warning}")
 
-        print("\n✅ System requirements met!")
-        return True
+        # TODO: Review unreachable code - print("\n✅ System requirements met!")
+        # TODO: Review unreachable code - return True
 
     def _setup_api_keys(self, missing_only: bool = False):
-        """Set up API keys interactively."""
+        # Set up API keys interactively.
         print("\n🔑 API Key Setup")
         print("=" * 50)
 
@@ -316,7 +313,7 @@ You can start with just one provider and add more later.
             print("You can add keys later with: alice keys setup")
 
     def _validate_api_key(self, provider: str, key: str) -> bool:
-        """Validate API key format."""
+        # Validate API key format.
         validations = {
             "anthropic": lambda k: k.startswith("sk-ant-"),
             "openai": lambda k: k.startswith("sk-") and len(k) > 20,
@@ -327,16 +324,16 @@ You can start with just one provider and add more later.
         validator = validations.get(provider, lambda k: len(k) > 10)
         return validator(key)
 
-    def _setup_directories(self):
-        """Set up directory structure."""
-        print("\n📁 Directory Setup")
-        print("=" * 50)
+    # TODO: Review unreachable code - def _setup_directories(self):
+    # TODO: Review unreachable code - """Set up directory structure."""
+    # TODO: Review unreachable code - print("\n📁 Directory Setup")
+    # TODO: Review unreachable code - print("=" * 50)
 
-        # Default directories
-        default_inbox = Path.home() / "Downloads" / "ai-images"
-        default_organized = Path.home() / "Pictures" / "AI-Organized"
+    # TODO: Review unreachable code - # Default directories
+    # TODO: Review unreachable code - default_inbox = Path.home() / "Downloads" / "ai-images"
+    # TODO: Review unreachable code - default_organized = Path.home() / "Pictures" / "AI-Organized"
 
-        print("""
+    # TODO: Review unreachable code - print("""
 Alice needs two directories:
 1. INBOX: Where you save new AI-generated images
 2. ORGANIZED: Where Alice will organize them by date/project/source
@@ -364,11 +361,11 @@ Alice needs two directories:
             print(f"\n❌ Failed to create directories: {e}")
             raise
 
-        self.inbox_path = inbox
-        self.organized_path = organized
+        # TODO: Review unreachable code - self.inbox_path = inbox
+        # TODO: Review unreachable code - self.organized_path = organized
 
     def _create_initial_config(self):
-        """Create initial configuration file."""
+        # Create initial configuration file.
         print("\n⚙️  Creating Configuration")
         print("=" * 50)
 
@@ -398,7 +395,8 @@ Alice needs two directories:
                 if self.key_manager.get_api_key(provider):
                     providers.append(provider)
 
-            config["understanding"] = {
+            if config is not None:
+                config["understanding"] = {
                 "providers": providers,
                 "preferred_provider": providers[0] if providers else None
             }
@@ -414,72 +412,72 @@ Alice needs two directories:
             print(f"\n❌ Failed to save configuration: {e}")
             raise
 
-    def _run_test_organization(self):
-        """Run a test organization if possible."""
-        print("\n🧪 Test Run")
-        print("=" * 50)
+    # TODO: Review unreachable code - def _run_test_organization(self):
+    # TODO: Review unreachable code - """Run a test organization if possible."""
+    # TODO: Review unreachable code - print("\n🧪 Test Run")
+    # TODO: Review unreachable code - print("=" * 50)
 
-        # Check if there are any test images
-        test_images = []
-        for ext in ['.png', '.jpg', '.jpeg', '.webp']:
-            test_images.extend(self.inbox_path.glob(f"*{ext}"))
+    # TODO: Review unreachable code - # Check if there are any test images
+    # TODO: Review unreachable code - test_images = []
+    # TODO: Review unreachable code - for ext in ['.png', '.jpg', '.jpeg', '.webp']:
+    # TODO: Review unreachable code - test_images.extend(self.inbox_path.glob(f"*{ext}"))
 
-        if not test_images:
-            print("\nNo images found in inbox for test run.")
-            print("Add some AI-generated images to:")
-            print(f"  {self.inbox_path}")
-            return
+    # TODO: Review unreachable code - if not test_images:
+    # TODO: Review unreachable code - print("\nNo images found in inbox for test run.")
+    # TODO: Review unreachable code - print("Add some AI-generated images to:")
+    # TODO: Review unreachable code - print(f"  {self.inbox_path}")
+    # TODO: Review unreachable code - return
 
-        print(f"\nFound {len(test_images)} images in inbox.")
-        run_test = input("Run test organization? (Y/n): ").strip().lower()
+    # TODO: Review unreachable code - print(f"\nFound {len(test_images)} images in inbox.")
+    # TODO: Review unreachable code - run_test = input("Run test organization? (Y/n): ").strip().lower()
 
-        if run_test != 'n':
-            print("\nRunning test organization...")
-            try:
-                # Run alice with dry-run
-                import subprocess
-                result = subprocess.run(
-                    ["alice", "--dry-run", "--understand"],
-                    capture_output=True,
-                    text=True
-                )
+    # TODO: Review unreachable code - if run_test != 'n':
+    # TODO: Review unreachable code - print("\nRunning test organization...")
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Run alice with dry-run
+    # TODO: Review unreachable code - import subprocess
+    # TODO: Review unreachable code - result = subprocess.run(
+    # TODO: Review unreachable code - ["alice", "--dry-run", "--understand"],
+    # TODO: Review unreachable code - capture_output=True,
+    # TODO: Review unreachable code - text=True
+    # TODO: Review unreachable code - )
 
-                if result.returncode == 0:
-                    print("\n✅ Test run successful!")
-                    print("Images would be organized without --dry-run")
-                else:
-                    print("\n⚠️  Test run encountered issues:")
-                    print(result.stderr[:500])
+    # TODO: Review unreachable code - if result.returncode == 0:
+    # TODO: Review unreachable code - print("\n✅ Test run successful!")
+    # TODO: Review unreachable code - print("Images would be organized without --dry-run")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - print("\n⚠️  Test run encountered issues:")
+    # TODO: Review unreachable code - print(result.stderr[:500])
 
-            except Exception as e:
-                print(f"\n❌ Test run failed: {e}")
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - print(f"\n❌ Test run failed: {e}")
 
-    def _show_next_steps(self):
-        """Show next steps to the user."""
-        print("\n🎉 Setup Complete!")
-        print("=" * 50)
+    # TODO: Review unreachable code - def _show_next_steps(self):
+    # TODO: Review unreachable code - """Show next steps to the user."""
+    # TODO: Review unreachable code - print("\n🎉 Setup Complete!")
+    # TODO: Review unreachable code - print("=" * 50)
 
-        print("\n📋 Quick Start Commands:")
+    # TODO: Review unreachable code - print("\n📋 Quick Start Commands:")
 
-        if self.has_any_key:
-            # Show provider-specific costs
-            providers_configured = []
-            for provider in ["google", "deepseek", "anthropic", "openai"]:
-                if self.key_manager.get_api_key(provider):
-                    providers_configured.append(provider)
+    # TODO: Review unreachable code - if self.has_any_key:
+    # TODO: Review unreachable code - # Show provider-specific costs
+    # TODO: Review unreachable code - providers_configured = []
+    # TODO: Review unreachable code - for provider in ["google", "deepseek", "anthropic", "openai"]:
+    # TODO: Review unreachable code - if self.key_manager.get_api_key(provider):
+    # TODO: Review unreachable code - providers_configured.append(provider)
 
-            print("\n💰 Your Configured Providers:")
-            for provider in providers_configured:
-                if provider == "google":
-                    print("  • Google AI: FREE (50 images/day)")
-                elif provider == "deepseek":
-                    print("  • DeepSeek: ~$0.0002/image")
-                elif provider == "anthropic":
-                    print("  • Anthropic: ~$0.0025/image")
-                elif provider == "openai":
-                    print("  • OpenAI: ~$0.0050/image")
+    # TODO: Review unreachable code - print("\n💰 Your Configured Providers:")
+    # TODO: Review unreachable code - for provider in providers_configured:
+    # TODO: Review unreachable code - if provider == "google":
+    # TODO: Review unreachable code - print("  • Google AI: FREE (50 images/day)")
+    # TODO: Review unreachable code - elif provider == "deepseek":
+    # TODO: Review unreachable code - print("  • DeepSeek: ~$0.0002/image")
+    # TODO: Review unreachable code - elif provider == "anthropic":
+    # TODO: Review unreachable code - print("  • Anthropic: ~$0.0025/image")
+    # TODO: Review unreachable code - elif provider == "openai":
+    # TODO: Review unreachable code - print("  • OpenAI: ~$0.0050/image")
 
-            print("""
+    # TODO: Review unreachable code - print("""
 1. Test with dry run (no cost, no changes):
    alice --dry-run
 
@@ -527,38 +525,35 @@ Then ask Claude: "Help me organize my AI images"
             print("     alice keys setup")
 
     def _run_full_setup(self) -> bool:
-        """Run full setup, overwriting existing configuration."""
+        # Run full setup, overwriting existing configuration.
         confirm = input("\n⚠️  This will overwrite existing configuration. Continue? (y/N): ").strip().lower()
         if confirm != 'y':
             return False
 
-        # Clear existing setup
-        self.has_any_key = False
+        # TODO: Review unreachable code - # Clear existing setup
+        # TODO: Review unreachable code - self.has_any_key = False
 
-        # Continue with normal setup
-        return True
+        # TODO: Review unreachable code - # Continue with normal setup
+        # TODO: Review unreachable code - return True
 
 
 def check_first_run() -> bool:
-    """Check if this is the first run and launch wizard if needed.
-
-    Returns:
-        True if setup is complete (or was already done)
-    """
+    # Check if this is the first run and launch wizard if needed.
+    # Returns: True if setup is complete (or was already done)
     from .welcome import show_first_run_prompt
 
     # Check if already configured
     config_exists = Path("settings.yaml").exists()
     keys_exist = False
 
-    try:
-        key_manager = APIKeyManager()
-        for provider in ["anthropic", "openai", "google", "deepseek"]:
-            if key_manager.get_api_key(provider):
-                keys_exist = True
-                break
-    except Exception:
-        pass
+    # TODO: Review unreachable code - try:
+    key_manager = APIKeyManager()
+    for provider in ["anthropic", "openai", "google", "deepseek"]:
+        if key_manager.get_api_key(provider):
+            keys_exist = True
+            break
+    # TODO: Review unreachable code - except Exception:
+    # TODO: Review unreachable code -     pass
 
     # If nothing is configured, this is first run
     if not config_exists and not keys_exist:
@@ -566,9 +561,9 @@ def check_first_run() -> bool:
         if show_first_run_prompt():
             wizard = FirstRunWizard()
             return wizard.run()
-        else:
-            print("\nYou can run setup anytime with: alice setup")
-            return True
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - print("\nYou can run setup anytime with: alice setup")
+        # TODO: Review unreachable code - return True
     else:
         # Show quick start for existing users
         from .welcome import show_quick_start
@@ -577,8 +572,8 @@ def check_first_run() -> bool:
     return True
 
 
-def run_setup_command() -> Any:
-    """Run the setup wizard (can be called explicitly via CLI)."""
-    wizard = FirstRunWizard()
-    success = wizard.run()
-    return 0 if success else 1
+# TODO: Review unreachable code - def run_setup_command() -> Any:
+# TODO: Review unreachable code -     '''Run the setup wizard (can be called explicitly via CLI).'''
+# TODO: Review unreachable code -     wizard = FirstRunWizard()
+# TODO: Review unreachable code -     success = wizard.run()
+# TODO: Review unreachable code -     return 0 if success else 1

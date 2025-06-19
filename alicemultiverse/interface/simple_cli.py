@@ -53,68 +53,68 @@ Essential commands:
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Simplified main entry point."""
-    parser = create_parser()
-    args = parser.parse_args(argv)
+# TODO: Review unreachable code - def main(argv: list[str] | None = None) -> int:
+# TODO: Review unreachable code - """Simplified main entry point."""
+# TODO: Review unreachable code - parser = create_parser()
+# TODO: Review unreachable code - args = parser.parse_args(argv)
 
-    # Configure logging
-    level = logging.DEBUG if args.debug else logging.INFO if args.verbose else logging.WARNING
-    logging.basicConfig(level=level, format='%(message)s')
+# TODO: Review unreachable code - # Configure logging
+# TODO: Review unreachable code - level = logging.DEBUG if args.debug else logging.INFO if args.verbose else logging.WARNING
+# TODO: Review unreachable code - logging.basicConfig(level=level, format='%(message)s')
 
-    try:
-        # Handle MCP server
-        if args.command == "mcp-server":
-            logger.info("Starting MCP server...")
-            from ..mcp_server import main as mcp_main
-            return mcp_main()
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - # Handle MCP server
+# TODO: Review unreachable code - if args.command == "mcp-server":
+# TODO: Review unreachable code - logger.info("Starting MCP server...")
+# TODO: Review unreachable code - from ..mcp_server import main as mcp_main
+# TODO: Review unreachable code - return mcp_main()
 
-        # Handle keys
-        elif args.command == "keys":
-            from ..core.keys.cli import run_keys_command
-            return run_keys_command(args)
+# TODO: Review unreachable code - # Handle keys
+# TODO: Review unreachable code - elif args.command == "keys":
+# TODO: Review unreachable code - from ..core.keys.cli import run_keys_command
+# TODO: Review unreachable code - return run_keys_command(args)
 
-        # Handle basic organization (debug mode)
-        elif args.inbox or args.output:
-            if not args.debug:
-                logger.warning("⚠️  Direct CLI usage is deprecated! Use --debug flag for debugging.")
-                logger.warning("For normal usage, configure Alice with Claude Desktop.")
-                return 1
+# TODO: Review unreachable code - # Handle basic organization (debug mode)
+# TODO: Review unreachable code - elif args.inbox or args.output:
+# TODO: Review unreachable code - if not args.debug:
+# TODO: Review unreachable code - logger.warning("⚠️  Direct CLI usage is deprecated! Use --debug flag for debugging.")
+# TODO: Review unreachable code - logger.warning("For normal usage, configure Alice with Claude Desktop.")
+# TODO: Review unreachable code - return 1
 
-            from ..organizer.media_organizer import MediaOrganizer
-            config = load_config()
+# TODO: Review unreachable code - from ..organizer.media_organizer import MediaOrganizer
+# TODO: Review unreachable code - config = load_config()
 
-            # Override paths if provided
-            if args.inbox:
-                config.paths.inbox = Path(args.inbox)
-            if args.output:
-                config.paths.organized = Path(args.output)
+# TODO: Review unreachable code - # Override paths if provided
+# TODO: Review unreachable code - if args.inbox:
+# TODO: Review unreachable code - config.paths.inbox = Path(args.inbox)
+# TODO: Review unreachable code - if args.output:
+# TODO: Review unreachable code - config.paths.organized = Path(args.output)
 
-            organizer = MediaOrganizer(
-                config,
-                dry_run=args.dry_run,
-                watch_mode=args.watch,
-                enable_understanding=args.understand
-            )
+# TODO: Review unreachable code - organizer = MediaOrganizer(
+# TODO: Review unreachable code - config,
+# TODO: Review unreachable code - dry_run=args.dry_run,
+# TODO: Review unreachable code - watch_mode=args.watch,
+# TODO: Review unreachable code - enable_understanding=args.understand
+# TODO: Review unreachable code - )
 
-            results = organizer.organize()
-            logger.info(f"Organized {results.statistics['organized']} files")
-            return 0
+# TODO: Review unreachable code - results = organizer.organize()
+# TODO: Review unreachable code - logger.info(f"Organized {results.statistics['organized']} files")
+# TODO: Review unreachable code - return 0
 
-        else:
-            parser.print_help()
-            return 0
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - parser.print_help()
+# TODO: Review unreachable code - return 0
 
-    except AliceMultiverseError as e:
-        logger.error(f"Error: {e}")
-        return 1
-    except KeyboardInterrupt:
-        logger.info("\nInterrupted by user")
-        return 130
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}", exc_info=args.debug)
-        return 1
+# TODO: Review unreachable code - except AliceMultiverseError as e:
+# TODO: Review unreachable code - logger.error(f"Error: {e}")
+# TODO: Review unreachable code - return 1
+# TODO: Review unreachable code - except KeyboardInterrupt:
+# TODO: Review unreachable code - logger.info("\nInterrupted by user")
+# TODO: Review unreachable code - return 130
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Unexpected error: {e}", exc_info=args.debug)
+# TODO: Review unreachable code - return 1
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+# TODO: Review unreachable code - if __name__ == "__main__":
+# TODO: Review unreachable code - sys.exit(main())

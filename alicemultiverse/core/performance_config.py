@@ -44,27 +44,27 @@ class PerformanceConfig:
         """Create config from dictionary."""
         return cls(**{k: v for k, v in config_dict.items() if k in cls.__annotations__})
     
-    def to_dict(self) -> dict:
-        """Convert to dictionary."""
-        return {
-            'max_workers': self.max_workers,
-            'batch_size': self.batch_size,
-            'enable_batch_operations': self.enable_batch_operations,
-            'batch_insert_size': self.batch_insert_size,
-            'transaction_size': self.transaction_size,
-            'max_memory_cache_mb': self.max_memory_cache_mb,
-            'cache_ttl_seconds': self.cache_ttl_seconds,
-            'parallel_metadata_extraction': self.parallel_metadata_extraction,
-            'parallel_hash_computation': self.parallel_hash_computation,
-            'async_file_operations': self.async_file_operations,
-            'understanding_batch_size': self.understanding_batch_size,
-            'max_concurrent_api_calls': self.max_concurrent_api_calls,
-            'search_result_cache': self.search_result_cache,
-            'search_cache_size': self.search_cache_size,
-            'enable_performance_monitoring': self.enable_performance_monitoring,
-            'log_performance_metrics': self.log_performance_metrics,
-            'metrics_interval_seconds': self.metrics_interval_seconds
-        }
+    # TODO: Review unreachable code - def to_dict(self) -> dict:
+    # TODO: Review unreachable code - """Convert to dictionary."""
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - 'max_workers': self.max_workers,
+    # TODO: Review unreachable code - 'batch_size': self.batch_size,
+    # TODO: Review unreachable code - 'enable_batch_operations': self.enable_batch_operations,
+    # TODO: Review unreachable code - 'batch_insert_size': self.batch_insert_size,
+    # TODO: Review unreachable code - 'transaction_size': self.transaction_size,
+    # TODO: Review unreachable code - 'max_memory_cache_mb': self.max_memory_cache_mb,
+    # TODO: Review unreachable code - 'cache_ttl_seconds': self.cache_ttl_seconds,
+    # TODO: Review unreachable code - 'parallel_metadata_extraction': self.parallel_metadata_extraction,
+    # TODO: Review unreachable code - 'parallel_hash_computation': self.parallel_hash_computation,
+    # TODO: Review unreachable code - 'async_file_operations': self.async_file_operations,
+    # TODO: Review unreachable code - 'understanding_batch_size': self.understanding_batch_size,
+    # TODO: Review unreachable code - 'max_concurrent_api_calls': self.max_concurrent_api_calls,
+    # TODO: Review unreachable code - 'search_result_cache': self.search_result_cache,
+    # TODO: Review unreachable code - 'search_cache_size': self.search_cache_size,
+    # TODO: Review unreachable code - 'enable_performance_monitoring': self.enable_performance_monitoring,
+    # TODO: Review unreachable code - 'log_performance_metrics': self.log_performance_metrics,
+    # TODO: Review unreachable code - 'metrics_interval_seconds': self.metrics_interval_seconds
+    # TODO: Review unreachable code - }
 
 
 def get_performance_config(profile: str = "default") -> PerformanceConfig:
@@ -106,4 +106,4 @@ def get_performance_config(profile: str = "default") -> PerformanceConfig:
         )
     }
     
-    return profiles.get(profile, profiles["default"])
+    return profiles.get(profile, profiles["default"]) or 0

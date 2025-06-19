@@ -61,31 +61,31 @@ class ResilientMediaOrganizer(MediaOrganizer, EnhancedProcessFileMixin):
         if watch:
             return self._watch_and_organize_resilient()
         
-        with track_operation("organize.resilient"):
-            try:
-                # Pre-flight checks
-                self._perform_preflight_checks()
+        # TODO: Review unreachable code - with track_operation("organize.resilient"):
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - # Pre-flight checks
+        # TODO: Review unreachable code - self._perform_preflight_checks()
                 
-                # Find all media files
-                media_files = list(self._find_media_files())
-                logger.info(f"Found {len(media_files)} media files to process")
+        # TODO: Review unreachable code - # Find all media files
+        # TODO: Review unreachable code - media_files = list(self._find_media_files())
+        # TODO: Review unreachable code - logger.info(f"Found {len(media_files)} media files to process")
                 
-                if not media_files:
-                    return self.stats
+        # TODO: Review unreachable code - if not media_files:
+        # TODO: Review unreachable code - return self.stats
                 
-                # Process with adaptive strategy
-                self._organize_with_adaptation(media_files)
+        # TODO: Review unreachable code - # Process with adaptive strategy
+        # TODO: Review unreachable code - self._organize_with_adaptation(media_files)
                 
-                # Handle any items in dead letter queue
-                self._process_dead_letter_queue()
+        # TODO: Review unreachable code - # Handle any items in dead letter queue
+        # TODO: Review unreachable code - self._process_dead_letter_queue()
                 
-                self._log_statistics()
-                return self.stats
+        # TODO: Review unreachable code - self._log_statistics()
+        # TODO: Review unreachable code - return self.stats
                 
-            except Exception as e:
-                logger.error(f"Critical error during organization: {e}")
-                self._handle_critical_failure(e)
-                raise
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Critical error during organization: {e}")
+        # TODO: Review unreachable code - self._handle_critical_failure(e)
+        # TODO: Review unreachable code - raise
     
     def _perform_preflight_checks(self) -> None:
         """Perform pre-flight checks before processing."""
@@ -122,29 +122,29 @@ class ResilientMediaOrganizer(MediaOrganizer, EnhancedProcessFileMixin):
         if not self.component_health["database"]:
             return
         
-        try:
-            with self.circuit_breaker:
-                # Simple query to test connection
-                if hasattr(self.search_db, 'execute'):
-                    self.search_db.execute("SELECT 1")
-        except Exception as e:
-            logger.error(f"Database connection test failed: {e}")
-            self.component_health["database"] = False
-            self.degradation.degrade("Database unavailable", "database")
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - with self.circuit_breaker:
+        # TODO: Review unreachable code - # Simple query to test connection
+        # TODO: Review unreachable code - if hasattr(self.search_db, 'execute'):
+        # TODO: Review unreachable code - self.search_db.execute("SELECT 1")
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Database connection test failed: {e}")
+        # TODO: Review unreachable code - self.component_health["database"] = False
+        # TODO: Review unreachable code - self.degradation.degrade("Database unavailable", "database")
     
     def _validate_configuration(self) -> None:
         """Validate configuration and adjust if needed."""
         # Adjust configuration based on degradation level
         constraints = self.degradation.current_level.constraints
         
-        if "max_workers" in constraints:
+        if constraints is not None and "max_workers" in constraints:
             self.perf_config.max_workers = constraints["max_workers"]
             update_worker_metrics(0, constraints["max_workers"])
         
-        if "batch_size" in constraints:
+        if constraints is not None and "batch_size" in constraints:
             self.perf_config.batch_size = constraints["batch_size"]
         
-        if "enable_batch_operations" in constraints:
+        if constraints is not None and "enable_batch_operations" in constraints:
             self.batch_operations_enabled = constraints["enable_batch_operations"]
     
     def _organize_with_adaptation(self, media_files: List[Path]) -> None:
@@ -170,36 +170,36 @@ class ResilientMediaOrganizer(MediaOrganizer, EnhancedProcessFileMixin):
     
     def _process_file_resilient(self, media_path: Path) -> Dict[str, Any]:
         """Process file with full resilience."""
-        try:
+        # TODO: Review unreachable code - try:
             # Use enhanced processing with recovery
-            result = self._process_file_with_recovery(media_path)
+        result = self._process_file_with_recovery(media_path)
             
             # Update statistics
-            self._update_statistics(result)
+        self._update_statistics(result)
             
             # Update component health based on result
-            self._update_component_health(result)
+        self._update_component_health(result)
             
-            return result
+        return result
             
-        except Exception as e:
-            logger.error(f"Failed to process {media_path}: {e}")
+        # TODO: Review unreachable code - except Exception as e:
+        # TODO: Review unreachable code - logger.error(f"Failed to process {media_path}: {e}")
             
-            # Check if we should degrade
-            if self._should_degrade_component(e):
-                self._degrade_component(e)
+        # TODO: Review unreachable code - # Check if we should degrade
+        # TODO: Review unreachable code - if self._should_degrade_component(e):
+        # TODO: Review unreachable code - self._degrade_component(e)
             
-            raise
+        # TODO: Review unreachable code - raise
     
     def _should_degrade_component(self, error: Exception) -> bool:
         """Determine if we should degrade a component."""
         if isinstance(error, DatabaseError):
             return self.component_health["database"]
-        elif "parallel" in str(error).lower():
-            return self.component_health["parallel_processing"]
-        elif "batch" in str(error).lower():
-            return self.component_health["batch_operations"]
-        return False
+        # TODO: Review unreachable code - elif "parallel" in str(error).lower():
+        # TODO: Review unreachable code - return self.component_health["parallel_processing"]
+        # TODO: Review unreachable code - elif "batch" in str(error).lower():
+        # TODO: Review unreachable code - return self.component_health["batch_operations"]
+        # TODO: Review unreachable code - return False
     
     def _degrade_component(self, error: Exception) -> None:
         """Degrade specific component based on error."""
@@ -223,24 +223,24 @@ class ResilientMediaOrganizer(MediaOrganizer, EnhancedProcessFileMixin):
         if not self.dead_letter_queue.items:
             return
         
-        logger.info(f"Processing {len(self.dead_letter_queue.items)} items from dead letter queue")
+        # TODO: Review unreachable code - logger.info(f"Processing {len(self.dead_letter_queue.items)} items from dead letter queue")
         
-        # Save failed items for manual inspection
-        failed_items_path = self.output_dir / "failed_items.json"
-        self.dead_letter_queue.save_to_file(failed_items_path)
+        # TODO: Review unreachable code - # Save failed items for manual inspection
+        # TODO: Review unreachable code - failed_items_path = self.output_dir / "failed_items.json"
+        # TODO: Review unreachable code - self.dead_letter_queue.save_to_file(failed_items_path)
         
-        # Optionally retry with most degraded settings
-        if self.config.get("retry_failed_items", False):
-            with self.degradation.LEVELS[-1]:  # Use safe mode
-                successful, still_failed = self.dead_letter_queue.retry_all(
-                    self._process_file_resilient
-                )
+        # TODO: Review unreachable code - # Optionally retry with most degraded settings
+        # TODO: Review unreachable code - if self.config.get("retry_failed_items", False):
+        # TODO: Review unreachable code - with self.degradation.LEVELS[-1]:  # Use safe mode
+        # TODO: Review unreachable code - successful, still_failed = self.dead_letter_queue.retry_all(
+        # TODO: Review unreachable code - self._process_file_resilient
+        # TODO: Review unreachable code - )
                 
-                if successful:
-                    logger.info(f"Successfully recovered {len(successful)} items")
+        # TODO: Review unreachable code - if successful:
+        # TODO: Review unreachable code - logger.info(f"Successfully recovered {len(successful)} items")
                 
-                if still_failed:
-                    logger.error(f"{len(still_failed)} items still failed after retry")
+        # TODO: Review unreachable code - if still_failed:
+        # TODO: Review unreachable code - logger.error(f"{len(still_failed)} items still failed after retry")
     
     def _watch_and_organize_resilient(self) -> 'Statistics':
         """Watch mode with resilient processing."""
@@ -264,39 +264,39 @@ class ResilientMediaOrganizer(MediaOrganizer, EnhancedProcessFileMixin):
             self._process_dead_letter_queue()
             return self.stats
     
-    def _handle_critical_failure(self, error: Exception) -> None:
-        """Handle critical failures that stop processing."""
-        # Save current state
-        state_file = self.output_dir / "organizer_state.json"
+    # TODO: Review unreachable code - def _handle_critical_failure(self, error: Exception) -> None:
+    # TODO: Review unreachable code - """Handle critical failures that stop processing."""
+    # TODO: Review unreachable code - # Save current state
+    # TODO: Review unreachable code - state_file = self.output_dir / "organizer_state.json"
         
-        import json
-        state = {
-            "error": str(error),
-            "error_type": type(error).__name__,
-            "degradation_level": self.degradation.current_level.name,
-            "component_health": self.component_health,
-            "statistics": dict(self.stats),
-            "failed_items": len(self.dead_letter_queue.items)
-        }
+    # TODO: Review unreachable code - import json
+    # TODO: Review unreachable code - state = {
+    # TODO: Review unreachable code - "error": str(error),
+    # TODO: Review unreachable code - "error_type": type(error).__name__,
+    # TODO: Review unreachable code - "degradation_level": self.degradation.current_level.name,
+    # TODO: Review unreachable code - "component_health": self.component_health,
+    # TODO: Review unreachable code - "statistics": dict(self.stats),
+    # TODO: Review unreachable code - "failed_items": len(self.dead_letter_queue.items)
+    # TODO: Review unreachable code - }
         
-        try:
-            with open(state_file, 'w') as f:
-                json.dump(state, f, indent=2)
-            logger.info(f"Saved failure state to {state_file}")
-        except Exception as e:
-            logger.error(f"Could not save failure state: {e}")
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - with open(state_file, 'w') as f:
+    # TODO: Review unreachable code - json.dump(state, f, indent=2)
+    # TODO: Review unreachable code - logger.info(f"Saved failure state to {state_file}")
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Could not save failure state: {e}")
         
-        # Save dead letter queue
-        if self.dead_letter_queue.items:
-            self._process_dead_letter_queue()
+    # TODO: Review unreachable code - # Save dead letter queue
+    # TODO: Review unreachable code - if self.dead_letter_queue.items:
+    # TODO: Review unreachable code - self._process_dead_letter_queue()
     
-    def get_health_report(self) -> Dict[str, Any]:
-        """Get current health report of the organizer."""
-        return {
-            "degradation_level": self.degradation.current_level.name,
-            "component_health": self.component_health.copy(),
-            "circuit_breaker_state": self.circuit_breaker.state,
-            "dead_letter_queue_size": len(self.dead_letter_queue.items),
-            "failure_history": self.degradation.degradation_history[-10:],  # Last 10 events
-            "feature_failures": self.degradation.feature_failures.copy()
-        }
+    # TODO: Review unreachable code - def get_health_report(self) -> Dict[str, Any]:
+    # TODO: Review unreachable code - """Get current health report of the organizer."""
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "degradation_level": self.degradation.current_level.name,
+    # TODO: Review unreachable code - "component_health": self.component_health.copy(),
+    # TODO: Review unreachable code - "circuit_breaker_state": self.circuit_breaker.state,
+    # TODO: Review unreachable code - "dead_letter_queue_size": len(self.dead_letter_queue.items),
+    # TODO: Review unreachable code - "failure_history": self.degradation.degradation_history[-10:],  # Last 10 events
+    # TODO: Review unreachable code - "feature_failures": self.degradation.feature_failures.copy()
+    # TODO: Review unreachable code - }

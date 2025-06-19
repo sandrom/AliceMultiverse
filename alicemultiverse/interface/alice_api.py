@@ -110,110 +110,110 @@ class AliceAPI:
         return result
 
 
-# Convenience functions for even simpler usage
+# TODO: Review unreachable code - # Convenience functions for even simpler usage
 
 
-async def ask_alice(message: str, project: str | None = None) -> dict[str, Any]:
-    """One-line helper to ask Alice anything.
+# TODO: Review unreachable code - async def ask_alice(message: str, project: str | None = None) -> dict[str, Any]:
+# TODO: Review unreachable code - """One-line helper to ask Alice anything.
 
-    Args:
-        message: What you want to ask
-        project: Optional project context
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - message: What you want to ask
+# TODO: Review unreachable code - project: Optional project context
 
-    Returns:
-        Alice's response
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Alice's response
 
-    Example:
-        result = await ask_alice("Find all the cyberpunk images from last week")
-    """
-    api = AliceAPI(project)
-    return await api.request(message)
-
-
-def ask_alice_sync(message: str, project: str | None = None) -> dict[str, Any]:
-    """Synchronous version for non-async contexts.
-
-    Args:
-        message: What you want to ask
-        project: Optional project context
-
-    Returns:
-        Alice's response
-
-    Example:
-        result = ask_alice_sync("Create a variation of the last image")
-    """
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    result = loop.run_until_complete(ask_alice(message, project))
-    loop.close()
-    return result
+# TODO: Review unreachable code - Example:
+# TODO: Review unreachable code - result = await ask_alice("Find all the cyberpunk images from last week")
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - api = AliceAPI(project)
+# TODO: Review unreachable code - return await api.request(message)
 
 
-# MCP (Model Context Protocol) Integration Helper
+# TODO: Review unreachable code - def ask_alice_sync(message: str, project: str | None = None) -> dict[str, Any]:
+# TODO: Review unreachable code - """Synchronous version for non-async contexts.
+
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - message: What you want to ask
+# TODO: Review unreachable code - project: Optional project context
+
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Alice's response
+
+# TODO: Review unreachable code - Example:
+# TODO: Review unreachable code - result = ask_alice_sync("Create a variation of the last image")
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - loop = asyncio.new_event_loop()
+# TODO: Review unreachable code - asyncio.set_event_loop(loop)
+# TODO: Review unreachable code - result = loop.run_until_complete(ask_alice(message, project))
+# TODO: Review unreachable code - loop.close()
+# TODO: Review unreachable code - return result
 
 
-class AliceMCP:
-    """Helper for MCP integration.
+# TODO: Review unreachable code - # MCP (Model Context Protocol) Integration Helper
 
-    This class provides MCP-compatible methods that can be exposed
-    as tools to AI assistants like Claude.
-    """
 
-    def __init__(self, project_id: str | None = None) -> None:
-        self.api = AliceAPI(project_id)
+# TODO: Review unreachable code - class AliceMCP:
+# TODO: Review unreachable code - """Helper for MCP integration.
 
-    def search(self, query: str) -> dict[str, Any]:
-        """Search for assets using natural language.
+# TODO: Review unreachable code - This class provides MCP-compatible methods that can be exposed
+# TODO: Review unreachable code - as tools to AI assistants like Claude.
+# TODO: Review unreachable code - """
 
-        Args:
-            query: Natural language search query
+# TODO: Review unreachable code - def __init__(self, project_id: str | None = None) -> None:
+# TODO: Review unreachable code - self.api = AliceAPI(project_id)
 
-        Returns:
-            Search results with assets and suggestions
-        """
-        return ask_alice_sync(f"Find {query}")
+# TODO: Review unreachable code - def search(self, query: str) -> dict[str, Any]:
+# TODO: Review unreachable code - """Search for assets using natural language.
 
-    def create(self, description: str) -> dict[str, Any]:
-        """Create new content from description.
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - query: Natural language search query
 
-        Args:
-            description: What to create
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Search results with assets and suggestions
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - return ask_alice_sync(f"Find {query}")
 
-        Returns:
-            Creation status and workflow information
-        """
-        return ask_alice_sync(f"Create {description}")
+# TODO: Review unreachable code - def create(self, description: str) -> dict[str, Any]:
+# TODO: Review unreachable code - """Create new content from description.
 
-    def remember(self, topic: str = "recent work") -> dict[str, Any]:
-        """Remember past work and context.
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - description: What to create
 
-        Args:
-            topic: What to remember about
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Creation status and workflow information
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - return ask_alice_sync(f"Create {description}")
 
-        Returns:
-            Memory and context information
-        """
-        return ask_alice_sync(f"Remember our {topic}")
+# TODO: Review unreachable code - def remember(self, topic: str = "recent work") -> dict[str, Any]:
+# TODO: Review unreachable code - """Remember past work and context.
 
-    def organize(self, instruction: str = "media files") -> dict[str, Any]:
-        """Organize assets based on instruction.
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - topic: What to remember about
 
-        Args:
-            instruction: Organization instruction
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Memory and context information
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - return ask_alice_sync(f"Remember our {topic}")
 
-        Returns:
-            Organization status
-        """
-        return ask_alice_sync(f"Organize {instruction}")
+# TODO: Review unreachable code - def organize(self, instruction: str = "media files") -> dict[str, Any]:
+# TODO: Review unreachable code - """Organize assets based on instruction.
 
-    def explore(self, starting_point: str) -> dict[str, Any]:
-        """Explore variations and related content.
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - instruction: Organization instruction
 
-        Args:
-            starting_point: What to explore from
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Organization status
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - return ask_alice_sync(f"Organize {instruction}")
 
-        Returns:
-            Exploration results and suggestions
-        """
-        return ask_alice_sync(f"Explore variations of {starting_point}")
+# TODO: Review unreachable code - def explore(self, starting_point: str) -> dict[str, Any]:
+# TODO: Review unreachable code - """Explore variations and related content.
+
+# TODO: Review unreachable code - Args:
+# TODO: Review unreachable code - starting_point: What to explore from
+
+# TODO: Review unreachable code - Returns:
+# TODO: Review unreachable code - Exploration results and suggestions
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - return ask_alice_sync(f"Explore variations of {starting_point}")

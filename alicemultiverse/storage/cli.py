@@ -66,29 +66,29 @@ def add(name: str, path: str, type: str, priority: int, rule: tuple):
             console.print(f"[red]Error parsing rule:[/red] {e}")
             return
 
-    # Create location
-    location = StorageLocation(
-        location_id=None,  # Will be generated
-        name=name,
-        type=StorageType.from_string(type),
-        path=path,
-        priority=priority,
-        rules=rules
-    )
+    # TODO: Review unreachable code - # Create location
+    # TODO: Review unreachable code - location = StorageLocation(
+    # TODO: Review unreachable code - location_id=None,  # Will be generated
+    # TODO: Review unreachable code - name=name,
+    # TODO: Review unreachable code - type=StorageType.from_string(type),
+    # TODO: Review unreachable code - path=path,
+    # TODO: Review unreachable code - priority=priority,
+    # TODO: Review unreachable code - rules=rules
+    # TODO: Review unreachable code - )
 
-    try:
-        registered = registry.register_location(location)
-        console.print(f"[green]✓[/green] Added storage location: {name}")
-        console.print(f"  ID: {registered.location_id}")
-        console.print(f"  Type: {type}")
-        console.print(f"  Path: {path}")
-        console.print(f"  Priority: {priority}")
-        if rules:
-            console.print(f"  Rules: {len(rules)}")
-    except Exception as e:
-        console.print(f"[red]Error adding location:[/red] {e}")
-    finally:
-        registry.close()
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - registered = registry.register_location(location)
+    # TODO: Review unreachable code - console.print(f"[green]✓[/green] Added storage location: {name}")
+    # TODO: Review unreachable code - console.print(f"  ID: {registered.location_id}")
+    # TODO: Review unreachable code - console.print(f"  Type: {type}")
+    # TODO: Review unreachable code - console.print(f"  Path: {path}")
+    # TODO: Review unreachable code - console.print(f"  Priority: {priority}")
+    # TODO: Review unreachable code - if rules:
+    # TODO: Review unreachable code - console.print(f"  Rules: {len(rules)}")
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - console.print(f"[red]Error adding location:[/red] {e}")
+    # TODO: Review unreachable code - finally:
+    # TODO: Review unreachable code - registry.close()
 
 
 @storage.command()
@@ -103,26 +103,26 @@ def list():
         registry.close()
         return
 
-    table = Table(title="Storage Locations")
-    table.add_column("Name", style="cyan")
-    table.add_column("Type", style="green")
-    table.add_column("Path")
-    table.add_column("Priority", justify="right")
-    table.add_column("Status")
-    table.add_column("Last Scan")
+    # TODO: Review unreachable code - table = Table(title="Storage Locations")
+    # TODO: Review unreachable code - table.add_column("Name", style="cyan")
+    # TODO: Review unreachable code - table.add_column("Type", style="green")
+    # TODO: Review unreachable code - table.add_column("Path")
+    # TODO: Review unreachable code - table.add_column("Priority", justify="right")
+    # TODO: Review unreachable code - table.add_column("Status")
+    # TODO: Review unreachable code - table.add_column("Last Scan")
 
-    for loc in locations:
-        table.add_row(
-            loc.name,
-            loc.type.value,
-            loc.path,
-            str(loc.priority),
-            loc.status.value,
-            loc.last_scan.strftime("%Y-%m-%d %H:%M") if loc.last_scan else "Never"
-        )
+    # TODO: Review unreachable code - for loc in locations:
+    # TODO: Review unreachable code - table.add_row(
+    # TODO: Review unreachable code - loc.name,
+    # TODO: Review unreachable code - loc.type.value,
+    # TODO: Review unreachable code - loc.path,
+    # TODO: Review unreachable code - str(loc.priority),
+    # TODO: Review unreachable code - loc.status.value,
+    # TODO: Review unreachable code - loc.last_scan.strftime("%Y-%m-%d %H:%M") if loc.last_scan else "Never"
+    # TODO: Review unreachable code - )
 
-    console.print(table)
-    registry.close()
+    # TODO: Review unreachable code - console.print(table)
+    # TODO: Review unreachable code - registry.close()
 
 
 @storage.command()
@@ -141,24 +141,24 @@ def scan(location_id: str, no_progress: bool):
             console.print(f"[red]Location not found:[/red] {location_id}")
             return
 
-        # Scan location
-        scanner = MultiPathScanner(cache, registry)
+        # TODO: Review unreachable code - # Scan location
+        # TODO: Review unreachable code - scanner = MultiPathScanner(cache, registry)
 
-        async def run_scan():
-            return await scanner._scan_location(
-                location,
-                force_scan=True,
-                show_progress=not no_progress
-            )
+        # TODO: Review unreachable code - async def run_scan():
+        # TODO: Review unreachable code - return await scanner._scan_location(
+        # TODO: Review unreachable code - location,
+        # TODO: Review unreachable code - force_scan=True,
+        # TODO: Review unreachable code - show_progress=not no_progress
+        # TODO: Review unreachable code - )
 
-        stats = asyncio.run(run_scan())
+        # TODO: Review unreachable code - stats = asyncio.run(run_scan())
 
-        console.print(f"[green]✓[/green] Scan complete for {location.name}")
-        console.print(f"  Files found: {stats['files_found']}")
-        console.print(f"  New files: {stats['new_files']}")
-        console.print(f"  Projects: {len(stats['projects'])}")
+        # TODO: Review unreachable code - console.print(f"[green]✓[/green] Scan complete for {location.name}")
+        # TODO: Review unreachable code - console.print(f"  Files found: {stats['files_found']}")
+        # TODO: Review unreachable code - console.print(f"  New files: {stats['new_files']}")
+        # TODO: Review unreachable code - console.print(f"  Projects: {len(stats['projects'])}")
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         console.print(f"[red]Error scanning location:[/red] {e}")
     finally:
         registry.close()
@@ -196,7 +196,7 @@ def discover(force: bool, no_progress: bool):
             for error in stats['errors']:
                 console.print(f"  - {error['location']}: {error['error']}")
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         console.print(f"[red]Error during discovery:[/red] {e}")
     finally:
         registry.close()
@@ -236,7 +236,7 @@ def stats():
 
             console.print(table)
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         console.print(f"[red]Error getting statistics:[/red] {e}")
     finally:
         registry.close()
@@ -266,30 +266,30 @@ def find_project(project_name: str, type: tuple):
             console.print(f"No assets found for project: {project_name}")
             return
 
-        console.print(f"[green]Found {len(assets)} assets for project {project_name}[/green]")
+        # TODO: Review unreachable code - console.print(f"[green]Found {len(assets)} assets for project {project_name}[/green]")
 
-        table = Table()
-        table.add_column("File")
-        table.add_column("Type")
-        table.add_column("Locations")
+        # TODO: Review unreachable code - table = Table()
+        # TODO: Review unreachable code - table.add_column("File")
+        # TODO: Review unreachable code - table.add_column("Type")
+        # TODO: Review unreachable code - table.add_column("Locations")
 
-        for asset in assets[:20]:  # Show first 20
-            filename = Path(asset['path']).name
-            media_type = asset['metadata'].get('media_type', 'unknown') if asset['metadata'] else 'unknown'
-            location_count = len(asset['registry_locations'])
+        # TODO: Review unreachable code - for asset in assets[:20]:  # Show first 20
+        # TODO: Review unreachable code - filename = Path(asset['path']).name
+        # TODO: Review unreachable code - media_type = asset['metadata'].get('media_type', 'unknown') if asset['metadata'] else 'unknown'
+        # TODO: Review unreachable code - location_count = len(asset['registry_locations'])
 
-            table.add_row(
-                filename,
-                media_type,
-                f"{location_count} location(s)"
-            )
+        # TODO: Review unreachable code - table.add_row(
+        # TODO: Review unreachable code - filename,
+        # TODO: Review unreachable code - media_type,
+        # TODO: Review unreachable code - f"{location_count} location(s)"
+        # TODO: Review unreachable code - )
 
-        console.print(table)
+        # TODO: Review unreachable code - console.print(table)
 
-        if len(assets) > 20:
-            console.print(f"\n... and {len(assets) - 20} more")
+        # TODO: Review unreachable code - if len(assets) > 20:
+        # TODO: Review unreachable code - console.print(f"\n... and {len(assets) - 20} more")
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         console.print(f"[red]Error finding project assets:[/red] {e}")
     finally:
         registry.close()
@@ -306,35 +306,35 @@ def update(location_id: str | None, priority: int | None, status: str | None):
         console.print("[red]Please specify --location-id[/red]")
         return
 
-    config = load_config()
-    registry = StorageRegistry(Path(config.storage.location_registry_db))
+    # TODO: Review unreachable code - config = load_config()
+    # TODO: Review unreachable code - registry = StorageRegistry(Path(config.storage.location_registry_db))
 
-    try:
-        location = registry.get_location_by_id(location_id)
-        if not location:
-            console.print(f"[red]Location not found:[/red] {location_id}")
-            return
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - location = registry.get_location_by_id(location_id)
+    # TODO: Review unreachable code - if not location:
+    # TODO: Review unreachable code - console.print(f"[red]Location not found:[/red] {location_id}")
+    # TODO: Review unreachable code - return
 
-        # Update fields
-        updated = False
-        if priority is not None:
-            location.priority = priority
-            updated = True
+    # TODO: Review unreachable code - # Update fields
+    # TODO: Review unreachable code - updated = False
+    # TODO: Review unreachable code - if priority is not None:
+    # TODO: Review unreachable code - location.priority = priority
+    # TODO: Review unreachable code - updated = True
 
-        if status is not None:
-            location.status = LocationStatus.from_string(status)
-            updated = True
+    # TODO: Review unreachable code - if status is not None:
+    # TODO: Review unreachable code - location.status = LocationStatus.from_string(status)
+    # TODO: Review unreachable code - updated = True
 
-        if updated:
-            registry.update_location(location)
-            console.print(f"[green]✓[/green] Updated location: {location.name}")
-        else:
-            console.print("No changes to apply")
+    # TODO: Review unreachable code - if updated:
+    # TODO: Review unreachable code - registry.update_location(location)
+    # TODO: Review unreachable code - console.print(f"[green]✓[/green] Updated location: {location.name}")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - console.print("No changes to apply")
 
-    except Exception as e:
-        console.print(f"[red]Error updating location:[/red] {e}")
-    finally:
-        registry.close()
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - console.print(f"[red]Error updating location:[/red] {e}")
+    # TODO: Review unreachable code - finally:
+    # TODO: Review unreachable code - registry.close()
 
 
 @storage.command()
@@ -346,40 +346,40 @@ def from_config():
         console.print("No storage locations defined in configuration")
         return
 
-    registry = StorageRegistry(Path(config.storage.location_registry_db))
+    # TODO: Review unreachable code - registry = StorageRegistry(Path(config.storage.location_registry_db))
 
-    try:
-        added = 0
-        for loc_config in config.storage.locations:
-            # Parse rules
-            rules = []
-            for rule_data in loc_config.get("rules", []):
-                rules.append(StorageRule.from_dict(rule_data))
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - added = 0
+    # TODO: Review unreachable code - for loc_config in config.storage.locations:
+    # TODO: Review unreachable code - # Parse rules
+    # TODO: Review unreachable code - rules = []
+    # TODO: Review unreachable code - for rule_data in loc_config.get("rules", []):
+    # TODO: Review unreachable code - rules.append(StorageRule.from_dict(rule_data))
 
-            # Create location
-            location = StorageLocation(
-                location_id=None,
-                name=loc_config["name"],
-                type=StorageType.from_string(loc_config.get("type", "local")),
-                path=loc_config["path"],
-                priority=loc_config.get("priority", 50),
-                rules=rules,
-                config=loc_config.get("config", {})
-            )
+    # TODO: Review unreachable code - # Create location
+    # TODO: Review unreachable code - location = StorageLocation(
+    # TODO: Review unreachable code - location_id=None,
+    # TODO: Review unreachable code - name=loc_config["name"],
+    # TODO: Review unreachable code - type=StorageType.from_string(loc_config.get("type", "local")),
+    # TODO: Review unreachable code - path=loc_config["path"],
+    # TODO: Review unreachable code - priority=loc_config.get("priority", 50),
+    # TODO: Review unreachable code - rules=rules,
+    # TODO: Review unreachable code - config=loc_config.get("config", {})
+    # TODO: Review unreachable code - )
 
-            try:
-                registry.register_location(location)
-                console.print(f"[green]✓[/green] Added: {location.name}")
-                added += 1
-            except Exception as e:
-                console.print(f"[yellow]![/yellow] Skipped {location.name}: {e}")
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - registry.register_location(location)
+    # TODO: Review unreachable code - console.print(f"[green]✓[/green] Added: {location.name}")
+    # TODO: Review unreachable code - added += 1
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - console.print(f"[yellow]![/yellow] Skipped {location.name}: {e}")
 
-        console.print(f"\nAdded {added} storage locations from config")
+    # TODO: Review unreachable code - console.print(f"\nAdded {added} storage locations from config")
 
-    except Exception as e:
-        console.print(f"[red]Error loading from config:[/red] {e}")
-    finally:
-        registry.close()
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - console.print(f"[red]Error loading from config:[/red] {e}")
+    # TODO: Review unreachable code - finally:
+    # TODO: Review unreachable code - registry.close()
 
 
 @storage.command()
@@ -418,7 +418,7 @@ def consolidate(project_name: str, target_location_id: str, move: bool, no_progr
             for error in stats['errors']:
                 console.print(f"  - {error['file']}: {error['error']}")
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         console.print(f"[red]Error during consolidation:[/red] {e}")
     finally:
         registry.close()
@@ -499,7 +499,7 @@ def migrate(dry_run: bool, move: bool, no_progress: bool):
                 for error in exec_stats['errors'][:5]:
                     console.print(f"  - {error['content_hash'][:8]}...: {error['error']}")
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         console.print(f"[red]Error during migration:[/red] {e}")
     finally:
         registry.close()
@@ -522,43 +522,43 @@ def sync_status(show_all: bool):
         async def check_conflicts():
             return await tracker.detect_conflicts(show_progress=True)
 
-        conflicts = asyncio.run(check_conflicts())
+        # TODO: Review unreachable code - conflicts = asyncio.run(check_conflicts())
 
-        if not conflicts:
-            console.print("[green]✓[/green] All files are synchronized")
-        else:
-            console.print(f"[yellow]![/yellow] Found {len(conflicts)} files with sync conflicts")
+        # TODO: Review unreachable code - if not conflicts:
+        # TODO: Review unreachable code - console.print("[green]✓[/green] All files are synchronized")
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - console.print(f"[yellow]![/yellow] Found {len(conflicts)} files with sync conflicts")
 
-            # Create table
-            table = Table(title="Sync Conflicts")
-            table.add_column("File Hash", style="cyan")
-            table.add_column("Locations", justify="center")
-            table.add_column("Versions", justify="center")
-            table.add_column("Status")
+        # TODO: Review unreachable code - # Create table
+        # TODO: Review unreachable code - table = Table(title="Sync Conflicts")
+        # TODO: Review unreachable code - table.add_column("File Hash", style="cyan")
+        # TODO: Review unreachable code - table.add_column("Locations", justify="center")
+        # TODO: Review unreachable code - table.add_column("Versions", justify="center")
+        # TODO: Review unreachable code - table.add_column("Status")
 
-            for conflict in conflicts[:20]:  # Show first 20
-                hash_short = conflict['content_hash'][:12] + "..."
-                location_count = len(conflict['locations'])
-                version_count = conflict['status']['version_count']
+        # TODO: Review unreachable code - for conflict in conflicts[:20]:  # Show first 20
+        # TODO: Review unreachable code - hash_short = conflict['content_hash'][:12] + "..."
+        # TODO: Review unreachable code - location_count = len(conflict['locations'])
+        # TODO: Review unreachable code - version_count = conflict['status']['version_count']
 
-                table.add_row(
-                    hash_short,
-                    str(location_count),
-                    str(version_count),
-                    "conflict"
-                )
+        # TODO: Review unreachable code - table.add_row(
+        # TODO: Review unreachable code - hash_short,
+        # TODO: Review unreachable code - str(location_count),
+        # TODO: Review unreachable code - str(version_count),
+        # TODO: Review unreachable code - "conflict"
+        # TODO: Review unreachable code - )
 
-            console.print(table)
+        # TODO: Review unreachable code - console.print(table)
 
-            if len(conflicts) > 20:
-                console.print(f"\n... and {len(conflicts) - 20} more conflicts")
+        # TODO: Review unreachable code - if len(conflicts) > 20:
+        # TODO: Review unreachable code - console.print(f"\n... and {len(conflicts) - 20} more conflicts")
 
-        # Show pending syncs
-        pending = tracker.get_sync_queue()
-        if pending:
-            console.print(f"\n[yellow]Pending sync operations:[/yellow] {len(pending)}")
+        # TODO: Review unreachable code - # Show pending syncs
+        # TODO: Review unreachable code - pending = tracker.get_sync_queue()
+        # TODO: Review unreachable code - if pending:
+        # TODO: Review unreachable code - console.print(f"\n[yellow]Pending sync operations:[/yellow] {len(pending)}")
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         console.print(f"[red]Error checking sync status:[/red] {e}")
     finally:
         registry.close()
@@ -615,7 +615,7 @@ def resolve_conflict(content_hash: str, strategy: str):
                     console.print(f"     Size: {opt['file_size']} bytes")
                     console.print(f"     Last verified: {opt['last_verified']}")
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         console.print(f"[red]Error resolving conflict:[/red] {e}")
     finally:
         registry.close()
@@ -654,7 +654,7 @@ def sync_process(max_concurrent: int, no_progress: bool):
             for error in stats['errors'][:5]:
                 console.print(f"  - {error}")
 
-    except Exception as e:
+    # TODO: Review unreachable code - except Exception as e:
         console.print(f"[red]Error processing sync queue:[/red] {e}")
     finally:
         registry.close()

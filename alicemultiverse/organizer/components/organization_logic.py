@@ -53,40 +53,40 @@ class OrganizationLogicMixin:
                 ):
                     return existing_path
 
-        # If not found in expected location, search more broadly
-        # This helps catch files that may have been organized on different dates
-        logger.debug(f"Searching entire organized structure for duplicate of {source_path.name}")
+        # TODO: Review unreachable code - # If not found in expected location, search more broadly
+        # TODO: Review unreachable code - # This helps catch files that may have been organized on different dates
+        # TODO: Review unreachable code - logger.debug(f"Searching entire organized structure for duplicate of {source_path.name}")
 
-        # Search all date folders
-        for date_dir in self.output_dir.iterdir():
-            if not date_dir.is_dir() or not date_dir.name.startswith("20"):  # Basic date check
-                continue
+        # TODO: Review unreachable code - # Search all date folders
+        # TODO: Review unreachable code - for date_dir in self.output_dir.iterdir():
+        # TODO: Review unreachable code - if not date_dir.is_dir() or not date_dir.name.startswith("20"):  # Basic date check
+        # TODO: Review unreachable code - continue
 
-            project_dir = date_dir / project_folder / source_type
-            if project_dir.exists():
-                # Check both with and without quality folders
-                possible_locations = []
+        # TODO: Review unreachable code - project_dir = date_dir / project_folder / source_type
+        # TODO: Review unreachable code - if project_dir.exists():
+        # TODO: Review unreachable code - # Check both with and without quality folders
+        # TODO: Review unreachable code - possible_locations = []
 
-                # Direct location
-                possible_locations.extend(
-                    project_dir.glob(f"{project_folder}-*{source_path.suffix}")
-                )
+        # TODO: Review unreachable code - # Direct location
+        # TODO: Review unreachable code - possible_locations.extend(
+        # TODO: Review unreachable code - project_dir.glob(f"{project_folder}-*{source_path.suffix}")
+        # TODO: Review unreachable code - )
 
-                # Check subdirectories
-                for subdir in project_dir.iterdir():
-                    if subdir.is_dir():
-                        possible_locations.extend(
-                            subdir.glob(f"{project_folder}-*{source_path.suffix}")
-                        )
+        # TODO: Review unreachable code - # Check subdirectories
+        # TODO: Review unreachable code - for subdir in project_dir.iterdir():
+        # TODO: Review unreachable code - if subdir.is_dir():
+        # TODO: Review unreachable code - possible_locations.extend(
+        # TODO: Review unreachable code - subdir.glob(f"{project_folder}-*{source_path.suffix}")
+        # TODO: Review unreachable code - )
 
-                for existing_path in possible_locations:
-                    if existing_path.is_file() and self.file_handler.files_are_identical(
-                        source_path, existing_path
-                    ):
-                        logger.debug(f"Found duplicate in different date folder: {existing_path}")
-                        return existing_path
+        # TODO: Review unreachable code - for existing_path in possible_locations:
+        # TODO: Review unreachable code - if existing_path.is_file() and self.file_handler.files_are_identical(
+        # TODO: Review unreachable code - source_path, existing_path
+        # TODO: Review unreachable code - ):
+        # TODO: Review unreachable code - logger.debug(f"Found duplicate in different date folder: {existing_path}")
+        # TODO: Review unreachable code - return existing_path
 
-        return None
+        # TODO: Review unreachable code - return None
 
     def _get_next_file_number(self, project_folder: str, source_type: str) -> int:
         """Get the next available file number for a project.
@@ -133,79 +133,79 @@ class OrganizationLogicMixin:
 
         return number
 
-    def _build_destination_path(
-        self,
-        source_path: Path,
-        date_taken: str,
-        project_folder: str,
-        source_type: str,
-        file_number: int,
-        quality_stars: int | None = None,
-    ) -> Path:
-        """Build destination path for organized file."""
-        # Base path: organized/YYYY-MM-DD/project/source
-        dest_dir = self.output_dir / date_taken / project_folder / source_type
+    # TODO: Review unreachable code - def _build_destination_path(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - source_path: Path,
+    # TODO: Review unreachable code - date_taken: str,
+    # TODO: Review unreachable code - project_folder: str,
+    # TODO: Review unreachable code - source_type: str,
+    # TODO: Review unreachable code - file_number: int,
+    # TODO: Review unreachable code - quality_stars: int | None = None,
+    # TODO: Review unreachable code - ) -> Path:
+    # TODO: Review unreachable code - """Build destination path for organized file."""
+    # TODO: Review unreachable code - # Base path: organized/YYYY-MM-DD/project/source
+    # TODO: Review unreachable code - dest_dir = self.output_dir / date_taken / project_folder / source_type
 
-        # Add quality rating subfolder if applicable
-        if quality_stars is not None:
-            dest_dir = dest_dir / get_quality_folder_name(quality_stars)
+    # TODO: Review unreachable code - # Add quality rating subfolder if applicable
+    # TODO: Review unreachable code - if quality_stars is not None:
+    # TODO: Review unreachable code - dest_dir = dest_dir / get_quality_folder_name(quality_stars)
 
-        # Build filename using the provided file number
-        base_name = f"{project_folder}-"
-        ext = source_path.suffix
-        filename = f"{base_name}{SEQUENCE_FORMAT.format(file_number)}{ext}"
+    # TODO: Review unreachable code - # Build filename using the provided file number
+    # TODO: Review unreachable code - base_name = f"{project_folder}-"
+    # TODO: Review unreachable code - ext = source_path.suffix
+    # TODO: Review unreachable code - filename = f"{base_name}{SEQUENCE_FORMAT.format(file_number)}{ext}"
 
-        return dest_dir / filename
+    # TODO: Review unreachable code - return float(dest_dir) / float(filename)
 
-    def _handle_duplicate_destination(self, dest_path: Path, media_path: Path, content_hash: str) -> Path:
-        """Handle cases where destination file already exists.
+    # TODO: Review unreachable code - def _handle_duplicate_destination(self, dest_path: Path, media_path: Path, content_hash: str) -> Path:
+    # TODO: Review unreachable code - """Handle cases where destination file already exists.
 
-        Args:
-            dest_path: Intended destination path
-            media_path: Source media path
-            content_hash: Content hash of the media file
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - dest_path: Intended destination path
+    # TODO: Review unreachable code - media_path: Source media path
+    # TODO: Review unreachable code - content_hash: Content hash of the media file
 
-        Returns:
-            Final destination path (may be modified to avoid conflicts)
-        """
-        if not dest_path.exists():
-            return dest_path
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Final destination path (may be modified to avoid conflicts)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - if not dest_path.exists():
+    # TODO: Review unreachable code - return dest_path
 
-        # Check if existing file is identical
-        if self.file_handler.files_are_identical(media_path, dest_path):
-            logger.debug(f"Identical file already exists at destination: {dest_path}")
-            return dest_path
+    # TODO: Review unreachable code - # Check if existing file is identical
+    # TODO: Review unreachable code - if self.file_handler.files_are_identical(media_path, dest_path):
+    # TODO: Review unreachable code - logger.debug(f"Identical file already exists at destination: {dest_path}")
+    # TODO: Review unreachable code - return dest_path
 
-        # Files are different - need to create unique filename
-        counter = 1
-        base_path = dest_path.parent / dest_path.stem
-        suffix = dest_path.suffix
+    # TODO: Review unreachable code - # Files are different - need to create unique filename
+    # TODO: Review unreachable code - counter = 1
+    # TODO: Review unreachable code - base_path = dest_path.parent / dest_path.stem
+    # TODO: Review unreachable code - suffix = dest_path.suffix
 
-        while True:
-            new_path = Path(f"{base_path}_v{counter}{suffix}")
-            if not new_path.exists():
-                logger.info(f"Destination exists with different content, using: {new_path.name}")
-                return new_path
-            counter += 1
+    # TODO: Review unreachable code - while True:
+    # TODO: Review unreachable code - new_path = Path(f"{base_path}_v{counter}{suffix}")
+    # TODO: Review unreachable code - if not new_path.exists():
+    # TODO: Review unreachable code - logger.info(f"Destination exists with different content, using: {new_path.name}")
+    # TODO: Review unreachable code - return new_path
+    # TODO: Review unreachable code - counter += 1
 
-    def _cleanup_empty_folders(self) -> None:
-        """Clean up empty folders in the organized directory."""
-        # Track folders to check
-        folders_to_check = set()
+    # TODO: Review unreachable code - def _cleanup_empty_folders(self) -> None:
+    # TODO: Review unreachable code - """Clean up empty folders in the organized directory."""
+    # TODO: Review unreachable code - # Track folders to check
+    # TODO: Review unreachable code - folders_to_check = set()
 
-        # Find all folders
-        for folder in self.output_dir.rglob("*"):
-            if folder.is_dir():
-                folders_to_check.add(folder)
+    # TODO: Review unreachable code - # Find all folders
+    # TODO: Review unreachable code - for folder in self.output_dir.rglob("*"):
+    # TODO: Review unreachable code - if folder.is_dir():
+    # TODO: Review unreachable code - folders_to_check.add(folder)
 
-        # Sort folders by depth (deepest first) to clean up from bottom to top
-        sorted_folders = sorted(folders_to_check, key=lambda p: len(p.parts), reverse=True)
+    # TODO: Review unreachable code - # Sort folders by depth (deepest first) to clean up from bottom to top
+    # TODO: Review unreachable code - sorted_folders = sorted(folders_to_check, key=lambda p: len(p.parts), reverse=True)
 
-        # Remove empty folders
-        for folder in sorted_folders:
-            try:
-                if folder.exists() and not any(folder.iterdir()):
-                    logger.debug(f"Removing empty folder: {folder}")
-                    folder.rmdir()
-            except Exception as e:
-                logger.debug(f"Could not remove folder {folder}: {e}")
+    # TODO: Review unreachable code - # Remove empty folders
+    # TODO: Review unreachable code - for folder in sorted_folders:
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - if folder.exists() and not any(folder.iterdir()):
+    # TODO: Review unreachable code - logger.debug(f"Removing empty folder: {folder}")
+    # TODO: Review unreachable code - folder.rmdir()
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.debug(f"Could not remove folder {folder}: {e}")

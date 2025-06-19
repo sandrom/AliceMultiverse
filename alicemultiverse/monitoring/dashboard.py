@@ -56,188 +56,188 @@ class MetricsDashboard:
         
         return layout
     
-    def get_header(self) -> Panel:
-        """Create header panel."""
-        title = Text("AliceMultiverse Performance Monitor", style="bold magenta")
-        subtitle = Text(f"Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", style="dim")
+    # TODO: Review unreachable code - def get_header(self) -> Panel:
+    # TODO: Review unreachable code - """Create header panel."""
+    # TODO: Review unreachable code - title = Text("AliceMultiverse Performance Monitor", style="bold magenta")
+    # TODO: Review unreachable code - subtitle = Text(f"Updated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}", style="dim")
         
-        header = Text.assemble(title, "\n", subtitle, justify="center")
-        return Panel(header, style="cyan")
+    # TODO: Review unreachable code - header = Text.assemble(title, "\n", subtitle, justify="center")
+    # TODO: Review unreachable code - return Panel(header, style="cyan")
     
-    def get_overview_panel(self, snapshot: MetricsSnapshot) -> Panel:
-        """Create overview metrics panel."""
-        report = self.collector.get_performance_report()
-        summary = report["summary"]
+    # TODO: Review unreachable code - def get_overview_panel(self, snapshot: MetricsSnapshot) -> Panel:
+    # TODO: Review unreachable code - """Create overview metrics panel."""
+    # TODO: Review unreachable code - report = self.collector.get_performance_report()
+    # TODO: Review unreachable code - summary = report["summary"]
         
-        table = Table(show_header=False, expand=True, box=None)
-        table.add_column("Metric", style="cyan")
-        table.add_column("Value", style="green")
+    # TODO: Review unreachable code - table = Table(show_header=False, expand=True, box=None)
+    # TODO: Review unreachable code - table.add_column("Metric", style="cyan")
+    # TODO: Review unreachable code - table.add_column("Value", style="green")
         
-        table.add_row("Files Processed", f"{snapshot.files_processed:,}")
-        table.add_row("Processing Rate", f"{summary['files_per_second']:.2f} files/sec")
-        table.add_row("Average Time/File", f"{snapshot.average_processing_time:.3f}s")
-        table.add_row("Total Errors", f"{snapshot.errors}")
-        table.add_row("Error Rate", f"{summary['error_rate']:.1f}%")
+    # TODO: Review unreachable code - table.add_row("Files Processed", f"{snapshot.files_processed:,}")
+    # TODO: Review unreachable code - table.add_row("Processing Rate", f"{summary['files_per_second']:.2f} files/sec")
+    # TODO: Review unreachable code - table.add_row("Average Time/File", f"{snapshot.average_processing_time:.3f}s")
+    # TODO: Review unreachable code - table.add_row("Total Errors", f"{snapshot.errors}")
+    # TODO: Review unreachable code - table.add_row("Error Rate", f"{summary['error_rate']:.1f}%")
         
-        return Panel(table, title="Overview", border_style="blue")
+    # TODO: Review unreachable code - return Panel(table, title="Overview", border_style="blue")
     
-    def get_performance_panel(self, snapshot: MetricsSnapshot) -> Panel:
-        """Create performance metrics panel."""
-        table = Table(show_header=False, expand=True, box=None)
-        table.add_column("Metric", style="cyan")
-        table.add_column("Value", style="yellow")
+    # TODO: Review unreachable code - def get_performance_panel(self, snapshot: MetricsSnapshot) -> Panel:
+    # TODO: Review unreachable code - """Create performance metrics panel."""
+    # TODO: Review unreachable code - table = Table(show_header=False, expand=True, box=None)
+    # TODO: Review unreachable code - table.add_column("Metric", style="cyan")
+    # TODO: Review unreachable code - table.add_column("Value", style="yellow")
         
-        table.add_row("CPU Usage", f"{snapshot.cpu_usage_percent:.1f}%")
-        table.add_row("Memory Usage", f"{snapshot.memory_usage_mb:.1f} MB")
-        table.add_row("Peak Memory", f"{self.collector.peak_memory_mb:.1f} MB")
-        table.add_row("Cache Hit Rate", f"{snapshot.cache_hit_rate:.1f}%")
-        table.add_row("Worker Utilization", f"{snapshot.worker_utilization:.1f}%")
-        table.add_row("Queue Depth", f"{snapshot.queue_depth}")
+    # TODO: Review unreachable code - table.add_row("CPU Usage", f"{snapshot.cpu_usage_percent:.1f}%")
+    # TODO: Review unreachable code - table.add_row("Memory Usage", f"{snapshot.memory_usage_mb:.1f} MB")
+    # TODO: Review unreachable code - table.add_row("Peak Memory", f"{self.collector.peak_memory_mb:.1f} MB")
+    # TODO: Review unreachable code - table.add_row("Cache Hit Rate", f"{snapshot.cache_hit_rate:.1f}%")
+    # TODO: Review unreachable code - table.add_row("Worker Utilization", f"{snapshot.worker_utilization:.1f}%")
+    # TODO: Review unreachable code - table.add_row("Queue Depth", f"{snapshot.queue_depth}")
         
-        return Panel(table, title="Performance", border_style="green")
+    # TODO: Review unreachable code - return Panel(table, title="Performance", border_style="green")
     
-    def get_operations_panel(self) -> Panel:
-        """Create operations timing panel."""
-        operations = self.collector.get_operation_summary()
+    # TODO: Review unreachable code - def get_operations_panel(self) -> Panel:
+    # TODO: Review unreachable code - """Create operations timing panel."""
+    # TODO: Review unreachable code - operations = self.collector.get_operation_summary()
         
-        if not operations:
-            return Panel("No operations recorded yet", title="Operations", border_style="yellow")
+    # TODO: Review unreachable code - if not operations:
+    # TODO: Review unreachable code - return Panel("No operations recorded yet", title="Operations", border_style="yellow")
         
-        table = Table(expand=True)
-        table.add_column("Operation", style="cyan")
-        table.add_column("Count", justify="right")
-        table.add_column("Avg Time", justify="right")
-        table.add_column("Total Time", justify="right")
+    # TODO: Review unreachable code - table = Table(expand=True)
+    # TODO: Review unreachable code - table.add_column("Operation", style="cyan")
+    # TODO: Review unreachable code - table.add_column("Count", justify="right")
+    # TODO: Review unreachable code - table.add_column("Avg Time", justify="right")
+    # TODO: Review unreachable code - table.add_column("Total Time", justify="right")
         
-        for op_name, stats in sorted(operations.items()):
-            table.add_row(
-                op_name.split('.')[-1][:20],  # Truncate long names
-                f"{stats['count']:,}",
-                f"{stats['average']:.3f}s",
-                f"{stats['total']:.1f}s"
-            )
+    # TODO: Review unreachable code - for op_name, stats in sorted(operations.items()):
+    # TODO: Review unreachable code - table.add_row(
+    # TODO: Review unreachable code - op_name.split('.')[-1][:20],  # Truncate long names
+    # TODO: Review unreachable code - f"{stats['count']:,}",
+    # TODO: Review unreachable code - f"{stats['average']:.3f}s",
+    # TODO: Review unreachable code - f"{stats['total']:.1f}s"
+    # TODO: Review unreachable code - )
         
-        return Panel(table, title="Operations", border_style="yellow")
+    # TODO: Review unreachable code - return Panel(table, title="Operations", border_style="yellow")
     
-    def get_file_types_panel(self) -> Panel:
-        """Create file types panel."""
-        file_types = self.collector.get_file_type_summary()
+    # TODO: Review unreachable code - def get_file_types_panel(self) -> Panel:
+    # TODO: Review unreachable code - """Create file types panel."""
+    # TODO: Review unreachable code - file_types = self.collector.get_file_type_summary()
         
-        if not file_types:
-            return Panel("No files processed yet", title="File Types", border_style="magenta")
+    # TODO: Review unreachable code - if not file_types:
+    # TODO: Review unreachable code - return Panel("No files processed yet", title="File Types", border_style="magenta")
         
-        table = Table(expand=True)
-        table.add_column("Type", style="cyan")
-        table.add_column("Count", justify="right")
-        table.add_column("Avg Time", justify="right")
-        table.add_column("Avg Size", justify="right")
+    # TODO: Review unreachable code - table = Table(expand=True)
+    # TODO: Review unreachable code - table.add_column("Type", style="cyan")
+    # TODO: Review unreachable code - table.add_column("Count", justify="right")
+    # TODO: Review unreachable code - table.add_column("Avg Time", justify="right")
+    # TODO: Review unreachable code - table.add_column("Avg Size", justify="right")
         
-        for ext, stats in sorted(file_types.items(), key=lambda x: x[1]['count'], reverse=True):
-            table.add_row(
-                ext or "(none)",
-                f"{stats['count']:,}",
-                f"{stats['average_time']:.3f}s",
-                f"{stats['average_size_mb']:.1f} MB"
-            )
+    # TODO: Review unreachable code - for ext, stats in sorted(file_types.items(), key=lambda x: x[1]['count'], reverse=True):
+    # TODO: Review unreachable code - table.add_row(
+    # TODO: Review unreachable code - ext or "(none)",
+    # TODO: Review unreachable code - f"{stats['count']:,}",
+    # TODO: Review unreachable code - f"{stats['average_time']:.3f}s",
+    # TODO: Review unreachable code - f"{stats['average_size_mb']:.1f} MB"
+    # TODO: Review unreachable code - )
         
-        return Panel(table, title="File Types", border_style="magenta")
+    # TODO: Review unreachable code - return Panel(table, title="File Types", border_style="magenta")
     
-    def get_footer(self, snapshot: MetricsSnapshot) -> Panel:
-        """Create footer with database and cache stats."""
-        lines = []
+    # TODO: Review unreachable code - def get_footer(self, snapshot: MetricsSnapshot) -> Panel:
+    # TODO: Review unreachable code - """Create footer with database and cache stats."""
+    # TODO: Review unreachable code - lines = []
         
-        # Database stats
-        db_ops = snapshot.database_operations
-        db_time = snapshot.database_time
-        db_overhead = snapshot.database_overhead_percent
-        lines.append(f"Database: {db_ops:,} ops, {db_time:.1f}s total, {db_overhead:.1f}% overhead")
+    # TODO: Review unreachable code - # Database stats
+    # TODO: Review unreachable code - db_ops = snapshot.database_operations
+    # TODO: Review unreachable code - db_time = snapshot.database_time
+    # TODO: Review unreachable code - db_overhead = snapshot.database_overhead_percent
+    # TODO: Review unreachable code - lines.append(f"Database: {db_ops:,} ops, {db_time:.1f}s total, {db_overhead:.1f}% overhead")
         
-        # Cache stats
-        cache_total = snapshot.cache_hits + snapshot.cache_misses
-        lines.append(f"Cache: {snapshot.cache_hits:,} hits, {snapshot.cache_misses:,} misses ({snapshot.cache_hit_rate:.1f}% hit rate)")
+    # TODO: Review unreachable code - # Cache stats
+    # TODO: Review unreachable code - cache_total = snapshot.cache_hits + snapshot.cache_misses
+    # TODO: Review unreachable code - lines.append(f"Cache: {snapshot.cache_hits:,} hits, {snapshot.cache_misses:,} misses ({snapshot.cache_hit_rate:.1f}% hit rate)")
         
-        # Progress bar for worker utilization
-        if snapshot.worker_utilization > 0:
-            bar_width = 40
-            filled = int(bar_width * snapshot.worker_utilization / 100)
-            bar = "█" * filled + "░" * (bar_width - filled)
-            lines.append(f"Workers: [{bar}] {snapshot.worker_utilization:.0f}%")
+    # TODO: Review unreachable code - # Progress bar for worker utilization
+    # TODO: Review unreachable code - if snapshot.worker_utilization > 0:
+    # TODO: Review unreachable code - bar_width = 40
+    # TODO: Review unreachable code - filled = int(bar_width * snapshot.worker_utilization / 100)
+    # TODO: Review unreachable code - bar = "█" * filled + "░" * (bar_width - filled)
+    # TODO: Review unreachable code - lines.append(f"Workers: [{bar}] {snapshot.worker_utilization:.0f}%")
         
-        content = "\n".join(lines)
-        return Panel(content, title="System Stats", border_style="dim")
+    # TODO: Review unreachable code - content = "\n".join(lines)
+    # TODO: Review unreachable code - return Panel(content, title="System Stats", border_style="dim")
     
-    def update_display(self, layout: Layout) -> None:
-        """Update the dashboard display."""
-        snapshot = self.collector.get_snapshot()
-        self.history.append(snapshot)
-        if len(self.history) > self.max_history:
-            self.history.pop(0)
+    # TODO: Review unreachable code - def update_display(self, layout: Layout) -> None:
+    # TODO: Review unreachable code - """Update the dashboard display."""
+    # TODO: Review unreachable code - snapshot = self.collector.get_snapshot()
+    # TODO: Review unreachable code - self.history.append(snapshot)
+    # TODO: Review unreachable code - if len(self.history) > self.max_history:
+    # TODO: Review unreachable code - self.history.pop(0)
         
-        layout["header"].update(self.get_header())
-        layout["overview"].update(self.get_overview_panel(snapshot))
-        layout["performance"].update(self.get_performance_panel(snapshot))
-        layout["operations"].update(self.get_operations_panel())
-        layout["file_types"].update(self.get_file_types_panel())
-        layout["footer"].update(self.get_footer(snapshot))
+    # TODO: Review unreachable code - layout["header"].update(self.get_header())
+    # TODO: Review unreachable code - layout["overview"].update(self.get_overview_panel(snapshot))
+    # TODO: Review unreachable code - layout["performance"].update(self.get_performance_panel(snapshot))
+    # TODO: Review unreachable code - layout["operations"].update(self.get_operations_panel())
+    # TODO: Review unreachable code - layout["file_types"].update(self.get_file_types_panel())
+    # TODO: Review unreachable code - layout["footer"].update(self.get_footer(snapshot))
     
-    def run(self) -> None:
-        """Run the dashboard in a separate thread."""
-        if self._running:
-            return
+    # TODO: Review unreachable code - def run(self) -> None:
+    # TODO: Review unreachable code - """Run the dashboard in a separate thread."""
+    # TODO: Review unreachable code - if self._running:
+    # TODO: Review unreachable code - return
         
-        self._running = True
-        layout = self.create_layout()
+    # TODO: Review unreachable code - self._running = True
+    # TODO: Review unreachable code - layout = self.create_layout()
         
-        with Live(layout, refresh_per_second=1, screen=True) as live:
-            while self._running:
-                self.update_display(layout)
-                time.sleep(self.refresh_interval)
+    # TODO: Review unreachable code - with Live(layout, refresh_per_second=1, screen=True) as live:
+    # TODO: Review unreachable code - while self._running:
+    # TODO: Review unreachable code - self.update_display(layout)
+    # TODO: Review unreachable code - time.sleep(self.refresh_interval)
     
-    def start(self) -> None:
-        """Start the dashboard in background."""
-        if self._running:
-            return
+    # TODO: Review unreachable code - def start(self) -> None:
+    # TODO: Review unreachable code - """Start the dashboard in background."""
+    # TODO: Review unreachable code - if self._running:
+    # TODO: Review unreachable code - return
         
-        self._thread = threading.Thread(target=self.run, daemon=True)
-        self._thread.start()
+    # TODO: Review unreachable code - self._thread = threading.Thread(target=self.run, daemon=True)
+    # TODO: Review unreachable code - self._thread.start()
     
-    def stop(self) -> None:
-        """Stop the dashboard."""
-        self._running = False
-        if self._thread:
-            self._thread.join(timeout=2.0)
+    # TODO: Review unreachable code - def stop(self) -> None:
+    # TODO: Review unreachable code - """Stop the dashboard."""
+    # TODO: Review unreachable code - self._running = False
+    # TODO: Review unreachable code - if self._thread:
+    # TODO: Review unreachable code - self._thread.join(timeout=2.0)
     
-    def show_once(self) -> None:
-        """Show dashboard once without continuous updates."""
-        layout = self.create_layout()
-        self.update_display(layout)
-        self.console.print(layout)
+    # TODO: Review unreachable code - def show_once(self) -> None:
+    # TODO: Review unreachable code - """Show dashboard once without continuous updates."""
+    # TODO: Review unreachable code - layout = self.create_layout()
+    # TODO: Review unreachable code - self.update_display(layout)
+    # TODO: Review unreachable code - self.console.print(layout)
     
-    def export_metrics(self, path: Path) -> None:
-        """Export current metrics to file."""
-        self.collector.save_report(path)
-        self.console.print(f"[green]Metrics exported to {path}[/green]")
+    # TODO: Review unreachable code - def export_metrics(self, path: Path) -> None:
+    # TODO: Review unreachable code - """Export current metrics to file."""
+    # TODO: Review unreachable code - self.collector.save_report(path)
+    # TODO: Review unreachable code - self.console.print(f"[green]Metrics exported to {path}[/green]")
     
-    def get_performance_summary(self) -> str:
-        """Get a text summary of performance."""
-        report = self.collector.get_performance_report()
-        summary = report["summary"]
+    # TODO: Review unreachable code - def get_performance_summary(self) -> str:
+    # TODO: Review unreachable code - """Get a text summary of performance."""
+    # TODO: Review unreachable code - report = self.collector.get_performance_report()
+    # TODO: Review unreachable code - summary = report["summary"]
         
-        lines = [
-            "Performance Summary",
-            "=" * 50,
-            f"Total Files: {summary['total_files']:,}",
-            f"Total Time: {summary['total_time']:.1f}s",
-            f"Processing Rate: {summary['files_per_second']:.2f} files/sec",
-            f"Error Rate: {summary['error_rate']:.1f}%",
-            "",
-            "File Types:",
-        ]
+    # TODO: Review unreachable code - lines = [
+    # TODO: Review unreachable code - "Performance Summary",
+    # TODO: Review unreachable code - "=" * 50,
+    # TODO: Review unreachable code - f"Total Files: {summary['total_files']:,}",
+    # TODO: Review unreachable code - f"Total Time: {summary['total_time']:.1f}s",
+    # TODO: Review unreachable code - f"Processing Rate: {summary['files_per_second']:.2f} files/sec",
+    # TODO: Review unreachable code - f"Error Rate: {summary['error_rate']:.1f}%",
+    # TODO: Review unreachable code - "",
+    # TODO: Review unreachable code - "File Types:",
+    # TODO: Review unreachable code - ]
         
-        for ext, stats in report["file_types"].items():
-            lines.append(f"  {ext}: {stats['count']:,} files, {stats['average_time']:.3f}s avg")
+    # TODO: Review unreachable code - for ext, stats in report["file_types"].items():
+    # TODO: Review unreachable code - lines.append(f"  {ext}: {stats['count']:,} files, {stats['average_time']:.3f}s avg")
         
-        return "\n".join(lines)
+    # TODO: Review unreachable code - return "\n".join(lines)
 
 
 def create_dashboard(refresh_interval: float = 1.0) -> MetricsDashboard:
@@ -245,13 +245,13 @@ def create_dashboard(refresh_interval: float = 1.0) -> MetricsDashboard:
     return MetricsDashboard(refresh_interval)
 
 
-def show_metrics_once() -> None:
-    """Show metrics dashboard once."""
-    dashboard = MetricsDashboard()
-    dashboard.show_once()
+# TODO: Review unreachable code - def show_metrics_once() -> None:
+# TODO: Review unreachable code - """Show metrics dashboard once."""
+# TODO: Review unreachable code - dashboard = MetricsDashboard()
+# TODO: Review unreachable code - dashboard.show_once()
 
 
-def export_metrics(path: Path) -> None:
-    """Export metrics to file."""
-    dashboard = MetricsDashboard()
-    dashboard.export_metrics(path)
+# TODO: Review unreachable code - def export_metrics(path: Path) -> None:
+# TODO: Review unreachable code - """Export metrics to file."""
+# TODO: Review unreachable code - dashboard = MetricsDashboard()
+# TODO: Review unreachable code - dashboard.export_metrics(path)

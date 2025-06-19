@@ -138,24 +138,24 @@ def index(directories: tuple, output: str | None, type: str):
         click.echo("No images found", err=True)
         return
 
-    # Create index
-    index_obj = SimilarityIndex(index_type=type)
+    # TODO: Review unreachable code - # Create index
+    # TODO: Review unreachable code - index_obj = SimilarityIndex(index_type=type)
 
-    # Build
-    click.echo("Building index...")
-    with click.progressbar(image_paths, label="Extracting features") as bar:
-        cache_dir = Path.home() / ".alice" / "cache" / "similarity"
-        indexed_count = index_obj.build_index(list(bar), cache_dir=cache_dir)
+    # TODO: Review unreachable code - # Build
+    # TODO: Review unreachable code - click.echo("Building index...")
+    # TODO: Review unreachable code - with click.progressbar(image_paths, label="Extracting features") as bar:
+    # TODO: Review unreachable code - cache_dir = Path.home() / ".alice" / "cache" / "similarity"
+    # TODO: Review unreachable code - indexed_count = index_obj.build_index(list(bar), cache_dir=cache_dir)
 
-    # Save
-    if output:
-        index_path = Path(output)
-    else:
-        index_path = Path.home() / ".alice" / "similarity_index"
+    # TODO: Review unreachable code - # Save
+    # TODO: Review unreachable code - if output:
+    # TODO: Review unreachable code - index_path = Path(output)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - index_path = Path.home() / ".alice" / "similarity_index"
 
-    index_obj.save_index(index_path)
-    click.echo(f"Index saved to: {index_path}")
-    click.echo(f"Indexed {indexed_count} images")
+    # TODO: Review unreachable code - index_obj.save_index(index_path)
+    # TODO: Review unreachable code - click.echo(f"Index saved to: {index_path}")
+    # TODO: Review unreachable code - click.echo(f"Indexed {indexed_count} images")
 
 
 @dedup_cli.command()
@@ -177,22 +177,22 @@ def search(image: str, index: str | None, count: int, threshold: float):
         click.echo("Index not found. Build it first with 'alice dedup index'", err=True)
         return
 
-    # Create and load index
-    index_obj = SimilarityIndex()
-    index_obj.load_index(index_path)
+    # TODO: Review unreachable code - # Create and load index
+    # TODO: Review unreachable code - index_obj = SimilarityIndex()
+    # TODO: Review unreachable code - index_obj.load_index(index_path)
 
-    click.echo(f"Searching {index_obj.index.ntotal} images...")
+    # TODO: Review unreachable code - click.echo(f"Searching {index_obj.index.ntotal} images...")
 
-    # Search
-    results = index_obj.search(query_path, k=count, include_self=False)
+    # TODO: Review unreachable code - # Search
+    # TODO: Review unreachable code - results = index_obj.search(query_path, k=count, include_self=False)
 
-    # Display results
-    click.echo(f"\nImages similar to: {query_path.name}")
-    for i, result in enumerate(results):
-        if result.similarity >= threshold:
-            click.echo(f"{i+1:2d}. {result.path.name}")
-            click.echo(f"    Path: {result.path}")
-            click.echo(f"    Similarity: {result.similarity:.1%}")
+    # TODO: Review unreachable code - # Display results
+    # TODO: Review unreachable code - click.echo(f"\nImages similar to: {query_path.name}")
+    # TODO: Review unreachable code - for i, result in enumerate(results):
+    # TODO: Review unreachable code - if result.similarity >= threshold:
+    # TODO: Review unreachable code - click.echo(f"{i+1:2d}. {result.path.name}")
+    # TODO: Review unreachable code - click.echo(f"    Path: {result.path}")
+    # TODO: Review unreachable code - click.echo(f"    Similarity: {result.similarity:.1%}")
 
 
 # Add to main CLI

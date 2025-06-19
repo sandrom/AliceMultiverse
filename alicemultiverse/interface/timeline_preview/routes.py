@@ -32,8 +32,8 @@ class RouteHandlers:
         index_path = self.static_dir / "index.html"
         if index_path.exists():
             return index_path.read_text()
-        else:
-            return self.server._generate_default_html()
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - return self.server._generate_default_html()
 
     async def get_timeline(self, session_id: str):
         """Get timeline data for a session."""
@@ -41,10 +41,10 @@ class RouteHandlers:
         if not session:
             raise HTTPException(status_code=404, detail="Session not found")
 
-        return {
-            "timeline": self.server._timeline_to_dict(session.timeline),
-            "version": session.version
-        }
+        # TODO: Review unreachable code - return {
+        # TODO: Review unreachable code - "timeline": self.server._timeline_to_dict(session.timeline),
+        # TODO: Review unreachable code - "version": session.version
+        # TODO: Review unreachable code - }
 
     async def serve_media(self, file_path: str):
         """Serve media files (videos/images) from the media directory."""
@@ -56,313 +56,313 @@ class RouteHandlers:
             if not str(media_path).startswith(str(self.media_dir)):
                 raise HTTPException(status_code=403, detail="Access denied")
 
-            if not media_path.exists():
-                raise HTTPException(status_code=404, detail="File not found")
+            # TODO: Review unreachable code - if not media_path.exists():
+            # TODO: Review unreachable code - raise HTTPException(status_code=404, detail="File not found")
 
-            # Determine content type
-            content_type = "application/octet-stream"
-            suffix = media_path.suffix.lower()
-            if suffix in [".mp4", ".mov", ".avi"]:
-                content_type = "video/mp4"
-            elif suffix in [".jpg", ".jpeg"]:
-                content_type = "image/jpeg"
-            elif suffix in [".png"]:
-                content_type = "image/png"
-            elif suffix in [".webp"]:
-                content_type = "image/webp"
-            elif suffix in [".webm"]:
-                content_type = "video/webm"
+            # TODO: Review unreachable code - # Determine content type
+            # TODO: Review unreachable code - content_type = "application/octet-stream"
+            # TODO: Review unreachable code - suffix = media_path.suffix.lower()
+            # TODO: Review unreachable code - if suffix in [".mp4", ".mov", ".avi"]:
+            # TODO: Review unreachable code - content_type = "video/mp4"
+            # TODO: Review unreachable code - elif suffix in [".jpg", ".jpeg"]:
+            # TODO: Review unreachable code - content_type = "image/jpeg"
+            # TODO: Review unreachable code - elif suffix in [".png"]:
+            # TODO: Review unreachable code - content_type = "image/png"
+            # TODO: Review unreachable code - elif suffix in [".webp"]:
+            # TODO: Review unreachable code - content_type = "image/webp"
+            # TODO: Review unreachable code - elif suffix in [".webm"]:
+            # TODO: Review unreachable code - content_type = "video/webm"
 
-            return FileResponse(
-                media_path,
-                media_type=content_type,
-                headers={
-                    "Accept-Ranges": "bytes",
-                    "Cache-Control": "public, max-age=3600"
-                }
-            )
+            # TODO: Review unreachable code - return FileResponse(
+            # TODO: Review unreachable code - media_path,
+            # TODO: Review unreachable code - media_type=content_type,
+            # TODO: Review unreachable code - headers={
+            # TODO: Review unreachable code - "Accept-Ranges": "bytes",
+            # TODO: Review unreachable code - "Cache-Control": "public, max-age=3600"
+            # TODO: Review unreachable code - }
+            # TODO: Review unreachable code - )
         except Exception as e:
             logger.error(f"Error serving media: {e}")
             raise HTTPException(status_code=500, detail="Internal server error")
 
-    async def create_session(self, timeline_data: dict):
-        """Create a new preview session from timeline data."""
-        try:
-            # Convert dict to Timeline object
-            clips = [TimelineClip(**clip) for clip in timeline_data.get("clips", [])]
-            timeline = Timeline(
-                name=timeline_data.get("name", "Untitled"),
-                duration=timeline_data.get("duration", 0),
-                frame_rate=timeline_data.get("frame_rate", 30),
-                resolution=tuple(timeline_data.get("resolution", [1920, 1080])),
-                clips=clips,
-                audio_tracks=timeline_data.get("audio_tracks", []),
-                markers=timeline_data.get("markers", []),
-                metadata=timeline_data.get("metadata", {})
-            )
+    # TODO: Review unreachable code - async def create_session(self, timeline_data: dict):
+    # TODO: Review unreachable code - """Create a new preview session from timeline data."""
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Convert dict to Timeline object
+    # TODO: Review unreachable code - clips = [TimelineClip(**clip) for clip in timeline_data.get("clips", [])]
+    # TODO: Review unreachable code - timeline = Timeline(
+    # TODO: Review unreachable code - name=timeline_data.get("name", "Untitled"),
+    # TODO: Review unreachable code - duration=timeline_data.get("duration", 0),
+    # TODO: Review unreachable code - frame_rate=timeline_data.get("frame_rate", 30),
+    # TODO: Review unreachable code - resolution=tuple(timeline_data.get("resolution", [1920, 1080])),
+    # TODO: Review unreachable code - clips=clips,
+    # TODO: Review unreachable code - audio_tracks=timeline_data.get("audio_tracks", []),
+    # TODO: Review unreachable code - markers=timeline_data.get("markers", []),
+    # TODO: Review unreachable code - metadata=timeline_data.get("metadata", {})
+    # TODO: Review unreachable code - )
 
-            session = PreviewSession(timeline)
-            self.sessions[session.id] = session
+    # TODO: Review unreachable code - session = PreviewSession(timeline)
+    # TODO: Review unreachable code - self.sessions[session.id] = session
 
-            return {
-                "session_id": session.id,
-                "timeline": self.server._timeline_to_dict(timeline)
-            }
-        except Exception as e:
-            logger.error(f"Failed to create session: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "session_id": session.id,
+    # TODO: Review unreachable code - "timeline": self.server._timeline_to_dict(timeline)
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to create session: {e}")
+    # TODO: Review unreachable code - raise HTTPException(status_code=400, detail=str(e))
 
-    async def get_session(self, session_id: str):
-        """Get session details."""
-        session = self.sessions.get(session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
+    # TODO: Review unreachable code - async def get_session(self, session_id: str):
+    # TODO: Review unreachable code - """Get session details."""
+    # TODO: Review unreachable code - session = self.sessions.get(session_id)
+    # TODO: Review unreachable code - if not session:
+    # TODO: Review unreachable code - raise HTTPException(status_code=404, detail="Session not found")
 
-        return {
-            "session_id": session.id,
-            "timeline": self.server._timeline_to_dict(session.timeline),
-            "version": session.version,
-            "created_at": session.created_at.isoformat(),
-            "last_modified": session.last_modified.isoformat(),
-            "can_undo": len(session.undo_stack) > 0,
-            "can_redo": len(session.redo_stack) > 0
-        }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "session_id": session.id,
+    # TODO: Review unreachable code - "timeline": self.server._timeline_to_dict(session.timeline),
+    # TODO: Review unreachable code - "version": session.version,
+    # TODO: Review unreachable code - "created_at": session.created_at.isoformat(),
+    # TODO: Review unreachable code - "last_modified": session.last_modified.isoformat(),
+    # TODO: Review unreachable code - "can_undo": len(session.undo_stack) > 0,
+    # TODO: Review unreachable code - "can_redo": len(session.redo_stack) > 0
+    # TODO: Review unreachable code - }
 
-    async def update_timeline(self, session_id: str, request: TimelineUpdateRequest):
-        """Update timeline in session."""
-        session = self.sessions.get(session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
+    # TODO: Review unreachable code - async def update_timeline(self, session_id: str, request: TimelineUpdateRequest):
+    # TODO: Review unreachable code - """Update timeline in session."""
+    # TODO: Review unreachable code - session = self.sessions.get(session_id)
+    # TODO: Review unreachable code - if not session:
+    # TODO: Review unreachable code - raise HTTPException(status_code=404, detail="Session not found")
 
-        try:
-            # Apply the requested operation
-            new_timeline = self.server._apply_timeline_operation(
-                session.timeline,
-                request.operation,
-                request.clips
-            )
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Apply the requested operation
+    # TODO: Review unreachable code - new_timeline = self.server._apply_timeline_operation(
+    # TODO: Review unreachable code - session.timeline,
+    # TODO: Review unreachable code - request.operation,
+    # TODO: Review unreachable code - request.clips
+    # TODO: Review unreachable code - )
 
-            session.update_timeline(new_timeline)
+    # TODO: Review unreachable code - session.update_timeline(new_timeline)
 
-            return {
-                "success": True,
-                "timeline": self.server._timeline_to_dict(session.timeline),
-                "version": session.version
-            }
-        except Exception as e:
-            logger.error(f"Failed to update timeline: {e}")
-            raise HTTPException(status_code=400, detail=str(e))
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "success": True,
+    # TODO: Review unreachable code - "timeline": self.server._timeline_to_dict(session.timeline),
+    # TODO: Review unreachable code - "version": session.version
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Failed to update timeline: {e}")
+    # TODO: Review unreachable code - raise HTTPException(status_code=400, detail=str(e))
 
-    async def undo(self, session_id: str):
-        """Undo last change."""
-        session = self.sessions.get(session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
+    # TODO: Review unreachable code - async def undo(self, session_id: str):
+    # TODO: Review unreachable code - """Undo last change."""
+    # TODO: Review unreachable code - session = self.sessions.get(session_id)
+    # TODO: Review unreachable code - if not session:
+    # TODO: Review unreachable code - raise HTTPException(status_code=404, detail="Session not found")
 
-        if session.undo():
-            return {
-                "success": True,
-                "timeline": self.server._timeline_to_dict(session.timeline),
-                "version": session.version
-            }
-        else:
-            return {"success": False, "message": "Nothing to undo"}
+    # TODO: Review unreachable code - if session.undo():
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "success": True,
+    # TODO: Review unreachable code - "timeline": self.server._timeline_to_dict(session.timeline),
+    # TODO: Review unreachable code - "version": session.version
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return {"success": False, "message": "Nothing to undo"}
 
-    async def redo(self, session_id: str):
-        """Redo last undone change."""
-        session = self.sessions.get(session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
+    # TODO: Review unreachable code - async def redo(self, session_id: str):
+    # TODO: Review unreachable code - """Redo last undone change."""
+    # TODO: Review unreachable code - session = self.sessions.get(session_id)
+    # TODO: Review unreachable code - if not session:
+    # TODO: Review unreachable code - raise HTTPException(status_code=404, detail="Session not found")
 
-        if session.redo():
-            return {
-                "success": True,
-                "timeline": self.server._timeline_to_dict(session.timeline),
-                "version": session.version
-            }
-        else:
-            return {"success": False, "message": "Nothing to redo"}
+    # TODO: Review unreachable code - if session.redo():
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "success": True,
+    # TODO: Review unreachable code - "timeline": self.server._timeline_to_dict(session.timeline),
+    # TODO: Review unreachable code - "version": session.version
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - return {"success": False, "message": "Nothing to redo"}
 
-    async def export_timeline(self, session_id: str, format: str = "json"):
-        """Export timeline in requested format."""
-        session = self.sessions.get(session_id)
-        if not session:
-            raise HTTPException(status_code=404, detail="Session not found")
+    # TODO: Review unreachable code - async def export_timeline(self, session_id: str, format: str = "json"):
+    # TODO: Review unreachable code - """Export timeline in requested format."""
+    # TODO: Review unreachable code - session = self.sessions.get(session_id)
+    # TODO: Review unreachable code - if not session:
+    # TODO: Review unreachable code - raise HTTPException(status_code=404, detail="Session not found")
 
-        if format == "json":
-            return self.server._timeline_to_dict(session.timeline)
-        elif format == "edl":
-            # Use the EDL exporter from video_export module
-            from ...workflows.video_export import TimelineExporter
+    # TODO: Review unreachable code - if format == "json":
+    # TODO: Review unreachable code - return self.server._timeline_to_dict(session.timeline)
+    # TODO: Review unreachable code - elif format == "edl":
+    # TODO: Review unreachable code - # Use the EDL exporter from video_export module
+    # TODO: Review unreachable code - from ...workflows.video_export import TimelineExporter
             
-            # Convert session timeline to export format
-            export_timeline = self._convert_to_export_timeline(session.timeline)
+    # TODO: Review unreachable code - # Convert session timeline to export format
+    # TODO: Review unreachable code - export_timeline = self._convert_to_export_timeline(session.timeline)
             
-            # Export to temporary file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.edl', delete=False) as tmp:
-                TimelineExporter.export_edl(export_timeline, Path(tmp.name))
-                tmp.flush()
-                with open(tmp.name, 'r') as f:
-                    content = f.read()
-                Path(tmp.name).unlink()  # Clean up
+    # TODO: Review unreachable code - # Export to temporary file
+    # TODO: Review unreachable code - with tempfile.NamedTemporaryFile(mode='w', suffix='.edl', delete=False) as tmp:
+    # TODO: Review unreachable code - TimelineExporter.export_edl(export_timeline, Path(tmp.name))
+    # TODO: Review unreachable code - tmp.flush()
+    # TODO: Review unreachable code - with open(tmp.name, 'r') as f:
+    # TODO: Review unreachable code - content = f.read()
+    # TODO: Review unreachable code - Path(tmp.name).unlink()  # Clean up
             
-            return {"format": "edl", "content": content}
-        elif format == "xml":
-            # Use the XML exporter from video_export module  
-            from ...workflows.video_export import TimelineExporter
+    # TODO: Review unreachable code - return {"format": "edl", "content": content}
+    # TODO: Review unreachable code - elif format == "xml":
+    # TODO: Review unreachable code - # Use the XML exporter from video_export module  
+    # TODO: Review unreachable code - from ...workflows.video_export import TimelineExporter
             
-            # Convert session timeline to export format
-            export_timeline = self._convert_to_export_timeline(session.timeline)
+    # TODO: Review unreachable code - # Convert session timeline to export format
+    # TODO: Review unreachable code - export_timeline = self._convert_to_export_timeline(session.timeline)
             
-            # Export to temporary file
-            with tempfile.NamedTemporaryFile(mode='w', suffix='.xml', delete=False) as tmp:
-                TimelineExporter.export_davinci_xml(export_timeline, Path(tmp.name))
-                tmp.flush()
-                with open(tmp.name, 'r') as f:
-                    content = f.read()
-                Path(tmp.name).unlink()  # Clean up
+    # TODO: Review unreachable code - # Export to temporary file
+    # TODO: Review unreachable code - with tempfile.NamedTemporaryFile(mode='w', suffix='.xml', delete=False) as tmp:
+    # TODO: Review unreachable code - TimelineExporter.export_davinci_xml(export_timeline, Path(tmp.name))
+    # TODO: Review unreachable code - tmp.flush()
+    # TODO: Review unreachable code - with open(tmp.name, 'r') as f:
+    # TODO: Review unreachable code - content = f.read()
+    # TODO: Review unreachable code - Path(tmp.name).unlink()  # Clean up
                 
-            return {"format": "xml", "content": content}
-        else:
-            raise HTTPException(status_code=400, detail=f"Unknown format: {format}")
+    # TODO: Review unreachable code - return {"format": "xml", "content": content}
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - raise HTTPException(status_code=400, detail=f"Unknown format: {format}")
 
-    async def websocket_endpoint(self, websocket: WebSocket, session_id: str):
-        """WebSocket for real-time updates."""
-        await websocket.accept()
+    # TODO: Review unreachable code - async def websocket_endpoint(self, websocket: WebSocket, session_id: str):
+    # TODO: Review unreachable code - """WebSocket for real-time updates."""
+    # TODO: Review unreachable code - await websocket.accept()
 
-        session = self.sessions.get(session_id)
-        if not session:
-            await websocket.close(code=1008, reason="Session not found")
-            return
+    # TODO: Review unreachable code - session = self.sessions.get(session_id)
+    # TODO: Review unreachable code - if not session:
+    # TODO: Review unreachable code - await websocket.close(code=1008, reason="Session not found")
+    # TODO: Review unreachable code - return
 
-        try:
-            while True:
-                # Receive message from client
-                data = await websocket.receive_text()
-                message = json.loads(data)
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - while True:
+    # TODO: Review unreachable code - # Receive message from client
+    # TODO: Review unreachable code - data = await websocket.receive_text()
+    # TODO: Review unreachable code - message = json.loads(data)
 
-                # Handle different message types
-                if message["type"] == "ping":
-                    await websocket.send_json({"type": "pong"})
+    # TODO: Review unreachable code - # Handle different message types
+    # TODO: Review unreachable code - if message is not None and message["type"] == "ping":
+    # TODO: Review unreachable code - await websocket.send_json({"type": "pong"})
 
-                elif message["type"] == "update_timeline":
-                    # Update timeline based on client changes
-                    updates = message.get("updates", {})
-                    if "clips" in updates:
-                        # Update clip arrangement
-                        new_timeline = copy.deepcopy(session.timeline)
-                        new_timeline.clips = [TimelineClip(**clip) for clip in updates["clips"]]
-                        new_timeline.duration = max((c.start_time + c.duration) for c in new_timeline.clips) if new_timeline.clips else 0
-                        session.update_timeline(new_timeline)
+    # TODO: Review unreachable code - elif message["type"] == "update_timeline":
+    # TODO: Review unreachable code - # Update timeline based on client changes
+    # TODO: Review unreachable code - updates = message.get("updates", {})
+    # TODO: Review unreachable code - if updates is not None and "clips" in updates:
+    # TODO: Review unreachable code - # Update clip arrangement
+    # TODO: Review unreachable code - new_timeline = copy.deepcopy(session.timeline)
+    # TODO: Review unreachable code - new_timeline.clips = [TimelineClip(**clip) for clip in updates["clips"]]
+    # TODO: Review unreachable code - new_timeline.duration = max((c.start_time + c.duration) for c in new_timeline.clips) if new_timeline.clips else 0
+    # TODO: Review unreachable code - session.update_timeline(new_timeline)
 
-                        # Send update confirmation
-                        await websocket.send_json({
-                            "type": "timeline_update",
-                            "timeline": self.server._timeline_to_dict(session.timeline)
-                        })
+    # TODO: Review unreachable code - # Send update confirmation
+    # TODO: Review unreachable code - await websocket.send_json({
+    # TODO: Review unreachable code - "type": "timeline_update",
+    # TODO: Review unreachable code - "timeline": self.server._timeline_to_dict(session.timeline)
+    # TODO: Review unreachable code - })
 
-                elif message["type"] == "undo":
-                    if session.undo():
-                        await websocket.send_json({
-                            "type": "timeline_update",
-                            "timeline": self.server._timeline_to_dict(session.timeline)
-                        })
+    # TODO: Review unreachable code - elif message["type"] == "undo":
+    # TODO: Review unreachable code - if session.undo():
+    # TODO: Review unreachable code - await websocket.send_json({
+    # TODO: Review unreachable code - "type": "timeline_update",
+    # TODO: Review unreachable code - "timeline": self.server._timeline_to_dict(session.timeline)
+    # TODO: Review unreachable code - })
 
-                elif message["type"] == "redo":
-                    if session.redo():
-                        await websocket.send_json({
-                            "type": "timeline_update",
-                            "timeline": self.server._timeline_to_dict(session.timeline)
-                        })
+    # TODO: Review unreachable code - elif message["type"] == "redo":
+    # TODO: Review unreachable code - if session.redo():
+    # TODO: Review unreachable code - await websocket.send_json({
+    # TODO: Review unreachable code - "type": "timeline_update",
+    # TODO: Review unreachable code - "timeline": self.server._timeline_to_dict(session.timeline)
+    # TODO: Review unreachable code - })
 
-        except Exception as e:
-            logger.error(f"WebSocket error: {e}")
-        finally:
-            await websocket.close()
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"WebSocket error: {e}")
+    # TODO: Review unreachable code - finally:
+    # TODO: Review unreachable code - await websocket.close()
 
-    def _convert_to_export_timeline(self, session_timeline) -> 'Timeline':
-        """Convert session timeline to export format."""
-        from ...workflows.video_export import Timeline as ExportTimeline, TimelineClip as ExportClip
+    # TODO: Review unreachable code - def _convert_to_export_timeline(self, session_timeline) -> 'Timeline':
+    # TODO: Review unreachable code - """Convert session timeline to export format."""
+    # TODO: Review unreachable code - from ...workflows.video_export import Timeline as ExportTimeline, TimelineClip as ExportClip
         
-        # Create export timeline
-        export_timeline = ExportTimeline(
-            name=getattr(session_timeline, 'name', 'Untitled Timeline'),
-            duration=getattr(session_timeline, 'duration', 0),
-            fps=getattr(session_timeline, 'fps', 30.0)
-        )
+    # TODO: Review unreachable code - # Create export timeline
+    # TODO: Review unreachable code - export_timeline = ExportTimeline(
+    # TODO: Review unreachable code - name=getattr(session_timeline, 'name', 'Untitled Timeline'),
+    # TODO: Review unreachable code - duration=getattr(session_timeline, 'duration', 0),
+    # TODO: Review unreachable code - fps=getattr(session_timeline, 'fps', 30.0)
+    # TODO: Review unreachable code - )
         
-        # Convert clips
-        if hasattr(session_timeline, 'clips'):
-            for clip in session_timeline.clips:
-                export_clip = ExportClip(
-                    asset_path=Path(clip.asset_path) if hasattr(clip, 'asset_path') else Path(clip.path),
-                    start_time=clip.start_time,
-                    duration=clip.duration,
-                    in_point=getattr(clip, 'in_point', 0.0),
-                    out_point=getattr(clip, 'out_point', None),
-                    transition_in=getattr(clip, 'transition_in', None),
-                    transition_in_duration=getattr(clip, 'transition_in_duration', 0.0),
-                    transition_out=getattr(clip, 'transition_out', None),
-                    transition_out_duration=getattr(clip, 'transition_out_duration', 0.0),
-                    effects=getattr(clip, 'effects', []),
-                    metadata=getattr(clip, 'metadata', {}),
-                    beat_aligned=getattr(clip, 'beat_aligned', False),
-                    sync_point=getattr(clip, 'sync_point', None)
-                )
-                export_timeline.add_clip(export_clip)
+    # TODO: Review unreachable code - # Convert clips
+    # TODO: Review unreachable code - if hasattr(session_timeline, 'clips'):
+    # TODO: Review unreachable code - for clip in session_timeline.clips:
+    # TODO: Review unreachable code - export_clip = ExportClip(
+    # TODO: Review unreachable code - asset_path=Path(clip.asset_path) if hasattr(clip, 'asset_path') else Path(clip.path),
+    # TODO: Review unreachable code - start_time=clip.start_time,
+    # TODO: Review unreachable code - duration=clip.duration,
+    # TODO: Review unreachable code - in_point=getattr(clip, 'in_point', 0.0),
+    # TODO: Review unreachable code - out_point=getattr(clip, 'out_point', None),
+    # TODO: Review unreachable code - transition_in=getattr(clip, 'transition_in', None),
+    # TODO: Review unreachable code - transition_in_duration=getattr(clip, 'transition_in_duration', 0.0),
+    # TODO: Review unreachable code - transition_out=getattr(clip, 'transition_out', None),
+    # TODO: Review unreachable code - transition_out_duration=getattr(clip, 'transition_out_duration', 0.0),
+    # TODO: Review unreachable code - effects=getattr(clip, 'effects', []),
+    # TODO: Review unreachable code - metadata=getattr(clip, 'metadata', {}),
+    # TODO: Review unreachable code - beat_aligned=getattr(clip, 'beat_aligned', False),
+    # TODO: Review unreachable code - sync_point=getattr(clip, 'sync_point', None)
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - export_timeline.add_clip(export_clip)
         
-        # Convert markers
-        if hasattr(session_timeline, 'markers'):
-            export_timeline.markers = session_timeline.markers
+    # TODO: Review unreachable code - # Convert markers
+    # TODO: Review unreachable code - if hasattr(session_timeline, 'markers'):
+    # TODO: Review unreachable code - export_timeline.markers = session_timeline.markers
             
-        # Convert audio tracks
-        if hasattr(session_timeline, 'audio_tracks'):
-            export_timeline.audio_tracks = session_timeline.audio_tracks
+    # TODO: Review unreachable code - # Convert audio tracks
+    # TODO: Review unreachable code - if hasattr(session_timeline, 'audio_tracks'):
+    # TODO: Review unreachable code - export_timeline.audio_tracks = session_timeline.audio_tracks
             
-        return export_timeline
+    # TODO: Review unreachable code - return export_timeline
 
-    async def generate_preview(self, request: dict):
-        """Generate a preview video file from timeline."""
-        try:
-            timeline_data = request.get("timeline", {})
-            format = request.get("format", "mp4")
-            resolution = request.get("resolution", [1280, 720])
-            request.get("includeAudio", True)
+    # TODO: Review unreachable code - async def generate_preview(self, request: dict):
+    # TODO: Review unreachable code - """Generate a preview video file from timeline."""
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - timeline_data = request.get("timeline", {})
+    # TODO: Review unreachable code - format = request.get("format", "mp4")
+    # TODO: Review unreachable code - resolution = request.get("resolution", [1280, 720])
+    # TODO: Review unreachable code - request.get("includeAudio", True)
 
-            # Create temporary output file
-            temp_dir = Path(tempfile.mkdtemp())
-            output_path = temp_dir / f"preview.{format}"
+    # TODO: Review unreachable code - # Create temporary output file
+    # TODO: Review unreachable code - temp_dir = Path(tempfile.mkdtemp())
+    # TODO: Review unreachable code - output_path = temp_dir / f"preview.{format}"
 
-            # Import video export functionality
-            from ...workflows.video_export import VideoExportManager
+    # TODO: Review unreachable code - # Import video export functionality
+    # TODO: Review unreachable code - from ...workflows.video_export import VideoExportManager
 
-            # Convert timeline data to Timeline object
-            timeline = Timeline(
-                name=timeline_data.get("name", "Preview"),
-                duration=timeline_data.get("duration", 0),
-                frame_rate=timeline_data.get("frame_rate", 30),
-                resolution=tuple(resolution),
-                clips=[TimelineClip(**clip) for clip in timeline_data.get("clips", [])]
-            )
+    # TODO: Review unreachable code - # Convert timeline data to Timeline object
+    # TODO: Review unreachable code - timeline = Timeline(
+    # TODO: Review unreachable code - name=timeline_data.get("name", "Preview"),
+    # TODO: Review unreachable code - duration=timeline_data.get("duration", 0),
+    # TODO: Review unreachable code - frame_rate=timeline_data.get("frame_rate", 30),
+    # TODO: Review unreachable code - resolution=tuple(resolution),
+    # TODO: Review unreachable code - clips=[TimelineClip(**clip) for clip in timeline_data.get("clips", [])]
+    # TODO: Review unreachable code - )
 
-            # Generate preview (simplified version - in production would use ffmpeg)
-            VideoExportManager()
+    # TODO: Review unreachable code - # Generate preview (simplified version - in production would use ffmpeg)
+    # TODO: Review unreachable code - VideoExportManager()
 
-            # For now, return a placeholder response
-            # Full implementation would use ffmpeg to create actual preview
-            # Generate a unique preview ID
-            import hashlib
-            # Generate preview ID from timeline + timestamp
-            preview_source = f"{timeline.id}:{datetime.now().isoformat()}"
-            preview_id = hashlib.sha256(preview_source.encode()).hexdigest()[:16]
-            preview_url = f"/preview/{preview_id}/{output_path.name}"
+    # TODO: Review unreachable code - # For now, return a placeholder response
+    # TODO: Review unreachable code - # Full implementation would use ffmpeg to create actual preview
+    # TODO: Review unreachable code - # Generate a unique preview ID
+    # TODO: Review unreachable code - import hashlib
+    # TODO: Review unreachable code - # Generate preview ID from timeline + timestamp
+    # TODO: Review unreachable code - preview_source = f"{timeline.id}:{datetime.now().isoformat()}"
+    # TODO: Review unreachable code - preview_id = hashlib.sha256(preview_source.encode()).hexdigest()[:16]
+    # TODO: Review unreachable code - preview_url = f"/preview/{preview_id}/{output_path.name}"
 
-            return {
-                "preview_url": preview_url,
-                "duration": timeline.duration,
-                "format": format
-            }
+    # TODO: Review unreachable code - return {
+    # TODO: Review unreachable code - "preview_url": preview_url,
+    # TODO: Review unreachable code - "duration": timeline.duration,
+    # TODO: Review unreachable code - "format": format
+    # TODO: Review unreachable code - }
 
-        except Exception as e:
-            logger.error(f"Preview generation failed: {e}")
-            raise HTTPException(status_code=500, detail=str(e))
+    # TODO: Review unreachable code - except Exception as e:
+    # TODO: Review unreachable code - logger.error(f"Preview generation failed: {e}")
+    # TODO: Review unreachable code - raise HTTPException(status_code=500, detail=str(e))

@@ -75,102 +75,102 @@ Debug commands (use --debug flag):
     return parser
 
 
-def main(argv: list[str] | None = None) -> int:
-    """Simplified main entry point."""
-    parser = create_parser()
-    args = parser.parse_args(argv)
+# TODO: Review unreachable code - def main(argv: list[str] | None = None) -> int:
+# TODO: Review unreachable code - """Simplified main entry point."""
+# TODO: Review unreachable code - parser = create_parser()
+# TODO: Review unreachable code - args = parser.parse_args(argv)
 
-    # Configure logging
-    level = logging.DEBUG if args.debug else logging.INFO if args.verbose else logging.WARNING
-    logging.basicConfig(level=level, format='%(message)s')
+# TODO: Review unreachable code - # Configure logging
+# TODO: Review unreachable code - level = logging.DEBUG if args.debug else logging.INFO if args.verbose else logging.WARNING
+# TODO: Review unreachable code - logging.basicConfig(level=level, format='%(message)s')
 
-    try:
-        # Handle MCP server
-        if args.command == "mcp-server":
-            logger.info("Starting MCP server...")
-            from ..mcp import main as mcp_main
-            return mcp_main()
+# TODO: Review unreachable code - try:
+# TODO: Review unreachable code - # Handle MCP server
+# TODO: Review unreachable code - if args.command == "mcp-server":
+# TODO: Review unreachable code - logger.info("Starting MCP server...")
+# TODO: Review unreachable code - from ..mcp import main as mcp_main
+# TODO: Review unreachable code - return mcp_main()
 
-        # Handle keys
-        elif args.command == "keys":
-            from ..core.keys.cli import run_keys_command
-            return run_keys_command(args)
+# TODO: Review unreachable code - # Handle keys
+# TODO: Review unreachable code - elif args.command == "keys":
+# TODO: Review unreachable code - from ..core.keys.cli import run_keys_command
+# TODO: Review unreachable code - return run_keys_command(args)
 
-        # Handle debug commands
-        elif args.command == "debug":
-            if not args.debug:
-                logger.error("⚠️  Debug commands require --debug flag!")
-                logger.error("Example: alice --debug debug organize -i ~/inbox -o ~/organized")
-                return 1
+# TODO: Review unreachable code - # Handle debug commands
+# TODO: Review unreachable code - elif args.command == "debug":
+# TODO: Review unreachable code - if not args.debug:
+# TODO: Review unreachable code - logger.error("⚠️  Debug commands require --debug flag!")
+# TODO: Review unreachable code - logger.error("Example: alice --debug debug organize -i ~/inbox -o ~/organized")
+# TODO: Review unreachable code - return 1
 
-            # Handle organize subcommand
-            if args.debug_command == "organize":
-                from ..organizer.media_organizer import MediaOrganizer
-                config = load_config()
+# TODO: Review unreachable code - # Handle organize subcommand
+# TODO: Review unreachable code - if args.debug_command == "organize":
+# TODO: Review unreachable code - from ..organizer.media_organizer import MediaOrganizer
+# TODO: Review unreachable code - config = load_config()
 
-                # Override paths if provided
-                if args.inbox:
-                    config.paths.inbox = Path(args.inbox)
-                if args.output:
-                    config.paths.organized = Path(args.output)
+# TODO: Review unreachable code - # Override paths if provided
+# TODO: Review unreachable code - if args.inbox:
+# TODO: Review unreachable code - config.paths.inbox = Path(args.inbox)
+# TODO: Review unreachable code - if args.output:
+# TODO: Review unreachable code - config.paths.organized = Path(args.output)
 
-                organizer = MediaOrganizer(
-                    config,
-                    dry_run=args.dry_run,
-                    watch_mode=args.watch,
-                    enable_understanding=args.understand
-                )
+# TODO: Review unreachable code - organizer = MediaOrganizer(
+# TODO: Review unreachable code - config,
+# TODO: Review unreachable code - dry_run=args.dry_run,
+# TODO: Review unreachable code - watch_mode=args.watch,
+# TODO: Review unreachable code - enable_understanding=args.understand
+# TODO: Review unreachable code - )
 
-                results = organizer.organize()
-                return 0 if results else 1
+# TODO: Review unreachable code - results = organizer.organize()
+# TODO: Review unreachable code - return 0 if results else 1
 
-            # Delegate to Click-based commands
-            elif args.debug_command in ["dedup", "prompts", "storage", "scenes", "transitions", "performance", "config"]:
-                # Import the appropriate Click command group
-                click_args = sys.argv[sys.argv.index(args.debug_command) + 1:]
+# TODO: Review unreachable code - # Delegate to Click-based commands
+# TODO: Review unreachable code - elif args.debug_command in ["dedup", "prompts", "storage", "scenes", "transitions", "performance", "config"]:
+# TODO: Review unreachable code - # Import the appropriate Click command group
+# TODO: Review unreachable code - click_args = sys.argv[sys.argv.index(args.debug_command) + 1:]
 
-                if args.debug_command == "dedup":
-                    from ..assets.deduplication.cli import dedup_cli
-                    return dedup_cli(click_args, standalone_mode=False)
-                elif args.debug_command == "prompts":
-                    from ..prompts.cli import prompts_cli
-                    return prompts_cli(click_args, standalone_mode=False)
-                elif args.debug_command == "storage":
-                    from ..storage.cli import storage
-                    return storage(click_args, standalone_mode=False)
-                elif args.debug_command == "scenes":
-                    from ..scene_detection.cli import scenes_cli
-                    return scenes_cli(click_args, standalone_mode=False)
-                elif args.debug_command == "transitions":
-                    from ..workflows.transitions.cli import transitions_cli
-                    return transitions_cli(click_args, standalone_mode=False)
-                elif args.debug_command == "performance":
-                    from ..cli.performance_command import performance
-                    return performance(click_args, standalone_mode=False)
-                elif args.debug_command == "config":
-                    from ..cli.config_command import config
-                    return config(click_args, standalone_mode=False)
+# TODO: Review unreachable code - if args.debug_command == "dedup":
+# TODO: Review unreachable code - from ..assets.deduplication.cli import dedup_cli
+# TODO: Review unreachable code - return dedup_cli(click_args, standalone_mode=False)
+# TODO: Review unreachable code - elif args.debug_command == "prompts":
+# TODO: Review unreachable code - from ..prompts.cli import prompts_cli
+# TODO: Review unreachable code - return prompts_cli(click_args, standalone_mode=False)
+# TODO: Review unreachable code - elif args.debug_command == "storage":
+# TODO: Review unreachable code - from ..storage.cli import storage
+# TODO: Review unreachable code - return storage(click_args, standalone_mode=False)
+# TODO: Review unreachable code - elif args.debug_command == "scenes":
+# TODO: Review unreachable code - from ..scene_detection.cli import scenes_cli
+# TODO: Review unreachable code - return scenes_cli(click_args, standalone_mode=False)
+# TODO: Review unreachable code - elif args.debug_command == "transitions":
+# TODO: Review unreachable code - from ..workflows.transitions.cli import transitions_cli
+# TODO: Review unreachable code - return transitions_cli(click_args, standalone_mode=False)
+# TODO: Review unreachable code - elif args.debug_command == "performance":
+# TODO: Review unreachable code - from ..cli.performance_command import performance
+# TODO: Review unreachable code - return performance(click_args, standalone_mode=False)
+# TODO: Review unreachable code - elif args.debug_command == "config":
+# TODO: Review unreachable code - from ..cli.config_command import config
+# TODO: Review unreachable code - return config(click_args, standalone_mode=False)
 
-            else:
-                parser.print_help()
-                return 1
-            logger.info(f"Organized {results.statistics['organized']} files")
-            return 0
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - parser.print_help()
+# TODO: Review unreachable code - return 1
+# TODO: Review unreachable code - logger.info(f"Organized {results.statistics['organized']} files")
+# TODO: Review unreachable code - return 0
 
-        else:
-            parser.print_help()
-            return 0
+# TODO: Review unreachable code - else:
+# TODO: Review unreachable code - parser.print_help()
+# TODO: Review unreachable code - return 0
 
-    except AliceMultiverseError as e:
-        logger.error(f"Error: {e}")
-        return 1
-    except KeyboardInterrupt:
-        logger.info("\nInterrupted by user")
-        return 130
-    except Exception as e:
-        logger.error(f"Unexpected error: {e}", exc_info=args.debug)
-        return 1
+# TODO: Review unreachable code - except AliceMultiverseError as e:
+# TODO: Review unreachable code - logger.error(f"Error: {e}")
+# TODO: Review unreachable code - return 1
+# TODO: Review unreachable code - except KeyboardInterrupt:
+# TODO: Review unreachable code - logger.info("\nInterrupted by user")
+# TODO: Review unreachable code - return 130
+# TODO: Review unreachable code - except Exception as e:
+# TODO: Review unreachable code - logger.error(f"Unexpected error: {e}", exc_info=args.debug)
+# TODO: Review unreachable code - return 1
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+# TODO: Review unreachable code - if __name__ == "__main__":
+# TODO: Review unreachable code - sys.exit(main())

@@ -74,7 +74,8 @@ class DuckDBSearch(DuckDBBase):
                 """, [content_hash]).fetchall()
 
                 if tags_result:
-                    asset["tags"] = {}
+                    if asset is not None:
+                        asset["tags"] = {}
                     for tag_type, tag_value, confidence, source in tags_result:
                         if tag_type not in asset["tags"]:
                             asset["tags"][tag_type] = []
@@ -88,370 +89,370 @@ class DuckDBSearch(DuckDBBase):
 
         return assets, total_count
 
-    def search_by_tags(
-        self,
-        tags: list[str],
-        tag_type: str | None = None,
-        match_all: bool = False,
-        limit: int = 100,
-        offset: int = 0,
-    ) -> tuple[list[dict[str, Any]], int]:
-        """Search assets by tags.
+    # TODO: Review unreachable code - def search_by_tags(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - tags: list[str],
+    # TODO: Review unreachable code - tag_type: str | None = None,
+    # TODO: Review unreachable code - match_all: bool = False,
+    # TODO: Review unreachable code - limit: int = 100,
+    # TODO: Review unreachable code - offset: int = 0,
+    # TODO: Review unreachable code - ) -> tuple[list[dict[str, Any]], int]:
+    # TODO: Review unreachable code - """Search assets by tags.
 
-        Args:
-            tags: List of tags to search for
-            tag_type: Specific tag type to search in
-            match_all: Require all tags to match
-            limit: Maximum results
-            offset: Skip results
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - tags: List of tags to search for
+    # TODO: Review unreachable code - tag_type: Specific tag type to search in
+    # TODO: Review unreachable code - match_all: Require all tags to match
+    # TODO: Review unreachable code - limit: Maximum results
+    # TODO: Review unreachable code - offset: Skip results
 
-        Returns:
-            Tuple of (results, total_count)
-        """
-        if not tags:
-            return [], 0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Tuple of (results, total_count)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - if not tags:
+    # TODO: Review unreachable code - return [], 0
 
-        # Build tag query
-        tag_conditions = []
-        params = []
+    # TODO: Review unreachable code - # Build tag query
+    # TODO: Review unreachable code - tag_conditions = []
+    # TODO: Review unreachable code - params = []
 
-        for tag in tags:
-            condition = "tag_value = ?"
-            params.append(tag)
+    # TODO: Review unreachable code - for tag in tags:
+    # TODO: Review unreachable code - condition = "tag_value = ?"
+    # TODO: Review unreachable code - params.append(tag)
 
-            if tag_type:
-                condition += " AND tag_type = ?"
-                params.append(tag_type)
+    # TODO: Review unreachable code - if tag_type:
+    # TODO: Review unreachable code - condition += " AND tag_type = ?"
+    # TODO: Review unreachable code - params.append(tag_type)
 
-            tag_conditions.append(f"({condition})")
+    # TODO: Review unreachable code - tag_conditions.append(f"({condition})")
 
-        if match_all:
-            # All tags must match
-            tag_query = f"""
-                SELECT content_hash
-                FROM tags
-                WHERE {" OR ".join(tag_conditions)}
-                GROUP BY content_hash
-                HAVING COUNT(DISTINCT tag_value) = {len(tags)}
-            """
-        else:
-            # Any tag can match
-            tag_query = f"""
-                SELECT DISTINCT content_hash
-                FROM tags
-                WHERE {" OR ".join(tag_conditions)}
-            """
+    # TODO: Review unreachable code - if match_all:
+    # TODO: Review unreachable code - # All tags must match
+    # TODO: Review unreachable code - tag_query = f"""
+    # TODO: Review unreachable code - SELECT content_hash
+    # TODO: Review unreachable code - FROM tags
+    # TODO: Review unreachable code - WHERE {" OR ".join(tag_conditions)}
+    # TODO: Review unreachable code - GROUP BY content_hash
+    # TODO: Review unreachable code - HAVING COUNT(DISTINCT tag_value) = {len(tags)}
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Any tag can match
+    # TODO: Review unreachable code - tag_query = f"""
+    # TODO: Review unreachable code - SELECT DISTINCT content_hash
+    # TODO: Review unreachable code - FROM tags
+    # TODO: Review unreachable code - WHERE {" OR ".join(tag_conditions)}
+    # TODO: Review unreachable code - """
 
-        # Get count
-        count_query = f"SELECT COUNT(*) FROM ({tag_query}) t"
-        total_count = self.conn.execute(count_query, params).fetchone()[0]
+    # TODO: Review unreachable code - # Get count
+    # TODO: Review unreachable code - count_query = f"SELECT COUNT(*) FROM ({tag_query}) t"
+    # TODO: Review unreachable code - total_count = self.conn.execute(count_query, params).fetchone()[0]
 
-        # Get assets
-        asset_query = f"""
-            SELECT a.*
-            FROM assets a
-            INNER JOIN ({tag_query}) t ON a.content_hash = t.content_hash
-            ORDER BY a.created_at DESC
-            LIMIT {limit} OFFSET {offset}
-        """
+    # TODO: Review unreachable code - # Get assets
+    # TODO: Review unreachable code - asset_query = f"""
+    # TODO: Review unreachable code - SELECT a.*
+    # TODO: Review unreachable code - FROM assets a
+    # TODO: Review unreachable code - INNER JOIN ({tag_query}) t ON a.content_hash = t.content_hash
+    # TODO: Review unreachable code - ORDER BY a.created_at DESC
+    # TODO: Review unreachable code - LIMIT {limit} OFFSET {offset}
+    # TODO: Review unreachable code - """
 
-        results = self.conn.execute(asset_query, params).fetchall()
-        # Store column names before doing other queries
-        columns = [desc[0] for desc in self.conn.description]
+    # TODO: Review unreachable code - results = self.conn.execute(asset_query, params).fetchall()
+    # TODO: Review unreachable code - # Store column names before doing other queries
+    # TODO: Review unreachable code - columns = [desc[0] for desc in self.conn.description]
 
-        # Convert to dictionaries
-        assets = []
-        for row in results:
-            asset = self._row_to_dict(row, columns)
+    # TODO: Review unreachable code - # Convert to dictionaries
+    # TODO: Review unreachable code - assets = []
+    # TODO: Review unreachable code - for row in results:
+    # TODO: Review unreachable code - asset = self._row_to_dict(row, columns)
 
-            # Add tags
-            content_hash = asset["content_hash"]
-            tags_result = self.conn.execute("""
-                SELECT tag_type, tag_value, confidence, source
-                FROM tags WHERE content_hash = ?
-                ORDER BY tag_type, confidence DESC
-            """, [content_hash]).fetchall()
+    # TODO: Review unreachable code - # Add tags
+    # TODO: Review unreachable code - content_hash = asset["content_hash"]
+    # TODO: Review unreachable code - tags_result = self.conn.execute("""
+    # TODO: Review unreachable code - SELECT tag_type, tag_value, confidence, source
+    # TODO: Review unreachable code - FROM tags WHERE content_hash = ?
+    # TODO: Review unreachable code - ORDER BY tag_type, confidence DESC
+    # TODO: Review unreachable code - """, [content_hash]).fetchall()
 
-            if tags_result:
-                asset["tags"] = {}
-                for tag_type, tag_value, confidence, source in tags_result:
-                    if tag_type not in asset["tags"]:
-                        asset["tags"][tag_type] = []
-                    asset["tags"][tag_type].append({
-                        "value": tag_value,
-                        "confidence": confidence,
-                        "source": source
-                    })
+    # TODO: Review unreachable code - if tags_result:
+    # TODO: Review unreachable code - asset["tags"] = {}
+    # TODO: Review unreachable code - for tag_type, tag_value, confidence, source in tags_result:
+    # TODO: Review unreachable code - if tag_type not in asset["tags"]:
+    # TODO: Review unreachable code - asset["tags"][tag_type] = []
+    # TODO: Review unreachable code - asset["tags"][tag_type].append({
+    # TODO: Review unreachable code - "value": tag_value,
+    # TODO: Review unreachable code - "confidence": confidence,
+    # TODO: Review unreachable code - "source": source
+    # TODO: Review unreachable code - })
 
-            assets.append(asset)
+    # TODO: Review unreachable code - assets.append(asset)
 
-        return assets, total_count
+    # TODO: Review unreachable code - return assets, total_count
 
-    def search_by_text(
-        self,
-        query: str,
-        search_fields: list[str] | None = None,
-        limit: int = 100,
-        offset: int = 0,
-    ) -> tuple[list[dict[str, Any]], int]:
-        """Full-text search across specified fields.
+    # TODO: Review unreachable code - def search_by_text(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - query: str,
+    # TODO: Review unreachable code - search_fields: list[str] | None = None,
+    # TODO: Review unreachable code - limit: int = 100,
+    # TODO: Review unreachable code - offset: int = 0,
+    # TODO: Review unreachable code - ) -> tuple[list[dict[str, Any]], int]:
+    # TODO: Review unreachable code - """Full-text search across specified fields.
 
-        Args:
-            query: Search query
-            search_fields: Fields to search in (default: prompt, description)
-            limit: Maximum results
-            offset: Skip results
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - query: Search query
+    # TODO: Review unreachable code - search_fields: Fields to search in (default: prompt, description)
+    # TODO: Review unreachable code - limit: Maximum results
+    # TODO: Review unreachable code - offset: Skip results
 
-        Returns:
-            Tuple of (results, total_count)
-        """
-        if not query:
-            return [], 0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Tuple of (results, total_count)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - if not query:
+    # TODO: Review unreachable code - return [], 0
 
-        if not search_fields:
-            search_fields = ["prompt", "description"]
+    # TODO: Review unreachable code - if not search_fields:
+    # TODO: Review unreachable code - search_fields = ["prompt", "description"]
 
-        # Build search conditions
-        conditions = []
-        params = []
+    # TODO: Review unreachable code - # Build search conditions
+    # TODO: Review unreachable code - conditions = []
+    # TODO: Review unreachable code - params = []
 
-        for field in search_fields:
-            if field in ["prompt", "description"]:
-                # Use FTS if available
-                conditions.append(f"{field} MATCH ?")
-                params.append(query)
-            else:
-                # Use LIKE for other fields
-                conditions.append(f"{field} LIKE ?")
-                params.append(f"%{query}%")
+    # TODO: Review unreachable code - for field in search_fields:
+    # TODO: Review unreachable code - if field in ["prompt", "description"]:
+    # TODO: Review unreachable code - # Use FTS if available
+    # TODO: Review unreachable code - conditions.append(f"{field} MATCH ?")
+    # TODO: Review unreachable code - params.append(query)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - # Use LIKE for other fields
+    # TODO: Review unreachable code - conditions.append(f"{field} LIKE ?")
+    # TODO: Review unreachable code - params.append(f"%{query}%")
 
-        where_clause = " OR ".join(conditions)
+    # TODO: Review unreachable code - where_clause = " OR ".join(conditions)
 
-        # Get count
-        count_query = f"SELECT COUNT(*) FROM assets WHERE {where_clause}"
-        total_count = self.conn.execute(count_query, params).fetchone()[0]
+    # TODO: Review unreachable code - # Get count
+    # TODO: Review unreachable code - count_query = f"SELECT COUNT(*) FROM assets WHERE {where_clause}"
+    # TODO: Review unreachable code - total_count = self.conn.execute(count_query, params).fetchone()[0]
 
-        # Get results
-        search_query = f"""
-            SELECT * FROM assets
-            WHERE {where_clause}
-            ORDER BY created_at DESC
-            LIMIT {limit} OFFSET {offset}
-        """
+    # TODO: Review unreachable code - # Get results
+    # TODO: Review unreachable code - search_query = f"""
+    # TODO: Review unreachable code - SELECT * FROM assets
+    # TODO: Review unreachable code - WHERE {where_clause}
+    # TODO: Review unreachable code - ORDER BY created_at DESC
+    # TODO: Review unreachable code - LIMIT {limit} OFFSET {offset}
+    # TODO: Review unreachable code - """
 
-        results = self.conn.execute(search_query, params).fetchall()
+    # TODO: Review unreachable code - results = self.conn.execute(search_query, params).fetchall()
 
-        # Convert to dictionaries
-        assets = [self._row_to_dict(row) for row in results]
+    # TODO: Review unreachable code - # Convert to dictionaries
+    # TODO: Review unreachable code - assets = [self._row_to_dict(row) for row in results]
 
-        return assets, total_count
+    # TODO: Review unreachable code - return assets, total_count
 
-    def search_with_cache(
-        self,
-        filters: dict[str, Any] | None = None,
-        sort_by: str = "created_at",
-        sort_order: str = "desc",
-        limit: int = 100,
-        offset: int = 0,
-        cache_ttl: int = 300,  # 5 minutes
-    ) -> tuple[list[dict[str, Any]], int]:
-        """Search with query caching for performance.
+    # TODO: Review unreachable code - def search_with_cache(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - filters: dict[str, Any] | None = None,
+    # TODO: Review unreachable code - sort_by: str = "created_at",
+    # TODO: Review unreachable code - sort_order: str = "desc",
+    # TODO: Review unreachable code - limit: int = 100,
+    # TODO: Review unreachable code - offset: int = 0,
+    # TODO: Review unreachable code - cache_ttl: int = 300,  # 5 minutes
+    # TODO: Review unreachable code - ) -> tuple[list[dict[str, Any]], int]:
+    # TODO: Review unreachable code - """Search with query caching for performance.
 
-        Args:
-            filters: Search filters
-            sort_by: Sort field
-            sort_order: Sort order
-            limit: Maximum results
-            offset: Skip results
-            cache_ttl: Cache time-to-live in seconds
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - filters: Search filters
+    # TODO: Review unreachable code - sort_by: Sort field
+    # TODO: Review unreachable code - sort_order: Sort order
+    # TODO: Review unreachable code - limit: Maximum results
+    # TODO: Review unreachable code - offset: Skip results
+    # TODO: Review unreachable code - cache_ttl: Cache time-to-live in seconds
 
-        Returns:
-            Tuple of (results, total_count)
-        """
-        # Generate cache key
-        cache_data = {
-            "filters": filters or {},
-            "sort_by": sort_by,
-            "sort_order": sort_order,
-            "limit": limit,
-            "offset": offset
-        }
-        cache_key = hashlib.md5(json.dumps(cache_data, sort_keys=True).encode()).hexdigest()
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Tuple of (results, total_count)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Generate cache key
+    # TODO: Review unreachable code - cache_data = {
+    # TODO: Review unreachable code - "filters": filters or {},
+    # TODO: Review unreachable code - "sort_by": sort_by,
+    # TODO: Review unreachable code - "sort_order": sort_order,
+    # TODO: Review unreachable code - "limit": limit,
+    # TODO: Review unreachable code - "offset": offset
+    # TODO: Review unreachable code - }
+    # TODO: Review unreachable code - cache_key = hashlib.md5(json.dumps(cache_data, sort_keys=True).encode()).hexdigest()
 
-        # Check cache
-        cutoff_time = datetime.now() - timedelta(seconds=cache_ttl)
-        cached = self.conn.execute("""
-            SELECT results, total_count
-            FROM query_cache
-            WHERE cache_key = ? AND cached_at > ?
-        """, [cache_key, cutoff_time]).fetchone()
+    # TODO: Review unreachable code - # Check cache
+    # TODO: Review unreachable code - cutoff_time = datetime.now() - timedelta(seconds=cache_ttl)
+    # TODO: Review unreachable code - cached = self.conn.execute("""
+    # TODO: Review unreachable code - SELECT results, total_count
+    # TODO: Review unreachable code - FROM query_cache
+    # TODO: Review unreachable code - WHERE cache_key = ? AND cached_at > ?
+    # TODO: Review unreachable code - """, [cache_key, cutoff_time]).fetchone()
 
-        if cached:
-            results = json.loads(cached[0])
-            total_count = cached[1]
-            logger.debug(f"Cache hit for query {cache_key}")
-            return results, total_count
+    # TODO: Review unreachable code - if cached:
+    # TODO: Review unreachable code - results = json.loads(cached[0])
+    # TODO: Review unreachable code - total_count = cached[1]
+    # TODO: Review unreachable code - logger.debug(f"Cache hit for query {cache_key}")
+    # TODO: Review unreachable code - return results, total_count
 
-        # Execute search
-        results, total_count = self.search(
-            filters, sort_by, sort_order, limit, offset, include_metadata=True
-        )
+    # TODO: Review unreachable code - # Execute search
+    # TODO: Review unreachable code - results, total_count = self.search(
+    # TODO: Review unreachable code - filters, sort_by, sort_order, limit, offset, include_metadata=True
+    # TODO: Review unreachable code - )
 
-        # Cache results
-        self.conn.execute("""
-            INSERT OR REPLACE INTO query_cache (cache_key, results, total_count, cached_at)
-            VALUES (?, ?, ?, ?)
-        """, [cache_key, json.dumps(results, default=str), total_count, datetime.now()])
+    # TODO: Review unreachable code - # Cache results
+    # TODO: Review unreachable code - self.conn.execute("""
+    # TODO: Review unreachable code - INSERT OR REPLACE INTO query_cache (cache_key, results, total_count, cached_at)
+    # TODO: Review unreachable code - VALUES (?, ?, ?, ?)
+    # TODO: Review unreachable code - """, [cache_key, json.dumps(results, default=str), total_count, datetime.now()])
 
-        # Clean old cache entries
-        self.conn.execute(
-            "DELETE FROM query_cache WHERE cached_at < ?",
-            [datetime.now() - timedelta(hours=1)]
-        )
+    # TODO: Review unreachable code - # Clean old cache entries
+    # TODO: Review unreachable code - self.conn.execute(
+    # TODO: Review unreachable code - "DELETE FROM query_cache WHERE cached_at < ?",
+    # TODO: Review unreachable code - [datetime.now() - timedelta(hours=1)]
+    # TODO: Review unreachable code - )
 
-        return results, total_count
+    # TODO: Review unreachable code - return results, total_count
 
-    def _apply_search_filters(
-        self,
-        filters: dict[str, Any]
-    ) -> tuple[str, list[Any]]:
-        """Apply search filters to build WHERE clause.
+    # TODO: Review unreachable code - def _apply_search_filters(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - filters: dict[str, Any]
+    # TODO: Review unreachable code - ) -> tuple[str, list[Any]]:
+    # TODO: Review unreachable code - """Apply search filters to build WHERE clause.
 
-        Args:
-            filters: Dictionary of filters
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - filters: Dictionary of filters
 
-        Returns:
-            Tuple of (where_clause, parameters)
-        """
-        conditions = []
-        params = []
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Tuple of (where_clause, parameters)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - conditions = []
+    # TODO: Review unreachable code - params = []
 
-        for key, value in filters.items():
-            if value is None:
-                continue
+    # TODO: Review unreachable code - for key, value in filters.items():
+    # TODO: Review unreachable code - if value is None:
+    # TODO: Review unreachable code - continue
 
-            # Handle different filter types
-            if key == "content_hash":
-                conditions.append("content_hash = ?")
-                params.append(value)
+    # TODO: Review unreachable code - # Handle different filter types
+    # TODO: Review unreachable code - if key == "content_hash":
+    # TODO: Review unreachable code - conditions.append("content_hash = ?")
+    # TODO: Review unreachable code - params.append(value)
 
-            elif key == "media_type":
-                conditions.append("media_type = ?")
-                params.append(value)
+    # TODO: Review unreachable code - elif key == "media_type":
+    # TODO: Review unreachable code - conditions.append("media_type = ?")
+    # TODO: Review unreachable code - params.append(value)
 
-            elif key == "ai_source":
-                if isinstance(value, list):
-                    placeholders = ",".join("?" * len(value))
-                    conditions.append(f"ai_source IN ({placeholders})")
-                    params.extend(value)
-                else:
-                    conditions.append("ai_source = ?")
-                    params.append(value)
+    # TODO: Review unreachable code - elif key == "ai_source":
+    # TODO: Review unreachable code - if isinstance(value, list):
+    # TODO: Review unreachable code - placeholders = ",".join("?" * len(value))
+    # TODO: Review unreachable code - conditions.append(f"ai_source IN ({placeholders})")
+    # TODO: Review unreachable code - params.extend(value)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - conditions.append("ai_source = ?")
+    # TODO: Review unreachable code - params.append(value)
 
-            elif key == "quality_rating":
-                if isinstance(value, dict):
-                    if "min" in value:
-                        conditions.append("quality_rating >= ?")
-                        params.append(value["min"])
-                    if "max" in value:
-                        conditions.append("quality_rating <= ?")
-                        params.append(value["max"])
-                else:
-                    conditions.append("quality_rating = ?")
-                    params.append(value)
+    # TODO: Review unreachable code - elif key == "quality_rating":
+    # TODO: Review unreachable code - if isinstance(value, dict):
+    # TODO: Review unreachable code - if value is not None and "min" in value:
+    # TODO: Review unreachable code - conditions.append("quality_rating >= ?")
+    # TODO: Review unreachable code - params.append(value["min"])
+    # TODO: Review unreachable code - if value is not None and "max" in value:
+    # TODO: Review unreachable code - conditions.append("quality_rating <= ?")
+    # TODO: Review unreachable code - params.append(value["max"])
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - conditions.append("quality_rating = ?")
+    # TODO: Review unreachable code - params.append(value)
 
-            elif key == "file_size":
-                if isinstance(value, dict):
-                    if "min" in value:
-                        conditions.append("file_size >= ?")
-                        params.append(value["min"])
-                    if "max" in value:
-                        conditions.append("file_size <= ?")
-                        params.append(value["max"])
-                else:
-                    conditions.append("file_size = ?")
-                    params.append(value)
+    # TODO: Review unreachable code - elif key == "file_size":
+    # TODO: Review unreachable code - if isinstance(value, dict):
+    # TODO: Review unreachable code - if value is not None and "min" in value:
+    # TODO: Review unreachable code - conditions.append("file_size >= ?")
+    # TODO: Review unreachable code - params.append(value["min"])
+    # TODO: Review unreachable code - if value is not None and "max" in value:
+    # TODO: Review unreachable code - conditions.append("file_size <= ?")
+    # TODO: Review unreachable code - params.append(value["max"])
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - conditions.append("file_size = ?")
+    # TODO: Review unreachable code - params.append(value)
 
-            elif key == "created_after":
-                conditions.append("created_at >= ?")
-                params.append(self._parse_timestamp(value))
+    # TODO: Review unreachable code - elif key == "created_after":
+    # TODO: Review unreachable code - conditions.append("created_at >= ?")
+    # TODO: Review unreachable code - params.append(self._parse_timestamp(value))
 
-            elif key == "created_before":
-                conditions.append("created_at <= ?")
-                params.append(self._parse_timestamp(value))
+    # TODO: Review unreachable code - elif key == "created_before":
+    # TODO: Review unreachable code - conditions.append("created_at <= ?")
+    # TODO: Review unreachable code - params.append(self._parse_timestamp(value))
 
-            elif key == "project":
-                conditions.append("project = ?")
-                params.append(value)
+    # TODO: Review unreachable code - elif key == "project":
+    # TODO: Review unreachable code - conditions.append("project = ?")
+    # TODO: Review unreachable code - params.append(value)
 
-            elif key == "collection":
-                conditions.append("collection = ?")
-                params.append(value)
+    # TODO: Review unreachable code - elif key == "collection":
+    # TODO: Review unreachable code - conditions.append("collection = ?")
+    # TODO: Review unreachable code - params.append(value)
 
-            elif key == "asset_role":
-                if isinstance(value, list):
-                    placeholders = ",".join("?" * len(value))
-                    conditions.append(f"asset_role IN ({placeholders})")
-                    params.extend(value)
-                else:
-                    conditions.append("asset_role = ?")
-                    params.append(value)
+    # TODO: Review unreachable code - elif key == "asset_role":
+    # TODO: Review unreachable code - if isinstance(value, list):
+    # TODO: Review unreachable code - placeholders = ",".join("?" * len(value))
+    # TODO: Review unreachable code - conditions.append(f"asset_role IN ({placeholders})")
+    # TODO: Review unreachable code - params.extend(value)
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - conditions.append("asset_role = ?")
+    # TODO: Review unreachable code - params.append(value)
 
-            elif key == "has_prompt":
-                if value:
-                    conditions.append("prompt IS NOT NULL AND prompt != ''")
-                else:
-                    conditions.append("(prompt IS NULL OR prompt = '')")
+    # TODO: Review unreachable code - elif key == "has_prompt":
+    # TODO: Review unreachable code - if value:
+    # TODO: Review unreachable code - conditions.append("prompt IS NOT NULL AND prompt != ''")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - conditions.append("(prompt IS NULL OR prompt = '')")
 
-            elif key == "has_description":
-                if value:
-                    conditions.append("description IS NOT NULL AND description != ''")
-                else:
-                    conditions.append("(description IS NULL OR description = '')")
+    # TODO: Review unreachable code - elif key == "has_description":
+    # TODO: Review unreachable code - if value:
+    # TODO: Review unreachable code - conditions.append("description IS NOT NULL AND description != ''")
+    # TODO: Review unreachable code - else:
+    # TODO: Review unreachable code - conditions.append("(description IS NULL OR description = '')")
 
-            elif key == "tags":
-                # Handle tag filters
-                if isinstance(value, list):
-                    # Search for assets with any of these tags
-                    tag_query = """
-                        EXISTS (
-                            SELECT 1 FROM tags t
-                            WHERE t.content_hash = assets.content_hash
-                            AND t.tag_value IN ({})
-                        )
-                    """.format(",".join("?" * len(value)))
-                    conditions.append(tag_query)
-                    params.extend(value)
-                elif isinstance(value, dict):
-                    # Search for specific tag types
-                    for tag_type, tag_values in value.items():
-                        if isinstance(tag_values, list):
-                            tag_query = """
-                                EXISTS (
-                                    SELECT 1 FROM tags t
-                                    WHERE t.content_hash = assets.content_hash
-                                    AND t.tag_type = ?
-                                    AND t.tag_value IN ({})
-                                )
-                            """.format(",".join("?" * len(tag_values)))
-                            conditions.append(tag_query)
-                            params.append(tag_type)
-                            params.extend(tag_values)
+    # TODO: Review unreachable code - elif key == "tags":
+    # TODO: Review unreachable code - # Handle tag filters
+    # TODO: Review unreachable code - if isinstance(value, list):
+    # TODO: Review unreachable code - # Search for assets with any of these tags
+    # TODO: Review unreachable code - tag_query = """
+    # TODO: Review unreachable code - EXISTS (
+    # TODO: Review unreachable code - SELECT 1 FROM tags t
+    # TODO: Review unreachable code - WHERE t.content_hash = assets.content_hash
+    # TODO: Review unreachable code - AND t.tag_value IN ({})
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - """.format(",".join("?" * len(value)))
+    # TODO: Review unreachable code - conditions.append(tag_query)
+    # TODO: Review unreachable code - params.extend(value)
+    # TODO: Review unreachable code - elif isinstance(value, dict):
+    # TODO: Review unreachable code - # Search for specific tag types
+    # TODO: Review unreachable code - for tag_type, tag_values in value.items():
+    # TODO: Review unreachable code - if isinstance(tag_values, list):
+    # TODO: Review unreachable code - tag_query = """
+    # TODO: Review unreachable code - EXISTS (
+    # TODO: Review unreachable code - SELECT 1 FROM tags t
+    # TODO: Review unreachable code - WHERE t.content_hash = assets.content_hash
+    # TODO: Review unreachable code - AND t.tag_type = ?
+    # TODO: Review unreachable code - AND t.tag_value IN ({})
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - """.format(",".join("?" * len(tag_values)))
+    # TODO: Review unreachable code - conditions.append(tag_query)
+    # TODO: Review unreachable code - params.append(tag_type)
+    # TODO: Review unreachable code - params.extend(tag_values)
 
-        where_clause = " AND ".join(conditions) if conditions else ""
-        return where_clause, params
+    # TODO: Review unreachable code - where_clause = " AND ".join(conditions) if conditions else ""
+    # TODO: Review unreachable code - return where_clause, params
 
-    def _map_sort_field(self, field: str) -> str:
-        """Map user-friendly sort field names to database columns."""
-        field_mapping = {
-            "created": "created_at",
-            "modified": "modified_at",
-            "discovered": "discovered_at",
-            "size": "file_size",
-            "quality": "quality_rating",
-            "score": "quality_score",
-            "type": "media_type",
-            "source": "ai_source",
-        }
+    # TODO: Review unreachable code - def _map_sort_field(self, field: str) -> str:
+    # TODO: Review unreachable code - """Map user-friendly sort field names to database columns."""
+    # TODO: Review unreachable code - field_mapping = {
+    # TODO: Review unreachable code - "created": "created_at",
+    # TODO: Review unreachable code - "modified": "modified_at",
+    # TODO: Review unreachable code - "discovered": "discovered_at",
+    # TODO: Review unreachable code - "size": "file_size",
+    # TODO: Review unreachable code - "quality": "quality_rating",
+    # TODO: Review unreachable code - "score": "quality_score",
+    # TODO: Review unreachable code - "type": "media_type",
+    # TODO: Review unreachable code - "source": "ai_source",
+    # TODO: Review unreachable code - }
 
-        return field_mapping.get(field, field)
+    # TODO: Review unreachable code - return field_mapping.get(field, field) or 0

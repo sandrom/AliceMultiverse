@@ -58,52 +58,52 @@ def register_selection_tools(server: Server) -> None:
         if not paths:
             raise ValidationError("At least one path is required")
 
-        # Validate paths
-        valid_paths = []
-        for path_str in paths:
-            try:
-                path = validate_path(path_str, must_exist=True)
-                valid_paths.append(str(path))
-            except ValidationError as e:
-                logger.warning(f"Skipping invalid path: {e}")
+        # TODO: Review unreachable code - # Validate paths
+        # TODO: Review unreachable code - valid_paths = []
+        # TODO: Review unreachable code - for path_str in paths:
+        # TODO: Review unreachable code - try:
+        # TODO: Review unreachable code - path = validate_path(path_str, must_exist=True)
+        # TODO: Review unreachable code - valid_paths.append(str(path))
+        # TODO: Review unreachable code - except ValidationError as e:
+        # TODO: Review unreachable code - logger.warning(f"Skipping invalid path: {e}")
 
-        if not valid_paths:
-            raise ValidationError("No valid paths provided")
+        # TODO: Review unreachable code - if not valid_paths:
+        # TODO: Review unreachable code - raise ValidationError("No valid paths provided")
 
-        # Validate rating if provided
-        if rating is not None:
-            if not 1 <= rating <= 5:
-                raise ValidationError("Rating must be between 1 and 5")
+        # TODO: Review unreachable code - # Validate rating if provided
+        # TODO: Review unreachable code - if rating is not None:
+        # TODO: Review unreachable code - if not 1 <= rating <= 5:
+        # TODO: Review unreachable code - raise ValidationError("Rating must be between 1 and 5")
 
-        # Generate name if not provided
-        if not name:
-            name = f"Quick Mark {datetime.now().strftime('%Y-%m-%d %H:%M')}"
+        # TODO: Review unreachable code - # Generate name if not provided
+        # TODO: Review unreachable code - if not name:
+        # TODO: Review unreachable code - name = f"Quick Mark {datetime.now().strftime('%Y-%m-%d %H:%M')}"
 
-        # Get selection service
-        selection_service = services.get("selections")
+        # TODO: Review unreachable code - # Get selection service
+        # TODO: Review unreachable code - selection_service = services.get("selections")
 
-        # Create selection
-        selection_data = SelectionCreate(
-            name=name,
-            paths=valid_paths,
-            tags=tags or [],
-            notes=notes,
-            metadata={"rating": rating} if rating else {}
-        )
+        # TODO: Review unreachable code - # Create selection
+        # TODO: Review unreachable code - selection_data = SelectionCreate(
+        # TODO: Review unreachable code - name=name,
+        # TODO: Review unreachable code - paths=valid_paths,
+        # TODO: Review unreachable code - tags=tags or [],
+        # TODO: Review unreachable code - notes=notes,
+        # TODO: Review unreachable code - metadata={"rating": rating} if rating else {}
+        # TODO: Review unreachable code - )
 
-        selection = selection_service.create_selection(selection_data)
+        # TODO: Review unreachable code - selection = selection_service.create_selection(selection_data)
 
-        return create_tool_response(
-            success=True,
-            data={
-                "id": selection.id,
-                "name": selection.name,
-                "file_count": len(selection.paths),
-                "tags": selection.tags,
-                "created_at": selection.created_at.isoformat()
-            },
-            message=f"Marked {len(valid_paths)} files as '{name}'"
-        )
+        # TODO: Review unreachable code - return create_tool_response(
+        # TODO: Review unreachable code - success=True,
+        # TODO: Review unreachable code - data={
+        # TODO: Review unreachable code - "id": selection.id,
+        # TODO: Review unreachable code - "name": selection.name,
+        # TODO: Review unreachable code - "file_count": len(selection.paths),
+        # TODO: Review unreachable code - "tags": selection.tags,
+        # TODO: Review unreachable code - "created_at": selection.created_at.isoformat()
+        # TODO: Review unreachable code - },
+        # TODO: Review unreachable code - message=f"Marked {len(valid_paths)} files as '{name}'"
+        # TODO: Review unreachable code - )
 
     @server.tool()
     @handle_errors
@@ -127,41 +127,41 @@ def register_selection_tools(server: Server) -> None:
         if limit <= 0:
             raise ValidationError("Limit must be positive")
 
-        # Get selection service
-        selection_service = services.get("selections")
+        # TODO: Review unreachable code - # Get selection service
+        # TODO: Review unreachable code - selection_service = services.get("selections")
 
-        # Get selections
-        selections = selection_service.list_selections(
-            tags=tags,
-            limit=limit
-        )
+        # TODO: Review unreachable code - # Get selections
+        # TODO: Review unreachable code - selections = selection_service.list_selections(
+        # TODO: Review unreachable code - tags=tags,
+        # TODO: Review unreachable code - limit=limit
+        # TODO: Review unreachable code - )
 
-        # Format selections
-        selection_list = []
-        for selection in selections:
-            data = {
-                "id": selection.id,
-                "name": selection.name,
-                "file_count": len(selection.paths),
-                "tags": selection.tags,
-                "notes": selection.notes,
-                "created_at": selection.created_at.isoformat(),
-                "metadata": selection.metadata
-            }
+        # TODO: Review unreachable code - # Format selections
+        # TODO: Review unreachable code - selection_list = []
+        # TODO: Review unreachable code - for selection in selections:
+        # TODO: Review unreachable code - data = {
+        # TODO: Review unreachable code - "id": selection.id,
+        # TODO: Review unreachable code - "name": selection.name,
+        # TODO: Review unreachable code - "file_count": len(selection.paths),
+        # TODO: Review unreachable code - "tags": selection.tags,
+        # TODO: Review unreachable code - "notes": selection.notes,
+        # TODO: Review unreachable code - "created_at": selection.created_at.isoformat(),
+        # TODO: Review unreachable code - "metadata": selection.metadata
+        # TODO: Review unreachable code - }
 
-            if include_paths:
-                data["paths"] = selection.paths
+        # TODO: Review unreachable code - if include_paths:
+        # TODO: Review unreachable code - data["paths"] = selection.paths
 
-            selection_list.append(data)
+        # TODO: Review unreachable code - selection_list.append(data)
 
-        return create_tool_response(
-            success=True,
-            data={
-                "selections": selection_list,
-                "count": len(selection_list),
-                "total_files": sum(s["file_count"] for s in selection_list)
-            }
-        )
+        # TODO: Review unreachable code - return create_tool_response(
+        # TODO: Review unreachable code - success=True,
+        # TODO: Review unreachable code - data={
+        # TODO: Review unreachable code - "selections": selection_list,
+        # TODO: Review unreachable code - "count": len(selection_list),
+        # TODO: Review unreachable code - "total_files": sum(s["file_count"] for s in selection_list)
+        # TODO: Review unreachable code - }
+        # TODO: Review unreachable code - )
 
     @server.tool()
     @handle_errors
@@ -185,91 +185,91 @@ def register_selection_tools(server: Server) -> None:
         if format not in ["json", "txt", "csv"]:
             raise ValidationError("Format must be one of: json, txt, csv")
 
-        # Get selection service
-        selection_service = services.get("selections")
+        # TODO: Review unreachable code - # Get selection service
+        # TODO: Review unreachable code - selection_service = services.get("selections")
 
-        # Get selections to export
-        if selection_id:
-            selection = selection_service.get_selection(selection_id)
-            if not selection:
-                raise ValidationError(f"Selection '{selection_id}' not found")
-            selections = [selection]
-        else:
-            selections = selection_service.list_selections()
+        # TODO: Review unreachable code - # Get selections to export
+        # TODO: Review unreachable code - if selection_id:
+        # TODO: Review unreachable code - selection = selection_service.get_selection(selection_id)
+        # TODO: Review unreachable code - if not selection:
+        # TODO: Review unreachable code - raise ValidationError(f"Selection '{selection_id}' not found")
+        # TODO: Review unreachable code - selections = [selection]
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - selections = selection_service.list_selections()
 
-        if not selections:
-            raise ValidationError("No selections to export")
+        # TODO: Review unreachable code - if not selections:
+        # TODO: Review unreachable code - raise ValidationError("No selections to export")
 
-        # Determine output path
-        if output_path:
-            output_file = validate_path(output_path, must_exist=False)
-        else:
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            output_file = Path(f"selections_export_{timestamp}.{format}")
+        # TODO: Review unreachable code - # Determine output path
+        # TODO: Review unreachable code - if output_path:
+        # TODO: Review unreachable code - output_file = validate_path(output_path, must_exist=False)
+        # TODO: Review unreachable code - else:
+        # TODO: Review unreachable code - timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        # TODO: Review unreachable code - output_file = Path(f"selections_export_{timestamp}.{format}")
 
-        # Export based on format
-        if format == "json":
-            export_data = []
-            for sel in selections:
-                export_data.append({
-                    "id": sel.id,
-                    "name": sel.name,
-                    "paths": sel.paths,
-                    "tags": sel.tags,
-                    "notes": sel.notes,
-                    "metadata": sel.metadata,
-                    "created_at": sel.created_at.isoformat()
-                })
+        # TODO: Review unreachable code - # Export based on format
+        # TODO: Review unreachable code - if format == "json":
+        # TODO: Review unreachable code - export_data = []
+        # TODO: Review unreachable code - for sel in selections:
+        # TODO: Review unreachable code - export_data.append({
+        # TODO: Review unreachable code - "id": sel.id,
+        # TODO: Review unreachable code - "name": sel.name,
+        # TODO: Review unreachable code - "paths": sel.paths,
+        # TODO: Review unreachable code - "tags": sel.tags,
+        # TODO: Review unreachable code - "notes": sel.notes,
+        # TODO: Review unreachable code - "metadata": sel.metadata,
+        # TODO: Review unreachable code - "created_at": sel.created_at.isoformat()
+        # TODO: Review unreachable code - })
 
-            with open(output_file, 'w') as f:
-                json.dump(export_data, f, indent=2)
+        # TODO: Review unreachable code - with open(output_file, 'w') as f:
+        # TODO: Review unreachable code - json.dump(export_data, f, indent=2)
 
-        elif format == "txt":
-            lines = []
-            for sel in selections:
-                lines.append(f"# {sel.name}")
-                lines.append(f"Created: {sel.created_at}")
-                if sel.tags:
-                    lines.append(f"Tags: {', '.join(sel.tags)}")
-                if sel.notes:
-                    lines.append(f"Notes: {sel.notes}")
-                lines.append("Files:")
-                for path in sel.paths:
-                    lines.append(f"  - {path}")
-                lines.append("")  # Empty line between selections
+        # TODO: Review unreachable code - elif format == "txt":
+        # TODO: Review unreachable code - lines = []
+        # TODO: Review unreachable code - for sel in selections:
+        # TODO: Review unreachable code - lines.append(f"# {sel.name}")
+        # TODO: Review unreachable code - lines.append(f"Created: {sel.created_at}")
+        # TODO: Review unreachable code - if sel.tags:
+        # TODO: Review unreachable code - lines.append(f"Tags: {', '.join(sel.tags)}")
+        # TODO: Review unreachable code - if sel.notes:
+        # TODO: Review unreachable code - lines.append(f"Notes: {sel.notes}")
+        # TODO: Review unreachable code - lines.append("Files:")
+        # TODO: Review unreachable code - for path in sel.paths:
+        # TODO: Review unreachable code - lines.append(f"  - {path}")
+        # TODO: Review unreachable code - lines.append("")  # Empty line between selections
 
-            with open(output_file, 'w') as f:
-                f.write("\n".join(lines))
+        # TODO: Review unreachable code - with open(output_file, 'w') as f:
+        # TODO: Review unreachable code - f.write("\n".join(lines))
 
-        elif format == "csv":
-            import csv
+        # TODO: Review unreachable code - elif format == "csv":
+        # TODO: Review unreachable code - import csv
 
-            with open(output_file, 'w', newline='') as f:
-                writer = csv.writer(f)
-                writer.writerow(["Selection", "File", "Tags", "Notes", "Created"])
+        # TODO: Review unreachable code - with open(output_file, 'w', newline='') as f:
+        # TODO: Review unreachable code - writer = csv.writer(f)
+        # TODO: Review unreachable code - writer.writerow(["Selection", "File", "Tags", "Notes", "Created"])
 
-                for sel in selections:
-                    tags_str = ", ".join(sel.tags) if sel.tags else ""
-                    for path in sel.paths:
-                        writer.writerow([
-                            sel.name,
-                            path,
-                            tags_str,
-                            sel.notes or "",
-                            sel.created_at.isoformat()
-                        ])
+        # TODO: Review unreachable code - for sel in selections:
+        # TODO: Review unreachable code - tags_str = ", ".join(sel.tags) if sel.tags else ""
+        # TODO: Review unreachable code - for path in sel.paths:
+        # TODO: Review unreachable code - writer.writerow([
+        # TODO: Review unreachable code - sel.name,
+        # TODO: Review unreachable code - path,
+        # TODO: Review unreachable code - tags_str,
+        # TODO: Review unreachable code - sel.notes or "",
+        # TODO: Review unreachable code - sel.created_at.isoformat()
+        # TODO: Review unreachable code - ])
 
-        # Get file size
-        file_size = output_file.stat().st_size
+        # TODO: Review unreachable code - # Get file size
+        # TODO: Review unreachable code - file_size = output_file.stat().st_size
 
-        return create_tool_response(
-            success=True,
-            data={
-                "output_file": str(output_file),
-                "format": format,
-                "selections_exported": len(selections),
-                "total_files": sum(len(s.paths) for s in selections),
-                "file_size": file_size
-            },
-            message=f"Exported {len(selections)} selections to {output_file.name}"
-        )
+        # TODO: Review unreachable code - return create_tool_response(
+        # TODO: Review unreachable code - success=True,
+        # TODO: Review unreachable code - data={
+        # TODO: Review unreachable code - "output_file": str(output_file),
+        # TODO: Review unreachable code - "format": format,
+        # TODO: Review unreachable code - "selections_exported": len(selections),
+        # TODO: Review unreachable code - "total_files": sum(len(s.paths) for s in selections),
+        # TODO: Review unreachable code - "file_size": file_size
+        # TODO: Review unreachable code - },
+        # TODO: Review unreachable code - message=f"Exported {len(selections)} selections to {output_file.name}"
+        # TODO: Review unreachable code - )

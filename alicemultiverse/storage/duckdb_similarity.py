@@ -66,53 +66,53 @@ class DuckDBSimilarity(DuckDBBase):
             logger.warning(f"No {hash_type} found for {content_hash}")
             return []
 
-        ref_hash = ref_result[0]
+        # TODO: Review unreachable code - ref_hash = ref_result[0]
 
-        # Find similar hashes
-        # DuckDB doesn't have built-in hamming distance, so we use a workaround
-        # This gets all hashes and we'll calculate similarity in Python
-        query = f"""
-            SELECT
-                p.content_hash,
-                p.{hash_type} as hash_value,
-                a.media_type,
-                a.ai_source,
-                a.prompt,
-                a.created_at,
-                a.locations
-            FROM perceptual_hashes p
-            INNER JOIN assets a ON p.content_hash = a.content_hash
-            WHERE p.{hash_type} IS NOT NULL
-            AND p.content_hash != ?
-        """
+        # TODO: Review unreachable code - # Find similar hashes
+        # TODO: Review unreachable code - # DuckDB doesn't have built-in hamming distance, so we use a workaround
+        # TODO: Review unreachable code - # This gets all hashes and we'll calculate similarity in Python
+        # TODO: Review unreachable code - query = f"""
+        # TODO: Review unreachable code - SELECT
+        # TODO: Review unreachable code - p.content_hash,
+        # TODO: Review unreachable code - p.{hash_type} as hash_value,
+        # TODO: Review unreachable code - a.media_type,
+        # TODO: Review unreachable code - a.ai_source,
+        # TODO: Review unreachable code - a.prompt,
+        # TODO: Review unreachable code - a.created_at,
+        # TODO: Review unreachable code - a.locations
+        # TODO: Review unreachable code - FROM perceptual_hashes p
+        # TODO: Review unreachable code - INNER JOIN assets a ON p.content_hash = a.content_hash
+        # TODO: Review unreachable code - WHERE p.{hash_type} IS NOT NULL
+        # TODO: Review unreachable code - AND p.content_hash != ?
+        # TODO: Review unreachable code - """
 
-        results = self.conn.execute(query, [content_hash]).fetchall()
+        # TODO: Review unreachable code - results = self.conn.execute(query, [content_hash]).fetchall()
 
-        # Calculate similarities
-        similar_assets = []
-        for row in results:
-            other_hash = row[1]
-            if not other_hash:
-                continue
+        # TODO: Review unreachable code - # Calculate similarities
+        # TODO: Review unreachable code - similar_assets = []
+        # TODO: Review unreachable code - for row in results:
+        # TODO: Review unreachable code - other_hash = row[1]
+        # TODO: Review unreachable code - if not other_hash:
+        # TODO: Review unreachable code - continue
 
-            # Calculate hamming distance
-            similarity = self._calculate_hash_similarity(ref_hash, other_hash)
+        # TODO: Review unreachable code - # Calculate hamming distance
+        # TODO: Review unreachable code - similarity = self._calculate_hash_similarity(ref_hash, other_hash)
 
-            if similarity >= threshold:
-                asset = {
-                    "content_hash": row[0],
-                    "similarity": similarity,
-                    "media_type": row[2],
-                    "ai_source": row[3],
-                    "prompt": row[4],
-                    "created_at": row[5],
-                    "locations": row[6],
-                }
-                similar_assets.append(asset)
+        # TODO: Review unreachable code - if similarity >= threshold:
+        # TODO: Review unreachable code - asset = {
+        # TODO: Review unreachable code - "content_hash": row[0],
+        # TODO: Review unreachable code - "similarity": similarity,
+        # TODO: Review unreachable code - "media_type": row[2],
+        # TODO: Review unreachable code - "ai_source": row[3],
+        # TODO: Review unreachable code - "prompt": row[4],
+        # TODO: Review unreachable code - "created_at": row[5],
+        # TODO: Review unreachable code - "locations": row[6],
+        # TODO: Review unreachable code - }
+        # TODO: Review unreachable code - similar_assets.append(asset)
 
-        # Sort by similarity and limit
-        similar_assets.sort(key=lambda x: x["similarity"], reverse=True)
-        return similar_assets[:limit]
+        # TODO: Review unreachable code - # Sort by similarity and limit
+        # TODO: Review unreachable code - similar_assets.sort(key=lambda x: x["similarity"], reverse=True)
+        # TODO: Review unreachable code - return similar_assets[:limit]
 
     def find_duplicates(
         self,
@@ -158,89 +158,89 @@ class DuckDBSimilarity(DuckDBBase):
 
         return duplicate_groups
 
-    def get_similarity_matrix(
-        self,
-        content_hashes: list[str],
-        hash_type: str = "phash"
-    ) -> dict[str, dict[str, float]]:
-        """Calculate similarity matrix for a set of images.
+    # TODO: Review unreachable code - def get_similarity_matrix(
+    # TODO: Review unreachable code - self,
+    # TODO: Review unreachable code - content_hashes: list[str],
+    # TODO: Review unreachable code - hash_type: str = "phash"
+    # TODO: Review unreachable code - ) -> dict[str, dict[str, float]]:
+    # TODO: Review unreachable code - """Calculate similarity matrix for a set of images.
 
-        Args:
-            content_hashes: List of content hashes to compare
-            hash_type: Type of hash to use
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - content_hashes: List of content hashes to compare
+    # TODO: Review unreachable code - hash_type: Type of hash to use
 
-        Returns:
-            Dictionary mapping pairs of hashes to similarity scores
-        """
-        # Get hashes for all requested content
-        placeholders = ",".join("?" * len(content_hashes))
-        query = f"""
-            SELECT content_hash, {hash_type}
-            FROM perceptual_hashes
-            WHERE content_hash IN ({placeholders})
-            AND {hash_type} IS NOT NULL
-        """
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Dictionary mapping pairs of hashes to similarity scores
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - # Get hashes for all requested content
+    # TODO: Review unreachable code - placeholders = ",".join("?" * len(content_hashes))
+    # TODO: Review unreachable code - query = f"""
+    # TODO: Review unreachable code - SELECT content_hash, {hash_type}
+    # TODO: Review unreachable code - FROM perceptual_hashes
+    # TODO: Review unreachable code - WHERE content_hash IN ({placeholders})
+    # TODO: Review unreachable code - AND {hash_type} IS NOT NULL
+    # TODO: Review unreachable code - """
 
-        results = self.conn.execute(query, content_hashes).fetchall()
+    # TODO: Review unreachable code - results = self.conn.execute(query, content_hashes).fetchall()
 
-        # Build hash lookup
-        hash_lookup = {row[0]: row[1] for row in results}
+    # TODO: Review unreachable code - # Build hash lookup
+    # TODO: Review unreachable code - hash_lookup = {row[0]: row[1] for row in results}
 
-        # Calculate similarities
-        matrix = {}
-        for i, hash1 in enumerate(content_hashes):
-            if hash1 not in hash_lookup:
-                continue
+    # TODO: Review unreachable code - # Calculate similarities
+    # TODO: Review unreachable code - matrix = {}
+    # TODO: Review unreachable code - for i, hash1 in enumerate(content_hashes):
+    # TODO: Review unreachable code - if hash1 not in hash_lookup:
+    # TODO: Review unreachable code - continue
 
-            matrix[hash1] = {}
+    # TODO: Review unreachable code - matrix[hash1] = {}
 
-            for j, hash2 in enumerate(content_hashes):
-                if i == j:
-                    matrix[hash1][hash2] = 1.0
-                    continue
+    # TODO: Review unreachable code - for j, hash2 in enumerate(content_hashes):
+    # TODO: Review unreachable code - if i == j:
+    # TODO: Review unreachable code - matrix[hash1][hash2] = 1.0
+    # TODO: Review unreachable code - continue
 
-                if hash2 not in hash_lookup:
-                    continue
+    # TODO: Review unreachable code - if hash2 not in hash_lookup:
+    # TODO: Review unreachable code - continue
 
-                similarity = self._calculate_hash_similarity(
-                    hash_lookup[hash1],
-                    hash_lookup[hash2]
-                )
-                matrix[hash1][hash2] = similarity
+    # TODO: Review unreachable code - similarity = self._calculate_hash_similarity(
+    # TODO: Review unreachable code - hash_lookup[hash1],
+    # TODO: Review unreachable code - hash_lookup[hash2]
+    # TODO: Review unreachable code - )
+    # TODO: Review unreachable code - matrix[hash1][hash2] = similarity
 
-        return matrix
+    # TODO: Review unreachable code - return matrix
 
-    def _calculate_hash_similarity(self, hash1: str, hash2: str) -> float:
-        """Calculate similarity between two perceptual hashes.
+    # TODO: Review unreachable code - def _calculate_hash_similarity(self, hash1: str, hash2: str) -> float:
+    # TODO: Review unreachable code - """Calculate similarity between two perceptual hashes.
 
-        Args:
-            hash1: First hash
-            hash2: Second hash
+    # TODO: Review unreachable code - Args:
+    # TODO: Review unreachable code - hash1: First hash
+    # TODO: Review unreachable code - hash2: Second hash
 
-        Returns:
-            Similarity score (0-1)
-        """
-        if len(hash1) != len(hash2):
-            return 0.0
+    # TODO: Review unreachable code - Returns:
+    # TODO: Review unreachable code - Similarity score (0-1)
+    # TODO: Review unreachable code - """
+    # TODO: Review unreachable code - if len(hash1) != len(hash2):
+    # TODO: Review unreachable code - return 0.0
 
-        # Convert hex to binary
-        try:
-            # Remove '0x' prefix if present
-            hash1 = hash1.replace("0x", "")
-            hash2 = hash2.replace("0x", "")
+    # TODO: Review unreachable code - # Convert hex to binary
+    # TODO: Review unreachable code - try:
+    # TODO: Review unreachable code - # Remove '0x' prefix if present
+    # TODO: Review unreachable code - hash1 = hash1.replace("0x", "")
+    # TODO: Review unreachable code - hash2 = hash2.replace("0x", "")
 
-            # Convert to binary
-            bin1 = bin(int(hash1, 16))[2:].zfill(len(hash1) * 4)
-            bin2 = bin(int(hash2, 16))[2:].zfill(len(hash2) * 4)
+    # TODO: Review unreachable code - # Convert to binary
+    # TODO: Review unreachable code - bin1 = bin(int(hash1, 16))[2:].zfill(len(hash1) * 4)
+    # TODO: Review unreachable code - bin2 = bin(int(hash2, 16))[2:].zfill(len(hash2) * 4)
 
-            # Calculate hamming distance
-            distance = sum(b1 != b2 for b1, b2 in zip(bin1, bin2))
+    # TODO: Review unreachable code - # Calculate hamming distance
+    # TODO: Review unreachable code - distance = sum(b1 != b2 for b1, b2 in zip(bin1, bin2))
 
-            # Convert to similarity (0-1)
-            similarity = 1.0 - (distance / len(bin1))
+    # TODO: Review unreachable code - # Convert to similarity (0-1)
+    # TODO: Review unreachable code - similarity = 1.0 - (distance / len(bin1))
 
-            return similarity
+    # TODO: Review unreachable code - return similarity
 
-        except (ValueError, TypeError):
-            logger.warning(f"Invalid hash format: {hash1} or {hash2}")
-            return 0.0
+    # TODO: Review unreachable code - except (ValueError, TypeError):
+    # TODO: Review unreachable code - logger.warning(f"Invalid hash format: {hash1} or {hash2}")
+    # TODO: Review unreachable code - return 0.0
