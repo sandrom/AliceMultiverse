@@ -389,9 +389,9 @@ class DuckDBStorage(DuckDBBase, BatchOperationsMixin):
 
             return check_result is not None and check_result[0] == role
 
-        # TODO: Review unreachable code - except Exception as e:
-        # TODO: Review unreachable code - logger.error(f"Failed to set asset role: {e}")
-        # TODO: Review unreachable code - return False
+        except Exception as e:
+            logger.error(f"Failed to set asset role: {e}")
+            return False
 
     def get_assets_by_role(self, role: str, limit: int = 100) -> list[dict[str, Any]]:
         """Get all assets with a specific role.

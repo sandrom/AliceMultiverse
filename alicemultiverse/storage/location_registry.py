@@ -32,8 +32,8 @@ class StorageType(Enum):
         """Create StorageType from string."""
         try:
             return cls(value.lower())
-        # TODO: Review unreachable code - except ValueError:
-        # TODO: Review unreachable code - raise ValueError(f"Invalid storage type: {value}")
+        except ValueError:
+            raise ValueError(f"Invalid storage type: {value}")
 
 
 class LocationStatus(Enum):
@@ -48,8 +48,8 @@ class LocationStatus(Enum):
         """Create LocationStatus from string."""
         try:
             return cls(value.lower())
-        # TODO: Review unreachable code - except ValueError:
-        # TODO: Review unreachable code - raise ValueError(f"Invalid location status: {value}")
+        except ValueError:
+            raise ValueError(f"Invalid location status: {value}")
 
 
 @dataclass

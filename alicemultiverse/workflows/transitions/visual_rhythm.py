@@ -184,8 +184,8 @@ class VisualRhythmAnalyzer:
         num_elements = min(len(np.unique(labels)) - 1, 20)  # Cap at 20
 
         # Movement potential from directional edges
-        sobelx = cv2.Sobel(gray, cv2.CV_64F  # type: ignore, 1, 0, ksize=3)
-        sobely = cv2.Sobel(gray, cv2.CV_64F  # type: ignore, 0, 1, ksize=3)
+        sobelx = cv2.Sobel(gray, cv2.CV_64F, 1, 0, ksize=3)  # type: ignore
+        sobely = cv2.Sobel(gray, cv2.CV_64F, 0, 1, ksize=3)  # type: ignore
         movement = np.mean(np.sqrt(sobelx**2 + sobely**2)) / 255.0
 
         return VisualComplexity(

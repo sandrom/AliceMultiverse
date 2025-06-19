@@ -241,53 +241,53 @@ class FlowAnalyzer:
     # TODO: Review unreachable code - try:
     # TODO: Review unreachable code - # Analyze for motion and complexity
     # TODO: Review unreachable code - custom_instructions = """Analyze this image and provide scores (0-1):
-1. Motion level: How much movement/action is implied
-2. Visual complexity: How complex/busy vs simple
-3. Overall energy: Dynamic vs calm
+# TODO: Review unreachable code - 1. Motion level: How much movement/action is implied
+# TODO: Review unreachable code - 2. Visual complexity: How complex/busy vs simple
+# TODO: Review unreachable code - 3. Overall energy: Dynamic vs calm
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - Include these scores in your description using this format:
+# TODO: Review unreachable code - motion=X.X, complexity=X.X, energy=X.X"""
 
-Include these scores in your description using this format:
-motion=X.X, complexity=X.X, energy=X.X"""
+    # TODO: Review unreachable code -             from ...understanding.analyzer import ImageAnalyzer
+    # TODO: Review unreachable code - 
+    # TODO: Review unreachable code -             analyzer = ImageAnalyzer()
+    # TODO: Review unreachable code -             if self.vision_provider in analyzer.get_available_providers():
+    # TODO: Review unreachable code -                 result = await analyzer.analyze(
+    # TODO: Review unreachable code -                     clip.asset_path,
+    # TODO: Review unreachable code -                     provider=self.vision_provider,
+    # TODO: Review unreachable code -                     detailed=True,
+    # TODO: Review unreachable code -                     extract_tags=False,
+    # TODO: Review unreachable code -                     generate_prompt=False,
+    # TODO: Review unreachable code -                     custom_instructions=custom_instructions
+    # TODO: Review unreachable code -                 )
+    # TODO: Review unreachable code - 
+    # TODO: Review unreachable code -                 # Convert to simple format
+    # TODO: Review unreachable code -                 if result:
+    # TODO: Review unreachable code -                     description = result.description
+    # TODO: Review unreachable code - 
+    # TODO: Review unreachable code -                     # Parse results from description
+    # TODO: Review unreachable code -                     if "motion=" in description:
+    # TODO: Review unreachable code -                         motion_level = float(description.split("motion=")[1].split(",")[0])
+    # TODO: Review unreachable code -                     if "complexity=" in description:
+    # TODO: Review unreachable code -                         complexity = float(description.split("complexity=")[1].split(",")[0])
+    # TODO: Review unreachable code -                     if "energy=" in description:
+    # TODO: Review unreachable code -                         energy_level = float(description.split("energy=")[1].split(",")[0])
+    # TODO: Review unreachable code - 
+    # TODO: Review unreachable code -         except Exception as e:
+    # TODO: Review unreachable code -             logger.warning(f"Vision analysis failed for {clip.asset_path}: {e}")
 
-                from ...understanding.analyzer import ImageAnalyzer
-
-                analyzer = ImageAnalyzer()
-                if self.vision_provider in analyzer.get_available_providers():
-                    result = await analyzer.analyze(
-                        clip.asset_path,
-                        provider=self.vision_provider,
-                        detailed=True,
-                        extract_tags=False,
-                        generate_prompt=False,
-                        custom_instructions=custom_instructions
-                    )
-
-                    # Convert to simple format
-                    if result:
-                        description = result.description
-
-                        # Parse results from description
-                        if "motion=" in description:
-                            motion_level = float(description.split("motion=")[1].split(",")[0])
-                        if "complexity=" in description:
-                            complexity = float(description.split("complexity=")[1].split(",")[0])
-                        if "energy=" in description:
-                            energy_level = float(description.split("energy=")[1].split(",")[0])
-
-            except Exception as e:
-                logger.warning(f"Vision analysis failed for {clip.asset_path}: {e}")
-
-        return ClipAnalysis(
-            clip_index=clip_index,
-            dominant_colors=dominant_colors,
-            brightness=brightness,
-            contrast=contrast,
-            motion_level=motion_level,
-            complexity=complexity,
-            mood_score=mood_score,
-            energy_level=energy_level,
-            style_vector=style_vector,
-            semantic_tags=semantic_tags,
-        )
+    # TODO: Review unreachable code -     return ClipAnalysis(
+    # TODO: Review unreachable code -         clip_index=clip_index,
+    # TODO: Review unreachable code -         dominant_colors=dominant_colors,
+    # TODO: Review unreachable code -         brightness=brightness,
+    # TODO: Review unreachable code -         contrast=contrast,
+    # TODO: Review unreachable code -         motion_level=motion_level,
+    # TODO: Review unreachable code -         complexity=complexity,
+    # TODO: Review unreachable code -         mood_score=mood_score,
+    # TODO: Review unreachable code -         energy_level=energy_level,
+    # TODO: Review unreachable code -         style_vector=style_vector,
+    # TODO: Review unreachable code -         semantic_tags=semantic_tags,
+    # TODO: Review unreachable code -     )
 
     def _analyze_pacing(
         self,

@@ -184,7 +184,10 @@ class WorkflowExecutor:
 
             return result
 
-        # TODO: Review unreachable code - except Exception as e:
+        except Exception as e:
+            # TODO: Review unreachable code - except block implementation
+            logger.error(f"Workflow {workflow.name} failed: {e}", exc_info=True)
+            raise
         # TODO: Review unreachable code - logger.error(f"Workflow {workflow.name} failed: {e}", exc_info=True)
 
         # TODO: Review unreachable code - # Publish failure event

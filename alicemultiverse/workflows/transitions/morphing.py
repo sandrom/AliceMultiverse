@@ -588,115 +588,115 @@ class SubjectMorpher:
 
     # TODO: Review unreachable code - # Time remapping expression
     # TODO: Review unreachable code - expressions["time_remap"] = """
-// Morph timing control
-transitionStart = 0;
-transitionEnd = %.2f;
-progress = linear(time, transitionStart, transitionEnd, 0, 1);
-easeProgress = ease(progress, 0, 1);
-easeProgress;
-""" % transition.duration
+# TODO: Review unreachable code - // Morph timing control
+# TODO: Review unreachable code - transitionStart = 0;
+# TODO: Review unreachable code - transitionEnd = %.2f;
+# TODO: Review unreachable code - progress = linear(time, transitionStart, transitionEnd, 0, 1);
+# TODO: Review unreachable code - easeProgress = ease(progress, 0, 1);
+# TODO: Review unreachable code - easeProgress;
+# TODO: Review unreachable code - """ % transition.duration
 
-        # Morph amount expression
-        if expressions is not None:
-            expressions["morph_amount"] = """
-// Control morph intensity
-maxMorph = 100;
-morphCurve = thisComp.layer("Control").effect("Morph Curve")("Slider");
-progress = thisComp.layer("Control").effect("Progress")("Slider");
-morphAmount = progress * maxMorph * morphCurve / 100;
-morphAmount;
-"""
-
-        # Auto-orient expression
-        if expressions is not None:
-            expressions["auto_orient"] = """
-// Auto-orient based on motion direction
-prevPos = transform.position.valueAtTime(time - 0.1);
-currPos = transform.position;
-direction = currPos - prevPos;
-angle = Math.atan2(direction[1], direction[0]) * 180 / Math.PI;
-angle + value;
-"""
-
-        return expressions
+        # TODO: Review unreachable code - # Morph amount expression
+        # TODO: Review unreachable code - if expressions is not None:
+        # TODO: Review unreachable code -     expressions["morph_amount"] = """
+# TODO: Review unreachable code - // Control morph intensity
+# TODO: Review unreachable code - maxMorph = 100;
+# TODO: Review unreachable code - morphCurve = thisComp.layer("Control").effect("Morph Curve")("Slider");
+# TODO: Review unreachable code - progress = thisComp.layer("Control").effect("Progress")("Slider");
+# TODO: Review unreachable code - morphAmount = progress * maxMorph * morphCurve / 100;
+# TODO: Review unreachable code - morphAmount;
+# TODO: Review unreachable code - """
+        # TODO: Review unreachable code - 
+        # TODO: Review unreachable code - # Auto-orient expression
+        # TODO: Review unreachable code - if expressions is not None:
+        # TODO: Review unreachable code -     expressions["auto_orient"] = """
+# TODO: Review unreachable code - // Auto-orient based on motion direction
+# TODO: Review unreachable code - prevPos = transform.position.valueAtTime(time - 0.1);
+# TODO: Review unreachable code - currPos = transform.position;
+# TODO: Review unreachable code - direction = currPos - prevPos;
+# TODO: Review unreachable code - angle = Math.atan2(direction[1], direction[0]) * 180 / Math.PI;
+# TODO: Review unreachable code - angle + value;
+# TODO: Review unreachable code - """
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         return expressions
 
     # TODO: Review unreachable code - def _generate_jsx_script(self, ae_data: dict[str, Any]) -> str:
     # TODO: Review unreachable code - """Generate JSX script for After Effects import."""
     # TODO: Review unreachable code - jsx_template = """
-// Alice Multiverse - Subject Morph Import Script
-// Generated morph transition data
-
-function importMorphData() {
-    var data = %s;
-
-    // Get active composition
-    var comp = app.project.activeItem;
-    if (!comp || !(comp instanceof CompItem)) {
-        alert("Please select a composition first");
-        return;
-    # TODO: Review unreachable code - }
-
-    # TODO: Review unreachable code - // Create null object for control
-    # TODO: Review unreachable code - var controlNull = comp.layers.addNull();
-    # TODO: Review unreachable code - controlNull.name = "Morph Control";
-
-    # TODO: Review unreachable code - // Add slider controls
-    # TODO: Review unreachable code - var progressSlider = controlNull.Effects.addProperty("ADBE Slider Control");
-    # TODO: Review unreachable code - progressSlider.name = "Progress";
-    # TODO: Review unreachable code - progressSlider.property("Slider").setValueAtTime(0, 0);
-    # TODO: Review unreachable code - progressSlider.property("Slider").setValueAtTime(data.project.duration, 100);
-
-    # TODO: Review unreachable code - var curveSlider = controlNull.Effects.addProperty("ADBE Slider Control");
-    # TODO: Review unreachable code - curveSlider.name = "Morph Curve";
-    # TODO: Review unreachable code - curveSlider.property("Slider").setValue(100);
-
-    # TODO: Review unreachable code - // Process each morph layer
-    # TODO: Review unreachable code - for (var i = 0; i < data.morph_data.length; i++) {
-    # TODO: Review unreachable code - var morphData = data.morph_data[i];
-    # TODO: Review unreachable code - createMorphLayer(comp, morphData, controlNull);
-    # TODO: Review unreachable code - }
-
-    # TODO: Review unreachable code - alert("Morph data imported successfully!");
-}
-
-function createMorphLayer(comp, morphData, controlNull) {
-    // Create shape layer for morph
-    var morphLayer = comp.layers.addShape();
-    morphLayer.name = morphData.name;
-
-    // Add mask shape
-    var shapeGroup = morphLayer.property("Contents").addProperty("ADBE Vector Group");
-    var maskPath = shapeGroup.property("Contents").addProperty("ADBE Vector Shape - Group");
-
-    // Set mask vertices
-    var path = maskPath.property("Path");
-    var shape = new Shape();
-    shape.vertices = morphData.mask_data.source.vertices;
-    shape.inTangents = morphData.mask_data.source.inTangents;
-    shape.outTangents = morphData.mask_data.source.outTangents;
-    shape.closed = morphData.mask_data.source.closed;
-    path.setValue(shape);
-
-    // Add keyframes
-    for (var j = 0; j < morphData.keyframes.length; j++) {
-        var kf = morphData.keyframes[j];
-        var time = kf.time / %.1f; // Convert frames to seconds
-
-        morphLayer.transform.position.setValueAtTime(time, kf.position);
-        morphLayer.transform.opacity.setValueAtTime(time, kf.opacity);
-        morphLayer.transform.scale.setValueAtTime(time, kf.scale);
-        morphLayer.transform.rotation.setValueAtTime(time, kf.rotation);
-    }
-
-    // Link to control null
-    morphLayer.parent = controlNull;
-}
-
-// Run the import
-importMorphData();
-""" % (json.dumps(ae_data), ae_data["project"]["fps"])
-
-        return jsx_template
+# TODO: Review unreachable code - // Alice Multiverse - Subject Morph Import Script
+# TODO: Review unreachable code - // Generated morph transition data
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - function importMorphData() {
+# TODO: Review unreachable code -     var data = %s;
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     // Get active composition
+# TODO: Review unreachable code -     var comp = app.project.activeItem;
+# TODO: Review unreachable code -     if (!comp || !(comp instanceof CompItem)) {
+# TODO: Review unreachable code -         alert("Please select a composition first");
+# TODO: Review unreachable code -         return;
+# TODO: Review unreachable code -     # TODO: Review unreachable code - }
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     # TODO: Review unreachable code - // Create null object for control
+# TODO: Review unreachable code -     # TODO: Review unreachable code - var controlNull = comp.layers.addNull();
+# TODO: Review unreachable code -     # TODO: Review unreachable code - controlNull.name = "Morph Control";
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     # TODO: Review unreachable code - // Add slider controls
+# TODO: Review unreachable code -     # TODO: Review unreachable code - var progressSlider = controlNull.Effects.addProperty("ADBE Slider Control");
+# TODO: Review unreachable code -     # TODO: Review unreachable code - progressSlider.name = "Progress";
+# TODO: Review unreachable code -     # TODO: Review unreachable code - progressSlider.property("Slider").setValueAtTime(0, 0);
+# TODO: Review unreachable code -     # TODO: Review unreachable code - progressSlider.property("Slider").setValueAtTime(data.project.duration, 100);
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     # TODO: Review unreachable code - var curveSlider = controlNull.Effects.addProperty("ADBE Slider Control");
+# TODO: Review unreachable code -     # TODO: Review unreachable code - curveSlider.name = "Morph Curve";
+# TODO: Review unreachable code -     # TODO: Review unreachable code - curveSlider.property("Slider").setValue(100);
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     # TODO: Review unreachable code - // Process each morph layer
+# TODO: Review unreachable code -     # TODO: Review unreachable code - for (var i = 0; i < data.morph_data.length; i++) {
+# TODO: Review unreachable code -     # TODO: Review unreachable code - var morphData = data.morph_data[i];
+# TODO: Review unreachable code -     # TODO: Review unreachable code - createMorphLayer(comp, morphData, controlNull);
+# TODO: Review unreachable code -     # TODO: Review unreachable code - }
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     # TODO: Review unreachable code - alert("Morph data imported successfully!");
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - function createMorphLayer(comp, morphData, controlNull) {
+# TODO: Review unreachable code -     // Create shape layer for morph
+# TODO: Review unreachable code -     var morphLayer = comp.layers.addShape();
+# TODO: Review unreachable code -     morphLayer.name = morphData.name;
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     // Add mask shape
+# TODO: Review unreachable code -     var shapeGroup = morphLayer.property("Contents").addProperty("ADBE Vector Group");
+# TODO: Review unreachable code -     var maskPath = shapeGroup.property("Contents").addProperty("ADBE Vector Shape - Group");
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     // Set mask vertices
+# TODO: Review unreachable code -     var path = maskPath.property("Path");
+# TODO: Review unreachable code -     var shape = new Shape();
+# TODO: Review unreachable code -     shape.vertices = morphData.mask_data.source.vertices;
+# TODO: Review unreachable code -     shape.inTangents = morphData.mask_data.source.inTangents;
+# TODO: Review unreachable code -     shape.outTangents = morphData.mask_data.source.outTangents;
+# TODO: Review unreachable code -     shape.closed = morphData.mask_data.source.closed;
+# TODO: Review unreachable code -     path.setValue(shape);
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     // Add keyframes
+# TODO: Review unreachable code -     for (var j = 0; j < morphData.keyframes.length; j++) {
+# TODO: Review unreachable code -         var kf = morphData.keyframes[j];
+# TODO: Review unreachable code -         var time = kf.time / %.1f; // Convert frames to seconds
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         morphLayer.transform.position.setValueAtTime(time, kf.position);
+# TODO: Review unreachable code -         morphLayer.transform.opacity.setValueAtTime(time, kf.opacity);
+# TODO: Review unreachable code -         morphLayer.transform.scale.setValueAtTime(time, kf.scale);
+# TODO: Review unreachable code -         morphLayer.transform.rotation.setValueAtTime(time, kf.rotation);
+# TODO: Review unreachable code -     }
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     // Link to control null
+# TODO: Review unreachable code -     morphLayer.parent = controlNull;
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - // Run the import
+# TODO: Review unreachable code - importMorphData();
+# TODO: Review unreachable code - """ % (json.dumps(ae_data), ae_data["project"]["fps"])
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         return jsx_template
 
 
 # TODO: Review unreachable code - class MorphingTransitionMatcher:

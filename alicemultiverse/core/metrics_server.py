@@ -8,7 +8,7 @@ from fastapi.responses import PlainTextResponse
 
 # from ..database.config import get_pool_monitor
 # from ..database.pool_manager import get_pool_diagnostics
-from ..providers.health_monitor import health_monitor
+# from ..providers.health_monitor import health_monitor
 from .metrics import get_metrics, get_metrics_content_type
 from .structured_logging import get_logger
 
@@ -49,20 +49,21 @@ async def update_dynamic_metrics():
     logger.debug("Database pool metrics not available")
 
     # Update provider health metrics
-    try:
-        for provider_name, breaker in health_monitor.circuit_breakers.items():
-            health_data = {
-                'is_healthy': breaker.metrics.is_healthy,
-                'circuit_state': breaker.state.value,
-                'error_rate': breaker.metrics.failure_rate
-            }
-            update_provider_health_metrics(provider_name, health_data)
-    except Exception as e:
-        logger.error(
-            "Failed to update provider health metrics",
-            error=str(e),
-            exc_info=True
-        )
+    # TODO: Implement health monitor
+    # try:
+    #     for provider_name, breaker in health_monitor.circuit_breakers.items():
+    #         health_data = {
+    #             'is_healthy': breaker.metrics.is_healthy,
+    #             'circuit_state': breaker.state.value,
+    #             'error_rate': breaker.metrics.failure_rate
+    #         }
+    #         update_provider_health_metrics(provider_name, health_data)
+    # except Exception as e:
+    #     logger.error(
+    #         "Failed to update provider health metrics",
+    #         error=str(e),
+    #         exc_info=True
+    #     )
 
 
 class MetricsServer:

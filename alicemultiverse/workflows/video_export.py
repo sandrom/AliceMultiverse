@@ -126,9 +126,9 @@ class DaVinciResolveExporter:
             logger.info(f"Exported EDL to {output_path}")
             return True
 
-        # TODO: Review unreachable code - except Exception as e:
-        # TODO: Review unreachable code - logger.error(f"Failed to export EDL: {e}")
-        # TODO: Review unreachable code - return False
+        except Exception as e:
+            logger.error(f"Failed to export EDL: {e}")
+            return False
 
     @staticmethod
     def export_xml(timeline: Timeline, output_path: Path) -> bool:
@@ -220,9 +220,9 @@ class DaVinciResolveExporter:
             logger.info(f"Exported DaVinci Resolve XML to {output_path}")
             return True
 
-        # TODO: Review unreachable code - except Exception as e:
-        # TODO: Review unreachable code - logger.error(f"Failed to export XML: {e}")
-        # TODO: Review unreachable code - return False
+        except Exception as e:
+            logger.error(f"Failed to export XML: {e}")
+            return False
 
     @staticmethod
     def _seconds_to_timecode(seconds: float, fps: float) -> str:

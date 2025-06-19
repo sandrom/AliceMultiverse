@@ -52,8 +52,10 @@ class CompositionAnalyzer:
         self,
         image_path: Path,
         return_visualization: bool = False,
-    # TODO: Review unreachable code - ) -> CompositionMetrics:
-    # TODO: Review unreachable code - """Analyze composition of a single image.
+    ) -> CompositionMetrics:
+        """Analyze composition of a single image."""
+        # TODO: Review unreachable code - function body commented out
+        return CompositionMetrics()
 
     # TODO: Review unreachable code - Args:
     # TODO: Review unreachable code - image_path: Path to image

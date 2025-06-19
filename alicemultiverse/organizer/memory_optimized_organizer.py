@@ -12,9 +12,11 @@ from ..core.memory_optimization import (
     BoundedCache, ObjectPool, MemoryOptimizedBatchProcessor,
     optimize_for_memory
 )
-from ..core.models import ProcessedFile
+# TODO: Fix missing import
+# from ..core.models import ProcessedFile
 from .resilient_organizer import ResilientMediaOrganizer
-from .mixins.base import EnhancedProcessFileMixin
+# TODO: Fix missing import
+# from .mixins.base import EnhancedProcessFileMixin
 
 logger = logging.getLogger(__name__)
 

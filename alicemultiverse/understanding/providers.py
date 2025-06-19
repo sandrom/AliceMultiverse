@@ -73,20 +73,20 @@ class AnthropicImageAnalyzer(ImageAnalyzer):
 
     # TODO: Review unreachable code - if extract_tags:
     # TODO: Review unreachable code - prompt_parts.append("""
-Extract semantic tags in the following categories:
-- style: artistic style, rendering style, visual style
-- mood: emotional tone, atmosphere, feeling
-- subject: main subjects, people, objects
-- color: color palette, color mood, dominant colors
-- technical: camera settings, composition, lighting
-- fashion: clothing, accessories, style
-- hair: hair color, style, length
-- pose: body position, expression
-- setting: location, environment, time of day
-- action: what's happening, activities
-- genre: type of image (portrait, landscape, etc)
-
-Format tags as JSON: {"category": ["tag1", "tag2"]}
+# TODO: Review unreachable code - Extract semantic tags in the following categories:
+# TODO: Review unreachable code - - style: artistic style, rendering style, visual style
+# TODO: Review unreachable code - - mood: emotional tone, atmosphere, feeling
+# TODO: Review unreachable code - - subject: main subjects, people, objects
+# TODO: Review unreachable code - - color: color palette, color mood, dominant colors
+# TODO: Review unreachable code - - technical: camera settings, composition, lighting
+# TODO: Review unreachable code - - fashion: clothing, accessories, style
+# TODO: Review unreachable code - - hair: hair color, style, length
+# TODO: Review unreachable code - - pose: body position, expression
+# TODO: Review unreachable code - - setting: location, environment, time of day
+# TODO: Review unreachable code - - action: what's happening, activities
+# TODO: Review unreachable code - - genre: type of image (portrait, landscape, etc)
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - Format tags as JSON: {"category": ["tag1", "tag2"]}
 # TODO: Review unreachable code - """)
 
         if generate_prompt:
@@ -248,13 +248,13 @@ class OpenAIImageAnalyzer(ImageAnalyzer):
 
     # TODO: Review unreachable code - if extract_tags:
     # TODO: Review unreachable code - user_prompt_parts.append("""
-Extract semantic tags and return them as a JSON object with these categories:
-style, mood, subject, color, technical, fashion, hair, pose, setting,
-camera, art_movement, emotion, composition, texture, weather, action,
-gender, age_group, accessories, time_period, genre
-
-Only include relevant categories. Format: {"category": ["tag1", "tag2"]}
-""")
+# TODO: Review unreachable code - Extract semantic tags and return them as a JSON object with these categories:
+# TODO: Review unreachable code - style, mood, subject, color, technical, fashion, hair, pose, setting,
+# TODO: Review unreachable code - camera, art_movement, emotion, composition, texture, weather, action,
+# TODO: Review unreachable code - gender, age_group, accessories, time_period, genre
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - Only include relevant categories. Format: {"category": ["tag1", "tag2"]}
+# TODO: Review unreachable code - """)
 
         if generate_prompt:
             user_prompt_parts.append("""
@@ -432,19 +432,19 @@ class GoogleAIImageAnalyzer(ImageAnalyzer):
 
     # TODO: Review unreachable code - if extract_tags:
     # TODO: Review unreachable code - prompt_parts.append("""
-Extract semantic tags in JSON format with these categories:
-{
-  "style": ["artistic style tags"],
-  "mood": ["emotional/atmosphere tags"],
-  "subject": ["main subjects"],
-  "color": ["color-related tags"],
-  "technical": ["photography/technical tags"],
-  "fashion": ["clothing/fashion tags"],
-  "setting": ["location/environment tags"],
-  "composition": ["compositional elements"],
-  "genre": ["image genre/type"]
-}
-Include only relevant categories.""")
+# TODO: Review unreachable code - Extract semantic tags in JSON format with these categories:
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code -   "style": ["artistic style tags"],
+# TODO: Review unreachable code -   "mood": ["emotional/atmosphere tags"],
+# TODO: Review unreachable code -   "subject": ["main subjects"],
+# TODO: Review unreachable code -   "color": ["color-related tags"],
+# TODO: Review unreachable code -   "technical": ["photography/technical tags"],
+# TODO: Review unreachable code -   "fashion": ["clothing/fashion tags"],
+# TODO: Review unreachable code -   "setting": ["location/environment tags"],
+# TODO: Review unreachable code -   "composition": ["compositional elements"],
+# TODO: Review unreachable code -   "genre": ["image genre/type"]
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - Include only relevant categories.""")
 
         if generate_prompt:
             prompt_parts.append("""
@@ -597,19 +597,19 @@ class DeepSeekImageAnalyzer(ImageAnalyzer):
 
     # TODO: Review unreachable code - if extract_tags:
     # TODO: Review unreachable code - prompt_parts.append("""
-Extract semantic tags as a JSON object:
-{
-  "style": ["visual/artistic style"],
-  "mood": ["emotional tone"],
-  "subject": ["main subjects"],
-  "color": ["color descriptors"],
-  "technical": ["camera/technical aspects"],
-  "fashion": ["clothing/accessories"],
-  "setting": ["location/environment"],
-  "action": ["activities/poses"],
-  "composition": ["compositional elements"]
-}
-""")
+# TODO: Review unreachable code - Extract semantic tags as a JSON object:
+# TODO: Review unreachable code - {
+# TODO: Review unreachable code -   "style": ["visual/artistic style"],
+# TODO: Review unreachable code -   "mood": ["emotional tone"],
+# TODO: Review unreachable code -   "subject": ["main subjects"],
+# TODO: Review unreachable code -   "color": ["color descriptors"],
+# TODO: Review unreachable code -   "technical": ["camera/technical aspects"],
+# TODO: Review unreachable code -   "fashion": ["clothing/accessories"],
+# TODO: Review unreachable code -   "setting": ["location/environment"],
+# TODO: Review unreachable code -   "action": ["activities/poses"],
+# TODO: Review unreachable code -   "composition": ["compositional elements"]
+# TODO: Review unreachable code - }
+# TODO: Review unreachable code - """)
 
         if generate_prompt:
             prompt_parts.append("""
@@ -707,7 +707,7 @@ NEGATIVE: Elements to avoid""")
         return result
 
     # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
-    # TODO: Review unreachable code - """Estimate cost - DeepSeek is very affordable."""
+    # TODO: Review unreachable code - # Estimate cost - DeepSeek is very affordable.
     # TODO: Review unreachable code - avg_input_tokens = 1000  # Image + prompt
     # TODO: Review unreachable code - avg_output_tokens = 500 if detailed else 300
 
