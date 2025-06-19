@@ -1,9 +1,12 @@
 """Advanced image understanding and analysis module."""
 
-from .advanced_tagger import AdvancedTagger, ProjectTagVocabulary, TagVocabulary
+# TODO: Fix missing imports - classes are commented out
+# from .advanced_tagger import AdvancedTagger, ProjectTagVocabulary, TagVocabulary
 from .analyzer import ImageAnalyzer
 from .batch_analyzer import BatchAnalysisRequest, BatchAnalyzer, BatchProgress
-from .custom_instructions import CustomInstructionManager, InstructionTemplate, ProjectInstructions
+# TODO: Fix missing imports - classes are commented out in custom_instructions.py
+# from .custom_instructions import CustomInstructionManager, InstructionTemplate, ProjectInstructions
+from .custom_instructions import InstructionTemplate
 
 # Pipeline stages have been removed - use simple_analysis functions instead
 # Provider optimizer removed - simple cost tracking in results is sufficient
@@ -33,14 +36,14 @@ __all__ = [
     "DeepSeekImageAnalyzer",
 
     # Advanced tagging system
-    "AdvancedTagger",
-    "TagVocabulary",
-    "ProjectTagVocabulary",
+    # "AdvancedTagger",
+    # "TagVocabulary",
+    # "ProjectTagVocabulary",
 
     # Custom instructions
-    "CustomInstructionManager",
+    # "CustomInstructionManager",  # Class is commented out
     "InstructionTemplate",
-    "ProjectInstructions",
+    # "ProjectInstructions",  # Class is commented out
 
     # Batch processing
     "BatchAnalyzer",

@@ -17,7 +17,7 @@ class PerformanceTracker:
     """Track performance metrics throughout the application."""
     
     def __init__(self):
-        self.collector = MetricsCollector.get_instance()
+        self.collector = MetricsCollector()
     
     @contextmanager
     def track_file_processing(self, file_path: Path):
@@ -104,32 +104,32 @@ def get_tracker() -> PerformanceTracker:
     return _tracker
 
 
-# TODO: Review unreachable code - # Convenience functions
-# TODO: Review unreachable code - def track_file_processing(file_path: Path):
-# TODO: Review unreachable code - """Context manager for tracking file processing."""
-# TODO: Review unreachable code - return _tracker.track_file_processing(file_path)
+# Convenience functions - stub implementations
+def track_file_processing(file_path: Path):
+    """Context manager for tracking file processing."""
+    return _tracker.track_file_processing(file_path)
 
 
-# TODO: Review unreachable code - def track_database_operation():
-# TODO: Review unreachable code - """Context manager for tracking database operations."""
-# TODO: Review unreachable code - return _tracker.track_database_operation()
+def track_database_operation():
+    """Context manager for tracking database operations."""
+    return _tracker.track_database_operation()
 
 
-# TODO: Review unreachable code - def track_operation(operation_name: str):
-# TODO: Review unreachable code - """Context manager for tracking named operations."""
-# TODO: Review unreachable code - return _tracker.track_operation(operation_name)
+def track_operation(operation_name: str):
+    """Context manager for tracking named operations."""
+    return _tracker.track_operation(operation_name)
 
 
-# TODO: Review unreachable code - def track_cache_access(hit: bool) -> None:
-# TODO: Review unreachable code - """Track cache hit or miss."""
-# TODO: Review unreachable code - _tracker.track_cache_access(hit)
+def track_cache_access(hit: bool) -> None:
+    """Track cache hit or miss."""
+    _tracker.track_cache_access(hit)
 
 
-# TODO: Review unreachable code - def update_worker_metrics(active_workers: int, max_workers: int) -> None:
-# TODO: Review unreachable code - """Update worker thread metrics."""
-# TODO: Review unreachable code - _tracker.update_worker_metrics(active_workers, max_workers)
+def update_worker_metrics(active_workers: int, max_workers: int) -> None:
+    """Update worker thread metrics."""
+    _tracker.update_worker_metrics(active_workers, max_workers)
 
 
-# TODO: Review unreachable code - def update_queue_depth(depth: int) -> None:
-# TODO: Review unreachable code - """Update processing queue depth."""
-# TODO: Review unreachable code - _tracker.update_queue_depth(depth)
+def update_queue_depth(depth: int) -> None:
+    """Update processing queue depth."""
+    _tracker.update_queue_depth(depth)

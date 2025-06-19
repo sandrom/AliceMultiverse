@@ -26,6 +26,33 @@ def get_quality_folder_name(stars: int) -> str:
     return f"{stars}-star"
 
 
+def extract_project_folder(media_path: Path, source_dir: Path) -> str:
+    """Extract project folder name from file path.
+    
+    Args:
+        media_path: Path to media file
+        source_dir: Source directory (inbox)
+        
+    Returns:
+        Project folder name or "uncategorized"
+    """
+    from ..core.constants import UNCATEGORIZED_PROJECT
+    
+    try:
+        relative_path = media_path.relative_to(source_dir)
+        path_parts = relative_path.parts
+        
+        if len(path_parts) > 1:
+            # File is in a project folder (or deeper)
+            return path_parts[0]
+        else:
+            # File is directly in inbox
+            return UNCATEGORIZED_PROJECT
+    except ValueError:
+        # Path is not relative to source_dir
+        return UNCATEGORIZED_PROJECT
+
+
 # TODO: Review unreachable code - def extract_project_folder(media_path: Path, source_dir: Path) -> str:
 # TODO: Review unreachable code - """Extract project folder name from file path.
 

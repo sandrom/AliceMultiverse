@@ -116,61 +116,61 @@ class PromptYAMLFormatter:
     # TODO: Review unreachable code - def create_example_prompt_yaml(file_path: Path) -> None:
     # TODO: Review unreachable code - """Create an example YAML file showing the format."""
     # TODO: Review unreachable code - example = """# Example Prompt Format
-# This file shows how to structure prompts in YAML
+# TODO: Review unreachable code - # This file shows how to structure prompts in YAML
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - prompt: "A serene Japanese garden with cherry blossoms in full bloom, koi pond reflecting the sky, traditional wooden bridge, soft morning light, photorealistic, 8k"
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - category: image_generation
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - providers:
+# TODO: Review unreachable code -   - midjourney
+# TODO: Review unreachable code -   - flux
+# TODO: Review unreachable code -   - stable_diffusion
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - description: "Creates a peaceful Japanese garden scene with traditional elements"
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - tags:
+# TODO: Review unreachable code -   - landscape
+# TODO: Review unreachable code -   - japanese
+# TODO: Review unreachable code -   - nature
+# TODO: Review unreachable code -   - serene
+# TODO: Review unreachable code -   - photorealistic
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - style: photorealistic
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - project: SpringScenes
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - context:
+# TODO: Review unreachable code -   aspect_ratio: "16:9"
+# TODO: Review unreachable code -   model_version: "v6"
+# TODO: Review unreachable code -   quality: "high"
+# TODO: Review unreachable code -   steps: 50
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - effectiveness:
+# TODO: Review unreachable code -   rating: 8.5
+# TODO: Review unreachable code -   uses: 24
+# TODO: Review unreachable code -   successes: 22
+# TODO: Review unreachable code -   success_rate: "91.7%"
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - notes: |
+# TODO: Review unreachable code -   This prompt works exceptionally well for creating calming scenes.
+# TODO: Review unreachable code -   Best results with Midjourney v6 using --ar 16:9 --q 2
+# TODO: Review unreachable code -   For Flux, increase the steps to 50 for better detail
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -   Variations to try:
+# TODO: Review unreachable code -   - Change "morning light" to "golden hour" for warmer tones
+# TODO: Review unreachable code -   - Add "misty atmosphere" for more mystical feeling
+# TODO: Review unreachable code -   - Include "stone lanterns" for additional traditional elements
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - metadata:
+# TODO: Review unreachable code -   id: "550e8400-e29b-41d4-a716-446655440000"
+# TODO: Review unreachable code -   created: "2024-01-15T10:30:00"
+# TODO: Review unreachable code -   updated: "2024-01-20T14:45:00"
+# TODO: Review unreachable code -   keywords:
+# TODO: Review unreachable code -     - zen
+# TODO: Review unreachable code -     - meditation
+# TODO: Review unreachable code -     - tranquil
+# TODO: Review unreachable code - """
 
-prompt: "A serene Japanese garden with cherry blossoms in full bloom, koi pond reflecting the sky, traditional wooden bridge, soft morning light, photorealistic, 8k"
-
-category: image_generation
-
-providers:
-  - midjourney
-  - flux
-  - stable_diffusion
-
-description: "Creates a peaceful Japanese garden scene with traditional elements"
-
-tags:
-  - landscape
-  - japanese
-  - nature
-  - serene
-  - photorealistic
-
-style: photorealistic
-
-project: SpringScenes
-
-context:
-  aspect_ratio: "16:9"
-  model_version: "v6"
-  quality: "high"
-  steps: 50
-
-effectiveness:
-  rating: 8.5
-  uses: 24
-  successes: 22
-  success_rate: "91.7%"
-
-notes: |
-  This prompt works exceptionally well for creating calming scenes.
-  Best results with Midjourney v6 using --ar 16:9 --q 2
-  For Flux, increase the steps to 50 for better detail
-
-  Variations to try:
-  - Change "morning light" to "golden hour" for warmer tones
-  - Add "misty atmosphere" for more mystical feeling
-  - Include "stone lanterns" for additional traditional elements
-
-metadata:
-  id: "550e8400-e29b-41d4-a716-446655440000"
-  created: "2024-01-15T10:30:00"
-  updated: "2024-01-20T14:45:00"
-  keywords:
-    - zen
-    - meditation
-    - tranquil
-"""
-
-        with open(file_path, 'w') as f:
-            f.write(example)
+    # TODO: Review unreachable code -     with open(file_path, 'w') as f:
+    # TODO: Review unreachable code -         f.write(example)

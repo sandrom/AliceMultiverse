@@ -89,100 +89,100 @@ class AnthropicImageAnalyzer(ImageAnalyzer):
 # TODO: Review unreachable code - Format tags as JSON: {"category": ["tag1", "tag2"]}
 # TODO: Review unreachable code - """)
 
-        if generate_prompt:
-            prompt_parts.append("Generate a detailed prompt that could recreate this image. Also suggest a negative prompt for what to avoid. Format as: PROMPT: <positive prompt> NEGATIVE: <negative prompt>")
-
-        if custom_instructions:
-            prompt_parts.append(f"\nAdditional instructions: {custom_instructions}")
-
-        prompt = "\n\n".join(prompt_parts)
-
-        # Make API request
-        async with aiohttp.ClientSession() as session:
-            headers = {
-                "x-api-key": self.api_key,
-                "anthropic-version": "2023-06-01",
-                "content-type": "application/json",
-            }
-
-            payload = {
-                "model": self.model,
-                "max_tokens": 2000 if detailed else 1000,
-                "messages": [{
-                    "role": "user",
-                    "content": [
-                        {
-                            "type": "image",
-                            "source": {
-                                "type": "base64",
-                                "media_type": media_type,
-                                "data": image_data
-                            }
-                        },
-                        {
-                            "type": "text",
-                            "text": prompt
-                        }
-                    ]
-                }]
-            }
-
-            async with session.post(
-                self.BASE_URL,
-                headers=headers,
-                json=payload
-            ) as response:
-                if response.status != 200:
-                    error_text = await response.text()
-                    raise Exception(f"Anthropic API error: {response.status} - {error_text}")
-
-                # TODO: Review unreachable code - data = await response.json()
-                # TODO: Review unreachable code - content = data["content"][0]["text"]
-                # TODO: Review unreachable code - usage = data.get("usage", {})
-
-        # Parse the response
-        result = ImageAnalysisResult(
-            description=content.split("\n")[0] if not detailed else content,
-            provider=self.name,
-            model=self.model,
-            raw_response=data,
-            tokens_used=usage.get("input_tokens", 0) + usage.get("output_tokens", 0)
-        )
-
-        # Extract structured data from response
-        if extract_tags:
-            # Look for JSON in response
-            import re
-            json_match = re.search(r'\{[^{}]*\}', content, re.DOTALL)
-            if json_match:
-                try:
-                    result.tags = json.loads(json_match.group())
-                except (json.JSONDecodeError, ValueError):
-                    logger.warning("Failed to parse tags JSON")
-
-        if generate_prompt:
-            # Extract prompts
-            prompt_match = re.search(r'PROMPT:\s*(.+?)(?=NEGATIVE:|$)', content, re.DOTALL)
-            negative_match = re.search(r'NEGATIVE:\s*(.+?)$', content, re.DOTALL)
-
-            if prompt_match:
-                result.generated_prompt = prompt_match.group(1).strip()
-            if negative_match:
-                result.negative_prompt = negative_match.group(1).strip()
-
-        # Calculate cost
-        if self.model in self.PRICING:
-            input_tokens = usage.get("input_tokens", 0)
-            output_tokens = usage.get("output_tokens", 0)
-            pricing = self.PRICING[self.model]
-            result.cost = (
-                (input_tokens * pricing["input"] / 1_000_000) +
-                (output_tokens * pricing["output"] / 1_000_000)
-            )
-
-        return result
-
-    # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
+# TODO: Review unreachable code -         if generate_prompt:
+# TODO: Review unreachable code -             prompt_parts.append("Generate a detailed prompt that could recreate this image. Also suggest a negative prompt for what to avoid. Format as: PROMPT: <positive prompt> NEGATIVE: <negative prompt>")
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         if custom_instructions:
+# TODO: Review unreachable code -             prompt_parts.append(f"\nAdditional instructions: {custom_instructions}")
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         prompt = "\n\n".join(prompt_parts)
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         # Make API request
+# TODO: Review unreachable code -         async with aiohttp.ClientSession() as session:
+# TODO: Review unreachable code -             headers = {
+# TODO: Review unreachable code -                 "x-api-key": self.api_key,
+# TODO: Review unreachable code -                 "anthropic-version": "2023-06-01",
+# TODO: Review unreachable code -                 "content-type": "application/json",
+# TODO: Review unreachable code -             }
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -             payload = {
+# TODO: Review unreachable code -                 "model": self.model,
+# TODO: Review unreachable code -                 "max_tokens": 2000 if detailed else 1000,
+# TODO: Review unreachable code -                 "messages": [{
+# TODO: Review unreachable code -                     "role": "user",
+# TODO: Review unreachable code -                     "content": [
+# TODO: Review unreachable code -                         {
+# TODO: Review unreachable code -                             "type": "image",
+# TODO: Review unreachable code -                             "source": {
+# TODO: Review unreachable code -                                 "type": "base64",
+# TODO: Review unreachable code -                                 "media_type": media_type,
+# TODO: Review unreachable code -                                 "data": image_data
+# TODO: Review unreachable code -                             }
+# TODO: Review unreachable code -                         },
+# TODO: Review unreachable code -                         {
+# TODO: Review unreachable code -                             "type": "text",
+# TODO: Review unreachable code -                             "text": prompt
+# TODO: Review unreachable code -                         }
+# TODO: Review unreachable code -                     ]
+# TODO: Review unreachable code -                 }]
+# TODO: Review unreachable code -             }
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -             async with session.post(
+# TODO: Review unreachable code -                 self.BASE_URL,
+# TODO: Review unreachable code -                 headers=headers,
+# TODO: Review unreachable code -                 json=payload
+# TODO: Review unreachable code -             ) as response:
+# TODO: Review unreachable code -                 if response.status != 200:
+# TODO: Review unreachable code -                     error_text = await response.text()
+# TODO: Review unreachable code -                     raise Exception(f"Anthropic API error: {response.status} - {error_text}")
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - data = await response.json()
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - content = data["content"][0]["text"]
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - usage = data.get("usage", {})
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         # Parse the response
+# TODO: Review unreachable code -         result = ImageAnalysisResult(
+# TODO: Review unreachable code -             description=content.split("\n")[0] if not detailed else content,
+# TODO: Review unreachable code -             provider=self.name,
+# TODO: Review unreachable code -             model=self.model,
+# TODO: Review unreachable code -             raw_response=data,
+# TODO: Review unreachable code -             tokens_used=usage.get("input_tokens", 0) + usage.get("output_tokens", 0)
+# TODO: Review unreachable code -         )
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         # Extract structured data from response
+# TODO: Review unreachable code -         if extract_tags:
+# TODO: Review unreachable code -             # Look for JSON in response
+# TODO: Review unreachable code -             import re
+# TODO: Review unreachable code -             json_match = re.search(r'\{[^{}]*\}', content, re.DOTALL)
+# TODO: Review unreachable code -             if json_match:
+# TODO: Review unreachable code -                 try:
+# TODO: Review unreachable code -                     result.tags = json.loads(json_match.group())
+# TODO: Review unreachable code -                 except (json.JSONDecodeError, ValueError):
+# TODO: Review unreachable code -                     logger.warning("Failed to parse tags JSON")
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         if generate_prompt:
+# TODO: Review unreachable code -             # Extract prompts
+# TODO: Review unreachable code -             prompt_match = re.search(r'PROMPT:\s*(.+?)(?=NEGATIVE:|$)', content, re.DOTALL)
+# TODO: Review unreachable code -             negative_match = re.search(r'NEGATIVE:\s*(.+?)$', content, re.DOTALL)
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -             if prompt_match:
+# TODO: Review unreachable code -                 result.generated_prompt = prompt_match.group(1).strip()
+# TODO: Review unreachable code -             if negative_match:
+# TODO: Review unreachable code -                 result.negative_prompt = negative_match.group(1).strip()
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         # Calculate cost
+# TODO: Review unreachable code -         if self.model in self.PRICING:
+# TODO: Review unreachable code -             input_tokens = usage.get("input_tokens", 0)
+# TODO: Review unreachable code -             output_tokens = usage.get("output_tokens", 0)
+# TODO: Review unreachable code -             pricing = self.PRICING[self.model]
+# TODO: Review unreachable code -             result.cost = (
+# TODO: Review unreachable code -                 (input_tokens * pricing["input"] / 1_000_000) +
+# TODO: Review unreachable code -                 (output_tokens * pricing["output"] / 1_000_000)
+# TODO: Review unreachable code -             )
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         return result
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -     # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
     # TODO: Review unreachable code - """Estimate cost based on average tokens."""
     # TODO: Review unreachable code - # Rough estimates
     # TODO: Review unreachable code - avg_input_tokens = 1500  # Image + prompt
@@ -256,110 +256,110 @@ class OpenAIImageAnalyzer(ImageAnalyzer):
 # TODO: Review unreachable code - Only include relevant categories. Format: {"category": ["tag1", "tag2"]}
 # TODO: Review unreachable code - """)
 
-        if generate_prompt:
-            user_prompt_parts.append("""
-Generate:
-1. A detailed prompt to recreate this image
-2. A negative prompt for things to avoid
+# TODO: Review unreachable code -         if generate_prompt:
+# TODO: Review unreachable code -             user_prompt_parts.append("""
+# TODO: Review unreachable code - Generate:
+# TODO: Review unreachable code - 1. A detailed prompt to recreate this image
+# TODO: Review unreachable code - 2. A negative prompt for things to avoid
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - Format:
+# TODO: Review unreachable code - PROMPT: <detailed positive prompt>
+# TODO: Review unreachable code - NEGATIVE: <negative prompt>
+# TODO: Review unreachable code - """)
 
-Format:
-PROMPT: <detailed positive prompt>
-NEGATIVE: <negative prompt>
-""")
+# TODO: Review unreachable code -         if custom_instructions:
+# TODO: Review unreachable code -             user_prompt_parts.append(custom_instructions)
 
-        if custom_instructions:
-            user_prompt_parts.append(custom_instructions)
+# TODO: Review unreachable code -         user_prompt = "\n\n".join(user_prompt_parts)
 
-        user_prompt = "\n\n".join(user_prompt_parts)
+# TODO: Review unreachable code -         # Make API request
+# TODO: Review unreachable code -         async with aiohttp.ClientSession() as session:
+# TODO: Review unreachable code -             headers = {
+# TODO: Review unreachable code -                 "Authorization": f"Bearer {self.api_key}",
+# TODO: Review unreachable code -                 "Content-Type": "application/json",
+# TODO: Review unreachable code -             }
 
-        # Make API request
-        async with aiohttp.ClientSession() as session:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            }
+# TODO: Review unreachable code -             payload = {
+# TODO: Review unreachable code -                 "model": self.model,
+# TODO: Review unreachable code -                 "messages": [
+# TODO: Review unreachable code -                     {"role": "system", "content": system_prompt},
+# TODO: Review unreachable code -                     {
+# TODO: Review unreachable code -                         "role": "user",
+# TODO: Review unreachable code -                         "content": [
+# TODO: Review unreachable code -                             {
+# TODO: Review unreachable code -                                 "type": "text",
+# TODO: Review unreachable code -                                 "text": user_prompt
+# TODO: Review unreachable code -                             },
+# TODO: Review unreachable code -                             {
+# TODO: Review unreachable code -                                 "type": "image_url",
+# TODO: Review unreachable code -                                 "image_url": {
+# TODO: Review unreachable code -                                     "url": f"data:image/jpeg;base64,{image_data}",
+# TODO: Review unreachable code -                                     "detail": "high" if detailed else "low"
+# TODO: Review unreachable code -                                 }
+# TODO: Review unreachable code -                             }
+# TODO: Review unreachable code -                         ]
+# TODO: Review unreachable code -                     }
+# TODO: Review unreachable code -                 ],
+# TODO: Review unreachable code -                 "max_tokens": 2000 if detailed else 1000,
+# TODO: Review unreachable code -             }
 
-            payload = {
-                "model": self.model,
-                "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": user_prompt
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{image_data}",
-                                    "detail": "high" if detailed else "low"
-                                }
-                            }
-                        ]
-                    }
-                ],
-                "max_tokens": 2000 if detailed else 1000,
-            }
+# TODO: Review unreachable code -             async with session.post(
+# TODO: Review unreachable code -                 self.BASE_URL,
+# TODO: Review unreachable code -                 headers=headers,
+# TODO: Review unreachable code -                 json=payload
+# TODO: Review unreachable code -             ) as response:
+# TODO: Review unreachable code -                 if response.status != 200:
+# TODO: Review unreachable code -                     error_text = await response.text()
+# TODO: Review unreachable code -                     raise Exception(f"OpenAI API error: {response.status} - {error_text}")
 
-            async with session.post(
-                self.BASE_URL,
-                headers=headers,
-                json=payload
-            ) as response:
-                if response.status != 200:
-                    error_text = await response.text()
-                    raise Exception(f"OpenAI API error: {response.status} - {error_text}")
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - data = await response.json()
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - content = data["choices"][0]["message"]["content"]
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - usage = data.get("usage", {})
 
-                # TODO: Review unreachable code - data = await response.json()
-                # TODO: Review unreachable code - content = data["choices"][0]["message"]["content"]
-                # TODO: Review unreachable code - usage = data.get("usage", {})
+# TODO: Review unreachable code -         # Parse response
+# TODO: Review unreachable code -         result = ImageAnalysisResult(
+# TODO: Review unreachable code -             description=content.split("\n")[0] if not detailed else content,
+# TODO: Review unreachable code -             provider=self.name,
+# TODO: Review unreachable code -             model=self.model,
+# TODO: Review unreachable code -             raw_response=data,
+# TODO: Review unreachable code -             tokens_used=usage.get("total_tokens", 0)
+# TODO: Review unreachable code -         )
 
-        # Parse response
-        result = ImageAnalysisResult(
-            description=content.split("\n")[0] if not detailed else content,
-            provider=self.name,
-            model=self.model,
-            raw_response=data,
-            tokens_used=usage.get("total_tokens", 0)
-        )
+# TODO: Review unreachable code -         # Extract structured data
+# TODO: Review unreachable code -         if extract_tags:
+# TODO: Review unreachable code -             import re
+# TODO: Review unreachable code -             # Find JSON block
+# TODO: Review unreachable code -             json_match = re.search(r'\{[^{}]+\}', content, re.DOTALL)
+# TODO: Review unreachable code -             if json_match:
+# TODO: Review unreachable code -                 try:
+# TODO: Review unreachable code -                     result.tags = json.loads(json_match.group())
+# TODO: Review unreachable code -                 except (json.JSONDecodeError, ValueError):
+# TODO: Review unreachable code -                     logger.warning("Failed to parse tags JSON from OpenAI")
 
-        # Extract structured data
-        if extract_tags:
-            import re
-            # Find JSON block
-            json_match = re.search(r'\{[^{}]+\}', content, re.DOTALL)
-            if json_match:
-                try:
-                    result.tags = json.loads(json_match.group())
-                except (json.JSONDecodeError, ValueError):
-                    logger.warning("Failed to parse tags JSON from OpenAI")
+# TODO: Review unreachable code -         if generate_prompt:
+# TODO: Review unreachable code -             # Extract prompts
+# TODO: Review unreachable code -             import re
+# TODO: Review unreachable code -             prompt_match = re.search(r'PROMPT:\s*(.+?)(?=NEGATIVE:|$)', content, re.DOTALL | re.IGNORECASE)
+# TODO: Review unreachable code -             negative_match = re.search(r'NEGATIVE:\s*(.+?)$', content, re.DOTALL | re.IGNORECASE)
 
-        if generate_prompt:
-            # Extract prompts
-            import re
-            prompt_match = re.search(r'PROMPT:\s*(.+?)(?=NEGATIVE:|$)', content, re.DOTALL | re.IGNORECASE)
-            negative_match = re.search(r'NEGATIVE:\s*(.+?)$', content, re.DOTALL | re.IGNORECASE)
+# TODO: Review unreachable code -             if prompt_match:
+# TODO: Review unreachable code -                 result.generated_prompt = prompt_match.group(1).strip()
+# TODO: Review unreachable code -             if negative_match:
+# TODO: Review unreachable code -                 result.negative_prompt = negative_match.group(1).strip()
 
-            if prompt_match:
-                result.generated_prompt = prompt_match.group(1).strip()
-            if negative_match:
-                result.negative_prompt = negative_match.group(1).strip()
-
-        # Calculate cost
-        if self.model in self.PRICING:
-            tokens = usage.get("total_tokens", 0)
-            # Rough split between input/output
-            input_tokens = int(tokens * 0.7)
-            output_tokens = tokens - input_tokens
-            pricing = self.PRICING[self.model]
-            result.cost = (
-                (input_tokens * pricing["input"] / 1_000_000) +
-                (output_tokens * pricing["output"] / 1_000_000)
-            )
-
-        return result
+# TODO: Review unreachable code -         # Calculate cost
+# TODO: Review unreachable code -         if self.model in self.PRICING:
+# TODO: Review unreachable code -             tokens = usage.get("total_tokens", 0)
+# TODO: Review unreachable code -             # Rough split between input/output
+# TODO: Review unreachable code -             input_tokens = int(tokens * 0.7)
+# TODO: Review unreachable code -             output_tokens = tokens - input_tokens
+# TODO: Review unreachable code -             pricing = self.PRICING[self.model]
+# TODO: Review unreachable code -             result.cost = (
+# TODO: Review unreachable code -                 (input_tokens * pricing["input"] / 1_000_000) +
+# TODO: Review unreachable code -                 (output_tokens * pricing["output"] / 1_000_000)
+# TODO: Review unreachable code -             )
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         return result
 
     # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
     # TODO: Review unreachable code - """Estimate cost."""
@@ -446,97 +446,97 @@ class GoogleAIImageAnalyzer(ImageAnalyzer):
 # TODO: Review unreachable code - }
 # TODO: Review unreachable code - Include only relevant categories.""")
 
-        if generate_prompt:
-            prompt_parts.append("""
-Generate:
-PROMPT: A detailed prompt to recreate this image
-NEGATIVE: Things to avoid""")
+# TODO: Review unreachable code -         if generate_prompt:
+# TODO: Review unreachable code -             prompt_parts.append("""
+# TODO: Review unreachable code - Generate:
+# TODO: Review unreachable code - PROMPT: A detailed prompt to recreate this image
+# TODO: Review unreachable code - NEGATIVE: Things to avoid""")
 
-        if custom_instructions:
-            prompt_parts.append(custom_instructions)
+# TODO: Review unreachable code -         if custom_instructions:
+# TODO: Review unreachable code -             prompt_parts.append(custom_instructions)
 
-        prompt = "\n\n".join(prompt_parts)
+# TODO: Review unreachable code -         prompt = "\n\n".join(prompt_parts)
 
-        # Make API request
-        url = self.BASE_URL.format(model=self.model)
+# TODO: Review unreachable code -         # Make API request
+# TODO: Review unreachable code -         url = self.BASE_URL.format(model=self.model)
 
-        async with aiohttp.ClientSession() as session:
-            headers = {
-                "Content-Type": "application/json",
-            }
+# TODO: Review unreachable code -         async with aiohttp.ClientSession() as session:
+# TODO: Review unreachable code -             headers = {
+# TODO: Review unreachable code -                 "Content-Type": "application/json",
+# TODO: Review unreachable code -             }
 
-            payload = {
-                "contents": [{
-                    "parts": [
-                        {
-                            "text": prompt
-                        },
-                        {
-                            "inline_data": {
-                                "mime_type": mime_type,
-                                "data": image_data
-                            }
-                        }
-                    ]
-                }],
-                "generationConfig": {
-                    "temperature": 0.4,
-                    "maxOutputTokens": 2048 if detailed else 1024,
-                }
-            }
+# TODO: Review unreachable code -             payload = {
+# TODO: Review unreachable code -                 "contents": [{
+# TODO: Review unreachable code -                     "parts": [
+# TODO: Review unreachable code -                         {
+# TODO: Review unreachable code -                             "text": prompt
+# TODO: Review unreachable code -                         },
+# TODO: Review unreachable code -                         {
+# TODO: Review unreachable code -                             "inline_data": {
+# TODO: Review unreachable code -                                 "mime_type": mime_type,
+# TODO: Review unreachable code -                                 "data": image_data
+# TODO: Review unreachable code -                             }
+# TODO: Review unreachable code -                         }
+# TODO: Review unreachable code -                     ]
+# TODO: Review unreachable code -                 }],
+# TODO: Review unreachable code -                 "generationConfig": {
+# TODO: Review unreachable code -                     "temperature": 0.4,
+# TODO: Review unreachable code -                     "maxOutputTokens": 2048 if detailed else 1024,
+# TODO: Review unreachable code -                 }
+# TODO: Review unreachable code -             }
 
-            async with session.post(
-                f"{url}?key={self.api_key}",
-                headers=headers,
-                json=payload
-            ) as response:
-                if response.status != 200:
-                    error_text = await response.text()
-                    raise Exception(f"Google AI API error: {response.status} - {error_text}")
+# TODO: Review unreachable code -             async with session.post(
+# TODO: Review unreachable code -                 f"{url}?key={self.api_key}",
+# TODO: Review unreachable code -                 headers=headers,
+# TODO: Review unreachable code -                 json=payload
+# TODO: Review unreachable code -             ) as response:
+# TODO: Review unreachable code -                 if response.status != 200:
+# TODO: Review unreachable code -                     error_text = await response.text()
+# TODO: Review unreachable code -                     raise Exception(f"Google AI API error: {response.status} - {error_text}")
 
-                # TODO: Review unreachable code - data = await response.json()
-                # TODO: Review unreachable code - content = data["candidates"][0]["content"]["parts"][0]["text"]
-                # TODO: Review unreachable code - usage_metadata = data.get("usageMetadata", {})
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - data = await response.json()
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - content = data["candidates"][0]["content"]["parts"][0]["text"]
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - usage_metadata = data.get("usageMetadata", {})
 
-        # Parse response
-        result = ImageAnalysisResult(
-            description=content.split("\n")[0] if not detailed else content,
-            provider=self.name,
-            model=self.model,
-            raw_response=data,
-            tokens_used=usage_metadata.get("totalTokenCount", 0)
-        )
+# TODO: Review unreachable code -         # Parse response
+# TODO: Review unreachable code -         result = ImageAnalysisResult(
+# TODO: Review unreachable code -             description=content.split("\n")[0] if not detailed else content,
+# TODO: Review unreachable code -             provider=self.name,
+# TODO: Review unreachable code -             model=self.model,
+# TODO: Review unreachable code -             raw_response=data,
+# TODO: Review unreachable code -             tokens_used=usage_metadata.get("totalTokenCount", 0)
+# TODO: Review unreachable code -         )
 
-        # Extract structured data
-        if extract_tags:
-            import re
-            # Find JSON block
-            json_match = re.search(r'\{[^{}]+\}', content, re.DOTALL)
-            if json_match:
-                try:
-                    result.tags = json.loads(json_match.group())
-                except (json.JSONDecodeError, ValueError):
-                    logger.warning("Failed to parse tags JSON from Gemini")
+# TODO: Review unreachable code -         # Extract structured data
+# TODO: Review unreachable code -         if extract_tags:
+# TODO: Review unreachable code -             import re
+# TODO: Review unreachable code -             # Find JSON block
+# TODO: Review unreachable code -             json_match = re.search(r'\{[^{}]+\}', content, re.DOTALL)
+# TODO: Review unreachable code -             if json_match:
+# TODO: Review unreachable code -                 try:
+# TODO: Review unreachable code -                     result.tags = json.loads(json_match.group())
+# TODO: Review unreachable code -                 except (json.JSONDecodeError, ValueError):
+# TODO: Review unreachable code -                     logger.warning("Failed to parse tags JSON from Gemini")
 
-        if generate_prompt:
-            # Extract prompts
-            import re
-            prompt_match = re.search(r'PROMPT:\s*(.+?)(?=NEGATIVE:|$)', content, re.DOTALL | re.IGNORECASE)
-            negative_match = re.search(r'NEGATIVE:\s*(.+?)$', content, re.DOTALL | re.IGNORECASE)
+# TODO: Review unreachable code -         if generate_prompt:
+# TODO: Review unreachable code -             # Extract prompts
+# TODO: Review unreachable code -             import re
+# TODO: Review unreachable code -             prompt_match = re.search(r'PROMPT:\s*(.+?)(?=NEGATIVE:|$)', content, re.DOTALL | re.IGNORECASE)
+# TODO: Review unreachable code -             negative_match = re.search(r'NEGATIVE:\s*(.+?)$', content, re.DOTALL | re.IGNORECASE)
 
-            if prompt_match:
-                result.generated_prompt = prompt_match.group(1).strip()
-            if negative_match:
-                result.negative_prompt = negative_match.group(1).strip()
+# TODO: Review unreachable code -             if prompt_match:
+# TODO: Review unreachable code -                 result.generated_prompt = prompt_match.group(1).strip()
+# TODO: Review unreachable code -             if negative_match:
+# TODO: Review unreachable code -                 result.negative_prompt = negative_match.group(1).strip()
 
-        # Calculate cost (after free tier)
-        if self.model in self.PRICING:
-            tokens = usage_metadata.get("totalTokenCount", 0)
-            pricing = self.PRICING[self.model]
-            # Simplified - doesn't account for free tier
-            result.cost = tokens * pricing["cost_per_million"] / 1_000_000
-
-        return result
+# TODO: Review unreachable code -         # Calculate cost (after free tier)
+# TODO: Review unreachable code -         if self.model in self.PRICING:
+# TODO: Review unreachable code -             tokens = usage_metadata.get("totalTokenCount", 0)
+# TODO: Review unreachable code -             pricing = self.PRICING[self.model]
+# TODO: Review unreachable code -             # Simplified - doesn't account for free tier
+# TODO: Review unreachable code -             result.cost = tokens * pricing["cost_per_million"] / 1_000_000
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code -         return result
 
     # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
     # TODO: Review unreachable code - """Estimate cost."""
@@ -611,100 +611,100 @@ class DeepSeekImageAnalyzer(ImageAnalyzer):
 # TODO: Review unreachable code - }
 # TODO: Review unreachable code - """)
 
-        if generate_prompt:
-            prompt_parts.append("""
-Create:
-PROMPT: Detailed prompt to recreate this image
-NEGATIVE: Elements to avoid""")
+# TODO: Review unreachable code -         if generate_prompt:
+# TODO: Review unreachable code -             prompt_parts.append("""
+# TODO: Review unreachable code - Create:
+# TODO: Review unreachable code - PROMPT: Detailed prompt to recreate this image
+# TODO: Review unreachable code - NEGATIVE: Elements to avoid""")
 
-        if custom_instructions:
-            prompt_parts.append(custom_instructions)
+# TODO: Review unreachable code -         if custom_instructions:
+# TODO: Review unreachable code -             prompt_parts.append(custom_instructions)
 
-        prompt = "\n\n".join(prompt_parts)
+# TODO: Review unreachable code -         prompt = "\n\n".join(prompt_parts)
 
-        # Make API request
-        async with aiohttp.ClientSession() as session:
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            }
+# TODO: Review unreachable code -         # Make API request
+# TODO: Review unreachable code -         async with aiohttp.ClientSession() as session:
+# TODO: Review unreachable code -             headers = {
+# TODO: Review unreachable code -                 "Authorization": f"Bearer {self.api_key}",
+# TODO: Review unreachable code -                 "Content-Type": "application/json",
+# TODO: Review unreachable code -             }
 
-            payload = {
-                "model": self.model,
-                "messages": [
-                    {
-                        "role": "user",
-                        "content": [
-                            {
-                                "type": "text",
-                                "text": prompt
-                            },
-                            {
-                                "type": "image_url",
-                                "image_url": {
-                                    "url": f"data:image/jpeg;base64,{image_data}"
-                                }
-                            }
-                        ]
-                    }
-                ],
-                "max_tokens": 2000 if detailed else 1000,
-                "temperature": 0.7,
-            }
+# TODO: Review unreachable code -             payload = {
+# TODO: Review unreachable code -                 "model": self.model,
+# TODO: Review unreachable code -                 "messages": [
+# TODO: Review unreachable code -                     {
+# TODO: Review unreachable code -                         "role": "user",
+# TODO: Review unreachable code -                         "content": [
+# TODO: Review unreachable code -                             {
+# TODO: Review unreachable code -                                 "type": "text",
+# TODO: Review unreachable code -                                 "text": prompt
+# TODO: Review unreachable code -                             },
+# TODO: Review unreachable code -                             {
+# TODO: Review unreachable code -                                 "type": "image_url",
+# TODO: Review unreachable code -                                 "image_url": {
+# TODO: Review unreachable code -                                     "url": f"data:image/jpeg;base64,{image_data}"
+# TODO: Review unreachable code -                                 }
+# TODO: Review unreachable code -                             }
+# TODO: Review unreachable code -                         ]
+# TODO: Review unreachable code -                     }
+# TODO: Review unreachable code -                 ],
+# TODO: Review unreachable code -                 "max_tokens": 2000 if detailed else 1000,
+# TODO: Review unreachable code -                 "temperature": 0.7,
+# TODO: Review unreachable code -             }
 
-            async with session.post(
-                self.BASE_URL,
-                headers=headers,
-                json=payload
-            ) as response:
-                if response.status != 200:
-                    error_text = await response.text()
-                    raise Exception(f"DeepSeek API error: {response.status} - {error_text}")
+# TODO: Review unreachable code -             async with session.post(
+# TODO: Review unreachable code -                 self.BASE_URL,
+# TODO: Review unreachable code -                 headers=headers,
+# TODO: Review unreachable code -                 json=payload
+# TODO: Review unreachable code -             ) as response:
+# TODO: Review unreachable code -                 if response.status != 200:
+# TODO: Review unreachable code -                     error_text = await response.text()
+# TODO: Review unreachable code -                     raise Exception(f"DeepSeek API error: {response.status} - {error_text}")
 
-                # TODO: Review unreachable code - data = await response.json()
-                # TODO: Review unreachable code - content = data["choices"][0]["message"]["content"]
-                # TODO: Review unreachable code - usage = data.get("usage", {})
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - data = await response.json()
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - content = data["choices"][0]["message"]["content"]
+# TODO: Review unreachable code -                 # TODO: Review unreachable code - usage = data.get("usage", {})
 
-        # Parse response
-        result = ImageAnalysisResult(
-            description=content.split("\n")[0] if not detailed else content,
-            provider=self.name,
-            model=self.model,
-            raw_response=data,
-            tokens_used=usage.get("total_tokens", 0)
-        )
+# TODO: Review unreachable code -         # Parse response
+# TODO: Review unreachable code -         result = ImageAnalysisResult(
+# TODO: Review unreachable code -             description=content.split("\n")[0] if not detailed else content,
+# TODO: Review unreachable code -             provider=self.name,
+# TODO: Review unreachable code -             model=self.model,
+# TODO: Review unreachable code -             raw_response=data,
+# TODO: Review unreachable code -             tokens_used=usage.get("total_tokens", 0)
+# TODO: Review unreachable code -         )
 
-        # Extract structured data
-        if extract_tags:
-            import re
-            json_match = re.search(r'\{[^{}]+\}', content, re.DOTALL)
-            if json_match:
-                try:
-                    result.tags = json.loads(json_match.group())
-                except (json.JSONDecodeError, ValueError):
-                    logger.warning("Failed to parse tags JSON from DeepSeek")
+# TODO: Review unreachable code -         # Extract structured data
+# TODO: Review unreachable code -         if extract_tags:
+# TODO: Review unreachable code -             import re
+# TODO: Review unreachable code -             json_match = re.search(r'\{[^{}]+\}', content, re.DOTALL)
+# TODO: Review unreachable code -             if json_match:
+# TODO: Review unreachable code -                 try:
+# TODO: Review unreachable code -                     result.tags = json.loads(json_match.group())
+# TODO: Review unreachable code -                 except (json.JSONDecodeError, ValueError):
+# TODO: Review unreachable code -                     logger.warning("Failed to parse tags JSON from DeepSeek")
 
-        if generate_prompt:
-            import re
-            prompt_match = re.search(r'PROMPT:\s*(.+?)(?=NEGATIVE:|$)', content, re.DOTALL | re.IGNORECASE)
-            negative_match = re.search(r'NEGATIVE:\s*(.+?)$', content, re.DOTALL | re.IGNORECASE)
+# TODO: Review unreachable code -         if generate_prompt:
+# TODO: Review unreachable code -             import re
+# TODO: Review unreachable code -             prompt_match = re.search(r'PROMPT:\s*(.+?)(?=NEGATIVE:|$)', content, re.DOTALL | re.IGNORECASE)
+# TODO: Review unreachable code -             negative_match = re.search(r'NEGATIVE:\s*(.+?)$', content, re.DOTALL | re.IGNORECASE)
 
-            if prompt_match:
-                result.generated_prompt = prompt_match.group(1).strip()
-            if negative_match:
-                result.negative_prompt = negative_match.group(1).strip()
+# TODO: Review unreachable code -             if prompt_match:
+# TODO: Review unreachable code -                 result.generated_prompt = prompt_match.group(1).strip()
+# TODO: Review unreachable code -             if negative_match:
+# TODO: Review unreachable code -                 result.negative_prompt = negative_match.group(1).strip()
 
-        # Calculate cost
-        if self.model in self.PRICING:
-            input_tokens = usage.get("prompt_tokens", 0)
-            output_tokens = usage.get("completion_tokens", 0)
-            pricing = self.PRICING[self.model]
-            result.cost = (
-                (input_tokens * pricing["input"] / 1_000_000) +
-                (output_tokens * pricing["output"] / 1_000_000)
-            )
+# TODO: Review unreachable code -         # Calculate cost
+# TODO: Review unreachable code -         if self.model in self.PRICING:
+# TODO: Review unreachable code -             input_tokens = usage.get("prompt_tokens", 0)
+# TODO: Review unreachable code -             output_tokens = usage.get("completion_tokens", 0)
+# TODO: Review unreachable code -             pricing = self.PRICING[self.model]
+# TODO: Review unreachable code -             result.cost = (
+# TODO: Review unreachable code -                 (input_tokens * pricing["input"] / 1_000_000) +
+# TODO: Review unreachable code -                 (output_tokens * pricing["output"] / 1_000_000)
+# TODO: Review unreachable code -             )
 
-        return result
+# TODO: Review unreachable code -         return result
 
     # TODO: Review unreachable code - def estimate_cost(self, detailed: bool = False) -> float:
     # TODO: Review unreachable code - # Estimate cost - DeepSeek is very affordable.

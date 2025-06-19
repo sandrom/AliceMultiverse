@@ -334,10 +334,10 @@ You can start with just one provider and add more later.
     # TODO: Review unreachable code - default_organized = Path.home() / "Pictures" / "AI-Organized"
 
     # TODO: Review unreachable code - print("""
-Alice needs two directories:
-1. INBOX: Where you save new AI-generated images
-2. ORGANIZED: Where Alice will organize them by date/project/source
-""")
+# TODO: Review unreachable code - Alice needs two directories:
+# TODO: Review unreachable code - 1. INBOX: Where you save new AI-generated images
+# TODO: Review unreachable code - 2. ORGANIZED: Where Alice will organize them by date/project/source
+# TODO: Review unreachable code - """)
 
         print("📥 INBOX - Where do you save AI-generated images?")
         print(f"   Default: {default_inbox}")
@@ -478,16 +478,16 @@ Alice needs two directories:
     # TODO: Review unreachable code - print("  • OpenAI: ~$0.0050/image")
 
     # TODO: Review unreachable code - print("""
-1. Test with dry run (no cost, no changes):
-   alice --dry-run
-
-2. Organize with understanding (uses cheapest provider):
-   alice
-
-3. Monitor costs:
-   alice cost report
-   alice cost set-budget --daily 1.00
-""")
+# TODO: Review unreachable code - 1. Test with dry run (no cost, no changes):
+# TODO: Review unreachable code -    alice --dry-run
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - 2. Organize with understanding (uses cheapest provider):
+# TODO: Review unreachable code -    alice
+# TODO: Review unreachable code - 
+# TODO: Review unreachable code - 3. Monitor costs:
+# TODO: Review unreachable code -    alice cost report
+# TODO: Review unreachable code -    alice cost set-budget --daily 1.00
+# TODO: Review unreachable code - """)
         else:
             print("""
 1. Basic organization (no AI):

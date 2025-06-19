@@ -204,3 +204,18 @@ def hash_file_content(file_path: Path) -> str:
 # TODO: Review unreachable code - logger.debug(f"Embedded content hash in {file_path.name}")
 
 # TODO: Review unreachable code - return content_hash
+
+
+
+def get_or_calculate_content_hash(file_path: Path) -> str:
+    """Get or calculate content hash for a file.
+    
+    This is a stub implementation that just calculates the hash.
+    
+    Args:
+        file_path: Path to file
+        
+    Returns:
+        SHA-256 hash hex string
+    """
+    return calculate_content_hash(file_path)

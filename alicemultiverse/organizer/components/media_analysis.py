@@ -10,7 +10,8 @@ from ...core.constants import OUTPUT_DATE_FORMAT
 from ...core.config import Config
 from ...core.logging import get_logger
 from ...core.types import MediaType
-from ..organization_helpers import match_ai_source_patterns
+# TODO: Fix missing import - function is commented out
+# from ..organization_helpers import match_ai_source_patterns
 
 logger = get_logger(__name__)
 
