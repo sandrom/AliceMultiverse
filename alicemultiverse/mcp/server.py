@@ -107,3 +107,10 @@ def create_server(name: str = "alice-mcp") -> Server:
 
 # TODO: Review unreachable code - if __name__ == "__main__":
 # TODO: Review unreachable code - main()
+
+
+def main():
+    """Main entry point for MCP server - stub implementation."""
+    logger.info("MCP server is not yet implemented.")
+    return 0
+

@@ -75,7 +75,53 @@ Debug commands (use --debug flag):
     return parser
 
 
-# TODO: Review unreachable code - def main(argv: list[str] | None = None) -> int:
+def main(argv: list[str] | None = None) -> int:
+    """Simplified main entry point."""
+    parser = create_parser()
+    args = parser.parse_args(argv)
+    
+    # Configure logging
+    level = logging.DEBUG if args.debug else logging.INFO if args.verbose else logging.WARNING
+    logging.basicConfig(level=level, format='%(message)s')
+    
+    try:
+        # Handle MCP server
+        if args.command == "mcp-server":
+            logger.info("Starting MCP server...")
+            from ..mcp import main as mcp_main
+            return mcp_main()
+            
+        # Handle keys
+        elif args.command == "keys":
+            from ..core.keys.cli import run_keys_command
+            return run_keys_command(args)
+            
+        # Handle debug commands
+        elif args.command == "debug":
+            logger.warning("Debug commands not yet implemented.")
+            return 1
+            
+        # No command
+        elif not args.command:
+            parser.print_help()
+            return 0
+            
+        else:
+            logger.error(f"Unknown command: {args.command}")
+            return 1
+            
+    except AliceMultiverseError as e:
+        logger.error(f"Error: {e}")
+        return 1
+    except KeyboardInterrupt:
+        logger.info("\nInterrupted by user")
+        return 130
+    except Exception as e:
+        logger.error(f"Unexpected error: {e}", exc_info=args.debug)
+        return 1
+
+
+# TODO: Review unreachable code - def main_original(argv: list[str] | None = None) -> int:
 # TODO: Review unreachable code - """Simplified main entry point."""
 # TODO: Review unreachable code - parser = create_parser()
 # TODO: Review unreachable code - args = parser.parse_args(argv)

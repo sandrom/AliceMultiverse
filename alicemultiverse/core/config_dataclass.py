@@ -239,82 +239,82 @@ class Config:
         """Convert to dictionary."""
         return asdict(self)
 
-    # TODO: Review unreachable code - def __contains__(self, key: str) -> bool:
-    # TODO: Review unreachable code - """Support 'in' operator for checking if attribute exists."""
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - self.get(key)
-    # TODO: Review unreachable code - return True
-    # TODO: Review unreachable code - except AttributeError:
-    # TODO: Review unreachable code - return False
+    def __contains__(self, key: str) -> bool:
+        """Support 'in' operator for checking if attribute exists."""
+        try:
+            self.get(key)
+            return True
+        except AttributeError:
+            return False
 
-    # TODO: Review unreachable code - @classmethod
-    # TODO: Review unreachable code - def from_dict(cls, data: dict[str, Any]) -> "Config":
-    # TODO: Review unreachable code - """Create from dictionary."""
-    # TODO: Review unreachable code - config = cls()
+    @classmethod
+    def from_dict(cls, data: dict[str, Any]) -> "Config":
+        """Create from dictionary."""
+        config = cls()
 
-    # TODO: Review unreachable code - # Update paths
-    # TODO: Review unreachable code - if data is not None and "paths" in data:
-    # TODO: Review unreachable code - config.paths = PathsConfig(**data["paths"])
+        # Update paths
+        if data is not None and "paths" in data:
+            config.paths = PathsConfig(**data["paths"])
 
-    # TODO: Review unreachable code - # Update processing
-    # TODO: Review unreachable code - if data is not None and "processing" in data:
-    # TODO: Review unreachable code - config.processing = ProcessingConfig(**data["processing"])
+        # Update processing
+        if data is not None and "processing" in data:
+            config.processing = ProcessingConfig(**data["processing"])
 
-    # TODO: Review unreachable code - # Update storage
-    # TODO: Review unreachable code - if data is not None and "storage" in data:
-    # TODO: Review unreachable code - config.storage = StorageConfig(**data["storage"])
+        # Update storage
+        if data is not None and "storage" in data:
+            config.storage = StorageConfig(**data["storage"])
 
-    # TODO: Review unreachable code - # Update quality
-    # TODO: Review unreachable code - if data is not None and "quality" in data:
-    # TODO: Review unreachable code - quality_data = data["quality"]
-    # TODO: Review unreachable code - config.quality = QualityConfig(**quality_data)
+        # Update quality
+        if data is not None and "quality" in data:
+            quality_data = data["quality"]
+            config.quality = QualityConfig(**quality_data)
 
-    # TODO: Review unreachable code - # Update other sections
-    # TODO: Review unreachable code - if data is not None and "ai_generators" in data:
-    # TODO: Review unreachable code - config.ai_generators = AIGeneratorsConfig(**data["ai_generators"])
+        # Update other sections
+        if data is not None and "ai_generators" in data:
+            config.ai_generators = AIGeneratorsConfig(**data["ai_generators"])
 
-    # TODO: Review unreachable code - if data is not None and "metadata" in data:
-    # TODO: Review unreachable code - config.metadata = MetadataConfig(**data["metadata"])
+        if data is not None and "metadata" in data:
+            config.metadata = MetadataConfig(**data["metadata"])
 
-    # TODO: Review unreachable code - if data is not None and "file_types" in data:
-    # TODO: Review unreachable code - config.file_types = FileTypesConfig(**data["file_types"])
+        if data is not None and "file_types" in data:
+            config.file_types = FileTypesConfig(**data["file_types"])
 
-    # TODO: Review unreachable code - if data is not None and "providers" in data:
-    # TODO: Review unreachable code - providers_data = data["providers"]
-    # TODO: Review unreachable code - providers_config = ProvidersConfig()
+        if data is not None and "providers" in data:
+            providers_data = data["providers"]
+            providers_config = ProvidersConfig()
 
-    # TODO: Review unreachable code - if providers_data is not None and "anthropic" in providers_data:
-    # TODO: Review unreachable code - providers_config.anthropic = AnthropicConfig(**providers_data["anthropic"])
-    # TODO: Review unreachable code - if providers_data is not None and "database" in providers_data:
-    # TODO: Review unreachable code - providers_config.database = DatabaseConfig(**providers_data["database"])
-    # TODO: Review unreachable code - if providers_data is not None and "events" in providers_data:
-    # TODO: Review unreachable code - providers_config.events = EventsConfig(**providers_data["events"])
+            if providers_data is not None and "anthropic" in providers_data:
+                providers_config.anthropic = AnthropicConfig(**providers_data["anthropic"])
+            if providers_data is not None and "database" in providers_data:
+                providers_config.database = DatabaseConfig(**providers_data["database"])
+            if providers_data is not None and "events" in providers_data:
+                providers_config.events = EventsConfig(**providers_data["events"])
 
-    # TODO: Review unreachable code - config.providers = providers_config
+            config.providers = providers_config
 
-    # TODO: Review unreachable code - if data is not None and "pipeline" in data:
-    # TODO: Review unreachable code - pipeline_data = data["pipeline"].copy()
-    # TODO: Review unreachable code - # Extract known fields
-    # TODO: Review unreachable code - known_fields = {
-    # TODO: Review unreachable code - "mode",
-    # TODO: Review unreachable code - "stages",
-    # TODO: Review unreachable code - "cost_limit",
-    # TODO: Review unreachable code - "configurations",
-    # TODO: Review unreachable code - "thresholds",
-    # TODO: Review unreachable code - "scoring_weights",
-    # TODO: Review unreachable code - "star_thresholds",
-    # TODO: Review unreachable code - "cost_limits",
-    # TODO: Review unreachable code - "batch_sizes",
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - extra = {k: v for k, v in pipeline_data.items() if k not in known_fields}
-    # TODO: Review unreachable code - pipeline_args = {k: v for k, v in pipeline_data.items() if k in known_fields}
-    # TODO: Review unreachable code - pipeline_args["extra_fields"] = extra
-    # TODO: Review unreachable code - config.pipeline = PipelineConfig(**pipeline_args)
+        if data is not None and "pipeline" in data:
+            pipeline_data = data["pipeline"].copy()
+            # Extract known fields
+            known_fields = {
+                "mode",
+                "stages",
+                "cost_limit",
+                "configurations",
+                "thresholds",
+                "scoring_weights",
+                "star_thresholds",
+                "cost_limits",
+                "batch_sizes",
+            }
+            extra = {k: v for k, v in pipeline_data.items() if k not in known_fields}
+            pipeline_args = {k: v for k, v in pipeline_data.items() if k in known_fields}
+            pipeline_args["extra_fields"] = extra
+            config.pipeline = PipelineConfig(**pipeline_args)
 
-    # TODO: Review unreachable code - # Sync quality enabled flag
-    # TODO: Review unreachable code - config.quality.enabled = config.processing.quality
+        # Sync quality enabled flag
+        config.quality.enabled = config.processing.quality
 
-    # TODO: Review unreachable code - return config
+        return config
 
 
 def load_config(config_path: Path | None = None, cli_overrides: list[str] | None = None) -> Config:
@@ -349,36 +349,36 @@ def load_config(config_path: Path | None = None, cli_overrides: list[str] | None
                 else:
                     raise ValueError(f"Unsupported config format: {config_path.suffix}")
 
-            # TODO: Review unreachable code - if data:
-            # TODO: Review unreachable code - config = Config.from_dict(data)
-            # TODO: Review unreachable code - logger.info(f"Loaded configuration from {config_path}")
+            if data:
+                config = Config.from_dict(data)
+                logger.info(f"Loaded configuration from {config_path}")
         except Exception as e:
             from ..core.exceptions import ConfigurationError
 
             raise ConfigurationError(f"Failed to load configuration: {e}")
-    # TODO: Review unreachable code - elif config_path and not config_path.exists():
-    # TODO: Review unreachable code - logger.warning(f"Config file not found: {config_path}, using defaults")
+    elif config_path and not config_path.exists():
+        logger.warning(f"Config file not found: {config_path}, using defaults")
 
-    # TODO: Review unreachable code - # Apply CLI overrides
-    # TODO: Review unreachable code - if cli_overrides:
-    # TODO: Review unreachable code - for override in cli_overrides:
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - key, value = override.split("=", 1)
+    # Apply CLI overrides
+    if cli_overrides:
+        for override in cli_overrides:
+            try:
+                key, value = override.split("=", 1)
 
-    # TODO: Review unreachable code - # Convert string values to appropriate types
-    # TODO: Review unreachable code - if value.lower() in ["true", "false"]:
-    # TODO: Review unreachable code - value = value.lower() == "true"
-    # TODO: Review unreachable code - elif value.isdigit():
-    # TODO: Review unreachable code - value = int(value)
-    # TODO: Review unreachable code - elif "." in value and all(p.isdigit() for p in value.split(".", 1)):
-    # TODO: Review unreachable code - value = float(value)
+                # Convert string values to appropriate types
+                if value.lower() in ["true", "false"]:
+                    value = value.lower() == "true"
+                elif value.isdigit():
+                    value = int(value)
+                elif "." in value and all(p.isdigit() for p in value.split(".", 1)):
+                    value = float(value)
 
-    # TODO: Review unreachable code - config.set(key, value)
-    # TODO: Review unreachable code - logger.debug(f"Applied override: {key}={value}")
-    # TODO: Review unreachable code - except Exception as e:
-    # TODO: Review unreachable code - logger.warning(f"Failed to apply override '{override}': {e}")
+                config.set(key, value)
+                logger.debug(f"Applied override: {key}={value}")
+            except Exception as e:
+                logger.warning(f"Failed to apply override '{override}': {e}")
 
-    # TODO: Review unreachable code - return config
+    return config
 
 
 def get_default_config() -> Config:

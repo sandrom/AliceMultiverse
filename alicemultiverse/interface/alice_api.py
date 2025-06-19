@@ -13,6 +13,17 @@ from .alice_orchestrator import AliceOrchestrator
 logger = get_logger(__name__)
 
 
+# Stub implementations for backwards compatibility
+async def ask_alice(message: str, project: str | None = None) -> dict[str, Any]:
+    """Ask Alice a question - stub implementation."""
+    return {"response": "Alice is not yet implemented", "status": "stub"}
+
+
+def ask_alice_sync(message: str, project: str | None = None) -> dict[str, Any]:
+    """Ask Alice a question synchronously - stub implementation."""
+    return {"response": "Alice is not yet implemented", "status": "stub"}
+
+
 class AliceAPI:
     """Simple API for AI assistants to interact with Alice.
 

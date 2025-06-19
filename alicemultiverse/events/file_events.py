@@ -66,7 +66,7 @@ class FileBasedEventSystem:
             logger.debug(f"Published event {event_type} with ID {event_id}")
 
             # Call local listeners (for same-process subscriptions)
-            self._notify_listeners(event_type, event)
+            # self._notify_listeners(event_type, event)  # Method is commented out
 
         except Exception as e:
             # Log error but don't crash - graceful degradation
@@ -297,3 +297,21 @@ def get_event_system() -> FileBasedEventSystem:
 # TODO: Review unreachable code - def subscribe_to_events(event_types: list[str], callback: Callable) -> None:
 # TODO: Review unreachable code - """Subscribe to events."""
 # TODO: Review unreachable code - get_event_system().subscribe(event_types, callback)
+
+
+# Stub implementations for backwards compatibility
+async def publish_event(event_type: str, data: dict[str, Any]) -> str:
+    """Publish event asynchronously - stub."""
+    return get_event_system().publish_sync(event_type, data)
+
+
+def publish_event_sync(event_type: str, data: dict[str, Any]) -> str:
+    """Publish event synchronously - stub."""
+    return get_event_system().publish_sync(event_type, data)
+
+
+def subscribe_to_events(event_types: list[str], callback: Callable) -> None:
+    """Subscribe to events - stub."""
+    # For now, just log that we would subscribe
+    logger.debug(f"Would subscribe to events: {event_types}")
+

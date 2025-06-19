@@ -26,6 +26,22 @@ def get_correlation_id() -> str:
     return correlation_id
 
 
+def get_logger(name: str) -> logging.Logger:
+    """Get a logger instance. Stub that redirects to standard logging."""
+    from .logging import get_logger as _get_logger
+    return _get_logger(name)
+
+
+def trace_operation(operation_name: str) -> Any:
+    """Trace operation decorator - stub implementation."""
+    def decorator(func: Any) -> Any:
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Any:
+            return func(*args, **kwargs)
+        return wrapper
+    return decorator
+
+
 # TODO: Review unreachable code - def set_correlation_id(correlation_id: str) -> None:
 # TODO: Review unreachable code - """Set correlation ID for current context."""
 # TODO: Review unreachable code - correlation_id_var.set(correlation_id)

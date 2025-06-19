@@ -1,6 +1,7 @@
 """Alice Interface - The primary interface for AI assistants."""
 
-from .alice_api import AliceAPI, AliceMCP, ask_alice, ask_alice_sync
+from .alice_api import AliceAPI, ask_alice, ask_alice_sync
+# AliceMCP is commented out in alice_api.py
 from .alice_interface import AliceInterface
 from .alice_orchestrator import AliceOrchestrator, CreativeIntent, CreativeResponse
 from .alice_structured import AliceStructuredInterface
