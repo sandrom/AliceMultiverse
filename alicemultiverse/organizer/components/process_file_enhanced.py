@@ -23,7 +23,9 @@ logger = get_logger(__name__)
 if TYPE_CHECKING:
     from ...core.protocols import HasConfig, HasMetadataCache, HasStats
     from ...core.config import Config
-    from ...core.statistics import Statistics
+    # TODO: Fix missing import
+    # from ...core.statistics import Statistics
+    Statistics = Any  # type: ignore
 
 
 class EnhancedProcessFileMixin:

@@ -8,7 +8,9 @@ import tempfile
 from pathlib import Path
 from typing import Any
 
-from alicemultiverse.transitions import TransitionMatcher
+# TODO: Fix import - transitions is in workflows
+# from alicemultiverse.transitions import TransitionMatcher
+from ..transitions.transition_matcher import TransitionMatcher
 from alicemultiverse.workflows.base import WorkflowContext, WorkflowStep, WorkflowTemplate
 from alicemultiverse.workflows.music_analyzer import MusicAnalyzer
 from alicemultiverse.workflows.transitions.models import TransitionType

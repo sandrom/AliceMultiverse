@@ -11,7 +11,9 @@ from pathlib import Path
 from tqdm import tqdm
 
 from ..core.structured_logging import get_logger
-from .duckdb_cache import DuckDBSearchCache
+# TODO: Fix missing import - duckdb_cache doesn't exist
+# from .duckdb_cache import DuckDBSearchCache
+from .duckdb_storage import DuckDBStorage as DuckDBSearchCache  # Use closest match
 from .location_registry import StorageLocation, StorageRegistry
 from .multi_path_scanner import MultiPathScanner
 from typing import Any

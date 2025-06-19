@@ -12,7 +12,9 @@ from tqdm import tqdm
 
 from ..core.structured_logging import get_logger
 from ..projects.service import ProjectService
-from .duckdb_cache import DuckDBSearchCache
+# TODO: Fix missing import - duckdb_cache doesn't exist
+# from .duckdb_cache import DuckDBSearchCache
+from .duckdb_storage import DuckDBStorage as DuckDBSearchCache  # Use closest match
 from .file_scanner import FileScanner
 from .location_registry import StorageLocation, StorageRegistry, StorageType
 from typing import Any

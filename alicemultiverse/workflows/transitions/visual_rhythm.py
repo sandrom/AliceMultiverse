@@ -15,7 +15,7 @@ from typing import Any
 
 import cv2  # type: ignore
 import numpy as np
-from scipy import signal
+from scipy import signal  # type: ignore[import-untyped]
 
 logger = logging.getLogger(__name__)
 

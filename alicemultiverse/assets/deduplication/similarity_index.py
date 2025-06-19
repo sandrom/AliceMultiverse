@@ -6,9 +6,9 @@ import pickle
 from dataclasses import dataclass
 from pathlib import Path
 
-import faiss
+import faiss  # type: ignore[import-untyped]
 import numpy as np
-from sklearn.preprocessing import normalize
+from sklearn.preprocessing import normalize  # type: ignore[import-untyped]
 
 from .perceptual_hasher import PerceptualHasher
 

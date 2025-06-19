@@ -32,8 +32,8 @@ class S3Scanner:
         """Get or create S3 client."""
         if self._client is None:
             try:
-                import boto3
-                from botocore.exceptions import NoCredentialsError
+                import boto3  # type: ignore[import-not-found]
+                from botocore.exceptions import NoCredentialsError  # type: ignore[import-not-found]
 
                 # Get credentials from location config or environment
                 config = self.location.config
@@ -201,8 +201,8 @@ class GCSScanner:
         """Get or create GCS client."""
         if self._client is None:
             try:
-                from google.auth.exceptions import DefaultCredentialsError
-                from google.cloud import storage
+                from google.auth.exceptions import DefaultCredentialsError  # type: ignore[import-not-found]
+                from google.cloud import storage  # type: ignore[import-not-found]
 
                 # Get credentials from location config or environment
                 config = self.location.config

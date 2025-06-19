@@ -13,7 +13,7 @@ from typing import Any
 import cv2  # type: ignore
 import numpy as np
 from PIL import Image
-from sklearn.cluster import KMeans
+from sklearn.cluster import KMeans  # type: ignore[import-untyped]
 
 
 @dataclass

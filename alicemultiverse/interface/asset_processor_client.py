@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 import aiohttp
-from alice_config import get_config
+from alice_config import get_config  # type: ignore[import-untyped]
 
 logger = logging.getLogger(__name__)
 

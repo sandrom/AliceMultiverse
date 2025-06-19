@@ -19,7 +19,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
-import piexif
+import piexif  # type: ignore[import-untyped]
 from PIL import Image
 from PIL.PngImagePlugin import PngInfo
 
@@ -27,7 +27,7 @@ from PIL.PngImagePlugin import PngInfo
 # Note: WebP is handled through Pillow's built-in support
 
 try:
-    from pillow_heif import register_heif_opener
+    from pillow_heif import register_heif_opener  # type: ignore[import-untyped]
 
     register_heif_opener()
     HEIF_AVAILABLE = True
