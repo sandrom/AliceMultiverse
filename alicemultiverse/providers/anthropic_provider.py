@@ -26,6 +26,33 @@ class AnthropicProvider(BaseProvider):
 
     BASE_URL = "https://api.anthropic.com/v1"
 
+    @property
+    def name(self) -> str:
+        """Provider name."""
+        return "anthropic"
+
+    @property
+    def capabilities(self) -> ProviderCapabilities:
+        """Provider capabilities."""
+        return ProviderCapabilities(
+            generation_types=[
+                GenerationType.TEXT,
+                GenerationType.IMAGE,  # For vision/analysis
+            ],
+            max_file_size=100 * 1024 * 1024,  # 100MB
+            supported_formats=[".jpg", ".jpeg", ".png", ".gif", ".webp"],
+            features=[
+                "vision",
+                "text_generation",
+                "streaming",
+                "function_calling",
+            ],
+            rate_limits={
+                "requests_per_minute": 50,
+                "tokens_per_minute": 100000,
+            },
+        )
+
     # Load model configurations from settings
     MODELS = {
         model_name: {
@@ -52,7 +79,7 @@ class AnthropicProvider(BaseProvider):
             event_bus: Deprecated parameter, kept for compatibility
             **kwargs: Additional arguments for BaseProvider
         """
-        super().__init__("anthropic", api_key, **kwargs)
+        super().__init__(api_key, **kwargs)
 
 
     @property
@@ -106,187 +133,187 @@ class AnthropicProvider(BaseProvider):
         self._last_check = datetime.now()
         return self._status
 
-    # TODO: Review unreachable code - async def _generate(self, request: GenerationRequest) -> GenerationResult:
-    # TODO: Review unreachable code - """Perform the actual generation using Anthropic Claude.
+    async def _generate(self, request: GenerationRequest) -> GenerationResult:
+        """Perform the actual generation using Anthropic Claude.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - request: Generation request
+        Args:
+            request: Generation request
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - Generation result
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - # Determine model
-    # TODO: Review unreachable code - model = request.model or self.get_default_model(request.generation_type)
+        Returns:
+            Generation result
+        """
+        # Determine model
+        model = request.model or self.get_default_model(request.generation_type)
 
-    # TODO: Review unreachable code - # Only TEXT generation is supported
-    # TODO: Review unreachable code - if request.generation_type != GenerationType.TEXT:
-    # TODO: Review unreachable code - raise GenerationError(f"Anthropic only supports TEXT generation, not {request.generation_type}")
+        # Only TEXT generation is supported
+        if request.generation_type != GenerationType.TEXT:
+            raise GenerationError(f"Anthropic only supports TEXT generation, not {request.generation_type}")
 
-    # TODO: Review unreachable code - # Analyze image or generate text
-    # TODO: Review unreachable code - if request.reference_assets and len(request.reference_assets) > 0:
-    # TODO: Review unreachable code - result = await self._analyze_image(request, model)
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - result = await self._generate_text(request, model)
+        # Analyze image or generate text
+        if request.reference_assets and len(request.reference_assets) > 0:
+            result = await self._analyze_image(request, model)
+        else:
+            result = await self._generate_text(request, model)
 
-    # TODO: Review unreachable code - return result
+        return result
 
-    # TODO: Review unreachable code - async def _analyze_image(self, request: GenerationRequest, model: str) -> GenerationResult:
-    # TODO: Review unreachable code - """Analyze image using Claude vision."""
-    # TODO: Review unreachable code - if not request.reference_assets:
-    # TODO: Review unreachable code - raise GenerationError("Image analysis requires reference_assets")
+    async def _analyze_image(self, request: GenerationRequest, model: str) -> GenerationResult:
+        """Analyze image using Claude vision."""
+        if not request.reference_assets:
+            raise GenerationError("Image analysis requires reference_assets")
 
-    # TODO: Review unreachable code - # Build vision request
-    # TODO: Review unreachable code - content = [{"type": "text", "text": request.prompt}]
+        # Build vision request
+        content = [{"type": "text", "text": request.prompt}]
 
-    # TODO: Review unreachable code - # Add images
-    # TODO: Review unreachable code - for asset_path in request.reference_assets:
-    # TODO: Review unreachable code - image_data = await self._encode_image(asset_path)
-    # TODO: Review unreachable code - content.append({
-    # TODO: Review unreachable code - "type": "image",
-    # TODO: Review unreachable code - "source": {
-    # TODO: Review unreachable code - "type": "base64",
-    # TODO: Review unreachable code - "media_type": self._get_media_type(asset_path),
-    # TODO: Review unreachable code - "data": image_data,
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - })
+        # Add images
+        for asset_path in request.reference_assets:
+            image_data = await self._encode_image(asset_path)
+            content.append({
+                "type": "image",
+                "source": {
+                    "type": "base64",
+                    "media_type": self._get_media_type(asset_path),
+                    "data": image_data,
+                }
+            })
 
-    # TODO: Review unreachable code - messages = [{"role": "user", "content": content}]
+        messages = [{"role": "user", "content": content}]
 
-    # TODO: Review unreachable code - params = {
-    # TODO: Review unreachable code - "model": model,
-    # TODO: Review unreachable code - "messages": messages,
-    # TODO: Review unreachable code - "max_tokens": request.parameters.get("max_tokens", 1024) if request.parameters else 1024,
-    # TODO: Review unreachable code - }
+        params = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": request.parameters.get("max_tokens", 1024) if request.parameters else 1024,
+        }
 
-    # TODO: Review unreachable code - # Add temperature if specified
-    # TODO: Review unreachable code - if request.parameters and "temperature" in request.parameters:
-    # TODO: Review unreachable code - params["temperature"] = request.parameters["temperature"]
+        # Add temperature if specified
+        if request.parameters and "temperature" in request.parameters:
+            params["temperature"] = request.parameters["temperature"]
 
-    # TODO: Review unreachable code - # Call API
-    # TODO: Review unreachable code - session = await self._get_session()
+        # Call API
+        session = await self._ensure_session()
 
-    # TODO: Review unreachable code - async with session.post(f"{self.BASE_URL}/messages", json=params) as response:
-    # TODO: Review unreachable code - await self._handle_response_errors(response, "Image analysis")
+        async with session.post(f"{self.BASE_URL}/messages", json=params) as response:
+            await self._handle_response_errors(response, "Image analysis")
 
-    # TODO: Review unreachable code - data = await response.json()
+            data = await response.json()
 
-    # TODO: Review unreachable code - # Extract response
-    # TODO: Review unreachable code - analysis = data["content"][0]["text"]
-    # TODO: Review unreachable code - input_tokens = data["usage"]["input_tokens"]
-    # TODO: Review unreachable code - output_tokens = data["usage"]["output_tokens"]
-    # TODO: Review unreachable code - total_tokens = input_tokens + output_tokens
+        # Extract response
+        analysis = data["content"][0]["text"]
+        input_tokens = data["usage"]["input_tokens"]
+        output_tokens = data["usage"]["output_tokens"]
+        total_tokens = input_tokens + output_tokens
 
-    # TODO: Review unreachable code - # Calculate cost
-    # TODO: Review unreachable code - pricing = self.PRICING[model]
-    # TODO: Review unreachable code - input_cost = (input_tokens / 1_000_000) * pricing["input"]
-    # TODO: Review unreachable code - output_cost = (output_tokens / 1_000_000) * pricing["output"]
-    # TODO: Review unreachable code - total_cost = input_cost + output_cost
+        # Calculate cost
+        pricing = self.PRICING[model]
+        input_cost = (input_tokens / 1_000_000) * pricing["input"]
+        output_cost = (output_tokens / 1_000_000) * pricing["output"]
+        total_cost = input_cost + output_cost
 
-    # TODO: Review unreachable code - # Save analysis if output path specified
-    # TODO: Review unreachable code - file_path = None
-    # TODO: Review unreachable code - if request.output_path:
-    # TODO: Review unreachable code - file_path = request.output_path
-    # TODO: Review unreachable code - await save_text_file(file_path, analysis)
+        # Save analysis if output path specified
+        file_path = None
+        if request.output_path:
+            file_path = request.output_path
+            await save_text_file(file_path, analysis)
 
-    # TODO: Review unreachable code - return GenerationResult(
-    # TODO: Review unreachable code - success=True,
-    # TODO: Review unreachable code - file_path=file_path,
-    # TODO: Review unreachable code - cost=total_cost,
-    # TODO: Review unreachable code - provider=self.name,
-    # TODO: Review unreachable code - model=model,
-    # TODO: Review unreachable code - metadata={
-    # TODO: Review unreachable code - "analysis": analysis,
-    # TODO: Review unreachable code - "input_tokens": input_tokens,
-    # TODO: Review unreachable code - "output_tokens": output_tokens,
-    # TODO: Review unreachable code - "total_tokens": total_tokens,
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - )
+        return GenerationResult(
+            success=True,
+            file_path=file_path,
+            cost=total_cost,
+            provider=self.name,
+            model=model,
+            metadata={
+                "analysis": analysis,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "total_tokens": total_tokens,
+                "prompt": request.prompt,
+            }
+        )
 
-    # TODO: Review unreachable code - async def _generate_text(self, request: GenerationRequest, model: str) -> GenerationResult:
-    # TODO: Review unreachable code - """Generate text using Claude."""
-    # TODO: Review unreachable code - messages = [{"role": "user", "content": request.prompt}]
+    async def _generate_text(self, request: GenerationRequest, model: str) -> GenerationResult:
+        """Generate text using Claude."""
+        messages = [{"role": "user", "content": request.prompt}]
 
-    # TODO: Review unreachable code - params = {
-    # TODO: Review unreachable code - "model": model,
-    # TODO: Review unreachable code - "messages": messages,
-    # TODO: Review unreachable code - "max_tokens": request.parameters.get("max_tokens", 1024) if request.parameters else 1024,
-    # TODO: Review unreachable code - }
+        params = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": request.parameters.get("max_tokens", 1024) if request.parameters else 1024,
+        }
 
-    # TODO: Review unreachable code - # Add optional parameters
-    # TODO: Review unreachable code - if request.parameters:
-    # TODO: Review unreachable code - if "temperature" in request.parameters:
-    # TODO: Review unreachable code - params["temperature"] = request.parameters["temperature"]
-    # TODO: Review unreachable code - if "system" in request.parameters:
-    # TODO: Review unreachable code - params["system"] = request.parameters["system"]
+        # Add optional parameters
+        if request.parameters:
+            if "temperature" in request.parameters:
+                params["temperature"] = request.parameters["temperature"]
+            if "system" in request.parameters:
+                params["system"] = request.parameters["system"]
 
-    # TODO: Review unreachable code - # Call API
-    # TODO: Review unreachable code - session = await self._get_session()
+        # Call API
+        session = await self._ensure_session()
 
-    # TODO: Review unreachable code - async with session.post(f"{self.BASE_URL}/messages", json=params) as response:
-    # TODO: Review unreachable code - await self._handle_response_errors(response, "Image analysis")
+        async with session.post(f"{self.BASE_URL}/messages", json=params) as response:
+            await self._handle_response_errors(response, "Image analysis")
 
-    # TODO: Review unreachable code - data = await response.json()
+            data = await response.json()
 
-    # TODO: Review unreachable code - # Extract response
-    # TODO: Review unreachable code - text = data["content"][0]["text"]
-    # TODO: Review unreachable code - input_tokens = data["usage"]["input_tokens"]
-    # TODO: Review unreachable code - output_tokens = data["usage"]["output_tokens"]
+        # Extract response
+        text = data["content"][0]["text"]
+        input_tokens = data["usage"]["input_tokens"]
+        output_tokens = data["usage"]["output_tokens"]
 
-    # TODO: Review unreachable code - # Calculate cost
-    # TODO: Review unreachable code - pricing = self.PRICING[model]
-    # TODO: Review unreachable code - input_cost = (input_tokens / 1_000_000) * pricing["input"]
-    # TODO: Review unreachable code - output_cost = (output_tokens / 1_000_000) * pricing["output"]
-    # TODO: Review unreachable code - total_cost = input_cost + output_cost
+        # Calculate cost
+        pricing = self.PRICING[model]
+        input_cost = (input_tokens / 1_000_000) * pricing["input"]
+        output_cost = (output_tokens / 1_000_000) * pricing["output"]
+        total_cost = input_cost + output_cost
 
-    # TODO: Review unreachable code - # Save text if output path specified
-    # TODO: Review unreachable code - file_path = None
-    # TODO: Review unreachable code - if request.output_path:
-    # TODO: Review unreachable code - file_path = request.output_path
-    # TODO: Review unreachable code - await save_text_file(file_path, text)
+        # Save text if output path specified
+        file_path = None
+        if request.output_path:
+            file_path = request.output_path
+            await save_text_file(file_path, text)
 
-    # TODO: Review unreachable code - return GenerationResult(
-    # TODO: Review unreachable code - success=True,
-    # TODO: Review unreachable code - file_path=file_path,
-    # TODO: Review unreachable code - cost=total_cost,
-    # TODO: Review unreachable code - provider=self.name,
-    # TODO: Review unreachable code - model=model,
-    # TODO: Review unreachable code - metadata={
-    # TODO: Review unreachable code - "text": text,
-    # TODO: Review unreachable code - "input_tokens": input_tokens,
-    # TODO: Review unreachable code - "output_tokens": output_tokens,
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - )
+        return GenerationResult(
+            success=True,
+            file_path=file_path,
+            cost=total_cost,
+            provider=self.name,
+            model=model,
+            metadata={
+                "text": text,
+                "input_tokens": input_tokens,
+                "output_tokens": output_tokens,
+                "prompt": request.prompt,
+            }
+        )
 
-    # TODO: Review unreachable code - async def _encode_image(self, image_path: str) -> str:
-    # TODO: Review unreachable code - """Encode image to base64."""
-    # TODO: Review unreachable code - path = Path(image_path)
-    # TODO: Review unreachable code - with open(path, "rb") as f:
-    # TODO: Review unreachable code - return base64.b64encode(f.read()).decode("utf-8")
+    async def _encode_image(self, image_path: str) -> str:
+        """Encode image to base64."""
+        path = Path(image_path)
+        with open(path, "rb") as f:
+            return base64.b64encode(f.read()).decode("utf-8")
 
-    # TODO: Review unreachable code - def _get_media_type(self, image_path: str) -> str:
-    # TODO: Review unreachable code - """Get media type from file extension."""
-    # TODO: Review unreachable code - ext = Path(image_path).suffix.lower()
-    # TODO: Review unreachable code - media_types = {
-    # TODO: Review unreachable code - ".jpg": "image/jpeg",
-    # TODO: Review unreachable code - ".jpeg": "image/jpeg",
-    # TODO: Review unreachable code - ".png": "image/png",
-    # TODO: Review unreachable code - ".gif": "image/gif",
-    # TODO: Review unreachable code - ".webp": "image/webp",
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - return media_types.get(ext, "image/jpeg") or 0
+    def _get_media_type(self, image_path: str) -> str:
+        """Get media type from file extension."""
+        ext = Path(image_path).suffix.lower()
+        media_types = {
+            ".jpg": "image/jpeg",
+            ".jpeg": "image/jpeg",
+            ".png": "image/png",
+            ".gif": "image/gif",
+            ".webp": "image/webp",
+        }
+        return media_types.get(ext, "image/jpeg")
 
-    # TODO: Review unreachable code - def get_default_model(self, generation_type: GenerationType) -> str:
-    # TODO: Review unreachable code - """Get default model for generation type."""
-    # TODO: Review unreachable code - if generation_type == GenerationType.TEXT:
-    # TODO: Review unreachable code - return settings.providers.anthropic.default_model
-    # TODO: Review unreachable code - return None
+    def get_default_model(self, generation_type: GenerationType) -> str:
+        """Get default model for generation type."""
+        if generation_type == GenerationType.TEXT:
+            return settings.providers.anthropic.default_model
+        return None
 
-    # TODO: Review unreachable code - def get_models_for_type(self, generation_type: GenerationType) -> list[str]:
-    # TODO: Review unreachable code - """Get available models for a generation type."""
-    # TODO: Review unreachable code - return [
-    # TODO: Review unreachable code - model for model, config in self.MODELS.items()
-    # TODO: Review unreachable code - if config is not None and config["type"] == generation_type
-    # TODO: Review unreachable code - ]
+    def get_models_for_type(self, generation_type: GenerationType) -> list[str]:
+        """Get available models for a generation type."""
+        return [
+            model for model, config in self.MODELS.items()
+            if config is not None and config["type"] == generation_type
+        ]
 

@@ -171,7 +171,7 @@ async def test_get_recent_events_with_filter(event_system):
     event_system.publish_sync("asset.processed", {"name": "image2.jpg"})
 
     # Get only asset events
-    events = await event_system.get_recent_events(event_type="asset.created")
+    events = await event_system.get_recent_events(event_types=["asset.created"])
 
     assert len(events) == 1
     assert events[0]["type"] == "asset.created"

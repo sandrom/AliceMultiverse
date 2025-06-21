@@ -122,91 +122,91 @@ class Provider(ABC):
 
         start_time = time.time()
 
-        # TODO: Review unreachable code - try:
+        try:
             # Validate request
-        await self.validate_request(request)
+            await self.validate_request(request)
 
             # Publish start event
-        self._publish_started(request)
+            self._publish_started(request)
 
             # Perform generation with retry logic
-        logger.info(
-            "Starting generation",
-            provider=self.name,
-            model=request.model or "default",
-            generation_type=request.generation_type.value,
-            budget_limit=request.budget_limit
-        )
-        result = await self._retry_async(self._generate, request)
+            logger.info(
+                "Starting generation",
+                provider=self.name,
+                model=request.model or "default",
+                generation_type=request.generation_type.value,
+                budget_limit=request.budget_limit
+            )
+            result = await self._retry_async(self._generate, request)
 
             # Track metrics
-        result.generation_time = time.time() - start_time
-        self._total_cost += result.cost or 0.0
-        self._generation_count += 1
+            result.generation_time = time.time() - start_time
+            self._total_cost += result.cost or 0.0
+            self._generation_count += 1
 
 
 
             # Update metrics
-        api_requests_total.labels(
-            provider=self.name,
-            model=result.model or request.model or "default",
-            operation=request.generation_type.value,
-            status="success"
-        ).inc()
-
-        api_request_duration_seconds.labels(
-            provider=self.name,
-            model=result.model or request.model or "default",
-            operation=request.generation_type.value
-        ).observe(result.generation_time)
-
-        if result.cost:
-            api_request_cost_dollars.labels(
+            api_requests_total.labels(
                 provider=self.name,
-                model=result.model or request.model or "default"
-            ).observe(result.cost)
+                model=result.model or request.model or "default",
+                operation=request.generation_type.value,
+                status="success"
+            ).inc()
+
+            api_request_duration_seconds.labels(
+                provider=self.name,
+                model=result.model or request.model or "default",
+                operation=request.generation_type.value
+            ).observe(result.generation_time)
+
+            if result.cost:
+                api_request_cost_dollars.labels(
+                    provider=self.name,
+                    model=result.model or request.model or "default"
+                ).observe(result.cost)
 
             # Log success
-        logger.info(
-            "Generation completed",
-            provider=self.name,
-            model=result.model or request.model or "default",
-            generation_time=result.generation_time,
-            cost=result.cost,
-            success=True
-        )
+            logger.info(
+                "Generation completed",
+                provider=self.name,
+                model=result.model or request.model or "default",
+                generation_time=result.generation_time,
+                cost=result.cost,
+                success=True
+            )
 
             # Publish success event
-        self._publish_success(request, result)
+            self._publish_success(request, result)
 
-        return result
+            return result
 
-        # TODO: Review unreachable code - except Exception as e:
-        # TODO: Review unreachable code - # Record failure with health monitor
-        # TODO: Review unreachable code - # health_monitor.record_failure(self.name)
+        except Exception as e:
+            # Record failure with health monitor
+            # health_monitor.record_failure(self.name)
 
-        # TODO: Review unreachable code - # Update metrics
-        # TODO: Review unreachable code - api_requests_total.labels(
-        # TODO: Review unreachable code - provider=self.name,
-        # TODO: Review unreachable code - model=request.model or "default",
-        # TODO: Review unreachable code - operation=request.generation_type.value,
-        # TODO: Review unreachable code - status="error"
-        # TODO: Review unreachable code - ).inc()
+            # Update metrics
+            api_requests_total.labels(
+                provider=self.name,
+                model=request.model or "default",
+                operation=request.generation_type.value,
+                status="error"
+            ).inc()
 
-        # TODO: Review unreachable code - # Log failure
-        # TODO: Review unreachable code - logger.error(
-        # TODO: Review unreachable code - "Generation failed",
-        # TODO: Review unreachable code - provider=self.name,
-        # TODO: Review unreachable code - model=request.model or "default",
-        # TODO: Review unreachable code - generation_type=request.generation_type.value,
-        # TODO: Review unreachable code - error_type=type(e).__name__,
-        # TODO: Review unreachable code - error_message=str(e),
-        # TODO: Review unreachable code - exc_info=True
-        # TODO: Review unreachable code - )
+            # Log failure
+            logger.error(
+                "Generation failed",
+                provider=self.name,
+                model=request.model or "default",
+                generation_type=request.generation_type.value,
+                error_type=type(e).__name__,
+                error_message=str(e),
+                exc_info=True
+            )
 
-        # TODO: Review unreachable code - # Publish failure event
-        # TODO: Review unreachable code - self._publish_failure(request, str(e))
-        # TODO: Review unreachable code - raise
+            # Publish failure event
+            self._publish_failure(request, str(e))
+            raise
 
     @abstractmethod
     async def _generate(self, request: GenerationRequest) -> GenerationResult:
@@ -372,214 +372,215 @@ class Provider(ABC):
         # Subclasses should override this for smarter defaults
         return self.capabilities.models[0] if self.capabilities.models else "default"
 
-    # TODO: Review unreachable code - def get_models_for_type(self, generation_type: GenerationType) -> list[str]:
-    # TODO: Review unreachable code - """Get available models for a generation type.
+    def get_models_for_type(self, generation_type: GenerationType) -> list[str]:
+        """Get available models for a generation type.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - generation_type: Type of generation
+        Args:
+            generation_type: Type of generation
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - List of model names
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - # Base implementation returns all models
-    # TODO: Review unreachable code - # Subclasses can override for type-specific filtering
-    # TODO: Review unreachable code - return self.capabilities.models
+        Returns:
+            List of model names
+        """
+        # Base implementation returns all models
+        # Subclasses can override for type-specific filtering
+        return self.capabilities.models
 
-    # TODO: Review unreachable code - @property
-    # TODO: Review unreachable code - def total_cost(self) -> float:
-    # TODO: Review unreachable code - """Total cost of all generations."""
-    # TODO: Review unreachable code - return self._total_cost
+    @property
+    def total_cost(self) -> float:
+        """Total cost of all generations."""
+        return self._total_cost
 
-    # TODO: Review unreachable code - @property
-    # TODO: Review unreachable code - def generation_count(self) -> int:
-    # TODO: Review unreachable code - """Total number of generations."""
-    # TODO: Review unreachable code - return self._generation_count
+    @property
+    def generation_count(self) -> int:
+        """Total number of generations."""
+        return self._generation_count
 
-    # TODO: Review unreachable code - # Event publishing methods
+    # Event publishing methods
 
-    # TODO: Review unreachable code - def _publish_started(self, request: GenerationRequest):
-    # TODO: Review unreachable code - """Publish generation started event."""
-    # TODO: Review unreachable code - publish_event_sync(
-    # TODO: Review unreachable code - "generation.started",
-    # TODO: Review unreachable code - {
-    # TODO: Review unreachable code - "source": f"provider:{self.name}",
-    # TODO: Review unreachable code - "generation_type": request.generation_type.value,
-    # TODO: Review unreachable code - "provider": self.name,
-    # TODO: Review unreachable code - "model": request.model or "default",
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - "parameters": request.parameters or {},
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - )
+    def _publish_started(self, request: GenerationRequest):
+        """Publish generation started event."""
+        publish_event_sync(
+            "generation.started",
+            {
+                "source": f"provider:{self.name}",
+                "generation_type": request.generation_type.value,
+                "provider": self.name,
+                "model": request.model or "default",
+                "prompt": request.prompt,
+                "parameters": request.parameters or {},
+            }
+        )
 
-    # TODO: Review unreachable code - def _publish_success(self, request: GenerationRequest, result: GenerationResult):
-    # TODO: Review unreachable code - """Publish success event."""
-    # TODO: Review unreachable code - if result.file_path:
-    # TODO: Review unreachable code - publish_event_sync(
-    # TODO: Review unreachable code - "asset.generated",
-    # TODO: Review unreachable code - {
-    # TODO: Review unreachable code - "source": f"provider:{self.name}",
-    # TODO: Review unreachable code - "asset_id": result.asset_id or "",
-    # TODO: Review unreachable code - "file_path": str(result.file_path),
-    # TODO: Review unreachable code - "generation_type": request.generation_type.value,
-    # TODO: Review unreachable code - "provider": self.name,
-    # TODO: Review unreachable code - "model": result.model or request.model or "default",
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - "parameters": request.parameters or {},
-    # TODO: Review unreachable code - "cost": result.cost,
-    # TODO: Review unreachable code - "generation_time": result.generation_time,
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - )
+    def _publish_success(self, request: GenerationRequest, result: GenerationResult):
+        """Publish success event."""
+        if result.file_path:
+            publish_event_sync(
+                "asset.generated",
+                {
+                    "source": f"provider:{self.name}",
+                    "asset_id": result.asset_id or "",
+                    "file_path": str(result.file_path),
+                    "generation_type": request.generation_type.value,
+                    "provider": self.name,
+                    "model": result.model or request.model or "default",
+                    "prompt": request.prompt,
+                    "parameters": request.parameters or {},
+                    "cost": result.cost,
+                    "generation_time": result.generation_time,
+                }
+            )
 
-    # TODO: Review unreachable code - def _publish_failure(self, request: GenerationRequest, error: str):
-    # TODO: Review unreachable code - """Publish failure event."""
-    # TODO: Review unreachable code - publish_event_sync(
-    # TODO: Review unreachable code - "generation.failed",
-    # TODO: Review unreachable code - {
-    # TODO: Review unreachable code - "source": f"provider:{self.name}",
-    # TODO: Review unreachable code - "generation_type": request.generation_type.value,
-    # TODO: Review unreachable code - "provider": self.name,
-    # TODO: Review unreachable code - "model": request.model or "default",
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - "error": error,
-    # TODO: Review unreachable code - "parameters": request.parameters or {},
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - )
+    def _publish_failure(self, request: GenerationRequest, error: str):
+        """Publish failure event."""
+        publish_event_sync(
+            "generation.failed",
+            {
+                "source": f"provider:{self.name}",
+                "generation_type": request.generation_type.value,
+                "provider": self.name,
+                "model": request.model or "default",
+                "prompt": request.prompt,
+                "error": error,
+                "parameters": request.parameters or {},
+            }
+        )
 
-    # TODO: Review unreachable code - # Context manager support
+    # Context manager support
 
-    # TODO: Review unreachable code - async def __aenter__(self):
-    # TODO: Review unreachable code - """Async context manager entry."""
-    # TODO: Review unreachable code - return self
+    async def __aenter__(self):
+        """Async context manager entry."""
+        return self
 
-    # TODO: Review unreachable code - async def __aexit__(self, exc_type, exc_val, exc_tb):
-    # TODO: Review unreachable code - """Async context manager exit."""
-    # TODO: Review unreachable code - # Subclasses should override to clean up resources
+    async def __aexit__(self, exc_type, exc_val, exc_tb):
+        """Async context manager exit."""
+        # Subclasses should override to clean up resources
+        pass
 
-    # TODO: Review unreachable code - # Retry logic methods
+    # Retry logic methods
 
-    # TODO: Review unreachable code - def _calculate_delay(self, attempt: int) -> float:
-    # TODO: Review unreachable code - """Calculate delay with exponential backoff and jitter."""
-    # TODO: Review unreachable code - delay = min(
-    # TODO: Review unreachable code - self.initial_delay * (self.backoff_factor ** attempt),
-    # TODO: Review unreachable code - self.max_delay
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - # Add jitter to prevent thundering herd
-    # TODO: Review unreachable code - jitter_amount = delay * self.jitter
-    # TODO: Review unreachable code - delay += random.uniform(-jitter_amount, jitter_amount)
-    # TODO: Review unreachable code - return max(0, delay)
+    def _calculate_delay(self, attempt: int) -> float:
+        """Calculate delay with exponential backoff and jitter."""
+        delay = min(
+            self.initial_delay * (self.backoff_factor ** attempt),
+            self.max_delay
+        )
+        # Add jitter to prevent thundering herd
+        jitter_amount = delay * self.jitter
+        delay += random.uniform(-jitter_amount, jitter_amount)
+        return max(0, delay)
 
-    # TODO: Review unreachable code - def _should_retry(self, exception: Exception) -> bool:
-    # TODO: Review unreachable code - """Determine if an exception should trigger a retry.
+    def _should_retry(self, exception: Exception) -> bool:
+        """Determine if an exception should trigger a retry.
 
-    # TODO: Review unreachable code - Override this method in subclasses to customize retry logic.
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - # Don't retry validation errors or budget exceeded
-    # TODO: Review unreachable code - if isinstance(exception, (ValueError, BudgetExceededError, AuthenticationError)):
-    # TODO: Review unreachable code - return False
+        Override this method in subclasses to customize retry logic.
+        """
+        # Don't retry validation errors or budget exceeded
+        if isinstance(exception, (ValueError, BudgetExceededError, AuthenticationError)):
+            return False
 
-    # TODO: Review unreachable code - # Retry rate limit errors with longer delay
-    # TODO: Review unreachable code - if isinstance(exception, RateLimitError):
-    # TODO: Review unreachable code - return True
+        # Retry rate limit errors with longer delay
+        if isinstance(exception, RateLimitError):
+            return True
 
-    # TODO: Review unreachable code - # Default: retry on common transient errors
-    # TODO: Review unreachable code - error_msg = str(exception).lower()
-    # TODO: Review unreachable code - transient_errors = [
-    # TODO: Review unreachable code - 'timeout', 'timed out',
-    # TODO: Review unreachable code - 'connection', 'network',
-    # TODO: Review unreachable code - 'temporarily unavailable',
-    # TODO: Review unreachable code - 'service unavailable',
-    # TODO: Review unreachable code - '502', '503', '504',  # Gateway errors
-    # TODO: Review unreachable code - 'rate limit', 'too many requests',
-    # TODO: Review unreachable code - 'internal server error', '500'
-    # TODO: Review unreachable code - ]
-    # TODO: Review unreachable code - return any(error in error_msg for error in transient_errors)
+        # Default: retry on common transient errors
+        error_msg = str(exception).lower()
+        transient_errors = [
+            'timeout', 'timed out',
+            'connection', 'network',
+            'temporarily unavailable',
+            'service unavailable',
+            '502', '503', '504',  # Gateway errors
+            'rate limit', 'too many requests',
+            'internal server error', '500'
+        ]
+        return any(error in error_msg for error in transient_errors)
 
-    # TODO: Review unreachable code - async def _retry_async(self, func: Callable, *args, **kwargs) -> Any:
-    # TODO: Review unreachable code - """Retry an async function with exponential backoff."""
-    # TODO: Review unreachable code - last_exception = None
+    async def _retry_async(self, func: Callable, *args, **kwargs) -> Any:
+        """Retry an async function with exponential backoff."""
+        last_exception = None
 
-    # TODO: Review unreachable code - for attempt in range(self.max_retries + 1):
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - return await func(*args, **kwargs)
-    # TODO: Review unreachable code - except Exception as e:
-    # TODO: Review unreachable code - last_exception = e
+        for attempt in range(self.max_retries + 1):
+            try:
+                return await func(*args, **kwargs)
+            except Exception as e:
+                last_exception = e
 
-    # TODO: Review unreachable code - if attempt == self.max_retries:
-    # TODO: Review unreachable code - logger.error(
-    # TODO: Review unreachable code - "Max retries exceeded",
-    # TODO: Review unreachable code - provider=self.name,
-    # TODO: Review unreachable code - attempts=self.max_retries + 1,
-    # TODO: Review unreachable code - final_error=str(e),
-    # TODO: Review unreachable code - error_type=type(e).__name__
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - raise
+                if attempt == self.max_retries:
+                    logger.error(
+                        "Max retries exceeded",
+                        provider=self.name,
+                        attempts=self.max_retries + 1,
+                        final_error=str(e),
+                        error_type=type(e).__name__
+                    )
+                    raise
 
-    # TODO: Review unreachable code - if not self._should_retry(e):
-    # TODO: Review unreachable code - logger.error(
-    # TODO: Review unreachable code - "Non-retryable error",
-    # TODO: Review unreachable code - provider=self.name,
-    # TODO: Review unreachable code - error_type=type(e).__name__,
-    # TODO: Review unreachable code - error_message=str(e)
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - raise
+                if not self._should_retry(e):
+                    logger.error(
+                        "Non-retryable error",
+                        provider=self.name,
+                        error_type=type(e).__name__,
+                        error_message=str(e)
+                    )
+                    raise
 
-    # TODO: Review unreachable code - # Special handling for rate limit errors
-    # TODO: Review unreachable code - if isinstance(e, RateLimitError):
-    # TODO: Review unreachable code - # Use longer delay for rate limits
-    # TODO: Review unreachable code - delay = self._calculate_delay(attempt + 2)  # Extra backoff
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - delay = self._calculate_delay(attempt)
+                # Special handling for rate limit errors
+                if isinstance(e, RateLimitError):
+                    # Use longer delay for rate limits
+                    delay = self._calculate_delay(attempt + 2)  # Extra backoff
+                else:
+                    delay = self._calculate_delay(attempt)
 
-    # TODO: Review unreachable code - logger.warning(
-    # TODO: Review unreachable code - "Retrying after failure",
-    # TODO: Review unreachable code - provider=self.name,
-    # TODO: Review unreachable code - attempt=attempt + 1,
-    # TODO: Review unreachable code - max_attempts=self.max_retries + 1,
-    # TODO: Review unreachable code - retry_delay=delay,
-    # TODO: Review unreachable code - error_type=type(e).__name__,
-    # TODO: Review unreachable code - error_message=str(e)
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - await asyncio.sleep(delay)
+                logger.warning(
+                    "Retrying after failure",
+                    provider=self.name,
+                    attempt=attempt + 1,
+                    max_attempts=self.max_retries + 1,
+                    retry_delay=delay,
+                    error_type=type(e).__name__,
+                    error_message=str(e)
+                )
+                await asyncio.sleep(delay)
 
-    # TODO: Review unreachable code - # This should never be reached, but just in case
-    # TODO: Review unreachable code - if last_exception:
-    # TODO: Review unreachable code - raise last_exception
-    # TODO: Review unreachable code - raise RuntimeError("Retry logic error")
+        # This should never be reached, but just in case
+        if last_exception:
+            raise last_exception
+        raise RuntimeError("Retry logic error")
 
-    # TODO: Review unreachable code - def retry_with_backoff(self, func: Callable[..., T]) -> Callable[..., T]:
-    # TODO: Review unreachable code - """Decorator to retry a sync function with exponential backoff.
+    def retry_with_backoff(self, func: Callable[..., T]) -> Callable[..., T]:
+        """Decorator to retry a sync function with exponential backoff.
 
-    # TODO: Review unreachable code - For use with synchronous methods in providers.
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - @wraps(func)
-    # TODO: Review unreachable code - def wrapper(*args, **kwargs) -> T:
-    # TODO: Review unreachable code - last_exception = None
+        For use with synchronous methods in providers.
+        """
+        @wraps(func)
+        def wrapper(*args, **kwargs) -> T:
+            last_exception = None
 
-    # TODO: Review unreachable code - for attempt in range(self.max_retries + 1):
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - return func(*args, **kwargs)
-    # TODO: Review unreachable code - except Exception as e:
-    # TODO: Review unreachable code - last_exception = e
+            for attempt in range(self.max_retries + 1):
+                try:
+                    return func(*args, **kwargs)
+                except Exception as e:
+                    last_exception = e
 
-    # TODO: Review unreachable code - if attempt == self.max_retries:
-    # TODO: Review unreachable code - logger.error(
-    # TODO: Review unreachable code - f"{self.name}: Failed after {self.max_retries + 1} attempts: {e}"
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - raise
+                    if attempt == self.max_retries:
+                        logger.error(
+                            f"{self.name}: Failed after {self.max_retries + 1} attempts: {e}"
+                        )
+                        raise
 
-    # TODO: Review unreachable code - if not self._should_retry(e):
-    # TODO: Review unreachable code - logger.error(f"{self.name}: Non-retryable error: {e}")
-    # TODO: Review unreachable code - raise
+                    if not self._should_retry(e):
+                        logger.error(f"{self.name}: Non-retryable error: {e}")
+                        raise
 
-    # TODO: Review unreachable code - delay = self._calculate_delay(attempt)
-    # TODO: Review unreachable code - logger.warning(
-    # TODO: Review unreachable code - f"{self.name}: Attempt {attempt + 1} failed: {e}. "
-    # TODO: Review unreachable code - f"Retrying in {delay:.1f} seconds..."
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - time.sleep(delay)
+                    delay = self._calculate_delay(attempt)
+                    logger.warning(
+                        f"{self.name}: Attempt {attempt + 1} failed: {e}. "
+                        f"Retrying in {delay:.1f} seconds..."
+                    )
+                    time.sleep(delay)
 
-    # TODO: Review unreachable code - if last_exception:
-    # TODO: Review unreachable code - raise last_exception
-    # TODO: Review unreachable code - raise RuntimeError("Retry logic error")
+            if last_exception:
+                raise last_exception
+            raise RuntimeError("Retry logic error")
 
-    # TODO: Review unreachable code - return wrapper
+        return wrapper

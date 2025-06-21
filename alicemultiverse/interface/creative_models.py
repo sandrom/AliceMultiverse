@@ -68,8 +68,8 @@ class CreativeContext:
     technical_requirements: dict[str, Any] = field(default_factory=dict)
 
     # History
-    created_at: datetime = field(default_factory=datetime.utcnow)
-    last_active: datetime = field(default_factory=datetime.utcnow)
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    last_active: datetime = field(default_factory=lambda: datetime.now(UTC))
     iteration_count: int = 0
 
     def to_prompt_modifiers(self) -> str:
@@ -94,201 +94,201 @@ class CreativeContext:
         return ", ".join(modifiers)
 
 
-# TODO: Review unreachable code - @dataclass
-# TODO: Review unreachable code - class CreativeAsset:
-# TODO: Review unreachable code - """Represents an asset in creative terms."""
+@dataclass
+class CreativeAsset:
+    """Represents an asset in creative terms."""
 
-# TODO: Review unreachable code - id: str
-# TODO: Review unreachable code - name: str
-# TODO: Review unreachable code - role: CreativeRole = CreativeRole.EXPERIMENT
+    id: str
+    name: str
+    role: CreativeRole = CreativeRole.EXPERIMENT
 
-# TODO: Review unreachable code - # Creative properties
-# TODO: Review unreachable code - style_tags: list[str] = field(default_factory=list)
-# TODO: Review unreachable code - mood_tags: list[str] = field(default_factory=list)
-# TODO: Review unreachable code - subject_tags: list[str] = field(default_factory=list)
+    # Creative properties
+    style_tags: list[str] = field(default_factory=list)
+    mood_tags: list[str] = field(default_factory=list)
+    subject_tags: list[str] = field(default_factory=list)
 
-# TODO: Review unreachable code - # Relationships
-# TODO: Review unreachable code - inspired_by: list[str] = field(default_factory=list)  # Asset IDs
-# TODO: Review unreachable code - variations_of: str | None = None  # Parent asset ID
-# TODO: Review unreachable code - used_in: list[str] = field(default_factory=list)  # Project/scene IDs
+    # Relationships
+    inspired_by: list[str] = field(default_factory=list)  # Asset IDs
+    variations_of: str | None = None  # Parent asset ID
+    used_in: list[str] = field(default_factory=list)  # Project/scene IDs
 
-# TODO: Review unreachable code - # Creative metadata
-# TODO: Review unreachable code - prompt: str | None = None
-# TODO: Review unreachable code - notes: str | None = None
-# TODO: Review unreachable code - rating: int | None = None  # 1-5 stars
+    # Creative metadata
+    prompt: str | None = None
+    notes: str | None = None
+    rating: int | None = None  # 1-5 stars
 
-# TODO: Review unreachable code - # Temporal
-# TODO: Review unreachable code - created_at: datetime = field(default_factory=datetime.utcnow)
-# TODO: Review unreachable code - last_used: datetime | None = None
+    # Temporal
+    created_at: datetime = field(default_factory=lambda: datetime.now(UTC))
+    last_used: datetime | None = None
 
-# TODO: Review unreachable code - def matches_mood(self, mood: CreativeMood) -> bool:
-# TODO: Review unreachable code - """Check if asset matches a mood."""
-# TODO: Review unreachable code - return mood.value in self.mood_tags
+    def matches_mood(self, mood: CreativeMood) -> bool:
+        """Check if asset matches a mood."""
+        return mood.value in self.mood_tags
 
-# TODO: Review unreachable code - def has_style(self, style: str) -> bool:
-# TODO: Review unreachable code - """Check if asset has a style."""
-# TODO: Review unreachable code - return style.lower() in [s.lower() for s in self.style_tags]
-
-
-# TODO: Review unreachable code - @dataclass
-# TODO: Review unreachable code - class CreativeWorkflow:
-# TODO: Review unreachable code - """Represents a creative workflow."""
-
-# TODO: Review unreachable code - id: str
-# TODO: Review unreachable code - name: str
-# TODO: Review unreachable code - description: str | None = None
-
-# TODO: Review unreachable code - # Workflow definition
-# TODO: Review unreachable code - steps: list[dict[str, Any]] = field(default_factory=list)
-# TODO: Review unreachable code - current_step: int = 0
-
-# TODO: Review unreachable code - # Context and parameters
-# TODO: Review unreachable code - context: CreativeContext | None = None
-# TODO: Review unreachable code - input_assets: list[str] = field(default_factory=list)
-# TODO: Review unreachable code - output_assets: list[str] = field(default_factory=list)
-
-# TODO: Review unreachable code - # Execution state
-# TODO: Review unreachable code - status: str = "pending"  # pending, running, completed, failed
-# TODO: Review unreachable code - started_at: datetime | None = None
-# TODO: Review unreachable code - completed_at: datetime | None = None
-
-# TODO: Review unreachable code - # Results
-# TODO: Review unreachable code - success_count: int = 0
-# TODO: Review unreachable code - failure_count: int = 0
-# TODO: Review unreachable code - cost_estimate: float | None = None
-
-# TODO: Review unreachable code - def add_step(self, step_type: str, parameters: dict[str, Any]) -> None:
-# TODO: Review unreachable code - """Add a step to the workflow."""
-# TODO: Review unreachable code - self.steps.append({"type": step_type, "parameters": parameters, "status": "pending"})
-
-# TODO: Review unreachable code - def complete_step(self, success: bool = True) -> None:
-# TODO: Review unreachable code - """Mark current step as complete."""
-# TODO: Review unreachable code - if self.current_step < len(self.steps):
-# TODO: Review unreachable code - self.steps[self.current_step]["status"] = "completed" if success else "failed"
-# TODO: Review unreachable code - self.current_step += 1
-
-# TODO: Review unreachable code - if success:
-# TODO: Review unreachable code - self.success_count += 1
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - self.failure_count += 1
+    def has_style(self, style: str) -> bool:
+        """Check if asset has a style."""
+        return style.lower() in [s.lower() for s in self.style_tags]
 
 
-# TODO: Review unreachable code - @dataclass
-# TODO: Review unreachable code - class StyleEvolution:
-# TODO: Review unreachable code - """Tracks how a style evolves over time."""
+@dataclass
+class CreativeWorkflow:
+    """Represents a creative workflow."""
 
-# TODO: Review unreachable code - style_name: str
-# TODO: Review unreachable code - base_elements: dict[str, Any] = field(default_factory=dict)
+    id: str
+    name: str
+    description: str | None = None
 
-# TODO: Review unreachable code - # Evolution history
-# TODO: Review unreachable code - iterations: list[dict[str, Any]] = field(default_factory=list)
-# TODO: Review unreachable code - current_version: int = 1
+    # Workflow definition
+    steps: list[dict[str, Any]] = field(default_factory=list)
+    current_step: int = 0
 
-# TODO: Review unreachable code - # Learned preferences
-# TODO: Review unreachable code - successful_elements: list[str] = field(default_factory=list)
-# TODO: Review unreachable code - avoided_elements: list[str] = field(default_factory=list)
+    # Context and parameters
+    context: CreativeContext | None = None
+    input_assets: list[str] = field(default_factory=list)
+    output_assets: list[str] = field(default_factory=list)
 
-# TODO: Review unreachable code - # Statistics
-# TODO: Review unreachable code - usage_count: int = 0
-# TODO: Review unreachable code - success_rate: float = 0.0
+    # Execution state
+    status: str = "pending"  # pending, running, completed, failed
+    started_at: datetime | None = None
+    completed_at: datetime | None = None
 
-# TODO: Review unreachable code - def record_iteration(self, elements: dict[str, Any], success: bool) -> None:
-# TODO: Review unreachable code - """Record a style iteration."""
-# TODO: Review unreachable code - self.iterations.append(
-# TODO: Review unreachable code - {
-# TODO: Review unreachable code - "version": self.current_version,
-# TODO: Review unreachable code - "elements": elements,
-# TODO: Review unreachable code - "success": success,
-# TODO: Review unreachable code - "timestamp": datetime.now(UTC),
-# TODO: Review unreachable code - }
-# TODO: Review unreachable code - )
+    # Results
+    success_count: int = 0
+    failure_count: int = 0
+    cost_estimate: float | None = None
 
-# TODO: Review unreachable code - if success:
-# TODO: Review unreachable code - # Learn from successful iterations
-# TODO: Review unreachable code - for key, value in elements.items():
-# TODO: Review unreachable code - if isinstance(value, str) and value not in self.successful_elements:
-# TODO: Review unreachable code - self.successful_elements.append(value)
+    def add_step(self, step_type: str, parameters: dict[str, Any]) -> None:
+        """Add a step to the workflow."""
+        self.steps.append({"type": step_type, "parameters": parameters, "status": "pending"})
 
-# TODO: Review unreachable code - self.usage_count += 1
-# TODO: Review unreachable code - self.current_version += 1
+    def complete_step(self, success: bool = True) -> None:
+        """Mark current step as complete."""
+        if self.current_step < len(self.steps):
+            self.steps[self.current_step]["status"] = "completed" if success else "failed"
+            self.current_step += 1
 
-# TODO: Review unreachable code - # Update success rate
-# TODO: Review unreachable code - successful = sum(1 for i in self.iterations if i is not None and i["success"])
-# TODO: Review unreachable code - self.success_rate = successful / len(self.iterations)
-
-# TODO: Review unreachable code - def get_evolved_style(self) -> dict[str, Any]:
-# TODO: Review unreachable code - """Get the current evolved style."""
-# TODO: Review unreachable code - evolved = self.base_elements.copy()
-
-# TODO: Review unreachable code - # Add successful elements
-# TODO: Review unreachable code - if self.successful_elements:
-# TODO: Review unreachable code - evolved["proven_elements"] = self.successful_elements[:5]  # Top 5
-
-# TODO: Review unreachable code - # Note avoided elements
-# TODO: Review unreachable code - if self.avoided_elements:
-# TODO: Review unreachable code - evolved["avoid"] = self.avoided_elements
-
-# TODO: Review unreachable code - return evolved
+            if success:
+                self.success_count += 1
+            else:
+                self.failure_count += 1
 
 
-# TODO: Review unreachable code - @dataclass
-# TODO: Review unreachable code - class CreativeMemoryEntry:
-# TODO: Review unreachable code - """An entry in creative memory."""
+@dataclass
+class StyleEvolution:
+    """Tracks how a style evolves over time."""
 
-# TODO: Review unreachable code - id: str
-# TODO: Review unreachable code - timestamp: datetime
-# TODO: Review unreachable code - entry_type: str  # 'search', 'creation', 'feedback', 'discovery'
+    style_name: str
+    base_elements: dict[str, Any] = field(default_factory=dict)
 
-# TODO: Review unreachable code - # Content
-# TODO: Review unreachable code - description: str
-# TODO: Review unreachable code - tags: list[str] = field(default_factory=list)
+    # Evolution history
+    iterations: list[dict[str, Any]] = field(default_factory=list)
+    current_version: int = 1
 
-# TODO: Review unreachable code - # Context
-# TODO: Review unreachable code - project_id: str | None = None
-# TODO: Review unreachable code - workflow_id: str | None = None
-# TODO: Review unreachable code - related_assets: list[str] = field(default_factory=list)
+    # Learned preferences
+    successful_elements: list[str] = field(default_factory=list)
+    avoided_elements: list[str] = field(default_factory=list)
 
-# TODO: Review unreachable code - # Outcome
-# TODO: Review unreachable code - success: bool = True
-# TODO: Review unreachable code - impact_score: float = 0.0  # How important was this
+    # Statistics
+    usage_count: int = 0
+    success_rate: float = 0.0
 
-# TODO: Review unreachable code - def age_days(self) -> int:
-# TODO: Review unreachable code - """Get age of memory in days."""
-# TODO: Review unreachable code - return (datetime.now(UTC) - self.timestamp).days
+    def record_iteration(self, elements: dict[str, Any], success: bool) -> None:
+        """Record a style iteration."""
+        self.iterations.append(
+            {
+                "version": self.current_version,
+                "elements": elements,
+                "success": success,
+                "timestamp": datetime.now(UTC),
+            }
+        )
+
+        if success:
+            # Learn from successful iterations
+            for key, value in elements.items():
+                if isinstance(value, str) and value not in self.successful_elements:
+                    self.successful_elements.append(value)
+
+        self.usage_count += 1
+        self.current_version += 1
+
+        # Update success rate
+        successful = sum(1 for i in self.iterations if i is not None and i["success"])
+        self.success_rate = successful / len(self.iterations)
+
+    def get_evolved_style(self) -> dict[str, Any]:
+        """Get the current evolved style."""
+        evolved = self.base_elements.copy()
+
+        # Add successful elements
+        if self.successful_elements:
+            evolved["proven_elements"] = self.successful_elements[:5]  # Top 5
+
+        # Note avoided elements
+        if self.avoided_elements:
+            evolved["avoid"] = self.avoided_elements
+
+        return evolved
 
 
-# TODO: Review unreachable code - @dataclass
-# TODO: Review unreachable code - class CreativePattern:
-# TODO: Review unreachable code - """A pattern in creative work."""
+@dataclass
+class CreativeMemoryEntry:
+    """An entry in creative memory."""
 
-# TODO: Review unreachable code - pattern_type: str  # 'style_combination', 'workflow_sequence', 'time_preference'
-# TODO: Review unreachable code - elements: list[str]
+    id: str
+    timestamp: datetime
+    entry_type: str  # 'search', 'creation', 'feedback', 'discovery'
 
-# TODO: Review unreachable code - # Statistics
-# TODO: Review unreachable code - occurrence_count: int = 1
-# TODO: Review unreachable code - success_rate: float = 1.0
-# TODO: Review unreachable code - last_seen: datetime = field(default_factory=lambda: datetime.now(UTC))
+    # Content
+    description: str
+    tags: list[str] = field(default_factory=list)
 
-# TODO: Review unreachable code - # Context
-# TODO: Review unreachable code - common_contexts: list[str] = field(default_factory=list)
+    # Context
+    project_id: str | None = None
+    workflow_id: str | None = None
+    related_assets: list[str] = field(default_factory=list)
 
-# TODO: Review unreachable code - def record_occurrence(self, success: bool, context: str | None = None) -> None:
-# TODO: Review unreachable code - """Record a pattern occurrence."""
-# TODO: Review unreachable code - self.occurrence_count += 1
-# TODO: Review unreachable code - self.last_seen = datetime.now(UTC)
+    # Outcome
+    success: bool = True
+    impact_score: float = 0.0  # How important was this
 
-# TODO: Review unreachable code - # Update success rate
-# TODO: Review unreachable code - if not success:
-# TODO: Review unreachable code - self.success_rate = (
-# TODO: Review unreachable code - (self.success_rate * (self.occurrence_count - 1)) + (1.0 if success else 0.0)
-# TODO: Review unreachable code - ) / self.occurrence_count
+    def age_days(self) -> int:
+        """Get age of memory in days."""
+        return (datetime.now(UTC) - self.timestamp).days
 
-# TODO: Review unreachable code - # Track context
-# TODO: Review unreachable code - if context and context not in self.common_contexts:
-# TODO: Review unreachable code - self.common_contexts.append(context)
-# TODO: Review unreachable code - if len(self.common_contexts) > 5:
-# TODO: Review unreachable code - self.common_contexts.pop(0)
 
-# TODO: Review unreachable code - def is_successful(self) -> bool:
-# TODO: Review unreachable code - """Check if pattern is generally successful."""
-# TODO: Review unreachable code - return self.success_rate > 0.7 and self.occurrence_count > 3
+@dataclass
+class CreativePattern:
+    """A pattern in creative work."""
+
+    pattern_type: str  # 'style_combination', 'workflow_sequence', 'time_preference'
+    elements: list[str]
+
+    # Statistics
+    occurrence_count: int = 1
+    success_rate: float = 1.0
+    last_seen: datetime = field(default_factory=lambda: datetime.now(UTC))
+
+    # Context
+    common_contexts: list[str] = field(default_factory=list)
+
+    def record_occurrence(self, success: bool, context: str | None = None) -> None:
+        """Record a pattern occurrence."""
+        self.occurrence_count += 1
+        self.last_seen = datetime.now(UTC)
+
+        # Update success rate
+        if not success:
+            self.success_rate = (
+                (self.success_rate * (self.occurrence_count - 1)) + (1.0 if success else 0.0)
+            ) / self.occurrence_count
+
+        # Track context
+        if context and context not in self.common_contexts:
+            self.common_contexts.append(context)
+            if len(self.common_contexts) > 5:
+                self.common_contexts.pop(0)
+
+    def is_successful(self) -> bool:
+        """Check if pattern is generally successful."""
+        return self.success_rate > 0.7 and self.occurrence_count > 3

@@ -24,6 +24,33 @@ class OpenAIProvider(BaseProvider):
 
     BASE_URL = "https://api.openai.com/v1"
 
+    @property
+    def name(self) -> str:
+        """Provider name."""
+        return "openai"
+
+    @property
+    def capabilities(self) -> ProviderCapabilities:
+        """Provider capabilities."""
+        return ProviderCapabilities(
+            generation_types=[
+                GenerationType.IMAGE,
+                GenerationType.TEXT,  # For vision/analysis
+            ],
+            max_file_size=20 * 1024 * 1024,  # 20MB
+            supported_formats=[".jpg", ".jpeg", ".png", ".gif", ".webp"],
+            features=[
+                "dalle_generation",
+                "vision_analysis",
+                "image_variations",
+                "image_editing",
+            ],
+            rate_limits={
+                "requests_per_minute": 50,
+                "images_per_minute": 50,
+            },
+        )
+
     # Available models
     MODELS = {
         # Image generation
@@ -80,7 +107,7 @@ class OpenAIProvider(BaseProvider):
             api_key: OpenAI API key (or from OPENAI_API_KEY env var)
             **kwargs: Additional arguments for BaseProvider
         """
-        super().__init__("openai", api_key, **kwargs)
+        super().__init__(api_key, **kwargs)
 
 
     @property
@@ -131,234 +158,234 @@ class OpenAIProvider(BaseProvider):
         self._last_check = datetime.now()
         return self._status
 
-    # TODO: Review unreachable code - async def _generate(self, request: GenerationRequest) -> GenerationResult:
-    # TODO: Review unreachable code - """Perform the actual generation using OpenAI.
+    async def _generate(self, request: GenerationRequest) -> GenerationResult:
+        """Perform the actual generation using OpenAI.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - request: Generation request
+        Args:
+            request: Generation request
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - Generation result
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - # Determine model
-    # TODO: Review unreachable code - model = request.model or self.get_default_model(request.generation_type)
+        Returns:
+            Generation result
+        """
+        # Determine model
+        model = request.model or self.get_default_model(request.generation_type)
 
-    # TODO: Review unreachable code - # Generate based on type
-    # TODO: Review unreachable code - if request.generation_type == GenerationType.IMAGE:
-    # TODO: Review unreachable code - result = await self._generate_image(request, model)
-    # TODO: Review unreachable code - elif request.generation_type == GenerationType.TEXT:
-    # TODO: Review unreachable code - result = await self._analyze_image(request, model)
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - raise GenerationError(f"Unsupported generation type: {request.generation_type}")
+        # Generate based on type
+        if request.generation_type == GenerationType.IMAGE:
+            result = await self._generate_image(request, model)
+        elif request.generation_type == GenerationType.TEXT:
+            result = await self._analyze_image(request, model)
+        else:
+            raise GenerationError(f"Unsupported generation type: {request.generation_type}")
 
-    # TODO: Review unreachable code - return result
+        return result
 
-    # TODO: Review unreachable code - async def _generate_image(self, request: GenerationRequest, model: str) -> GenerationResult:
-    # TODO: Review unreachable code - """Generate image using DALL-E."""
-    # TODO: Review unreachable code - # Build parameters
-    # TODO: Review unreachable code - params = self._build_dalle_params(request, model)
+    async def _generate_image(self, request: GenerationRequest, model: str) -> GenerationResult:
+        """Generate image using DALL-E."""
+        # Build parameters
+        params = self._build_dalle_params(request, model)
 
-    # TODO: Review unreachable code - # Call API
-    # TODO: Review unreachable code - session = await self._ensure_session()
-    # TODO: Review unreachable code - endpoint = self.MODELS[model]["endpoint"]
+        # Call API
+        session = await self._ensure_session()
+        endpoint = self.MODELS[model]["endpoint"]
 
-    # TODO: Review unreachable code - async with session.post(f"{self.BASE_URL}{endpoint}", json=params) as response:
-    # TODO: Review unreachable code - await self._handle_response_errors(response, "Image generation")
+        async with session.post(f"{self.BASE_URL}{endpoint}", json=params) as response:
+            await self._handle_response_errors(response, "Image generation")
 
-    # TODO: Review unreachable code - data = await response.json()
+            data = await response.json()
 
-    # TODO: Review unreachable code - # Download image
-    # TODO: Review unreachable code - image_data = data["data"][0]
+        # Download image
+        image_data = data["data"][0]
 
-    # TODO: Review unreachable code - if image_data is not None and "url" in image_data:
-    # TODO: Review unreachable code - # Download from URL
-    # TODO: Review unreachable code - image_url = image_data["url"]
-    # TODO: Review unreachable code - file_path = await self._download_image(request, image_url)
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Save base64 data
-    # TODO: Review unreachable code - b64_data = image_data["b64_json"]
-    # TODO: Review unreachable code - file_path = await self._save_base64_image(request, b64_data)
+        if image_data is not None and "url" in image_data:
+            # Download from URL
+            image_url = image_data["url"]
+            file_path = await self._download_image(request, image_url)
+        else:
+            # Save base64 data
+            b64_data = image_data["b64_json"]
+            file_path = await self._save_base64_image(request, b64_data)
 
-    # TODO: Review unreachable code - # Calculate cost
-    # TODO: Review unreachable code - cost = self._calculate_dalle_cost(model, params)
+        # Calculate cost
+        cost = self._calculate_dalle_cost(model, params)
 
-    # TODO: Review unreachable code - # Get revised prompt if available (DALL-E 3)
-    # TODO: Review unreachable code - revised_prompt = image_data.get("revised_prompt") if image_data else request.prompt
+        # Get revised prompt if available (DALL-E 3)
+        revised_prompt = image_data.get("revised_prompt") if image_data else request.prompt
 
-    # TODO: Review unreachable code - return GenerationResult(
-    # TODO: Review unreachable code - success=True,
-    # TODO: Review unreachable code - file_path=file_path,
-    # TODO: Review unreachable code - cost=cost,
-    # TODO: Review unreachable code - provider=self.name,
-    # TODO: Review unreachable code - model=model,
-    # TODO: Review unreachable code - metadata={
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - "revised_prompt": revised_prompt,
-    # TODO: Review unreachable code - "model": model,
-    # TODO: Review unreachable code - "size": params.get("size"),
-    # TODO: Review unreachable code - "quality": params.get("quality", "standard"),
-    # TODO: Review unreachable code - "style": params.get("style", "vivid"),
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - )
+        return GenerationResult(
+            success=True,
+            file_path=file_path,
+            cost=cost,
+            provider=self.name,
+            model=model,
+            metadata={
+                "prompt": request.prompt,
+                "revised_prompt": revised_prompt,
+                "model": model,
+                "size": params.get("size"),
+                "quality": params.get("quality", "standard"),
+                "style": params.get("style", "vivid"),
+            }
+        )
 
-    # TODO: Review unreachable code - async def _analyze_image(self, request: GenerationRequest, model: str) -> GenerationResult:
-    # TODO: Review unreachable code - """Analyze image using GPT-4 Vision."""
-    # TODO: Review unreachable code - if not request.reference_assets:
-    # TODO: Review unreachable code - raise GenerationError("Image analysis requires reference_assets")
+    async def _analyze_image(self, request: GenerationRequest, model: str) -> GenerationResult:
+        """Analyze image using GPT-4 Vision."""
+        if not request.reference_assets:
+            raise GenerationError("Image analysis requires reference_assets")
 
-    # TODO: Review unreachable code - # Build vision request
-    # TODO: Review unreachable code - messages = [{
-    # TODO: Review unreachable code - "role": "user",
-    # TODO: Review unreachable code - "content": [
-    # TODO: Review unreachable code - {"type": "text", "text": request.prompt},
-    # TODO: Review unreachable code - {
-    # TODO: Review unreachable code - "type": "image_url",
-    # TODO: Review unreachable code - "image_url": {
-    # TODO: Review unreachable code - "url": f"data:image/jpeg;base64,{await self._encode_image(request.reference_assets[0])}"
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - ]
-    # TODO: Review unreachable code - }]
+        # Build vision request
+        messages = [{
+            "role": "user",
+            "content": [
+                {"type": "text", "text": request.prompt},
+                {
+                    "type": "image_url",
+                    "image_url": {
+                        "url": f"data:image/jpeg;base64,{await self._encode_image(request.reference_assets[0])}"
+                    }
+                }
+            ]
+        }]
 
-    # TODO: Review unreachable code - params = {
-    # TODO: Review unreachable code - "model": model,
-    # TODO: Review unreachable code - "messages": messages,
-    # TODO: Review unreachable code - "max_tokens": request.parameters.get("max_tokens", 300) if request.parameters else 300,
-    # TODO: Review unreachable code - }
+        params = {
+            "model": model,
+            "messages": messages,
+            "max_tokens": request.parameters.get("max_tokens", 300) if request.parameters else 300,
+        }
 
-    # TODO: Review unreachable code - # Call API
-    # TODO: Review unreachable code - session = await self._ensure_session()
-    # TODO: Review unreachable code - endpoint = self.MODELS[model]["endpoint"]
+        # Call API
+        session = await self._ensure_session()
+        endpoint = self.MODELS[model]["endpoint"]
 
-    # TODO: Review unreachable code - async with session.post(f"{self.BASE_URL}{endpoint}", json=params) as response:
-    # TODO: Review unreachable code - await self._handle_response_errors(response, "Image analysis")
+        async with session.post(f"{self.BASE_URL}{endpoint}", json=params) as response:
+            await self._handle_response_errors(response, "Image analysis")
 
-    # TODO: Review unreachable code - data = await response.json()
+            data = await response.json()
 
-    # TODO: Review unreachable code - # Extract response
-    # TODO: Review unreachable code - analysis = data["choices"][0]["message"]["content"]
-    # TODO: Review unreachable code - tokens_used = data.get("usage", {}).get("total_tokens", 0)
+        # Extract response
+        analysis = data["choices"][0]["message"]["content"]
+        tokens_used = data.get("usage", {}).get("total_tokens", 0)
 
-    # TODO: Review unreachable code - # Calculate cost
-    # TODO: Review unreachable code - cost = (tokens_used / 1000) * self.PRICING.get(model, 0.01)
+        # Calculate cost
+        cost = (tokens_used / 1000) * self.PRICING.get(model, 0.01)
 
-    # TODO: Review unreachable code - return GenerationResult(
-    # TODO: Review unreachable code - success=True,
-    # TODO: Review unreachable code - provider=self.name,
-    # TODO: Review unreachable code - model=model,
-    # TODO: Review unreachable code - cost=cost,
-    # TODO: Review unreachable code - metadata={
-    # TODO: Review unreachable code - "analysis": analysis,
-    # TODO: Review unreachable code - "tokens_used": tokens_used,
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - )
+        return GenerationResult(
+            success=True,
+            provider=self.name,
+            model=model,
+            cost=cost,
+            metadata={
+                "analysis": analysis,
+                "tokens_used": tokens_used,
+                "prompt": request.prompt,
+            }
+        )
 
-    # TODO: Review unreachable code - def _build_dalle_params(self, request: GenerationRequest, model: str) -> dict[str, Any]:
-    # TODO: Review unreachable code - """Build parameters for DALL-E request."""
-    # TODO: Review unreachable code - params = {
-    # TODO: Review unreachable code - "model": model,
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - "n": 1,  # Number of images
-    # TODO: Review unreachable code - }
+    def _build_dalle_params(self, request: GenerationRequest, model: str) -> dict[str, Any]:
+        """Build parameters for DALL-E request."""
+        params = {
+            "model": model,
+            "prompt": request.prompt,
+            "n": 1,  # Number of images
+        }
 
-    # TODO: Review unreachable code - # Get parameters from request
-    # TODO: Review unreachable code - req_params = request.parameters or {}
+        # Get parameters from request
+        req_params = request.parameters or {}
 
-    # TODO: Review unreachable code - if model == "dall-e-3":
-    # TODO: Review unreachable code - # Size
-    # TODO: Review unreachable code - size = req_params.get("size", "1024x1024")
-    # TODO: Review unreachable code - if size not in self.MODELS[model]["max_size"]:
-    # TODO: Review unreachable code - size = "1024x1024"  # Default
-    # TODO: Review unreachable code - params["size"] = size
+        if model == "dall-e-3":
+            # Size
+            size = req_params.get("size", "1024x1024")
+            if size not in self.MODELS[model]["max_size"]:
+                size = "1024x1024"  # Default
+            params["size"] = size
 
-    # TODO: Review unreachable code - # Quality
-    # TODO: Review unreachable code - quality = req_params.get("quality", "standard")
-    # TODO: Review unreachable code - if quality in ["standard", "hd"]:
-    # TODO: Review unreachable code - params["quality"] = quality
+            # Quality
+            quality = req_params.get("quality", "standard")
+            if quality in ["standard", "hd"]:
+                params["quality"] = quality
 
-    # TODO: Review unreachable code - # Style
-    # TODO: Review unreachable code - style = req_params.get("style", "vivid")
-    # TODO: Review unreachable code - if style in ["vivid", "natural"]:
-    # TODO: Review unreachable code - params["style"] = style
+            # Style
+            style = req_params.get("style", "vivid")
+            if style in ["vivid", "natural"]:
+                params["style"] = style
 
-    # TODO: Review unreachable code - elif model == "dall-e-2":
-    # TODO: Review unreachable code - # Size
-    # TODO: Review unreachable code - size = req_params.get("size", "1024x1024")
-    # TODO: Review unreachable code - if size not in self.MODELS[model]["max_size"]:
-    # TODO: Review unreachable code - size = "1024x1024"
-    # TODO: Review unreachable code - params["size"] = size
+        elif model == "dall-e-2":
+            # Size
+            size = req_params.get("size", "1024x1024")
+            if size not in self.MODELS[model]["max_size"]:
+                size = "1024x1024"
+            params["size"] = size
 
-    # TODO: Review unreachable code - # Response format
-    # TODO: Review unreachable code - if req_params.get("response_format") == "b64_json":
-    # TODO: Review unreachable code - params["response_format"] = "b64_json"
+            # Response format
+            if req_params.get("response_format") == "b64_json":
+                params["response_format"] = "b64_json"
 
-    # TODO: Review unreachable code - return params
+        return params
 
-    # TODO: Review unreachable code - def _calculate_dalle_cost(self, model: str, params: dict[str, Any]) -> float:
-    # TODO: Review unreachable code - """Calculate cost for DALL-E generation."""
-    # TODO: Review unreachable code - if model == "dall-e-3":
-    # TODO: Review unreachable code - quality = params.get("quality", "standard")
-    # TODO: Review unreachable code - size = params.get("size", "1024x1024")
-    # TODO: Review unreachable code - return self.PRICING["dall-e-3"][quality].get(size, 0.040)
-    # TODO: Review unreachable code - elif model == "dall-e-2":
-    # TODO: Review unreachable code - size = params.get("size", "1024x1024")
-    # TODO: Review unreachable code - return self.PRICING["dall-e-2"].get(size, 0.020)
-    # TODO: Review unreachable code - return 0.0
+    def _calculate_dalle_cost(self, model: str, params: dict[str, Any]) -> float:
+        """Calculate cost for DALL-E generation."""
+        if model == "dall-e-3":
+            quality = params.get("quality", "standard")
+            size = params.get("size", "1024x1024")
+            return self.PRICING["dall-e-3"][quality].get(size, 0.040)
+        elif model == "dall-e-2":
+            size = params.get("size", "1024x1024")
+            return self.PRICING["dall-e-2"].get(size, 0.020)
+        return 0.0
 
-    # TODO: Review unreachable code - async def _download_image(self, request: GenerationRequest, url: str) -> Path:
-    # TODO: Review unreachable code - """Download image from URL."""
-    # TODO: Review unreachable code - # Determine output path
-    # TODO: Review unreachable code - if request.output_path:
-    # TODO: Review unreachable code - output_path = request.output_path
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    # TODO: Review unreachable code - filename = f"dalle_{timestamp}.png"
-    # TODO: Review unreachable code - output_path = Path.cwd() / "generated" / filename
+    async def _download_image(self, request: GenerationRequest, url: str) -> Path:
+        """Download image from URL."""
+        # Determine output path
+        if request.output_path:
+            output_path = request.output_path
+        else:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"dalle_{timestamp}.png"
+            output_path = Path.cwd() / "generated" / filename
 
-    # TODO: Review unreachable code - # Use base class download method
-    # TODO: Review unreachable code - return await self._download_result(url, output_path.parent, output_path.name)
+        # Use base class download method
+        return await self._download_result(url, output_path.parent, output_path.name)
 
-    # TODO: Review unreachable code - async def _save_base64_image(self, request: GenerationRequest, b64_data: str) -> Path:
-    # TODO: Review unreachable code - """Save base64 image data."""
-    # TODO: Review unreachable code - # Determine output path
-    # TODO: Review unreachable code - if request.output_path:
-    # TODO: Review unreachable code - output_path = request.output_path
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-    # TODO: Review unreachable code - filename = f"dalle_{timestamp}.png"
-    # TODO: Review unreachable code - output_path = Path.cwd() / "generated" / filename
+    async def _save_base64_image(self, request: GenerationRequest, b64_data: str) -> Path:
+        """Save base64 image data."""
+        # Determine output path
+        if request.output_path:
+            output_path = request.output_path
+        else:
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            filename = f"dalle_{timestamp}.png"
+            output_path = Path.cwd() / "generated" / filename
 
-    # TODO: Review unreachable code - # Ensure directory exists
-    # TODO: Review unreachable code - output_path.parent.mkdir(parents=True, exist_ok=True)
+        # Ensure directory exists
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    # TODO: Review unreachable code - # Decode and save
-    # TODO: Review unreachable code - image_data = base64.b64decode(b64_data)
-    # TODO: Review unreachable code - output_path.write_bytes(image_data)
+        # Decode and save
+        image_data = base64.b64decode(b64_data)
+        output_path.write_bytes(image_data)
 
-    # TODO: Review unreachable code - return output_path
+        return output_path
 
-    # TODO: Review unreachable code - async def _encode_image(self, image_path: str) -> str:
-    # TODO: Review unreachable code - """Encode image to base64 for vision API."""
-    # TODO: Review unreachable code - path = Path(image_path)
-    # TODO: Review unreachable code - if not path.exists():
-    # TODO: Review unreachable code - raise GenerationError(f"Image not found: {image_path}")
+    async def _encode_image(self, image_path: str) -> str:
+        """Encode image to base64 for vision API."""
+        path = Path(image_path)
+        if not path.exists():
+            raise GenerationError(f"Image not found: {image_path}")
 
-    # TODO: Review unreachable code - return base64.b64encode(path.read_bytes()).decode('utf-8')
+        return base64.b64encode(path.read_bytes()).decode('utf-8')
 
-    # TODO: Review unreachable code - def get_default_model(self, generation_type: GenerationType) -> str:
-    # TODO: Review unreachable code - """Get default model for generation type."""
-    # TODO: Review unreachable code - if generation_type == GenerationType.IMAGE:
-    # TODO: Review unreachable code - return "dall-e-3"
-    # TODO: Review unreachable code - elif generation_type == GenerationType.TEXT:
-    # TODO: Review unreachable code - return "gpt-4o-mini"  # Cheapest vision model
-    # TODO: Review unreachable code - return super().get_default_model(generation_type)
+    def get_default_model(self, generation_type: GenerationType) -> str:
+        """Get default model for generation type."""
+        if generation_type == GenerationType.IMAGE:
+            return "dall-e-3"
+        elif generation_type == GenerationType.TEXT:
+            return "gpt-4o-mini"  # Cheapest vision model
+        return super().get_default_model(generation_type)
 
-    # TODO: Review unreachable code - def get_models_for_type(self, generation_type: GenerationType) -> list[str]:
-    # TODO: Review unreachable code - """Get available models for a generation type."""
-    # TODO: Review unreachable code - models = []
-    # TODO: Review unreachable code - for name, info in self.MODELS.items():
-    # TODO: Review unreachable code - if info.get("type") == generation_type or (generation_type == GenerationType.TEXT and "image_analysis" in info.get("capabilities", [])):
-    # TODO: Review unreachable code - models.append(name)
-    # TODO: Review unreachable code - return models
+    def get_models_for_type(self, generation_type: GenerationType) -> list[str]:
+        """Get available models for a generation type."""
+        models = []
+        for name, info in self.MODELS.items():
+            if info.get("type") == generation_type or (generation_type == GenerationType.TEXT and "image_analysis" in info.get("capabilities", [])):
+                models.append(name)
+        return models
 

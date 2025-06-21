@@ -203,7 +203,7 @@ class TestBoundedCache:
         
         # Should have evicted old items
         stats = cache.get_stats()
-        assert stats['entries'] < 100
+        assert stats['items'] < 100
         assert cache.get("key0") is None  # First item evicted
     
     def test_ttl_expiration(self):

@@ -21,17 +21,17 @@ def run_keys_command(args: Any) -> int:
 
     if args.keys_command == "set":
         return _handle_set(manager, args)
-    # TODO: Review unreachable code - elif args.keys_command == "get":
-    # TODO: Review unreachable code - return _handle_get(manager, args)
-    # TODO: Review unreachable code - elif args.keys_command == "delete":
-    # TODO: Review unreachable code - return _handle_delete(manager, args)
-    # TODO: Review unreachable code - elif args.keys_command == "list":
-    # TODO: Review unreachable code - return _handle_list(manager)
-    # TODO: Review unreachable code - elif args.keys_command == "setup":
-    # TODO: Review unreachable code - return _handle_setup(manager)
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - logger.error(f"Unknown keys command: {args.keys_command}")
-    # TODO: Review unreachable code - return 1
+    elif args.keys_command == "get":
+        return _handle_get(manager, args)
+    elif args.keys_command == "delete":
+        return _handle_delete(manager, args)
+    elif args.keys_command == "list":
+        return _handle_list(manager)
+    elif args.keys_command == "setup":
+        return _handle_setup(manager)
+    else:
+        logger.error(f"Unknown keys command: {args.keys_command}")
+        return 1
 
 
 def _handle_set(manager: APIKeyManager, args) -> int:
@@ -95,105 +95,105 @@ def _handle_list(manager: APIKeyManager) -> int:
         print("No API keys configured")
         return 0
 
-        # TODO: Review unreachable code - print("Configured API keys:")
-        # TODO: Review unreachable code - for key_info in sorted(keys):
-        # TODO: Review unreachable code - print(f"  • {key_info}")
+    print("Configured API keys:")
+    for key_info in sorted(keys):
+        print(f"  • {key_info}")
 
-        # TODO: Review unreachable code - return 0
+    return 0
     # TODO: Review unreachable code - except Exception as e:
     # TODO: Review unreachable code -     logger.error(f"Failed to list keys: {e}")
     # TODO: Review unreachable code -     return 1
 
 
-# TODO: Review unreachable code - def _handle_setup(manager: APIKeyManager) -> int:
-# TODO: Review unreachable code - """Handle setup command - run interactive setup wizard."""
-# TODO: Review unreachable code - print("AliceMultiverse API Key Setup Wizard")
-# TODO: Review unreachable code - print("=" * 40)
-# TODO: Review unreachable code - print()
-# TODO: Review unreachable code - print("This wizard will help you configure API keys securely in macOS Keychain.")
-# TODO: Review unreachable code - print()
-# TODO: Review unreachable code - print("Note: For containerized environments, use environment variables instead:")
-# TODO: Review unreachable code - print("  • SIGHTENGINE_API_USER and SIGHTENGINE_API_SECRET")
-# TODO: Review unreachable code - print("  • ANTHROPIC_API_KEY")
-# TODO: Review unreachable code - print()
+def _handle_setup(manager: APIKeyManager) -> int:
+    """Handle setup command - run interactive setup wizard."""
+    print("AliceMultiverse API Key Setup Wizard")
+    print("=" * 40)
+    print()
+    print("This wizard will help you configure API keys securely in macOS Keychain.")
+    print()
+    print("Note: For containerized environments, use environment variables instead:")
+    print("  • SIGHTENGINE_API_USER and SIGHTENGINE_API_SECRET")
+    print("  • ANTHROPIC_API_KEY")
+    print()
 
-# TODO: Review unreachable code - # Use keychain for secure storage
-# TODO: Review unreachable code - method = "keychain"
+    # Use keychain for secure storage
+    method = "keychain"
 
-# TODO: Review unreachable code - while True:
-# TODO: Review unreachable code - print("Which API key would you like to configure?")
-# TODO: Review unreachable code - print()
-# TODO: Review unreachable code - print("1. SightEngine (quality assessment)")
-# TODO: Review unreachable code - print("2. Anthropic Claude (AI defect detection)")
-# TODO: Review unreachable code - print("3. Exit setup")
-# TODO: Review unreachable code - print()
+    while True:
+        print("Which API key would you like to configure?")
+        print()
+        print("1. SightEngine (quality assessment)")
+        print("2. Anthropic Claude (AI defect detection)")
+        print("3. Exit setup")
+        print()
 
-# TODO: Review unreachable code - choice = input("Select option [1-3]: ").strip()
+        choice = input("Select option [1-3]: ").strip()
 
-# TODO: Review unreachable code - if choice == "1":
-# TODO: Review unreachable code - # SightEngine setup
-# TODO: Review unreachable code - print()
-# TODO: Review unreachable code - print("SightEngine Setup")
-# TODO: Review unreachable code - print("-" * 30)
-# TODO: Review unreachable code - print("SightEngine provides advanced quality assessment.")
-# TODO: Review unreachable code - print("Get your API credentials at: https://sightengine.com")
-# TODO: Review unreachable code - print()
+        if choice == "1":
+            # SightEngine setup
+            print()
+            print("SightEngine Setup")
+            print("-" * 30)
+            print("SightEngine provides advanced quality assessment.")
+            print("Get your API credentials at: https://sightengine.com")
+            print()
 
-# TODO: Review unreachable code - api_user = input("SightEngine API User: ").strip()
-# TODO: Review unreachable code - api_secret = input("SightEngine API Secret: ").strip()
+            api_user = input("SightEngine API User: ").strip()
+            api_secret = input("SightEngine API Secret: ").strip()
 
-# TODO: Review unreachable code - if api_user and api_secret:
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - manager.set_api_key("sightengine_user", api_user, method)
-# TODO: Review unreachable code - manager.set_api_key("sightengine_secret", api_secret, method)
-# TODO: Review unreachable code - print("✓ SightEngine credentials saved to macOS Keychain")
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - print(f"✗ Failed to save SightEngine credentials: {e}")
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - print("✗ Both API User and Secret are required")
-# TODO: Review unreachable code - print()
+            if api_user and api_secret:
+                try:
+                    manager.set_api_key("sightengine_user", api_user, method)
+                    manager.set_api_key("sightengine_secret", api_secret, method)
+                    print("✓ SightEngine credentials saved to macOS Keychain")
+                except Exception as e:
+                    print(f"✗ Failed to save SightEngine credentials: {e}")
+            else:
+                print("✗ Both API User and Secret are required")
+            print()
 
-# TODO: Review unreachable code - elif choice == "2":
-# TODO: Review unreachable code - # Anthropic Claude setup
-# TODO: Review unreachable code - print()
-# TODO: Review unreachable code - print("Anthropic Claude Setup")
-# TODO: Review unreachable code - print("-" * 30)
-# TODO: Review unreachable code - print("Claude provides AI defect detection for premium pipeline.")
-# TODO: Review unreachable code - print("Get your API key at: https://console.anthropic.com")
-# TODO: Review unreachable code - print()
+        elif choice == "2":
+            # Anthropic Claude setup
+            print()
+            print("Anthropic Claude Setup")
+            print("-" * 30)
+            print("Claude provides AI defect detection for premium pipeline.")
+            print("Get your API key at: https://console.anthropic.com")
+            print()
 
-# TODO: Review unreachable code - import getpass
+            import getpass
 
-# TODO: Review unreachable code - api_key = getpass.getpass("Anthropic API Key: ").strip()
+            api_key = getpass.getpass("Anthropic API Key: ").strip()
 
-# TODO: Review unreachable code - if api_key:
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - manager.set_api_key("anthropic_api_key", api_key, method)
-# TODO: Review unreachable code - print("✓ Anthropic API key saved to macOS Keychain")
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - print(f"✗ Failed to save Anthropic API key: {e}")
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - print("✗ API key is required")
-# TODO: Review unreachable code - print()
+            if api_key:
+                try:
+                    manager.set_api_key("anthropic_api_key", api_key, method)
+                    print("✓ Anthropic API key saved to macOS Keychain")
+                except Exception as e:
+                    print(f"✗ Failed to save Anthropic API key: {e}")
+            else:
+                print("✗ API key is required")
+            print()
 
-# TODO: Review unreachable code - elif choice == "3":
-# TODO: Review unreachable code - break
+        elif choice == "3":
+            break
 
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - print("Invalid choice. Please enter 1, 2, or 3.")
-# TODO: Review unreachable code - print()
+        else:
+            print("Invalid choice. Please enter 1, 2, or 3.")
+            print()
 
-# TODO: Review unreachable code - print()
-# TODO: Review unreachable code - print("Setup complete!")
-# TODO: Review unreachable code - print()
-# TODO: Review unreachable code - print("You can view your configured keys with:")
-# TODO: Review unreachable code - print("  alice keys list")
-# TODO: Review unreachable code - print()
+    print()
+    print("Setup complete!")
+    print()
+    print("You can view your configured keys with:")
+    print("  alice keys list")
+    print()
 
-# TODO: Review unreachable code - return 0
+    return 0
 
 
-# TODO: Review unreachable code - def run_interactive_setup() -> int:
-# TODO: Review unreachable code - """Run interactive setup wizard (legacy function for compatibility)."""
-# TODO: Review unreachable code - manager = APIKeyManager()
-# TODO: Review unreachable code - return _handle_setup(manager)
+def run_interactive_setup() -> int:
+    """Run interactive setup wizard (legacy function for compatibility)."""
+    manager = APIKeyManager()
+    return _handle_setup(manager)

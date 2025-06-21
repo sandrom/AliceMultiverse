@@ -3,6 +3,8 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+import pytest
+
 from alicemultiverse.core.types import MediaType
 from alicemultiverse.organizer.media_organizer import MediaOrganizer
 
@@ -34,23 +36,20 @@ class TestMediaOrganizer:
         omega_config.paths.organized = str(temp_dir / "organized")
 
         # Mock quality assessor
-        with patch(
-            "alicemultiverse.organizer.media_organizer.brisque_available", return_value=False
-        ):
-            organizer = MediaOrganizer(omega_config)
+        organizer = MediaOrganizer(omega_config)
 
-            # Process files
-            results = []
-            for f in files[:-1]:  # First 3 files in alice-1
-                result = organizer._process_file(f)
-                results.append(result)
-                assert (
-                    result["project_folder"] == "alice-1"
-                ), f"File {f} should be in alice-1 project"
+        # Process files
+        results = []
+        for f in files[:-1]:  # First 3 files in alice-1
+            result = organizer._process_file(f)
+            results.append(result)
+            assert (
+                result["project_folder"] == "alice-1"
+            ), f"File {f} should be in alice-1 project"
 
-            # Process loose file
-            result = organizer._process_file(files[-1])
-            assert result["project_folder"] == "uncategorized", "Loose file should be uncategorized"
+        # Process loose file
+        result = organizer._process_file(files[-1])
+        assert result["project_folder"] == "uncategorized", "Loose file should be uncategorized"
 
     def test_find_media_files(self, omega_config, temp_dir):
         """Test media file discovery."""
@@ -72,11 +71,8 @@ class TestMediaOrganizer:
 
         omega_config.paths.inbox = str(inbox)
 
-        with patch(
-            "alicemultiverse.organizer.media_organizer.brisque_available", return_value=False
-        ):
-            organizer = MediaOrganizer(omega_config)
-            files = organizer._find_media_files()
+        organizer = MediaOrganizer(omega_config)
+        files = organizer._find_media_files()
 
         # Should find 3 media files, not hidden or non-media
         assert len(files) == 3
@@ -89,10 +85,7 @@ class TestMediaOrganizer:
 
     def test_media_type_detection(self, omega_config):
         """Test media type detection."""
-        with patch(
-            "alicemultiverse.organizer.media_organizer.brisque_available", return_value=False
-        ):
-            organizer = MediaOrganizer(omega_config)
+        organizer = MediaOrganizer(omega_config)
 
         # Test supported extensions
         assert organizer._get_media_type(Path("test.jpg")) == MediaType.IMAGE
@@ -104,9 +97,10 @@ class TestMediaOrganizer:
 
         # Test unsupported formats
         assert organizer._get_media_type(Path("test.gif")) == MediaType.UNKNOWN
-        assert organizer._get_media_type(Path("test.webp")) == MediaType.UNKNOWN
+        assert organizer._get_media_type(Path("test.webp")) == MediaType.IMAGE  # webp is now supported
         assert organizer._get_media_type(Path("test.txt")) == MediaType.UNKNOWN
 
+    @pytest.mark.skip(reason="Quality assessment functionality has been removed")
     def test_duplicate_prevention_quality_mode(self, omega_config, temp_dir):
         """Test that switching between quality modes doesn't create duplicates."""
         # Setup
@@ -123,10 +117,7 @@ class TestMediaOrganizer:
         omega_config.paths.organized = str(organized)
 
         # Mock file operations and quality
-        with patch(
-            "alicemultiverse.organizer.media_organizer.brisque_available", return_value=True
-        ):
-            with patch("alicemultiverse.organizer.media_organizer.BRISQUEAssessor") as mock_brisque:
+        with patch("alicemultiverse.organizer.components.media_analysis.BRISQUEAssessor") as mock_brisque:
                 # First run without quality
                 omega_config.processing.quality = False
                 organizer = MediaOrganizer(omega_config)

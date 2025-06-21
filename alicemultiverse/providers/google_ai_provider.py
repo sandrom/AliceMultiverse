@@ -34,6 +34,33 @@ class GoogleAIBackend(Enum):
 class GoogleAIProvider(BaseProvider):
     """Google AI provider implementation for Imagen and Veo."""
 
+    @property
+    def name(self) -> str:
+        """Provider name."""
+        return "google_ai"
+
+    @property
+    def capabilities(self) -> ProviderCapabilities:
+        """Provider capabilities."""
+        return ProviderCapabilities(
+            generation_types=[
+                GenerationType.IMAGE,
+                GenerationType.VIDEO,
+            ],
+            max_file_size=100 * 1024 * 1024,  # 100MB
+            supported_formats=[".jpg", ".jpeg", ".png", ".mp4", ".mov"],
+            features=[
+                "imagen_generation",
+                "veo_generation",
+                "batch_processing",
+                "long_running_operations",
+            ],
+            rate_limits={
+                "requests_per_minute": 60,
+                "operations_per_minute": 10,
+            },
+        )
+
     # Model mapping
     MODELS = {
         # Imagen 3 models
@@ -91,7 +118,7 @@ class GoogleAIProvider(BaseProvider):
             )
 
         # Initialize base class
-        super().__init__("google_ai", api_key, **kwargs)
+        super().__init__(api_key, **kwargs)
 
         self.access_token = None  # For Vertex AI
         self.token_expires_at = None
@@ -139,33 +166,33 @@ class GoogleAIProvider(BaseProvider):
             if datetime.now().timestamp() < self.token_expires_at - 300:
                 return
 
-        # TODO: Review unreachable code - # In a real implementation, use google.auth to get credentials
-        # TODO: Review unreachable code - # For now, assume the API key is an access token
-        # TODO: Review unreachable code - self.access_token = self.api_key
-        # TODO: Review unreachable code - self.token_expires_at = datetime.now().timestamp() + 3600
+        # In a real implementation, use google.auth to get credentials
+        # For now, assume the API key is an access token
+        self.access_token = self.api_key
+        self.token_expires_at = datetime.now().timestamp() + 3600
 
     def _get_base_url(self) -> str:
         """Get the appropriate base URL based on backend."""
         if self.backend == GoogleAIBackend.GEMINI:
             return self.GEMINI_BASE_URL
-        # TODO: Review unreachable code - else:
-        # TODO: Review unreachable code - return self.VERTEX_BASE_URL.format(location=self.location)
+        else:
+            return self.VERTEX_BASE_URL.format(location=self.location)
 
     def _estimate_generation_time(self, request: GenerationRequest) -> float:
         """Estimate generation time for a request."""
         if request.generation_type == GenerationType.VIDEO:
             # Video generation takes longer
             return 60.0  # Base 60 seconds for video
-        # TODO: Review unreachable code - else:
-        # TODO: Review unreachable code - # Image generation
-        # TODO: Review unreachable code - base_time = 5.0
-        # TODO: Review unreachable code - params = request.parameters or {}
+        else:
+            # Image generation
+            base_time = 5.0
+            params = request.parameters or {}
 
-        # TODO: Review unreachable code - # More images take longer
-        # TODO: Review unreachable code - num_images = params.get("number_of_images", 1)
-        # TODO: Review unreachable code - base_time += (num_images - 1) * 2.0
+            # More images take longer
+            num_images = params.get("number_of_images", 1)
+            base_time += (num_images - 1) * 2.0
 
-        # TODO: Review unreachable code - return base_time
+            return base_time
 
     async def estimate_cost(self, request: GenerationRequest) -> float:
         """Estimate the cost of a generation request."""
@@ -178,336 +205,336 @@ class GoogleAIProvider(BaseProvider):
             # Image generation cost
             num_images = params.get("number_of_images", 1)
             return base_cost * num_images
-        # TODO: Review unreachable code - else:
-        # TODO: Review unreachable code - # Video generation cost
-        # TODO: Review unreachable code - # Cost might vary by duration in the future
-        # TODO: Review unreachable code - return base_cost
+        else:
+            # Video generation cost
+            # Cost might vary by duration in the future
+            return base_cost
 
     def _validate_aspect_ratio(self, aspect_ratio: str, model_type: str) -> bool:
         """Validate if aspect ratio is supported for model type."""
         supported = self.ASPECT_RATIOS.get(model_type, [])
         return aspect_ratio in supported
 
-    # TODO: Review unreachable code - async def _prepare_imagen_request(self, request: GenerationRequest) -> dict[str, Any]:
-    # TODO: Review unreachable code - """Prepare request body for Imagen API."""
-    # TODO: Review unreachable code - params = request.parameters or {}
+    async def _prepare_imagen_request(self, request: GenerationRequest) -> dict[str, Any]:
+        """Prepare request body for Imagen API."""
+        params = request.parameters or {}
 
-    # TODO: Review unreachable code - if self.backend == GoogleAIBackend.GEMINI:
-    # TODO: Review unreachable code - # Gemini API format
-    # TODO: Review unreachable code - body = {
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - "config": {
-    # TODO: Review unreachable code - "number_of_images": params.get("number_of_images", 1),
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - }
+        if self.backend == GoogleAIBackend.GEMINI:
+            # Gemini API format
+            body = {
+                "prompt": request.prompt,
+                "config": {
+                    "number_of_images": params.get("number_of_images", 1),
+                }
+            }
 
-    # TODO: Review unreachable code - # Add optional parameters
-    # TODO: Review unreachable code - if params.get("negative_prompt"):
-    # TODO: Review unreachable code - body["config"]["negative_prompt"] = params["negative_prompt"]
+            # Add optional parameters
+            if params.get("negative_prompt"):
+                body["config"]["negative_prompt"] = params["negative_prompt"]
 
-    # TODO: Review unreachable code - if params.get("aspect_ratio"):
-    # TODO: Review unreachable code - if self._validate_aspect_ratio(params["aspect_ratio"], "imagen"):
-    # TODO: Review unreachable code - body["config"]["aspect_ratio"] = params["aspect_ratio"]
+            if params.get("aspect_ratio"):
+                if self._validate_aspect_ratio(params["aspect_ratio"], "imagen"):
+                    body["config"]["aspect_ratio"] = params["aspect_ratio"]
 
-    # TODO: Review unreachable code - if params.get("seed") is not None:
-    # TODO: Review unreachable code - body["config"]["seed"] = params["seed"]
+            if params.get("seed") is not None:
+                body["config"]["seed"] = params["seed"]
 
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Vertex AI format
-    # TODO: Review unreachable code - body = {
-    # TODO: Review unreachable code - "instances": [{
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - }],
-    # TODO: Review unreachable code - "parameters": {
-    # TODO: Review unreachable code - "sampleCount": params.get("number_of_images", 1),
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - }
+        else:
+            # Vertex AI format
+            body = {
+                "instances": [{
+                    "prompt": request.prompt,
+                }],
+                "parameters": {
+                    "sampleCount": params.get("number_of_images", 1),
+                }
+            }
 
-    # TODO: Review unreachable code - if params.get("negative_prompt"):
-    # TODO: Review unreachable code - body["parameters"]["negativePrompt"] = params["negative_prompt"]
+            if params.get("negative_prompt"):
+                body["parameters"]["negativePrompt"] = params["negative_prompt"]
 
-    # TODO: Review unreachable code - if params.get("aspect_ratio"):
-    # TODO: Review unreachable code - if self._validate_aspect_ratio(params["aspect_ratio"], "imagen"):
-    # TODO: Review unreachable code - body["parameters"]["aspectRatio"] = params["aspect_ratio"]
+            if params.get("aspect_ratio"):
+                if self._validate_aspect_ratio(params["aspect_ratio"], "imagen"):
+                    body["parameters"]["aspectRatio"] = params["aspect_ratio"]
 
-    # TODO: Review unreachable code - if params.get("seed") is not None:
-    # TODO: Review unreachable code - body["parameters"]["seed"] = params["seed"]
+            if params.get("seed") is not None:
+                body["parameters"]["seed"] = params["seed"]
 
-    # TODO: Review unreachable code - return body
+        return body
 
-    # TODO: Review unreachable code - async def _prepare_veo_request(self, request: GenerationRequest) -> dict[str, Any]:
-    # TODO: Review unreachable code - """Prepare request body for Veo API."""
-    # TODO: Review unreachable code - params = request.parameters or {}
-    # TODO: Review unreachable code - model_key = self.MODELS.get(request.model, request.model)
-    # TODO: Review unreachable code - is_veo3 = "veo-3" in model_key
+    async def _prepare_veo_request(self, request: GenerationRequest) -> dict[str, Any]:
+        """Prepare request body for Veo API."""
+        params = request.parameters or {}
+        model_key = self.MODELS.get(request.model, request.model)
+        is_veo3 = "veo-3" in model_key
 
-    # TODO: Review unreachable code - if self.backend == GoogleAIBackend.GEMINI:
-    # TODO: Review unreachable code - # Gemini API format
-    # TODO: Review unreachable code - body = {
-    # TODO: Review unreachable code - "config": {}
-    # TODO: Review unreachable code - }
+        if self.backend == GoogleAIBackend.GEMINI:
+            # Gemini API format
+            body = {
+                "config": {}
+            }
 
-    # TODO: Review unreachable code - # Text or image prompt
-    # TODO: Review unreachable code - if request.prompt:
-    # TODO: Review unreachable code - body["text_prompt"] = request.prompt
+            # Text or image prompt
+            if request.prompt:
+                body["text_prompt"] = request.prompt
 
-    # TODO: Review unreachable code - if request.reference_assets and len(request.reference_assets) > 0:
-    # TODO: Review unreachable code - # Image to video
-    # TODO: Review unreachable code - image_data = params.get("image_data")
-    # TODO: Review unreachable code - if image_data:
-    # TODO: Review unreachable code - # In real implementation, upload image first
-    # TODO: Review unreachable code - body["image_prompt"] = {"image_bytes": image_data}
+            if request.reference_assets and len(request.reference_assets) > 0:
+                # Image to video
+                image_data = params.get("image_data")
+                if image_data:
+                    # In real implementation, upload image first
+                    body["image_prompt"] = {"image_bytes": image_data}
 
-    # TODO: Review unreachable code - # Optional parameters
-    # TODO: Review unreachable code - if params.get("aspect_ratio"):
-    # TODO: Review unreachable code - if self._validate_aspect_ratio(params["aspect_ratio"], "veo"):
-    # TODO: Review unreachable code - body["config"]["aspect_ratio"] = params["aspect_ratio"]
+            # Optional parameters
+            if params.get("aspect_ratio"):
+                if self._validate_aspect_ratio(params["aspect_ratio"], "veo"):
+                    body["config"]["aspect_ratio"] = params["aspect_ratio"]
 
-    # TODO: Review unreachable code - if params.get("negative_prompt"):
-    # TODO: Review unreachable code - body["config"]["negative_prompt"] = params["negative_prompt"]
+            if params.get("negative_prompt"):
+                body["config"]["negative_prompt"] = params["negative_prompt"]
 
-    # TODO: Review unreachable code - if params.get("seed") is not None:
-    # TODO: Review unreachable code - body["config"]["seed"] = params["seed"]
+            if params.get("seed") is not None:
+                body["config"]["seed"] = params["seed"]
 
-    # TODO: Review unreachable code - # Veo 3 specific parameters
-    # TODO: Review unreachable code - if is_veo3:
-    # TODO: Review unreachable code - body["config"]["enable_sound"] = params.get("enable_sound", False)
-    # TODO: Review unreachable code - body["config"]["enable_prompt_rewriting"] = params.get("enable_prompt_rewriting", True)
-    # TODO: Review unreachable code - body["config"]["number_of_videos"] = params.get("number_of_videos", 1)  # Max 2
+            # Veo 3 specific parameters
+            if is_veo3:
+                body["config"]["enable_sound"] = params.get("enable_sound", False)
+                body["config"]["enable_prompt_rewriting"] = params.get("enable_prompt_rewriting", True)
+                body["config"]["number_of_videos"] = params.get("number_of_videos", 1)  # Max 2
 
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Vertex AI format
-    # TODO: Review unreachable code - body = {
-    # TODO: Review unreachable code - "instances": [{}],
-    # TODO: Review unreachable code - "parameters": {}
-    # TODO: Review unreachable code - }
+        else:
+            # Vertex AI format
+            body = {
+                "instances": [{}],
+                "parameters": {}
+            }
 
-    # TODO: Review unreachable code - if request.prompt:
-    # TODO: Review unreachable code - body["instances"][0]["prompt"] = request.prompt
+            if request.prompt:
+                body["instances"][0]["prompt"] = request.prompt
 
-    # TODO: Review unreachable code - if request.reference_assets and len(request.reference_assets) > 0:
-    # TODO: Review unreachable code - # Image to video
-    # TODO: Review unreachable code - image_data = params.get("image_data")
-    # TODO: Review unreachable code - if image_data:
-    # TODO: Review unreachable code - # In real implementation, handle image upload
-    # TODO: Review unreachable code - body["instances"][0]["image"] = {"bytesBase64Encoded": image_data}
+            if request.reference_assets and len(request.reference_assets) > 0:
+                # Image to video
+                image_data = params.get("image_data")
+                if image_data:
+                    # In real implementation, handle image upload
+                    body["instances"][0]["image"] = {"bytesBase64Encoded": image_data}
 
-    # TODO: Review unreachable code - # Parameters
-    # TODO: Review unreachable code - if params.get("aspect_ratio"):
-    # TODO: Review unreachable code - if self._validate_aspect_ratio(params["aspect_ratio"], "veo"):
-    # TODO: Review unreachable code - body["parameters"]["aspectRatio"] = params["aspect_ratio"]
+            # Parameters
+            if params.get("aspect_ratio"):
+                if self._validate_aspect_ratio(params["aspect_ratio"], "veo"):
+                    body["parameters"]["aspectRatio"] = params["aspect_ratio"]
 
-    # TODO: Review unreachable code - if params.get("negative_prompt"):
-    # TODO: Review unreachable code - body["parameters"]["negativePrompt"] = params["negative_prompt"]
+            if params.get("negative_prompt"):
+                body["parameters"]["negativePrompt"] = params["negative_prompt"]
 
-    # TODO: Review unreachable code - if params.get("seed") is not None:
-    # TODO: Review unreachable code - body["parameters"]["seed"] = params["seed"]
+            if params.get("seed") is not None:
+                body["parameters"]["seed"] = params["seed"]
 
-    # TODO: Review unreachable code - # Veo 3 specific parameters for Vertex AI
-    # TODO: Review unreachable code - if is_veo3:
-    # TODO: Review unreachable code - body["parameters"]["enableSound"] = params.get("enable_sound", False)
-    # TODO: Review unreachable code - body["parameters"]["enablePromptRewriting"] = params.get("enable_prompt_rewriting", True)
-    # TODO: Review unreachable code - body["parameters"]["sampleCount"] = params.get("number_of_videos", 1)  # Max 2
+            # Veo 3 specific parameters for Vertex AI
+            if is_veo3:
+                body["parameters"]["enableSound"] = params.get("enable_sound", False)
+                body["parameters"]["enablePromptRewriting"] = params.get("enable_prompt_rewriting", True)
+                body["parameters"]["sampleCount"] = params.get("number_of_videos", 1)  # Max 2
 
-    # TODO: Review unreachable code - return body
+        return body
 
-    # TODO: Review unreachable code - async def _poll_long_running_operation(self, operation_name: str) -> dict[str, Any]:
-    # TODO: Review unreachable code - """Poll a long-running operation until completion."""
-    # TODO: Review unreachable code - await self._ensure_session()
+    async def _poll_long_running_operation(self, operation_name: str) -> dict[str, Any]:
+        """Poll a long-running operation until completion."""
+        await self._ensure_session()
 
-    # TODO: Review unreachable code - headers = self._get_headers()
+        headers = self._get_headers()
 
-    # TODO: Review unreachable code - # For Vertex AI long-running operations
-    # TODO: Review unreachable code - max_attempts = 120  # 10 minutes with 5 second intervals
-    # TODO: Review unreachable code - for attempt in range(max_attempts):
-    # TODO: Review unreachable code - url = f"{self._get_base_url()}/v1/{operation_name}"
+        # For Vertex AI long-running operations
+        max_attempts = 120  # 10 minutes with 5 second intervals
+        for attempt in range(max_attempts):
+            url = f"{self._get_base_url()}/v1/{operation_name}"
 
-    # TODO: Review unreachable code - async with self._session.get(url, headers=headers) as resp:
-    # TODO: Review unreachable code - await self._handle_response_errors(resp, "Operation status check")
+            async with self._session.get(url, headers=headers) as resp:
+                await self._handle_response_errors(resp, "Operation status check")
 
-    # TODO: Review unreachable code - data = await resp.json()
+                data = await resp.json()
 
-    # TODO: Review unreachable code - if data.get("done"):
-    # TODO: Review unreachable code - if data.get("error"):
-    # TODO: Review unreachable code - raise GenerationError(f"Operation failed: {data['error']}")
-    # TODO: Review unreachable code - return data.get("response", {}) or 0
+                if data.get("done"):
+                    if data.get("error"):
+                        raise GenerationError(f"Operation failed: {data['error']}")
+                    return data.get("response", {})
 
-    # TODO: Review unreachable code - # Wait before next poll
-    # TODO: Review unreachable code - await asyncio.sleep(5)
+            # Wait before next poll
+            await asyncio.sleep(5)
 
-    # TODO: Review unreachable code - raise GenerationError("Operation timed out after 10 minutes")
+        raise GenerationError("Operation timed out after 10 minutes")
 
-    # TODO: Review unreachable code - def _get_headers(self) -> dict[str, str]:
-    # TODO: Review unreachable code - """Get appropriate headers based on backend."""
-    # TODO: Review unreachable code - if self.backend == GoogleAIBackend.GEMINI:
-    # TODO: Review unreachable code - return {
-    # TODO: Review unreachable code - "Content-Type": "application/json",
-    # TODO: Review unreachable code - "x-goog-api-key": self._get_api_key('GOOGLE_AI_API_KEY'),
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Vertex AI
-    # TODO: Review unreachable code - return {
-    # TODO: Review unreachable code - "Content-Type": "application/json",
-    # TODO: Review unreachable code - "Authorization": f"Bearer {self.access_token}",
-    # TODO: Review unreachable code - }
+    def _get_headers(self) -> dict[str, str]:
+        """Get appropriate headers based on backend."""
+        if self.backend == GoogleAIBackend.GEMINI:
+            return {
+                "Content-Type": "application/json",
+                "x-goog-api-key": self._get_api_key('GOOGLE_AI_API_KEY'),
+            }
+        else:
+            # Vertex AI
+            return {
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.access_token}",
+            }
 
-    # TODO: Review unreachable code - async def _generate(self, request: GenerationRequest) -> GenerationResult:
-    # TODO: Review unreachable code - """Perform the actual generation using Google AI."""
-    # TODO: Review unreachable code - session = await self._ensure_session()
+    async def _generate(self, request: GenerationRequest) -> GenerationResult:
+        """Perform the actual generation using Google AI."""
+        session = await self._ensure_session()
 
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - # Determine model and endpoint
-    # TODO: Review unreachable code - model_key = self.MODELS.get(request.model, request.model)
-    # TODO: Review unreachable code - is_video = request.generation_type == GenerationType.VIDEO
+        try:
+            # Determine model and endpoint
+            model_key = self.MODELS.get(request.model, request.model)
+            is_video = request.generation_type == GenerationType.VIDEO
 
-    # TODO: Review unreachable code - # Prepare request based on model type
-    # TODO: Review unreachable code - if is_video:
-    # TODO: Review unreachable code - body = await self._prepare_veo_request(request)
-    # TODO: Review unreachable code - endpoint = self._get_veo_endpoint(model_key)
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - body = await self._prepare_imagen_request(request)
-    # TODO: Review unreachable code - endpoint = self._get_imagen_endpoint(model_key)
+            # Prepare request based on model type
+            if is_video:
+                body = await self._prepare_veo_request(request)
+                endpoint = self._get_veo_endpoint(model_key)
+            else:
+                body = await self._prepare_imagen_request(request)
+                endpoint = self._get_imagen_endpoint(model_key)
 
-    # TODO: Review unreachable code - # Make API request
-    # TODO: Review unreachable code - headers = self._get_headers()
-    # TODO: Review unreachable code - url = f"{self._get_base_url()}{endpoint}"
+            # Make API request
+            headers = self._get_headers()
+            url = f"{self._get_base_url()}{endpoint}"
 
-    # TODO: Review unreachable code - async with session.post(url, headers=headers, json=body) as resp:
-    # TODO: Review unreachable code - if resp.status == 202:
-    # TODO: Review unreachable code - # This is OK - long-running operation
-    # TODO: Review unreachable code - pass
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - await self._handle_response_errors(resp, "Generation")
+            async with session.post(url, headers=headers, json=body) as resp:
+                if resp.status == 202:
+                    # This is OK - long-running operation
+                    pass
+                else:
+                    await self._handle_response_errors(resp, "Generation")
 
-    # TODO: Review unreachable code - data = await resp.json()
+                data = await resp.json()
 
-    # TODO: Review unreachable code - # Handle long-running operations (Vertex AI)
-    # TODO: Review unreachable code - if resp.status == 202 or "name" in data:
-    # TODO: Review unreachable code - # This is a long-running operation
-    # TODO: Review unreachable code - operation_name = data.get("name")
-    # TODO: Review unreachable code - if operation_name:
-    # TODO: Review unreachable code - result_data = await self._poll_long_running_operation(operation_name)
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - result_data = data
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - result_data = data
+            # Handle long-running operations (Vertex AI)
+            if resp.status == 202 or "name" in data:
+                # This is a long-running operation
+                operation_name = data.get("name")
+                if operation_name:
+                    result_data = await self._poll_long_running_operation(operation_name)
+                else:
+                    result_data = data
+            else:
+                result_data = data
 
-    # TODO: Review unreachable code - # Process results
-    # TODO: Review unreachable code - file_paths = []
+            # Process results
+            file_paths = []
 
-    # TODO: Review unreachable code - if is_video:
-    # TODO: Review unreachable code - # Video generation result
-    # TODO: Review unreachable code - videos = result_data.get("videos", [])
-    # TODO: Review unreachable code - for i, video in enumerate(videos):
-    # TODO: Review unreachable code - video_data = video.get("video_bytes")
-    # TODO: Review unreachable code - if video_data and request.output_path:
-    # TODO: Review unreachable code - file_path = request.output_path / f"veo_{i}.mp4"
-    # TODO: Review unreachable code - file_path.parent.mkdir(parents=True, exist_ok=True)
-    # TODO: Review unreachable code - # In real implementation, decode base64 if needed
-    # TODO: Review unreachable code - with open(file_path, "wb") as f:
-    # TODO: Review unreachable code - f.write(video_data)
-    # TODO: Review unreachable code - file_paths.append(file_path)
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Image generation result
-    # TODO: Review unreachable code - if self.backend == GoogleAIBackend.GEMINI:
-    # TODO: Review unreachable code - images = result_data.get("generated_images", [])
-    # TODO: Review unreachable code - for i, image in enumerate(images):
-    # TODO: Review unreachable code - image_data = image.get("image", {}).get("image_bytes")
-    # TODO: Review unreachable code - if image_data and request.output_path:
-    # TODO: Review unreachable code - file_path = request.output_path / f"imagen_{i}.png"
-    # TODO: Review unreachable code - file_path.parent.mkdir(parents=True, exist_ok=True)
-    # TODO: Review unreachable code - # In real implementation, decode base64 if needed
-    # TODO: Review unreachable code - with open(file_path, "wb") as f:
-    # TODO: Review unreachable code - f.write(image_data)
-    # TODO: Review unreachable code - file_paths.append(file_path)
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Vertex AI format
-    # TODO: Review unreachable code - predictions = result_data.get("predictions", [])
-    # TODO: Review unreachable code - for i, pred in enumerate(predictions):
-    # TODO: Review unreachable code - image_data = pred.get("bytesBase64Encoded")
-    # TODO: Review unreachable code - if image_data and request.output_path:
-    # TODO: Review unreachable code - file_path = request.output_path / f"imagen_{i}.png"
-    # TODO: Review unreachable code - file_path.parent.mkdir(parents=True, exist_ok=True)
-    # TODO: Review unreachable code - import base64
-    # TODO: Review unreachable code - with open(file_path, "wb") as f:
-    # TODO: Review unreachable code - f.write(base64.b64decode(image_data))
-    # TODO: Review unreachable code - file_paths.append(file_path)
+            if is_video:
+                # Video generation result
+                videos = result_data.get("videos", [])
+                for i, video in enumerate(videos):
+                    video_data = video.get("video_bytes")
+                    if video_data and request.output_path:
+                        file_path = request.output_path / f"veo_{i}.mp4"
+                        file_path.parent.mkdir(parents=True, exist_ok=True)
+                        # In real implementation, decode base64 if needed
+                        with open(file_path, "wb") as f:
+                            f.write(video_data)
+                        file_paths.append(file_path)
+            else:
+                # Image generation result
+                if self.backend == GoogleAIBackend.GEMINI:
+                    images = result_data.get("generated_images", [])
+                    for i, image in enumerate(images):
+                        image_data = image.get("image", {}).get("image_bytes")
+                        if image_data and request.output_path:
+                            file_path = request.output_path / f"imagen_{i}.png"
+                            file_path.parent.mkdir(parents=True, exist_ok=True)
+                            # In real implementation, decode base64 if needed
+                            with open(file_path, "wb") as f:
+                                f.write(image_data)
+                            file_paths.append(file_path)
+                else:
+                    # Vertex AI format
+                    predictions = result_data.get("predictions", [])
+                    for i, pred in enumerate(predictions):
+                        image_data = pred.get("bytesBase64Encoded")
+                        if image_data and request.output_path:
+                            file_path = request.output_path / f"imagen_{i}.png"
+                            file_path.parent.mkdir(parents=True, exist_ok=True)
+                            import base64
+                            with open(file_path, "wb") as f:
+                                f.write(base64.b64decode(image_data))
+                            file_paths.append(file_path)
 
-    # TODO: Review unreachable code - # Calculate actual cost
-    # TODO: Review unreachable code - actual_cost = await self.estimate_cost(request)
+            # Calculate actual cost
+            actual_cost = await self.estimate_cost(request)
 
-    # TODO: Review unreachable code - # Get generation metadata
-    # TODO: Review unreachable code - params = request.parameters or {}
-    # TODO: Review unreachable code - metadata = {
-    # TODO: Review unreachable code - "provider": "google_ai",
-    # TODO: Review unreachable code - "backend": self.backend.value,
-    # TODO: Review unreachable code - "model": model_key,
-    # TODO: Review unreachable code - "prompt": request.prompt,
-    # TODO: Review unreachable code - "generation_type": request.generation_type.value,
-    # TODO: Review unreachable code - "aspect_ratio": params.get("aspect_ratio"),
-    # TODO: Review unreachable code - "seed": params.get("seed"),
-    # TODO: Review unreachable code - }
+            # Get generation metadata
+            params = request.parameters or {}
+            metadata = {
+                "provider": "google_ai",
+                "backend": self.backend.value,
+                "model": model_key,
+                "prompt": request.prompt,
+                "generation_type": request.generation_type.value,
+                "aspect_ratio": params.get("aspect_ratio"),
+                "seed": params.get("seed"),
+            }
 
-    # TODO: Review unreachable code - return GenerationResult(
-    # TODO: Review unreachable code - success=True,
-    # TODO: Review unreachable code - file_path=file_paths[0] if file_paths else None,
-    # TODO: Review unreachable code - cost=actual_cost,
-    # TODO: Review unreachable code - generation_time=0.0,  # Not reported by API
-    # TODO: Review unreachable code - metadata=metadata,
-    # TODO: Review unreachable code - provider="google_ai",
-    # TODO: Review unreachable code - model=request.model,
-    # TODO: Review unreachable code - )
+            return GenerationResult(
+                success=True,
+                file_path=file_paths[0] if file_paths else None,
+                cost=actual_cost,
+                generation_time=0.0,  # Not reported by API
+                metadata=metadata,
+                provider="google_ai",
+                model=request.model,
+            )
 
-    # TODO: Review unreachable code - except Exception as e:
-    # TODO: Review unreachable code - logger.error(f"Google AI generation failed: {e!s}")
-    # TODO: Review unreachable code - return GenerationResult(
-    # TODO: Review unreachable code - success=False,
-    # TODO: Review unreachable code - error=str(e),
-    # TODO: Review unreachable code - provider="google_ai",
-    # TODO: Review unreachable code - model=request.model,
-    # TODO: Review unreachable code - )
+        except Exception as e:
+            logger.error(f"Google AI generation failed: {e!s}")
+            return GenerationResult(
+                success=False,
+                error=str(e),
+                provider="google_ai",
+                model=request.model,
+            )
 
-    # TODO: Review unreachable code - def _get_imagen_endpoint(self, model_key: str) -> str:
-    # TODO: Review unreachable code - """Get the appropriate endpoint for Imagen model."""
-    # TODO: Review unreachable code - if self.backend == GoogleAIBackend.GEMINI:
-    # TODO: Review unreachable code - return f"/v1beta/models/{model_key}:generateImages"
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Vertex AI
-    # TODO: Review unreachable code - return f"/v1/projects/{self.project_id}/locations/{self.location}/publishers/google/models/{model_key}:predict"
+    def _get_imagen_endpoint(self, model_key: str) -> str:
+        """Get the appropriate endpoint for Imagen model."""
+        if self.backend == GoogleAIBackend.GEMINI:
+            return f"/v1beta/models/{model_key}:generateImages"
+        else:
+            # Vertex AI
+            return f"/v1/projects/{self.project_id}/locations/{self.location}/publishers/google/models/{model_key}:predict"
 
-    # TODO: Review unreachable code - def _get_veo_endpoint(self, model_key: str) -> str:
-    # TODO: Review unreachable code - """Get the appropriate endpoint for Veo model."""
-    # TODO: Review unreachable code - if self.backend == GoogleAIBackend.GEMINI:
-    # TODO: Review unreachable code - return f"/v1beta/models/{model_key}:generateVideos"
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Vertex AI
-    # TODO: Review unreachable code - return f"/v1/projects/{self.project_id}/locations/{self.location}/publishers/google/models/{model_key}:predictLongRunning"
+    def _get_veo_endpoint(self, model_key: str) -> str:
+        """Get the appropriate endpoint for Veo model."""
+        if self.backend == GoogleAIBackend.GEMINI:
+            return f"/v1beta/models/{model_key}:generateVideos"
+        else:
+            # Vertex AI
+            return f"/v1/projects/{self.project_id}/locations/{self.location}/publishers/google/models/{model_key}:predictLongRunning"
 
-    # TODO: Review unreachable code - async def check_status(self) -> ProviderStatus:
-    # TODO: Review unreachable code - """Check provider availability status."""
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - if not self._session:
-    # TODO: Review unreachable code - await self.initialize()
+    async def check_status(self) -> ProviderStatus:
+        """Check provider availability status."""
+        try:
+            if not self._session:
+                await self.initialize()
 
-    # TODO: Review unreachable code - # Try a simple API call
-    # TODO: Review unreachable code - headers = self._get_headers()
+            # Try a simple API call
+            headers = self._get_headers()
 
-    # TODO: Review unreachable code - if self.backend == GoogleAIBackend.GEMINI:
-    # TODO: Review unreachable code - # List models endpoint
-    # TODO: Review unreachable code - url = f"{self._get_base_url()}/v1beta/models"
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Vertex AI health check
-    # TODO: Review unreachable code - url = f"{self._get_base_url()}/v1/projects/{self.project_id}/locations/{self.location}/models"
+            if self.backend == GoogleAIBackend.GEMINI:
+                # List models endpoint
+                url = f"{self._get_base_url()}/v1beta/models"
+            else:
+                # Vertex AI health check
+                url = f"{self._get_base_url()}/v1/projects/{self.project_id}/locations/{self.location}/models"
 
-    # TODO: Review unreachable code - async with self._session.get(url, headers=headers) as resp:
-    # TODO: Review unreachable code - if resp.status == 200:
-    # TODO: Review unreachable code - self._status = ProviderStatus.AVAILABLE
-    # TODO: Review unreachable code - return ProviderStatus.AVAILABLE
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - self._status = ProviderStatus.DEGRADED
-    # TODO: Review unreachable code - return ProviderStatus.DEGRADED
+            async with self._session.get(url, headers=headers) as resp:
+                if resp.status == 200:
+                    self._status = ProviderStatus.AVAILABLE
+                    return ProviderStatus.AVAILABLE
+                else:
+                    self._status = ProviderStatus.DEGRADED
+                    return ProviderStatus.DEGRADED
 
-    # TODO: Review unreachable code - except Exception as e:
-    # TODO: Review unreachable code - logger.error(f"Google AI status check failed: {e}")
-    # TODO: Review unreachable code - self._status = ProviderStatus.UNAVAILABLE
-    # TODO: Review unreachable code - return ProviderStatus.UNAVAILABLE
+        except Exception as e:
+            logger.error(f"Google AI status check failed: {e}")
+            self._status = ProviderStatus.UNAVAILABLE
+            return ProviderStatus.UNAVAILABLE

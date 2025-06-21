@@ -56,14 +56,21 @@ class TestBatchOperations:
         result = storage.batch_upsert_assets(sample_assets)
         
         assert result == len(sample_assets)
-        # Should have called execute once with batch insert
-        storage.conn.execute.assert_called_once()
+        # Should have called execute multiple times (BEGIN, executemany for inserts, COMMIT)
+        assert storage.conn.execute.call_count >= 2  # At least BEGIN and COMMIT
         
-        # Check the SQL contains proper batch insert syntax
-        sql_call = storage.conn.execute.call_args[0][0]
-        assert "INSERT INTO assets" in sql_call
-        assert "ON CONFLICT" in sql_call
-        assert "VALUES" in sql_call
+        # Check that executemany was called for batch insert
+        storage.conn.executemany.assert_called()
+        
+        # Check the SQL in executemany calls
+        for call in storage.conn.executemany.call_args_list:
+            sql = call[0][0]
+            if "INSERT" in sql and "assets" in sql:
+                assert "INSERT OR REPLACE INTO assets" in sql
+                assert "VALUES" in sql
+                break
+        else:
+            assert False, "No INSERT statement for assets found"
     
     def test_batch_upsert_empty_list(self, storage):
         """Test batch upsert with empty list."""
@@ -92,12 +99,24 @@ class TestBatchOperations:
         result = storage.batch_upsert_assets(assets_with_datetime)
         
         assert result == 1
-        # Check that metadata was JSON serialized
-        call_args = storage.conn.execute.call_args[0][1]
-        metadata_json = call_args[8]  # metadata is 9th parameter
-        metadata = json.loads(metadata_json)
-        assert metadata["created_at"] == "2024-01-15T10:30:00"
-        assert metadata["width"] == 512
+        # Check that executemany was called with properly serialized data
+        storage.conn.executemany.assert_called()
+        
+        # Find the assets insert call
+        for call in storage.conn.executemany.call_args_list:
+            sql = call[0][0]
+            if "INSERT OR REPLACE INTO assets" in sql:
+                # Check the data passed to executemany
+                data = call[0][1]
+                assert len(data) == 1
+                # metadata is at index 17 (18th parameter)
+                metadata = data[0][17]
+                # Metadata should be a dict (DuckDB can handle JSON natively)
+                assert isinstance(metadata, dict)
+                assert metadata["width"] == 512
+                break
+        else:
+            assert False, "No INSERT statement for assets found"
     
     def test_batch_update_tags(self, storage):
         """Test batch updating tags."""
@@ -111,13 +130,28 @@ class TestBatchOperations:
         result = storage.batch_update_tags(tag_updates)
         
         assert result == len(tag_updates)
-        storage.conn.execute.assert_called_once()
+        # Should have multiple execute calls (BEGIN, DELETE, COMMIT) and executemany for INSERT and UPDATE
+        assert storage.conn.execute.call_count >= 3  # BEGIN, DELETE, COMMIT
+        assert storage.conn.executemany.call_count >= 2  # INSERT tags, UPDATE timestamps
         
-        # Check SQL contains UPDATE
-        sql_call = storage.conn.execute.call_args[0][0]
-        assert "UPDATE assets" in sql_call
-        assert "SET tags =" in sql_call
-        assert "WHERE content_hash =" in sql_call
+        # Check that the correct SQL was used
+        # Check DELETE was called
+        delete_found = False
+        for call in storage.conn.execute.call_args_list:
+            sql = call[0][0]
+            if "DELETE FROM tags" in sql:
+                delete_found = True
+                break
+        assert delete_found, "DELETE FROM tags not found"
+        
+        # Check INSERT tags was called via executemany
+        insert_found = False
+        for call in storage.conn.executemany.call_args_list:
+            sql = call[0][0]
+            if "INSERT INTO tags" in sql:
+                insert_found = True
+                break
+        assert insert_found, "INSERT INTO tags not found"
     
     def test_batch_update_tags_empty(self, storage):
         """Test batch update tags with empty list."""

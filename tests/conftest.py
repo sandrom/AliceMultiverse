@@ -11,6 +11,7 @@ import pytest
 from omegaconf import OmegaConf
 
 from alicemultiverse.core.types import MediaType
+from alicemultiverse.core.config import Config, get_default_config
 
 
 @pytest.fixture
@@ -38,6 +39,8 @@ def test_config(temp_dir: Path) -> OmegaConf:
             "dry_run": False,
             "watch": False,
             "quality": False,
+            "force_reindex": False,
+            "watch_interval": 5,
         },
         "pipeline": {
             "mode": "basic",
@@ -65,8 +68,78 @@ def test_config(temp_dir: Path) -> OmegaConf:
             }
         },
         "enhanced_metadata": True,
+        "ai_generators": {
+            "image": ["stablediffusion", "midjourney", "dalle", "comfyui", "flux"],
+            "video": ["runway", "kling", "pika", "stable-video", "animatediff"],
+        },
     }
     return OmegaConf.create(config)
+
+
+@pytest.fixture
+def omega_config(temp_dir: Path) -> OmegaConf:
+    """Create an OmegaConf configuration for backward compatibility."""
+    # Create a complete config dict that matches the dataclass structure
+    config_dict = {
+        "paths": {
+            "inbox": str(temp_dir / "inbox"),
+            "organized": str(temp_dir / "organized"),
+            "metadata_dir": ".metadata",
+        },
+        "processing": {
+            "move": False,
+            "force": False,
+            "dry_run": False,
+            "watch": False,
+            "quality": False,
+            "force_reindex": False,
+            "watch_interval": 5,
+        },
+        "pipeline": {
+            "mode": "basic",
+            "stages": ["brisque"],
+            "cost_limit": None,
+            "dry_run": False,
+            "resume": False,
+        },
+        "quality": {
+            "thresholds": {
+                "5_star": {"min": 0, "max": 25},
+                "4_star": {"min": 25, "max": 45},
+                "3_star": {"min": 45, "max": 65},
+                "2_star": {"min": 65, "max": 80},
+                "1_star": {"min": 80, "max": 100},
+            }
+        },
+        "cache": {
+            "enable_duckdb": True,
+            "duckdb_path": str(temp_dir / "cache.db"),
+            "redis": {
+                "enabled": False,
+                "host": "localhost",
+                "port": 6379,
+            }
+        },
+        "enhanced_metadata": True,
+        "ai_generators": {
+            "image": ["stablediffusion", "midjourney", "dalle", "comfyui", "flux"],
+            "video": ["runway", "kling", "pika", "stable-video", "animatediff"],
+        },
+        "file_types": {
+            "image_extensions": [".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif"],
+            "video_extensions": [".mp4", ".mov"],
+        },
+        "storage": {
+            "search_db": "data/search.duckdb",
+            "location_registry_db": "data/locations.duckdb",
+            "project_paths": ["projects"],
+            "asset_paths": ["organized", "inbox"],
+            "sorted_out_path": "sorted-out",
+            "locations": [],
+            "use_legacy_paths": True,
+        },
+    }
+    return OmegaConf.create(config_dict)
 
 
 @pytest.fixture

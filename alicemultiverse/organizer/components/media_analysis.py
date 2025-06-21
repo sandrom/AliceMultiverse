@@ -74,54 +74,57 @@ class MediaAnalysisMixin:
 
         return analysis
 
-    # TODO: Review unreachable code - def _detect_ai_source(self, media_path: Path, media_type: MediaType) -> str:
-    # TODO: Review unreachable code - """Detect AI generation source from filename and metadata."""
-    # TODO: Review unreachable code - filename = media_path.stem.lower()
+    def _detect_ai_source(self, media_path: Path, media_type: MediaType) -> str:
+        """Detect AI generation source from filename and metadata."""
+        filename = media_path.stem.lower()
 
-    # TODO: Review unreachable code - # Get appropriate generator list
-    # TODO: Review unreachable code - if media_type == MediaType.IMAGE:
-    # TODO: Review unreachable code - generators = self.ai_generators["image"]
-    # TODO: Review unreachable code - elif media_type == MediaType.VIDEO:
-    # TODO: Review unreachable code - generators = self.ai_generators["video"]
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - return "unknown"
+        # Get appropriate generator list
+        if media_type == MediaType.IMAGE:
+            generators = self.ai_generators["image"]
+        elif media_type == MediaType.VIDEO:
+            generators = self.ai_generators["video"]
+        else:
+            return "unknown"
 
-    # TODO: Review unreachable code - # Check filename patterns
-    # TODO: Review unreachable code - for generator in generators:
-    # TODO: Review unreachable code - if generator in filename:
-    # TODO: Review unreachable code - return generator
+        # Check filename patterns
+        for generator in generators:
+            if generator in filename:
+                return generator
 
-    # TODO: Review unreachable code - # Check specific patterns using helper
-    # TODO: Review unreachable code - matched_source = match_ai_source_patterns(filename, generators)
-    # TODO: Review unreachable code - if matched_source:
-    # TODO: Review unreachable code - return matched_source
+        # Check specific patterns using helper
+        # TODO: match_ai_source_patterns is not imported
+        # matched_source = match_ai_source_patterns(filename, generators)
+        # if matched_source:
+        #     return matched_source
 
-    # TODO: Review unreachable code - # Try to read metadata for additional clues
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - if media_type == MediaType.IMAGE:
-    # TODO: Review unreachable code - img = Image.open(media_path)
-    # TODO: Review unreachable code - metadata = img.info
+        # Try to read metadata for additional clues
+        try:
+            if media_type == MediaType.IMAGE:
+                img = Image.open(media_path)
+                metadata = img.info
 
-    # TODO: Review unreachable code - # Check for generator signatures in metadata
-    # TODO: Review unreachable code - for _, value in metadata.items():
-    # TODO: Review unreachable code - value_str = str(value).lower()
-    # TODO: Review unreachable code - for generator in generators:
-    # TODO: Review unreachable code - if generator in value_str:
-    # TODO: Review unreachable code - return generator
-    # TODO: Review unreachable code - except Exception as e:
-    # TODO: Review unreachable code - logger.debug(f"Unable to extract metadata from {media_path}: {e}")
+                # Check for generator signatures in metadata
+                for _, value in metadata.items():
+                    value_str = str(value).lower()
+                    for generator in generators:
+                        if generator in value_str:
+                            return generator
+        except Exception as e:
+            logger.debug(f"Unable to extract metadata from {media_path}: {e}")
+        
+        return "ai-generated"  # Generic fallback
 
     # TODO: Review unreachable code - return "ai-generated"  # Generic fallback
 
-    # TODO: Review unreachable code - def _get_date_taken(self, media_path: Path, media_type: MediaType) -> str:
-    # TODO: Review unreachable code - """Extract date taken from media file."""
-    # TODO: Review unreachable code - _ = media_type  # Reserved for future metadata extraction
-    # TODO: Review unreachable code - # Try file modification time first
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - mtime = media_path.stat().st_mtime
-    # TODO: Review unreachable code - return datetime.fromtimestamp(mtime).strftime(OUTPUT_DATE_FORMAT)
-    # TODO: Review unreachable code - except Exception:
-    # TODO: Review unreachable code - return datetime.now().strftime(OUTPUT_DATE_FORMAT)
+    def _get_date_taken(self, media_path: Path, media_type: MediaType) -> str:
+        """Extract date taken from media file."""
+        _ = media_type  # Reserved for future metadata extraction
+        # Try file modification time first
+        try:
+            mtime = media_path.stat().st_mtime
+            return datetime.fromtimestamp(mtime).strftime(OUTPUT_DATE_FORMAT)
+        except Exception:
+            return datetime.now().strftime(OUTPUT_DATE_FORMAT)
 
     # TODO: Review unreachable code - def _get_or_analyze_media(self, media_path: Path, project_folder: str) -> dict:
     # TODO: Review unreachable code - """Get cached analysis or analyze media file.

@@ -176,7 +176,7 @@ class StorageRegistry:
         # Storage locations table
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS storage_locations (
-                location_id str PRIMARY KEY,
+                location_id VARCHAR PRIMARY KEY,
                 name VARCHAR NOT NULL UNIQUE,
                 type VARCHAR NOT NULL,
                 path VARCHAR NOT NULL,
@@ -194,7 +194,7 @@ class StorageRegistry:
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS file_locations (
                 content_hash VARCHAR NOT NULL,
-                location_id str NOT NULL,
+                location_id VARCHAR NOT NULL,
                 file_path VARCHAR NOT NULL,
                 file_size BIGINT,
                 last_verified TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -210,7 +210,7 @@ class StorageRegistry:
         self.conn.execute("""
             CREATE TABLE IF NOT EXISTS rule_evaluations (
                 content_hash VARCHAR NOT NULL,
-                location_id str NOT NULL,
+                location_id VARCHAR NOT NULL,
                 evaluated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
                 matches BOOLEAN NOT NULL,
                 rule_details JSON,
@@ -260,671 +260,671 @@ class StorageRegistry:
         logger.info(f"Registered storage location: {location.name} ({location.type.value})")
         return location
 
-    # TODO: Review unreachable code - def update_location(self, location: StorageLocation) -> None:
-    # TODO: Review unreachable code - """Update an existing storage location.
+    def update_location(self, location: StorageLocation) -> None:
+        """Update an existing storage location.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - location: Storage location with updated information
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - self.conn.execute("""
-    # TODO: Review unreachable code - UPDATE storage_locations
-    # TODO: Review unreachable code - SET name = ?, type = ?, path = ?, priority = ?,
-    # TODO: Review unreachable code - rules = ?, last_scan = ?, status = ?, config = ?,
-    # TODO: Review unreachable code - updated_at = ?
-    # TODO: Review unreachable code - WHERE location_id = ?
-    # TODO: Review unreachable code - """, [
-    # TODO: Review unreachable code - location.name,
-    # TODO: Review unreachable code - location.type.value,
-    # TODO: Review unreachable code - location.path,
-    # TODO: Review unreachable code - location.priority,
-    # TODO: Review unreachable code - json.dumps([rule.to_dict() for rule in location.rules]),
-    # TODO: Review unreachable code - location.last_scan,
-    # TODO: Review unreachable code - location.status.value,
-    # TODO: Review unreachable code - json.dumps(location.config),
-    # TODO: Review unreachable code - datetime.now(),
-    # TODO: Review unreachable code - str(location.location_id)
-    # TODO: Review unreachable code - ])
+        Args:
+            location: Storage location with updated information
+        """
+        self.conn.execute("""
+            UPDATE storage_locations
+            SET name = ?, type = ?, path = ?, priority = ?,
+                rules = ?, last_scan = ?, status = ?, config = ?,
+                updated_at = ?
+            WHERE location_id = ?
+        """, [
+            location.name,
+            location.type.value,
+            location.path,
+            location.priority,
+            json.dumps([rule.to_dict() for rule in location.rules]),
+            location.last_scan,
+            location.status.value,
+            json.dumps(location.config),
+            datetime.now(),
+            str(location.location_id)
+        ])
 
-    # TODO: Review unreachable code - logger.info(f"Updated storage location: {location.name}")
+        logger.info(f"Updated storage location: {location.name}")
 
-    # TODO: Review unreachable code - def update_scan_time(self, location_id: str) -> None:
-    # TODO: Review unreachable code - """Update only the last scan time for a location.
+    def update_scan_time(self, location_id: str) -> None:
+        """Update only the last scan time for a location.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - location_id: ID of the location to update
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - self.conn.execute("""
-    # TODO: Review unreachable code - UPDATE storage_locations
-    # TODO: Review unreachable code - SET last_scan = ?, updated_at = ?
-    # TODO: Review unreachable code - WHERE location_id = ?
-    # TODO: Review unreachable code - """, [datetime.now(), datetime.now(), str(location_id)])
+        Args:
+            location_id: ID of the location to update
+        """
+        self.conn.execute("""
+            UPDATE storage_locations
+            SET last_scan = ?, updated_at = ?
+            WHERE location_id = ?
+        """, [datetime.now(), datetime.now(), str(location_id)])
 
-    # TODO: Review unreachable code - def get_locations(
-    # TODO: Review unreachable code - self,
-    # TODO: Review unreachable code - status: LocationStatus | None = None,
-    # TODO: Review unreachable code - type: StorageType | None = None
-    # TODO: Review unreachable code - ) -> list[StorageLocation]:
-    # TODO: Review unreachable code - """Get all storage locations, optionally filtered.
+    def get_locations(
+        self,
+        status: LocationStatus | None = None,
+        type: StorageType | None = None
+    ) -> list[StorageLocation]:
+        """Get all storage locations, optionally filtered.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - status: Filter by location status
-    # TODO: Review unreachable code - type: Filter by storage type
+        Args:
+            status: Filter by location status
+            type: Filter by storage type
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - List of storage locations sorted by priority
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - query = "SELECT * FROM storage_locations WHERE 1=1"
-    # TODO: Review unreachable code - params = []
+        Returns:
+            List of storage locations sorted by priority
+        """
+        query = "SELECT * FROM storage_locations WHERE 1=1"
+        params = []
 
-    # TODO: Review unreachable code - if status:
-    # TODO: Review unreachable code - query += " AND status = ?"
-    # TODO: Review unreachable code - params.append(status.value)
+        if status:
+            query += " AND status = ?"
+            params.append(status.value)
 
-    # TODO: Review unreachable code - if type:
-    # TODO: Review unreachable code - query += " AND type = ?"
-    # TODO: Review unreachable code - params.append(type.value)
+        if type:
+            query += " AND type = ?"
+            params.append(type.value)
 
-    # TODO: Review unreachable code - query += " ORDER BY priority DESC, name"
+        query += " ORDER BY priority DESC, name"
 
-    # TODO: Review unreachable code - results = self.conn.execute(query, params).fetchall()
+        results = self.conn.execute(query, params).fetchall()
 
-    # TODO: Review unreachable code - locations = []
-    # TODO: Review unreachable code - for row in results:
-    # TODO: Review unreachable code - locations.append(StorageLocation(
-    # TODO: Review unreachable code - location_id=row[0] if isinstance(row[0], str) else str(row[0]),
-    # TODO: Review unreachable code - name=row[1],
-    # TODO: Review unreachable code - type=StorageType.from_string(row[2]),
-    # TODO: Review unreachable code - path=row[3],
-    # TODO: Review unreachable code - priority=row[4],
-    # TODO: Review unreachable code - rules=[StorageRule.from_dict(r) for r in json.loads(row[5] or "[]")],
-    # TODO: Review unreachable code - last_scan=row[6],
-    # TODO: Review unreachable code - status=LocationStatus.from_string(row[7]),
-    # TODO: Review unreachable code - config=json.loads(row[8] or "{}")
-    # TODO: Review unreachable code - ))
+        locations = []
+        for row in results:
+            locations.append(StorageLocation(
+                location_id=row[0] if isinstance(row[0], str) else str(row[0]),
+                name=row[1],
+                type=StorageType.from_string(row[2]),
+                path=row[3],
+                priority=row[4],
+                rules=[StorageRule.from_dict(r) for r in json.loads(row[5] or "[]")],
+                last_scan=row[6],
+                status=LocationStatus.from_string(row[7]),
+                config=json.loads(row[8] or "{}")
+            ))
 
-    # TODO: Review unreachable code - return locations
+        return locations
 
-    # TODO: Review unreachable code - def get_location_by_id(self, location_id: str) -> StorageLocation | None:
-    # TODO: Review unreachable code - """Get a specific storage location by ID.
+    def get_location_by_id(self, location_id: str) -> StorageLocation | None:
+        """Get a specific storage location by ID.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - location_id: str of the location
+        Args:
+            location_id: str of the location
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - Storage location or None if not found
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - result = self.conn.execute(
-    # TODO: Review unreachable code - "SELECT * FROM storage_locations WHERE location_id = ?",
-    # TODO: Review unreachable code - [str(location_id)]
-    # TODO: Review unreachable code - ).fetchone()
+        Returns:
+            Storage location or None if not found
+        """
+        result = self.conn.execute(
+            "SELECT * FROM storage_locations WHERE location_id = ?",
+            [str(location_id)]
+        ).fetchone()
 
-    # TODO: Review unreachable code - if not result:
-    # TODO: Review unreachable code - return None
+        if not result:
+            return None
 
-    # TODO: Review unreachable code - return StorageLocation(
-    # TODO: Review unreachable code - location_id=result[0] if isinstance(result[0], str) else str(result[0]),
-    # TODO: Review unreachable code - name=result[1],
-    # TODO: Review unreachable code - type=StorageType.from_string(result[2]),
-    # TODO: Review unreachable code - path=result[3],
-    # TODO: Review unreachable code - priority=result[4],
-    # TODO: Review unreachable code - rules=[StorageRule.from_dict(r) for r in json.loads(result[5] or "[]")],
-    # TODO: Review unreachable code - last_scan=result[6],
-    # TODO: Review unreachable code - status=LocationStatus.from_string(result[7]),
-    # TODO: Review unreachable code - config=json.loads(result[8] or "{}")
-    # TODO: Review unreachable code - )
+        return StorageLocation(
+            location_id=result[0] if isinstance(result[0], str) else str(result[0]),
+            name=result[1],
+            type=StorageType.from_string(result[2]),
+            path=result[3],
+            priority=result[4],
+            rules=[StorageRule.from_dict(r) for r in json.loads(result[5] or "[]")],
+            last_scan=result[6],
+            status=LocationStatus.from_string(result[7]),
+            config=json.loads(result[8] or "{}")
+        )
 
-    # TODO: Review unreachable code - def get_location_for_file(
-    # TODO: Review unreachable code - self,
-    # TODO: Review unreachable code - content_hash: str,
-    # TODO: Review unreachable code - file_metadata: dict[str, Any]
-    # TODO: Review unreachable code - ) -> StorageLocation | None:
-    # TODO: Review unreachable code - """Determine the best storage location for a file based on rules.
+    def get_location_for_file(
+        self,
+        content_hash: str,
+        file_metadata: dict[str, Any]
+    ) -> StorageLocation | None:
+        """Determine the best storage location for a file based on rules.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - content_hash: SHA-256 hash of the file
-    # TODO: Review unreachable code - file_metadata: Metadata about the file (size, type, age, tags, etc.)
+        Args:
+            content_hash: SHA-256 hash of the file
+            file_metadata: Metadata about the file (size, type, age, tags, etc.)
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - Best matching storage location or None
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - # Get all active locations sorted by priority
-    # TODO: Review unreachable code - locations = self.get_locations(status=LocationStatus.ACTIVE)
+        Returns:
+            Best matching storage location or None
+        """
+        # Get all active locations sorted by priority
+        locations = self.get_locations(status=LocationStatus.ACTIVE)
 
-    # TODO: Review unreachable code - for location in locations:
-    # TODO: Review unreachable code - if self._evaluate_rules(location, file_metadata):
-    # TODO: Review unreachable code - # Cache the evaluation result
-    # TODO: Review unreachable code - self._cache_rule_evaluation(content_hash, location.location_id, True, file_metadata)
-    # TODO: Review unreachable code - return location
+        for location in locations:
+            if self._evaluate_rules(location, file_metadata):
+                # Cache the evaluation result
+                self._cache_rule_evaluation(content_hash, location.location_id, True, file_metadata)
+                return location
 
-    # TODO: Review unreachable code - # If no location matches rules, return highest priority active location
-    # TODO: Review unreachable code - if locations:
-    # TODO: Review unreachable code - return locations[0]
+        # If no location matches rules, return highest priority active location
+        if locations:
+            return locations[0]
 
-    # TODO: Review unreachable code - return None
+        return None
 
-    # TODO: Review unreachable code - def _evaluate_rules(self, location: StorageLocation, metadata: dict[str, Any]) -> bool:
-    # TODO: Review unreachable code - """Evaluate if a file matches location rules.
+    def _evaluate_rules(self, location: StorageLocation, metadata: dict[str, Any]) -> bool:
+        """Evaluate if a file matches location rules.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - location: Storage location to evaluate
-    # TODO: Review unreachable code - metadata: File metadata
+        Args:
+            location: Storage location to evaluate
+            metadata: File metadata
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - True if file matches all rules
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - if not location.rules:
-    # TODO: Review unreachable code - return True  # No rules means accept all
+        Returns:
+            True if file matches all rules
+        """
+        if not location.rules:
+            return True  # No rules means accept all
 
-    # TODO: Review unreachable code - for rule in location.rules:
-    # TODO: Review unreachable code - # Check age rules
-    # TODO: Review unreachable code - if rule.max_age_days is not None:
-    # TODO: Review unreachable code - file_age_days = metadata.get("age_days", 0)
-    # TODO: Review unreachable code - if file_age_days > rule.max_age_days:
-    # TODO: Review unreachable code - return False
+        for rule in location.rules:
+            # Check age rules
+            if rule.max_age_days is not None:
+                file_age_days = metadata.get("age_days", 0)
+                if file_age_days > rule.max_age_days:
+                    return False
 
-    # TODO: Review unreachable code - if rule.min_age_days is not None:
-    # TODO: Review unreachable code - file_age_days = metadata.get("age_days", 0)
-    # TODO: Review unreachable code - if file_age_days < rule.min_age_days:
-    # TODO: Review unreachable code - return False
+            if rule.min_age_days is not None:
+                file_age_days = metadata.get("age_days", 0)
+                if file_age_days < rule.min_age_days:
+                    return False
 
-    # TODO: Review unreachable code - # Check type rules
-    # TODO: Review unreachable code - file_type = metadata.get("file_type", "").lower()
-    # TODO: Review unreachable code - if rule.include_types and file_type not in [t.lower() for t in rule.include_types]:
-    # TODO: Review unreachable code - return False
+            # Check type rules
+            file_type = metadata.get("file_type", "").lower()
+            if rule.include_types and file_type not in [t.lower() for t in rule.include_types]:
+                return False
 
-    # TODO: Review unreachable code - if rule.exclude_types and file_type in [t.lower() for t in rule.exclude_types]:
-    # TODO: Review unreachable code - return False
+            if rule.exclude_types and file_type in [t.lower() for t in rule.exclude_types]:
+                return False
 
-    # TODO: Review unreachable code - # Check size rules
-    # TODO: Review unreachable code - if rule.max_size_bytes is not None:
-    # TODO: Review unreachable code - file_size = metadata.get("file_size", 0)
-    # TODO: Review unreachable code - if file_size > rule.max_size_bytes:
-    # TODO: Review unreachable code - return False
+            # Check size rules
+            if rule.max_size_bytes is not None:
+                file_size = metadata.get("file_size", 0)
+                if file_size > rule.max_size_bytes:
+                    return False
 
-    # TODO: Review unreachable code - if rule.min_size_bytes is not None:
-    # TODO: Review unreachable code - file_size = metadata.get("file_size", 0)
-    # TODO: Review unreachable code - if file_size < rule.min_size_bytes:
-    # TODO: Review unreachable code - return False
+            if rule.min_size_bytes is not None:
+                file_size = metadata.get("file_size", 0)
+                if file_size < rule.min_size_bytes:
+                    return False
 
-    # TODO: Review unreachable code - # Check tag rules
-    # TODO: Review unreachable code - file_tags = set(metadata.get("tags", []))
-    # TODO: Review unreachable code - if rule.require_tags:
-    # TODO: Review unreachable code - required = set(rule.require_tags)
-    # TODO: Review unreachable code - if not required.issubset(file_tags):
-    # TODO: Review unreachable code - return False
+            # Check tag rules
+            file_tags = set(metadata.get("tags", []))
+            if rule.require_tags:
+                required = set(rule.require_tags)
+                if not required.issubset(file_tags):
+                    return False
 
-    # TODO: Review unreachable code - if rule.exclude_tags:
-    # TODO: Review unreachable code - excluded = set(rule.exclude_tags)
-    # TODO: Review unreachable code - if excluded.intersection(file_tags):
-    # TODO: Review unreachable code - return False
+            if rule.exclude_tags:
+                excluded = set(rule.exclude_tags)
+                if excluded.intersection(file_tags):
+                    return False
 
-    # TODO: Review unreachable code - # Check quality rules
-    # TODO: Review unreachable code - if rule.min_quality_stars is not None:
-    # TODO: Review unreachable code - quality = metadata.get("quality_stars", 0)
-    # TODO: Review unreachable code - if quality < rule.min_quality_stars:
-    # TODO: Review unreachable code - return False
+            # Check quality rules
+            if rule.min_quality_stars is not None:
+                quality = metadata.get("quality_stars", 0)
+                if quality < rule.min_quality_stars:
+                    return False
 
-    # TODO: Review unreachable code - if rule.max_quality_stars is not None:
-    # TODO: Review unreachable code - quality = metadata.get("quality_stars", 0)
-    # TODO: Review unreachable code - if quality > rule.max_quality_stars:
-    # TODO: Review unreachable code - return False
+            if rule.max_quality_stars is not None:
+                quality = metadata.get("quality_stars", 0)
+                if quality > rule.max_quality_stars:
+                    return False
 
-    # TODO: Review unreachable code - return True
+        return True
 
-    # TODO: Review unreachable code - def _cache_rule_evaluation(
-    # TODO: Review unreachable code - self,
-    # TODO: Review unreachable code - content_hash: str,
-    # TODO: Review unreachable code - location_id: str,
-    # TODO: Review unreachable code - matches: bool,
-    # TODO: Review unreachable code - metadata: dict[str, Any]
-    # TODO: Review unreachable code - ) -> None:
-    # TODO: Review unreachable code - """Cache the result of rule evaluation."""
-    # TODO: Review unreachable code - # Convert datetime objects to ISO format for JSON serialization
-    # TODO: Review unreachable code - clean_metadata = {}
-    # TODO: Review unreachable code - for k, v in metadata.items():
-    # TODO: Review unreachable code - if isinstance(v, datetime):
-    # TODO: Review unreachable code - clean_metadata[k] = v.isoformat()
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - clean_metadata[k] = v
+    def _cache_rule_evaluation(
+        self,
+        content_hash: str,
+        location_id: str,
+        matches: bool,
+        metadata: dict[str, Any]
+    ) -> None:
+        """Cache the result of rule evaluation."""
+        # Convert datetime objects to ISO format for JSON serialization
+        clean_metadata = {}
+        for k, v in metadata.items():
+            if isinstance(v, datetime):
+                clean_metadata[k] = v.isoformat()
+            else:
+                clean_metadata[k] = v
 
-    # TODO: Review unreachable code - self.conn.execute("""
-    # TODO: Review unreachable code - INSERT INTO rule_evaluations (content_hash, location_id, evaluated_at, matches, rule_details)
-    # TODO: Review unreachable code - VALUES (?, ?, ?, ?, ?)
-    # TODO: Review unreachable code - ON CONFLICT (content_hash, location_id)
-    # TODO: Review unreachable code - DO UPDATE SET
-    # TODO: Review unreachable code - evaluated_at = ?,
-    # TODO: Review unreachable code - matches = EXCLUDED.matches,
-    # TODO: Review unreachable code - rule_details = EXCLUDED.rule_details
-    # TODO: Review unreachable code - """, [content_hash, str(location_id), datetime.now(), matches, json.dumps(clean_metadata), datetime.now()])
+        self.conn.execute("""
+            INSERT INTO rule_evaluations (content_hash, location_id, evaluated_at, matches, rule_details)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT (content_hash, location_id)
+            DO UPDATE SET
+                evaluated_at = ?,
+                matches = EXCLUDED.matches,
+                rule_details = EXCLUDED.rule_details
+        """, [content_hash, str(location_id), datetime.now(), matches, json.dumps(clean_metadata), datetime.now()])
 
-    # TODO: Review unreachable code - def track_file(
-    # TODO: Review unreachable code - self,
-    # TODO: Review unreachable code - content_hash: str,
-    # TODO: Review unreachable code - location_id: str,
-    # TODO: Review unreachable code - file_path: str,
-    # TODO: Review unreachable code - file_size: int | None = None,
-    # TODO: Review unreachable code - metadata_embedded: bool = False
-    # TODO: Review unreachable code - ) -> None:
-    # TODO: Review unreachable code - """Track a file in a specific location.
+    def track_file(
+        self,
+        content_hash: str,
+        location_id: str,
+        file_path: str,
+        file_size: int | None = None,
+        metadata_embedded: bool = False
+    ) -> None:
+        """Track a file in a specific location.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - content_hash: SHA-256 hash of the file
-    # TODO: Review unreachable code - location_id: ID of the storage location
-    # TODO: Review unreachable code - file_path: Path to the file within the location
-    # TODO: Review unreachable code - file_size: Size of the file in bytes
-    # TODO: Review unreachable code - metadata_embedded: Whether metadata is embedded in the file
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - self.conn.execute("""
-    # TODO: Review unreachable code - INSERT INTO file_locations (
-    # TODO: Review unreachable code - content_hash, location_id, file_path, file_size,
-    # TODO: Review unreachable code - metadata_embedded, last_verified
-    # TODO: Review unreachable code - ) VALUES (?, ?, ?, ?, ?, ?)
-    # TODO: Review unreachable code - ON CONFLICT (content_hash, location_id)
-    # TODO: Review unreachable code - DO UPDATE SET
-    # TODO: Review unreachable code - file_path = EXCLUDED.file_path,
-    # TODO: Review unreachable code - file_size = EXCLUDED.file_size,
-    # TODO: Review unreachable code - metadata_embedded = EXCLUDED.metadata_embedded,
-    # TODO: Review unreachable code - last_verified = ?,
-    # TODO: Review unreachable code - sync_status = 'synced',
-    # TODO: Review unreachable code - error_message = NULL
-    # TODO: Review unreachable code - """, [content_hash, str(location_id), file_path, file_size, metadata_embedded, datetime.now(), datetime.now()])
+        Args:
+            content_hash: SHA-256 hash of the file
+            location_id: ID of the storage location
+            file_path: Path to the file within the location
+            file_size: Size of the file in bytes
+            metadata_embedded: Whether metadata is embedded in the file
+        """
+        self.conn.execute("""
+            INSERT INTO file_locations (
+                content_hash, location_id, file_path, file_size,
+                metadata_embedded, last_verified
+            ) VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT (content_hash, location_id)
+            DO UPDATE SET
+                file_path = EXCLUDED.file_path,
+                file_size = EXCLUDED.file_size,
+                metadata_embedded = EXCLUDED.metadata_embedded,
+                last_verified = ?,
+                sync_status = 'synced',
+                error_message = NULL
+        """, [content_hash, str(location_id), file_path, file_size, metadata_embedded, datetime.now(), datetime.now()])
 
-    # TODO: Review unreachable code - def get_file_locations(self, content_hash: str) -> list[dict[str, Any]]:
-    # TODO: Review unreachable code - """Get all locations where a file exists.
+    def get_file_locations(self, content_hash: str) -> list[dict[str, Any]]:
+        """Get all locations where a file exists.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - content_hash: SHA-256 hash of the file
+        Args:
+            content_hash: SHA-256 hash of the file
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - List of location information for the file
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - results = self.conn.execute("""
-    # TODO: Review unreachable code - SELECT
-    # TODO: Review unreachable code - fl.location_id,
-    # TODO: Review unreachable code - fl.file_path,
-    # TODO: Review unreachable code - fl.file_size,
-    # TODO: Review unreachable code - fl.last_verified,
-    # TODO: Review unreachable code - fl.metadata_embedded,
-    # TODO: Review unreachable code - fl.sync_status,
-    # TODO: Review unreachable code - fl.error_message,
-    # TODO: Review unreachable code - sl.name,
-    # TODO: Review unreachable code - sl.type,
-    # TODO: Review unreachable code - sl.path as location_path,
-    # TODO: Review unreachable code - sl.status
-    # TODO: Review unreachable code - FROM file_locations fl
-    # TODO: Review unreachable code - JOIN storage_locations sl ON fl.location_id = sl.location_id
-    # TODO: Review unreachable code - WHERE fl.content_hash = ?
-    # TODO: Review unreachable code - ORDER BY sl.priority DESC
-    # TODO: Review unreachable code - """, [content_hash]).fetchall()
+        Returns:
+            List of location information for the file
+        """
+        results = self.conn.execute("""
+            SELECT
+                fl.location_id,
+                fl.file_path,
+                fl.file_size,
+                fl.last_verified,
+                fl.metadata_embedded,
+                fl.sync_status,
+                fl.error_message,
+                sl.name,
+                sl.type,
+                sl.path as location_path,
+                sl.status
+            FROM file_locations fl
+            JOIN storage_locations sl ON fl.location_id = sl.location_id
+            WHERE fl.content_hash = ?
+            ORDER BY sl.priority DESC
+        """, [content_hash]).fetchall()
 
-    # TODO: Review unreachable code - locations = []
-    # TODO: Review unreachable code - for row in results:
-    # TODO: Review unreachable code - locations.append({
-    # TODO: Review unreachable code - "location_id": row[0],
-    # TODO: Review unreachable code - "file_path": row[1],
-    # TODO: Review unreachable code - "file_size": row[2],
-    # TODO: Review unreachable code - "last_verified": row[3],
-    # TODO: Review unreachable code - "metadata_embedded": row[4],
-    # TODO: Review unreachable code - "sync_status": row[5],
-    # TODO: Review unreachable code - "error_message": row[6],
-    # TODO: Review unreachable code - "location_name": row[7],
-    # TODO: Review unreachable code - "location_type": row[8],
-    # TODO: Review unreachable code - "location_path": row[9],
-    # TODO: Review unreachable code - "location_status": row[10]
-    # TODO: Review unreachable code - })
+        locations = []
+        for row in results:
+            locations.append({
+                "location_id": row[0],
+                "file_path": row[1],
+                "file_size": row[2],
+                "last_verified": row[3],
+                "metadata_embedded": row[4],
+                "sync_status": row[5],
+                "error_message": row[6],
+                "location_name": row[7],
+                "location_type": row[8],
+                "location_path": row[9],
+                "location_status": row[10]
+            })
 
-    # TODO: Review unreachable code - return locations
+        return locations
 
-    # TODO: Review unreachable code - def remove_file_from_location(self, content_hash: str, location_id: str) -> None:
-    # TODO: Review unreachable code - """Remove a file from a specific location.
+    def remove_file_from_location(self, content_hash: str, location_id: str) -> None:
+        """Remove a file from a specific location.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - content_hash: SHA-256 hash of the file
-    # TODO: Review unreachable code - location_id: ID of the storage location
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - self.conn.execute("""
-    # TODO: Review unreachable code - DELETE FROM file_locations
-    # TODO: Review unreachable code - WHERE content_hash = ? AND location_id = ?
-    # TODO: Review unreachable code - """, [content_hash, str(location_id)])
+        Args:
+            content_hash: SHA-256 hash of the file
+            location_id: ID of the storage location
+        """
+        self.conn.execute("""
+            DELETE FROM file_locations
+            WHERE content_hash = ? AND location_id = ?
+        """, [content_hash, str(location_id)])
 
-    # TODO: Review unreachable code - # Also remove rule evaluation cache
-    # TODO: Review unreachable code - self.conn.execute("""
-    # TODO: Review unreachable code - DELETE FROM rule_evaluations
-    # TODO: Review unreachable code - WHERE content_hash = ? AND location_id = ?
-    # TODO: Review unreachable code - """, [content_hash, str(location_id)])
+        # Also remove rule evaluation cache
+        self.conn.execute("""
+            DELETE FROM rule_evaluations
+            WHERE content_hash = ? AND location_id = ?
+        """, [content_hash, str(location_id)])
 
-    # TODO: Review unreachable code - def scan_location(self, location_id: str) -> dict[str, Any]:
-    # TODO: Review unreachable code - """Scan a storage location to discover files.
+    def scan_location(self, location_id: str) -> dict[str, Any]:
+        """Scan a storage location to discover files.
 
-    # TODO: Review unreachable code - This is a placeholder for the actual implementation which would
-    # TODO: Review unreachable code - depend on the storage type (local filesystem, S3, etc.)
+        This is a placeholder for the actual implementation which would
+        depend on the storage type (local filesystem, S3, etc.)
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - location_id: ID of the storage location to scan
+        Args:
+            location_id: ID of the storage location to scan
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - Scan results including discovered files
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - location = self.get_location_by_id(location_id)
-    # TODO: Review unreachable code - if not location:
-    # TODO: Review unreachable code - raise ValueError(f"Location {location_id} not found")
+        Returns:
+            Scan results including discovered files
+        """
+        location = self.get_location_by_id(location_id)
+        if not location:
+            raise ValueError(f"Location {location_id} not found")
 
-    # TODO: Review unreachable code - # Update last scan time
-    # TODO: Review unreachable code - self.conn.execute(
-    # TODO: Review unreachable code - "UPDATE storage_locations SET last_scan = ? WHERE location_id = ?",
-    # TODO: Review unreachable code - [datetime.now(), str(location_id)]
-    # TODO: Review unreachable code - )
+        # Update last scan time
+        self.conn.execute(
+            "UPDATE storage_locations SET last_scan = ? WHERE location_id = ?",
+            [datetime.now(), str(location_id)]
+        )
 
-    # TODO: Review unreachable code - # Implement scanning based on storage type
-    # TODO: Review unreachable code - scan_result = {
-    # TODO: Review unreachable code - "location_id": str(location_id),
-    # TODO: Review unreachable code - "location_name": location.name,
-    # TODO: Review unreachable code - "scan_time": datetime.now().isoformat(),
-    # TODO: Review unreachable code - "files_discovered": 0,
-    # TODO: Review unreachable code - "files_updated": 0,
-    # TODO: Review unreachable code - "files_removed": 0
-    # TODO: Review unreachable code - }
+        # Implement scanning based on storage type
+        scan_result = {
+            "location_id": str(location_id),
+            "location_name": location.name,
+            "scan_time": datetime.now().isoformat(),
+            "files_discovered": 0,
+            "files_updated": 0,
+            "files_removed": 0
+        }
         
-    # TODO: Review unreachable code - if location.type == StorageType.LOCAL:
-    # TODO: Review unreachable code - # Scan local filesystem
-    # TODO: Review unreachable code - scan_result = self._scan_local_location(location)
-    # TODO: Review unreachable code - elif location.type == StorageType.S3:
-    # TODO: Review unreachable code - # Scan S3 bucket
-    # TODO: Review unreachable code - scan_result = self._scan_s3_location(location)
-    # TODO: Review unreachable code - elif location.type == StorageType.GCS:
-    # TODO: Review unreachable code - # Scan Google Cloud Storage
-    # TODO: Review unreachable code - scan_result = self._scan_gcs_location(location)
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - logger.warning(f"Unsupported storage type: {location.type}")
+        if location.type == StorageType.LOCAL:
+            # Scan local filesystem
+            scan_result = self._scan_local_location(location)
+        elif location.type == StorageType.S3:
+            # Scan S3 bucket
+            scan_result = self._scan_s3_location(location)
+        elif location.type == StorageType.GCS:
+            # Scan Google Cloud Storage
+            scan_result = self._scan_gcs_location(location)
+        else:
+            logger.warning(f"Unsupported storage type: {location.type}")
             
-    # TODO: Review unreachable code - logger.info(f"Scanned location {location.name}: {scan_result['files_discovered']} new, "
-    # TODO: Review unreachable code - f"{scan_result['files_updated']} updated, {scan_result['files_removed']} removed")
+        logger.info(f"Scanned location {location.name}: {scan_result['files_discovered']} new, "
+                    f"{scan_result['files_updated']} updated, {scan_result['files_removed']} removed")
 
-    # TODO: Review unreachable code - return scan_result
+        return scan_result
 
-    # TODO: Review unreachable code - def mark_file_for_sync(
-    # TODO: Review unreachable code - self,
-    # TODO: Review unreachable code - content_hash: str,
-    # TODO: Review unreachable code - source_location_id: str,
-    # TODO: Review unreachable code - target_location_id: str,
-    # TODO: Review unreachable code - action: str = "upload"
-    # TODO: Review unreachable code - ) -> None:
-    # TODO: Review unreachable code - """Mark a file for synchronization between locations.
+    def mark_file_for_sync(
+        self,
+        content_hash: str,
+        source_location_id: str,
+        target_location_id: str,
+        action: str = "upload"
+    ) -> None:
+        """Mark a file for synchronization between locations.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - content_hash: SHA-256 hash of the file
-    # TODO: Review unreachable code - source_location_id: Source location ID
-    # TODO: Review unreachable code - target_location_id: Target location ID
-    # TODO: Review unreachable code - action: Sync action (upload, delete)
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - # Update source to indicate pending operation
-    # TODO: Review unreachable code - self.conn.execute("""
-    # TODO: Review unreachable code - UPDATE file_locations
-    # TODO: Review unreachable code - SET sync_status = ?
-    # TODO: Review unreachable code - WHERE content_hash = ? AND location_id = ?
-    # TODO: Review unreachable code - """, [f"pending_{action}", content_hash, str(source_location_id)])
+        Args:
+            content_hash: SHA-256 hash of the file
+            source_location_id: Source location ID
+            target_location_id: Target location ID
+            action: Sync action (upload, delete)
+        """
+        # Update source to indicate pending operation
+        self.conn.execute("""
+            UPDATE file_locations
+            SET sync_status = ?
+            WHERE content_hash = ? AND location_id = ?
+        """, [f"pending_{action}", content_hash, str(source_location_id)])
 
-    # TODO: Review unreachable code - # Create placeholder in target if uploading
-    # TODO: Review unreachable code - if action == "upload":
-    # TODO: Review unreachable code - self.conn.execute("""
-    # TODO: Review unreachable code - INSERT INTO file_locations (
-    # TODO: Review unreachable code - content_hash, location_id, file_path, sync_status
-    # TODO: Review unreachable code - ) VALUES (?, ?, '', 'pending_upload')
-    # TODO: Review unreachable code - ON CONFLICT (content_hash, location_id) DO NOTHING
-    # TODO: Review unreachable code - """, [content_hash, str(target_location_id)])
+        # Create placeholder in target if uploading
+        if action == "upload":
+            self.conn.execute("""
+                INSERT INTO file_locations (
+                    content_hash, location_id, file_path, sync_status
+                ) VALUES (?, ?, '', 'pending_upload')
+                ON CONFLICT (content_hash, location_id) DO NOTHING
+            """, [content_hash, str(target_location_id)])
 
-    # TODO: Review unreachable code - def get_pending_syncs(self) -> list[dict[str, Any]]:
-    # TODO: Review unreachable code - """Get all files pending synchronization.
+    def get_pending_syncs(self) -> list[dict[str, Any]]:
+        """Get all files pending synchronization.
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - List of files needing sync with their details
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - results = self.conn.execute("""
-    # TODO: Review unreachable code - SELECT
-    # TODO: Review unreachable code - fl.content_hash,
-    # TODO: Review unreachable code - fl.location_id,
-    # TODO: Review unreachable code - fl.file_path,
-    # TODO: Review unreachable code - fl.sync_status,
-    # TODO: Review unreachable code - sl.name as location_name,
-    # TODO: Review unreachable code - sl.type as location_type
-    # TODO: Review unreachable code - FROM file_locations fl
-    # TODO: Review unreachable code - JOIN storage_locations sl ON fl.location_id = sl.location_id
-    # TODO: Review unreachable code - WHERE fl.sync_status != 'synced'
-    # TODO: Review unreachable code - ORDER BY fl.last_verified
-    # TODO: Review unreachable code - """).fetchall()
+        Returns:
+            List of files needing sync with their details
+        """
+        results = self.conn.execute("""
+            SELECT
+                fl.content_hash,
+                fl.location_id,
+                fl.file_path,
+                fl.sync_status,
+                sl.name as location_name,
+                sl.type as location_type
+            FROM file_locations fl
+            JOIN storage_locations sl ON fl.location_id = sl.location_id
+            WHERE fl.sync_status != 'synced'
+            ORDER BY fl.last_verified
+        """).fetchall()
 
-    # TODO: Review unreachable code - syncs = []
-    # TODO: Review unreachable code - for row in results:
-    # TODO: Review unreachable code - syncs.append({
-    # TODO: Review unreachable code - "content_hash": row[0],
-    # TODO: Review unreachable code - "location_id": row[1],
-    # TODO: Review unreachable code - "file_path": row[2],
-    # TODO: Review unreachable code - "sync_status": row[3],
-    # TODO: Review unreachable code - "location_name": row[4],
-    # TODO: Review unreachable code - "location_type": row[5]
-    # TODO: Review unreachable code - })
+        syncs = []
+        for row in results:
+            syncs.append({
+                "content_hash": row[0],
+                "location_id": row[1],
+                "file_path": row[2],
+                "sync_status": row[3],
+                "location_name": row[4],
+                "location_type": row[5]
+            })
 
-    # TODO: Review unreachable code - return syncs
+        return syncs
 
-    # TODO: Review unreachable code - def get_statistics(self) -> dict[str, Any]:
-    # TODO: Review unreachable code - """Get registry statistics.
+    def get_statistics(self) -> dict[str, Any]:
+        """Get registry statistics.
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - Dictionary with various statistics
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - stats = {}
+        Returns:
+            Dictionary with various statistics
+        """
+        stats = {}
 
-    # TODO: Review unreachable code - # Total locations
-    # TODO: Review unreachable code - stats["total_locations"] = self.conn.execute(
-    # TODO: Review unreachable code - "SELECT COUNT(*) FROM storage_locations"
-    # TODO: Review unreachable code - ).fetchone()[0]
+        # Total locations
+        stats["total_locations"] = self.conn.execute(
+            "SELECT COUNT(*) FROM storage_locations"
+        ).fetchone()[0]
 
-    # TODO: Review unreachable code - # Locations by type
-    # TODO: Review unreachable code - type_stats = self.conn.execute("""
-    # TODO: Review unreachable code - SELECT type, COUNT(*) as count
-    # TODO: Review unreachable code - FROM storage_locations
-    # TODO: Review unreachable code - GROUP BY type
-    # TODO: Review unreachable code - """).fetchall()
-    # TODO: Review unreachable code - stats["by_type"] = {t: count for t, count in type_stats}
+        # Locations by type
+        type_stats = self.conn.execute("""
+            SELECT type, COUNT(*) as count
+            FROM storage_locations
+            GROUP BY type
+        """).fetchall()
+        stats["by_type"] = {t: count for t, count in type_stats}
 
-    # TODO: Review unreachable code - # Locations by status
-    # TODO: Review unreachable code - status_stats = self.conn.execute("""
-    # TODO: Review unreachable code - SELECT status, COUNT(*) as count
-    # TODO: Review unreachable code - FROM storage_locations
-    # TODO: Review unreachable code - GROUP BY status
-    # TODO: Review unreachable code - """).fetchall()
-    # TODO: Review unreachable code - stats["by_status"] = {s: count for s, count in status_stats}
+        # Locations by status
+        status_stats = self.conn.execute("""
+            SELECT status, COUNT(*) as count
+            FROM storage_locations
+            GROUP BY status
+        """).fetchall()
+        stats["by_status"] = {s: count for s, count in status_stats}
 
-    # TODO: Review unreachable code - # Total unique files
-    # TODO: Review unreachable code - stats["total_unique_files"] = self.conn.execute(
-    # TODO: Review unreachable code - "SELECT COUNT(DISTINCT content_hash) FROM file_locations"
-    # TODO: Review unreachable code - ).fetchone()[0]
+        # Total unique files
+        stats["total_unique_files"] = self.conn.execute(
+            "SELECT COUNT(DISTINCT content_hash) FROM file_locations"
+        ).fetchone()[0]
 
-    # TODO: Review unreachable code - # Total file instances
-    # TODO: Review unreachable code - stats["total_file_instances"] = self.conn.execute(
-    # TODO: Review unreachable code - "SELECT COUNT(*) FROM file_locations"
-    # TODO: Review unreachable code - ).fetchone()[0]
+        # Total file instances
+        stats["total_file_instances"] = self.conn.execute(
+            "SELECT COUNT(*) FROM file_locations"
+        ).fetchone()[0]
 
-    # TODO: Review unreachable code - # Files by location
-    # TODO: Review unreachable code - location_stats = self.conn.execute("""
-    # TODO: Review unreachable code - SELECT
-    # TODO: Review unreachable code - sl.name,
-    # TODO: Review unreachable code - COUNT(fl.content_hash) as file_count,
-    # TODO: Review unreachable code - SUM(fl.file_size) as total_size,
-    # TODO: Review unreachable code - MAX(sl.priority) as priority
-    # TODO: Review unreachable code - FROM storage_locations sl
-    # TODO: Review unreachable code - LEFT JOIN file_locations fl ON sl.location_id = fl.location_id
-    # TODO: Review unreachable code - GROUP BY sl.name
-    # TODO: Review unreachable code - ORDER BY priority DESC
-    # TODO: Review unreachable code - """).fetchall()
+        # Files by location
+        location_stats = self.conn.execute("""
+            SELECT
+                sl.name,
+                COUNT(fl.content_hash) as file_count,
+                SUM(fl.file_size) as total_size,
+                MAX(sl.priority) as priority
+            FROM storage_locations sl
+            LEFT JOIN file_locations fl ON sl.location_id = fl.location_id
+            GROUP BY sl.name
+            ORDER BY priority DESC
+        """).fetchall()
 
-    # TODO: Review unreachable code - stats["by_location"] = []
-    # TODO: Review unreachable code - for name, count, size, priority in location_stats:
-    # TODO: Review unreachable code - stats["by_location"].append({
-    # TODO: Review unreachable code - "name": name,
-    # TODO: Review unreachable code - "file_count": count,
-    # TODO: Review unreachable code - "total_size_bytes": size or 0
-    # TODO: Review unreachable code - })
+        stats["by_location"] = []
+        for name, count, size, priority in location_stats:
+            stats["by_location"].append({
+                "name": name,
+                "file_count": count,
+                "total_size_bytes": size or 0
+            })
 
-    # TODO: Review unreachable code - # Pending syncs
-    # TODO: Review unreachable code - stats["pending_syncs"] = self.conn.execute(
-    # TODO: Review unreachable code - "SELECT COUNT(*) FROM file_locations WHERE sync_status != 'synced'"
-    # TODO: Review unreachable code - ).fetchone()[0]
+        # Pending syncs
+        stats["pending_syncs"] = self.conn.execute(
+            "SELECT COUNT(*) FROM file_locations WHERE sync_status != 'synced'"
+        ).fetchone()[0]
 
-    # TODO: Review unreachable code - # Files with multiple copies
-    # TODO: Review unreachable code - stats["files_with_multiple_copies"] = self.conn.execute("""
-    # TODO: Review unreachable code - SELECT COUNT(*) FROM (
-    # TODO: Review unreachable code - SELECT content_hash, COUNT(*) as copy_count
-    # TODO: Review unreachable code - FROM file_locations
-    # TODO: Review unreachable code - GROUP BY content_hash
-    # TODO: Review unreachable code - HAVING COUNT(*) > 1
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - """).fetchone()[0]
+        # Files with multiple copies
+        stats["files_with_multiple_copies"] = self.conn.execute("""
+            SELECT COUNT(*) FROM (
+                SELECT content_hash, COUNT(*) as copy_count
+                FROM file_locations
+                GROUP BY content_hash
+                HAVING COUNT(*) > 1
+            )
+        """).fetchone()[0]
 
-    # TODO: Review unreachable code - return stats
+        return stats
 
-    # TODO: Review unreachable code - def close(self):
-    # TODO: Review unreachable code - """Close the database connection."""
-    # TODO: Review unreachable code - self.conn.close()
+    def close(self):
+        """Close the database connection."""
+        self.conn.close()
 
-    # TODO: Review unreachable code - def cleanup_for_tests(self):
-    # TODO: Review unreachable code - """Clean up all data for tests. WARNING: This deletes all data!"""
-    # TODO: Review unreachable code - # Disable foreign key constraints temporarily
-    # TODO: Review unreachable code - self.conn.execute("SET foreign_keys=false")
+    def cleanup_for_tests(self):
+        """Clean up all data for tests. WARNING: This deletes all data!"""
+        # Disable foreign key constraints temporarily
+        self.conn.execute("SET foreign_keys=false")
 
-    # TODO: Review unreachable code - # Delete in reverse order of dependencies
-    # TODO: Review unreachable code - self.conn.execute("DELETE FROM rule_evaluations")
-    # TODO: Review unreachable code - self.conn.execute("DELETE FROM file_locations")
-    # TODO: Review unreachable code - self.conn.execute("DELETE FROM storage_locations")
+        # Delete in reverse order of dependencies
+        self.conn.execute("DELETE FROM rule_evaluations")
+        self.conn.execute("DELETE FROM file_locations")
+        self.conn.execute("DELETE FROM storage_locations")
 
-    # TODO: Review unreachable code - # Re-enable foreign key constraints
-    # TODO: Review unreachable code - self.conn.execute("SET foreign_keys=true")
+        # Re-enable foreign key constraints
+        self.conn.execute("SET foreign_keys=true")
     
-    # TODO: Review unreachable code - def add_file_to_location(self, content_hash: str, location_id: str, file_path: str, file_size: int) -> None:
-    # TODO: Review unreachable code - """Add a new file to a location. Alias for track_file."""
-    # TODO: Review unreachable code - self.track_file(content_hash, location_id, file_path, file_size)
+    def add_file_to_location(self, content_hash: str, location_id: str, file_path: str, file_size: int) -> None:
+        """Add a new file to a location. Alias for track_file."""
+        self.track_file(content_hash, location_id, file_path, file_size)
     
-    # TODO: Review unreachable code - def update_file_in_location(self, content_hash: str, location_id: str, file_path: str, file_size: int) -> None:
-    # TODO: Review unreachable code - """Update an existing file in a location."""
-    # TODO: Review unreachable code - # First remove the old entry for this file path
-    # TODO: Review unreachable code - self.conn.execute(
-    # TODO: Review unreachable code - "DELETE FROM file_locations WHERE location_id = ? AND file_path = ?",
-    # TODO: Review unreachable code - [str(location_id), file_path]
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - # Then add the new one
-    # TODO: Review unreachable code - self.track_file(content_hash, location_id, file_path, file_size)
+    def update_file_in_location(self, content_hash: str, location_id: str, file_path: str, file_size: int) -> None:
+        """Update an existing file in a location."""
+        # First remove the old entry for this file path
+        self.conn.execute(
+            "DELETE FROM file_locations WHERE location_id = ? AND file_path = ?",
+            [str(location_id), file_path]
+        )
+        # Then add the new one
+        self.track_file(content_hash, location_id, file_path, file_size)
     
-    # TODO: Review unreachable code - def _scan_local_location(self, location: StorageLocation, full_scan: bool = False) -> dict[str, Any]:
-    # TODO: Review unreachable code - """Scan a local filesystem location."""
-    # TODO: Review unreachable code - from pathlib import Path
-    # TODO: Review unreachable code - import hashlib
+    def _scan_local_location(self, location: StorageLocation, full_scan: bool = False) -> dict[str, Any]:
+        """Scan a local filesystem location."""
+        from pathlib import Path
+        import hashlib
         
-    # TODO: Review unreachable code - path = Path(location.path)
-    # TODO: Review unreachable code - if not path.exists():
-    # TODO: Review unreachable code - logger.error(f"Location path does not exist: {location.path}")
-    # TODO: Review unreachable code - return {
-    # TODO: Review unreachable code - "location_id": str(location.location_id),
-    # TODO: Review unreachable code - "location_name": location.name,
-    # TODO: Review unreachable code - "scan_time": datetime.now().isoformat(),
-    # TODO: Review unreachable code - "files_discovered": 0,
-    # TODO: Review unreachable code - "files_updated": 0,
-    # TODO: Review unreachable code - "files_removed": 0,
-    # TODO: Review unreachable code - "error": "Path does not exist"
-    # TODO: Review unreachable code - }
+        path = Path(location.path)
+        if not path.exists():
+            logger.error(f"Location path does not exist: {location.path}")
+            return {
+                "location_id": str(location.location_id),
+                "location_name": location.name,
+                "scan_time": datetime.now().isoformat(),
+                "files_discovered": 0,
+                "files_updated": 0,
+                "files_removed": 0,
+                "error": "Path does not exist"
+            }
         
-    # TODO: Review unreachable code - files_discovered = 0
-    # TODO: Review unreachable code - files_updated = 0
-    # TODO: Review unreachable code - files_removed = 0
+        files_discovered = 0
+        files_updated = 0
+        files_removed = 0
         
-    # TODO: Review unreachable code - # Get existing files in this location
-    # TODO: Review unreachable code - existing_files = {}
-    # TODO: Review unreachable code - for row in self.conn.execute(
-    # TODO: Review unreachable code - "SELECT file_path, content_hash FROM file_locations WHERE location_id = ?",
-    # TODO: Review unreachable code - [str(location.location_id)]
-    # TODO: Review unreachable code - ).fetchall():
-    # TODO: Review unreachable code - existing_files[row[0]] = row[1]
+        # Get existing files in this location
+        existing_files = {}
+        for row in self.conn.execute(
+            "SELECT file_path, content_hash FROM file_locations WHERE location_id = ?",
+            [str(location.location_id)]
+        ).fetchall():
+            existing_files[row[0]] = row[1]
         
-    # TODO: Review unreachable code - # Scan for media files
-    # TODO: Review unreachable code - media_extensions = {'.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.mp4', '.mov'}
-    # TODO: Review unreachable code - scanned_paths = set()
+        # Scan for media files
+        media_extensions = {'.jpg', '.jpeg', '.png', '.webp', '.heic', '.heif', '.mp4', '.mov'}
+        scanned_paths = set()
         
-    # TODO: Review unreachable code - for file_path in path.rglob('*'):
-    # TODO: Review unreachable code - if file_path.is_file() and file_path.suffix.lower() in media_extensions:
-    # TODO: Review unreachable code - relative_path = str(file_path.relative_to(path))
-    # TODO: Review unreachable code - scanned_paths.add(relative_path)
+        for file_path in path.rglob('*'):
+            if file_path.is_file() and file_path.suffix.lower() in media_extensions:
+                relative_path = str(file_path.relative_to(path))
+                scanned_paths.add(relative_path)
                 
-    # TODO: Review unreachable code - # Compute content hash
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - with open(file_path, 'rb') as f:
-    # TODO: Review unreachable code - content_hash = hashlib.sha256(f.read()).hexdigest()
+                # Compute content hash
+                try:
+                    with open(file_path, 'rb') as f:
+                        content_hash = hashlib.sha256(f.read()).hexdigest()
                     
-    # TODO: Review unreachable code - if relative_path in existing_files:
-    # TODO: Review unreachable code - # Check if file changed
-    # TODO: Review unreachable code - if existing_files[relative_path] != content_hash:
-    # TODO: Review unreachable code - # Update file
-    # TODO: Review unreachable code - self.update_file_in_location(
-    # TODO: Review unreachable code - content_hash, 
-    # TODO: Review unreachable code - str(location.location_id),
-    # TODO: Review unreachable code - relative_path,
-    # TODO: Review unreachable code - file_path.stat().st_size
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - files_updated += 1
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # New file
-    # TODO: Review unreachable code - self.add_file_to_location(
-    # TODO: Review unreachable code - content_hash,
-    # TODO: Review unreachable code - str(location.location_id),
-    # TODO: Review unreachable code - relative_path,
-    # TODO: Review unreachable code - file_path.stat().st_size
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - files_discovered += 1
+                    if relative_path in existing_files:
+                        # Check if file changed
+                        if existing_files[relative_path] != content_hash:
+                            # Update file
+                            self.update_file_in_location(
+                                content_hash, 
+                                str(location.location_id),
+                                relative_path,
+                                file_path.stat().st_size
+                            )
+                            files_updated += 1
+                    else:
+                        # New file
+                        self.add_file_to_location(
+                            content_hash,
+                            str(location.location_id),
+                            relative_path,
+                            file_path.stat().st_size
+                        )
+                        files_discovered += 1
                         
-    # TODO: Review unreachable code - except Exception as e:
-    # TODO: Review unreachable code - logger.error(f"Error scanning file {file_path}: {e}")
+                except Exception as e:
+                    logger.error(f"Error scanning file {file_path}: {e}")
         
-    # TODO: Review unreachable code - # Find removed files
-    # TODO: Review unreachable code - for existing_path in existing_files:
-    # TODO: Review unreachable code - if existing_path not in scanned_paths:
-    # TODO: Review unreachable code - # Mark as removed
-    # TODO: Review unreachable code - self.conn.execute(
-    # TODO: Review unreachable code - "UPDATE file_locations SET sync_status = 'missing' WHERE location_id = ? AND file_path = ?",
-    # TODO: Review unreachable code - [str(location.location_id), existing_path]
-    # TODO: Review unreachable code - )
-    # TODO: Review unreachable code - files_removed += 1
+        # Find removed files
+        for existing_path in existing_files:
+            if existing_path not in scanned_paths:
+                # Mark as removed
+                self.conn.execute(
+                    "UPDATE file_locations SET sync_status = 'missing' WHERE location_id = ? AND file_path = ?",
+                    [str(location.location_id), existing_path]
+                )
+                files_removed += 1
         
-    # TODO: Review unreachable code - return {
-    # TODO: Review unreachable code - "location_id": str(location.location_id),
-    # TODO: Review unreachable code - "location_name": location.name,
-    # TODO: Review unreachable code - "scan_time": datetime.now().isoformat(),
-    # TODO: Review unreachable code - "files_discovered": files_discovered,
-    # TODO: Review unreachable code - "files_updated": files_updated,
-    # TODO: Review unreachable code - "files_removed": files_removed
-    # TODO: Review unreachable code - }
+        return {
+            "location_id": str(location.location_id),
+            "location_name": location.name,
+            "scan_time": datetime.now().isoformat(),
+            "files_discovered": files_discovered,
+            "files_updated": files_updated,
+            "files_removed": files_removed
+        }
     
-    # TODO: Review unreachable code - def _scan_s3_location(self, location: StorageLocation, full_scan: bool = False) -> dict[str, Any]:
-    # TODO: Review unreachable code - """Scan an S3 bucket location."""
-    # TODO: Review unreachable code - # Placeholder for S3 scanning - would use boto3
-    # TODO: Review unreachable code - logger.info(f"S3 scanning not yet implemented for {location.name}")
-    # TODO: Review unreachable code - return {
-    # TODO: Review unreachable code - "location_id": str(location.location_id),
-    # TODO: Review unreachable code - "location_name": location.name,
-    # TODO: Review unreachable code - "scan_time": datetime.now().isoformat(),
-    # TODO: Review unreachable code - "files_discovered": 0,
-    # TODO: Review unreachable code - "files_updated": 0,
-    # TODO: Review unreachable code - "files_removed": 0,
-    # TODO: Review unreachable code - "error": "S3 scanning not implemented"
-    # TODO: Review unreachable code - }
+    def _scan_s3_location(self, location: StorageLocation, full_scan: bool = False) -> dict[str, Any]:
+        """Scan an S3 bucket location."""
+        # Placeholder for S3 scanning - would use boto3
+        logger.info(f"S3 scanning not yet implemented for {location.name}")
+        return {
+            "location_id": str(location.location_id),
+            "location_name": location.name,
+            "scan_time": datetime.now().isoformat(),
+            "files_discovered": 0,
+            "files_updated": 0,
+            "files_removed": 0,
+            "error": "S3 scanning not implemented"
+        }
     
-    # TODO: Review unreachable code - def _scan_gcs_location(self, location: StorageLocation, full_scan: bool = False) -> dict[str, Any]:
-    # TODO: Review unreachable code - """Scan a Google Cloud Storage location."""
-    # TODO: Review unreachable code - # Placeholder for GCS scanning - would use google-cloud-storage
-    # TODO: Review unreachable code - logger.info(f"GCS scanning not yet implemented for {location.name}")
-    # TODO: Review unreachable code - return {
-    # TODO: Review unreachable code - "location_id": str(location.location_id),
-    # TODO: Review unreachable code - "location_name": location.name,
-    # TODO: Review unreachable code - "scan_time": datetime.now().isoformat(),
-    # TODO: Review unreachable code - "files_discovered": 0,
-    # TODO: Review unreachable code - "files_updated": 0,
-    # TODO: Review unreachable code - "files_removed": 0,
-    # TODO: Review unreachable code - "error": "GCS scanning not implemented"
-    # TODO: Review unreachable code - }
+    def _scan_gcs_location(self, location: StorageLocation, full_scan: bool = False) -> dict[str, Any]:
+        """Scan a Google Cloud Storage location."""
+        # Placeholder for GCS scanning - would use google-cloud-storage
+        logger.info(f"GCS scanning not yet implemented for {location.name}")
+        return {
+            "location_id": str(location.location_id),
+            "location_name": location.name,
+            "scan_time": datetime.now().isoformat(),
+            "files_discovered": 0,
+            "files_updated": 0,
+            "files_removed": 0,
+            "error": "GCS scanning not implemented"
+        }

@@ -64,116 +64,116 @@ class FileOperationsMixin:
 
         return sorted(media_files)
 
-    # TODO: Review unreachable code - def _is_media_file(self, file_path: Path) -> bool:
-    # TODO: Review unreachable code - """Check if file is a supported media file."""
-    # TODO: Review unreachable code - ext = file_path.suffix.lower()
-    # TODO: Review unreachable code - return ext in self.image_extensions or ext in self.video_extensions
+    def _is_media_file(self, file_path: Path) -> bool:
+        """Check if file is a supported media file."""
+        ext = file_path.suffix.lower()
+        return ext in self.image_extensions or ext in self.video_extensions
 
-    # TODO: Review unreachable code - def _get_media_type(self, file_path: Path) -> MediaType:
-    # TODO: Review unreachable code - """Determine media type from file extension."""
-    # TODO: Review unreachable code - ext = file_path.suffix.lower()
-    # TODO: Review unreachable code - if ext in self.image_extensions:
-    # TODO: Review unreachable code - return MediaType.IMAGE
-    # TODO: Review unreachable code - elif ext in self.video_extensions:
-    # TODO: Review unreachable code - return MediaType.VIDEO
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - return MediaType.UNKNOWN
+    def _get_media_type(self, file_path: Path) -> MediaType:
+        """Determine media type from file extension."""
+        ext = file_path.suffix.lower()
+        if ext in self.image_extensions:
+            return MediaType.IMAGE
+        elif ext in self.video_extensions:
+            return MediaType.VIDEO
+        else:
+            return MediaType.UNKNOWN
 
-    # TODO: Review unreachable code - def _perform_file_operation(self, media_path: Path, dest_path: Path) -> bool:
-    # TODO: Review unreachable code - """Perform the actual file operation (copy or move).
+    def _perform_file_operation(self, media_path: Path, dest_path: Path) -> bool:
+        """Perform the actual file operation (copy or move).
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - media_path: Source file path
-    # TODO: Review unreachable code - dest_path: Destination file path
+        Args:
+            media_path: Source file path
+            dest_path: Destination file path
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - True if successful, False otherwise
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - try:
-    # TODO: Review unreachable code - if self.config.processing.move:
-    # TODO: Review unreachable code - success = self.file_handler.move_file(media_path, dest_path)
-    # TODO: Review unreachable code - action = "Moved"
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - success = self.file_handler.copy_file(media_path, dest_path)
-    # TODO: Review unreachable code - action = "Copied"
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            if self.config.processing.move:
+                success = self.file_handler.move_file(media_path, dest_path)
+                action = "Moved"
+            else:
+                success = self.file_handler.copy_file(media_path, dest_path)
+                action = "Copied"
 
-    # TODO: Review unreachable code - if success:
-    # TODO: Review unreachable code - logger.info(f"{action}: {media_path.name} -> {dest_path.parent.name}/{dest_path.name}")
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - logger.error(f"Failed to {action.lower()}: {media_path.name}")
+            if success:
+                logger.info(f"{action}: {media_path.name} -> {dest_path.parent.name}/{dest_path.name}")
+            else:
+                logger.error(f"Failed to {action.lower()}: {media_path.name}")
 
-    # TODO: Review unreachable code - return success
+            return success
 
-    # TODO: Review unreachable code - except Exception as e:
-    # TODO: Review unreachable code - logger.error(f"Error during file operation: {e}")
-    # TODO: Review unreachable code - return False
+        except Exception as e:
+            logger.error(f"Error during file operation: {e}")
+            return False
 
-    # TODO: Review unreachable code - def _handle_existing_file_relocation(self, existing_file: Path, dest_path: Path) -> None:
-    # TODO: Review unreachable code - """Handle relocation of existing organized files.
+    def _handle_existing_file_relocation(self, existing_file: Path, dest_path: Path) -> None:
+        """Handle relocation of existing organized files.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - existing_file: Path to existing file
-    # TODO: Review unreachable code - dest_path: New destination path
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - if existing_file == dest_path:
-    # TODO: Review unreachable code - return  # Same file, no action needed
+        Args:
+            existing_file: Path to existing file
+            dest_path: New destination path
+        """
+        if existing_file == dest_path:
+            return  # Same file, no action needed
 
-    # TODO: Review unreachable code - if existing_file.parent == dest_path.parent:
-    # TODO: Review unreachable code - # Same folder, just rename
-    # TODO: Review unreachable code - logger.debug(f"Renaming in same folder: {existing_file.name} -> {dest_path.name}")
-    # TODO: Review unreachable code - if self.file_handler.move_file(existing_file, dest_path):
-    # TODO: Review unreachable code - logger.info(f"Renamed: {existing_file.name} -> {dest_path.name}")
-    # TODO: Review unreachable code - else:
-    # TODO: Review unreachable code - # Different folder, move the file
-    # TODO: Review unreachable code - logger.debug(f"Moving to new folder: {existing_file} -> {dest_path}")
-    # TODO: Review unreachable code - if self.file_handler.move_file(existing_file, dest_path):
-    # TODO: Review unreachable code - logger.info(f"Relocated: {existing_file.name} -> {dest_path.parent.name}/{dest_path.name}")
+        if existing_file.parent == dest_path.parent:
+            # Same folder, just rename
+            logger.debug(f"Renaming in same folder: {existing_file.name} -> {dest_path.name}")
+            if self.file_handler.move_file(existing_file, dest_path):
+                logger.info(f"Renamed: {existing_file.name} -> {dest_path.name}")
+        else:
+            # Different folder, move the file
+            logger.debug(f"Moving to new folder: {existing_file} -> {dest_path}")
+            if self.file_handler.move_file(existing_file, dest_path):
+                logger.info(f"Relocated: {existing_file.name} -> {dest_path.parent.name}/{dest_path.name}")
 
-    # TODO: Review unreachable code - def _cleanup_duplicates(self) -> None:
-    # TODO: Review unreachable code - """Clean up duplicate empty folders after organization."""
-    # TODO: Review unreachable code - # Map to track folders with their normalized names
-    # TODO: Review unreachable code - folder_map = {}
+    def _cleanup_duplicates(self) -> None:
+        """Clean up duplicate empty folders after organization."""
+        # Map to track folders with their normalized names
+        folder_map = {}
 
-    # TODO: Review unreachable code - # Find all date folders
-    # TODO: Review unreachable code - for date_folder in self.output_dir.iterdir():
-    # TODO: Review unreachable code - if not date_folder.is_dir():
-    # TODO: Review unreachable code - continue
+        # Find all date folders
+        for date_folder in self.output_dir.iterdir():
+            if not date_folder.is_dir():
+                continue
 
-    # TODO: Review unreachable code - # Find all project folders
-    # TODO: Review unreachable code - for project_folder in date_folder.iterdir():
-    # TODO: Review unreachable code - if not project_folder.is_dir():
-    # TODO: Review unreachable code - continue
+            # Find all project folders
+            for project_folder in date_folder.iterdir():
+                if not project_folder.is_dir():
+                    continue
 
-    # TODO: Review unreachable code - # Normalize folder name for comparison
-    # TODO: Review unreachable code - normalized = project_folder.name.lower().replace("-", "_").replace(" ", "_")
+                # Normalize folder name for comparison
+                normalized = project_folder.name.lower().replace("-", "_").replace(" ", "_")
 
-    # TODO: Review unreachable code - if normalized not in folder_map:
-    # TODO: Review unreachable code - folder_map[normalized] = []
-    # TODO: Review unreachable code - folder_map[normalized].append(project_folder)
+                if normalized not in folder_map:
+                    folder_map[normalized] = []
+                folder_map[normalized].append(project_folder)
 
-    # TODO: Review unreachable code - # Clean up duplicates
-    # TODO: Review unreachable code - for normalized, folders in folder_map.items():
-    # TODO: Review unreachable code - if len(folders) > 1:
-    # TODO: Review unreachable code - # Sort by modification time, keep the newest
-    # TODO: Review unreachable code - folders.sort(key=lambda f: f.stat().st_mtime, reverse=True)
+        # Clean up duplicates
+        for normalized, folders in folder_map.items():
+            if len(folders) > 1:
+                # Sort by modification time, keep the newest
+                folders.sort(key=lambda f: f.stat().st_mtime, reverse=True)
 
-    # TODO: Review unreachable code - for folder in folders[1:]:
-    # TODO: Review unreachable code - # Only remove if empty
-    # TODO: Review unreachable code - if not any(folder.iterdir()):
-    # TODO: Review unreachable code - logger.debug(f"Removing duplicate empty folder: {folder}")
-    # TODO: Review unreachable code - folder.rmdir()
+                for folder in folders[1:]:
+                    # Only remove if empty
+                    if not any(folder.iterdir()):
+                        logger.debug(f"Removing duplicate empty folder: {folder}")
+                        folder.rmdir()
 
-    # TODO: Review unreachable code - def _calculate_file_hash(self, file_path: Path) -> str:
-    # TODO: Review unreachable code - """Calculate SHA256 hash of a file.
+    def _calculate_file_hash(self, file_path: Path) -> str:
+        """Calculate SHA256 hash of a file.
 
-    # TODO: Review unreachable code - Args:
-    # TODO: Review unreachable code - file_path: Path to the file
+        Args:
+            file_path: Path to the file
 
-    # TODO: Review unreachable code - Returns:
-    # TODO: Review unreachable code - Hex string of the file hash
-    # TODO: Review unreachable code - """
-    # TODO: Review unreachable code - sha256_hash = hashlib.sha256()
-    # TODO: Review unreachable code - with open(file_path, "rb") as f:
-    # TODO: Review unreachable code - for byte_block in iter(lambda: f.read(4096), b""):
-    # TODO: Review unreachable code - sha256_hash.update(byte_block)
-    # TODO: Review unreachable code - return sha256_hash.hexdigest()
+        Returns:
+            Hex string of the file hash
+        """
+        sha256_hash = hashlib.sha256()
+        with open(file_path, "rb") as f:
+            for byte_block in iter(lambda: f.read(4096), b""):
+                sha256_hash.update(byte_block)
+        return sha256_hash.hexdigest()

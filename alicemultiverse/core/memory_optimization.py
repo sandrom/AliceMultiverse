@@ -1,18 +1,20 @@
 """Memory optimization utilities for large-scale operations."""
 
-import os
 import gc
-import mmap
-import weakref
-import psutil
 import logging
-from pathlib import Path
-from typing import Optional, Iterator, Dict, Any, List, Callable, TypeVar, Generic
-from contextlib import contextmanager
-from dataclasses import dataclass, field
-from collections import OrderedDict
+import mmap
+import os
+import psutil
+import resource
+import sys
 import threading
 import time
+import weakref
+from collections import OrderedDict
+from contextlib import contextmanager
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any, Callable, Dict, Generic, Iterator, List, Optional, TypeVar
 
 logger = logging.getLogger(__name__)
 
@@ -83,12 +85,12 @@ class MemoryMonitor:
             )
             return True
         
-        # TODO: Review unreachable code - # Check system memory
-        # TODO: Review unreachable code - if usage['percent'] > 90:
-        # TODO: Review unreachable code - logger.warning(f"System memory usage critical: {usage['percent']:.1f}%")
-        # TODO: Review unreachable code - return True
+        # Check system memory
+        if usage['percent'] > 90:
+            logger.warning(f"System memory usage critical: {usage['percent']:.1f}%")
+            return True
         
-        # TODO: Review unreachable code - return False
+        return False
     
     def maybe_collect_garbage(self, force: bool = False) -> bool:
         """Conditionally trigger garbage collection."""
@@ -108,28 +110,28 @@ class MemoryMonitor:
             self._last_gc_time = current_time
             return True
         
-        # TODO: Review unreachable code - return False
+        return False
     
     def get_adaptive_batch_size(self, base_size: int) -> int:
         """Calculate adaptive batch size based on memory pressure."""
         if not self.config.adaptive_batch_size:
             return base_size
         
-        # TODO: Review unreachable code - usage = self.get_memory_usage()
+        usage = self.get_memory_usage()
         
-        # TODO: Review unreachable code - # Reduce batch size under memory pressure
-        # TODO: Review unreachable code - if usage['usage_ratio'] > 0.8:
-        # TODO: Review unreachable code - factor = 0.25
-        # TODO: Review unreachable code - elif usage['usage_ratio'] > 0.6:
-        # TODO: Review unreachable code - factor = 0.5
-        # TODO: Review unreachable code - elif usage['usage_ratio'] > 0.4:
-        # TODO: Review unreachable code - factor = 0.75
-        # TODO: Review unreachable code - else:
-        # TODO: Review unreachable code - factor = 1.0
+        # Reduce batch size under memory pressure
+        if usage['usage_ratio'] > 0.8:
+            factor = 0.25
+        elif usage['usage_ratio'] > 0.6:
+            factor = 0.5
+        elif usage['usage_ratio'] > 0.4:
+            factor = 0.75
+        else:
+            factor = 1.0
         
-        # TODO: Review unreachable code - adjusted_size = int(base_size * factor)
-        # TODO: Review unreachable code - return max(self.config.min_batch_size,
-        # TODO: Review unreachable code - min(adjusted_size, self.config.max_batch_size))
+        adjusted_size = int(base_size * factor)
+        return max(self.config.min_batch_size, 
+                  min(adjusted_size, self.config.max_batch_size))
 
 
 class StreamingFileReader:
@@ -148,19 +150,20 @@ class StreamingFileReader:
                 yield f
             return
         
-        # TODO: Review unreachable code - with open(file_path, 'r+b' if mode == 'w' else 'rb') as f:
-        # TODO: Review unreachable code - try:
-        # TODO: Review unreachable code - with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mmapped:
-        # TODO: Review unreachable code - if mode == 'r':
-        # TODO: Review unreachable code - # Wrap in text mode for reading
-        # TODO: Review unreachable code - import io
-        # TODO: Review unreachable code - yield io.TextIOWrapper(io.BufferedReader(mmapped))
-        # TODO: Review unreachable code - else:
-        # TODO: Review unreachable code - yield mmapped
-        # TODO: Review unreachable code - except Exception as e:
-        # TODO: Review unreachable code - logger.debug(f"mmap failed for {file_path}, using regular file: {e}")
-        # TODO: Review unreachable code - f.seek(0)
-        # TODO: Review unreachable code - yield f
+        # For text mode, just use regular file
+        if mode == 'r':
+            with open(file_path, 'r', encoding='utf-8') as f:
+                yield f
+        else:
+            # For binary mode, try mmap
+            with open(file_path, 'r+b' if mode == 'w' else 'rb') as f:
+                try:
+                    with mmap.mmap(f.fileno(), 0, access=mmap.ACCESS_READ) as mmapped:
+                        yield mmapped
+                except Exception as e:
+                    logger.debug(f"mmap failed for {file_path}, using regular file: {e}")
+                    f.seek(0)
+                    yield f
     
     def read_chunks(self, file_path: Path) -> Iterator[bytes]:
         """Read file in memory-efficient chunks."""
@@ -200,257 +203,253 @@ class StreamingFileReader:
         return results
 
 
-# TODO: Review unreachable code - class BoundedCache(Generic[T]):
-# TODO: Review unreachable code - """Memory-bounded LRU cache with TTL support."""
+class BoundedCache(Generic[T]):
+    """Memory-bounded LRU cache with TTL support."""
     
-# TODO: Review unreachable code - def __init__(self, config: MemoryConfig):
-# TODO: Review unreachable code - self.config = config
-# TODO: Review unreachable code - self.max_size_bytes = config.cache_size_mb * 1024 * 1024
-# TODO: Review unreachable code - self.ttl_seconds = config.cache_ttl_seconds
+    def __init__(self, config: MemoryConfig):
+        self.config = config
+        self.max_size_bytes = config.cache_size_mb * 1024 * 1024
+        self.ttl_seconds = config.cache_ttl_seconds
         
-# TODO: Review unreachable code - self._cache: OrderedDict[str, tuple[T, float, int]] = OrderedDict()
-# TODO: Review unreachable code - self._current_size = 0
-# TODO: Review unreachable code - self._lock = threading.RLock()
-# TODO: Review unreachable code - self._hits = 0
-# TODO: Review unreachable code - self._misses = 0
+        self._cache: OrderedDict[str, tuple[T, float, int]] = OrderedDict()
+        self._current_size = 0
+        self._lock = threading.RLock()
+        self._hits = 0
+        self._misses = 0
     
-# TODO: Review unreachable code - def _estimate_size(self, value: Any) -> int:
-# TODO: Review unreachable code - """Estimate memory size of value."""
-# TODO: Review unreachable code - import sys
-        
-# TODO: Review unreachable code - if isinstance(value, (str, bytes)):
-# TODO: Review unreachable code - return int(len(value))
-# TODO: Review unreachable code - elif isinstance(value, (list, tuple)):
-# TODO: Review unreachable code - return sum(self._estimate_size(item) for item in value)
-# TODO: Review unreachable code - elif isinstance(value, dict):
-# TODO: Review unreachable code - return sum(
-# TODO: Review unreachable code - self._estimate_size(k) + self._estimate_size(v) 
-# TODO: Review unreachable code - for k, v in value.items()
-# TODO: Review unreachable code - )
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - return sys.getsizeof(value)
+    def _estimate_size(self, value: Any) -> int:
+        """Estimate memory size of value."""
+        if isinstance(value, (str, bytes)):
+            return len(value)
+        elif isinstance(value, (list, tuple)):
+            return sum(self._estimate_size(item) for item in value)
+        elif isinstance(value, dict):
+            return sum(
+                self._estimate_size(k) + self._estimate_size(v) 
+                for k, v in value.items()
+            )
+        else:
+            return sys.getsizeof(value)
     
-# TODO: Review unreachable code - def get(self, key: str) -> Optional[T]:
-# TODO: Review unreachable code - """Get value from cache."""
-# TODO: Review unreachable code - with self._lock:
-# TODO: Review unreachable code - if key not in self._cache:
-# TODO: Review unreachable code - self._misses += 1
-# TODO: Review unreachable code - return None
+    def get(self, key: str) -> Optional[T]:
+        """Get value from cache."""
+        with self._lock:
+            if key not in self._cache:
+                self._misses += 1
+                return None
             
-# TODO: Review unreachable code - value, timestamp, size = self._cache[key]
+            value, timestamp, size = self._cache[key]
             
-# TODO: Review unreachable code - # Check TTL
-# TODO: Review unreachable code - if self.ttl_seconds > 0:
-# TODO: Review unreachable code - if time.time() - timestamp > self.ttl_seconds:
-# TODO: Review unreachable code - del self._cache[key]
-# TODO: Review unreachable code - self._current_size -= size
-# TODO: Review unreachable code - self._misses += 1
-# TODO: Review unreachable code - return None
+            # Check TTL
+            if self.ttl_seconds > 0:
+                if time.time() - timestamp > self.ttl_seconds:
+                    del self._cache[key]
+                    self._current_size -= size
+                    self._misses += 1
+                    return None
             
-# TODO: Review unreachable code - # Move to end (LRU)
-# TODO: Review unreachable code - self._cache.move_to_end(key)
-# TODO: Review unreachable code - self._hits += 1
-# TODO: Review unreachable code - return value
+            # Move to end (LRU)
+            self._cache.move_to_end(key)
+            self._hits += 1
+            return value
     
-# TODO: Review unreachable code - def set(self, key: str, value: T) -> None:
-# TODO: Review unreachable code - """Set value in cache with size limit enforcement."""
-# TODO: Review unreachable code - with self._lock:
-# TODO: Review unreachable code - # Estimate size
-# TODO: Review unreachable code - size = self._estimate_size(value)
+    def set(self, key: str, value: T) -> None:
+        """Set value in cache with size limit enforcement."""
+        with self._lock:
+            # Estimate size
+            size = self._estimate_size(value)
             
-# TODO: Review unreachable code - # If single item is too large, don't cache
-# TODO: Review unreachable code - if size > self.max_size_bytes:
-# TODO: Review unreachable code - return
+            # If single item is too large, don't cache
+            if size > self.max_size_bytes:
+                return
             
-# TODO: Review unreachable code - # Remove old entry if exists
-# TODO: Review unreachable code - if key in self._cache:
-# TODO: Review unreachable code - _, _, old_size = self._cache[key]
-# TODO: Review unreachable code - self._current_size -= old_size
+            # Remove old entry if exists
+            if key in self._cache:
+                _, _, old_size = self._cache[key]
+                self._current_size -= old_size
             
-# TODO: Review unreachable code - # Evict items if needed
-# TODO: Review unreachable code - while self._current_size + size > self.max_size_bytes and self._cache:
-# TODO: Review unreachable code - evict_key, (_, _, evict_size) = self._cache.popitem(last=False)
-# TODO: Review unreachable code - self._current_size -= evict_size
+            # Evict items if needed
+            while self._current_size + size > self.max_size_bytes and self._cache:
+                evict_key, (_, _, evict_size) = self._cache.popitem(last=False)
+                self._current_size -= evict_size
             
-# TODO: Review unreachable code - # Add new entry
-# TODO: Review unreachable code - self._cache[key] = (value, time.time(), size)
-# TODO: Review unreachable code - self._current_size += size
+            # Add new entry
+            self._cache[key] = (value, time.time(), size)
+            self._current_size += size
     
-# TODO: Review unreachable code - def clear(self) -> None:
-# TODO: Review unreachable code - """Clear the cache."""
-# TODO: Review unreachable code - with self._lock:
-# TODO: Review unreachable code - self._cache.clear()
-# TODO: Review unreachable code - self._current_size = 0
+    def clear(self) -> None:
+        """Clear the cache."""
+        with self._lock:
+            self._cache.clear()
+            self._current_size = 0
     
-# TODO: Review unreachable code - def get_stats(self) -> dict:
-# TODO: Review unreachable code - """Get cache statistics."""
-# TODO: Review unreachable code - with self._lock:
-# TODO: Review unreachable code - total_requests = self._hits + self._misses
-# TODO: Review unreachable code - hit_rate = self._hits / total_requests if total_requests > 0 else 0
+    def get_stats(self) -> dict:
+        """Get cache statistics."""
+        with self._lock:
+            total_requests = self._hits + self._misses
+            hit_rate = self._hits / total_requests if total_requests > 0 else 0
             
-# TODO: Review unreachable code - return {
-# TODO: Review unreachable code - 'hits': self._hits,
-# TODO: Review unreachable code - 'misses': self._misses,
-# TODO: Review unreachable code - 'hit_rate': hit_rate,
-# TODO: Review unreachable code - 'size_mb': self._current_size / 1024 / 1024,
-# TODO: Review unreachable code - 'items': len(self._cache)
-# TODO: Review unreachable code - }
+            return {
+                'hits': self._hits,
+                'misses': self._misses,
+                'hit_rate': hit_rate,
+                'size_mb': self._current_size / 1024 / 1024,
+                'items': len(self._cache)
+            }
 
 
-# TODO: Review unreachable code - class ObjectPool(Generic[T]):
-# TODO: Review unreachable code - """Object pool for reusing expensive objects."""
+class ObjectPool(Generic[T]):
+    """Object pool for reusing expensive objects."""
     
-# TODO: Review unreachable code - def __init__(self, 
-# TODO: Review unreachable code - factory: Callable[[], T],
-# TODO: Review unreachable code - reset_func: Optional[Callable[[T], None]] = None,
-# TODO: Review unreachable code - max_size: int = 10):
-# TODO: Review unreachable code - self.factory = factory
-# TODO: Review unreachable code - self.reset_func = reset_func
-# TODO: Review unreachable code - self.max_size = max_size
-# TODO: Review unreachable code - self._pool: List[T] = []
-# TODO: Review unreachable code - self._lock = threading.Lock()
-# TODO: Review unreachable code - self._created = 0
-# TODO: Review unreachable code - self._reused = 0
+    def __init__(self, 
+                 factory: Callable[[], T],
+                 reset_func: Optional[Callable[[T], None]] = None,
+                 max_size: int = 10):
+        self.factory = factory
+        self.reset_func = reset_func
+        self.max_size = max_size
+        self._pool: List[T] = []
+        self._lock = threading.Lock()
+        self._created = 0
+        self._reused = 0
     
-# TODO: Review unreachable code - @contextmanager
-# TODO: Review unreachable code - def acquire(self) -> Iterator[T]:
-# TODO: Review unreachable code - """Acquire object from pool."""
-# TODO: Review unreachable code - obj = None
+    @contextmanager
+    def acquire(self) -> Iterator[T]:
+        """Acquire object from pool."""
+        obj = None
         
-# TODO: Review unreachable code - # Try to get from pool
-# TODO: Review unreachable code - with self._lock:
-# TODO: Review unreachable code - if self._pool:
-# TODO: Review unreachable code - obj = self._pool.pop()
-# TODO: Review unreachable code - self._reused += 1
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - obj = self.factory()
-# TODO: Review unreachable code - self._created += 1
+        # Try to get from pool
+        with self._lock:
+            if self._pool:
+                obj = self._pool.pop()
+                self._reused += 1
+            else:
+                obj = self.factory()
+                self._created += 1
         
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - yield obj
-# TODO: Review unreachable code - finally:
-# TODO: Review unreachable code - # Return to pool if space available
-# TODO: Review unreachable code - with self._lock:
-# TODO: Review unreachable code - if len(self._pool) < self.max_size:
-# TODO: Review unreachable code - if self.reset_func:
-# TODO: Review unreachable code - self.reset_func(obj)
-# TODO: Review unreachable code - self._pool.append(obj)
+        try:
+            yield obj
+        finally:
+            # Return to pool if space available
+            with self._lock:
+                if len(self._pool) < self.max_size:
+                    if self.reset_func:
+                        self.reset_func(obj)
+                    self._pool.append(obj)
     
-# TODO: Review unreachable code - def get_stats(self) -> Dict[str, int]:
-# TODO: Review unreachable code - """Get pool statistics."""
-# TODO: Review unreachable code - return {
-# TODO: Review unreachable code - 'pool_size': len(self._pool),
-# TODO: Review unreachable code - 'created': self._created,
-# TODO: Review unreachable code - 'reused': self._reused,
-# TODO: Review unreachable code - 'reuse_rate': self._reused / (self._created + self._reused) 
-# TODO: Review unreachable code - if self._created + self._reused > 0 else 0
-# TODO: Review unreachable code - }
+    def get_stats(self) -> Dict[str, int]:
+        """Get pool statistics."""
+        return {
+            'pool_size': len(self._pool),
+            'created': self._created,
+            'reused': self._reused,
+            'reuse_rate': self._reused / (self._created + self._reused) 
+                         if self._created + self._reused > 0 else 0
+        }
 
 
-# TODO: Review unreachable code - class WeakValueCache:
-# TODO: Review unreachable code - """Cache that allows garbage collection of unused values."""
+class WeakValueCache:
+    """Cache that allows garbage collection of unused values."""
     
-# TODO: Review unreachable code - def __init__(self):
-# TODO: Review unreachable code - self._cache: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
-# TODO: Review unreachable code - self._strong_refs: OrderedDict[str, Any] = OrderedDict()
-# TODO: Review unreachable code - self._max_strong_refs = 100
+    def __init__(self):
+        self._cache: weakref.WeakValueDictionary = weakref.WeakValueDictionary()
+        self._strong_refs: OrderedDict[str, Any] = OrderedDict()
+        self._max_strong_refs = 100
     
-# TODO: Review unreachable code - def get(self, key: str) -> Optional[Any]:
-# TODO: Review unreachable code - """Get value from cache."""
-# TODO: Review unreachable code - value = self._cache.get(key)
+    def get(self, key: str) -> Optional[Any]:
+        """Get value from cache."""
+        value = self._cache.get(key)
         
-# TODO: Review unreachable code - if value is not None:
-# TODO: Review unreachable code - # Keep strong reference to recently used items
-# TODO: Review unreachable code - self._strong_refs[key] = value
-# TODO: Review unreachable code - self._strong_refs.move_to_end(key)
+        if value is not None:
+            # Keep strong reference to recently used items
+            self._strong_refs[key] = value
+            self._strong_refs.move_to_end(key)
             
-# TODO: Review unreachable code - # Limit strong references
-# TODO: Review unreachable code - while len(self._strong_refs) > self._max_strong_refs:
-# TODO: Review unreachable code - self._strong_refs.popitem(last=False)
+            # Limit strong references
+            while len(self._strong_refs) > self._max_strong_refs:
+                self._strong_refs.popitem(last=False)
         
-# TODO: Review unreachable code - return value
+        return value
     
-# TODO: Review unreachable code - def set(self, key: str, value: Any) -> None:
-# TODO: Review unreachable code - """Set value in cache."""
-# TODO: Review unreachable code - self._cache[key] = value
-# TODO: Review unreachable code - self._strong_refs[key] = value
+    def set(self, key: str, value: Any) -> None:
+        """Set value in cache."""
+        self._cache[key] = value
+        self._strong_refs[key] = value
         
-# TODO: Review unreachable code - # Limit strong references
-# TODO: Review unreachable code - while len(self._strong_refs) > self._max_strong_refs:
-# TODO: Review unreachable code - self._strong_refs.popitem(last=False)
+        # Limit strong references
+        while len(self._strong_refs) > self._max_strong_refs:
+            self._strong_refs.popitem(last=False)
 
 
-# TODO: Review unreachable code - class MemoryOptimizedBatchProcessor:
-# TODO: Review unreachable code - """Process items in batches with memory optimization."""
+class MemoryOptimizedBatchProcessor:
+    """Process items in batches with memory optimization."""
     
-# TODO: Review unreachable code - def __init__(self, config: MemoryConfig):
-# TODO: Review unreachable code - self.config = config
-# TODO: Review unreachable code - self.monitor = MemoryMonitor(config)
+    def __init__(self, config: MemoryConfig):
+        self.config = config
+        self.monitor = MemoryMonitor(config)
     
-# TODO: Review unreachable code - def process_items(self,
-# TODO: Review unreachable code - items: Iterator[T],
-# TODO: Review unreachable code - processor: Callable[[List[T]], Any],
-# TODO: Review unreachable code - base_batch_size: int = 100) -> Iterator[Any]:
-# TODO: Review unreachable code - """Process items in memory-optimized batches."""
-# TODO: Review unreachable code - batch: List[T] = []
+    def process_items(self,
+                      items: Iterator[T],
+                      processor: Callable[[List[T]], Any],
+                      base_batch_size: int = 100) -> Iterator[Any]:
+        """Process items in memory-optimized batches."""
+        batch: List[T] = []
         
-# TODO: Review unreachable code - for item in items:
-# TODO: Review unreachable code - batch.append(item)
+        for item in items:
+            batch.append(item)
             
-# TODO: Review unreachable code - # Get adaptive batch size
-# TODO: Review unreachable code - batch_size = self.monitor.get_adaptive_batch_size(base_batch_size)
+            # Get adaptive batch size
+            batch_size = self.monitor.get_adaptive_batch_size(base_batch_size)
             
-# TODO: Review unreachable code - if len(batch) >= batch_size:
-# TODO: Review unreachable code - # Process batch
-# TODO: Review unreachable code - yield processor(batch)
+            if len(batch) >= batch_size:
+                # Process batch
+                yield processor(batch)
                 
-# TODO: Review unreachable code - # Clear batch and check memory
-# TODO: Review unreachable code - batch = []
-# TODO: Review unreachable code - self.monitor.maybe_collect_garbage()
+                # Clear batch and check memory
+                batch = []
+                self.monitor.maybe_collect_garbage()
         
-# TODO: Review unreachable code - # Process remaining items
-# TODO: Review unreachable code - if batch:
-# TODO: Review unreachable code - yield processor(batch)
+        # Process remaining items
+        if batch:
+            yield processor(batch)
 
 
-# TODO: Review unreachable code - @contextmanager
-# TODO: Review unreachable code - def memory_limit(max_memory_mb: int):
-# TODO: Review unreachable code - """Context manager to limit memory usage."""
-# TODO: Review unreachable code - import resource
+@contextmanager
+def memory_limit(max_memory_mb: int):
+    """Context manager to limit memory usage."""
+    # Get current limits
+    soft, hard = resource.getrlimit(resource.RLIMIT_AS)
     
-# TODO: Review unreachable code - # Get current limits
-# TODO: Review unreachable code - soft, hard = resource.getrlimit(resource.RLIMIT_AS)
+    # Set new limit
+    new_limit = max_memory_mb * 1024 * 1024
+    resource.setrlimit(resource.RLIMIT_AS, (new_limit, hard))
     
-# TODO: Review unreachable code - # Set new limit
-# TODO: Review unreachable code - new_limit = max_memory_mb * 1024 * 1024
-# TODO: Review unreachable code - resource.setrlimit(resource.RLIMIT_AS, (new_limit, hard))
-    
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - yield
-# TODO: Review unreachable code - finally:
-# TODO: Review unreachable code - # Restore original limits
-# TODO: Review unreachable code - resource.setrlimit(resource.RLIMIT_AS, (soft, hard))
+    try:
+        yield
+    finally:
+        # Restore original limits
+        resource.setrlimit(resource.RLIMIT_AS, (soft, hard))
 
 
-# TODO: Review unreachable code - def optimize_for_memory(func: Callable) -> Callable:
-# TODO: Review unreachable code - """Decorator to optimize function for memory usage."""
-# TODO: Review unreachable code - def wrapper(*args, **kwargs):
-# TODO: Review unreachable code - # Force garbage collection before
-# TODO: Review unreachable code - gc.collect()
+def optimize_for_memory(func: Callable) -> Callable:
+    """Decorator to optimize function for memory usage."""
+    def wrapper(*args, **kwargs):
+        # Force garbage collection before
+        gc.collect()
         
-# TODO: Review unreachable code - # Disable GC during execution for performance
-# TODO: Review unreachable code - gc_was_enabled = gc.isenabled()
-# TODO: Review unreachable code - gc.disable()
+        # Disable GC during execution for performance
+        gc_was_enabled = gc.isenabled()
+        gc.disable()
         
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - result = func(*args, **kwargs)
-# TODO: Review unreachable code - return result
-# TODO: Review unreachable code - finally:
-# TODO: Review unreachable code - # Re-enable GC
-# TODO: Review unreachable code - if gc_was_enabled:
-# TODO: Review unreachable code - gc.enable()
+        try:
+            result = func(*args, **kwargs)
+            return result
+        finally:
+            # Re-enable GC
+            if gc_was_enabled:
+                gc.enable()
             
-# TODO: Review unreachable code - # Force collection after
-# TODO: Review unreachable code - gc.collect()
+            # Force collection after
+            gc.collect()
     
-# TODO: Review unreachable code - return wrapper
+    return wrapper

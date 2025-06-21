@@ -33,33 +33,33 @@ class MetricsSnapshot:
         total = self.cache_hits + self.cache_misses
         return (self.cache_hits / total * 100) if total > 0 else 0.0
     
-    # TODO: Review unreachable code - @property
-    # TODO: Review unreachable code - def average_processing_time(self) -> float:
-    # TODO: Review unreachable code - """Calculate average time per file."""
-    # TODO: Review unreachable code - return float(self.processing_time) / self.files_processed if self.files_processed > 0 else 0.0
+    @property
+    def average_processing_time(self) -> float:
+        """Calculate average time per file."""
+        return float(self.processing_time) / self.files_processed if self.files_processed > 0 else 0.0
     
-    # TODO: Review unreachable code - @property
-    # TODO: Review unreachable code - def database_overhead_percent(self) -> float:
-    # TODO: Review unreachable code - """Calculate database time as percentage of total."""
-    # TODO: Review unreachable code - return (self.database_time / self.processing_time * 100) if self.processing_time > 0 else 0.0
+    @property
+    def database_overhead_percent(self) -> float:
+        """Calculate database time as percentage of total."""
+        return (self.database_time / self.processing_time * 100) if self.processing_time > 0 else 0.0
     
-    # TODO: Review unreachable code - def to_dict(self) -> Dict[str, Any]:
-    # TODO: Review unreachable code - """Convert to dictionary for serialization."""
-    # TODO: Review unreachable code - return {
-    # TODO: Review unreachable code - "timestamp": self.timestamp.isoformat(),
-    # TODO: Review unreachable code - "files_processed": self.files_processed,
-    # TODO: Review unreachable code - "processing_time": self.processing_time,
-    # TODO: Review unreachable code - "memory_usage_mb": self.memory_usage_mb,
-    # TODO: Review unreachable code - "cpu_usage_percent": self.cpu_usage_percent,
-    # TODO: Review unreachable code - "cache_hit_rate": self.cache_hit_rate,
-    # TODO: Review unreachable code - "database_operations": self.database_operations,
-    # TODO: Review unreachable code - "database_time": self.database_time,
-    # TODO: Review unreachable code - "worker_utilization": self.worker_utilization,
-    # TODO: Review unreachable code - "queue_depth": self.queue_depth,
-    # TODO: Review unreachable code - "errors": self.errors,
-    # TODO: Review unreachable code - "average_processing_time": self.average_processing_time,
-    # TODO: Review unreachable code - "database_overhead_percent": self.database_overhead_percent
-    # TODO: Review unreachable code - }
+    def to_dict(self) -> Dict[str, Any]:
+        """Convert to dictionary for serialization."""
+        return {
+            "timestamp": self.timestamp.isoformat(),
+            "files_processed": self.files_processed,
+            "processing_time": self.processing_time,
+            "memory_usage_mb": self.memory_usage_mb,
+            "cpu_usage_percent": self.cpu_usage_percent,
+            "cache_hit_rate": self.cache_hit_rate,
+            "database_operations": self.database_operations,
+            "database_time": self.database_time,
+            "worker_utilization": self.worker_utilization,
+            "queue_depth": self.queue_depth,
+            "errors": self.errors,
+            "average_processing_time": self.average_processing_time,
+            "database_overhead_percent": self.database_overhead_percent
+        }
 
 
 @dataclass
@@ -84,10 +84,10 @@ class FileTypeMetrics:
         """Average processing time."""
         return float(self.total_time) / self.count if self.count > 0 else 0.0
     
-    # TODO: Review unreachable code - @property
-    # TODO: Review unreachable code - def average_size_mb(self) -> float:
-    # TODO: Review unreachable code - """Average file size in MB."""
-    # TODO: Review unreachable code - return (self.total_size_bytes / self.count / 1024 / 1024) if self.count > 0 else 0.0
+    @property
+    def average_size_mb(self) -> float:
+        """Average file size in MB."""
+        return (self.total_size_bytes / self.count / 1024 / 1024) if self.count > 0 else 0.0
 
 
 class PerformanceMetrics:
@@ -181,104 +181,104 @@ class PerformanceMetrics:
         
         return memory_mb
     
-    # TODO: Review unreachable code - def get_current_cpu_percent(self) -> float:
-    # TODO: Review unreachable code - """Get current CPU usage percentage."""
-    # TODO: Review unreachable code - return self._process.cpu_percent(interval=0.1)
+    def get_current_cpu_percent(self) -> float:
+        """Get current CPU usage percentage."""
+        return self._process.cpu_percent(interval=0.1)
     
-    # TODO: Review unreachable code - def get_snapshot(self) -> MetricsSnapshot:
-    # TODO: Review unreachable code - """Get a snapshot of current metrics."""
-    # TODO: Review unreachable code - with self._lock:
-    # TODO: Review unreachable code - worker_utilization = (self.active_workers / self.max_workers * 100) if self.max_workers > 0 else 0.0
+    def get_snapshot(self) -> MetricsSnapshot:
+        """Get a snapshot of current metrics."""
+        with self._lock:
+            worker_utilization = (self.active_workers / self.max_workers * 100) if self.max_workers > 0 else 0.0
             
-    # TODO: Review unreachable code - return MetricsSnapshot(
-    # TODO: Review unreachable code - timestamp=datetime.now(),
-    # TODO: Review unreachable code - files_processed=self.files_processed,
-    # TODO: Review unreachable code - processing_time=self.processing_time,
-    # TODO: Review unreachable code - memory_usage_mb=self.get_current_memory_mb(),
-    # TODO: Review unreachable code - cpu_usage_percent=self.get_current_cpu_percent(),
-    # TODO: Review unreachable code - cache_hits=self.cache_hits,
-    # TODO: Review unreachable code - cache_misses=self.cache_misses,
-    # TODO: Review unreachable code - database_operations=self.database_operations,
-    # TODO: Review unreachable code - database_time=self.database_time,
-    # TODO: Review unreachable code - worker_utilization=worker_utilization,
-    # TODO: Review unreachable code - queue_depth=self.queue_depth,
-    # TODO: Review unreachable code - errors=self.errors
-    # TODO: Review unreachable code - )
+            return MetricsSnapshot(
+                timestamp=datetime.now(),
+                files_processed=self.files_processed,
+                processing_time=self.processing_time,
+                memory_usage_mb=self.get_current_memory_mb(),
+                cpu_usage_percent=self.get_current_cpu_percent(),
+                cache_hits=self.cache_hits,
+                cache_misses=self.cache_misses,
+                database_operations=self.database_operations,
+                database_time=self.database_time,
+                worker_utilization=worker_utilization,
+                queue_depth=self.queue_depth,
+                errors=self.errors
+            )
     
-    # TODO: Review unreachable code - def get_file_type_summary(self) -> Dict[str, Dict[str, Any]]:
-    # TODO: Review unreachable code - """Get summary statistics by file type."""
-    # TODO: Review unreachable code - with self._lock:
-    # TODO: Review unreachable code - summary = {}
-    # TODO: Review unreachable code - for ext, metrics in self.file_type_metrics.items():
-    # TODO: Review unreachable code - if metrics.count > 0:
-    # TODO: Review unreachable code - summary[ext] = {
-    # TODO: Review unreachable code - "count": metrics.count,
-    # TODO: Review unreachable code - "average_time": metrics.average_time,
-    # TODO: Review unreachable code - "min_time": metrics.min_time,
-    # TODO: Review unreachable code - "max_time": metrics.max_time,
-    # TODO: Review unreachable code - "average_size_mb": metrics.average_size_mb,
-    # TODO: Review unreachable code - "total_time": metrics.total_time
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - return summary
+    def get_file_type_summary(self) -> Dict[str, Dict[str, Any]]:
+        """Get summary statistics by file type."""
+        with self._lock:
+            summary = {}
+            for ext, metrics in self.file_type_metrics.items():
+                if metrics.count > 0:
+                    summary[ext] = {
+                        "count": metrics.count,
+                        "average_time": metrics.average_time,
+                        "min_time": metrics.min_time,
+                        "max_time": metrics.max_time,
+                        "average_size_mb": metrics.average_size_mb,
+                        "total_time": metrics.total_time
+                    }
+            return summary
     
-    # TODO: Review unreachable code - def get_operation_summary(self) -> Dict[str, Dict[str, float]]:
-    # TODO: Review unreachable code - """Get summary of operation timings."""
-    # TODO: Review unreachable code - with self._lock:
-    # TODO: Review unreachable code - summary = {}
-    # TODO: Review unreachable code - for operation, times in self._operation_times.items():
-    # TODO: Review unreachable code - if times:
-    # TODO: Review unreachable code - summary[operation] = {
-    # TODO: Review unreachable code - "count": len(times),
-    # TODO: Review unreachable code - "total": sum(times),
-    # TODO: Review unreachable code - "average": sum(times) / len(times),
-    # TODO: Review unreachable code - "min": min(times),
-    # TODO: Review unreachable code - "max": max(times)
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - return summary
+    def get_operation_summary(self) -> Dict[str, Dict[str, float]]:
+        """Get summary of operation timings."""
+        with self._lock:
+            summary = {}
+            for operation, times in self._operation_times.items():
+                if times:
+                    summary[operation] = {
+                        "count": len(times),
+                        "total": sum(times),
+                        "average": sum(times) / len(times),
+                        "min": min(times),
+                        "max": max(times)
+                    }
+            return summary
     
-    # TODO: Review unreachable code - def get_performance_report(self) -> Dict[str, Any]:
-    # TODO: Review unreachable code - """Get comprehensive performance report."""
-    # TODO: Review unreachable code - snapshot = self.get_snapshot()
-    # TODO: Review unreachable code - uptime = time.time() - self._start_time
+    def get_performance_report(self) -> Dict[str, Any]:
+        """Get comprehensive performance report."""
+        snapshot = self.get_snapshot()
+        uptime = time.time() - self._start_time
         
-    # TODO: Review unreachable code - return {
-    # TODO: Review unreachable code - "summary": {
-    # TODO: Review unreachable code - "uptime_seconds": uptime,
-    # TODO: Review unreachable code - "total_files": snapshot.files_processed,
-    # TODO: Review unreachable code - "total_time": snapshot.processing_time,
-    # TODO: Review unreachable code - "files_per_second": snapshot.files_processed / uptime if uptime > 0 else 0,
-    # TODO: Review unreachable code - "errors": snapshot.errors,
-    # TODO: Review unreachable code - "error_rate": (snapshot.errors / snapshot.files_processed * 100) if snapshot.files_processed > 0 else 0
-    # TODO: Review unreachable code - },
-    # TODO: Review unreachable code - "current_metrics": snapshot.to_dict(),
-    # TODO: Review unreachable code - "file_types": self.get_file_type_summary(),
-    # TODO: Review unreachable code - "operations": self.get_operation_summary(),
-    # TODO: Review unreachable code - "memory": {
-    # TODO: Review unreachable code - "current_mb": snapshot.memory_usage_mb,
-    # TODO: Review unreachable code - "peak_mb": self.peak_memory_mb
-    # TODO: Review unreachable code - },
-    # TODO: Review unreachable code - "cache": {
-    # TODO: Review unreachable code - "hits": snapshot.cache_hits,
-    # TODO: Review unreachable code - "misses": snapshot.cache_misses,
-    # TODO: Review unreachable code - "hit_rate": snapshot.cache_hit_rate
-    # TODO: Review unreachable code - },
-    # TODO: Review unreachable code - "database": {
-    # TODO: Review unreachable code - "operations": snapshot.database_operations,
-    # TODO: Review unreachable code - "total_time": snapshot.database_time,
-    # TODO: Review unreachable code - "overhead_percent": snapshot.database_overhead_percent
-    # TODO: Review unreachable code - }
-    # TODO: Review unreachable code - }
+        return {
+            "summary": {
+                "uptime_seconds": uptime,
+                "total_files": snapshot.files_processed,
+                "total_time": snapshot.processing_time,
+                "files_per_second": snapshot.files_processed / uptime if uptime > 0 else 0,
+                "errors": snapshot.errors,
+                "error_rate": (snapshot.errors / snapshot.files_processed * 100) if snapshot.files_processed > 0 else 0
+            },
+            "current_metrics": snapshot.to_dict(),
+            "file_types": self.get_file_type_summary(),
+            "operations": self.get_operation_summary(),
+            "memory": {
+                "current_mb": snapshot.memory_usage_mb,
+                "peak_mb": self.peak_memory_mb
+            },
+            "cache": {
+                "hits": snapshot.cache_hits,
+                "misses": snapshot.cache_misses,
+                "hit_rate": snapshot.cache_hit_rate
+            },
+            "database": {
+                "operations": snapshot.database_operations,
+                "total_time": snapshot.database_time,
+                "overhead_percent": snapshot.database_overhead_percent
+            }
+        }
     
-    # TODO: Review unreachable code - def reset(self) -> None:
-    # TODO: Review unreachable code - """Reset all metrics."""
-    # TODO: Review unreachable code - with self._lock:
-    # TODO: Review unreachable code - self.__init__()
+    def reset(self) -> None:
+        """Reset all metrics."""
+        with self._lock:
+            self.__init__()
     
-    # TODO: Review unreachable code - def save_report(self, path: Path) -> None:
-    # TODO: Review unreachable code - """Save performance report to file."""
-    # TODO: Review unreachable code - report = self.get_performance_report()
-    # TODO: Review unreachable code - with open(path, 'w') as f:
-    # TODO: Review unreachable code - json.dump(report, f, indent=2)
+    def save_report(self, path: Path) -> None:
+        """Save performance report to file."""
+        report = self.get_performance_report()
+        with open(path, 'w') as f:
+            json.dump(report, f, indent=2)
 
 
 class MetricsCollector:
@@ -295,16 +295,16 @@ class MetricsCollector:
                     cls._instance._initialized = False
         return cls._instance
     
-    # TODO: Review unreachable code - def __init__(self):
-    # TODO: Review unreachable code - if not self._initialized:
-    # TODO: Review unreachable code - self.metrics = PerformanceMetrics()
-    # TODO: Review unreachable code - self._initialized = True
+    def __init__(self):
+        if not self._initialized:
+            self.metrics = PerformanceMetrics()
+            self._initialized = True
     
-    # TODO: Review unreachable code - @classmethod
-    # TODO: Review unreachable code - def get_instance(cls) -> 'MetricsCollector':
-    # TODO: Review unreachable code - """Get the singleton instance."""
-    # TODO: Review unreachable code - return cls()
+    @classmethod
+    def get_instance(cls) -> 'MetricsCollector':
+        """Get the singleton instance."""
+        return cls()
     
-    # TODO: Review unreachable code - def __getattr__(self, name):
-    # TODO: Review unreachable code - """Delegate to metrics object."""
-    # TODO: Review unreachable code - return getattr(self.metrics, name)
+    def __getattr__(self, name):
+        """Delegate to metrics object."""
+        return getattr(self.metrics, name)

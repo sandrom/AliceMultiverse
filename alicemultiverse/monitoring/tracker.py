@@ -28,9 +28,9 @@ class PerformanceTracker:
         except Exception:
             self.collector.record_error()
             raise
-        # TODO: Review unreachable code - finally:
-        # TODO: Review unreachable code - processing_time = time.time() - start_time
-        # TODO: Review unreachable code - self.collector.record_file_processed(file_path, processing_time)
+        finally:
+            processing_time = time.time() - start_time
+            self.collector.record_file_processed(file_path, processing_time)
     
     @contextmanager
     def track_database_operation(self):
@@ -79,20 +79,20 @@ class PerformanceTracker:
                 with tracker.track_operation(op_name):
                     return func(*args, **kwargs)
             
-            # TODO: Review unreachable code - return cast(F, wrapper)
+            return cast(F, wrapper)
         return decorator
     
-    # TODO: Review unreachable code - @staticmethod
-    # TODO: Review unreachable code - def track_db_method(func: F) -> F:
-    # TODO: Review unreachable code - """Decorator to track database method execution."""
-    # TODO: Review unreachable code - tracker = PerformanceTracker()
+    @staticmethod
+    def track_db_method(func: F) -> F:
+        """Decorator to track database method execution."""
+        tracker = PerformanceTracker()
         
-    # TODO: Review unreachable code - @functools.wraps(func)
-    # TODO: Review unreachable code - def wrapper(*args, **kwargs):
-    # TODO: Review unreachable code - with tracker.track_database_operation():
-    # TODO: Review unreachable code - return func(*args, **kwargs)
+        @functools.wraps(func)
+        def wrapper(*args, **kwargs):
+            with tracker.track_database_operation():
+                return func(*args, **kwargs)
         
-    # TODO: Review unreachable code - return cast(F, wrapper)
+        return cast(F, wrapper)
 
 
 # Global tracker instance

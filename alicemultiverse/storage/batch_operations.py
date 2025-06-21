@@ -25,121 +25,121 @@ class BatchOperationsMixin:
         if not assets:
             return 0
             
-        # TODO: Review unreachable code - # Prepare batch data
-        # TODO: Review unreachable code - asset_data = []
-        # TODO: Review unreachable code - tag_data = []
-        # TODO: Review unreachable code - understanding_data = []
+        # Prepare batch data
+        asset_data = []
+        tag_data = []
+        understanding_data = []
         
-        # TODO: Review unreachable code - for asset in assets:
-        # TODO: Review unreachable code - content_hash = asset.get("content_hash")
-        # TODO: Review unreachable code - if not content_hash:
-        # TODO: Review unreachable code - continue
+        for asset in assets:
+            content_hash = asset.get("content_hash")
+            if not content_hash:
+                continue
                 
-        # TODO: Review unreachable code - # Prepare asset record
-        # TODO: Review unreachable code - asset_data.append((
-        # TODO: Review unreachable code - content_hash,
-        # TODO: Review unreachable code - asset.get("file_path", ""),
-        # TODO: Review unreachable code - asset.get("file_name", ""),
-        # TODO: Review unreachable code - asset.get("file_size", 0),
-        # TODO: Review unreachable code - asset.get("media_type", "image"),
-        # TODO: Review unreachable code - asset.get("width", 0),
-        # TODO: Review unreachable code - asset.get("height", 0),
-        # TODO: Review unreachable code - asset.get("duration"),
-        # TODO: Review unreachable code - asset.get("source_type", "unknown"),
-        # TODO: Review unreachable code - asset.get("ai_model", ""),
-        # TODO: Review unreachable code - asset.get("prompt", ""),
-        # TODO: Review unreachable code - asset.get("negative_prompt", ""),
-        # TODO: Review unreachable code - asset.get("date_taken", datetime.now()),
-        # TODO: Review unreachable code - asset.get("date_created", datetime.now()),
-        # TODO: Review unreachable code - asset.get("date_modified", datetime.now()),
-        # TODO: Review unreachable code - asset.get("project", ""),
-        # TODO: Review unreachable code - asset.get("asset_role", "primary"),
-        # TODO: Review unreachable code - asset.get("metadata", {}),
-        # TODO: Review unreachable code - datetime.now()  # added_at
-        # TODO: Review unreachable code - ))
+            # Prepare asset record
+            asset_data.append((
+                content_hash,
+                asset.get("file_path", ""),
+                asset.get("file_name", ""),
+                asset.get("file_size", 0),
+                asset.get("media_type", "image"),
+                asset.get("width", 0),
+                asset.get("height", 0),
+                asset.get("duration"),
+                asset.get("source_type", "unknown"),
+                asset.get("ai_model", ""),
+                asset.get("prompt", ""),
+                asset.get("negative_prompt", ""),
+                asset.get("date_taken", datetime.now()),
+                asset.get("date_created", datetime.now()),
+                asset.get("date_modified", datetime.now()),
+                asset.get("project", ""),
+                asset.get("asset_role", "primary"),
+                asset.get("metadata", {}),
+                datetime.now()  # added_at
+            ))
             
-        # TODO: Review unreachable code - # Prepare tag records
-        # TODO: Review unreachable code - if asset is not None and "tags" in asset:
-        # TODO: Review unreachable code - if isinstance(asset["tags"], list):
-        # TODO: Review unreachable code - for tag in asset["tags"]:
-        # TODO: Review unreachable code - tag_data.append((content_hash, "general", tag, 1.0, "user"))
-        # TODO: Review unreachable code - elif isinstance(asset["tags"], dict):
-        # TODO: Review unreachable code - for tag_type, tag_list in asset["tags"].items():
-        # TODO: Review unreachable code - for tag in tag_list:
-        # TODO: Review unreachable code - if isinstance(tag, dict):
-        # TODO: Review unreachable code - tag_data.append((
-        # TODO: Review unreachable code - content_hash, tag_type, 
-        # TODO: Review unreachable code - tag["value"], tag.get("confidence", 1.0),
-        # TODO: Review unreachable code - tag.get("source", "ai")
-        # TODO: Review unreachable code - ))
-        # TODO: Review unreachable code - else:
-        # TODO: Review unreachable code - tag_data.append((content_hash, tag_type, tag, 1.0, "ai"))
+            # Prepare tag records
+            if asset is not None and "tags" in asset:
+                if isinstance(asset["tags"], list):
+                    for tag in asset["tags"]:
+                        tag_data.append((content_hash, "general", tag, 1.0, "user"))
+                elif isinstance(asset["tags"], dict):
+                    for tag_type, tag_list in asset["tags"].items():
+                        for tag in tag_list:
+                            if isinstance(tag, dict):
+                                tag_data.append((
+                                    content_hash, tag_type, 
+                                    tag["value"], tag.get("confidence", 1.0),
+                                    tag.get("source", "ai")
+                                ))
+                            else:
+                                tag_data.append((content_hash, tag_type, tag, 1.0, "ai"))
             
-        # TODO: Review unreachable code - # Prepare understanding records
-        # TODO: Review unreachable code - if asset is not None and "understanding" in asset:
-        # TODO: Review unreachable code - understanding = asset["understanding"]
-        # TODO: Review unreachable code - understanding_data.append((
-        # TODO: Review unreachable code - content_hash,
-        # TODO: Review unreachable code - understanding.get("provider", "unknown"),
-        # TODO: Review unreachable code - understanding.get("model", ""),
-        # TODO: Review unreachable code - understanding.get("analysis_date", datetime.now()),
-        # TODO: Review unreachable code - understanding.get("description", ""),
-        # TODO: Review unreachable code - understanding.get("cost", 0.0),
-        # TODO: Review unreachable code - understanding.get("metadata", {})
-        # TODO: Review unreachable code - ))
+            # Prepare understanding records
+            if asset is not None and "understanding" in asset:
+                understanding = asset["understanding"]
+                understanding_data.append((
+                    content_hash,
+                    understanding.get("provider", "unknown"),
+                    understanding.get("model", ""),
+                    understanding.get("analysis_date", datetime.now()),
+                    understanding.get("description", ""),
+                    understanding.get("cost", 0.0),
+                    understanding.get("metadata", {})
+                ))
         
-        # TODO: Review unreachable code - try:
-        # TODO: Review unreachable code - # Begin transaction for atomicity
-        # TODO: Review unreachable code - self.conn.execute("BEGIN TRANSACTION")
+        try:
+            # Begin transaction for atomicity
+            self.conn.execute("BEGIN TRANSACTION")
             
-        # TODO: Review unreachable code - # Batch insert assets
-        # TODO: Review unreachable code - if asset_data:
-        # TODO: Review unreachable code - self.conn.executemany("""
-        # TODO: Review unreachable code - INSERT OR REPLACE INTO assets (
-        # TODO: Review unreachable code - content_hash, file_path, file_name, file_size,
-        # TODO: Review unreachable code - media_type, width, height, duration,
-        # TODO: Review unreachable code - source_type, ai_model, prompt, negative_prompt,
-        # TODO: Review unreachable code - date_taken, date_created, date_modified,
-        # TODO: Review unreachable code - project, asset_role, metadata, added_at
-        # TODO: Review unreachable code - ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        # TODO: Review unreachable code - """, asset_data)
+            # Batch insert assets
+            if asset_data:
+                self.conn.executemany("""
+                INSERT OR REPLACE INTO assets (
+                    content_hash, file_path, file_name, file_size,
+                    media_type, width, height, duration,
+                    source_type, ai_model, prompt, negative_prompt,
+                    date_taken, date_created, date_modified,
+                    project, asset_role, metadata, added_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, asset_data)
             
-        # TODO: Review unreachable code - # Batch delete and insert tags
-        # TODO: Review unreachable code - if tag_data:
-        # TODO: Review unreachable code - # Delete existing tags for these assets
-        # TODO: Review unreachable code - content_hashes = list(set(t[0] for t in tag_data))
-        # TODO: Review unreachable code - placeholders = ','.join(['?'] * len(content_hashes))
-        # TODO: Review unreachable code - self.conn.execute(
-        # TODO: Review unreachable code - f"DELETE FROM tags WHERE content_hash IN ({placeholders})",
-        # TODO: Review unreachable code - content_hashes
-        # TODO: Review unreachable code - )
+            # Batch delete and insert tags
+            if tag_data:
+                # Delete existing tags for these assets
+                content_hashes = list(set(t[0] for t in tag_data))
+                placeholders = ','.join(['?'] * len(content_hashes))
+                self.conn.execute(
+                    f"DELETE FROM tags WHERE content_hash IN ({placeholders})",
+                    content_hashes
+                )
                 
-        # TODO: Review unreachable code - # Insert new tags
-        # TODO: Review unreachable code - self.conn.executemany("""
-        # TODO: Review unreachable code - INSERT INTO tags (content_hash, tag_type, tag_value, confidence, source)
-        # TODO: Review unreachable code - VALUES (?, ?, ?, ?, ?)
-        # TODO: Review unreachable code - """, tag_data)
+                # Insert new tags
+                self.conn.executemany("""
+                INSERT INTO tags (content_hash, tag_type, tag_value, confidence, source)
+                VALUES (?, ?, ?, ?, ?)
+                """, tag_data)
             
-        # TODO: Review unreachable code - # Batch insert understanding
-        # TODO: Review unreachable code - if understanding_data:
-        # TODO: Review unreachable code - self.conn.executemany("""
-        # TODO: Review unreachable code - INSERT OR REPLACE INTO understanding (
-        # TODO: Review unreachable code - content_hash, provider, model, analysis_date,
-        # TODO: Review unreachable code - description, cost, metadata
-        # TODO: Review unreachable code - ) VALUES (?, ?, ?, ?, ?, ?, ?)
-        # TODO: Review unreachable code - """, understanding_data)
+            # Batch insert understanding
+            if understanding_data:
+                self.conn.executemany("""
+                INSERT OR REPLACE INTO understanding (
+                    content_hash, provider, model, analysis_date,
+                    description, cost, metadata
+                ) VALUES (?, ?, ?, ?, ?, ?, ?)
+                """, understanding_data)
             
-        # TODO: Review unreachable code - # Commit transaction
-        # TODO: Review unreachable code - self.conn.execute("COMMIT")
+            # Commit transaction
+            self.conn.execute("COMMIT")
             
-        # TODO: Review unreachable code - logger.info(f"Batch upserted {len(asset_data)} assets with {len(tag_data)} tags")
-        # TODO: Review unreachable code - return int(len(asset_data))
+            logger.info(f"Batch upserted {len(asset_data)} assets with {len(tag_data)} tags")
+            return int(len(asset_data))
             
-        # TODO: Review unreachable code - except Exception as e:
-        # TODO: Review unreachable code - # Rollback on error
-        # TODO: Review unreachable code - self.conn.execute("ROLLBACK")
-        # TODO: Review unreachable code - logger.error(f"Batch upsert failed: {e}")
-        # TODO: Review unreachable code - raise
+        except Exception as e:
+            # Rollback on error
+            self.conn.execute("ROLLBACK")
+            logger.error(f"Batch upsert failed: {e}")
+            raise
     
     def batch_update_tags(self, updates: List[Tuple[str, Dict[str, List[str]]]]) -> int:
         """Batch update tags for multiple assets.
@@ -153,53 +153,53 @@ class BatchOperationsMixin:
         if not updates:
             return 0
             
-        # TODO: Review unreachable code - try:
-        # TODO: Review unreachable code - self.conn.execute("BEGIN TRANSACTION")
+        try:
+            self.conn.execute("BEGIN TRANSACTION")
             
-        # TODO: Review unreachable code - # Prepare all tag data
-        # TODO: Review unreachable code - all_tag_data = []
-        # TODO: Review unreachable code - content_hashes = []
+            # Prepare all tag data
+            all_tag_data = []
+            content_hashes = []
             
-        # TODO: Review unreachable code - for content_hash, tags in updates:
-        # TODO: Review unreachable code - content_hashes.append(content_hash)
+            for content_hash, tags in updates:
+                content_hashes.append(content_hash)
                 
-        # TODO: Review unreachable code - if isinstance(tags, dict):
-        # TODO: Review unreachable code - for tag_type, tag_list in tags.items():
-        # TODO: Review unreachable code - for tag in tag_list:
-        # TODO: Review unreachable code - all_tag_data.append((content_hash, tag_type, tag, 1.0, "user"))
-        # TODO: Review unreachable code - elif isinstance(tags, list):
-        # TODO: Review unreachable code - for tag in tags:
-        # TODO: Review unreachable code - all_tag_data.append((content_hash, "general", tag, 1.0, "user"))
+                if isinstance(tags, dict):
+                    for tag_type, tag_list in tags.items():
+                        for tag in tag_list:
+                            all_tag_data.append((content_hash, tag_type, tag, 1.0, "user"))
+                elif isinstance(tags, list):
+                    for tag in tags:
+                        all_tag_data.append((content_hash, "general", tag, 1.0, "user"))
             
-        # TODO: Review unreachable code - # Delete existing tags
-        # TODO: Review unreachable code - if content_hashes:
-        # TODO: Review unreachable code - placeholders = ','.join(['?'] * len(content_hashes))
-        # TODO: Review unreachable code - self.conn.execute(
-        # TODO: Review unreachable code - f"DELETE FROM tags WHERE content_hash IN ({placeholders})",
-        # TODO: Review unreachable code - content_hashes
-        # TODO: Review unreachable code - )
+            # Delete existing tags
+            if content_hashes:
+                placeholders = ','.join(['?'] * len(content_hashes))
+                self.conn.execute(
+                    f"DELETE FROM tags WHERE content_hash IN ({placeholders})",
+                    content_hashes
+                )
             
-        # TODO: Review unreachable code - # Insert new tags
-        # TODO: Review unreachable code - if all_tag_data:
-        # TODO: Review unreachable code - self.conn.executemany("""
-        # TODO: Review unreachable code - INSERT INTO tags (content_hash, tag_type, tag_value, confidence, source)
-        # TODO: Review unreachable code - VALUES (?, ?, ?, ?, ?)
-        # TODO: Review unreachable code - """, all_tag_data)
+            # Insert new tags
+            if all_tag_data:
+                self.conn.executemany("""
+                INSERT INTO tags (content_hash, tag_type, tag_value, confidence, source)
+                VALUES (?, ?, ?, ?, ?)
+                """, all_tag_data)
             
-        # TODO: Review unreachable code - # Update modified timestamps
-        # TODO: Review unreachable code - self.conn.executemany("""
-        # TODO: Review unreachable code - UPDATE assets SET modified_at = ? WHERE content_hash = ?
-        # TODO: Review unreachable code - """, [(datetime.now(), ch) for ch in content_hashes])
+            # Update modified timestamps
+            self.conn.executemany("""
+            UPDATE assets SET modified_at = ? WHERE content_hash = ?
+            """, [(datetime.now(), ch) for ch in content_hashes])
             
-        # TODO: Review unreachable code - self.conn.execute("COMMIT")
+            self.conn.execute("COMMIT")
             
-        # TODO: Review unreachable code - logger.info(f"Batch updated tags for {len(content_hashes)} assets")
-        # TODO: Review unreachable code - return int(len(content_hashes))
+            logger.info(f"Batch updated tags for {len(content_hashes)} assets")
+            return int(len(content_hashes))
             
-        # TODO: Review unreachable code - except Exception as e:
-        # TODO: Review unreachable code - self.conn.execute("ROLLBACK")
-        # TODO: Review unreachable code - logger.error(f"Batch tag update failed: {e}")
-        # TODO: Review unreachable code - raise
+        except Exception as e:
+            self.conn.execute("ROLLBACK")
+            logger.error(f"Batch tag update failed: {e}")
+            raise
     
     def batch_search_by_tags(
         self, 

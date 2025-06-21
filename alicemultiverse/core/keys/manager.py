@@ -60,29 +60,29 @@ class APIKeyManager:
         if os.getenv(env_var):
             return os.getenv(env_var)
 
-        # TODO: Review unreachable code - # 2. macOS Keychain
-        # TODO: Review unreachable code - try:
-        # TODO: Review unreachable code - value = keyring.get_password(self.SERVICE_NAME, key_name)
-        # TODO: Review unreachable code - if value:
-        # TODO: Review unreachable code - return value
-        # TODO: Review unreachable code - except Exception as e:
-        # TODO: Review unreachable code - logger.debug(f"Unable to access keychain for {key_name}: {e}")
+        # 2. macOS Keychain
+        try:
+            value = keyring.get_password(self.SERVICE_NAME, key_name)
+            if value:
+                return value
+        except Exception as e:
+            logger.debug(f"Unable to access keychain for {key_name}: {e}")
 
-        # TODO: Review unreachable code - # 3. Config file
-        # TODO: Review unreachable code - if self.CONFIG_FILE.exists():
-        # TODO: Review unreachable code - try:
-        # TODO: Review unreachable code - with open(self.CONFIG_FILE) as f:
-        # TODO: Review unreachable code - config = json.load(f)
-        # TODO: Review unreachable code - if key_name in config:
-        # TODO: Review unreachable code - return config[key_name]
-        # TODO: Review unreachable code - except Exception as e:
-        # TODO: Review unreachable code - logger.debug(f"Unable to read config file for {key_name}: {e}")
+        # 3. Config file
+        if self.CONFIG_FILE.exists():
+            try:
+                with open(self.CONFIG_FILE) as f:
+                    config = json.load(f)
+                if key_name in config:
+                    return config[key_name]
+            except Exception as e:
+                logger.debug(f"Unable to read config file for {key_name}: {e}")
 
-        # TODO: Review unreachable code - # 4. Interactive prompt (if provided)
-        # TODO: Review unreachable code - if prompt:
-        # TODO: Review unreachable code - return getpass.getpass(prompt)
+        # 4. Interactive prompt (if provided)
+        if prompt:
+            return getpass.getpass(prompt)
 
-        # TODO: Review unreachable code - return None
+        return None
 
     def get_sightengine_credentials(self) -> str | None:
         """Get SightEngine credentials as 'user,secret' format."""
@@ -91,7 +91,7 @@ class APIKeyManager:
 
         if user and secret:
             return f"{user},{secret}"
-        # TODO: Review unreachable code - return None
+        return None
 
     def set_api_key(self, key_name: str, value: str, method: str = "keychain") -> None:
         """Store API key using specified method."""

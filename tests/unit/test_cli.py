@@ -91,10 +91,18 @@ class TestCLIParsing:
         assert overrides == expected_overrides
 
     @pytest.mark.unit
-    def test_apply_cli_args_to_config(self, omega_config):
+    def test_apply_cli_args_to_config(self):
         """Test applying CLI arguments to configuration."""
-        # Create mock args
-        args = MagicMock()
+        from alicemultiverse.core.config_dataclass import Config
+        
+        # Create a dataclass config
+        config = Config()
+        
+        # Create mock args with concrete values
+        class MockArgs:
+            pass
+        
+        args = MockArgs()
         args.inbox = "/cli/inbox"
         args.output = "/cli/output"
         args.move = True
@@ -102,20 +110,34 @@ class TestCLIParsing:
         args.watch = True
         args.dry_run = True
         args.force_reindex = True
-        args.pipeline = None  # Set to None to avoid MagicMock issue
+        args.understand = True
+        args.providers = None
+        args.pipeline = None
         args.stages = None
         args.cost_limit = None
         args.enhanced_metadata = None
+        args.openai_api_key = None
+        args.anthropic_api_key = None
+        args.google_ai_api_key = None
+        args.deepseek_api_key = None
+        args.detailed = None
+        args.verbose = None
+        args.debug = None
+        args.quiet = None
+        args.json = None
+        args.log_file = None
+        args.no_color = None
 
-        apply_cli_args_to_config(omega_config, args)
+        apply_cli_args_to_config(config, args)
 
-        assert omega_config.paths.inbox == "/cli/inbox"
-        assert omega_config.paths.organized == "/cli/output"
-        assert omega_config.processing.copy_mode is False  # move = True means copy_mode = False
-        assert omega_config.processing.quality is True
-        assert omega_config.processing.watch is True
-        assert omega_config.processing.dry_run is True
-        assert omega_config.processing.force_reindex is True
+        assert config.paths.inbox == "/cli/inbox"
+        assert config.paths.organized == "/cli/output"
+        assert config.processing.copy_mode is False  # move = True means copy_mode = False
+        assert config.processing.quality is True
+        assert config.processing.watch is True
+        assert config.processing.dry_run is True
+        assert config.processing.force_reindex is True
+        assert config.understanding.enabled is True
 
 
 class TestCLIMain:
@@ -132,15 +154,19 @@ class TestCLIMain:
         assert "1.7.1" in captured.out
 
     @pytest.mark.unit
-    @patch("alicemultiverse.core.keys.cli.run_keys_command")
-    def test_main_keys_command(self, mock_run_keys):
+    @patch("alicemultiverse.interface.main_cli.handle_keys_command")
+    @patch("alicemultiverse.interface.main_cli.load_config")
+    def test_main_keys_command(self, mock_load_config, mock_handle_keys):
         """Test keys subcommand routing."""
-        mock_run_keys.return_value = 0
+        from alicemultiverse.core.config_dataclass import Config
+        
+        mock_load_config.return_value = Config()
+        mock_handle_keys.return_value = 0
 
         result = main(["keys", "list"])
 
         assert result == 0
-        mock_run_keys.assert_called_once()
+        mock_handle_keys.assert_called_once()
 
     @pytest.mark.unit
     @patch("alicemultiverse.interface.main_cli.check_dependencies")

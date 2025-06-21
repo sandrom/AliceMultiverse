@@ -78,7 +78,6 @@ __all__ = [
     "AliceAPI",
     "ask_alice",
     "ask_alice_sync",
-    "AliceMCP",
     # Creative models
     "CreativeContext",
     "CreativeAsset",

@@ -82,7 +82,7 @@ class TestTagValidation:
 
     def test_tag_with_sql_injection(self):
         """Test SQL injection prevention."""
-        with pytest.raises(ValidationError, match="malicious content"):
+        with pytest.raises(ValidationError, match="invalid characters|malicious patterns"):
             validate_tag("'; DROP TABLE assets; --")
 
     def test_validate_tags_list(self):
@@ -382,5 +382,5 @@ class TestAssetRoleValidation:
 
     def test_invalid_role(self):
         """Test invalid role."""
-        with pytest.raises(ValidationError, match="Invalid role"):
+        with pytest.raises(ValidationError, match="Invalid asset role"):
             validate_asset_role("invalid_role")

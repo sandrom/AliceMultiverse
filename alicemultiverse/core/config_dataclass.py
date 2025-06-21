@@ -190,6 +190,54 @@ class EventsConfig:
 
 
 @dataclass
+class UnderstandingConfig:
+    """Understanding configuration."""
+    enabled: bool = False
+    providers: list[str] = field(default_factory=lambda: ["openai", "anthropic"])
+    cost_limit: float = 10.0
+    detailed: bool = False
+    extract_tags: bool = True
+    generate_prompt: bool = True
+    custom_instructions: str | None = None
+    preferred_provider: str | None = None
+    cost_limits: dict = field(default_factory=lambda: {"total": 10.0, "per_image": 0.01})
+    providers_config: dict = field(default_factory=dict)
+
+
+@dataclass
+class WatchConfig:
+    """Watch mode configuration."""
+    enabled: bool = False
+    interval: int = 5
+
+
+@dataclass
+class BehaviorConfig:
+    """Behavior configuration."""
+    move_files: bool = False
+    dry_run: bool = False
+    force_reindex: bool = False
+
+
+@dataclass
+class OutputConfig:
+    """Output configuration."""
+    # Date format for organized folders
+    date_format: str = "%Y-%m-%d"
+    # Number of digits for sequential numbering
+    sequence_digits: int = 5
+    # File naming pattern
+    naming_pattern: str = "{project}-{number:0{digits}d}{ext}"
+    # CLI output settings
+    verbose: bool = False
+    debug: bool = False
+    quiet: bool = False
+    format: str = "text"
+    log_file: str | None = None
+    no_color: bool = False
+
+
+@dataclass
 class ProvidersConfig:
     """Provider configuration."""
     anthropic: AnthropicConfig = field(default_factory=AnthropicConfig)
@@ -210,6 +258,10 @@ class Config:
     pipeline: PipelineConfig = field(default_factory=PipelineConfig)
     providers: ProvidersConfig = field(default_factory=ProvidersConfig)
     storage: StorageConfig = field(default_factory=StorageConfig)
+    understanding: UnderstandingConfig = field(default_factory=UnderstandingConfig)
+    watch: WatchConfig = field(default_factory=WatchConfig)
+    behavior: BehaviorConfig = field(default_factory=BehaviorConfig)
+    output: OutputConfig = field(default_factory=OutputConfig)
 
     def __post_init__(self) -> None:
         """Post-initialization processing."""
@@ -218,14 +270,14 @@ class Config:
 
     def get(self, key: str, default: Any = None) -> Any:
         """Get attribute with dot notation support."""
-        # TODO: Review unreachable code - try:
-        parts = key.split(".")
-        obj = self
-        for part in parts:
-            obj = getattr(obj, part)
-        return obj
-        # TODO: Review unreachable code - except AttributeError:
-        # TODO: Review unreachable code - return default
+        try:
+            parts = key.split(".")
+            obj = self
+            for part in parts:
+                obj = getattr(obj, part)
+            return obj
+        except AttributeError:
+            return default
 
     def set(self, key: str, value: Any) -> None:
         """Set attribute with dot notation support."""
@@ -311,6 +363,18 @@ class Config:
             pipeline_args["extra_fields"] = extra
             config.pipeline = PipelineConfig(**pipeline_args)
 
+        if data is not None and "understanding" in data:
+            config.understanding = UnderstandingConfig(**data["understanding"])
+
+        if data is not None and "watch" in data:
+            config.watch = WatchConfig(**data["watch"])
+
+        if data is not None and "behavior" in data:
+            config.behavior = BehaviorConfig(**data["behavior"])
+
+        if data is not None and "output" in data:
+            config.output = OutputConfig(**data["output"])
+
         # Sync quality enabled flag
         config.quality.enabled = config.processing.quality
 
@@ -386,14 +450,14 @@ def get_default_config() -> Config:
     return Config()
 
 
-# TODO: Review unreachable code - # Backward compatibility for OmegaConf style access
-# TODO: Review unreachable code - class DictConfig(Config):
-# TODO: Review unreachable code - """Wrapper to provide OmegaConf-like interface."""
+# Backward compatibility for OmegaConf style access
+class DictConfig(Config):
+    """Wrapper to provide OmegaConf-like interface."""
 
-# TODO: Review unreachable code - def __getitem__(self, key: str) -> Any:
-# TODO: Review unreachable code - """Allow dictionary-style access."""
-# TODO: Review unreachable code - return self.get(key) or 0
+    def __getitem__(self, key: str) -> Any:
+        """Allow dictionary-style access."""
+        return self.get(key) or 0
 
-# TODO: Review unreachable code - def __setitem__(self, key: str, value: Any) -> None:
-# TODO: Review unreachable code - """Allow dictionary-style setting."""
-# TODO: Review unreachable code - self.set(key, value)
+    def __setitem__(self, key: str, value: Any) -> None:
+        """Allow dictionary-style setting."""
+        self.set(key, value)

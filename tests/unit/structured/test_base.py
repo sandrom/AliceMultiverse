@@ -2,11 +2,11 @@
 
 import pytest
 
-from alicemultiverse.interface.structured.base import Base
+from alicemultiverse.interface.structured.base import StructuredInterfaceBase
 
 
-class TestBase:
-    """Test Base functionality."""
+class TestStructuredInterfaceBase:
+    """Test StructuredInterfaceBase functionality."""
     
     @pytest.mark.skip(reason="Tests need to be implemented")
     def test_placeholder(self):
