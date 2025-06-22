@@ -26,9 +26,9 @@ from .interface import AliceInterface
 from .interface.models import (
     OrganizeRequest,
     SearchRequest,
-    SearchResponse,
-    TagUpdateRequest,
+    TagRequest as TagUpdateRequest,
 )
+from .interface.models import AliceResponse as SearchResponse
 
 logger = logging.getLogger(__name__)
 

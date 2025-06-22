@@ -59,24 +59,27 @@ def handle_keys_command(args, config) -> int:
 
 def handle_setup_command(args, config) -> int:
     """Handle setup wizard command."""
-    # TODO: Fix missing import
-    # from ..core.setup import run_first_time_setup
-
+    # Setup wizard functionality is currently disabled
+    # Will be implemented when needed
+    
     # Check if already configured
     settings_path = Path.home() / ".alice" / "settings.yaml"
     if settings_path.exists() and not args.reconfigure:
         print("Alice is already configured. Use --reconfigure to run setup again.")
         return 0
 
-    # TODO: Fix missing import
-    # return run_first_time_setup()
+    print("Setup wizard is not yet implemented in the restored version.")
     return 0
 
 
 def handle_recreate_command(args, config) -> int:
     """Handle recreation commands."""
-    # TODO: Fix missing import
-    # from ..recreation import RecreationManager
+    # Recreation functionality is currently disabled
+    # Will be implemented when needed
+    print("Recreation commands are not yet implemented in the restored version.")
+    return 0
+    
+    # Placeholder for future implementation
     RecreationManager = None  # type: ignore
 
     manager = RecreationManager(config)
@@ -118,8 +121,12 @@ def handle_recreate_command(args, config) -> int:
 
 def handle_interface_command(args, config) -> int:
     """Handle interface server command."""
-    # TODO: Fix missing import
-    # from ..interface.server import run_server
+    # Interface server functionality is currently disabled
+    # Will be implemented when needed
+    print("Web interface server is not yet implemented in the restored version.")
+    return 0
+    
+    # Placeholder for future implementation
     run_server = None  # type: ignore
 
     print(f"Starting Alice interface on http://{args.host}:{args.port}")
