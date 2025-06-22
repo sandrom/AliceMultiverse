@@ -24,61 +24,10 @@ from .cli_handlers import (
     handle_storage_command,
     handle_transitions_command,
 )
-from .cli_parser import (
-    add_comparison_subcommand,
-    add_dedup_subcommand,
-    add_index_subcommand,
-    add_interface_subcommand,
-    add_keys_subcommand,
-    add_mcp_subcommand,
-    add_migrate_subcommand,
-    add_monitor_subcommand,
-    add_organization_args,
-    add_output_args,
-    add_prompts_subcommand,
-    add_recreate_subcommand,
-    add_scenes_subcommand,
-    add_setup_subcommand,
-    add_storage_subcommand,
-    add_technical_args,
-    add_transitions_subcommand,
-    add_understanding_args,
-    create_base_parser,
-)
+from .cli_parser import create_parser
 
 logger = logging.getLogger(__name__)
 
-
-def create_parser() -> argparse.ArgumentParser:
-    """Create and configure argument parser."""
-    parser = create_base_parser()
-
-    # Subparsers for commands
-    subparsers = parser.add_subparsers(dest="command", help="Commands")
-
-    # Add subcommands
-    add_keys_subcommand(subparsers)
-    add_setup_subcommand(subparsers)
-    add_recreate_subcommand(subparsers)
-    add_interface_subcommand(subparsers)
-    add_mcp_subcommand(subparsers)
-    add_migrate_subcommand(subparsers)
-    add_monitor_subcommand(subparsers)
-    add_storage_subcommand(subparsers)
-    add_scenes_subcommand(subparsers)
-    add_dedup_subcommand(subparsers)
-    add_prompts_subcommand(subparsers)
-    add_index_subcommand(subparsers)
-    add_comparison_subcommand(subparsers)
-    add_transitions_subcommand(subparsers)
-
-    # Add main organization arguments
-    add_organization_args(parser)
-    add_understanding_args(parser)
-    add_output_args(parser)
-    add_technical_args(parser)
-
-    return parser
 
 
 def parse_cli_overrides(args: list[str]) -> list[str]:
