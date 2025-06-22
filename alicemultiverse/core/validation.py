@@ -70,31 +70,31 @@ def validate_path(
             if path_arg is None:
                 raise ValidationError("No path argument found to validate")
 
-            # TODO: Review unreachable code - # Validate the path
-            # TODO: Review unreachable code - validated_path = validate_file_path(
-            # TODO: Review unreachable code - path_arg,
-            # TODO: Review unreachable code - must_exist=must_exist,
-            # TODO: Review unreachable code - allow_symlinks=allow_symlinks,
-            # TODO: Review unreachable code - allowed_extensions=allowed_extensions,
-            # TODO: Review unreachable code - base_path=base_path
-            # TODO: Review unreachable code - )
+            # Validate the path
+            validated_path = validate_file_path(
+                path_arg,
+                must_exist=must_exist,
+                allow_symlinks=allow_symlinks,
+                allowed_extensions=allowed_extensions,
+                base_path=base_path
+            )
 
-            # TODO: Review unreachable code - # Replace with validated path
-            # TODO: Review unreachable code - if path_idx is not None:
-            # TODO: Review unreachable code - args = list(args)
-            # TODO: Review unreachable code - args[path_idx] = validated_path
-            # TODO: Review unreachable code - args = tuple(args)
-            # TODO: Review unreachable code - else:
-            # TODO: Review unreachable code - # Update kwargs
-            # TODO: Review unreachable code - for key in ['path', 'file_path', 'filepath']:
-            # TODO: Review unreachable code - if key in kwargs:
-            # TODO: Review unreachable code - kwargs[key] = validated_path
-            # TODO: Review unreachable code - break
+            # Replace with validated path
+            if path_idx is not None:
+                args = list(args)
+                args[path_idx] = validated_path
+                args = tuple(args)
+            else:
+                # Update kwargs
+                for key in ['path', 'file_path', 'filepath']:
+                    if key in kwargs:
+                        kwargs[key] = validated_path
+                        break
 
-            # TODO: Review unreachable code - return func(*args, **kwargs)
+            return func(*args, **kwargs)
 
         return wrapper
-    # TODO: Review unreachable code - return decorator
+    return decorator
 
 
 def validate_url(
@@ -154,282 +154,282 @@ def validate_url(
 
             return func(*args, **kwargs)
 
-        # TODO: Review unreachable code - return wrapper
+        return wrapper
     return decorator
 
 
-# TODO: Review unreachable code - def validate_file_path(
-# TODO: Review unreachable code - path: str | Path,
-# TODO: Review unreachable code - must_exist: bool = False,
-# TODO: Review unreachable code - allow_symlinks: bool = True,
-# TODO: Review unreachable code - allowed_extensions: set[str] | None = None,
-# TODO: Review unreachable code - base_path: Path | None = None
-# TODO: Review unreachable code - ) -> Path:
-# TODO: Review unreachable code - """Validate a file path for security and correctness.
+def validate_file_path(
+    path: str | Path,
+    must_exist: bool = False,
+    allow_symlinks: bool = True,
+    allowed_extensions: set[str] | None = None,
+    base_path: Path | None = None
+) -> Path:
+    """Validate a file path for security and correctness.
 
-# TODO: Review unreachable code - Args:
-# TODO: Review unreachable code - path: Path to validate
-# TODO: Review unreachable code - must_exist: Whether the path must exist
-# TODO: Review unreachable code - allow_symlinks: Whether to allow symbolic links
-# TODO: Review unreachable code - allowed_extensions: Set of allowed file extensions
-# TODO: Review unreachable code - base_path: Base path for relative path resolution
+    Args:
+        path: Path to validate
+        must_exist: Whether the path must exist
+        allow_symlinks: Whether to allow symbolic links
+        allowed_extensions: Set of allowed file extensions
+        base_path: Base path for relative path resolution
 
-# TODO: Review unreachable code - Returns:
-# TODO: Review unreachable code - Validated Path object
+    Returns:
+        Validated Path object
 
-# TODO: Review unreachable code - Raises:
-# TODO: Review unreachable code - ValidationError: If validation fails
-# TODO: Review unreachable code - """
-# TODO: Review unreachable code - # Convert to string for pattern checking
-# TODO: Review unreachable code - path_str = str(path)
+    Raises:
+        ValidationError: If validation fails
+    """
+    # Convert to string for pattern checking
+    path_str = str(path)
 
-# TODO: Review unreachable code - # Check length
-# TODO: Review unreachable code - if len(path_str) > MAX_PATH_LENGTH:
-# TODO: Review unreachable code - raise ValidationError(f"Path too long: {len(path_str)} > {MAX_PATH_LENGTH}")
+    # Check length
+    if len(path_str) > MAX_PATH_LENGTH:
+        raise ValidationError(f"Path too long: {len(path_str)} > {MAX_PATH_LENGTH}")
 
-# TODO: Review unreachable code - # Check for dangerous patterns
-# TODO: Review unreachable code - for pattern in DANGEROUS_PATH_PATTERNS:
-# TODO: Review unreachable code - if re.search(pattern, path_str):
-# TODO: Review unreachable code - raise ValidationError(f"Dangerous path pattern detected: {pattern}")
+    # Check for dangerous patterns
+    for pattern in DANGEROUS_PATH_PATTERNS:
+        if re.search(pattern, path_str):
+            raise ValidationError(f"Dangerous path pattern detected: {pattern}")
 
-# TODO: Review unreachable code - # Convert to Path object
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - path_obj = Path(path_str)
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - raise ValidationError(f"Invalid path: {e}")
+    # Convert to Path object
+    try:
+        path_obj = Path(path_str)
+    except Exception as e:
+        raise ValidationError(f"Invalid path: {e}")
 
-# TODO: Review unreachable code - # Check filename length
-# TODO: Review unreachable code - if path_obj.name and len(path_obj.name) > MAX_FILENAME_LENGTH:
-# TODO: Review unreachable code - raise ValidationError(f"Filename too long: {len(path_obj.name)} > {MAX_FILENAME_LENGTH}")
+    # Check filename length
+    if path_obj.name and len(path_obj.name) > MAX_FILENAME_LENGTH:
+        raise ValidationError(f"Filename too long: {len(path_obj.name)} > {MAX_FILENAME_LENGTH}")
 
-# TODO: Review unreachable code - # Resolve path (handles .. and symlinks)
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - if base_path:
-# TODO: Review unreachable code - # Resolve relative to base path
-# TODO: Review unreachable code - full_path = (Path(base_path) / path_obj).resolve()
-# TODO: Review unreachable code - # Ensure it's within base path
-# TODO: Review unreachable code - if not str(full_path).startswith(str(Path(base_path).resolve())):
-# TODO: Review unreachable code - raise ValidationError("Path escapes base directory")
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - full_path = path_obj.resolve()
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - raise ValidationError(f"Cannot resolve path: {e}")
+    # Resolve path (handles .. and symlinks)
+    try:
+        if base_path:
+            # Resolve relative to base path
+            full_path = (Path(base_path) / path_obj).resolve()
+            # Ensure it's within base path
+            if not str(full_path).startswith(str(Path(base_path).resolve())):
+                raise ValidationError("Path escapes base directory")
+        else:
+            full_path = path_obj.resolve()
+    except Exception as e:
+        raise ValidationError(f"Cannot resolve path: {e}")
 
-# TODO: Review unreachable code - # Check symlinks
-# TODO: Review unreachable code - if not allow_symlinks and full_path.is_symlink():
-# TODO: Review unreachable code - raise ValidationError("Symbolic links not allowed")
+    # Check symlinks
+    if not allow_symlinks and full_path.is_symlink():
+        raise ValidationError("Symbolic links not allowed")
 
-# TODO: Review unreachable code - # Check existence
-# TODO: Review unreachable code - if must_exist and not full_path.exists():
-# TODO: Review unreachable code - raise ValidationError(f"Path does not exist: {full_path}")
+    # Check existence
+    if must_exist and not full_path.exists():
+        raise ValidationError(f"Path does not exist: {full_path}")
 
-# TODO: Review unreachable code - # Check extension
-# TODO: Review unreachable code - if allowed_extensions and full_path.suffix.lower() not in allowed_extensions:
-# TODO: Review unreachable code - raise ValidationError(
-# TODO: Review unreachable code - f"File extension '{full_path.suffix}' not allowed. "
-# TODO: Review unreachable code - f"Allowed: {', '.join(sorted(allowed_extensions))}"
-# TODO: Review unreachable code - )
+    # Check extension
+    if allowed_extensions and full_path.suffix.lower() not in allowed_extensions:
+        raise ValidationError(
+            f"File extension '{full_path.suffix}' not allowed. "
+            f"Allowed: {', '.join(sorted(allowed_extensions))}"
+        )
 
-# TODO: Review unreachable code - return full_path
-
-
-# TODO: Review unreachable code - def validate_url_string(
-# TODO: Review unreachable code - url: str,
-# TODO: Review unreachable code - allowed_schemes: set[str] | None = None,
-# TODO: Review unreachable code - allowed_domains: set[str] | None = None,
-# TODO: Review unreachable code - require_https: bool = False
-# TODO: Review unreachable code - ) -> str:
-# TODO: Review unreachable code - """Validate a URL string.
-
-# TODO: Review unreachable code - Args:
-# TODO: Review unreachable code - url: URL to validate
-# TODO: Review unreachable code - allowed_schemes: Set of allowed URL schemes
-# TODO: Review unreachable code - allowed_domains: Set of allowed domains
-# TODO: Review unreachable code - require_https: Whether to require HTTPS
-
-# TODO: Review unreachable code - Returns:
-# TODO: Review unreachable code - Validated URL string
-
-# TODO: Review unreachable code - Raises:
-# TODO: Review unreachable code - ValidationError: If validation fails
-# TODO: Review unreachable code - """
-# TODO: Review unreachable code - # Parse URL
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - parsed = urlparse(url)
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - raise ValidationError(f"Invalid URL: {e}")
-
-# TODO: Review unreachable code - # Check scheme
-# TODO: Review unreachable code - if allowed_schemes is None:
-# TODO: Review unreachable code - allowed_schemes = ALLOWED_URL_SCHEMES
-
-# TODO: Review unreachable code - if parsed.scheme not in allowed_schemes:
-# TODO: Review unreachable code - raise ValidationError(
-# TODO: Review unreachable code - f"URL scheme '{parsed.scheme}' not allowed. "
-# TODO: Review unreachable code - f"Allowed: {', '.join(sorted(allowed_schemes))}"
-# TODO: Review unreachable code - )
-
-# TODO: Review unreachable code - # Check HTTPS requirement
-# TODO: Review unreachable code - if require_https and parsed.scheme != 'https':
-# TODO: Review unreachable code - raise ValidationError("HTTPS required")
-
-# TODO: Review unreachable code - # Check domain
-# TODO: Review unreachable code - if allowed_domains and parsed.netloc:
-# TODO: Review unreachable code - domain = parsed.netloc.lower()
-# TODO: Review unreachable code - # Remove port if present
-# TODO: Review unreachable code - if ':' in domain:
-# TODO: Review unreachable code - domain = domain.split(':')[0]
-
-# TODO: Review unreachable code - if domain not in allowed_domains:
-# TODO: Review unreachable code - raise ValidationError(
-# TODO: Review unreachable code - f"Domain '{domain}' not allowed. "
-# TODO: Review unreachable code - f"Allowed: {', '.join(sorted(allowed_domains))}"
-# TODO: Review unreachable code - )
-
-# TODO: Review unreachable code - # Check for suspicious patterns
-# TODO: Review unreachable code - suspicious_patterns = [
-# TODO: Review unreachable code - r'javascript:',
-# TODO: Review unreachable code - r'data:',
-# TODO: Review unreachable code - r'vbscript:',
-# TODO: Review unreachable code - r'file://',
-# TODO: Review unreachable code - r'\.\./\.\.',  # Multiple traversals
-# TODO: Review unreachable code - r'@',  # Username in URL
-# TODO: Review unreachable code - ]
-
-# TODO: Review unreachable code - url_lower = url.lower()
-# TODO: Review unreachable code - for pattern in suspicious_patterns:
-# TODO: Review unreachable code - if re.search(pattern, url_lower):
-# TODO: Review unreachable code - raise ValidationError("Suspicious URL pattern detected")
-
-# TODO: Review unreachable code - return url
+    return full_path
 
 
-# TODO: Review unreachable code - def sanitize_filename(filename: str, default: str = "file") -> str:
-# TODO: Review unreachable code - """Sanitize a filename for safe file system usage.
+def validate_url_string(
+    url: str,
+    allowed_schemes: set[str] | None = None,
+    allowed_domains: set[str] | None = None,
+    require_https: bool = False
+) -> str:
+    """Validate a URL string.
 
-# TODO: Review unreachable code - Args:
-# TODO: Review unreachable code - filename: Original filename
-# TODO: Review unreachable code - default: Default name if sanitization fails
+    Args:
+        url: URL to validate
+        allowed_schemes: Set of allowed URL schemes
+        allowed_domains: Set of allowed domains
+        require_https: Whether to require HTTPS
 
-# TODO: Review unreachable code - Returns:
-# TODO: Review unreachable code - Safe filename
-# TODO: Review unreachable code - """
-# TODO: Review unreachable code - if not filename:
-# TODO: Review unreachable code - return default
+    Returns:
+        Validated URL string
 
-# TODO: Review unreachable code - # Remove path components
-# TODO: Review unreachable code - filename = Path(filename).name
+    Raises:
+        ValidationError: If validation fails
+    """
+    # Parse URL
+    try:
+        parsed = urlparse(url)
+    except Exception as e:
+        raise ValidationError(f"Invalid URL: {e}")
 
-# TODO: Review unreachable code - # Replace dangerous characters
-# TODO: Review unreachable code - safe_chars = re.sub(r'[^\w\s\-\.]', '_', filename)
+    # Check scheme
+    if allowed_schemes is None:
+        allowed_schemes = ALLOWED_URL_SCHEMES
 
-# TODO: Review unreachable code - # Remove multiple dots (prevent extension confusion)
-# TODO: Review unreachable code - safe_chars = re.sub(r'\.+', '.', safe_chars)
+    if parsed.scheme not in allowed_schemes:
+        raise ValidationError(
+            f"URL scheme '{parsed.scheme}' not allowed. "
+            f"Allowed: {', '.join(sorted(allowed_schemes))}"
+        )
 
-# TODO: Review unreachable code - # Remove leading/trailing dots and spaces
-# TODO: Review unreachable code - safe_chars = safe_chars.strip('. ')
+    # Check HTTPS requirement
+    if require_https and parsed.scheme != 'https':
+        raise ValidationError("HTTPS required")
 
-# TODO: Review unreachable code - # Limit length
-# TODO: Review unreachable code - if len(safe_chars) > MAX_FILENAME_LENGTH:
-# TODO: Review unreachable code - # Preserve extension if possible
-# TODO: Review unreachable code - name, ext = Path(safe_chars).stem, Path(safe_chars).suffix
-# TODO: Review unreachable code - max_name_length = MAX_FILENAME_LENGTH - len(ext)
-# TODO: Review unreachable code - safe_chars = name[:max_name_length] + ext
+    # Check domain
+    if allowed_domains and parsed.netloc:
+        domain = parsed.netloc.lower()
+        # Remove port if present
+        if ':' in domain:
+            domain = domain.split(':')[0]
 
-# TODO: Review unreachable code - # Return default if result is empty
-# TODO: Review unreachable code - return safe_chars or default
+        if domain not in allowed_domains:
+            raise ValidationError(
+                f"Domain '{domain}' not allowed. "
+                f"Allowed: {', '.join(sorted(allowed_domains))}"
+            )
 
+    # Check for suspicious patterns
+    suspicious_patterns = [
+        r'javascript:',
+        r'data:',
+        r'vbscript:',
+        r'file://',
+        r'\.\./\.\.',  # Multiple traversals
+        r'@',  # Username in URL
+    ]
 
-# TODO: Review unreachable code - def validate_json_input(
-# TODO: Review unreachable code - schema: dict | None = None,
-# TODO: Review unreachable code - required_fields: list[str] | None = None,
-# TODO: Review unreachable code - max_size: int = 10 * 1024 * 1024  # 10MB default
-# TODO: Review unreachable code - ) -> Callable[[F], F]:
-# TODO: Review unreachable code - """Decorator to validate JSON input.
+    url_lower = url.lower()
+    for pattern in suspicious_patterns:
+        if re.search(pattern, url_lower):
+            raise ValidationError("Suspicious URL pattern detected")
 
-# TODO: Review unreachable code - Args:
-# TODO: Review unreachable code - schema: JSON schema for validation
-# TODO: Review unreachable code - required_fields: List of required fields
-# TODO: Review unreachable code - max_size: Maximum allowed size in bytes
-
-# TODO: Review unreachable code - Returns:
-# TODO: Review unreachable code - Decorator function
-# TODO: Review unreachable code - """
-# TODO: Review unreachable code - def decorator(func: F) -> F:
-# TODO: Review unreachable code - @wraps(func)
-# TODO: Review unreachable code - def wrapper(*args, **kwargs):
-# TODO: Review unreachable code - # Find JSON data in arguments
-# TODO: Review unreachable code - json_data = None
-
-# TODO: Review unreachable code - for i, arg in enumerate(args):
-# TODO: Review unreachable code - if isinstance(arg, dict):
-# TODO: Review unreachable code - json_data = arg
-# TODO: Review unreachable code - break
-
-# TODO: Review unreachable code - # Check kwargs
-# TODO: Review unreachable code - if json_data is None:
-# TODO: Review unreachable code - for key in ['data', 'json', 'payload']:
-# TODO: Review unreachable code - if key in kwargs and isinstance(kwargs[key], dict):
-# TODO: Review unreachable code - json_data = kwargs[key]
-# TODO: Review unreachable code - break
-
-# TODO: Review unreachable code - if json_data:
-# TODO: Review unreachable code - # Check size (rough estimate)
-# TODO: Review unreachable code - import json
-# TODO: Review unreachable code - json_str = json.dumps(json_data)
-# TODO: Review unreachable code - if len(json_str) > max_size:
-# TODO: Review unreachable code - raise ValidationError(
-# TODO: Review unreachable code - f"JSON data too large: {len(json_str)} > {max_size} bytes"
-# TODO: Review unreachable code - )
-
-# TODO: Review unreachable code - # Check required fields
-# TODO: Review unreachable code - if required_fields:
-# TODO: Review unreachable code - missing = [f for f in required_fields if f not in json_data]
-# TODO: Review unreachable code - if missing:
-# TODO: Review unreachable code - raise ValidationError(
-# TODO: Review unreachable code - f"Missing required fields: {', '.join(missing)}"
-# TODO: Review unreachable code - )
-
-# TODO: Review unreachable code - # TODO: Add JSON schema validation if schema provided
-
-# TODO: Review unreachable code - return func(*args, **kwargs)
-
-# TODO: Review unreachable code - return wrapper
-# TODO: Review unreachable code - return decorator
+    return url
 
 
-# TODO: Review unreachable code - def sanitize_error_message(error: Exception, show_type: bool = True) -> str:
-# TODO: Review unreachable code - """Sanitize error message to remove sensitive information.
+def sanitize_filename(filename: str, default: str = "file") -> str:
+    """Sanitize a filename for safe file system usage.
 
-# TODO: Review unreachable code - Args:
-# TODO: Review unreachable code - error: Exception to sanitize
-# TODO: Review unreachable code - show_type: Whether to include error type
+    Args:
+        filename: Original filename
+        default: Default name if sanitization fails
 
-# TODO: Review unreachable code - Returns:
-# TODO: Review unreachable code - Safe error message
-# TODO: Review unreachable code - """
-# TODO: Review unreachable code - # Patterns that might contain sensitive data
-# TODO: Review unreachable code - sensitive_patterns = [
-# TODO: Review unreachable code - (r'api[_-]?key["\']?\s*[:=]\s*["\']?[\w\-]+', 'API_KEY=***'),
-# TODO: Review unreachable code - (r'token["\']?\s*[:=]\s*["\']?[\w\-]+', 'token=***'),
-# TODO: Review unreachable code - (r'password["\']?\s*[:=]\s*["\']?[\w\-]+', 'password=***'),
-# TODO: Review unreachable code - (r'secret["\']?\s*[:=]\s*["\']?[\w\-]+', 'secret=***'),
-# TODO: Review unreachable code - (r'/api/v\d+/[\w\-]+', '/api/v1/***'),  # API endpoints
-# TODO: Review unreachable code - (r'[a-f0-9]{32,}', '***'),  # Long hex strings (hashes, tokens)
-# TODO: Review unreachable code - (r'Bearer\s+[\w\-\.]+', 'Bearer ***'),  # Auth headers
-# TODO: Review unreachable code - ]
+    Returns:
+        Safe filename
+    """
+    if not filename:
+        return default
 
-# TODO: Review unreachable code - error_msg = str(error)
+    # Remove path components
+    filename = Path(filename).name
 
-# TODO: Review unreachable code - # Apply sanitization patterns
-# TODO: Review unreachable code - for pattern, replacement in sensitive_patterns:
-# TODO: Review unreachable code - error_msg = re.sub(pattern, replacement, error_msg, flags=re.IGNORECASE)
+    # Replace dangerous characters
+    safe_chars = re.sub(r'[^\w\s\-\.]', '_', filename)
 
-# TODO: Review unreachable code - # Truncate very long messages
-# TODO: Review unreachable code - if len(error_msg) > 500:
-# TODO: Review unreachable code - error_msg = error_msg[:500] + '... (truncated)'
+    # Remove multiple dots (prevent extension confusion)
+    safe_chars = re.sub(r'\.+', '.', safe_chars)
 
-# TODO: Review unreachable code - if show_type:
-# TODO: Review unreachable code - return f"{type(error).__name__}: {error_msg}"
+    # Remove leading/trailing dots and spaces
+    safe_chars = safe_chars.strip('. ')
 
-# TODO: Review unreachable code - return error_msg
+    # Limit length
+    if len(safe_chars) > MAX_FILENAME_LENGTH:
+        # Preserve extension if possible
+        name, ext = Path(safe_chars).stem, Path(safe_chars).suffix
+        max_name_length = MAX_FILENAME_LENGTH - len(ext)
+        safe_chars = name[:max_name_length] + ext
+
+    # Return default if result is empty
+    return safe_chars or default
+
+
+def validate_json_input(
+    schema: dict | None = None,
+    required_fields: list[str] | None = None,
+    max_size: int = 10 * 1024 * 1024  # 10MB default
+) -> Callable[[F], F]:
+    """Decorator to validate JSON input.
+
+    Args:
+        schema: JSON schema for validation
+        required_fields: List of required fields
+        max_size: Maximum allowed size in bytes
+
+    Returns:
+        Decorator function
+    """
+    def decorator(func: F) -> F:
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            # Find JSON data in arguments
+            json_data = None
+
+            for i, arg in enumerate(args):
+                if isinstance(arg, dict):
+                    json_data = arg
+                    break
+
+            # Check kwargs
+            if json_data is None:
+                for key in ['data', 'json', 'payload']:
+                    if key in kwargs and isinstance(kwargs[key], dict):
+                        json_data = kwargs[key]
+                        break
+
+            if json_data:
+                # Check size (rough estimate)
+                import json
+                json_str = json.dumps(json_data)
+                if len(json_str) > max_size:
+                    raise ValidationError(
+                        f"JSON data too large: {len(json_str)} > {max_size} bytes"
+                    )
+
+                # Check required fields
+                if required_fields:
+                    missing = [f for f in required_fields if f not in json_data]
+                    if missing:
+                        raise ValidationError(
+                            f"Missing required fields: {', '.join(missing)}"
+                        )
+
+                # TODO: Add JSON schema validation if schema provided
+
+            return func(*args, **kwargs)
+
+        return wrapper
+    return decorator
+
+
+def sanitize_error_message(error: Exception, show_type: bool = True) -> str:
+    """Sanitize error message to remove sensitive information.
+
+    Args:
+        error: Exception to sanitize
+        show_type: Whether to include error type
+
+    Returns:
+        Safe error message
+    """
+    # Patterns that might contain sensitive data
+    sensitive_patterns = [
+        (r'api[_-]?key["\']?\s*[:=]\s*["\']?[\w\-]+', 'API_KEY=***'),
+        (r'token["\']?\s*[:=]\s*["\']?[\w\-]+', 'token=***'),
+        (r'password["\']?\s*[:=]\s*["\']?[\w\-]+', 'password=***'),
+        (r'secret["\']?\s*[:=]\s*["\']?[\w\-]+', 'secret=***'),
+        (r'/api/v\d+/[\w\-]+', '/api/v1/***'),  # API endpoints
+        (r'[a-f0-9]{32,}', '***'),  # Long hex strings (hashes, tokens)
+        (r'Bearer\s+[\w\-\.]+', 'Bearer ***'),  # Auth headers
+    ]
+
+    error_msg = str(error)
+
+    # Apply sanitization patterns
+    for pattern, replacement in sensitive_patterns:
+        error_msg = re.sub(pattern, replacement, error_msg, flags=re.IGNORECASE)
+
+    # Truncate very long messages
+    if len(error_msg) > 500:
+        error_msg = error_msg[:500] + '... (truncated)'
+
+    if show_type:
+        return f"{type(error).__name__}: {error_msg}"
+
+    return error_msg

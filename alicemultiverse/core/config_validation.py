@@ -41,373 +41,373 @@ class ValidationResult:
             raise ConfigurationValidationError(self.errors)
 
 
-# TODO: Review unreachable code - @dataclass
-# TODO: Review unreachable code - class SystemResources:
-# TODO: Review unreachable code - """System resource information."""
-# TODO: Review unreachable code - cpu_count: int
-# TODO: Review unreachable code - memory_mb: int
-# TODO: Review unreachable code - available_disk_mb: int
-# TODO: Review unreachable code - has_gpu: bool = False
+@dataclass
+class SystemResources:
+    """System resource information."""
+    cpu_count: int
+    memory_mb: int
+    available_disk_mb: int
+    has_gpu: bool = False
     
-# TODO: Review unreachable code - @classmethod
-# TODO: Review unreachable code - def detect(cls) -> 'SystemResources':
-# TODO: Review unreachable code - """Detect system resources."""
-# TODO: Review unreachable code - memory = psutil.virtual_memory()
+    @classmethod
+    def detect(cls) -> 'SystemResources':
+        """Detect system resources."""
+        memory = psutil.virtual_memory()
         
-# TODO: Review unreachable code - # Check for GPU (simplified - could be enhanced)
-# TODO: Review unreachable code - has_gpu = False
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - import torch
-# TODO: Review unreachable code - has_gpu = torch.cuda.is_available()
-# TODO: Review unreachable code - except ImportError:
-# TODO: Review unreachable code - pass
+        # Check for GPU (simplified - could be enhanced)
+        has_gpu = False
+        try:
+            import torch
+            has_gpu = torch.cuda.is_available()
+        except ImportError:
+            pass
         
-# TODO: Review unreachable code - return cls(
-# TODO: Review unreachable code - cpu_count=psutil.cpu_count(logical=True),
-# TODO: Review unreachable code - memory_mb=int(memory.total / 1024 / 1024),
-# TODO: Review unreachable code - available_disk_mb=int(psutil.disk_usage('/').free / 1024 / 1024),
-# TODO: Review unreachable code - has_gpu=has_gpu
-# TODO: Review unreachable code - )
+        return cls(
+            cpu_count=psutil.cpu_count(logical=True),
+            memory_mb=int(memory.total / 1024 / 1024),
+            available_disk_mb=int(psutil.disk_usage('/').free / 1024 / 1024),
+            has_gpu=has_gpu
+        )
 
 
-# TODO: Review unreachable code - class ConfigValidator:
-# TODO: Review unreachable code - """Validates configuration and provides recommendations."""
+class ConfigValidator:
+    """Validates configuration and provides recommendations."""
     
-# TODO: Review unreachable code - def __init__(self):
-# TODO: Review unreachable code - self.system_resources = SystemResources.detect()
-# TODO: Review unreachable code - logger.info(
-# TODO: Review unreachable code - f"System resources: {self.system_resources.cpu_count} CPUs, "
-# TODO: Review unreachable code - f"{self.system_resources.memory_mb}MB RAM, "
-# TODO: Review unreachable code - f"{self.system_resources.available_disk_mb}MB disk"
-# TODO: Review unreachable code - )
+    def __init__(self):
+        self.system_resources = SystemResources.detect()
+        logger.info(
+            f"System resources: {self.system_resources.cpu_count} CPUs, "
+            f"{self.system_resources.memory_mb}MB RAM, "
+            f"{self.system_resources.available_disk_mb}MB disk"
+        )
     
-# TODO: Review unreachable code - def validate_config(self, config: Dict[str, Any]) -> ValidationResult:
-# TODO: Review unreachable code - """Validate complete configuration."""
-# TODO: Review unreachable code - result = ValidationResult(is_valid=True)
+    def validate_config(self, config: Dict[str, Any]) -> ValidationResult:
+        """Validate complete configuration."""
+        result = ValidationResult(is_valid=True)
         
-# TODO: Review unreachable code - # Validate paths
-# TODO: Review unreachable code - self._validate_paths(config.get('paths', {}), result)
+        # Validate paths
+        self._validate_paths(config.get('paths', {}), result)
         
-# TODO: Review unreachable code - # Validate performance settings
-# TODO: Review unreachable code - self._validate_performance(config.get('performance', {}), result)
+        # Validate performance settings
+        self._validate_performance(config.get('performance', {}), result)
         
-# TODO: Review unreachable code - # Validate storage settings
-# TODO: Review unreachable code - self._validate_storage(config.get('storage', {}), result)
+        # Validate storage settings
+        self._validate_storage(config.get('storage', {}), result)
         
-# TODO: Review unreachable code - # Validate API keys
-# TODO: Review unreachable code - self._validate_api_keys(config, result)
+        # Validate API keys
+        self._validate_api_keys(config, result)
         
-# TODO: Review unreachable code - # Validate understanding settings
-# TODO: Review unreachable code - self._validate_understanding(config.get('understanding', {}), result)
+        # Validate understanding settings
+        self._validate_understanding(config.get('understanding', {}), result)
         
-# TODO: Review unreachable code - # Add system-specific recommendations
-# TODO: Review unreachable code - self._add_recommendations(config, result)
+        # Add system-specific recommendations
+        self._add_recommendations(config, result)
         
-# TODO: Review unreachable code - return result
+        return result
     
-# TODO: Review unreachable code - def _validate_paths(self, paths: Dict[str, Any], result: ValidationResult) -> None:
-# TODO: Review unreachable code - """Validate path configuration."""
-# TODO: Review unreachable code - # Check inbox path
-# TODO: Review unreachable code - inbox_path = paths.get('inbox')
-# TODO: Review unreachable code - if inbox_path:
-# TODO: Review unreachable code - inbox = Path(inbox_path).expanduser()
-# TODO: Review unreachable code - if not inbox.exists():
-# TODO: Review unreachable code - result.add_error('paths.inbox', f"Inbox path does not exist: {inbox}")
-# TODO: Review unreachable code - elif not inbox.is_dir():
-# TODO: Review unreachable code - result.add_error('paths.inbox', f"Inbox path is not a directory: {inbox}")
-# TODO: Review unreachable code - elif not os.access(inbox, os.R_OK):
-# TODO: Review unreachable code - result.add_error('paths.inbox', f"No read permission for inbox: {inbox}")
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - result.add_error('paths.inbox', "Inbox path is required")
+    def _validate_paths(self, paths: Dict[str, Any], result: ValidationResult) -> None:
+        """Validate path configuration."""
+        # Check inbox path
+        inbox_path = paths.get('inbox')
+        if inbox_path:
+            inbox = Path(inbox_path).expanduser()
+            if not inbox.exists():
+                result.add_error('paths.inbox', f"Inbox path does not exist: {inbox}")
+            elif not inbox.is_dir():
+                result.add_error('paths.inbox', f"Inbox path is not a directory: {inbox}")
+            elif not os.access(inbox, os.R_OK):
+                result.add_error('paths.inbox', f"No read permission for inbox: {inbox}")
+        else:
+            result.add_error('paths.inbox', "Inbox path is required")
         
-# TODO: Review unreachable code - # Check organized path
-# TODO: Review unreachable code - organized_path = paths.get('organized')
-# TODO: Review unreachable code - if organized_path:
-# TODO: Review unreachable code - organized = Path(organized_path).expanduser()
-# TODO: Review unreachable code - # Try to create if doesn't exist
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - organized.mkdir(parents=True, exist_ok=True)
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - result.add_error('paths.organized', f"Cannot create organized path: {e}")
+        # Check organized path
+        organized_path = paths.get('organized')
+        if organized_path:
+            organized = Path(organized_path).expanduser()
+            # Try to create if doesn't exist
+            try:
+                organized.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                result.add_error('paths.organized', f"Cannot create organized path: {e}")
             
-# TODO: Review unreachable code - if organized.exists() and not os.access(organized, os.W_OK):
-# TODO: Review unreachable code - result.add_error('paths.organized', f"No write permission for organized: {organized}")
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - result.add_error('paths.organized', "Organized path is required")
+            if organized.exists() and not os.access(organized, os.W_OK):
+                result.add_error('paths.organized', f"No write permission for organized: {organized}")
+        else:
+            result.add_error('paths.organized', "Organized path is required")
         
-# TODO: Review unreachable code - # Check disk space
-# TODO: Review unreachable code - if inbox_path and organized_path:
-# TODO: Review unreachable code - self._check_disk_space(Path(organized_path).expanduser(), result)
+        # Check disk space
+        if inbox_path and organized_path:
+            self._check_disk_space(Path(organized_path).expanduser(), result)
     
-# TODO: Review unreachable code - def _check_disk_space(self, path: Path, result: ValidationResult) -> None:
-# TODO: Review unreachable code - """Check available disk space."""
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - stat = shutil.disk_usage(path.parent if not path.exists() else path)
-# TODO: Review unreachable code - available_mb = stat.free / 1024 / 1024
+    def _check_disk_space(self, path: Path, result: ValidationResult) -> None:
+        """Check available disk space."""
+        try:
+            stat = shutil.disk_usage(path.parent if not path.exists() else path)
+            available_mb = stat.free / 1024 / 1024
             
-# TODO: Review unreachable code - if available_mb < 100:
-# TODO: Review unreachable code - result.add_error('disk_space', f"Insufficient disk space: {available_mb:.1f}MB")
-# TODO: Review unreachable code - elif available_mb < 1000:
-# TODO: Review unreachable code - result.add_warning('disk_space', f"Low disk space: {available_mb:.1f}MB")
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - result.add_warning('disk_space', f"Could not check disk space: {e}")
+            if available_mb < 100:
+                result.add_error('disk_space', f"Insufficient disk space: {available_mb:.1f}MB")
+            elif available_mb < 1000:
+                result.add_warning('disk_space', f"Low disk space: {available_mb:.1f}MB")
+        except Exception as e:
+            result.add_warning('disk_space', f"Could not check disk space: {e}")
     
-# TODO: Review unreachable code - def _validate_performance(self, performance: Dict[str, Any], result: ValidationResult) -> None:
-# TODO: Review unreachable code - """Validate performance settings."""
-# TODO: Review unreachable code - # Check worker count
-# TODO: Review unreachable code - max_workers = performance.get('max_workers', 8)
-# TODO: Review unreachable code - if max_workers > self.system_resources.cpu_count * 2:
-# TODO: Review unreachable code - result.add_warning(
-# TODO: Review unreachable code - 'performance.max_workers',
-# TODO: Review unreachable code - f"max_workers ({max_workers}) exceeds 2x CPU count ({self.system_resources.cpu_count})"
-# TODO: Review unreachable code - )
+    def _validate_performance(self, performance: Dict[str, Any], result: ValidationResult) -> None:
+        """Validate performance settings."""
+        # Check worker count
+        max_workers = performance.get('max_workers', 8)
+        if max_workers > self.system_resources.cpu_count * 2:
+            result.add_warning(
+                'performance.max_workers',
+                f"max_workers ({max_workers}) exceeds 2x CPU count ({self.system_resources.cpu_count})"
+            )
         
-# TODO: Review unreachable code - # Check batch size vs memory
-# TODO: Review unreachable code - batch_size = performance.get('batch_size', 100)
-# TODO: Review unreachable code - estimated_memory_per_file = 10  # MB, rough estimate
-# TODO: Review unreachable code - estimated_batch_memory = batch_size * estimated_memory_per_file
+        # Check batch size vs memory
+        batch_size = performance.get('batch_size', 100)
+        estimated_memory_per_file = 10  # MB, rough estimate
+        estimated_batch_memory = batch_size * estimated_memory_per_file
         
-# TODO: Review unreachable code - if estimated_batch_memory > self.system_resources.memory_mb * 0.5:
-# TODO: Review unreachable code - result.add_warning(
-# TODO: Review unreachable code - 'performance.batch_size',
-# TODO: Review unreachable code - f"Large batch size ({batch_size}) may use significant memory"
-# TODO: Review unreachable code - )
+        if estimated_batch_memory > self.system_resources.memory_mb * 0.5:
+            result.add_warning(
+                'performance.batch_size',
+                f"Large batch size ({batch_size}) may use significant memory"
+            )
         
-# TODO: Review unreachable code - # Validate performance profile
-# TODO: Review unreachable code - profile = performance.get('profile')
-# TODO: Review unreachable code - if profile and profile not in ['default', 'fast', 'memory_constrained', 'large_collection']:
-# TODO: Review unreachable code - result.add_error(
-# TODO: Review unreachable code - 'performance.profile',
-# TODO: Review unreachable code - f"Invalid performance profile: {profile}"
-# TODO: Review unreachable code - )
+        # Validate performance profile
+        profile = performance.get('profile')
+        if profile and profile not in ['default', 'fast', 'memory_constrained', 'large_collection']:
+            result.add_error(
+                'performance.profile',
+                f"Invalid performance profile: {profile}"
+            )
     
-# TODO: Review unreachable code - def _validate_storage(self, storage: Dict[str, Any], result: ValidationResult) -> None:
-# TODO: Review unreachable code - """Validate storage settings."""
-# TODO: Review unreachable code - # Check search database path
-# TODO: Review unreachable code - search_db = storage.get('search_db')
-# TODO: Review unreachable code - if search_db:
-# TODO: Review unreachable code - db_path = Path(search_db).expanduser()
-# TODO: Review unreachable code - db_dir = db_path.parent
+    def _validate_storage(self, storage: Dict[str, Any], result: ValidationResult) -> None:
+        """Validate storage settings."""
+        # Check search database path
+        search_db = storage.get('search_db')
+        if search_db:
+            db_path = Path(search_db).expanduser()
+            db_dir = db_path.parent
             
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - db_dir.mkdir(parents=True, exist_ok=True)
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - result.add_error('storage.search_db', f"Cannot create database directory: {e}")
+            try:
+                db_dir.mkdir(parents=True, exist_ok=True)
+            except Exception as e:
+                result.add_error('storage.search_db', f"Cannot create database directory: {e}")
             
-# TODO: Review unreachable code - if db_dir.exists() and not os.access(db_dir, os.W_OK):
-# TODO: Review unreachable code - result.add_error('storage.search_db', f"No write permission for database: {db_dir}")
+            if db_dir.exists() and not os.access(db_dir, os.W_OK):
+                result.add_error('storage.search_db', f"No write permission for database: {db_dir}")
         
-# TODO: Review unreachable code - # Check cache settings
-# TODO: Review unreachable code - cache_size = storage.get('cache_size_mb', 500)
-# TODO: Review unreachable code - if cache_size > self.system_resources.memory_mb * 0.25:
-# TODO: Review unreachable code - result.add_warning(
-# TODO: Review unreachable code - 'storage.cache_size_mb',
-# TODO: Review unreachable code - f"Large cache size ({cache_size}MB) relative to system memory"
-# TODO: Review unreachable code - )
+        # Check cache settings
+        cache_size = storage.get('cache_size_mb', 500)
+        if cache_size > self.system_resources.memory_mb * 0.25:
+            result.add_warning(
+                'storage.cache_size_mb',
+                f"Large cache size ({cache_size}MB) relative to system memory"
+            )
     
-# TODO: Review unreachable code - def _validate_api_keys(self, config: Dict[str, Any], result: ValidationResult) -> None:
-# TODO: Review unreachable code - """Validate API key configuration."""
-# TODO: Review unreachable code - # Check if any understanding providers are configured
-# TODO: Review unreachable code - understanding = config.get('understanding', {})
-# TODO: Review unreachable code - if understanding.get('enabled', False):
-# TODO: Review unreachable code - providers = understanding.get('providers', [])
+    def _validate_api_keys(self, config: Dict[str, Any], result: ValidationResult) -> None:
+        """Validate API key configuration."""
+        # Check if any understanding providers are configured
+        understanding = config.get('understanding', {})
+        if understanding.get('enabled', False):
+            providers = understanding.get('providers', [])
             
-# TODO: Review unreachable code - # Check for API keys
-# TODO: Review unreachable code - api_keys_found = []
-# TODO: Review unreachable code - for provider in ['openai', 'anthropic', 'google']:
-# TODO: Review unreachable code - if os.environ.get(f'{provider.upper()}_API_KEY'):
-# TODO: Review unreachable code - api_keys_found.append(provider)
+            # Check for API keys
+            api_keys_found = []
+            for provider in ['openai', 'anthropic', 'google']:
+                if os.environ.get(f'{provider.upper()}_API_KEY'):
+                    api_keys_found.append(provider)
             
-# TODO: Review unreachable code - if not api_keys_found and providers:
-# TODO: Review unreachable code - result.add_warning(
-# TODO: Review unreachable code - 'api_keys',
-# TODO: Review unreachable code - "Understanding enabled but no API keys found. Run 'alice keys setup'"
-# TODO: Review unreachable code - )
+            if not api_keys_found and providers:
+                result.add_warning(
+                    'api_keys',
+                    "Understanding enabled but no API keys found. Run 'alice keys setup'"
+                )
     
-# TODO: Review unreachable code - def _validate_understanding(self, understanding: Dict[str, Any], result: ValidationResult) -> None:
-# TODO: Review unreachable code - """Validate understanding configuration."""
-# TODO: Review unreachable code - if not understanding.get('enabled', False):
-# TODO: Review unreachable code - return
+    def _validate_understanding(self, understanding: Dict[str, Any], result: ValidationResult) -> None:
+        """Validate understanding configuration."""
+        if not understanding.get('enabled', False):
+            return
         
-# TODO: Review unreachable code - providers = understanding.get('providers', [])
-# TODO: Review unreachable code - if not providers:
-# TODO: Review unreachable code - result.add_error(
-# TODO: Review unreachable code - 'understanding.providers',
-# TODO: Review unreachable code - "Understanding enabled but no providers configured"
-# TODO: Review unreachable code - )
+        providers = understanding.get('providers', [])
+        if not providers:
+            result.add_error(
+                'understanding.providers',
+                "Understanding enabled but no providers configured"
+            )
         
-# TODO: Review unreachable code - # Check cost limit
-# TODO: Review unreachable code - cost_limit = understanding.get('cost_limit')
-# TODO: Review unreachable code - if cost_limit and cost_limit < 0:
-# TODO: Review unreachable code - result.add_error(
-# TODO: Review unreachable code - 'understanding.cost_limit',
-# TODO: Review unreachable code - "Cost limit must be positive"
-# TODO: Review unreachable code - )
+        # Check cost limit
+        cost_limit = understanding.get('cost_limit')
+        if cost_limit and cost_limit < 0:
+            result.add_error(
+                'understanding.cost_limit',
+                "Cost limit must be positive"
+            )
     
-# TODO: Review unreachable code - def _add_recommendations(self, config: Dict[str, Any], result: ValidationResult) -> None:
-# TODO: Review unreachable code - """Add system-specific recommendations."""
-# TODO: Review unreachable code - performance = config.get('performance', {})
-# TODO: Review unreachable code - current_workers = performance.get('max_workers', 8)
+    def _add_recommendations(self, config: Dict[str, Any], result: ValidationResult) -> None:
+        """Add system-specific recommendations."""
+        performance = config.get('performance', {})
+        current_workers = performance.get('max_workers', 8)
         
-# TODO: Review unreachable code - # CPU-based recommendations
-# TODO: Review unreachable code - if self.system_resources.cpu_count >= 8:
-# TODO: Review unreachable code - if current_workers < self.system_resources.cpu_count:
-# TODO: Review unreachable code - result.add_recommendation(
-# TODO: Review unreachable code - f"Consider increasing max_workers to {self.system_resources.cpu_count} "
-# TODO: Review unreachable code - f"to utilize all CPU cores"
-# TODO: Review unreachable code - )
+        # CPU-based recommendations
+        if self.system_resources.cpu_count >= 8:
+            if current_workers < self.system_resources.cpu_count:
+                result.add_recommendation(
+                    f"Consider increasing max_workers to {self.system_resources.cpu_count} "
+                    f"to utilize all CPU cores"
+                )
         
-# TODO: Review unreachable code - # Memory-based recommendations
-# TODO: Review unreachable code - if self.system_resources.memory_mb >= 16000:  # 16GB+
-# TODO: Review unreachable code - if performance.get('profile') != 'fast':
-# TODO: Review unreachable code - result.add_recommendation(
-# TODO: Review unreachable code - "System has ample memory - consider using 'fast' performance profile"
-# TODO: Review unreachable code - )
-# TODO: Review unreachable code - elif self.system_resources.memory_mb < 8000:  # Less than 8GB
-# TODO: Review unreachable code - if performance.get('profile') != 'memory_constrained':
-# TODO: Review unreachable code - result.add_recommendation(
-# TODO: Review unreachable code - "Limited memory detected - consider 'memory_constrained' profile"
-# TODO: Review unreachable code - )
+        # Memory-based recommendations
+        if self.system_resources.memory_mb >= 16000:  # 16GB+
+            if performance.get('profile') != 'fast':
+                result.add_recommendation(
+                    "System has ample memory - consider using 'fast' performance profile"
+                )
+        elif self.system_resources.memory_mb < 8000:  # Less than 8GB
+            if performance.get('profile') != 'memory_constrained':
+                result.add_recommendation(
+                    "Limited memory detected - consider 'memory_constrained' profile"
+                )
         
-# TODO: Review unreachable code - # Batch size recommendations
-# TODO: Review unreachable code - batch_size = performance.get('batch_size', 100)
-# TODO: Review unreachable code - optimal_batch = min(500, max(50, self.system_resources.memory_mb // 100))
-# TODO: Review unreachable code - if abs(batch_size - optimal_batch) > 100:
-# TODO: Review unreachable code - result.add_recommendation(
-# TODO: Review unreachable code - f"Consider batch_size around {optimal_batch} for your system"
-# TODO: Review unreachable code - )
+        # Batch size recommendations
+        batch_size = performance.get('batch_size', 100)
+        optimal_batch = min(500, max(50, self.system_resources.memory_mb // 100))
+        if abs(batch_size - optimal_batch) > 100:
+            result.add_recommendation(
+                f"Consider batch_size around {optimal_batch} for your system"
+            )
         
-# TODO: Review unreachable code - # Storage recommendations
-# TODO: Review unreachable code - if self.system_resources.available_disk_mb < 5000:  # Less than 5GB
-# TODO: Review unreachable code - result.add_recommendation(
-# TODO: Review unreachable code - "Low disk space - consider enabling move_files instead of copy"
-# TODO: Review unreachable code - )
+        # Storage recommendations
+        if self.system_resources.available_disk_mb < 5000:  # Less than 5GB
+            result.add_recommendation(
+                "Low disk space - consider enabling move_files instead of copy"
+            )
     
-# TODO: Review unreachable code - def recommend_performance_profile(self) -> Tuple[str, Dict[str, Any]]:
-# TODO: Review unreachable code - """Recommend optimal performance profile for system."""
-# TODO: Review unreachable code - # Base decision on CPU and memory
-# TODO: Review unreachable code - if self.system_resources.memory_mb < 4000:
-# TODO: Review unreachable code - profile = "memory_constrained"
-# TODO: Review unreachable code - settings = {
-# TODO: Review unreachable code - "max_workers": min(4, self.system_resources.cpu_count),
-# TODO: Review unreachable code - "batch_size": 50,
-# TODO: Review unreachable code - "cache_size_mb": 200
-# TODO: Review unreachable code - }
-# TODO: Review unreachable code - elif self.system_resources.cpu_count >= 8 and self.system_resources.memory_mb >= 16000:
-# TODO: Review unreachable code - profile = "fast"
-# TODO: Review unreachable code - settings = {
-# TODO: Review unreachable code - "max_workers": min(16, self.system_resources.cpu_count),
-# TODO: Review unreachable code - "batch_size": 200,
-# TODO: Review unreachable code - "cache_size_mb": 1000
-# TODO: Review unreachable code - }
-# TODO: Review unreachable code - elif self.system_resources.memory_mb >= 32000:
-# TODO: Review unreachable code - profile = "large_collection"
-# TODO: Review unreachable code - settings = {
-# TODO: Review unreachable code - "max_workers": min(12, self.system_resources.cpu_count),
-# TODO: Review unreachable code - "batch_size": 500,
-# TODO: Review unreachable code - "cache_size_mb": 2000
-# TODO: Review unreachable code - }
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - profile = "default"
-# TODO: Review unreachable code - settings = {
-# TODO: Review unreachable code - "max_workers": min(8, self.system_resources.cpu_count),
-# TODO: Review unreachable code - "batch_size": 100,
-# TODO: Review unreachable code - "cache_size_mb": 500
-# TODO: Review unreachable code - }
+    def recommend_performance_profile(self) -> Tuple[str, Dict[str, Any]]:
+        """Recommend optimal performance profile for system."""
+        # Base decision on CPU and memory
+        if self.system_resources.memory_mb < 4000:
+            profile = "memory_constrained"
+            settings = {
+                "max_workers": min(4, self.system_resources.cpu_count),
+                "batch_size": 50,
+                "cache_size_mb": 200
+            }
+        elif self.system_resources.cpu_count >= 8 and self.system_resources.memory_mb >= 16000:
+            profile = "fast"
+            settings = {
+                "max_workers": min(16, self.system_resources.cpu_count),
+                "batch_size": 200,
+                "cache_size_mb": 1000
+            }
+        elif self.system_resources.memory_mb >= 32000:
+            profile = "large_collection"
+            settings = {
+                "max_workers": min(12, self.system_resources.cpu_count),
+                "batch_size": 500,
+                "cache_size_mb": 2000
+            }
+        else:
+            profile = "default"
+            settings = {
+                "max_workers": min(8, self.system_resources.cpu_count),
+                "batch_size": 100,
+                "cache_size_mb": 500
+            }
         
-# TODO: Review unreachable code - return profile, settings
+        return profile, settings
     
-# TODO: Review unreachable code - def validate_runtime_compatibility(self, config: Dict[str, Any]) -> ValidationResult:
-# TODO: Review unreachable code - """Validate configuration compatibility at runtime."""
-# TODO: Review unreachable code - result = ValidationResult(is_valid=True)
+    def validate_runtime_compatibility(self, config: Dict[str, Any]) -> ValidationResult:
+        """Validate configuration compatibility at runtime."""
+        result = ValidationResult(is_valid=True)
         
-# TODO: Review unreachable code - # Check if current memory usage allows for configured settings
-# TODO: Review unreachable code - memory = psutil.virtual_memory()
-# TODO: Review unreachable code - available_mb = memory.available / 1024 / 1024
+        # Check if current memory usage allows for configured settings
+        memory = psutil.virtual_memory()
+        available_mb = memory.available / 1024 / 1024
         
-# TODO: Review unreachable code - performance = config.get('performance', {})
-# TODO: Review unreachable code - batch_size = performance.get('batch_size', 100)
-# TODO: Review unreachable code - estimated_memory_needed = batch_size * 10  # Rough estimate
+        performance = config.get('performance', {})
+        batch_size = performance.get('batch_size', 100)
+        estimated_memory_needed = batch_size * 10  # Rough estimate
         
-# TODO: Review unreachable code - if estimated_memory_needed > available_mb * 0.8:
-# TODO: Review unreachable code - result.add_warning(
-# TODO: Review unreachable code - 'runtime.memory',
-# TODO: Review unreachable code - f"Current memory usage high - only {available_mb:.0f}MB available"
-# TODO: Review unreachable code - )
-# TODO: Review unreachable code - result.add_recommendation(
-# TODO: Review unreachable code - "Consider reducing batch_size or closing other applications"
-# TODO: Review unreachable code - )
+        if estimated_memory_needed > available_mb * 0.8:
+            result.add_warning(
+                'runtime.memory',
+                f"Current memory usage high - only {available_mb:.0f}MB available"
+            )
+            result.add_recommendation(
+                "Consider reducing batch_size or closing other applications"
+            )
         
-# TODO: Review unreachable code - # Check CPU load
-# TODO: Review unreachable code - cpu_percent = psutil.cpu_percent(interval=1)
-# TODO: Review unreachable code - if cpu_percent > 80:
-# TODO: Review unreachable code - result.add_warning(
-# TODO: Review unreachable code - 'runtime.cpu',
-# TODO: Review unreachable code - f"High CPU usage detected: {cpu_percent}%"
-# TODO: Review unreachable code - )
-# TODO: Review unreachable code - result.add_recommendation(
-# TODO: Review unreachable code - "Consider reducing max_workers or waiting for lower system load"
-# TODO: Review unreachable code - )
+        # Check CPU load
+        cpu_percent = psutil.cpu_percent(interval=1)
+        if cpu_percent > 80:
+            result.add_warning(
+                'runtime.cpu',
+                f"High CPU usage detected: {cpu_percent}%"
+            )
+            result.add_recommendation(
+                "Consider reducing max_workers or waiting for lower system load"
+            )
         
-# TODO: Review unreachable code - return result
+        return result
 
 
-# TODO: Review unreachable code - class SmartConfigBuilder:
-# TODO: Review unreachable code - """Builds optimized configuration based on system and usage."""
+class SmartConfigBuilder:
+    """Builds optimized configuration based on system and usage."""
     
-# TODO: Review unreachable code - def __init__(self):
-# TODO: Review unreachable code - self.validator = ConfigValidator()
-# TODO: Review unreachable code - self.system = self.validator.system_resources
+    def __init__(self):
+        self.validator = ConfigValidator()
+        self.system = self.validator.system_resources
     
-# TODO: Review unreachable code - def build_config(self,
-# TODO: Review unreachable code - base_config: Dict[str, Any],
-# TODO: Review unreachable code - use_case: Optional[str] = None) -> Dict[str, Any]:
-# TODO: Review unreachable code - """Build optimized configuration for use case."""
-# TODO: Review unreachable code - config = base_config.copy()
+    def build_config(self,
+                    base_config: Dict[str, Any],
+                    use_case: Optional[str] = None) -> Dict[str, Any]:
+        """Build optimized configuration for use case."""
+        config = base_config.copy()
         
-# TODO: Review unreachable code - # Get recommended profile
-# TODO: Review unreachable code - profile, settings = self.validator.recommend_performance_profile()
+        # Get recommended profile
+        profile, settings = self.validator.recommend_performance_profile()
         
-# TODO: Review unreachable code - # Apply use case specific adjustments
-# TODO: Review unreachable code - if use_case == "quick_scan":
-# TODO: Review unreachable code - settings["batch_size"] = min(50, settings["batch_size"])
-# TODO: Review unreachable code - settings["enable_understanding"] = False
-# TODO: Review unreachable code - elif use_case == "full_analysis":
-# TODO: Review unreachable code - settings["enable_understanding"] = True
-# TODO: Review unreachable code - settings["batch_size"] = min(100, settings["batch_size"])
-# TODO: Review unreachable code - elif use_case == "bulk_import":
-# TODO: Review unreachable code - settings["batch_size"] = min(1000, settings["batch_size"] * 2)
-# TODO: Review unreachable code - settings["enable_batch_operations"] = True
+        # Apply use case specific adjustments
+        if use_case == "quick_scan":
+            settings["batch_size"] = min(50, settings["batch_size"])
+            settings["enable_understanding"] = False
+        elif use_case == "full_analysis":
+            settings["enable_understanding"] = True
+            settings["batch_size"] = min(100, settings["batch_size"])
+        elif use_case == "bulk_import":
+            settings["batch_size"] = min(1000, settings["batch_size"] * 2)
+            settings["enable_batch_operations"] = True
         
-# TODO: Review unreachable code - # Update config
-# TODO: Review unreachable code - if 'performance' not in config:
-# TODO: Review unreachable code - config['performance'] = {}
+        # Update config
+        if 'performance' not in config:
+            config['performance'] = {}
         
-# TODO: Review unreachable code - config['performance'].update(settings)
-# TODO: Review unreachable code - config['performance']['profile'] = profile
+        config['performance'].update(settings)
+        config['performance']['profile'] = profile
         
-# TODO: Review unreachable code - logger.info(f"Built config with profile '{profile}' for use case '{use_case}'")
+        logger.info(f"Built config with profile '{profile}' for use case '{use_case}'")
         
-# TODO: Review unreachable code - return config
+        return config
     
-# TODO: Review unreachable code - def optimize_for_collection_size(self,
-# TODO: Review unreachable code - config: Dict[str, Any],
-# TODO: Review unreachable code - file_count: int) -> Dict[str, Any]:
-# TODO: Review unreachable code - """Optimize configuration based on collection size."""
-# TODO: Review unreachable code - config = config.copy()
+    def optimize_for_collection_size(self,
+                                   config: Dict[str, Any],
+                                   file_count: int) -> Dict[str, Any]:
+        """Optimize configuration based on collection size."""
+        config = config.copy()
         
-# TODO: Review unreachable code - if file_count < 100:
-# TODO: Review unreachable code - # Small collection - prioritize quality
-# TODO: Review unreachable code - config['performance']['max_workers'] = min(4, self.system.cpu_count)
-# TODO: Review unreachable code - config['performance']['batch_size'] = 10
-# TODO: Review unreachable code - elif file_count < 1000:
-# TODO: Review unreachable code - # Medium collection - balanced
-# TODO: Review unreachable code - config['performance']['max_workers'] = min(8, self.system.cpu_count)
-# TODO: Review unreachable code - config['performance']['batch_size'] = 50
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - # Large collection - prioritize throughput
-# TODO: Review unreachable code - config['performance']['max_workers'] = self.system.cpu_count
-# TODO: Review unreachable code - config['performance']['batch_size'] = 200
-# TODO: Review unreachable code - config['performance']['enable_batch_operations'] = True
+        if file_count < 100:
+            # Small collection - prioritize quality
+            config['performance']['max_workers'] = min(4, self.system.cpu_count)
+            config['performance']['batch_size'] = 10
+        elif file_count < 1000:
+            # Medium collection - balanced
+            config['performance']['max_workers'] = min(8, self.system.cpu_count)
+            config['performance']['batch_size'] = 50
+        else:
+            # Large collection - prioritize throughput
+            config['performance']['max_workers'] = self.system.cpu_count
+            config['performance']['batch_size'] = 200
+            config['performance']['enable_batch_operations'] = True
         
-# TODO: Review unreachable code - return config
+        return config

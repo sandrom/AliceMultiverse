@@ -94,7 +94,7 @@ class AliceOrchestrator:
         self.discovery = AssetDiscovery(search_paths=[])
 
     def _load_context(self) -> None:
-    """Load project context if available."""
+        """Load project context if available."""
         if self.project_id and self.project_repo:
             try:
                 project = self.project_repo.get_project(self.project_id)
@@ -107,21 +107,21 @@ class AliceOrchestrator:
 
     def _update_memory(self, intent: CreativeIntent,
                        data: dict[str, Any]) -> None:
-    """Update Alice's memory based on interactions."""
-    self.memory.last_interaction = datetime.now(UTC)
+        """Update Alice's memory based on interactions."""
+        self.memory.last_interaction = datetime.now(UTC)
 
-    # Track patterns
-    pattern_key = f"{intent.value}:{data.get('style', 'default')}"
-    self.memory.creative_patterns[pattern_key] = (
-        self.memory.creative_patterns.get(pattern_key, 0) + 1
-    )
+        # Track patterns
+        pattern_key = f"{intent.value}:{data.get('style', 'default')}"
+        self.memory.creative_patterns[pattern_key] = (
+            self.memory.creative_patterns.get(pattern_key, 0) + 1
+        )
 
-    # Update recent activities
-    if intent == CreativeIntent.SEARCH:
-        query = data.get("query", "")
-        if query and query not in self.memory.recent_searches:
-            self.memory.recent_searches.append(query)
-            if len(self.memory.recent_searches) > 20:
+        # Update recent activities
+        if intent == CreativeIntent.SEARCH:
+            query = data.get("query", "")
+            if query and query not in self.memory.recent_searches:
+                self.memory.recent_searches.append(query)
+                if len(self.memory.recent_searches) > 20:
                 self.memory.recent_searches.pop(0)
 
             elif intent == CreativeIntent.CREATE:

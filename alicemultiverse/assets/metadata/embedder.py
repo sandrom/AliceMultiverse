@@ -117,22 +117,22 @@ class MetadataEmbedder:
 
         try:
             # Ensure we have a Path object
-        if not isinstance(image_path, Path):
-        image_path = Path(image_path)
+            if not isinstance(image_path, Path):
+                image_path = Path(image_path)
 
-        suffix = image_path.suffix.lower()
+            suffix = image_path.suffix.lower()
 
-        if suffix == ".png":
-        metadata = self._extract_png_metadata(image_path)
-        elif suffix in [".jpg", ".jpeg"]:
-        metadata = self._extract_jpeg_metadata(image_path)
-        elif suffix == ".webp":
-        metadata = self._extract_webp_metadata(image_path)
-        elif suffix in [".heic", ".heif"]:
-        metadata = self._extract_heic_metadata(image_path)
+            if suffix == ".png":
+                metadata = self._extract_png_metadata(image_path)
+            elif suffix in [".jpg", ".jpeg"]:
+                metadata = self._extract_jpeg_metadata(image_path)
+            elif suffix == ".webp":
+                metadata = self._extract_webp_metadata(image_path)
+            elif suffix in [".heic", ".heif"]:
+                metadata = self._extract_heic_metadata(image_path)
 
         except Exception as e:
-        logger.error(f"Failed to extract metadata from {image_path}: {e}")
+            logger.error(f"Failed to extract metadata from {image_path}: {e}")
 
         return metadata
 
