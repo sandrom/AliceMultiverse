@@ -3,7 +3,7 @@
 from .alice_api import AliceAPI, ask_alice, ask_alice_sync
 # AliceMCP is commented out in alice_api.py
 from .alice_interface import AliceInterface
-from .alice_orchestrator import AliceOrchestrator, CreativeIntent, CreativeResponse
+# from .alice_orchestrator import AliceOrchestrator, CreativeIntent, CreativeResponse  # Temporarily disabled
 from .alice_structured import AliceStructuredInterface
 from .creative_models import (
     CreativeAsset,
@@ -71,10 +71,10 @@ __all__ = [
     "StructuredSearchRequest",
     "TagUpdateRequest",
     "WorkflowRequest",
-    # New orchestrator
-    "AliceOrchestrator",
-    "CreativeIntent",
-    "CreativeResponse",
+    # New orchestrator (temporarily disabled)
+    # "AliceOrchestrator",
+    # "CreativeIntent", 
+    # "CreativeResponse",
     "AliceAPI",
     "ask_alice",
     "ask_alice_sync",

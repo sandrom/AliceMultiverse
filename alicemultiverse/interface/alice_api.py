@@ -8,7 +8,7 @@ import asyncio
 from typing import Any
 
 from ..core.logging import get_logger
-from .alice_orchestrator import AliceOrchestrator
+# from .alice_orchestrator import AliceOrchestrator  # Temporarily disabled
 
 logger = get_logger(__name__)
 
