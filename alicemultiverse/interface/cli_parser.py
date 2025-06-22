@@ -632,3 +632,35 @@ def add_transitions_subcommand(subparsers) -> None:
         "--verbose",
         action="store_true",
         help="Verbose output")
+
+
+def create_parser() -> argparse.ArgumentParser:
+    """Create and configure the complete argument parser."""
+    parser = create_base_parser()
+
+    # Subparsers for commands
+    subparsers = parser.add_subparsers(dest="command", help="Commands")
+
+    # Add all subcommands
+    add_keys_subcommand(subparsers)
+    add_setup_subcommand(subparsers)
+    add_recreate_subcommand(subparsers)
+    add_interface_subcommand(subparsers)
+    add_mcp_subcommand(subparsers)
+    add_migrate_subcommand(subparsers)
+    add_monitor_subcommand(subparsers)
+    add_storage_subcommand(subparsers)
+    add_scenes_subcommand(subparsers)
+    add_dedup_subcommand(subparsers)
+    add_prompts_subcommand(subparsers)
+    add_index_subcommand(subparsers)
+    add_comparison_subcommand(subparsers)
+    add_transitions_subcommand(subparsers)
+
+    # Add argument groups to main parser
+    add_organization_args(parser)
+    add_understanding_args(parser)
+    add_output_args(parser)
+    add_technical_args(parser)
+
+    return parser
