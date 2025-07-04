@@ -98,8 +98,107 @@ def main(argv: list[str] | None = None) -> int:
             
         # Handle debug commands
         elif args.command == "debug":
-            logger.warning("Debug commands not yet implemented.")
-            return 1
+                if not args.debug: # Ensure --debug flag is present for debug commands
+                    logger.error("⚠️  Debug commands require --debug flag!")
+                    logger.error("Example: alice --debug organize -i ~/inbox -o ~/organized")
+                    # The create_parser() actually makes 'debug' a subcommand itself,
+                    # so 'alice debug organize' would be 'args.command == "debug"' and 'args.debug_command == "organize"'
+                    # This check might be redundant if argparse handles it, but good for clarity.
+                    # However, the parser is set up such that 'alice debug <subcommand>' is the pattern.
+                    # The top-level --debug flag is separate.
+                    # Let's adjust to check args.debug_command and ensure the global args.debug is true.
+                    return 1
+
+                if not args.debug_command:
+                    # This case might occur if 'alice debug' is run without a further subcommand.
+                    # We should show help for the debug subcommands.
+                    # Accessing subparsers to print help for 'debug' command:
+                    for action in parser._actions:
+                        if isinstance(action, argparse._SubParsersAction) and action.dest == "command":
+                            for sub_action in action._name_parser_map['debug']._actions:
+                                if isinstance(sub_action, argparse._SubParsersAction) and sub_action.dest == "debug_command":
+                                    sub_action.choices_action.print_help()
+                                    break
+                            break
+                    return 1
+
+                # Handle organize subcommand
+                if args.debug_command == "organize":
+                    from ..organizer.media_organizer import MediaOrganizer # Corrected path based on project structure
+                    config = load_config()
+
+                    # Override paths if provided
+                    if args.inbox:
+                        config.paths.inbox = Path(args.inbox)
+                    if args.output:
+                        config.paths.organized = Path(args.output)
+
+                    # Ensure performance settings are part of the config if MediaOrganizer expects them
+                    # For now, assuming basic config is enough as per original logic.
+
+                    organizer = MediaOrganizer(
+                        config=config, # Pass the loaded config object
+                        dry_run=args.dry_run,
+                        watch_mode=args.watch,
+                        enable_understanding=args.understand
+                        # Assuming MediaOrganizer signature matches this.
+                        # The original commented code passed 'config' as the first arg.
+                    )
+                    results = organizer.organize() # organizer.organize() might return stats or status
+                    # logger.info(f"Organized {results.statistics['organized']} files") # Assuming results has statistics
+                    return 0 if results else 1 # Or based on what organize() returns
+
+                # Delegate to Click-based commands
+                elif args.debug_command in ["dedup", "prompts", "storage", "scenes", "transitions", "performance", "config"]:
+                    # Import the appropriate Click command group
+                    # The way click_args are constructed here is specific and might need adjustment
+                    # if sys.argv structure is different when run through this argparse entrypoint.
+                    # It assumes 'alice --debug debug <debug_command> [click_args...]'
+                    # We need to pass the arguments that come *after* the debug_command
+
+                    # Reconstruct argv for the click app
+                    # Find the index of debug_command
+                    try:
+                        cmd_index = sys.argv.index(args.debug_command)
+                        click_args = sys.argv[cmd_index + 1:]
+                    except ValueError:
+                        # Should not happen if args.debug_command is set
+                        logger.error(f"Could not find {args.debug_command} in arguments.")
+                        return 1
+
+                    if args.debug_command == "dedup":
+                        from ..assets.deduplication.cli import dedup_cli
+                        return dedup_cli(click_args, standalone_mode=False)
+                    elif args.debug_command == "prompts":
+                        from ..prompts.cli import prompts_cli
+                        return prompts_cli(click_args, standalone_mode=False)
+                    elif args.debug_command == "storage":
+                        from ..storage.cli import storage_cli # Assuming storage.cli exports storage_cli
+                        return storage_cli(click_args, standalone_mode=False)
+                    elif args.debug_command == "scenes":
+                        from ..scene_detection.cli import scenes_cli
+                        return scenes_cli(click_args, standalone_mode=False)
+                    elif args.debug_command == "transitions":
+                        from ..workflows.transitions.cli import transitions_cli
+                        return transitions_cli(click_args, standalone_mode=False)
+                    elif args.debug_command == "performance":
+                        from ..cli.performance_command import performance # performance_cli
+                        return performance(click_args, standalone_mode=False)
+                    elif args.debug_command == "config":
+                        from ..cli.config_command import config_cli # config_cli
+                        return config_cli(click_args, standalone_mode=False)
+                else:
+                    # This means an unknown debug_command was given
+                    logger.error(f"Unknown debug command: {args.debug_command}")
+                    # Print help for debug commands
+                    for action in parser._actions:
+                        if isinstance(action, argparse._SubParsersAction) and action.dest == "command":
+                            for sub_action in action._name_parser_map['debug']._actions:
+                                if isinstance(sub_action, argparse._SubParsersAction) and sub_action.dest == "debug_command":
+                                    sub_action.choices_action.print_help()
+                                    break
+                            break
+                    return 1
             
         # No command
         elif not args.command:
@@ -120,103 +219,4 @@ def main(argv: list[str] | None = None) -> int:
         logger.error(f"Unexpected error: {e}", exc_info=args.debug)
         return 1
 
-
-# TODO: Review unreachable code - def main_original(argv: list[str] | None = None) -> int:
-# TODO: Review unreachable code - """Simplified main entry point."""
-# TODO: Review unreachable code - parser = create_parser()
-# TODO: Review unreachable code - args = parser.parse_args(argv)
-
-# TODO: Review unreachable code - # Configure logging
-# TODO: Review unreachable code - level = logging.DEBUG if args.debug else logging.INFO if args.verbose else logging.WARNING
-# TODO: Review unreachable code - logging.basicConfig(level=level, format='%(message)s')
-
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - # Handle MCP server
-# TODO: Review unreachable code - if args.command == "mcp-server":
-# TODO: Review unreachable code - logger.info("Starting MCP server...")
-# TODO: Review unreachable code - from ..mcp import main as mcp_main
-# TODO: Review unreachable code - return mcp_main()
-
-# TODO: Review unreachable code - # Handle keys
-# TODO: Review unreachable code - elif args.command == "keys":
-# TODO: Review unreachable code - from ..core.keys.cli import run_keys_command
-# TODO: Review unreachable code - return run_keys_command(args)
-
-# TODO: Review unreachable code - # Handle debug commands
-# TODO: Review unreachable code - elif args.command == "debug":
-# TODO: Review unreachable code - if not args.debug:
-# TODO: Review unreachable code - logger.error("⚠️  Debug commands require --debug flag!")
-# TODO: Review unreachable code - logger.error("Example: alice --debug debug organize -i ~/inbox -o ~/organized")
-# TODO: Review unreachable code - return 1
-
-# TODO: Review unreachable code - # Handle organize subcommand
-# TODO: Review unreachable code - if args.debug_command == "organize":
-# TODO: Review unreachable code - from ..organizer.media_organizer import MediaOrganizer
-# TODO: Review unreachable code - config = load_config()
-
-# TODO: Review unreachable code - # Override paths if provided
-# TODO: Review unreachable code - if args.inbox:
-# TODO: Review unreachable code - config.paths.inbox = Path(args.inbox)
-# TODO: Review unreachable code - if args.output:
-# TODO: Review unreachable code - config.paths.organized = Path(args.output)
-
-# TODO: Review unreachable code - organizer = MediaOrganizer(
-# TODO: Review unreachable code - config,
-# TODO: Review unreachable code - dry_run=args.dry_run,
-# TODO: Review unreachable code - watch_mode=args.watch,
-# TODO: Review unreachable code - enable_understanding=args.understand
-# TODO: Review unreachable code - )
-
-# TODO: Review unreachable code - results = organizer.organize()
-# TODO: Review unreachable code - return 0 if results else 1
-
-# TODO: Review unreachable code - # Delegate to Click-based commands
-# TODO: Review unreachable code - elif args.debug_command in ["dedup", "prompts", "storage", "scenes", "transitions", "performance", "config"]:
-# TODO: Review unreachable code - # Import the appropriate Click command group
-# TODO: Review unreachable code - click_args = sys.argv[sys.argv.index(args.debug_command) + 1:]
-
-# TODO: Review unreachable code - if args.debug_command == "dedup":
-# TODO: Review unreachable code - from ..assets.deduplication.cli import dedup_cli
-# TODO: Review unreachable code - return dedup_cli(click_args, standalone_mode=False)
-# TODO: Review unreachable code - elif args.debug_command == "prompts":
-# TODO: Review unreachable code - from ..prompts.cli import prompts_cli
-# TODO: Review unreachable code - return prompts_cli(click_args, standalone_mode=False)
-# TODO: Review unreachable code - elif args.debug_command == "storage":
-# TODO: Review unreachable code - from ..storage.cli import storage
-# TODO: Review unreachable code - return storage(click_args, standalone_mode=False)
-# TODO: Review unreachable code - elif args.debug_command == "scenes":
-# TODO: Review unreachable code - from ..scene_detection.cli import scenes_cli
-# TODO: Review unreachable code - return scenes_cli(click_args, standalone_mode=False)
-# TODO: Review unreachable code - elif args.debug_command == "transitions":
-# TODO: Review unreachable code - from ..workflows.transitions.cli import transitions_cli
-# TODO: Review unreachable code - return transitions_cli(click_args, standalone_mode=False)
-# TODO: Review unreachable code - elif args.debug_command == "performance":
-# TODO: Review unreachable code - from ..cli.performance_command import performance
-# TODO: Review unreachable code - return performance(click_args, standalone_mode=False)
-# TODO: Review unreachable code - elif args.debug_command == "config":
-# TODO: Review unreachable code - from ..cli.config_command import config
-# TODO: Review unreachable code - return config(click_args, standalone_mode=False)
-
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - parser.print_help()
-# TODO: Review unreachable code - return 1
-# TODO: Review unreachable code - logger.info(f"Organized {results.statistics['organized']} files")
-# TODO: Review unreachable code - return 0
-
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - parser.print_help()
-# TODO: Review unreachable code - return 0
-
-# TODO: Review unreachable code - except AliceMultiverseError as e:
-# TODO: Review unreachable code - logger.error(f"Error: {e}")
-# TODO: Review unreachable code - return 1
-# TODO: Review unreachable code - except KeyboardInterrupt:
-# TODO: Review unreachable code - logger.info("\nInterrupted by user")
-# TODO: Review unreachable code - return 130
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - logger.error(f"Unexpected error: {e}", exc_info=args.debug)
-# TODO: Review unreachable code - return 1
-
-
-# TODO: Review unreachable code - if __name__ == "__main__":
-# TODO: Review unreachable code - sys.exit(main())
+# Original main_original and its associated comments will be removed.

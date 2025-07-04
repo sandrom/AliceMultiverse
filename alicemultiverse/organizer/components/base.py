@@ -73,8 +73,13 @@ class MediaOrganizerBase:
         self.processed_files: set[Path] = set()
         self.stop_watching = False
 
-        # Statistics
-        self.stats: Statistics = self._init_statistics()
+        # Statistics are initialized by StatisticsMixin in the derived MediaOrganizer class.
+        # For type hinting purposes if MediaOrganizerBase itself used self.stats,
+        # we could declare:
+        # if TYPE_CHECKING:
+        #     from ...core.types import Statistics as CoreStatistics
+        #     self.stats: CoreStatistics
+        # However, MediaOrganizerBase doesn't seem to use self.stats directly.
 
         # AI generator patterns
         self.ai_generators = {
@@ -86,23 +91,25 @@ class MediaOrganizerBase:
         self.image_extensions = set(config.file_types.image_extensions)
         self.video_extensions = set(config.file_types.video_extensions)
 
-    def _init_statistics(self) -> Statistics:
-        """Initialize statistics tracking.
-
-        Returns:
-            Initialized statistics object
-        """
-        return Statistics(
-            processed=0,
-            organized=0,
-            skipped=0,
-            errors=0,
-            by_source={},
-            by_quality={},
-            total_size_mb=0.0,
-            processing_time=0.0,
-            understanding_cost=0.0,
-        )
+    # This _init_statistics is removed as it conflicts with the one in StatisticsMixin
+    # and uses a different Statistics type definition.
+    # def _init_statistics(self) -> Statistics:
+    #     """Initialize statistics tracking.
+    #
+    #     Returns:
+    #         Initialized statistics object
+    #     """
+    #     return Statistics(
+    #         processed=0,
+    #         organized=0,
+    #         skipped=0,
+    #         errors=0,
+    #         by_source={},
+    #         by_quality={},
+    #         total_size_mb=0.0,
+    #         processing_time=0.0,
+    #         understanding_cost=0.0,
+    #     )
 
     def _signal_handler(self, signum: int, frame) -> None:
         """Handle interrupt signals gracefully.
