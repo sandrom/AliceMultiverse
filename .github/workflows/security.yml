@@ -52,13 +52,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install bandit[toml] safety semgrep
 
-      - name: Run Bandit
-        run: |
-          bandit -r alicemultiverse -f json -o bandit-report.json -ll --skip B101,B601
-          echo "## Bandit Security Scan Results" >> $GITHUB_STEP_SUMMARY
-          echo '```json' >> $GITHUB_STEP_SUMMARY
-          cat bandit-report.json | python -m json.tool >> $GITHUB_STEP_SUMMARY
-          echo '```' >> $GITHUB_STEP_SUMMARY
+      - name: Run Bandit Security Scan
+        uses: PyCQA/bandit-action@v1
+        with:
+          targets: "alicemultiverse"
+          severity: "medium" # Equivalent to -ll
+          confidence: "medium"
+          skips: "B101,B601" # Equivalent to --skip B101,B601
+          # The PyCQA/bandit-action should handle SARIF output for security events.
+          # We remove the manual JSON summary generation.
 
       - name: Check dependencies with Safety
         run: |
