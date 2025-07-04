@@ -1,31 +1,33 @@
-{{- if .Values.config }}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{ include "alice-service.fullname" . }}
-  labels:
-    {{- include "alice-service.labels" . | nindent 4 }}
-data:
-  {{- toYaml .Values.config | nindent 2 }}
-{{- end }}
 ---
-{{- if and .Values.monitoring.enabled .Values.database.enabled }}
+  {{- if .Values.config}}
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: {{include "alice-service.fullname" .}}
+    labels:
+      {{- include "alice-service.labels" . | nindent 6}} # Adjusted nindent
+  data:
+    {{- toYaml .Values.config | nindent 4}} # Adjusted nindent
+  {{- end}}
+---
+{{- if and .Values.monitoring.enabled .Values.database.enabled}}
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "alice-service.fullname" . }}-queries
+  name: {{include "alice-service.fullname" .}}-queries
   labels:
-    {{- include "alice-service.labels" . | nindent 4 }}
+    {{- include "alice-service.labels" . | nindent 4}}
     app.kubernetes.io/component: monitoring
 data:
   queries.yaml: |
     queries:
       - name: alice_database_connections
-        query: "SELECT count(*) as value, state as state FROM pg_stat_activity WHERE datname = current_database() GROUP BY state"
+        query: >-
+          SELECT count(*) as value, state as state FROM pg_stat_activity WHERE datname = current_database() GROUP BY state
         metrics:
           - value:
               usage: "GAUGE"
               description: "Number of database connections by state"
         tags:
           - state
-{{- end }}
+{{- end}}

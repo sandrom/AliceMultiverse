@@ -1,3 +1,4 @@
+---
 site_name: AliceMultiverse Documentation
 site_description: AI Media Organization System - Technical Documentation
 site_author: AliceMultiverse Team
@@ -63,40 +64,40 @@ plugins:
 nav:
   - Home: index.md
   - Getting Started:
-    - Installation: getting-started/installation.md
-    - Quick Start: getting-started/quickstart.md
-    - Configuration: getting-started/configuration.md
+      - Installation: getting-started/installation.md
+      - Quick Start: getting-started/quickstart.md
+      - Configuration: getting-started/configuration.md
   - User Guide:
-    - Overview: user-guide/index.md
-    - Basic Usage: user-guide/basic-usage.md
-    - Quality Assessment: user-guide/quality-assessment.md
-    - Watch Mode: user-guide/watch-mode.md
-    - Pipeline System: user-guide/pipeline-system.md
-    - Selection Tracking: user-guide/selection-tracking.md
-    - API Keys: user-guide/api-keys.md
-    - fal.ai Provider: user-guide/fal-provider.md
+      - Overview: user-guide/index.md
+      - Basic Usage: user-guide/basic-usage.md
+      - Quality Assessment: user-guide/quality-assessment.md
+      - Watch Mode: user-guide/watch-mode.md
+      - Pipeline System: user-guide/pipeline-system.md
+      - Selection Tracking: user-guide/selection-tracking.md
+      - API Keys: user-guide/api-keys.md
+      - fal.ai Provider: user-guide/fal-provider.md
   - Architecture:
-    - Overview: architecture/index.md
-    - System Design: architecture/system-design.md
-    - Pipeline Architecture: architecture/pipeline-architecture.md
-    - Caching Strategy: architecture/caching-strategy.md
-    - Design Decisions: architecture/design-decisions.md
+      - Overview: architecture/index.md
+      - System Design: architecture/system-design.md
+      - Pipeline Architecture: architecture/pipeline-architecture.md
+      - Caching Strategy: architecture/caching-strategy.md
+      - Design Decisions: architecture/design-decisions.md
   - API Reference:
-    - Overview: api/index.md
-    - Organizer: api/reference/organizer.md
-    - Quality Pipeline: api/reference/quality-pipeline.md
-    - Metadata Cache: api/reference/metadata-cache.md
-    - API Key Manager: api/reference/api-key-manager.md
+      - Overview: api/index.md
+      - Organizer: api/reference/organizer.md
+      - Quality Pipeline: api/reference/quality-pipeline.md
+      - Metadata Cache: api/reference/metadata-cache.md
+      - API Key Manager: api/reference/api-key-manager.md
   - Tutorials:
-    - Overview: tutorials/index.md
-    - Organizing Your First Project: tutorials/first-project.md
-    - Setting Up Quality Pipeline: tutorials/quality-pipeline-setup.md
-    - Custom AI Detection: tutorials/custom-ai-detection.md
+      - Overview: tutorials/index.md
+      - Organizing Your First Project: tutorials/first-project.md
+      - Setting Up Quality Pipeline: tutorials/quality-pipeline-setup.md
+      - Custom AI Detection: tutorials/custom-ai-detection.md
   - Developer Guide:
-    - Contributing: developer/contributing.md
-    - Testing: developer/testing.md
-    - Architecture Deep Dive: developer/architecture.md
-    - Adding New Features: developer/adding-features.md
+      - Contributing: developer/contributing.md
+      - Testing: developer/testing.md
+      - Architecture Deep Dive: developer/architecture.md
+      - Adding New Features: developer/adding-features.md
 
 extra:
   social:

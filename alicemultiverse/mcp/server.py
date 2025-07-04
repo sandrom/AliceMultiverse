@@ -56,61 +56,62 @@ def create_server(name: str = "alice-mcp") -> Server:
     return server
 
 
-# TODO: Review unreachable code - async def run_server(
-# TODO: Review unreachable code - server: Server | None = None,
-# TODO: Review unreachable code - transport: str = "stdio"
-# TODO: Review unreachable code - ) -> None:
-# TODO: Review unreachable code - """Run the MCP server.
+async def run_server(
+    server: Server | None = None,
+    transport: str = "stdio"
+) -> None:
+    """Run the MCP server.
 
-# TODO: Review unreachable code - Args:
-# TODO: Review unreachable code - server: Server instance (creates default if not provided)
-# TODO: Review unreachable code - transport: Transport type (stdio, websocket, etc.)
-# TODO: Review unreachable code - """
-# TODO: Review unreachable code - if server is None:
-# TODO: Review unreachable code - server = create_server()
+    Args:
+        server: Server instance (creates default if not provided)
+        transport: Transport type (stdio, websocket, etc.)
+    """
+    if server is None:
+        server = create_server()
 
-# TODO: Review unreachable code - # Configure logging
-# TODO: Review unreachable code - logging.basicConfig(
-# TODO: Review unreachable code - level=logging.INFO,
-# TODO: Review unreachable code - format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-# TODO: Review unreachable code - )
+    # Configure logging
+    logging.basicConfig(
+        level=logging.INFO,
+        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    )
 
-# TODO: Review unreachable code - logger.info("Starting AliceMultiverse MCP server...")
+    logger.info("Starting AliceMultiverse MCP server...")
 
-# TODO: Review unreachable code - if transport == "stdio":
-# TODO: Review unreachable code - # Run with stdio transport
-# TODO: Review unreachable code - async with stdio_server() as (read_stream, write_stream):
-# TODO: Review unreachable code - init_options = InitializationOptions(
-# TODO: Review unreachable code - server_name="alice-mcp",
-# TODO: Review unreachable code - server_version="2.0.0"
-# TODO: Review unreachable code - )
+    if transport == "stdio":
+        # Run with stdio transport
+        async with stdio_server() as (read_stream, write_stream):
+            from ..version import __version__ as alice_version
+            init_options = InitializationOptions(
+                server_name="alice-mcp",
+                server_version=alice_version
+            )
 
-# TODO: Review unreachable code - await server.run(
-# TODO: Review unreachable code - read_stream,
-# TODO: Review unreachable code - write_stream,
-# TODO: Review unreachable code - init_options
-# TODO: Review unreachable code - )
-# TODO: Review unreachable code - else:
-# TODO: Review unreachable code - raise ValueError(f"Unsupported transport: {transport}")
+            await server.run(
+                read_stream,
+                write_stream,
+                init_options
+            )
+    else:
+        raise ValueError(f"Unsupported transport: {transport}")
 
 
-# TODO: Review unreachable code - def main():
-# TODO: Review unreachable code - """Main entry point for MCP server."""
-# TODO: Review unreachable code - try:
-# TODO: Review unreachable code - asyncio.run(run_server())
-# TODO: Review unreachable code - except KeyboardInterrupt:
-# TODO: Review unreachable code - logger.info("Server stopped by user")
-# TODO: Review unreachable code - except Exception as e:
-# TODO: Review unreachable code - logger.exception(f"Server error: {e}")
-# TODO: Review unreachable code - raise
+def main():
+    """Main entry point for MCP server."""
+    try:
+        asyncio.run(run_server())
+    except KeyboardInterrupt:
+        logger.info("Server stopped by user")
+    except Exception as e:
+        logger.exception(f"Server error: {e}")
+        raise
 
 
 # TODO: Review unreachable code - if __name__ == "__main__":
 # TODO: Review unreachable code - main()
 
 
-def main():
-    """Main entry point for MCP server - stub implementation."""
-    logger.info("MCP server is not yet implemented.")
-    return 0
+# def main():
+#     """Main entry point for MCP server - stub implementation."""
+#     logger.info("MCP server is not yet implemented.")
+#     return 0
 

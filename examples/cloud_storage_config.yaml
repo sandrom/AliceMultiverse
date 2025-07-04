@@ -3,10 +3,10 @@
 storage:
   # Where to store the search index
   search_db: data/search.duckdb
-  
+
   # Where to store the location registry
   location_registry_db: data/locations.duckdb
-  
+
   # Storage locations with priorities and rules
   locations:
     # Fast local SSD for recent/active work
@@ -17,7 +17,7 @@ storage:
       rules:
         - max_age_days: 30
           min_quality_stars: 4
-    
+
     # Network drive for medium-term storage
     - name: "Network Archive"
       type: "network"
@@ -26,7 +26,7 @@ storage:
       rules:
         - min_age_days: 30
           max_age_days: 180
-    
+
     # S3 bucket for long-term cloud storage
     - name: "AWS S3 Archive"
       type: "s3"
@@ -41,7 +41,7 @@ storage:
       rules:
         - min_age_days: 180
           exclude_types: ["video/mp4", "video/mov"]  # Don't archive videos to S3
-    
+
     # Google Cloud Storage for backup
     - name: "GCS Backup"
       type: "gcs"
