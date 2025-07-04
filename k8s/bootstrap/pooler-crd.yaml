@@ -13,7 +13,9 @@ spec:
   scope: Namespaced
   versions:
   - name: v1
-    schema:
+    schema: # Original line 14, text at 4 spaces. Error "expected 4, found 2"
+            # "found 2" means it considers this 2 spaces from parent list item, which is true.
+            # "expected 4" means it wants it 4 spaces from parent list item.
       openAPIV3Schema:
         type: object
         properties:

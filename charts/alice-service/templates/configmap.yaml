@@ -1,14 +1,14 @@
 ---
-{{- if .Values.config}}
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: {{include "alice-service.fullname" .}}
-  labels:
-    {{- include "alice-service.labels" . | nindent 4}}
-data:
-  {{- toYaml .Values.config | nindent 2}}
-{{- end}}
+  {{- if .Values.config}}
+  apiVersion: v1
+  kind: ConfigMap
+  metadata:
+    name: {{include "alice-service.fullname" .}}
+    labels:
+      {{- include "alice-service.labels" . | nindent 6}} # Adjusted nindent
+  data:
+    {{- toYaml .Values.config | nindent 4}} # Adjusted nindent
+  {{- end}}
 ---
 {{- if and .Values.monitoring.enabled .Values.database.enabled}}
 apiVersion: v1

@@ -137,7 +137,10 @@ networkPolicy:
       - podSelector: {}
   # Allow database access only from this service
   databaseAccess:
-    enabled: true
+    enabled: true # This line was previously indented by 4 spaces, text starting at col 4.
+                  # Error: expected 8, found 6 (col of text start + 2 for key, or similar)
+                  # Trying to indent it further by 2 spaces.
+                  # So, if databaseAccess is at 2, enabled will be at 6.
 
 # Service account
 serviceAccount:

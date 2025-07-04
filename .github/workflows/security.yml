@@ -56,9 +56,9 @@ jobs:
         uses: PyCQA/bandit-action@v1
         with:
           targets: "alicemultiverse"
-          severity: "medium" # Equivalent to -ll
+          severity: "medium"  # Equivalent to -ll
           confidence: "medium"
-          skips: "B101,B601" # Equivalent to --skip B101,B601
+          skips: "B101,B601"  # Equivalent to --skip B101,B601
           # The PyCQA/bandit-action should handle SARIF output for security events.
           # We remove the manual JSON summary generation.
 

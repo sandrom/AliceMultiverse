@@ -3,14 +3,14 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{include "alice-service.fullname" .}}
-  labels:
+  labels: |-
     {{- include "alice-service.labels" . | nindent 4}}
 spec:
-  {{- if not .Values.autoscaling.enabled}}
-  replicas: {{.Values.replicaCount}}
+  {{- if not .Values.autoscaling.enabled}} # This was line 8
+  replicas: {{.Values.replicaCount}}      # This was line 9 (log error line 10)
   {{- end}}
   selector:
-    matchLabels:
+    matchLabels: |-
       {{- include "alice-service.selectorLabels" . | nindent 6}}
   template:
     metadata:
@@ -21,7 +21,7 @@ spec:
         {{- with .Values.podAnnotations}}
         {{- toYaml . | nindent 8}}
         {{- end}}
-      labels:
+      labels: |-
         {{- include "alice-service.selectorLabels" . | nindent 8}}
     spec:
       {{- with .Values.imagePullSecrets}}

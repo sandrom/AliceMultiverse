@@ -38,8 +38,8 @@ jobs:
           echo "" >> release_notes.md
           git log --pretty=format:"* %s (%h)" ${{ steps.semver.outputs.current }}..HEAD >> release_notes.md
           echo "" >> release_notes.md
-          echo > release_notes.md \
-            "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.semver.outputs.current }}...${{ steps.semver.outputs.next }}"
+          CHANGELOG_LINE="**Full Changelog**: https://github.com/${{ github.repository }}/compare/${{ steps.semver.outputs.current }}...${{ steps.semver.outputs.next }}"
+          echo "$CHANGELOG_LINE" >> release_notes.md
 
       - name: Update Version File
         if: steps.semver.outputs.next != ''
@@ -104,10 +104,11 @@ jobs:
           mv CHANGELOG.tmp CHANGELOG.md
 
           # Update links section
-          echo >> CHANGELOG.md \
-            "[Unreleased]: https://github.com/${{ github.repository }}/compare/v${{ steps.semver.outputs.nextStrict }}...HEAD"
-          echo >> CHANGELOG.md \
-            "[${{ steps.semver.outputs.nextStrict }}]: https://github.com/${{ github.repository }}/compare/v${{ steps.semver.outputs.current }}...v${{ steps.semver.outputs.nextStrict }}"
+          UNRELEASED_LINK="[Unreleased]: https://github.com/${{ github.repository }}/compare/v${{ steps.semver.outputs.nextStrict }}...HEAD"
+          echo "$UNRELEASED_LINK" >> CHANGELOG.md
+
+          NEXT_VERSION_LINK="[${{ steps.semver.outputs.nextStrict }}]: https://github.com/${{ github.repository }}/compare/v${{ steps.semver.outputs.current }}...v${{ steps.semver.outputs.nextStrict }}"
+          echo "$NEXT_VERSION_LINK" >> CHANGELOG.md
 
           rm new_section.md
 
