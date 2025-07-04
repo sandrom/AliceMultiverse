@@ -22,7 +22,7 @@ parameters:
   seed: 2024
   style: cyberpunk
   lighting: neon_rain
-  
+
 # Reference images (for multi-reference or image-to-image)
 reference_assets:
   - https://example.com/cyberpunk_architecture.jpg

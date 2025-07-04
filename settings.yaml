@@ -13,20 +13,20 @@ paths:
 storage:
   # Where to store DuckDB search index
   search_db: "data/search.duckdb"
-  
+
   # Paths where projects can be stored
   # Can include local paths or cloud URLs (s3://, gcs://)
   project_paths:
     - "projects"       # Local projects directory
     # - "s3://my-bucket/projects"  # Example S3 path
     # - "gcs://my-bucket/projects" # Example GCS path
-  
+
   # Where to find existing assets for reuse
   asset_paths:
     - "organized"      # Default organized output
     - "inbox"          # Also check inbox
     # - "/Volumes/External/AI-Assets"  # Example external drive
-  
+
   # Where rejected/soft-deleted assets go
   sorted_out_path: "sorted-out"
 
@@ -53,22 +53,22 @@ processing:
 understanding:
   # Enable AI-powered image understanding
   enabled: true
-  
+
   # Which tags to extract
   extract_tags: true
   generate_prompt: true
-  
+
   # Custom instructions for all analyses
   custom_instructions: null
-  
+
   # Provider selection (null = cheapest available)
   preferred_provider: null
-  
+
   # Cost limits for analysis (USD)
   cost_limits:
     total: 10.0  # Stop processing when this limit is reached
     per_image: 0.01  # Maximum cost per image
-  
+
   # Detailed analysis (more thorough but costs more)
   detailed: false
 
@@ -160,34 +160,34 @@ providers:
         max_tokens: 4096
         vision: true
         context_window: 200000
-    
+
     # Default model for image understanding
     default_model: claude-opus-4-20250115
-    
+
     # API settings
     max_retries: 3
     timeout: 30
-    
+
   # Connection pool settings
   database:
     # Base pool size - number of persistent connections
     pool_size: 20  # Increased from 10 for better concurrency
-    
+
     # Maximum overflow - temporary connections when pool exhausted
     max_overflow: 40  # Increased from 20 to handle spikes
-    
+
     # Timeout waiting for connection from pool (seconds)
     pool_timeout: 30
-    
+
     # Recycle connections after this many seconds
     pool_recycle: 1800  # Reduced from 3600 to prevent stale connections
-    
+
     # Check connection health before use
     pool_pre_ping: true
-    
+
     # Log pool events for debugging (set to false in production)
     pool_echo: false
-    
+
   # Event system settings
   events:
     # PostgreSQL NOTIFY/LISTEN settings
@@ -199,13 +199,13 @@ providers:
 video_generation:
   # Default provider for video generation
   default_provider: luma  # Options: runway, pika, luma, minimax, kling, hedra, veo3
-  
+
   # Default duration for videos (seconds)
   default_duration: 5
-  
+
   # Cost limit per video generation
   cost_limit_per_video: 1.00
-  
+
   # Preferred models for each provider
   preferred_models:
     runway: gen3-alpha-turbo  # Options: gen3-alpha, gen3-alpha-turbo
@@ -215,7 +215,7 @@ video_generation:
     kling: kling-standard    # Options: kling-standard, kling-pro
     hedra: hedra-character   # Options: hedra-character, hedra-audio
     veo3: imagen-3           # Options: imagen-3, imagen-3-fast
-  
+
   # Provider-specific settings
   provider_settings:
     runway:
@@ -236,22 +236,22 @@ deduplication:
   # Similarity threshold for finding duplicates (0.0-1.0)
   # 1.0 = exact match only, 0.95 = very similar, 0.85 = somewhat similar
   similarity_threshold: 0.95
-  
+
   # Include video files in deduplication
   include_videos: true
-  
+
   # Create backup before removing duplicates
   backup_before_remove: true
-  
+
   # Preserve files with metadata when choosing which duplicate to keep
   preserve_metadata: true
-  
+
   # Hash algorithms to use (in order of preference)
   hash_algorithms:
     - phash  # Perceptual hash (default, good for general use)
     - dhash  # Difference hash (fast, good for exact matches)
     - whash  # Wavelet hash (good for scaled images)
-  
+
   # FAISS index settings
   index:
     # Rebuild index if it's older than this many days
@@ -260,11 +260,11 @@ deduplication:
     use_gpu: false
     # Maximum images to process in one batch
     batch_size: 1000
-  
+
   # Removal strategy when duplicates found
   # Options: keep_organized, keep_largest, keep_newest, interactive
   default_strategy: keep_organized
-  
+
   # Where to store backup files (relative to project root)
   backup_directory: duplicates-backup
 

@@ -1,3 +1,4 @@
+---
 # Redis configuration for single-node development
 # Optimized for local Kubernetes on Mac
 

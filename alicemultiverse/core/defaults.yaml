@@ -7,85 +7,85 @@ providers:
     base_url: "https://api.openai.com/v1"
     timeout: 120
     max_retries: 3
-  
+
   anthropic:
     base_url: "https://api.anthropic.com"
     timeout: 120
     max_retries: 3
-  
+
   google:
     base_url: "https://generativelanguage.googleapis.com"
     timeout: 180
     max_retries: 3
-  
+
   fal:
     base_url: "https://fal.run"
     timeout: 300
     poll_interval: 5
     max_poll_attempts: 60
-  
+
   ideogram:
     base_url: "https://api.ideogram.ai"
     timeout: 180
     max_retries: 3
-  
+
   leonardo:
     base_url: "https://cloud.leonardo.ai/api/rest/v1"
     timeout: 300
     poll_interval: 5
-  
+
   firefly:
     base_url: "https://firefly-api.adobe.io"
     timeout: 180
     max_retries: 3
-  
+
   midjourney:
     webhook_timeout: 300
     poll_interval: 10
-  
+
   kling:
     base_url: "https://api.klingai.com"
     timeout: 300
     poll_interval: 5
-  
+
   elevenlabs:
     base_url: "https://api.elevenlabs.io"
     timeout: 120
-  
+
   hedra:
     base_url: "https://api.hedra.com"
     timeout: 600
     poll_interval: 10
-  
+
   bfl:
     base_url: "https://api.bfl.ai"
     timeout: 300
     poll_interval: 2
-  
+
   freepik:
     base_url: "https://api.freepik.com"
     magnific_base_url: "https://magnific-api.freepik.com"
     timeout: 180
-  
+
   # Video Generation Providers
   runway:
     base_url: "https://api.runwayml.com/v1"
     timeout: 300
     poll_interval: 5
     max_poll_attempts: 120
-  
+
   pika:
     base_url: "https://api.pika.art/v1"
     timeout: 180
     poll_interval: 3
     max_poll_attempts: 60
-  
+
   luma:
     base_url: "https://api.lumalabs.ai/v1"
     timeout: 300
     poll_interval: 5
     max_poll_attempts: 120
-  
+
   minimax:
     base_url: "https://api.minimax.ai/v1"
     timeout: 300
@@ -97,12 +97,12 @@ services:
   ollama:
     base_url: "http://localhost:11434"
     timeout: 60
-  
+
   web_server:
     host: "0.0.0.0"
     port: 8000
     max_pending_comparisons: 100
-  
+
   metrics_server:
     host: "0.0.0.0"
     port: 9090
@@ -117,7 +117,7 @@ cache:
     ttl: 3600
     socket_connect_timeout: 5
     health_check_interval: 30
-  
+
   file:
     ttl: 3600
     cleanup_interval: 86400  # 24 hours
@@ -129,7 +129,7 @@ storage:
   metadata_dir: ".metadata"
   search_db: "data/search.duckdb"
   location_registry_db: "data/locations.duckdb"
-  
+
   # File size limits
   max_file_size: 104857600  # 100 MB
   min_file_size: 1024       # 1 KB
@@ -139,7 +139,7 @@ processing:
   watch_interval: 5
   batch_size: 50
   max_concurrent: 10
-  
+
   # Rate limits
   rate_limits:
     sightengine: 60
@@ -152,7 +152,7 @@ events:
     log_dir: "~/.alice/events"
     rotation_interval: 86400  # 24 hours
     max_file_size: 10485760   # 10 MB
-  
+
   redis:
     stream_prefix: "alice:events"
     consumer_group: "alice-consumers"
@@ -163,7 +163,7 @@ understanding:
   max_batch_size: 20
   cost_limit: 10.0
   cache_results: true
-  
+
   # Provider-specific settings
   provider_settings:
     openai:
@@ -205,7 +205,7 @@ video_generation:
   default_fps: 24
   default_resolution: "1280x720"
   max_duration: 30
-  
+
   # Cost thresholds for warnings
   cost_warning_threshold: 5.0
   cost_limit_default: 10.0
@@ -215,18 +215,18 @@ deduplication:
   similarity_threshold: 0.95
   exact_match_threshold: 0.99
   batch_size: 100
-  
+
   # Index settings
   index:
     type: "faiss"  # or "annoy", "hnsw"
     dimension: 256
     metric: "cosine"
-  
+
   # Default hash settings
   hash:
     size: 16  # Hash size for perceptual hashing
     highfreq_factor: 4  # For wHash
-  
+
   # Backup settings
   backup:
     enabled: true

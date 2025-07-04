@@ -62,8 +62,8 @@ def validate_search_request(request: SearchRequest) -> SearchRequest:
             filters["tags"] = validate_tags(filters["tags"])
         if filters is not None and "any_tags" in filters:
             filters["any_tags"] = validate_tags(filters["any_tags"])
-        if filters is not None and "exclude_tags" in filters:
-            filters["exclude_tags"] = validate_tags(filters["exclude_tags"])
+        if filters is not None and "not_tags" in filters: # Changed from exclude_tags
+            filters["not_tags"] = validate_tags(filters["not_tags"]) # Changed from exclude_tags
 
         # Validate content hash
         if filters is not None and "content_hash" in filters and filters["content_hash"] is not None:
@@ -145,31 +145,41 @@ def validate_organize_request(request: OrganizeRequest) -> OrganizeRequest:
     validated = request.copy()
 
     # Validate paths
-    if request is not None and "source_path" in request:
-        if validated is not None:
+    if "source_path" in request:
+        if request["source_path"] is not None:
             validated["source_path"] = str(validate_path(request["source_path"], "source_path"))
-    if request is not None and "destination_path" in request:
-        if validated is not None:
+        else:
+            validated["source_path"] = None # Preserve explicit None
+
+    if "destination_path" in request:
+        if request["destination_path"] is not None:
             validated["destination_path"] = str(validate_path(request["destination_path"], "destination_path"))
+        else:
+            validated["destination_path"] = None # Preserve explicit None
 
     # Validate pipeline
-    if request is not None and "pipeline" in request and request["pipeline"] is not None:
-        if not isinstance(request["pipeline"], str):
+    # Assuming pipeline is Optional[str] in OrganizeRequest based on total=False
+    # The original check `request["pipeline"] is not None` was good.
+    pipeline_val = request.get("pipeline")
+    if pipeline_val is not None:
+        if not isinstance(pipeline_val, str):
             raise ValidationError("pipeline must be a string")
-        # Add allowed pipeline values
         allowed_pipelines = [
             "brisque", "brisque-sightengine", "brisque-claude",
             "brisque-sightengine-claude", "basic", "standard",
             "premium", "full", "custom"
         ]
-        if request is not None and request["pipeline"] not in allowed_pipelines:
-            raise ValidationError(f"Invalid pipeline: {request['pipeline']}")
+        if pipeline_val not in allowed_pipelines:
+            raise ValidationError(f"Invalid pipeline: {pipeline_val}")
 
     # Validate boolean flags
-    for bool_field in ["quality_assessment", "watch_mode", "move_files"]:
-        if bool_field in request and request[bool_field] is not None:
-            if not isinstance(request[bool_field], bool):
+    for bool_field in ["quality_assessment", "watch_mode", "move_files", "understanding"]: # Added understanding
+        field_val = request.get(bool_field)
+        if field_val is not None:
+            if not isinstance(field_val, bool):
                 raise ValidationError(f"{bool_field} must be a boolean")
+            # No change needed for validated[bool_field] as it's already copied
+            # and type is correct if present and not None.
 
     return validated
 
@@ -188,21 +198,26 @@ def validate_tag_update_request(request: TagUpdateRequest) -> TagUpdateRequest:
     """
     validated = request.copy()
 
-    # Validate asset IDs
-    if validated is not None:
-        validated["asset_ids"] = validate_asset_ids(request["asset_ids"])
+    # Validate asset IDs (assuming asset_ids is always present as per current direct access)
+    # If asset_ids could be missing, this would need request.get("asset_ids")
+    validated["asset_ids"] = validate_asset_ids(request["asset_ids"])
 
     # Validate tag operations
     operations_count = 0
-    if request.get("add_tags") is not None:
+    add_tags_val = request.get("add_tags")
+    if add_tags_val is not None:
         operations_count += 1
-        validated["add_tags"] = validate_tags(request["add_tags"])
-    if request.get("remove_tags") is not None:
+        validated["add_tags"] = validate_tags(add_tags_val)
+
+    remove_tags_val = request.get("remove_tags")
+    if remove_tags_val is not None:
         operations_count += 1
-        validated["remove_tags"] = validate_tags(request["remove_tags"])
-    if request.get("set_tags") is not None:
+        validated["remove_tags"] = validate_tags(remove_tags_val)
+
+    set_tags_val = request.get("set_tags")
+    if set_tags_val is not None:
         operations_count += 1
-        validated["set_tags"] = validate_tags(request["set_tags"])
+        validated["set_tags"] = validate_tags(set_tags_val)
     
     # Ensure at least one operation is specified
     if operations_count == 0:

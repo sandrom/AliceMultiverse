@@ -1,66 +1,67 @@
-{{- if .Values.networkPolicy.enabled }}
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: {{ include "alice-service.fullname" . }}
-  labels:
-    {{- include "alice-service.labels" . | nindent 4 }}
-spec:
-  podSelector:
-    matchLabels:
-      {{- include "alice-service.selectorLabels" . | nindent 6 }}
-  policyTypes:
-    - Ingress
-    - Egress
-  ingress:
-    {{- toYaml .Values.networkPolicy.ingress | nindent 4 }}
-  egress:
-    # Allow DNS
-    - to:
-      - namespaceSelector:
-          matchLabels:
-            name: kube-system
-      ports:
-      - protocol: UDP
-        port: 53
-    # Allow access to database
-    {{- if and .Values.database.enabled .Values.networkPolicy.databaseAccess.enabled }}
-    - to:
-      - podSelector:
-          matchLabels:
-            cnpg.io/cluster: {{ include "alice-service.databaseClusterName" . }}
-      ports:
-      - protocol: TCP
-        port: 5432
-    {{- end }}
-    # Allow access to Redis
-    {{- if .Values.redis.enabled }}
-    - to:
-      - namespaceSelector:
-          matchLabels:
-            name: alice-events
-      ports:
-      - protocol: TCP
-        port: 6379
-    {{- end }}
-    # Additional egress rules
-    {{- with .Values.networkPolicy.egress }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
-{{- end }}
 ---
-{{- if and .Values.networkPolicy.enabled .Values.database.enabled .Values.networkPolicy.databaseAccess.enabled }}
+  {{- if .Values.networkPolicy.enabled}}
+  apiVersion: networking.k8s.io/v1
+  kind: NetworkPolicy
+  metadata:
+    name: {{include "alice-service.fullname" .}}
+    labels:
+      {{- include "alice-service.labels" . | nindent 6}} # Adjusted nindent
+  spec:
+    podSelector:
+      matchLabels:
+        {{- include "alice-service.selectorLabels" . | nindent 8}} # Adjusted nindent
+    policyTypes:
+      - Ingress
+      - Egress
+    ingress:
+      {{- toYaml .Values.networkPolicy.ingress | nindent 6}} # Adjusted nindent
+    egress:
+      # Allow DNS
+      - to:
+        - namespaceSelector:
+            matchLabels:
+              name: kube-system
+        ports:
+          - protocol: UDP
+            port: 53
+      # Allow access to database
+      {{- if and .Values.database.enabled .Values.networkPolicy.databaseAccess.enabled}}
+      - to:
+        - podSelector:
+            matchLabels:
+              cnpg.io/cluster: {{include "alice-service.databaseClusterName" .}}
+        ports:
+          - protocol: TCP
+            port: 5432
+      {{- end}}
+      # Allow access to Redis
+      {{- if .Values.redis.enabled}}
+      - to:
+        - namespaceSelector: # This was an assumed structure from before
+            matchLabels:
+              name: alice-events # Assuming this is the label
+        ports:
+          - protocol: TCP
+            port: 6379
+      {{- end}}
+      # Additional egress rules
+      {{- with .Values.networkPolicy.egress}}
+      {{- toYaml . | nindent 6}} # Adjusted nindent
+      {{- end}}
+  {{- end}}
+---
+{{- if and .Values.networkPolicy.enabled .Values.database.enabled .Values.networkPolicy.databaseAccess.enabled}}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: {{ include "alice-service.databaseClusterName" . }}-policy
+  name: {{include "alice-service.databaseClusterName" .}}-policy
   labels:
-    {{- include "alice-service.labels" . | nindent 4 }}
+    {{- include "alice-service.labels" . | nindent 4}}
     app.kubernetes.io/component: database
 spec:
   podSelector:
     matchLabels:
-      cnpg.io/cluster: {{ include "alice-service.databaseClusterName" . }}
+      cnpg.io/cluster: {{include "alice-service.databaseClusterName" .}}
   policyTypes:
     - Ingress
   ingress:
@@ -68,13 +69,13 @@ spec:
     - from:
       - podSelector:
           matchLabels:
-            {{- include "alice-service.selectorLabels" . | nindent 12 }}
+            {{- include "alice-service.selectorLabels" . | nindent 12}}
       ports:
-      - protocol: TCP
-        port: 5432
+        - protocol: TCP
+          port: 5432
     # Allow access from the CNPG operator
     - from:
       - namespaceSelector:
           matchLabels:
             name: cnpg-system
-{{- end }}
+{{- end}}
