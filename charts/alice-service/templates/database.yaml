@@ -1,36 +1,37 @@
-{{- if .Values.database.enabled }}
+---
+{{- if .Values.database.enabled}}
 apiVersion: postgresql.cnpg.io/v1
 kind: Cluster
 metadata:
-  name: {{ include "alice-service.databaseClusterName" . }}
+  name: {{include "alice-service.databaseClusterName" .}}
   labels:
-    {{- include "alice-service.labels" . | nindent 4 }}
+    {{- include "alice-service.labels" . | nindent 4}}
     app.kubernetes.io/component: database
 spec:
-  instances: {{ .Values.database.instances }}
+  instances: {{.Values.database.instances}}
 
   postgresql:
     parameters:
-      {{- toYaml .Values.database.parameters | nindent 6 }}
+      {{- toYaml .Values.database.parameters | nindent 6}}
 
   bootstrap:
     initdb:
-      database: {{ include "alice-service.databaseName" . }}
-      owner: {{ .Values.database.user }}
+      database: {{include "alice-service.databaseName" .}}
+      owner: {{.Values.database.user}}
       secret:
-        name: {{ include "alice-service.databaseSecretName" . }}
+        name: {{include "alice-service.databaseSecretName" .}}
 
   storage:
-    size: {{ .Values.database.size }}
-    {{- if .Values.database.storageClass }}
-    storageClass: {{ .Values.database.storageClass }}
-    {{- end }}
+    size: {{.Values.database.size}}
+    {{- if .Values.database.storageClass}}
+    storageClass: {{.Values.database.storageClass}}
+    {{- end}}
 
 
-  {{- if .Values.database.backup.enabled }}
+  {{- if .Values.database.backup.enabled}}
   backup:
     volumeSnapshot:
       enabled: true
-    retentionPolicy: {{ .Values.database.backup.retentionPolicy }}
-  {{- end }}
-{{- end }}
+    retentionPolicy: {{.Values.database.backup.retentionPolicy}}
+  {{- end}}
+{{- end}}

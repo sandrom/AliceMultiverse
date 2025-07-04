@@ -1,3 +1,4 @@
+---
 # Default values for alice-service
 # This is a YAML-formatted file
 
@@ -104,6 +105,7 @@ volumes: []
   #   configMap:
   #     name: my-config
 
+# Additional volume mounts
 volumeMounts: []
   # - name: config
   #   mountPath: /config

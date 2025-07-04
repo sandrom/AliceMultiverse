@@ -1,10 +1,11 @@
+---
 name: Security Checks
 
 on:
   pull_request:
-    branches: [ main, develop ]
+    branches: [main, develop]
   push:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read
@@ -90,7 +91,10 @@ jobs:
       - name: Check for sensitive patterns
         run: |
           echo "## Sensitive Data Scan" >> $GITHUB_STEP_SUMMARY
-          python scripts/security/check_sensitive_patterns.py $(find . -type f -name "*.py" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" -o -name "*.md" | grep -v ".git" | head -100) || {
+          python scripts/security/check_sensitive_patterns.py \
+            $(find . -type f -name "*.py" -o -name "*.yaml" -o -name "*.yml" -o -name "*.json" -o -name "*.md" \
+            | grep -v ".git" | head -100) \
+            || {
             echo "❌ Sensitive data detected!" >> $GITHUB_STEP_SUMMARY
             exit 1
           }
@@ -100,7 +104,10 @@ jobs:
         run: |
           echo "## Hardcoded Path Check" >> $GITHUB_STEP_SUMMARY
           # Check for hardcoded user paths
-          if grep -r "/Users/[a-zA-Z0-9_-]*/" . --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" --exclude-dir=.git --exclude-dir=.venv | grep -v "Documents/AI/AliceMultiverse"; then
+          if grep -r "/Users/[a-zA-Z0-9_-]*/" . \
+            --include="*.py" --include="*.yaml" --include="*.yml" --include="*.json" \
+            --exclude-dir=.git --exclude-dir=.venv \
+            | grep -v "Documents/AI/AliceMultiverse"; then
             echo "❌ Hardcoded user paths detected!" >> $GITHUB_STEP_SUMMARY
             exit 1
           else
