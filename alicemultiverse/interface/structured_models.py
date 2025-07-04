@@ -166,9 +166,9 @@ class BatchSelectionFeedback(TypedDict):
     context: str | None
 
 
-class TagUpdateRequest(TypedDict):
+class TagUpdateRequest(TypedDict, total=False): # Added total=False
     """Request to update asset tags."""
-    asset_ids: list[str]
+    asset_ids: list[str] # This should still be required if it's not Optional
     add_tags: list[str] | None
     remove_tags: list[str] | None
     set_tags: list[str] | None
